@@ -1,0 +1,691 @@
+{
+  "type": "snapshot",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "snapshot": {
+    "ref": {
+      "version": 1,
+      "host": "host-α",
+      "harness": "profile-1",
+      "nativeId": " opaque/%session "
+    },
+    "hydrationGeneration": "hydrate-1",
+    "hasMoreHistory": true,
+    "nextHistoryCursor": "opaque-history-cursor",
+    "info": {
+      "value": {
+        "ref": {
+          "version": 1,
+          "host": "host-α",
+          "harness": "profile-1",
+          "nativeId": " opaque/%session "
+        },
+        "title": "Synthetic history",
+        "ownership": {
+          "version": 1,
+          "kind": "savedHistory",
+          "proof": {
+            "version": 1,
+            "source": "synthetic.verified",
+            "observedAt": "2026-10-04T08:32:00Z"
+          }
+        },
+        "project": {
+          "version": 1,
+          "host": "host-α",
+          "canonicalDirectory": "/canonical/project",
+          "upstreamProjectId": "global"
+        },
+        "lineage": {
+          "version": 1,
+          "parent": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": "child-1"
+          },
+          "fork": {
+            "version": 1,
+            "source": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": "child-1"
+            },
+            "beforeItem": "fork-point"
+          }
+        }
+      },
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      }
+    },
+    "execution": {
+      "value": {
+        "kind": "idle"
+      },
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      }
+    },
+    "timeline": {
+      "values": [
+        {
+          "type": "assistantText",
+          "meta": {
+            "id": "item-1",
+            "generation": "generation-1",
+            "status": "completed",
+            "source": {
+              "harness": {
+                "version": 1,
+                "host": "host-α",
+                "harness": "profile-1"
+              },
+              "version": "synthetic-1",
+              "nativeType": "synthetic.domain",
+              "durability": "watermarkOnly",
+              "nativeCursor": "opaque:not-a-number",
+              "aggregateSeq": "184467440737095516160"
+            },
+            "turnId": "turn-1",
+            "ordinal": 0
+          },
+          "text": "Hello 🌍",
+          "complete": true,
+          "prefixMissing": false
+        }
+      ],
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      },
+      "complete": false
+    },
+    "pending": {
+      "values": [
+        {
+          "id": "pending-1",
+          "text": "Synthetic queued input",
+          "delivery": "queue",
+          "commandId": "command-queued"
+        }
+      ],
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254741001"
+        },
+        "readStartedAt": "2026-10-04T08:32:02Z",
+        "readCompletedAt": "2026-10-04T08:32:03Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      },
+      "complete": true
+    },
+    "interactions": {
+      "values": [
+        {
+          "id": "interaction-1",
+          "owner": {
+            "type": "session",
+            "session": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": " opaque/%session "
+            },
+            "origin": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": "child-1"
+            }
+          },
+          "kind": "permission",
+          "title": "Synthetic read",
+          "choices": [
+            {
+              "id": "once-native",
+              "label": "Native once",
+              "allows": true,
+              "scope": "once",
+              "resolutionScope": "request",
+              "acceptsNote": false
+            },
+            {
+              "id": "project-native",
+              "label": "Native project grant",
+              "allows": true,
+              "scope": "persistentProject",
+              "resolutionScope": "project",
+              "acceptsNote": false,
+              "scopePreview": {
+                "patterns": [
+                  "synthetic/*"
+                ]
+              }
+            },
+            {
+              "id": "reject-native",
+              "label": "Native rejection",
+              "allows": false,
+              "scope": "once",
+              "resolutionScope": "session",
+              "acceptsNote": true
+            }
+          ],
+          "requiresInput": false,
+          "autoApprovable": true
+        },
+        {
+          "id": "form-1",
+          "owner": {
+            "type": "session",
+            "session": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": " opaque/%session "
+            }
+          },
+          "kind": "form",
+          "title": "Synthetic form",
+          "choices": [],
+          "requiresInput": true,
+          "autoApprovable": false,
+          "form": {
+            "fields": [
+              {
+                "key": "mode/raw",
+                "kind": "multiSelect",
+                "required": true,
+                "hidden": false,
+                "acceptsCustom": false,
+                "options": [
+                  {
+                    "value": "a,b",
+                    "label": "Opaque comma"
+                  },
+                  {
+                    "value": "値",
+                    "label": "Unicode"
+                  }
+                ]
+              },
+              {
+                "key": "details",
+                "kind": "string",
+                "required": true,
+                "hidden": false,
+                "acceptsCustom": false,
+                "options": [],
+                "condition": {
+                  "type": "includes",
+                  "key": "mode/raw",
+                  "value": "a,b"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254741001"
+        },
+        "readStartedAt": "2026-10-04T08:32:02Z",
+        "readCompletedAt": "2026-10-04T08:32:03Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      },
+      "complete": true
+    },
+    "work": {
+      "values": [
+        {
+          "id": "work-1",
+          "owner": {
+            "type": "session",
+            "session": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": " opaque/%session "
+            }
+          },
+          "child": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": "child-1"
+          },
+          "parent": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          },
+          "status": "running",
+          "completionScope": "child",
+          "title": "Independent child",
+          "source": {
+            "harness": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1"
+            },
+            "version": "synthetic-1",
+            "nativeType": "synthetic.domain",
+            "durability": "watermarkOnly",
+            "nativeCursor": "opaque:not-a-number",
+            "aggregateSeq": "184467440737095516160"
+          }
+        }
+      ],
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254741001"
+        },
+        "readStartedAt": "2026-10-04T08:32:02Z",
+        "readCompletedAt": "2026-10-04T08:32:03Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      },
+      "complete": true
+    },
+    "plan": {
+      "value": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "entries": [
+          {
+            "id": "step-1",
+            "title": "Synthetic step",
+            "status": "inProgress"
+          }
+        ],
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        }
+      },
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      }
+    },
+    "usage": {
+      "values": [
+        {
+          "id": "usage-1",
+          "owner": {
+            "type": "session",
+            "session": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": " opaque/%session "
+            }
+          },
+          "scope": "session",
+          "source": "native",
+          "observedAt": "2026-10-04T08:32:00Z",
+          "tokens": {
+            "input": 12,
+            "output": null
+          },
+          "cost": {
+            "amount": null,
+            "currency": null,
+            "estimated": false,
+            "partial": true,
+            "cumulative": true
+          },
+          "context": {
+            "used": 12,
+            "limit": null,
+            "measurement": "estimated"
+          },
+          "quotas": [
+            {
+              "id": "synthetic-window",
+              "label": "Native window",
+              "source": "native",
+              "usedPercent": 125.5
+            }
+          ],
+          "partial": true,
+          "cumulative": true,
+          "aggregationKey": "native-series",
+          "provenance": {
+            "harness": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1"
+            },
+            "version": "synthetic-1",
+            "nativeType": "synthetic.domain",
+            "durability": "watermarkOnly",
+            "nativeCursor": "opaque:not-a-number",
+            "aggregateSeq": "184467440737095516160"
+          }
+        }
+      ],
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      },
+      "complete": true
+    },
+    "selection": {
+      "value": {
+        "modelId": "synthetic-model"
+      },
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      }
+    },
+    "revert": {
+      "value": {
+        "kind": "none"
+      },
+      "boundary": {
+        "owner": {
+          "type": "session",
+          "session": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          }
+        },
+        "hydrationGeneration": "hydrate-1",
+        "readStart": {
+          "version": 1,
+          "id": "stream-1",
+          "epoch": "epoch-1",
+          "seq": "9007199254740993"
+        },
+        "readStartedAt": "2026-10-04T08:32:00Z",
+        "readCompletedAt": "2026-10-04T08:32:01Z",
+        "source": {
+          "harness": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1"
+          },
+          "version": "synthetic-1",
+          "nativeType": "synthetic.domain",
+          "durability": "watermarkOnly",
+          "nativeCursor": "opaque:not-a-number",
+          "aggregateSeq": "184467440737095516160"
+        },
+        "authority": "authoritative"
+      }
+    }
+  }
+}

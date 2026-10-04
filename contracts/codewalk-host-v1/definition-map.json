@@ -1,0 +1,1035 @@
+{
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "canonicalModelCommit": "df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e",
+  "definitions": {
+    "CanonicalValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "CanonicalValue"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOpaqueId": {
+      "category": "canonical",
+      "modelTypes": [
+        "HostId",
+        "HarnessInstanceId",
+        "ItemId",
+        "TurnId",
+        "CommandId",
+        "InteractionId",
+        "WorkId"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOpenEnum": {
+      "category": "canonical",
+      "modelTypes": [
+        "OpenValue"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalDecimalSequence": {
+      "category": "canonical",
+      "modelTypes": [
+        "StreamPosition",
+        "SourceProvenance"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInstant": {
+      "category": "canonical",
+      "modelTypes": [
+        "OwnershipProof",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalHarnessRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "HarnessRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalProjectRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "ProjectRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalForkLineage": {
+      "category": "canonical",
+      "modelTypes": [
+        "ForkLineage"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionLineage": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionLineage"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOwnershipProof": {
+      "category": "canonical",
+      "modelTypes": [
+        "OwnershipProof"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalKnownOwnership": {
+      "category": "canonical",
+      "modelTypes": [
+        "OwnershipInfo"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUnknownOwnership": {
+      "category": "canonical",
+      "modelTypes": [
+        "OwnershipInfo"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOwnershipInfo": {
+      "category": "canonical",
+      "modelTypes": [
+        "OwnershipInfo"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalStreamPosition": {
+      "category": "canonical",
+      "modelTypes": [
+        "StreamPosition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalProjectOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "ProjectOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalHostOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "HostOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalGlobalOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "GlobalOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUnknownOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "UnknownOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalDomainOwner": {
+      "category": "canonical",
+      "modelTypes": [
+        "DomainOwner"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSourceProvenance": {
+      "category": "canonical",
+      "modelTypes": [
+        "SourceProvenance"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalDiagnosticRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "DiagnosticRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalEventMeta": {
+      "category": "canonical",
+      "modelTypes": [
+        "EventMeta"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalErrorInfo": {
+      "category": "canonical",
+      "modelTypes": [
+        "ErrorInfo"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCapabilityUnavailable": {
+      "category": "canonical",
+      "modelTypes": [
+        "CapabilityUnavailable"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOutputRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "OutputRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalAttachmentRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "AttachmentRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalMentionRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "MentionRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalItemMeta": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemMeta"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUserInput": {
+      "category": "canonical",
+      "modelTypes": [
+        "UserInput"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalAssistantText": {
+      "category": "canonical",
+      "modelTypes": [
+        "AssistantText"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalReasoning": {
+      "category": "canonical",
+      "modelTypes": [
+        "Reasoning"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalToolCall": {
+      "category": "canonical",
+      "modelTypes": [
+        "ToolCall"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalShellRun": {
+      "category": "canonical",
+      "modelTypes": [
+        "ShellRun"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalNotice": {
+      "category": "canonical",
+      "modelTypes": [
+        "Notice"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTurnOutcome": {
+      "category": "canonical",
+      "modelTypes": [
+        "TurnOutcome"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUnknownItem": {
+      "category": "canonical",
+      "modelTypes": [
+        "UnknownItem"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTimelineItem": {
+      "category": "canonical",
+      "modelTypes": [
+        "TimelineItem"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalConnectionState": {
+      "category": "canonical",
+      "modelTypes": [
+        "ConnectionState"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalExecutionOutcome": {
+      "category": "canonical",
+      "modelTypes": [
+        "ExecutionOutcome"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalExecutionState": {
+      "category": "canonical",
+      "modelTypes": [
+        "ExecutionState"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSubmissionState": {
+      "category": "canonical",
+      "modelTypes": [
+        "SubmissionState"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionState": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionState"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRevertState": {
+      "category": "canonical",
+      "modelTypes": [
+        "RevertState"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormOption": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormOption"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalEqualsCondition": {
+      "category": "canonical",
+      "modelTypes": [
+        "EqualsCondition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalNotEqualsCondition": {
+      "category": "canonical",
+      "modelTypes": [
+        "NotEqualsCondition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalIncludesCondition": {
+      "category": "canonical",
+      "modelTypes": [
+        "IncludesCondition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalAllConditions": {
+      "category": "canonical",
+      "modelTypes": [
+        "AllConditions"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalAnyConditions": {
+      "category": "canonical",
+      "modelTypes": [
+        "AnyConditions"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUnknownCondition": {
+      "category": "canonical",
+      "modelTypes": [
+        "UnknownCondition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormCondition": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormCondition"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormField": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormField"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormSpec": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormSpec"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormAnswers": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormAnswers"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalApprovalChoice": {
+      "category": "canonical",
+      "modelTypes": [
+        "ApprovalChoice"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionRequest": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionRequest"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalApprovalResponse": {
+      "category": "canonical",
+      "modelTypes": [
+        "ApprovalResponse"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFormResponse": {
+      "category": "canonical",
+      "modelTypes": [
+        "FormResponse"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionResponse": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionResponse"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionResolution": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionResolution"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalWorkItem": {
+      "category": "canonical",
+      "modelTypes": [
+        "WorkItem"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPlanEntry": {
+      "category": "canonical",
+      "modelTypes": [
+        "PlanEntry"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPlanSnapshot": {
+      "category": "canonical",
+      "modelTypes": [
+        "PlanSnapshot"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTokenBreakdown": {
+      "category": "canonical",
+      "modelTypes": [
+        "TokenBreakdown"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCost": {
+      "category": "canonical",
+      "modelTypes": [
+        "Cost"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalContextMeter": {
+      "category": "canonical",
+      "modelTypes": [
+        "ContextMeter"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalQuotaWindow": {
+      "category": "canonical",
+      "modelTypes": [
+        "QuotaWindow"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUsageObservation": {
+      "category": "canonical",
+      "modelTypes": [
+        "UsageObservation"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCapability": {
+      "category": "canonical",
+      "modelTypes": [
+        "Capability"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCapabilitySet": {
+      "category": "canonical",
+      "modelTypes": [
+        "CapabilitySet"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalScopedCapabilityEvidence": {
+      "category": "canonical",
+      "modelTypes": [
+        "ScopedCapabilityEvidence"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCapabilityContext": {
+      "category": "canonical",
+      "modelTypes": [
+        "CapabilityContext"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOriginalCommand": {
+      "category": "canonical",
+      "modelTypes": [
+        "OriginalCommand"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalOperationContract": {
+      "category": "canonical",
+      "modelTypes": [
+        "OperationContract"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCommandReceipt": {
+      "category": "canonical",
+      "modelTypes": [
+        "CommandReceipt"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCreateResult": {
+      "category": "canonical",
+      "modelTypes": [
+        "CreateResult",
+        "SessionHandle"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSelection": {
+      "category": "canonical",
+      "modelTypes": [
+        "Selection"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSelectionChange": {
+      "category": "canonical",
+      "modelTypes": [
+        "SelectionChange"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPendingInput": {
+      "category": "canonical",
+      "modelTypes": [
+        "PendingInput"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPromptIntent": {
+      "category": "canonical",
+      "modelTypes": ["PromptDraft", "SessionHandle", "Delivery"],
+      "projection": "Edge composition of SessionHandle.send draft and its optional delivery argument; not a new core model"
+    },
+    "CanonicalPromptDraft": {
+      "category": "canonical",
+      "modelTypes": [
+        "PromptDraft"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCreateSession": {
+      "category": "canonical",
+      "modelTypes": [
+        "CreateSession"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionInfo": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionInfo"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionSummary": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionSummary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionQuery": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionQuery"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSnapshotBoundary": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInfoSnapshotValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotValue",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalExecutionSnapshotValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotValue",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTimelineSnapshotCollection": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotCollection",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPendingSnapshotCollection": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotCollection",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionSnapshotCollection": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotCollection",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalWorkSnapshotCollection": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotCollection",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPlanSnapshotValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotValue",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUsageSnapshotCollection": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotCollection",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSelectionSnapshotValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotValue",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRevertSnapshotValue": {
+      "category": "canonical",
+      "modelTypes": [
+        "SnapshotValue",
+        "SnapshotBoundary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionSnapshot": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionSnapshot"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionPage": {
+      "category": "canonical",
+      "modelTypes": [
+        "Page",
+        "SessionSummary"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalHarnessDescriptor": {
+      "category": "canonical",
+      "modelTypes": [
+        "HarnessDescriptor"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalModelEntry": {
+      "category": "canonical",
+      "modelTypes": [
+        "ModelEntry"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCatalogEntry": {
+      "category": "canonical",
+      "modelTypes": [
+        "CatalogEntry"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalItemUpserted": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemUpserted"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalItemDelta": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemDelta"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalItemsRemoved": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemsRemoved"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalExecutionChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "ExecutionChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRetryScheduled": {
+      "category": "canonical",
+      "modelTypes": [
+        "RetryScheduled"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPendingInputChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "PendingInputChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionOpened": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionOpened"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInteractionResolved": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionResolved"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalWorkChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "WorkChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPlanChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "PlanChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUsageObserved": {
+      "category": "canonical",
+      "modelTypes": [
+        "UsageObserved"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSelectionChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "SelectionChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRevertChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "RevertChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionInfoChanged": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionInfoChanged"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalResyncRequired": {
+      "category": "canonical",
+      "modelTypes": [
+        "ResyncRequired"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalUnknownEvent": {
+      "category": "canonical",
+      "modelTypes": [
+        "UnknownEvent"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalSessionEvent": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionEvent"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalInterruptTarget": {
+      "category": "canonical",
+      "modelTypes": [
+        "InterruptTarget"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRespondIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "InteractionId",
+        "InteractionResponse"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalCancelQueuedIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemId"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalEditQueuedIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemId",
+        "PromptDraft"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalReorderQueuedIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "ItemId"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalRevertRequest": {
+      "category": "canonical",
+      "modelTypes": [
+        "RevertRequest"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalForkRequest": {
+      "category": "canonical",
+      "modelTypes": [
+        "ForkRequest"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalChildInputIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "SessionRef",
+        "PromptDraft"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalEmptyIntent": {
+      "category": "canonical",
+      "modelTypes": [],
+      "projection": "Explicit edge-only composition; no invented core class"
+    },
+    "CanonicalFileRef": {
+      "category": "canonical",
+      "modelTypes": [
+        "FileRef"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalFileWrite": {
+      "category": "canonical",
+      "modelTypes": [
+        "FileWrite"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTerminalRequest": {
+      "category": "canonical",
+      "modelTypes": [
+        "TerminalRequest"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTerminalInputIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "TerminalHandle"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTerminalResizeIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "TerminalHandle"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalTerminalCloseIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "TerminalHandle"
+      ],
+      "projection": "Existing domain type projected at the contract edge"
+    },
+    "ChpHello": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpEvent": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpSubscribe": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpResync": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpPing": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpPong": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpReceipt": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpSnapshot": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpCapabilities": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpSessionPage": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpCreateResult": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpCommand": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "ChpFrame": {
+      "category": "transport",
+      "modelTypes": [],
+      "projection": "CHP envelope/control definition referencing canonical payloads"
+    }
+  }
+}

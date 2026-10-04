@@ -1,0 +1,1883 @@
+{
+  "capturedAt": "2026-10-04T04:57:40.528551+00:00",
+  "calls": [
+    {
+      "name": "liveQueueSteerCreate",
+      "startedAt": "2026-10-04T04:57:22.523331+00:00",
+      "completedAt": "2026-10-04T04:57:22.540573+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10546195b00024e913db8b70bc",
+        "title": "V2-005B liveQueueSteer",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10546195b00024e913db8b70bc",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089842535,
+            "updated": 1791089842535
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "firstExecutingPrompt",
+      "startedAt": "2026-10-04T04:57:22.543226+00:00",
+      "completedAt": "2026-10-04T04:57:22.550027+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a10546196f000432f69db883568",
+        "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10546196f000432f69db883568",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089842546
+          },
+          "type": "user",
+          "payload": {
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "activeWhileToolRunning",
+      "startedAt": "2026-10-04T04:57:24.105526+00:00",
+      "completedAt": "2026-10-04T04:57:24.107502+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          },
+          "ses_1a10546195b00024e913db8b70bc": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "queueNextTurn",
+      "startedAt": "2026-10-04T04:57:24.107535+00:00",
+      "completedAt": "2026-10-04T04:57:24.113686+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a105461f8b0003dec9ad526fa45",
+        "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+        "delivery": "queue"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105461f8b0003dec9ad526fa45",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089844111
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "queueCancelled",
+      "startedAt": "2026-10-04T04:57:24.113706+00:00",
+      "completedAt": "2026-10-04T04:57:24.119189+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a105461f8b000a85ea45b56e942",
+        "text": "Reply exactly B_CANCELLED_MUST_NOT_RUN. No tools.",
+        "delivery": "queue"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105461f8b000a85ea45b56e942",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089844116
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_CANCELLED_MUST_NOT_RUN. No tools."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "queueToUpdate",
+      "startedAt": "2026-10-04T04:57:24.119206+00:00",
+      "completedAt": "2026-10-04T04:57:24.123230+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+        "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089844121
+          },
+          "type": "user",
+          "payload": {
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "pendingBeforeDeliveryChange",
+      "startedAt": "2026-10-04T04:57:24.123247+00:00",
+      "completedAt": "2026-10-04T04:57:24.125082+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105461f8b0003dec9ad526fa45",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844111
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a105461f8b000a85ea45b56e942",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844116
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_CANCELLED_MUST_NOT_RUN. No tools."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844121
+            },
+            "type": "user",
+            "payload": {
+              "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancelWhileExecuting",
+      "startedAt": "2026-10-04T04:57:24.125100+00:00",
+      "completedAt": "2026-10-04T04:57:24.127463+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox/msg_1a105461f8b000a85ea45b56e942",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "changePendingQueueToSteer",
+      "startedAt": "2026-10-04T04:57:24.127471+00:00",
+      "completedAt": "2026-10-04T04:57:24.130191+00:00",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox/msg_1a105461f8b000c7d0a8d81f3aa3",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "explicitSteerWhileExecuting",
+      "startedAt": "2026-10-04T04:57:24.130199+00:00",
+      "completedAt": "2026-10-04T04:57:24.134064+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a105461f8b0007bde81c2c229cc",
+        "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105461f8b0007bde81c2c229cc",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089844132
+          },
+          "type": "user",
+          "payload": {
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "busyAfterSteerAdmissionsession",
+      "startedAt": "2026-10-04T04:57:24.134080+00:00",
+      "completedAt": "2026-10-04T04:57:24.135368+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10546195b00024e913db8b70bc",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089842535,
+            "updated": 1791089844132
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "busyAfterSteerAdmissioninbox",
+      "startedAt": "2026-10-04T04:57:24.135384+00:00",
+      "completedAt": "2026-10-04T04:57:24.136660+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105461f8b0003dec9ad526fa45",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844111
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844121
+            },
+            "type": "user",
+            "payload": {
+              "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools."
+            },
+            "delivery": "steer"
+          },
+          {
+            "id": "msg_1a105461f8b0007bde81c2c229cc",
+            "sessionID": "ses_1a10546195b00024e913db8b70bc",
+            "time": {
+              "created": 1791089844132
+            },
+            "type": "user",
+            "payload": {
+              "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools."
+            },
+            "delivery": "steer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "busyAfterSteerAdmissionhistory",
+      "startedAt": "2026-10-04T04:57:24.136677+00:00",
+      "completedAt": "2026-10-04T04:57:24.138524+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10546196f000432f69db883568",
+            "time": {
+              "created": 1791089842558
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105461984001R7ekyD9fEiYqiP",
+            "time": {
+              "created": 1791089842593,
+              "streamed": 1791089844071
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "running",
+                  "input": {
+                    "command": "sleep 12; printf 'B_FIRST_TOOL_DONE\\n'"
+                  },
+                  "metadata": {}
+                },
+                "time": {
+                  "created": 1791089843708,
+                  "ran": 1791089844068
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2"
+            }
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ2MTk2ZjAwMDQzMmY2OWRiODgzNTY4Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NjE5ODQwMDFSN2VreUQ5ZkVpWXFpUCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "afterQueueSteerExecutionsession",
+      "startedAt": "2026-10-04T04:57:40.287564+00:00",
+      "completedAt": "2026-10-04T04:57:40.296882+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10546195b00024e913db8b70bc",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 114,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 15380,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089842535,
+            "updated": 1791089844132,
+            "idle": 1791089860263
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterQueueSteerExecutioninbox",
+      "startedAt": "2026-10-04T04:57:40.296916+00:00",
+      "completedAt": "2026-10-04T04:57:40.298964+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "afterQueueSteerExecutionhistory",
+      "startedAt": "2026-10-04T04:57:40.298979+00:00",
+      "completedAt": "2026-10-04T04:57:40.301178+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10546196f000432f69db883568",
+            "time": {
+              "created": 1791089842558
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105461984001R7ekyD9fEiYqiP",
+            "time": {
+              "created": 1791089842593,
+              "streamed": 1791089844071,
+              "completed": 1791089856100
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "command": "sleep 12; printf 'B_FIRST_TOOL_DONE\\n'"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "B_FIRST_TOOL_DONE\n"
+                    }
+                  ],
+                  "metadata": {
+                    "status": "completed",
+                    "truncated": false,
+                    "exit": 0
+                  }
+                },
+                "time": {
+                  "created": 1791089843708,
+                  "ran": 1791089844068,
+                  "completed": 1791089856088
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 1,
+              "output": 40,
+              "reasoning": 0,
+              "cache": {
+                "read": 5077,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+            "time": {
+              "created": 1791089856109
+            },
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1a105461f8b0007bde81c2c229cc",
+            "time": {
+              "created": 1791089856111
+            },
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105464e75001ut3XOWK9N524d2",
+            "time": {
+              "created": 1791089856137,
+              "streamed": 1791089858070,
+              "completed": 1791089858078
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_EXPLICIT_STEER"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 80,
+              "output": 9,
+              "reasoning": 0,
+              "cache": {
+                "read": 5112,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b0003dec9ad526fa45",
+            "time": {
+              "created": 1791089858086
+            },
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10546562c001V6Vcip638xNci6",
+            "time": {
+              "created": 1791089858108,
+              "streamed": 1791089860243,
+              "completed": 1791089860255
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_QUEUED_NEXT_TURN"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 33,
+              "output": 10,
+              "reasoning": 0,
+              "cache": {
+                "read": 5191,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105465ea7001qEOobp8XABsMRs",
+            "time": {
+              "created": 1791089860263
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ2MTk2ZjAwMDQzMmY2OWRiODgzNTY4Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NjVlYTcwMDFxRU9vYnA4WEFCc01ScyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "activeAfterQueueSteerExecution",
+      "startedAt": "2026-10-04T04:57:40.301237+00:00",
+      "completedAt": "2026-10-04T04:57:40.302304+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "replayPromotedUserChangedPayload",
+      "startedAt": "2026-10-04T04:57:40.302328+00:00",
+      "completedAt": "2026-10-04T04:57:40.309026+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a10546196f000432f69db883568",
+        "text": "This changed content must not replace history.",
+        "delivery": "steer",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10546196f000432f69db883568",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089842558
+          },
+          "type": "user",
+          "payload": {
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "cancelDeliveredNoOp",
+      "startedAt": "2026-10-04T04:57:40.309053+00:00",
+      "completedAt": "2026-10-04T04:57:40.314220+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox/msg_1a10546196f000432f69db883568",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "changeDeliveredConflict",
+      "startedAt": "2026-10-04T04:57:40.314237+00:00",
+      "completedAt": "2026-10-04T04:57:40.319086+00:00",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox/msg_1a10546196f000432f69db883568",
+      "request": {
+        "delivery": "queue"
+      },
+      "status": 409,
+      "response": {
+        "_tag": "ConflictError",
+        "message": "Pending input cannot change to queue: msg_1a10546196f000432f69db883568",
+        "resource": "msg_1a10546196f000432f69db883568"
+      }
+    },
+    {
+      "name": "afterDeliveredReplaysession",
+      "startedAt": "2026-10-04T04:57:40.319110+00:00",
+      "completedAt": "2026-10-04T04:57:40.321975+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10546195b00024e913db8b70bc",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 114,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 15380,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089842535,
+            "updated": 1791089844132,
+            "idle": 1791089860263
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterDeliveredReplayinbox",
+      "startedAt": "2026-10-04T04:57:40.322006+00:00",
+      "completedAt": "2026-10-04T04:57:40.323835+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "afterDeliveredReplayhistory",
+      "startedAt": "2026-10-04T04:57:40.323849+00:00",
+      "completedAt": "2026-10-04T04:57:40.326706+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10546196f000432f69db883568",
+            "time": {
+              "created": 1791089842558
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105461984001R7ekyD9fEiYqiP",
+            "time": {
+              "created": 1791089842593,
+              "streamed": 1791089844071,
+              "completed": 1791089856100
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "command": "sleep 12; printf 'B_FIRST_TOOL_DONE\\n'"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "B_FIRST_TOOL_DONE\n"
+                    }
+                  ],
+                  "metadata": {
+                    "status": "completed",
+                    "truncated": false,
+                    "exit": 0
+                  }
+                },
+                "time": {
+                  "created": 1791089843708,
+                  "ran": 1791089844068,
+                  "completed": 1791089856088
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 1,
+              "output": 40,
+              "reasoning": 0,
+              "cache": {
+                "read": 5077,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+            "time": {
+              "created": 1791089856109
+            },
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1a105461f8b0007bde81c2c229cc",
+            "time": {
+              "created": 1791089856111
+            },
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105464e75001ut3XOWK9N524d2",
+            "time": {
+              "created": 1791089856137,
+              "streamed": 1791089858070,
+              "completed": 1791089858078
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_EXPLICIT_STEER"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 80,
+              "output": 9,
+              "reasoning": 0,
+              "cache": {
+                "read": 5112,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b0003dec9ad526fa45",
+            "time": {
+              "created": 1791089858086
+            },
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10546562c001V6Vcip638xNci6",
+            "time": {
+              "created": 1791089858108,
+              "streamed": 1791089860243,
+              "completed": 1791089860255
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_QUEUED_NEXT_TURN"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 33,
+              "output": 10,
+              "reasoning": 0,
+              "cache": {
+                "read": 5191,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105465ea7001qEOobp8XABsMRs",
+            "time": {
+              "created": 1791089860263
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ2MTk2ZjAwMDQzMmY2OWRiODgzNTY4Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NjVlYTcwMDFxRU9vYnA4WEFCc01ScyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    }
+  ],
+  "stream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": null
+    },
+    "events": [
+      {
+        "id": "evt_10546196e001mB0XQoW8YICNKa",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_1054619720015dCI5JNMG4B66x",
+        "created": 1791089842546,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10546196f000432f69db883568",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461976001Y0vD6v0EpOfeuj",
+        "created": 1791089842550,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10546197c001Eopzc6BbMmMXz3",
+        "created": 1791089842556,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "delta": {
+            "core/codemode": "3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1",
+            "core/skill-guidance": "8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9",
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10546197e001Tft9wk2ZnryFUI",
+        "created": 1791089842558,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a10546196f000432f69db883568"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461df8001vfDUPMQJnObG1j",
+        "created": 1791089843704,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089842593
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461dfc001z3QkQP8p4QAW3Y",
+        "created": 1791089843708,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+          "name": "shell"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f61001FbsRSM4Etv2Drr",
+        "created": 1791089844065,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+          "text": "{\"command\": \"sleep 12; printf 'B_FIRST_TOOL_DONE\\\\n'\"}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f64001sKHvYnxJKAA0e1",
+        "created": 1791089844068,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+          "input": {
+            "command": "sleep 12; printf 'B_FIRST_TOOL_DONE\\n'"
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f67001YdZmLrCiQcO0bM",
+        "created": 1791089844071,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f71001p4HsmThrvmx4rC",
+        "created": 1791089844081,
+        "type": "session.tool.progress",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+          "metadata": {
+            "shellID": "sh_105461f6d001ylcT7Ds8gYgmnJ"
+          }
+        }
+      },
+      {
+        "id": "evt_105461f8f001piUvXdJcXCrl2N",
+        "created": 1791089844111,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a105461f8b0003dec9ad526fa45",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+            },
+            "delivery": "queue"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 10,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f940018pijqJD21IoG0P",
+        "created": 1791089844116,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a105461f8b000a85ea45b56e942",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_CANCELLED_MUST_NOT_RUN. No tools."
+            },
+            "delivery": "queue"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 11,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f99001EsF2dqpeq4Qdic",
+        "created": 1791089844121,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a105461f8b000c7d0a8d81f3aa3",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools."
+            },
+            "delivery": "queue"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 12,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461f9d001hjhgN3uWOGqsnJ",
+        "created": 1791089844125,
+        "type": "session.inbox.cancelled",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a105461f8b000a85ea45b56e942"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 13,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461fa0001wnH92SZElW4uus",
+        "created": 1791089844128,
+        "type": "session.inbox.delivery.changed",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a105461f8b000c7d0a8d81f3aa3",
+          "delivery": "steer"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 14,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105461fa4001UwhTUgSRDL9rZm",
+        "created": 1791089844132,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a105461f8b0007bde81c2c229cc",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 15,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105464e58001HZKEUwDuThsyTR",
+        "created": 1791089856088,
+        "type": "session.tool.success",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+          "content": [
+            {
+              "type": "text",
+              "text": "B_FIRST_TOOL_DONE\n"
+            }
+          ],
+          "metadata": {
+            "status": "completed",
+            "truncated": false,
+            "exit": 0
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 16,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_105464e64001Wht47o9edktM8k",
+        "created": 1791089856100,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105461984001R7ekyD9fEiYqiP",
+          "finish": "tool-calls",
+          "rawFinish": "tool_calls",
+          "cost": 0,
+          "tokens": {
+            "input": 1,
+            "output": 40,
+            "reasoning": 0,
+            "cache": {
+              "read": 5077,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 17,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105464e67001PtOfv5VrMIje98",
+        "created": 1791089856103,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "cost": 0,
+          "tokens": {
+            "input": 1,
+            "output": 40,
+            "reasoning": 0,
+            "cache": {
+              "read": 5077,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105464e6d001Bu57IYcsvUrgU2",
+        "created": 1791089856109,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a105461f8b000c7d0a8d81f3aa3"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 18,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105464e6f001e8e5ahBWM57kK7",
+        "created": 1791089856111,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a105461f8b0007bde81c2c229cc"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 19,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054654ae001yGAkfLtboGKEQ6",
+        "created": 1791089857710,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089856137
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 20,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054654b10015xeVJD61IukFZs",
+        "created": 1791089857713,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 21,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465517001H68MlD1eqR6Z4i",
+        "created": 1791089857815,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2",
+          "ordinal": 0,
+          "delta": "B_EXPLICIT_STEER"
+        }
+      },
+      {
+        "id": "evt_105465613001nGBTfc9JE3F7XN",
+        "created": 1791089858067,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2",
+          "ordinal": 0,
+          "text": "B_EXPLICIT_STEER"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 22,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465616001Nmfsad3GjMPz9F",
+        "created": 1791089858070,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 23,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10546561e001kZ5yh2jmBMBJKw",
+        "created": 1791089858078,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_105464e75001ut3XOWK9N524d2",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 80,
+            "output": 9,
+            "reasoning": 0,
+            "cache": {
+              "read": 5112,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 24,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465621001RStIUTAfFwgMV2",
+        "created": 1791089858081,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "cost": 0,
+          "tokens": {
+            "input": 81,
+            "output": 49,
+            "reasoning": 0,
+            "cache": {
+              "read": 10189,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105465626001KvO0AcgkIl6l68",
+        "created": 1791089858086,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "inboxID": "msg_1a105461f8b0003dec9ad526fa45"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 25,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465e22001cwvDxaNAyCBRhr",
+        "created": 1791089860130,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089858108
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 26,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465e25001OOuKaHuzIasoi3",
+        "created": 1791089860133,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 27,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465e8c00100kSVf6foxCtG5",
+        "created": 1791089860236,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6",
+          "ordinal": 0,
+          "delta": "B_QUEUED_NEXT_TURN"
+        }
+      },
+      {
+        "id": "evt_105465e9000162xDMK7y5vyEVT",
+        "created": 1791089860240,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6",
+          "ordinal": 0,
+          "text": "B_QUEUED_NEXT_TURN"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 28,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465e93001kNy68n290qOKvX",
+        "created": 1791089860243,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 29,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465e9f001fFEXwN2sRsVRjD",
+        "created": 1791089860255,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "assistantMessageID": "msg_10546562c001V6Vcip638xNci6",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 33,
+            "output": 10,
+            "reasoning": 0,
+            "cache": {
+              "read": 5191,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 30,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105465ea40010f54e60HX8XqUV",
+        "created": 1791089860260,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "cost": 0,
+          "tokens": {
+            "input": 114,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 15380,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105465ea7001qEOobp8XABsMRs",
+        "created": 1791089860263,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10546195b00024e913db8b70bc"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10546195b00024e913db8b70bc",
+          "seq": 31,
+          "version": 1
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_10546196e001mB0XQoW8YICNKa\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054619720015dCI5JNMG4B66x\", \"created\": 1791089842546, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10546196f000432f69db883568\", \"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 1, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461976001Y0vD6v0EpOfeuj\", \"created\": 1791089842550, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 2, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10546197c001Eopzc6BbMmMXz3\", \"created\": 1791089842556, \"metadata\": {\"instructions\": {\"initial\": true}}, \"type\": \"session.instructions.updated\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"delta\": {\"core/codemode\": \"3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1\", \"core/skill-guidance\": \"8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9\", \"core/date\": \"49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12\", \"core/environment\": \"8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 3, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10546197e001Tft9wk2ZnryFUI\", \"created\": 1791089842558, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a10546196f000432f69db883568\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 4, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461df8001vfDUPMQJnObG1j\", \"created\": 1791089843704, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089842593}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 5, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461dfc001z3QkQP8p4QAW3Y\", \"created\": 1791089843708, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"id\": \"call_p7zVie4wTVHLuiEeKboABy5V\", \"name\": \"shell\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 6, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f61001FbsRSM4Etv2Drr\", \"created\": 1791089844065, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"id\": \"call_p7zVie4wTVHLuiEeKboABy5V\", \"text\": \"{\\\"command\\\": \\\"sleep 12; printf 'B_FIRST_TOOL_DONE\\\\\\\\n'\\\"}\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 7, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f64001sKHvYnxJKAA0e1\", \"created\": 1791089844068, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"id\": \"call_p7zVie4wTVHLuiEeKboABy5V\", \"input\": {\"command\": \"sleep 12; printf 'B_FIRST_TOOL_DONE\\\\n'\"}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 8, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f67001YdZmLrCiQcO0bM\", \"created\": 1791089844071, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 9, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f71001p4HsmThrvmx4rC\", \"created\": 1791089844081, \"type\": \"session.tool.progress\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"id\": \"call_p7zVie4wTVHLuiEeKboABy5V\", \"metadata\": {\"shellID\": \"sh_105461f6d001ylcT7Ds8gYgmnJ\"}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f8f001piUvXdJcXCrl2N\", \"created\": 1791089844111, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a105461f8b0003dec9ad526fa45\", \"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_QUEUED_NEXT_TURN. No tools.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 10, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f940018pijqJD21IoG0P\", \"created\": 1791089844116, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a105461f8b000a85ea45b56e942\", \"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_CANCELLED_MUST_NOT_RUN. No tools.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 11, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f99001EsF2dqpeq4Qdic\", \"created\": 1791089844121, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a105461f8b000c7d0a8d81f3aa3\", \"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 12, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461f9d001hjhgN3uWOGqsnJ\", \"created\": 1791089844125, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a105461f8b000a85ea45b56e942\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 13, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461fa0001wnH92SZElW4uus\", \"created\": 1791089844128, \"type\": \"session.inbox.delivery.changed\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a105461f8b000c7d0a8d81f3aa3\", \"delivery\": \"steer\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 14, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105461fa4001UwhTUgSRDL9rZm\", \"created\": 1791089844132, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a105461f8b0007bde81c2c229cc\", \"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 15, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105464e58001HZKEUwDuThsyTR\", \"created\": 1791089856088, \"type\": \"session.tool.success\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"id\": \"call_p7zVie4wTVHLuiEeKboABy5V\", \"content\": [{\"type\": \"text\", \"text\": \"B_FIRST_TOOL_DONE\\n\"}], \"metadata\": {\"status\": \"completed\", \"truncated\": false, \"exit\": 0}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 16, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105464e64001Wht47o9edktM8k\", \"created\": 1791089856100, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105461984001R7ekyD9fEiYqiP\", \"finish\": \"tool-calls\", \"rawFinish\": \"tool_calls\", \"cost\": 0, \"tokens\": {\"input\": 1, \"output\": 40, \"reasoning\": 0, \"cache\": {\"read\": 5077, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 17, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105464e67001PtOfv5VrMIje98\", \"created\": 1791089856103, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"cost\": 0, \"tokens\": {\"input\": 1, \"output\": 40, \"reasoning\": 0, \"cache\": {\"read\": 5077, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105464e6d001Bu57IYcsvUrgU2\", \"created\": 1791089856109, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a105461f8b000c7d0a8d81f3aa3\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 18, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105464e6f001e8e5ahBWM57kK7\", \"created\": 1791089856111, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a105461f8b0007bde81c2c229cc\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 19, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054654ae001yGAkfLtboGKEQ6\", \"created\": 1791089857710, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089856137}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 20, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054654b10015xeVJD61IukFZs\", \"created\": 1791089857713, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 21, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465517001H68MlD1eqR6Z4i\", \"created\": 1791089857815, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\", \"ordinal\": 0, \"delta\": \"B_EXPLICIT_STEER\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465613001nGBTfc9JE3F7XN\", \"created\": 1791089858067, \"type\": \"session.text.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\", \"ordinal\": 0, \"text\": \"B_EXPLICIT_STEER\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 22, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465616001Nmfsad3GjMPz9F\", \"created\": 1791089858070, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 23, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10546561e001kZ5yh2jmBMBJKw\", \"created\": 1791089858078, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_105464e75001ut3XOWK9N524d2\", \"finish\": \"stop\", \"rawFinish\": \"stop\", \"cost\": 0, \"tokens\": {\"input\": 80, \"output\": 9, \"reasoning\": 0, \"cache\": {\"read\": 5112, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 24, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465621001RStIUTAfFwgMV2\", \"created\": 1791089858081, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"cost\": 0, \"tokens\": {\"input\": 81, \"output\": 49, \"reasoning\": 0, \"cache\": {\"read\": 10189, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465626001KvO0AcgkIl6l68\", \"created\": 1791089858086, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"inboxID\": \"msg_1a105461f8b0003dec9ad526fa45\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 25, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e22001cwvDxaNAyCBRhr\", \"created\": 1791089860130, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089858108}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 26, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e25001OOuKaHuzIasoi3\", \"created\": 1791089860133, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 27, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e8c00100kSVf6foxCtG5\", \"created\": 1791089860236, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\", \"ordinal\": 0, \"delta\": \"B_QUEUED_NEXT_TURN\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e9000162xDMK7y5vyEVT\", \"created\": 1791089860240, \"type\": \"session.text.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\", \"ordinal\": 0, \"text\": \"B_QUEUED_NEXT_TURN\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 28, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e93001kNy68n290qOKvX\", \"created\": 1791089860243, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 29, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465e9f001fFEXwN2sRsVRjD\", \"created\": 1791089860255, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"assistantMessageID\": \"msg_10546562c001V6Vcip638xNci6\", \"finish\": \"stop\", \"rawFinish\": \"stop\", \"cost\": 0, \"tokens\": {\"input\": 33, \"output\": 10, \"reasoning\": 0, \"cache\": {\"read\": 5191, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 30, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465ea40010f54e60HX8XqUV\", \"created\": 1791089860260, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\", \"cost\": 0, \"tokens\": {\"input\": 114, \"output\": 59, \"reasoning\": 0, \"cache\": {\"read\": 15380, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105465ea7001qEOobp8XABsMRs\", \"created\": 1791089860263, \"type\": \"session.execution.succeeded\", \"data\": {\"sessionID\": \"ses_1a10546195b00024e913db8b70bc\"}, \"durable\": {\"aggregateID\": \"ses_1a10546195b00024e913db8b70bc\", \"seq\": 31, \"version\": 1}}"
+      ]
+    ],
+    "failure": null
+  },
+  "toolCalledObserved": true,
+  "terminalObserved": true,
+  "promptIds": {
+    "first": "msg_1a10546196f000432f69db883568",
+    "queued": "msg_1a105461f8b0003dec9ad526fa45",
+    "cancelled": "msg_1a105461f8b000a85ea45b56e942",
+    "changed": "msg_1a105461f8b000c7d0a8d81f3aa3",
+    "steered": "msg_1a105461f8b0007bde81c2c229cc"
+  },
+  "modelWakeAdmissionCount": 4
+}

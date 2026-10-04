@@ -1,0 +1,13 @@
+{
+  "@@locale": "pt",
+  "chatAddServerToStart": "Adicione um servidor para começar a conversar.",
+  "chatConversation": "Conversa",
+  "chatConversations": "Conversas",
+  "commonCancel": "Cancelar",
+  "onboardingConnectRunningServer": "Conectar a um servidor em execução",
+  "serversCopy": "Copiar",
+  "settingsBack": "Voltar",
+  "settingsServersTitle": "Servidores",
+  "settingsTitle": "Configurações",
+  "unsupportedLink": "Este link não é compatível."
+}

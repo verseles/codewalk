@@ -3,7 +3,8 @@
 ## Project Snapshot
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
-- Architecture follows `presentation -> domain -> data` with `get_it` + `provider`.
+- The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. The harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -13,6 +14,144 @@
 - Session attention adds encrypted completion snapshots, root-session aggregation, and Android, desktop, and iOS presentation hosts.
 - Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; their tab menu offers up to five scope-matched cached root-session alternatives on mobile/compact layouts or while the desktop conversations pane is hidden, plus a searchable responsive picker for the full cached set; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab; project grouping renders a per-project inline new-chat accessory after each draft-free group (issue #200).
 - Browser-style session tab switcher (issue #171): hold-to-cycle MRU overlay (`Ctrl+Tab` / `Ctrl+Shift+Tab`) with commit-on-release orchestration in ChatPage.
+
+## Active v2 foundation on `main`
+
+The entries below are governed independently from the retained reference map:
+
+```text
+lib/main_v2.dart                         # Explicit entry point; composes dependencies before runApp
+lib/app/composition_root.dart           # Private GetIt instance; resolves the independent v2 graph
+lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
+lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, theme and locale bridges
+lib/app/app_{router,shell}.dart          # Responsive navigation and localized route placeholders
+lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
+lib/app/app_preferences_controller.dart # Transient theme mode, density, visual style and locale
+lib/shared/theme/                       # Independent Material3 shapes, theme and visual tokens
+lib/shared/layout/window_size_class.dart # Responsive viewport classes
+lib/shared/l10n/{arb,generated}/         # Scoped 10-key catalog and official generated delegates for 14 locales
+lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
+lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
+lib/platform/storage/storage.dart      # Storage API barrel; not initialized by the app graph
+lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
+lib/platform/storage/preferences_backend.dart # Guarded SharedPreferencesAsync adapter
+lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores, strict non-destructive presence checks, and memory LRU
+lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
+lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
+lib/platform/migration/                # Unwired read-only legacy sources, restartable v1 importer and sanitized report
+packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
+packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
+packages/codewalk_core/lib/src/{values,commands,capabilities,errors}.dart # Immutable unknown values, scoped mutation/replay guards and typed failures
+packages/codewalk_core/lib/src/{timeline,events,lifecycle,session}.dart # Canonical observations, independent lifecycle states and per-read snapshot boundaries
+packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit owners, manual choices/forms, work/plan and nullable usage contracts
+packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
+packages/codewalk_core/lib/src/reducer/ # Pure event/hydration reduction, effects and bounded full-reference session LRU
+packages/codewalk_core/test/reducer/    # Observed A prefix convergence, synthetic causality/bounds checks, and controlled review-race interleavings
+packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
+packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
+packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
+packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
+test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
+test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions, including VM payload-preservation composition coverage
+test/contract/chp/prompt_delivery_test.dart # Prompt intent delivery-shape and optional-default contract regressions
+contracts/codewalk-host-v1/             # Provisional canonical/CHP schema, examples, model map and revision hashes
+test/contract/chp/                     # Offline Draft 7 validation and synthetic model/edge parity checks
+tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
+tool/ci/import_rules.dart               # CI entry point for governed architecture checks
+tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
+tool/ci/architecture/widget_types.dart  # Widget ancestry by declaration identity and import/export visibility
+tool/ci/architecture/locator_values.dart # Escaping locator values versus ordinary resolved services
+tool/ci/v2_architecture_manifest.json   # New surface, retained reference and narrow vendor/generated scopes
+tool/ci/test/import_rules_test.dart     # Real CLI planted-violation regression cases
+tool/ci/check_v2_foundations.py         # Dynamic workspace discovery and explicit v2 analysis/test/build gate
+```
+
+The composition root resolves a private locator before widgets mount and passes
+typed dependencies into the app. Widgets consume constructor/provider injection.
+Routes `/`, `/sessions`, `/hosts`, `/settings`, `/pair`, `/s/:host/:session` and
+`/unsupported` currently show placeholders. Navigation uses a bottom bar below
+840 logical pixels and a rail from 840 pixels. Deep links retain pending intents;
+native session identifiers do not establish a canonical session without a
+harness profile. Appearance changes are controller-driven and in memory.
+
+The shared localization catalog contains nine reused UI keys and one new
+unsupported-link key in 14 locales. Its generator leaves the retained catalog
+and `lib/l10n/` outputs intact. Shared rendering currently provides GFM and
+link/file callbacks; images render as text. Full rendering and settings parity
+remain in their owning Issues.
+
+`codewalk_core` is pure Dart. Project identity is host plus the caller-supplied
+canonical directory; the upstream project ID is an annotation. Canonical models
+retain unknown values and distinguish admission, execution, connection,
+interactions, work and revert. Ports observe history separately from explicit
+resume commands. Mutation guards require installation/version/scope agreement,
+fresh ownership evidence and affirmative restrictions before invoking a boundary.
+Replay requires operation-specific evidence, unresolved admission, reconciliation,
+the original scope and encoded payload, and no cancellation fence. Each
+`SnapshotBoundary` carries its collection's client read-start position, start
+time for same-position read ordering, and hydration generation; these boundaries
+do not establish native authority. The pure reducer returns immutable session
+state and caller-executed effects. Observed removal events retain their timeline
+clock even when local membership is ambiguous, fencing older reads; delayed
+removals do not erase a newer suffix. Partial history anchors retained rows on shared item IDs, while
+live items are ordered only when their stream positions are comparable and
+reordering notifies consumers. Immutable per-collection hydration-pending state
+keeps rejected collection snapshots (including work) and stream-boundary gaps
+hydrating across unrelated reads until an accepted authoritative read barrier
+clears that collection.
+Timeline retention is bounded to at most 500 items; the session store requires a
+configured LRU bound and keys full composite refs. The reducer is not wired to
+the app graph. `review_races_test.dart` adds 11 controlled synthetic
+interleavings; these are not native acceptance evidence.
+
+The separate CHP artifact defines canonical payloads and transport envelopes at
+the explicitly provisional `cw-canonical-1-provisional.2` and
+`chp-1-provisional.2` revisions, pinned to the unchanged canonical model commit
+`df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e`. `CanonicalPromptIntent` retains the
+original draft and optional open delivery; hand-authored examples cover omitted
+default, `queue` and `steer`, while focused tests guard the shape. The local
+Draft 7 schema, example manifest, definition map and `SHA256SUMS` integrity test
+cover the complete 74-file artifact inventory. Test-only
+projections keep wire shape outside pure core; constructor/policy semantics are
+checked separately from schema shape. The contract remains provisional: real
+G2/G5 evidence, merge acceptance, a production serializer and Host implementation
+remain pending.
+
+`codewalk_net` preserves HTTP statuses and raw response
+bodies, validates endpoint paths before obtaining authentication headers,
+disables automatic redirects and supports request cancellation. Its strict
+UTF-8 SSE decoder handles fragmented input and configurable EOF dispatch,
+without interpreting JSON or promising event replay. Browser transport,
+isolates, batching and connection watchdogs are not implemented here.
+
+Storage provides namespaced metadata, guarded schema migrations, bounded
+payloads and endpoint credentials independently of the app graph. IO payloads
+use the `cw2_payloads` directory and flushed temporary-file replacement; Web
+payloads use preferences. Both stores expose a strict, non-destructive presence
+check: lookup failures propagate rather than looking absent, so the importer
+cannot overwrite or checkpoint an unreadable existing payload. Native
+credentials use secure storage, while Web credentials remain instance-local
+memory. The separate importer reads legacy preferences, explicitly scoped
+secure keys and known SHA1 payload-file keys; it writes only v2 destinations and
+checkpoints confirmed writes. Source absence is distinct from failure,
+corruption or refused size; those failures cannot select
+an older fallback and make it final. It preserves explicit
+`composerAutoApprovePermissions: false` (AllowAll OFF) and existing destinations
+during sequential resume. Unsupported top-level settings are reported as
+unresolved opaque identities, and unmapped drafts are recorded for later review.
+`payload_preservation_test.dart` checks VM composition behavior, including
+failed destination lookups. The library requires an explicit exclusive-startup
+precondition; it supplies no lease or protection against concurrent writers. It
+is not wired to bootstrap. Actual Android legacy-backend configuration,
+pre-engine source preservation, report/recovered-draft UI, credential boundaries
+and a real installed v1.266 upgrade remain separate acceptance work.
+
+`.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
+`v2_foundations` for discovered package analysis/tests, planted guards, scoped
+localization checks, v2 Flutter analysis, VM/Chrome tests and the explicit v2 Web
+build. Native platform compilation and distribution evidence remain separate
+from these checks. Retained reference paths may not be imported directly or
+transitively by authored v2 source.
 
 ## Folder Structure
 
@@ -557,11 +696,17 @@ make test-chat                              # ChatPage smoke + extended suites
 make test-web                               # Browser capability tests (requires Chrome)
 make test-coverage-tools                    # Python stdlib coverage-gate fixtures
 make coverage                               # Flutter LCOV plus the 35% global and per-file coverage gates
-make check                                  # deps + gen + analyze + coverage fixtures + full test suite
+make check                                  # root Flutter gate; does not discover workspace package tests
+make v2-architecture                        # governed v2 source and transitive boundary checks
+make v2-foundations                         # packages, guards, scoped l10n/analyze, VM/Chrome v2 tests and Web build
+make v2-smoke                               # explicit v2 Flutter tests in test/v2
+make v2-web                                 # lib/main_v2.dart Web build -> build/v2/web
 make check-fast                             # deps + gen + analyze + coverage fixtures + fast (non-slow, non-integration) tests
 dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
 dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
 flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
+python3 tool/l10n/generate_v2_localizations.py # Regenerate only lib/shared/l10n/generated/ using isolated Flutter config
+python3 tool/l10n/generate_v2_localizations.py --check # Check scoped v2 outputs without changing them
 make web
 make android
 make desktop
@@ -573,6 +718,7 @@ flutter test
 flutter run -d linux
 flutter run -d android
 flutter run -d chrome
+flutter run --target lib/main_v2.dart -d chrome # explicit active v2 foundation
 ```
 
 The full-suite `make test` defaults to four Flutter workers (`TEST_JOBS=4`); set `TEST_JOBS` to override Makefile targets that use it.

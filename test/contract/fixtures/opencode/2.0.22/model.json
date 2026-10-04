@@ -1,0 +1,61 @@
+{
+  "id": "fledge-alpha-free",
+  "modelID": "fledge-alpha-free",
+  "providerID": "opencode",
+  "name": "Fledge Alpha Free",
+  "package": "@opencode/ai/providers/openai-compatible",
+  "settings": {
+    "apiKey": "[REDACTED]",
+    "baseURL": "https://opencode.ai/zen/v1",
+    "provider": "opencode"
+  },
+  "capabilities": {
+    "tools": true,
+    "input": [
+      "text",
+      "image"
+    ],
+    "output": [
+      "text"
+    ]
+  },
+  "variants": [
+    {
+      "id": "low",
+      "settings": {
+        "reasoningEffort": "low"
+      }
+    },
+    {
+      "id": "high",
+      "settings": {
+        "reasoningEffort": "high"
+      }
+    },
+    {
+      "id": "max",
+      "settings": {
+        "reasoningEffort": "max"
+      }
+    }
+  ],
+  "time": {
+    "released": 1790812800000
+  },
+  "cost": [
+    {
+      "input": 0,
+      "output": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    }
+  ],
+  "status": "active",
+  "enabled": true,
+  "limit": {
+    "context": 1048576,
+    "output": 131072
+  }
+}

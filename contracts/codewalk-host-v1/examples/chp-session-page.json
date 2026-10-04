@@ -1,0 +1,58 @@
+{
+  "type": "sessionPage",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "page": {
+    "items": [
+      {
+        "info": {
+          "ref": {
+            "version": 1,
+            "host": "host-α",
+            "harness": "profile-1",
+            "nativeId": " opaque/%session "
+          },
+          "title": "Synthetic history",
+          "ownership": {
+            "version": 1,
+            "kind": "savedHistory",
+            "proof": {
+              "version": 1,
+              "source": "synthetic.verified",
+              "observedAt": "2026-10-04T08:32:00Z"
+            }
+          },
+          "project": {
+            "version": 1,
+            "host": "host-α",
+            "canonicalDirectory": "/canonical/project",
+            "upstreamProjectId": "global"
+          },
+          "lineage": {
+            "version": 1,
+            "parent": {
+              "version": 1,
+              "host": "host-α",
+              "harness": "profile-1",
+              "nativeId": "child-1"
+            },
+            "fork": {
+              "version": 1,
+              "source": {
+                "version": 1,
+                "host": "host-α",
+                "harness": "profile-1",
+                "nativeId": "child-1"
+              },
+              "beforeItem": "fork-point"
+            }
+          }
+        },
+        "execution": {
+          "kind": "idle"
+        }
+      }
+    ],
+    "nextCursor": "opaque-next"
+  }
+}

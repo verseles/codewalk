@@ -1,0 +1,13 @@
+{
+  "@@locale": "hi",
+  "chatAddServerToStart": "चैटिंग शुरू करने के लिए एक सर्वर जोड़ें।",
+  "chatConversation": "बातचीत",
+  "chatConversations": "बातचीत",
+  "commonCancel": "रद्द करें",
+  "onboardingConnectRunningServer": "चल रहे सर्वर से कनेक्ट करें",
+  "serversCopy": "कॉपी करें",
+  "settingsBack": "पीछे",
+  "settingsServersTitle": "सर्वर",
+  "settingsTitle": "सेटिंग्स",
+  "unsupportedLink": "यह लिंक समर्थित नहीं है।"
+}

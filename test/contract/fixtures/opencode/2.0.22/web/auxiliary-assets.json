@@ -1,0 +1,15 @@
+{
+  "browserOnly": true,
+  "nativeServiceRequests": 0,
+  "origin": "http://localhost:40087",
+  "servedMainJsSha256": "81ca074c4c2db9826c8e99a06e06d4a7cc1590c32df1fad6b773b23d978e8ff1",
+  "servedMainJsBytes": 1736004,
+  "failedResources": [
+    {
+      "url": "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2",
+      "resourceType": "fetch",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    }
+  ],
+  "compiledDartBridgeLoaded": true
+}

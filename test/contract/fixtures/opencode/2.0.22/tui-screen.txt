@@ -1,0 +1,24 @@
+ • V2-005A observed free model c +
+  ┃
+  ┃  Use your read tool to read capture-marker.txt in the current workspace.
+  ┃  Then reply with exactly the marker from that file. Do not modify files or
+  ┃  invoke shell or network tools.
+  ┃
+
+     + Thought · 574ms
+
+     → Explored: 1 read
+
+     + Thought · 47ms
+
+     SP01_NATIVE_V2_FREE_MODEL_OK
+
+     Build · Fledge Alpha Free · 3.5s · 28.8 tok/s
+
+  ┃
+  ┃
+  ┃
+  ┃  Build · Fledge Alpha Free OpenCode Zen · low
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  /workspace/.cloud-runtime/opencode-v2/workspace   6.0K (1%)  ctrl+p commands
+

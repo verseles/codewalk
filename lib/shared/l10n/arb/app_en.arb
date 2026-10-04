@@ -1,0 +1,43 @@
+{
+  "@@locale": "en",
+  "chatAddServerToStart": "Add a server to start chatting.",
+  "@chatAddServerToStart": {
+    "description": "CodeWalk UI string — chatAddServerToStart"
+  },
+  "chatConversation": "Conversation",
+  "@chatConversation": {
+    "description": "CodeWalk UI string — chatConversation"
+  },
+  "chatConversations": "Conversations",
+  "@chatConversations": {
+    "description": "CodeWalk UI string — chatConversations"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "CodeWalk UI string — commonCancel"
+  },
+  "onboardingConnectRunningServer": "Connect to a running server",
+  "@onboardingConnectRunningServer": {
+    "description": "CodeWalk UI string — onboardingConnectRunningServer"
+  },
+  "serversCopy": "Copy",
+  "@serversCopy": {
+    "description": "CodeWalk UI string — serversCopy"
+  },
+  "settingsBack": "Back",
+  "@settingsBack": {
+    "description": "CodeWalk UI string — settingsBack"
+  },
+  "settingsServersTitle": "Servers",
+  "@settingsServersTitle": {
+    "description": "CodeWalk UI string — settingsServersTitle"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "CodeWalk UI string — settingsTitle"
+  },
+  "unsupportedLink": "This link is not supported.",
+  "@unsupportedLink": {
+    "description": "Shown when CodeWalk cannot resolve an incoming navigation link."
+  }
+}

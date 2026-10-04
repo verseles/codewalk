@@ -1,0 +1,42 @@
+{
+  "type": "retryScheduled",
+  "meta": {
+    "owner": {
+      "type": "session",
+      "session": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1",
+        "nativeId": " opaque/%session "
+      }
+    },
+    "position": {
+      "version": 1,
+      "id": "stream-1",
+      "epoch": "epoch-1",
+      "seq": "9007199254740993"
+    },
+    "receivedAt": "2026-10-04T08:32:00Z",
+    "source": {
+      "harness": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1"
+      },
+      "version": "synthetic-1",
+      "nativeType": "synthetic.domain",
+      "durability": "watermarkOnly",
+      "nativeCursor": "opaque:not-a-number",
+      "aggregateSeq": "184467440737095516160"
+    }
+  },
+  "attempt": 1,
+  "at": "2026-10-04T08:32:00Z",
+  "error": {
+    "kind": "network",
+    "rawType": "synthetic.connection",
+    "rawMessage": "Synthetic connection observation",
+    "retryable": true,
+    "action": "refresh"
+  }
+}

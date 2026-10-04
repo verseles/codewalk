@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-10-04T04:57:56.645087+00:00",
+  "method": "GET",
+  "path": "/api/experimental/session/ses_1a10544fefd000988b1fefcc176a/log?follow=false",
+  "status": 200,
+  "events": [
+    {
+      "type": "log.synced",
+      "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+      "seq": 29
+    }
+  ],
+  "scope": "observed recovery evidence only; no general durable-log/cursor acceptance claim"
+}

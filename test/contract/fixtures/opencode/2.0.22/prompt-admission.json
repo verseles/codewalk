@@ -1,0 +1,20 @@
+{
+  "request": {
+    "text": "Use your read tool to read capture-marker.txt in the current workspace. Then reply with exactly the marker from that file. Do not modify files or invoke shell or network tools."
+  },
+  "status": 200,
+  "response": {
+    "data": {
+      "id": "msg_10527e359001D4wtdk92wivyM0",
+      "sessionID": "ses_efad87538ffeM1l1gJnGdlhjE0",
+      "time": {
+        "created": 1791087862619
+      },
+      "type": "user",
+      "payload": {
+        "text": "Use your read tool to read capture-marker.txt in the current workspace. Then reply with exactly the marker from that file. Do not modify files or invoke shell or network tools."
+      },
+      "delivery": "steer"
+    }
+  }
+}

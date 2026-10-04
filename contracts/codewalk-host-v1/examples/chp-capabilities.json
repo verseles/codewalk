@@ -1,0 +1,47 @@
+{
+  "type": "capabilities",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "capabilities": {
+    "harness": {
+      "version": 1,
+      "host": "host-α",
+      "harness": "profile-1"
+    },
+    "connectedVersion": "synthetic-1",
+    "scope": {
+      "type": "session",
+      "session": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1",
+        "nativeId": " opaque/%session "
+      }
+    },
+    "values": {
+      "history.read": {
+        "support": "native",
+        "verified": true,
+        "constraints": {}
+      },
+      "terminal.pty": {
+        "support": "unavailable",
+        "verified": true,
+        "reason": "notOffered",
+        "constraints": {}
+      },
+      "future.capability": {
+        "support": "futureSupport",
+        "verified": true,
+        "constraints": {
+          "nested": [
+            null,
+            false,
+            0,
+            "値"
+          ]
+        }
+      }
+    }
+  }
+}

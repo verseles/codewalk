@@ -1,0 +1,424 @@
+{
+  "capturedAt": "2026-10-04T04:49:03.186518+00:00",
+  "calls": [
+    {
+      "name": "createReplayCreate",
+      "startedAt": "2026-10-04T04:49:02.025939+00:00",
+      "completedAt": "2026-10-04T04:49:02.072714+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e76490008743dfb6f9d536",
+        "title": "V2-005B createReplay",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089342066
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "identicalCreateReplay",
+      "startedAt": "2026-10-04T04:49:02.072749+00:00",
+      "completedAt": "2026-10-04T04:49:02.076083+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e76490008743dfb6f9d536",
+        "title": "V2-005B createReplay",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089342066
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "changedPayloadCreateReplay",
+      "startedAt": "2026-10-04T04:49:02.076147+00:00",
+      "completedAt": "2026-10-04T04:49:02.078221+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e76490008743dfb6f9d536",
+        "title": "changed title ignored?",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        },
+        "metadata": {
+          "changed": true
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089342066
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "beforeCreateAuthoritativeAbsent",
+      "startedAt": "2026-10-04T04:49:02.581356+00:00",
+      "completedAt": "2026-10-04T04:49:02.586644+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e767e0007673bee3f465f2",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_1a1053e767e0007673bee3f465f2",
+        "message": "Session not found: ses_1a1053e767e0007673bee3f465f2"
+      }
+    },
+    {
+      "name": "beforeCreateSameIdRetry",
+      "startedAt": "2026-10-04T04:49:02.586659+00:00",
+      "completedAt": "2026-10-04T04:49:02.631832+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e767e0007673bee3f465f2",
+        "title": "V2-005B timeout before create",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e767e0007673bee3f465f2",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342618,
+            "updated": 1791089342618
+          },
+          "title": "V2-005B timeout before create",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterCreateNativeForward",
+      "startedAt": "2026-10-04T04:49:02.635089+00:00",
+      "completedAt": "2026-10-04T04:49:02.706694+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e78a700081efce6322b4e2",
+        "title": "V2-005B timeout after create",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e78a700081efce6322b4e2",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342696,
+            "updated": 1791089342696
+          },
+          "title": "V2-005B timeout after create",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterCreateAuthoritativePresent",
+      "startedAt": "2026-10-04T04:49:03.136090+00:00",
+      "completedAt": "2026-10-04T04:49:03.179579+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e78a700081efce6322b4e2",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e78a700081efce6322b4e2",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342696,
+            "updated": 1791089342696
+          },
+          "title": "V2-005B timeout after create",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterCreateSameIdReplay",
+      "startedAt": "2026-10-04T04:49:03.179609+00:00",
+      "completedAt": "2026-10-04T04:49:03.186488+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e78a700081efce6322b4e2",
+        "title": "V2-005B timeout after create",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e78a700081efce6322b4e2",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342696,
+            "updated": 1791089342696
+          },
+          "title": "V2-005B timeout after create",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    }
+  ],
+  "networkControls": [
+    {
+      "control": "withhold before forwarding",
+      "forwardedToNative": false,
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e767e0007673bee3f465f2",
+        "title": "V2-005B timeout before create",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "clientOutcome": "TimeoutError"
+    },
+    {
+      "control": "forward then withhold response",
+      "forwardedToNative": true,
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e78a700081efce6322b4e2",
+        "title": "V2-005B timeout after create",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "nativeStatus": 200,
+      "nativeResponse": {
+        "data": {
+          "id": "ses_1a1053e78a700081efce6322b4e2",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342696,
+            "updated": 1791089342696
+          },
+          "title": "V2-005B timeout after create",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      },
+      "clientOutcome": "TimeoutError"
+    }
+  ]
+}

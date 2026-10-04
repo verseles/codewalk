@@ -1,0 +1,27 @@
+[
+  {
+    "at": "2026-10-04T04:50:18.481650+00:00",
+    "scenario": "reject-none",
+    "method": "POST",
+    "path": "/api/session/ses_efac1869cffewhJvqo54bHxH3n/permission/per_1053e84c2001Nt2y37t52XC30t/reply",
+    "request": {
+      "decision": "reject"
+    },
+    "status": 204,
+    "response": null,
+    "diagnostic": "Fledge emitted one read only; settle it without claiming real parallel model requests"
+  },
+  {
+    "at": "2026-10-04T04:50:18.492555+00:00",
+    "scenario": "reject-note",
+    "method": "POST",
+    "path": "/api/session/ses_efac1c0beffe0vE6SyLsKaUF60/permission/per_1053e4db0001E2COuXdRXwRD8D/reply",
+    "request": {
+      "decision": "reject",
+      "message": "Do not read files; use the provided text C_REJECT_FEEDBACK_OK and reply exactly C_REJECT_FEEDBACK_OK."
+    },
+    "status": 204,
+    "response": null,
+    "diagnostic": "Fledge emitted one read only; settle it without claiming real parallel model requests"
+  }
+]

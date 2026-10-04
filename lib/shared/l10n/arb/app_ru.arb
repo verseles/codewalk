@@ -1,0 +1,13 @@
+{
+  "@@locale": "ru",
+  "chatAddServerToStart": "Добавьте сервер, чтобы начать общение.",
+  "chatConversation": "Беседа",
+  "chatConversations": "Беседы",
+  "commonCancel": "Отмена",
+  "onboardingConnectRunningServer": "Подключиться к работающему серверу",
+  "serversCopy": "Копировать",
+  "settingsBack": "Назад",
+  "settingsServersTitle": "Серверы",
+  "settingsTitle": "Настройки",
+  "unsupportedLink": "Эта ссылка не поддерживается."
+}

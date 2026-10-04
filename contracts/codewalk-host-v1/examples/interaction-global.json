@@ -1,0 +1,46 @@
+{
+  "id": "global-interaction",
+  "owner": {
+    "type": "global",
+    "harness": {
+      "version": 1,
+      "host": "host-α",
+      "harness": "profile-1"
+    }
+  },
+  "kind": "permission",
+  "title": "Synthetic read",
+  "choices": [
+    {
+      "id": "once-native",
+      "label": "Native once",
+      "allows": true,
+      "scope": "once",
+      "resolutionScope": "request",
+      "acceptsNote": false
+    },
+    {
+      "id": "project-native",
+      "label": "Native project grant",
+      "allows": true,
+      "scope": "persistentProject",
+      "resolutionScope": "project",
+      "acceptsNote": false,
+      "scopePreview": {
+        "patterns": [
+          "synthetic/*"
+        ]
+      }
+    },
+    {
+      "id": "reject-native",
+      "label": "Native rejection",
+      "allows": false,
+      "scope": "once",
+      "resolutionScope": "session",
+      "acceptsNote": true
+    }
+  ],
+  "requiresInput": false,
+  "autoApprovable": false
+}

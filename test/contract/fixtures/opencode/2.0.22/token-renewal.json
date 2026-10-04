@@ -1,0 +1,40 @@
+{
+  "capturedAt": "2026-10-04T04:25:52.165654+00:00",
+  "authorization": "[REDACTED]",
+  "request": {
+    "method": "POST",
+    "path": "/api/pair",
+    "credentialKind": "previously paired token"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "code": "[REDACTED]",
+      "expires_in": 300
+    }
+  },
+  "redemption": {
+    "status": 200,
+    "body": {
+      "token": "[REDACTED]"
+    }
+  },
+  "successorInfo": {
+    "status": 200,
+    "body": {
+      "version": "2.0.22",
+      "pid": 117273,
+      "urls": [
+        "http://127.0.0.1:49374"
+      ],
+      "paths": {
+        "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+      }
+    }
+  },
+  "previousTokenStillAccepted": true,
+  "newTokenDiffers": true,
+  "firstExpiryEpochSeconds": 1793679951,
+  "successorExpiryEpochSeconds": 1793679952,
+  "realTimeExpirationObserved": false
+}

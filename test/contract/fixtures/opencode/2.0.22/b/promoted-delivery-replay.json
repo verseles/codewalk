@@ -1,0 +1,294 @@
+{
+  "capturedAt": "2026-10-04T05:03:26.394847+00:00",
+  "calls": [
+    {
+      "name": "promotedQueuedIdChangedDelivery",
+      "startedAt": "2026-10-04T05:03:26.386085+00:00",
+      "completedAt": "2026-10-04T05:03:26.389909+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/prompt",
+      "request": {
+        "id": "msg_1a105461f8b0003dec9ad526fa45",
+        "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+        "delivery": "steer",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105461f8b0003dec9ad526fa45",
+          "sessionID": "ses_1a10546195b00024e913db8b70bc",
+          "time": {
+            "created": 1791089858086
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "afterPromotedDeliveryReplaysession",
+      "startedAt": "2026-10-04T05:03:26.389925+00:00",
+      "completedAt": "2026-10-04T05:03:26.391120+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10546195b00024e913db8b70bc",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 114,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 15380,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089842535,
+            "updated": 1791089844132,
+            "idle": 1791089860263
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterPromotedDeliveryReplayinbox",
+      "startedAt": "2026-10-04T05:03:26.391135+00:00",
+      "completedAt": "2026-10-04T05:03:26.392565+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "afterPromotedDeliveryReplayhistory",
+      "startedAt": "2026-10-04T05:03:26.392575+00:00",
+      "completedAt": "2026-10-04T05:03:26.394794+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10546195b00024e913db8b70bc/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10546196f000432f69db883568",
+            "time": {
+              "created": 1791089842558
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105461984001R7ekyD9fEiYqiP",
+            "time": {
+              "created": 1791089842593,
+              "streamed": 1791089844071,
+              "completed": 1791089856100
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_p7zVie4wTVHLuiEeKboABy5V",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "command": "sleep 12; printf 'B_FIRST_TOOL_DONE\\n'"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "B_FIRST_TOOL_DONE\n"
+                    }
+                  ],
+                  "metadata": {
+                    "status": "completed",
+                    "truncated": false,
+                    "exit": 0
+                  }
+                },
+                "time": {
+                  "created": 1791089843708,
+                  "ran": 1791089844068,
+                  "completed": 1791089856088
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 1,
+              "output": 40,
+              "reasoning": 0,
+              "cache": {
+                "read": 5077,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b000c7d0a8d81f3aa3",
+            "time": {
+              "created": 1791089856109
+            },
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1a105461f8b0007bde81c2c229cc",
+            "time": {
+              "created": 1791089856111
+            },
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105464e75001ut3XOWK9N524d2",
+            "time": {
+              "created": 1791089856137,
+              "streamed": 1791089858070,
+              "completed": 1791089858078
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_EXPLICIT_STEER"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 80,
+              "output": 9,
+              "reasoning": 0,
+              "cache": {
+                "read": 5112,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1a105461f8b0003dec9ad526fa45",
+            "time": {
+              "created": 1791089858086
+            },
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10546562c001V6Vcip638xNci6",
+            "time": {
+              "created": 1791089858108,
+              "streamed": 1791089860243,
+              "completed": 1791089860255
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_QUEUED_NEXT_TURN"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 33,
+              "output": 10,
+              "reasoning": 0,
+              "cache": {
+                "read": 5191,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105465ea7001qEOobp8XABsMRs",
+            "time": {
+              "created": 1791089860263
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ2MTk2ZjAwMDQzMmY2OWRiODgzNTY4Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NjVlYTcwMDFxRU9vYnA4WEFCc01ScyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    }
+  ],
+  "originalAdmission": {
+    "data": {
+      "id": "msg_1a105461f8b0003dec9ad526fa45",
+      "sessionID": "ses_1a10546195b00024e913db8b70bc",
+      "time": {
+        "created": 1791089844111
+      },
+      "type": "user",
+      "payload": {
+        "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools."
+      },
+      "delivery": "queue"
+    }
+  }
+}

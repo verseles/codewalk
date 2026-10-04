@@ -1,0 +1,13 @@
+{
+  "@@locale": "bn",
+  "chatAddServerToStart": "চ্যাটিং শুরু করতে একটি সার্ভার যোগ করুন।",
+  "chatConversation": "কথোপকথন",
+  "chatConversations": "কথোপকথন",
+  "commonCancel": "বাতিল করুন",
+  "onboardingConnectRunningServer": "একটি চলমান সার্ভারের সাথে সংযোগ করুন",
+  "serversCopy": "কপি",
+  "settingsBack": "ব্যাক",
+  "settingsServersTitle": "সার্ভার",
+  "settingsTitle": "সেটিংস",
+  "unsupportedLink": "এই লিঙ্কটি সমর্থিত নয়।"
+}

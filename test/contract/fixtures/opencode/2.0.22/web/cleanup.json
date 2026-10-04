@@ -1,0 +1,125 @@
+{
+  "capturedAt": "2026-10-04T06:12:07.248482+00:00",
+  "resources": [
+    {
+      "kind": "pty",
+      "id": "pty_10589325d001HNndDM3eibPgaO",
+      "before": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589325d001HNndDM3eibPgaO",
+          "title": "V2-008 A",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "exited",
+          "pid": 151314,
+          "exitCode": 0
+        }
+      },
+      "deleteStatus": 204,
+      "afterStatus": 404
+    },
+    {
+      "kind": "pty",
+      "id": "pty_10589327a001kO8IzH4TM0rLJo",
+      "before": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589327a001kO8IzH4TM0rLJo",
+          "title": "V2-008 B",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "running",
+          "pid": 151318
+        }
+      },
+      "deleteStatus": 204,
+      "afterStatus": 404
+    },
+    {
+      "kind": "session",
+      "id": "ses_1a1058931fa000ab9e66b292f954",
+      "deleteStatus": 204,
+      "afterStatus": 404
+    }
+  ],
+  "initialInfo": {
+    "version": "2.0.22",
+    "pid": 126717,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+    }
+  },
+  "finalInfo": {
+    "version": "2.0.22",
+    "pid": 126717,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+    }
+  },
+  "nativeServicePidPreserved": true,
+  "configAndRegistrationStatBefore": {
+    "config": {
+      "inode": 823690,
+      "mtimeNs": 1791085897851848682,
+      "size": 64,
+      "mode": "0o600"
+    },
+    "state": {
+      "inode": 824685,
+      "mtimeNs": 1791089776702670752,
+      "size": 165,
+      "mode": "0o600"
+    }
+  },
+  "configAndRegistrationStatAfter": {
+    "config": {
+      "inode": 823690,
+      "mtimeNs": 1791085897851848682,
+      "size": 64,
+      "mode": "0o600"
+    },
+    "state": {
+      "inode": 824685,
+      "mtimeNs": 1791089776702670752,
+      "size": 165,
+      "mode": "0o600"
+    }
+  },
+  "configAndRegistrationMetadataUnchanged": true,
+  "sharedServiceReconfiguredOrRestarted": false,
+  "disposableProjectGitCommit": "88a7e250a946a09f579ae3015c4c8c015b159a4f",
+  "disposableProjectGitStatus": "",
+  "credentialReturnedOnlyInMemory": true,
+  "durationSeconds": 87.6175453169999,
+  "postDeleteOwnedProcessProcfs": [
+    {
+      "pid": 151314,
+      "procfsExists": false
+    },
+    {
+      "pid": 151318,
+      "procfsExists": false
+    }
+  ]
+}

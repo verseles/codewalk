@@ -1,0 +1,162 @@
+{
+  "unit": "V2-005D",
+  "issue": "https://github.com/verseles/codewalk/issues/243",
+  "preflight": "https://github.com/verseles/codewalk/issues/243#issuecomment-5976920437",
+  "status": "delivered-awaiting-acceptance",
+  "limitations": [
+    "Retry remains pending/inconclusive: no natural native scheduled retry event was observed.",
+    "Quota remains pending/inconclusive: no natural provider quota or rate-limit failure was observed.",
+    "Passing the observed subset does not establish whole V2-005D or parent SP-01 acceptance."
+  ],
+  "capturedOn": "2026-10-04",
+  "platform": "Linux x86_64",
+  "runtime": {
+    "package": "@opencode/cli@2.0.22",
+    "wrapper": "/workspace/.cloud-tools/bin/opencode2",
+    "serverURL": "http://127.0.0.1:49374",
+    "observedVersion": "2.0.22",
+    "pid": 126717,
+    "serviceRestartByThisUnit": false,
+    "globalConfigurationMutatedByThisUnit": false
+  },
+  "checkout": {
+    "initialCommit": "7d8c690ef2b6ea89061892a41795d2923db96312",
+    "branch": "main",
+    "authoredApplicationBehaviorChanges": false
+  },
+  "workspace": {
+    "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d",
+    "initialGitCommit": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+    "nativeProjectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+    "nativeAccessBeforeInitialGitCommit": false,
+    "configArtifact": "setup.json",
+    "publicInputs": {
+      "nested-marker.txt": "D_NESTED_MARKER_OK\n",
+      "background-gate.txt": "D_BACKGROUND_MARKER_OK\n",
+      "revert-target.txt": "D_REVERT_BEFORE\n"
+    },
+    "selectedModel": {
+      "providerID": "opencode",
+      "id": "space-bunny-free",
+      "variant": "low"
+    },
+    "agent": "capture-d",
+    "projectLocalConfigurationOnly": true
+  },
+  "budget": {
+    "declaredActiveMinutes": 90,
+    "targetActualExecutions": "7\u20138",
+    "actualExecutionCeiling": 12,
+    "actualExecutionsObserved": 11,
+    "observedNativeExecutionDefinition": "Every owned session.execution.started busy period, including descendants, native notifications and empty clear-triggered drains",
+    "collectorDiagnosticExecutions": 2,
+    "foregroundNestedExecutions": 3,
+    "backgroundAndContinuationExecutions": 3,
+    "revertWriteExecution": 1,
+    "nativeClearEmptyDrains": 2,
+    "ceilingOverrun": 0,
+    "targetEstimateExceeded": true,
+    "observedCostUSD": 0,
+    "additionalAdmissionsAfterFinalCount": false,
+    "futureRemedy": "Reserve actual-execution capacity for native clear wakes and completion notifications; dispose negative sessions before shared restart."
+  },
+  "observedCounts": {
+    "session.created": 8,
+    "session.inbox.enqueued": 10,
+    "session.execution.started": 11,
+    "session.instructions.updated": 8,
+    "session.inbox.delivered": 10,
+    "session.step.started": 14,
+    "session.tool.input.started": 8,
+    "session.tool.input.ended": 8,
+    "session.tool.called": 8,
+    "session.step.streamed": 14,
+    "permission.asked": 6,
+    "permission.replied": 3,
+    "session.tool.progress": 3,
+    "session.tool.success": 5,
+    "session.step.ended": 11,
+    "session.usage.updated": 14,
+    "session.text.started": 6,
+    "session.text.delta": 9,
+    "session.text.ended": 6,
+    "session.execution.succeeded": 8,
+    "session.tool.failed": 3,
+    "session.step.failed": 3,
+    "session.execution.interrupted": 3,
+    "session.reasoning.started": 2,
+    "session.reasoning.delta": 18,
+    "session.reasoning.ended": 2,
+    "session.deleted": 3,
+    "session.revert.staged": 3,
+    "session.revert.cleared": 2,
+    "session.revert.committed": 1
+  },
+  "pendingAcceptance": {
+    "retry": {
+      "status": "inconclusive",
+      "nativeScheduledEventsObserved": 0,
+      "reason": "No natural native retry event emitted; no forced provider outage/rate limit or synthetic passing trace."
+    },
+    "quota": {
+      "status": "inconclusive",
+      "reason": "No naturally observed provider quota/rate-limit failure; zero model cost and native usage do not establish remaining quota."
+    }
+  },
+  "nativeAssistantErrorsObserved": [
+    {
+      "type": "aborted",
+      "message": "Step interrupted"
+    },
+    {
+      "type": "aborted",
+      "message": "Step interrupted"
+    },
+    {
+      "type": "aborted",
+      "message": "Step interrupted"
+    }
+  ],
+  "cleanupArtifact": "cleanup.json",
+  "sourceAuthority": {
+    "officialSourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+    "officialSourceVersion": "2.0.22",
+    "versionedAnchorPrimaryVersion": "2.0.21",
+    "officialInspectedPaths": [
+      "packages/protocol/src/groups/session.ts",
+      "packages/schema/src/config.ts",
+      "packages/schema/src/config/agent.ts",
+      "packages/schema/src/config/model.ts",
+      "packages/schema/src/config/experimental.ts",
+      "packages/schema/src/config/warming.ts",
+      "packages/core/src/tool/plugin/subagent.ts",
+      "packages/core/src/session/subagent-job.ts",
+      "packages/core/src/session/subagent-completion.ts",
+      "packages/core/src/session/execution.ts",
+      "packages/core/src/session/revert.ts",
+      "packages/core/src/session/projector.ts",
+      "packages/core/src/session/session.ts"
+    ],
+    "secondaryRepository": "openchamber/openchamber",
+    "secondarySourcePin": "24dac3fb23dd025c6cff135614b96e21a8e08348",
+    "secondaryInspectedPaths": [
+      "packages/ui/src/lib/opencode/subagent-run.ts",
+      "packages/ui/src/components/chat/revertedMessageDockState.ts"
+    ],
+    "secondaryAuthority": "Context only; no override of official/native evidence"
+  },
+  "redactions": [
+    "Pairing secrets stayed in memory; Authorization headers never saved",
+    "Credential fields replaced by [REDACTED]",
+    "Opaque provider state omitted with explicit structural marker"
+  ],
+  "evidenceBoundaries": [
+    "Actual provider-generated native subagent sessions; no fabricated child session IDs",
+    "Actual handler-generated backgrounding and completion synthetic messages, not client display placeholders",
+    "Saved parsed/sanitized native event frames, no SSE replay claim",
+    "Two collector failures preserved and counted but never used for positive child acceptance",
+    "Actual native tool write/revert file effects, no experimental raw fs-write containment claim",
+    "No whole child D/parent SP-01/application/platform acceptance while retry/quota pending"
+  ],
+  "validationCommand": "python3 test/contract/fixtures/opencode/2.0.22/d/validate.py"
+}

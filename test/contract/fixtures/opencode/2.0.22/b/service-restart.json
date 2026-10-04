@@ -1,0 +1,2088 @@
+{
+  "capturedAt": "2026-10-04T04:56:45.203372+00:00",
+  "calls": [
+    {
+      "name": "completedSessionBeforeRestartsession",
+      "startedAt": "2026-10-04T04:56:10.195583+00:00",
+      "completedAt": "2026-10-04T04:56:10.197874+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a105403b8800054800ae75ff8e8",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "failed",
+          "time": {
+            "created": 1791089458065,
+            "updated": 1791089558169,
+            "idle": 1791089558553
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "completedSessionBeforeRestartinbox",
+      "startedAt": "2026-10-04T04:56:10.197907+00:00",
+      "completedAt": "2026-10-04T04:56:10.199174+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "completedSessionBeforeRestarthistory",
+      "startedAt": "2026-10-04T04:56:10.199197+00:00",
+      "completedAt": "2026-10-04T04:56:10.201465+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105403b9600022d8d5f50fbfbc",
+            "time": {
+              "created": 1791089458087
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105403bad001eA3BStSOkIwNXY",
+            "time": {
+              "created": 1791089458122,
+              "completed": 1791089458666
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_105403dee001zX7983SbHo42Ad",
+            "time": {
+              "created": 1791089458670
+            },
+            "type": "idle",
+            "outcome": "failed"
+          },
+          {
+            "id": "msg_1a10541c26200016e50e1ac2c0b2",
+            "time": {
+              "created": 1791089558128
+            },
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10541c276001HC66T0Ow8Eiv2u",
+            "time": {
+              "created": 1791089558162,
+              "completed": 1791089558371
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_10541c3660011ylOdoLdSSd9g6",
+            "time": {
+              "created": 1791089558374
+            },
+            "type": "idle",
+            "outcome": "failed"
+          },
+          {
+            "id": "msg_1a10541c2620005d3b14e2b62ea5",
+            "time": {
+              "created": 1791089558383
+            },
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1a10541c26200060ba1db6b79d3d",
+            "time": {
+              "created": 1791089558384
+            },
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10541c375001b6ZztwTQvWqVf5",
+            "time": {
+              "created": 1791089558406,
+              "completed": 1791089558550
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_10541c419001HyG5feNcMoLPx0",
+            "time": {
+              "created": 1791089558553
+            },
+            "type": "idle",
+            "outcome": "failed"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQwM2I5NjAwMDIyZDhkNWY1MGZiZmJjIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0MWM0MTkwMDFIeUc1ZmVOY01vTFB4MCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "parkedAcrossRestartCreate",
+      "startedAt": "2026-10-04T04:56:10.201525+00:00",
+      "completedAt": "2026-10-04T04:56:10.223152+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10544fed90006d9c5107f9ef8f",
+        "title": "V2-005B parkedAcrossRestart",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fed90006d9c5107f9ef8f",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089770214,
+            "updated": 1791089770214
+          },
+          "title": "V2-005B parkedAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "pendingBeforeRestart",
+      "startedAt": "2026-10-04T04:56:10.223207+00:00",
+      "completedAt": "2026-10-04T04:56:10.233045+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/prompt",
+      "request": {
+        "id": "msg_1a10544feef000d06d2151ffa5ee",
+        "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10544feef000d06d2151ffa5ee",
+          "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+          "time": {
+            "created": 1791089770227
+          },
+          "type": "user",
+          "payload": {
+            "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE"
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "parkedBeforeRestartsession",
+      "startedAt": "2026-10-04T04:56:10.233070+00:00",
+      "completedAt": "2026-10-04T04:56:10.234432+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fed90006d9c5107f9ef8f",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089770214,
+            "updated": 1791089770227
+          },
+          "title": "V2-005B parkedAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "parkedBeforeRestartinbox",
+      "startedAt": "2026-10-04T04:56:10.234449+00:00",
+      "completedAt": "2026-10-04T04:56:10.235757+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10544feef000d06d2151ffa5ee",
+            "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+            "time": {
+              "created": 1791089770227
+            },
+            "type": "user",
+            "payload": {
+              "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE"
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parkedBeforeRestarthistory",
+      "startedAt": "2026-10-04T04:56:10.235769+00:00",
+      "completedAt": "2026-10-04T04:56:10.237340+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "name": "activeAcrossRestartCreate",
+      "startedAt": "2026-10-04T04:56:10.237369+00:00",
+      "completedAt": "2026-10-04T04:56:10.250542+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10544fefd000988b1fefcc176a",
+        "title": "V2-005B activeAcrossRestart",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fefd000988b1fefcc176a",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089770247,
+            "updated": 1791089770247
+          },
+          "title": "V2-005B activeAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "infoBeforeRestart",
+      "startedAt": "2026-10-04T04:56:10.250570+00:00",
+      "completedAt": "2026-10-04T04:56:10.251524+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 117273,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "name": "activeRestartPrompt",
+      "startedAt": "2026-10-04T04:56:10.253206+00:00",
+      "completedAt": "2026-10-04T04:56:10.257867+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a/prompt",
+      "request": {
+        "id": "msg_1a10544ff0d000c04d816ded6c81",
+        "text": "Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls.",
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10544ff0d000c04d816ded6c81",
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "time": {
+            "created": 1791089770255
+          },
+          "type": "user",
+          "payload": {
+            "text": "Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "activeAtRestartBoundary",
+      "startedAt": "2026-10-04T04:56:11.310351+00:00",
+      "completedAt": "2026-10-04T04:56:11.312260+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_1a10544fefd000988b1fefcc176a": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "activeSessionBeforeRestartsession",
+      "startedAt": "2026-10-04T04:56:11.312296+00:00",
+      "completedAt": "2026-10-04T04:56:11.314555+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fefd000988b1fefcc176a",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089770247,
+            "updated": 1791089770255
+          },
+          "title": "V2-005B activeAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "activeSessionBeforeRestartinbox",
+      "startedAt": "2026-10-04T04:56:11.314572+00:00",
+      "completedAt": "2026-10-04T04:56:11.315982+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "activeSessionBeforeRestarthistory",
+      "startedAt": "2026-10-04T04:56:11.315990+00:00",
+      "completedAt": "2026-10-04T04:56:11.317899+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10544ff0d000c04d816ded6c81",
+            "time": {
+              "created": 1791089770283
+            },
+            "text": "Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10544ff34001XRIpk07HPhAGw3",
+            "time": {
+              "created": 1791089770315,
+              "streamed": 1791089771264
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_01a1054502db71a497bddd2c",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "running",
+                  "input": {
+                    "command": "sleep 25; printf 'B_RESTART_RESUMED_OK\\n'",
+                    "timeout": 40000
+                  },
+                  "metadata": {}
+                },
+                "time": {
+                  "created": 1791089771255,
+                  "ran": 1791089771261
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2"
+            }
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ0ZmYwZDAwMGMwNGQ4MTZkZWQ2YzgxIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NGZmMzQwMDFYUklwazA3SFBoQUd3MyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "pairedTokenAcceptedAfterRestart",
+      "startedAt": "2026-10-04T04:56:16.767663+00:00",
+      "completedAt": "2026-10-04T04:56:16.774532+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "name": "parkedAfterRestartsession",
+      "startedAt": "2026-10-04T04:56:16.780161+00:00",
+      "completedAt": "2026-10-04T04:56:16.784448+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fed90006d9c5107f9ef8f",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089770214,
+            "updated": 1791089770227
+          },
+          "title": "V2-005B parkedAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "parkedAfterRestartinbox",
+      "startedAt": "2026-10-04T04:56:16.784469+00:00",
+      "completedAt": "2026-10-04T04:56:16.788627+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10544feef000d06d2151ffa5ee",
+            "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+            "time": {
+              "created": 1791089770227
+            },
+            "type": "user",
+            "payload": {
+              "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE"
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parkedAfterRestarthistory",
+      "startedAt": "2026-10-04T04:56:16.788642+00:00",
+      "completedAt": "2026-10-04T04:56:16.798198+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "name": "activeAfterServiceRestart",
+      "startedAt": "2026-10-04T04:56:16.798241+00:00",
+      "completedAt": "2026-10-04T04:56:16.801317+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efac1869cffewhJvqo54bHxH3n": {
+            "type": "running"
+          },
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          },
+          "ses_efabef2eaffefbTAKpkIHkrQek": {
+            "type": "running"
+          },
+          "ses_1a10544fefd000988b1fefcc176a": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "activeSessionAfterRestartsession",
+      "startedAt": "2026-10-04T04:56:45.184148+00:00",
+      "completedAt": "2026-10-04T04:56:45.187549+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10544fefd000988b1fefcc176a",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 5153,
+            "output": 112,
+            "reasoning": 23,
+            "cache": {
+              "read": 10389,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089770247,
+            "updated": 1791089770255,
+            "idle": 1791089805137
+          },
+          "title": "V2-005B activeAcrossRestart",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "activeSessionAfterRestartinbox",
+      "startedAt": "2026-10-04T04:56:45.187569+00:00",
+      "completedAt": "2026-10-04T04:56:45.189239+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "activeSessionAfterRestarthistory",
+      "startedAt": "2026-10-04T04:56:45.189249+00:00",
+      "completedAt": "2026-10-04T04:56:45.191889+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10544fefd000988b1fefcc176a/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10544ff0d000c04d816ded6c81",
+            "time": {
+              "created": 1791089770283
+            },
+            "text": "Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10544ff34001XRIpk07HPhAGw3",
+            "time": {
+              "created": 1791089770315,
+              "streamed": 1791089771264,
+              "completed": 1791089771532
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_01a1054502db71a497bddd2c",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "error",
+                  "input": {
+                    "command": "sleep 25; printf 'B_RESTART_RESUMED_OK\\n'",
+                    "timeout": 40000
+                  },
+                  "error": {
+                    "type": "aborted",
+                    "message": "Tool execution interrupted"
+                  },
+                  "metadata": {
+                    "shellID": "sh_10545030e001K2KGPLNv4li5Fh"
+                  }
+                },
+                "time": {
+                  "created": 1791089771255,
+                  "ran": 1791089771261,
+                  "completed": 1791089771523
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 4949,
+              "output": 51,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            },
+            "error": {
+              "type": "aborted",
+              "message": "Step interrupted"
+            }
+          },
+          {
+            "id": "msg_10545186b001Oqx3o7mT3jYO3A",
+            "metadata": {
+              "notice": "restart"
+            },
+            "time": {
+              "created": 1791089776747
+            },
+            "text": "The server restarted while you were working. Continue from where you left off without repeating completed work.",
+            "description": "Continuing after restart",
+            "type": "synthetic"
+          },
+          {
+            "id": "msg_105451ba7001JVktRI6lryily3",
+            "time": {
+              "created": 1791089777613,
+              "streamed": 1791089779108,
+              "completed": 1791089804164
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "reasoning",
+                "text": "The command was interrupted. Re-run? The instruction said once. But it failed to complete; retry is fine.",
+                "state": {
+                  "_redacted": "opaque provider state omitted"
+                },
+                "time": {
+                  "created": 1791089778669,
+                  "completed": 1791089779101
+                }
+              },
+              {
+                "type": "tool",
+                "id": "call_01a10545216f725bbabba026",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "command": "sleep 25; printf 'B_RESTART_RESUMED_OK\\n'",
+                    "timeout": 40000
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "B_RESTART_RESUMED_OK\n"
+                    }
+                  ],
+                  "metadata": {
+                    "status": "completed",
+                    "truncated": false,
+                    "exit": 0
+                  }
+                },
+                "time": {
+                  "created": 1791089779085,
+                  "ran": 1791089779106,
+                  "completed": 1791089804153
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 107,
+              "output": 52,
+              "reasoning": 23,
+              "cache": {
+                "read": 5077,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_1054583920010iEEN5dkowKnXt",
+            "time": {
+              "created": 1791089804200,
+              "streamed": 1791089805123,
+              "completed": 1791089805133
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_RESTART_RESUMED_OK"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 97,
+              "output": 9,
+              "reasoning": 0,
+              "cache": {
+                "read": 5184,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105458751001Hx6ZQRvX61qiph",
+            "time": {
+              "created": 1791089805137
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ0ZmYwZDAwMGMwNGQ4MTZkZWQ2YzgxIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NTg3NTEwMDFIeDZaUVJ2WDYxcWlwaCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "completedSessionAfterRestartsession",
+      "startedAt": "2026-10-04T04:56:45.191943+00:00",
+      "completedAt": "2026-10-04T04:56:45.193146+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a105403b8800054800ae75ff8e8",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "failed",
+          "time": {
+            "created": 1791089458065,
+            "updated": 1791089558169,
+            "idle": 1791089558553
+          },
+          "title": "V2-005B liveQueueSteer",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "completedSessionAfterRestartinbox",
+      "startedAt": "2026-10-04T04:56:45.193160+00:00",
+      "completedAt": "2026-10-04T04:56:45.194693+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "completedSessionAfterRestarthistory",
+      "startedAt": "2026-10-04T04:56:45.194702+00:00",
+      "completedAt": "2026-10-04T04:56:45.196407+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105403b8800054800ae75ff8e8/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105403b9600022d8d5f50fbfbc",
+            "time": {
+              "created": 1791089458087
+            },
+            "text": "For this controlled disposable test, use the shell tool once to execute exactly `sleep 12; printf 'B_FIRST_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_FIRST_DONE. Do not modify files or make network calls.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105403bad001eA3BStSOkIwNXY",
+            "time": {
+              "created": 1791089458122,
+              "completed": 1791089458666
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_105403dee001zX7983SbHo42Ad",
+            "time": {
+              "created": 1791089458670
+            },
+            "type": "idle",
+            "outcome": "failed"
+          },
+          {
+            "id": "msg_1a10541c26200016e50e1ac2c0b2",
+            "time": {
+              "created": 1791089558128
+            },
+            "text": "Reply exactly B_QUEUED_NEXT_TURN. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10541c276001HC66T0Ow8Eiv2u",
+            "time": {
+              "created": 1791089558162,
+              "completed": 1791089558371
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_10541c3660011ylOdoLdSSd9g6",
+            "time": {
+              "created": 1791089558374
+            },
+            "type": "idle",
+            "outcome": "failed"
+          },
+          {
+            "id": "msg_1a10541c2620005d3b14e2b62ea5",
+            "time": {
+              "created": 1791089558383
+            },
+            "text": "After the current tool finishes, reply exactly B_CHANGED_TO_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1a10541c26200060ba1db6b79d3d",
+            "time": {
+              "created": 1791089558384
+            },
+            "text": "The steered final response for the current turn should be exactly B_EXPLICIT_STEER. No more tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10541c375001b6ZztwTQvWqVf5",
+            "time": {
+              "created": 1791089558406,
+              "completed": 1791089558550
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "fledge-alpha-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_10541c419001HyG5feNcMoLPx0",
+            "time": {
+              "created": 1791089558553
+            },
+            "type": "idle",
+            "outcome": "failed"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQwM2I5NjAwMDIyZDhkNWY1MGZiZmJjIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0MWM0MTkwMDFIeUc1ZmVOY01vTFB4MCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "restartPendingSameIdReplay",
+      "startedAt": "2026-10-04T04:56:45.196470+00:00",
+      "completedAt": "2026-10-04T04:56:45.199325+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/prompt",
+      "request": {
+        "id": "msg_1a10544feef000d06d2151ffa5ee",
+        "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10544feef000d06d2151ffa5ee",
+          "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+          "time": {
+            "created": 1791089770227
+          },
+          "type": "user",
+          "payload": {
+            "text": "B_RESTART_DURABLE_PENDING_DO_NOT_EXECUTE"
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "cancelRestartPendingCleanup",
+      "startedAt": "2026-10-04T04:56:45.199338+00:00",
+      "completedAt": "2026-10-04T04:56:45.202106+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a10544fed90006d9c5107f9ef8f/inbox/msg_1a10544feef000d06d2151ffa5ee",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "activeAfterResumedCompletion",
+      "startedAt": "2026-10-04T04:56:45.202112+00:00",
+      "completedAt": "2026-10-04T04:56:45.203165+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          }
+        }
+      }
+    }
+  ],
+  "nativeCommands": [
+    {
+      "command": [
+        "/workspace/.cloud-tools/bin/opencode2",
+        "service",
+        "stop"
+      ],
+      "cwd": "/workspace/.cloud-runtime/opencode-v2/workspace",
+      "startedAt": "2026-10-04T04:56:11.317922+00:00",
+      "completedAt": "2026-10-04T04:56:16.456914+00:00",
+      "exitCode": 0,
+      "outputOmitted": "native service output may contain credentials"
+    },
+    {
+      "command": [
+        "/workspace/.cloud-tools/bin/opencode2",
+        "service",
+        "start"
+      ],
+      "cwd": "/workspace/.cloud-runtime/opencode-v2/workspace",
+      "startedAt": "2026-10-04T04:56:16.456954+00:00",
+      "completedAt": "2026-10-04T04:56:16.757585+00:00",
+      "exitCode": 0,
+      "outputOmitted": "native service output may contain credentials"
+    }
+  ],
+  "beforeInfo": {
+    "version": "2.0.22",
+    "pid": 117273,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+    }
+  },
+  "afterInfo": {
+    "version": "2.0.22",
+    "pid": 126717,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+    }
+  },
+  "oldStream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": null
+    },
+    "events": [
+      {
+        "id": "evt_10544ff0c0010ws7kKiAFoICeI",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10544ff0f001s3Ywbf7ionTOj6",
+        "created": 1791089770255,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10544ff0d000c04d816ded6c81",
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10544ff12001jizqeQokBkU3U7",
+        "created": 1791089770258,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10544ff27001Eb16dNg8iSrBRu",
+        "created": 1791089770279,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "delta": {
+            "core/codemode": "3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1",
+            "core/skill-guidance": "8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9",
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10544ff2b001LLrOPVonU5GKRq",
+        "created": 1791089770283,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "inboxID": "msg_1a10544ff0d000c04d816ded6c81"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054502f3001QImepuZ1qHZ7Lf",
+        "created": 1791089771251,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089770315
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054502f7001K8g3VNWBHESAAd",
+        "created": 1791089771255,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3",
+          "id": "call_01a1054502db71a497bddd2c",
+          "name": "shell"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054502fb001p3Fl2ULnVALxGY",
+        "created": 1791089771259,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3",
+          "id": "call_01a1054502db71a497bddd2c",
+          "text": "{\"command\":\"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\n'\",\"timeout\":40000}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054502fd001rIrZBcw67UIpCA",
+        "created": 1791089771261,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3",
+          "id": "call_01a1054502db71a497bddd2c",
+          "input": {
+            "command": "sleep 25; printf 'B_RESTART_RESUMED_OK\\n'",
+            "timeout": 40000
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105450300001bUH2kK3TZ5FLBm",
+        "created": 1791089771264,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105450312001FtDh12wJp48VqN",
+        "created": 1791089771282,
+        "type": "session.tool.progress",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_10544ff34001XRIpk07HPhAGw3",
+          "id": "call_01a1054502db71a497bddd2c",
+          "metadata": {
+            "shellID": "sh_10545030e001K2KGPLNv4li5Fh"
+          }
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_10544ff0c0010ws7kKiAFoICeI\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10544ff0f001s3Ywbf7ionTOj6\", \"created\": 1791089770255, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10544ff0d000c04d816ded6c81\", \"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Use your shell tool once to run exactly `sleep 25; printf 'B_RESTART_RESUMED_OK\\\\n'` in the current disposable project, foreground. Then reply exactly B_RESTART_RESUMED_OK. Do not change files or make network calls.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 1, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10544ff12001jizqeQokBkU3U7\", \"created\": 1791089770258, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 2, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10544ff27001Eb16dNg8iSrBRu\", \"created\": 1791089770279, \"metadata\": {\"instructions\": {\"initial\": true}}, \"type\": \"session.instructions.updated\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"delta\": {\"core/codemode\": \"3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1\", \"core/skill-guidance\": \"8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9\", \"core/date\": \"49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12\", \"core/environment\": \"8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e\"}}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 3, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10544ff2b001LLrOPVonU5GKRq\", \"created\": 1791089770283, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"inboxID\": \"msg_1a10544ff0d000c04d816ded6c81\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 4, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054502f3001QImepuZ1qHZ7Lf\", \"created\": 1791089771251, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089770315}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 5, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054502f7001K8g3VNWBHESAAd\", \"created\": 1791089771255, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\", \"id\": \"call_01a1054502db71a497bddd2c\", \"name\": \"shell\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 6, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054502fb001p3Fl2ULnVALxGY\", \"created\": 1791089771259, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\", \"id\": \"call_01a1054502db71a497bddd2c\", \"text\": \"{\\\"command\\\":\\\"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\\\\\n'\\\",\\\"timeout\\\":40000}\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 7, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054502fd001rIrZBcw67UIpCA\", \"created\": 1791089771261, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\", \"id\": \"call_01a1054502db71a497bddd2c\", \"input\": {\"command\": \"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\n'\", \"timeout\": 40000}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 8, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105450300001bUH2kK3TZ5FLBm\", \"created\": 1791089771264, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 9, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105450312001FtDh12wJp48VqN\", \"created\": 1791089771282, \"type\": \"session.tool.progress\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_10544ff34001XRIpk07HPhAGw3\", \"id\": \"call_01a1054502db71a497bddd2c\", \"metadata\": {\"shellID\": \"sh_10545030e001K2KGPLNv4li5Fh\"}}}"
+      ]
+    ],
+    "failure": null
+  },
+  "newStream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": "evt_105450312001FtDh12wJp48VqN"
+    },
+    "events": [
+      {
+        "id": "evt_105451889001I7zuYhijDz9108",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_105451fea001tbEIA77szZMc4W",
+        "created": 1791089778666,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089777613
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 15,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105451fed001sLfRkE1YSvRcZQ",
+        "created": 1791089778669,
+        "type": "session.reasoning.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "ordinal": 0,
+          "state": {
+            "_redacted": "opaque provider state omitted"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 16,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105452053001EFhjcSqlJP1tQ6",
+        "created": 1791089778771,
+        "type": "session.reasoning.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "ordinal": 0,
+          "delta": "The command was interrupted. Re-run? The instruction said once. But it failed"
+        }
+      },
+      {
+        "id": "evt_1054520cd001F3Dp9hvAMDeg2o",
+        "created": 1791089778893,
+        "type": "session.reasoning.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "ordinal": 0,
+          "delta": " to complete; retry is fine."
+        }
+      },
+      {
+        "id": "evt_10545218d001WhIaAuYlG4WtS3",
+        "created": 1791089779085,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "id": "call_01a10545216f725bbabba026",
+          "name": "shell"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 17,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10545219d001k414IGa421PC7D",
+        "created": 1791089779101,
+        "type": "session.reasoning.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "ordinal": 0,
+          "text": "The command was interrupted. Re-run? The instruction said once. But it failed to complete; retry is fine.",
+          "state": {
+            "_redacted": "opaque provider state omitted"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 18,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054521a0001r1ovpsMPfdQWsP",
+        "created": 1791089779104,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "id": "call_01a10545216f725bbabba026",
+          "text": "{\"command\":\"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\n'\",\"timeout\":40000}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 19,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054521a2001Ay7fK4g4HmSCzN",
+        "created": 1791089779106,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "id": "call_01a10545216f725bbabba026",
+          "input": {
+            "command": "sleep 25; printf 'B_RESTART_RESUMED_OK\\n'",
+            "timeout": 40000
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 20,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054521a4001Fa4M7911e8ztHf",
+        "created": 1791089779108,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 21,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054521cc0010U3VHawlIRRRDE",
+        "created": 1791089779148,
+        "type": "session.tool.progress",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "id": "call_01a10545216f725bbabba026",
+          "metadata": {
+            "shellID": "sh_1054521c7001VQ5p6lySg7v2eH"
+          }
+        }
+      },
+      {
+        "id": "evt_1054583790010wKsTqqnHneGww",
+        "created": 1791089804153,
+        "type": "session.tool.success",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "id": "call_01a10545216f725bbabba026",
+          "content": [
+            {
+              "type": "text",
+              "text": "B_RESTART_RESUMED_OK\n"
+            }
+          ],
+          "metadata": {
+            "status": "completed",
+            "truncated": false,
+            "exit": 0
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 22,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_105458384001d6LjSien53eh5z",
+        "created": 1791089804164,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_105451ba7001JVktRI6lryily3",
+          "finish": "tool-calls",
+          "rawFinish": "tool_calls",
+          "cost": 0,
+          "tokens": {
+            "input": 107,
+            "output": 52,
+            "reasoning": 23,
+            "cache": {
+              "read": 5077,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 23,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105458387001zFsBQte9VXDnZi",
+        "created": 1791089804167,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "cost": 0,
+          "tokens": {
+            "input": 5056,
+            "output": 103,
+            "reasoning": 23,
+            "cache": {
+              "read": 5205,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_1054586d9001AwMKMfdf67Swjf",
+        "created": 1791089805017,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089804200
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 24,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054586dc0019bYb1AL3f9dAp7",
+        "created": 1791089805020,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 25,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10545873f001HQAfc3JXvhGxsj",
+        "created": 1791089805119,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt",
+          "ordinal": 0,
+          "delta": "B_RESTART_RESUMED_OK"
+        }
+      },
+      {
+        "id": "evt_105458740001drg6rKQN0cw502",
+        "created": 1791089805120,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt",
+          "ordinal": 0,
+          "text": "B_RESTART_RESUMED_OK"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 26,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105458743001AwwDzh2ycM9rOq",
+        "created": 1791089805123,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 27,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10545874c0014TGEx3aG5bEx0o",
+        "created": 1791089805133,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "assistantMessageID": "msg_1054583920010iEEN5dkowKnXt",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 97,
+            "output": 9,
+            "reasoning": 0,
+            "cache": {
+              "read": 5184,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 28,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105458750001uC8Gy1TsO8IvW3",
+        "created": 1791089805136,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+          "cost": 0,
+          "tokens": {
+            "input": 5153,
+            "output": 112,
+            "reasoning": 23,
+            "cache": {
+              "read": 10389,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105458751001Hx6ZQRvX61qiph",
+        "created": 1791089805137,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10544fefd000988b1fefcc176a"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fefd000988b1fefcc176a",
+          "seq": 29,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105458790001m7P60xthAzD3m2",
+        "created": 1791089805200,
+        "type": "session.inbox.cancelled",
+        "data": {
+          "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+          "inboxID": "msg_1a10544feef000d06d2151ffa5ee"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10544fed90006d9c5107f9ef8f",
+          "seq": 2,
+          "version": 1
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_105451889001I7zuYhijDz9108\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105451fea001tbEIA77szZMc4W\", \"created\": 1791089778666, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089777613}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 15, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105451fed001sLfRkE1YSvRcZQ\", \"created\": 1791089778669, \"type\": \"session.reasoning.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"ordinal\": 0, \"state\": {\"_redacted\": \"opaque provider state omitted\"}}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 16, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105452053001EFhjcSqlJP1tQ6\", \"created\": 1791089778771, \"type\": \"session.reasoning.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"ordinal\": 0, \"delta\": \"The command was interrupted. Re-run? The instruction said once. But it failed\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054520cd001F3Dp9hvAMDeg2o\", \"created\": 1791089778893, \"type\": \"session.reasoning.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"ordinal\": 0, \"delta\": \" to complete; retry is fine.\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10545218d001WhIaAuYlG4WtS3\", \"created\": 1791089779085, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"id\": \"call_01a10545216f725bbabba026\", \"name\": \"shell\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 17, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10545219d001k414IGa421PC7D\", \"created\": 1791089779101, \"type\": \"session.reasoning.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"ordinal\": 0, \"text\": \"The command was interrupted. Re-run? The instruction said once. But it failed to complete; retry is fine.\", \"state\": {\"_redacted\": \"opaque provider state omitted\"}}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 18, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054521a0001r1ovpsMPfdQWsP\", \"created\": 1791089779104, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"id\": \"call_01a10545216f725bbabba026\", \"text\": \"{\\\"command\\\":\\\"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\\\\\n'\\\",\\\"timeout\\\":40000}\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 19, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054521a2001Ay7fK4g4HmSCzN\", \"created\": 1791089779106, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"id\": \"call_01a10545216f725bbabba026\", \"input\": {\"command\": \"sleep 25; printf 'B_RESTART_RESUMED_OK\\\\n'\", \"timeout\": 40000}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 20, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054521a4001Fa4M7911e8ztHf\", \"created\": 1791089779108, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 21, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054521cc0010U3VHawlIRRRDE\", \"created\": 1791089779148, \"type\": \"session.tool.progress\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"id\": \"call_01a10545216f725bbabba026\", \"metadata\": {\"shellID\": \"sh_1054521c7001VQ5p6lySg7v2eH\"}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054583790010wKsTqqnHneGww\", \"created\": 1791089804153, \"type\": \"session.tool.success\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"id\": \"call_01a10545216f725bbabba026\", \"content\": [{\"type\": \"text\", \"text\": \"B_RESTART_RESUMED_OK\\n\"}], \"metadata\": {\"status\": \"completed\", \"truncated\": false, \"exit\": 0}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 22, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458384001d6LjSien53eh5z\", \"created\": 1791089804164, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_105451ba7001JVktRI6lryily3\", \"finish\": \"tool-calls\", \"rawFinish\": \"tool_calls\", \"cost\": 0, \"tokens\": {\"input\": 107, \"output\": 52, \"reasoning\": 23, \"cache\": {\"read\": 5077, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 23, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458387001zFsBQte9VXDnZi\", \"created\": 1791089804167, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"cost\": 0, \"tokens\": {\"input\": 5056, \"output\": 103, \"reasoning\": 23, \"cache\": {\"read\": 5205, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054586d9001AwMKMfdf67Swjf\", \"created\": 1791089805017, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089804200}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 24, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054586dc0019bYb1AL3f9dAp7\", \"created\": 1791089805020, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 25, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10545873f001HQAfc3JXvhGxsj\", \"created\": 1791089805119, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\", \"ordinal\": 0, \"delta\": \"B_RESTART_RESUMED_OK\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458740001drg6rKQN0cw502\", \"created\": 1791089805120, \"type\": \"session.text.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\", \"ordinal\": 0, \"text\": \"B_RESTART_RESUMED_OK\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 26, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458743001AwwDzh2ycM9rOq\", \"created\": 1791089805123, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 27, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10545874c0014TGEx3aG5bEx0o\", \"created\": 1791089805133, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"assistantMessageID\": \"msg_1054583920010iEEN5dkowKnXt\", \"finish\": \"stop\", \"rawFinish\": \"stop\", \"cost\": 0, \"tokens\": {\"input\": 97, \"output\": 9, \"reasoning\": 0, \"cache\": {\"read\": 5184, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 28, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458750001uC8Gy1TsO8IvW3\", \"created\": 1791089805136, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\", \"cost\": 0, \"tokens\": {\"input\": 5153, \"output\": 112, \"reasoning\": 23, \"cache\": {\"read\": 10389, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458751001Hx6ZQRvX61qiph\", \"created\": 1791089805137, \"type\": \"session.execution.succeeded\", \"data\": {\"sessionID\": \"ses_1a10544fefd000988b1fefcc176a\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fefd000988b1fefcc176a\", \"seq\": 29, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105458790001m7P60xthAzD3m2\", \"created\": 1791089805200, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a10544fed90006d9c5107f9ef8f\", \"inboxID\": \"msg_1a10544feef000d06d2151ffa5ee\"}, \"durable\": {\"aggregateID\": \"ses_1a10544fed90006d9c5107f9ef8f\", \"seq\": 2, \"version\": 1}}"
+      ]
+    ],
+    "failure": null
+  },
+  "toolCalledBeforeRestart": true,
+  "pairedTokenAcceptedAfterRestart": true,
+  "completionAfterRestartObserved": true,
+  "sessions": {
+    "active": "ses_1a10544fefd000988b1fefcc176a",
+    "parked": "ses_1a10544fed90006d9c5107f9ef8f",
+    "completed": "ses_1a105403b8800054800ae75ff8e8"
+  },
+  "promptIds": {
+    "active": "msg_1a10544ff0d000c04d816ded6c81",
+    "parked": "msg_1a10544feef000d06d2151ffa5ee"
+  },
+  "modelWakeAdmissionCount": 1
+}

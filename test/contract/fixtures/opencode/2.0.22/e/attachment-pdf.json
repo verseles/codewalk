@@ -1,0 +1,581 @@
+{
+  "capturedAt": "2026-10-04T05:28:36.917536+00:00",
+  "kind": "pdf",
+  "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+  "model": {
+    "providerID": "opencode",
+    "id": "muse-spark-1.3-contributor-free",
+    "variant": "minimal"
+  },
+  "mime": "application/pdf",
+  "attachmentSha256": "af2490ee3899e7c320019cf10633c3a95c186ba8ac79fe0577b6c52d76ab9461",
+  "decodedBytes": 1505,
+  "expectedAttachmentOnlyMarker": "CW_PDF_37D0CA335E34",
+  "markerWasAbsentFromPromptText": true,
+  "calls": [
+    {
+      "name": "attachment-pdfCreate",
+      "startedAt": "2026-10-04T05:28:36.578628+00:00",
+      "completedAt": "2026-10-04T05:28:36.594605+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10562b1e2000106fc9c63f0fb6",
+        "title": "V2-005E attachment-pdf",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "model": {
+          "providerID": "opencode",
+          "id": "muse-spark-1.3-contributor-free",
+          "variant": "minimal"
+        },
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 517,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "muse-spark-1.3-contributor-free",
+            "providerID": "opencode",
+            "variant": "minimal"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091716590,
+            "updated": 1791091716590
+          },
+          "title": "V2-005E attachment-pdf",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "AttachmentPromptAdmission",
+      "startedAt": "2026-10-04T05:28:36.596848+00:00",
+      "completedAt": "2026-10-04T05:28:36.602756+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10562b1e2000106fc9c63f0fb6/prompt",
+      "request": {
+        "id": "msg_1a10562b1f40008ab3b7ec2bfa73",
+        "text": "Read the attached file. Return only the marker written in it. Do not use any tools. If you cannot read it, reply UNAVAILABLE.",
+        "files": [
+          {
+            "uri": "data:application/pdf;base64,JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKGFub255bW91cykgL0NyZWF0aW9uRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9DcmVhdG9yIChhbm9ueW1vdXMpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0ICh1bnNwZWNpZmllZCkgL1RpdGxlICh1bnRpdGxlZCkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Cj4+CnN0cmVhbQpHYXBRaDBFPUYsMFVcSDNUXHBOWVReUUtrP3RjPklQLDtXI1UxXjIzaWhQRU1fP0NdNjtEOWosTSZUVV09V2tXbFRna0NkLiR0cWouInBZMkJLMWRmI0lxOl8pazRHVjMnLyN0UyU5Ti1CSVxbRy4+MkFjb0krWVohM1RvTm1mfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDgzNiAwMDAwMCBuIAowMDAwMDAwODk1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDFjMTc4MTk4ZmJkZmE1MWIyNTk5NWQ4OWQ0MTAyMDQzPjwxYzE3ODE5OGZiZGZhNTFiMjU5OTVkODlkNDEwMjA0Mz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTExNAolJUVPRgo=",
+            "name": "capture.pdf"
+          }
+        ]
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 2413,
+      "response": {
+        "data": {
+          "id": "msg_1a10562b1f40008ab3b7ec2bfa73",
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "time": {
+            "created": 1791091716599
+          },
+          "type": "user",
+          "payload": {
+            "text": "Read the attached file. Return only the marker written in it. Do not use any tools. If you cannot read it, reply UNAVAILABLE.",
+            "files": [
+              {
+                "data": "JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKGFub255bW91cykgL0NyZWF0aW9uRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9DcmVhdG9yIChhbm9ueW1vdXMpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0ICh1bnNwZWNpZmllZCkgL1RpdGxlICh1bnRpdGxlZCkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Cj4+CnN0cmVhbQpHYXBRaDBFPUYsMFVcSDNUXHBOWVReUUtrP3RjPklQLDtXI1UxXjIzaWhQRU1fP0NdNjtEOWosTSZUVV09V2tXbFRna0NkLiR0cWouInBZMkJLMWRmI0lxOl8pazRHVjMnLyN0UyU5Ti1CSVxbRy4+MkFjb0krWVohM1RvTm1mfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDgzNiAwMDAwMCBuIAowMDAwMDAwODk1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDFjMTc4MTk4ZmJkZmE1MWIyNTk5NWQ4OWQ0MTAyMDQzPjwxYzE3ODE5OGZiZGZhNTFiMjU5OTVkODlkNDEwMjA0Mz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTExNAolJUVPRgo=",
+                "mime": "application/pdf",
+                "source": {
+                  "type": "inline"
+                },
+                "name": "capture.pdf"
+              }
+            ]
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "AttachmentAftersession",
+      "startedAt": "2026-10-04T05:28:36.903875+00:00",
+      "completedAt": "2026-10-04T05:28:36.909620+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b1e2000106fc9c63f0fb6",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 557,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "muse-spark-1.3-contributor-free",
+            "providerID": "opencode",
+            "variant": "minimal"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "failed",
+          "time": {
+            "created": 1791091716590,
+            "updated": 1791091716599,
+            "idle": 1791091716860
+          },
+          "title": "V2-005E attachment-pdf",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "AttachmentAfterinbox",
+      "startedAt": "2026-10-04T05:28:36.909695+00:00",
+      "completedAt": "2026-10-04T05:28:36.911594+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b1e2000106fc9c63f0fb6/inbox",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "AttachmentAfterhistory",
+      "startedAt": "2026-10-04T05:28:36.911610+00:00",
+      "completedAt": "2026-10-04T05:28:36.915671+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b1e2000106fc9c63f0fb6/message?order=asc&limit=200",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 3395,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10562b1f40008ab3b7ec2bfa73",
+            "time": {
+              "created": 1791091716610
+            },
+            "text": "Read the attached file. Return only the marker written in it. Do not use any tools. If you cannot read it, reply UNAVAILABLE.",
+            "files": [
+              {
+                "data": "JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKGFub255bW91cykgL0NyZWF0aW9uRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9DcmVhdG9yIChhbm9ueW1vdXMpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0ICh1bnNwZWNpZmllZCkgL1RpdGxlICh1bnRpdGxlZCkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Cj4+CnN0cmVhbQpHYXBRaDBFPUYsMFVcSDNUXHBOWVReUUtrP3RjPklQLDtXI1UxXjIzaWhQRU1fP0NdNjtEOWosTSZUVV09V2tXbFRna0NkLiR0cWouInBZMkJLMWRmI0lxOl8pazRHVjMnLyN0UyU5Ti1CSVxbRy4+MkFjb0krWVohM1RvTm1mfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDgzNiAwMDAwMCBuIAowMDAwMDAwODk1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDFjMTc4MTk4ZmJkZmE1MWIyNTk5NWQ4OWQ0MTAyMDQzPjwxYzE3ODE5OGZiZGZhNTFiMjU5OTVkODlkNDEwMjA0Mz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTExNAolJUVPRgo=",
+                "mime": "application/pdf",
+                "source": {
+                  "type": "inline"
+                },
+                "name": "capture.pdf"
+              }
+            ],
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b214001f4EpN1x8EkShDc",
+            "time": {
+              "created": 1791091716671,
+              "completed": 1791091716855
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "muse-spark-1.3-contributor-free",
+              "providerID": "opencode",
+              "variant": "minimal"
+            },
+            "content": [],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "error",
+            "error": {
+              "type": "provider.auth",
+              "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+              "status": 403,
+              "response": {
+                "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+              }
+            }
+          },
+          {
+            "id": "msg_10562b2fc001OeWscJoN26ypmE",
+            "time": {
+              "created": 1791091716860
+            },
+            "type": "idle",
+            "outcome": "failed"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjFmNDAwMDhhYjNiN2VjMmJmYTczIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmIyZmMwMDFPZVdzY0pvTjI2eXBtRSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    }
+  ],
+  "state": {
+    "session": {
+      "data": {
+        "id": "ses_1a10562b1e2000106fc9c63f0fb6",
+        "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+        "model": {
+          "id": "muse-spark-1.3-contributor-free",
+          "providerID": "opencode",
+          "variant": "minimal"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "outcome": "failed",
+        "time": {
+          "created": 1791091716590,
+          "updated": 1791091716599,
+          "idle": 1791091716860
+        },
+        "title": "V2-005E attachment-pdf",
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ],
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        }
+      }
+    },
+    "inbox": {
+      "data": []
+    },
+    "history": {
+      "data": [
+        {
+          "id": "msg_1a10562b1f40008ab3b7ec2bfa73",
+          "time": {
+            "created": 1791091716610
+          },
+          "text": "Read the attached file. Return only the marker written in it. Do not use any tools. If you cannot read it, reply UNAVAILABLE.",
+          "files": [
+            {
+              "data": "JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKGFub255bW91cykgL0NyZWF0aW9uRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9DcmVhdG9yIChhbm9ueW1vdXMpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0ICh1bnNwZWNpZmllZCkgL1RpdGxlICh1bnRpdGxlZCkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Cj4+CnN0cmVhbQpHYXBRaDBFPUYsMFVcSDNUXHBOWVReUUtrP3RjPklQLDtXI1UxXjIzaWhQRU1fP0NdNjtEOWosTSZUVV09V2tXbFRna0NkLiR0cWouInBZMkJLMWRmI0lxOl8pazRHVjMnLyN0UyU5Ti1CSVxbRy4+MkFjb0krWVohM1RvTm1mfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDgzNiAwMDAwMCBuIAowMDAwMDAwODk1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDFjMTc4MTk4ZmJkZmE1MWIyNTk5NWQ4OWQ0MTAyMDQzPjwxYzE3ODE5OGZiZGZhNTFiMjU5OTVkODlkNDEwMjA0Mz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTExNAolJUVPRgo=",
+              "mime": "application/pdf",
+              "source": {
+                "type": "inline"
+              },
+              "name": "capture.pdf"
+            }
+          ],
+          "type": "user"
+        },
+        {
+          "id": "msg_10562b214001f4EpN1x8EkShDc",
+          "time": {
+            "created": 1791091716671,
+            "completed": 1791091716855
+          },
+          "type": "assistant",
+          "agent": "build",
+          "model": {
+            "id": "muse-spark-1.3-contributor-free",
+            "providerID": "opencode",
+            "variant": "minimal"
+          },
+          "content": [],
+          "snapshot": {
+            "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+            "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+            "files": []
+          },
+          "finish": "error",
+          "error": {
+            "type": "provider.auth",
+            "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+            "status": 403,
+            "response": {
+              "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+            }
+          }
+        },
+        {
+          "id": "msg_10562b2fc001OeWscJoN26ypmE",
+          "time": {
+            "created": 1791091716860
+          },
+          "type": "idle",
+          "outcome": "failed"
+        }
+      ],
+      "cursor": {
+        "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjFmNDAwMDhhYjNiN2VjMmJmYTczIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+        "next": "eyJpZCI6Im1zZ18xMDU2MmIyZmMwMDFPZVdzY0pvTjI2eXBtRSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+      }
+    }
+  },
+  "stream": {
+    "path": "/api/event",
+    "openedAt": "2026-10-04T05:28:36.594653+00:00",
+    "closedAt": "2026-10-04T05:28:36.917563+00:00",
+    "status": 200,
+    "events": [
+      {
+        "id": "evt_10562b1f3001iwNq7muFVyE5dl",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10562b1f7001k00lpOMeBIw3Kb",
+        "created": 1791091716599,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10562b1f40008ab3b7ec2bfa73",
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Read the attached file. Return only the marker written in it. Do not use any tools. If you cannot read it, reply UNAVAILABLE.",
+              "files": [
+                {
+                  "data": "JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKGFub255bW91cykgL0NyZWF0aW9uRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9DcmVhdG9yIChhbm9ueW1vdXMpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDAwMDEwMTAwMDAwMCswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0ICh1bnNwZWNpZmllZCkgL1RpdGxlICh1bnRpdGxlZCkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNCAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMTI5Cj4+CnN0cmVhbQpHYXBRaDBFPUYsMFVcSDNUXHBOWVReUUtrP3RjPklQLDtXI1UxXjIzaWhQRU1fP0NdNjtEOWosTSZUVV09V2tXbFRna0NkLiR0cWouInBZMkJLMWRmI0lxOl8pazRHVjMnLyN0UyU5Ti1CSVxbRy4+MkFjb0krWVohM1RvTm1mfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDgzNiAwMDAwMCBuIAowMDAwMDAwODk1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDFjMTc4MTk4ZmJkZmE1MWIyNTk5NWQ4OWQ0MTAyMDQzPjwxYzE3ODE5OGZiZGZhNTFiMjU5OTVkODlkNDEwMjA0Mz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTExNAolJUVPRgo=",
+                  "mime": "application/pdf",
+                  "source": {
+                    "type": "inline"
+                  },
+                  "name": "capture.pdf"
+                }
+              ]
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b1fa001vg286CHynipDTT",
+        "created": 1791091716602,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b200001t53ztlkj0LD1f6",
+        "created": 1791091716608,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "delta": {
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "2f0607905bbfed79871cdb597e1cc5412e2f181492a7e54da0db702ea793c6cb"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10562b202001sWRfaR1knMOrJi",
+        "created": 1791091716610,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "inboxID": "msg_1a10562b1f40008ab3b7ec2bfa73"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b2e7001G8sTUZqJNpeA6g",
+        "created": 1791091716839,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "agent": "build",
+          "model": {
+            "id": "muse-spark-1.3-contributor-free",
+            "providerID": "opencode",
+            "variant": "minimal"
+          },
+          "assistantMessageID": "msg_10562b214001f4EpN1x8EkShDc",
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "started": 1791091716671
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b2f60016iynLqwmIu9g8U",
+        "created": 1791091716855,
+        "type": "session.step.failed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "assistantMessageID": "msg_10562b214001f4EpN1x8EkShDc",
+          "error": {
+            "type": "provider.auth",
+            "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+            "status": 403,
+            "response": {
+              "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+            }
+          },
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b2fc001OeWscJoN26ypmE",
+        "created": 1791091716860,
+        "type": "session.execution.failed",
+        "data": {
+          "sessionID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "error": {
+            "type": "provider.auth",
+            "message": "Error from provider (Console): OpenCode's free tier can only be used from within OpenCode",
+            "status": 403,
+            "response": {
+              "body": "{\"type\":\"error\",\"error\":{\"type\":\"FreeTierError\",\"message\":\"Error from provider (Console): OpenCode's free tier can only be used from within OpenCode\"}}"
+            }
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b1e2000106fc9c63f0fb6",
+          "seq": 7,
+          "version": 1
+        }
+      }
+    ],
+    "frames": null,
+    "totalHttpBodyBytes": 5832,
+    "ownedEventFrameBytes": 5819,
+    "heartbeatBytes": 13,
+    "ambientEventCount": 0,
+    "failure": null
+  },
+  "nativeTerminalObserved": true,
+  "modelReturnedExactMarker": false,
+  "assistantText": "",
+  "assistantToolCount": 0,
+  "observedProviderStepCount": 1,
+  "productPdfPolicy": "disabled; observation does not authorize enabling product PDF"
+}

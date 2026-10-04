@@ -1,0 +1,74 @@
+{
+  "capturedAt": "2026-10-04T05:04:32.578913+00:00",
+  "unit": "V2-005B",
+  "issue": "https://github.com/verseles/codewalk/issues/241",
+  "nativeVersion": "2.0.22",
+  "architecture": "x86_64",
+  "service": "http://127.0.0.1:49374",
+  "installation": "official @opencode/cli@2.0.22 managed service, isolated XDG runtime",
+  "nativeSourceRevision": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+  "sourceFiles": {
+    "handler-session.ts": "3ed7600c89d1d72a7ca70fcc469e73e5a0dc56d6fac04086989d405372e69aac",
+    "inbox.ts": "e849cf92dd802282cba7739f50c7702d4c4e9c31b8299ee9c10353d05d81024a",
+    "info.ts": "d14557573746c0b2ed65f42f8a881012813f36235bb67d2f2a27661c017c80a6",
+    "session.ts": "de53cba2fc621fb24bf1283473c041640759c7e761aadee0421378543e3853d4",
+    "zen-handler.ts": "a34d1a311ee432b31ff76e445ac429e2f07f53192329604b371886770a16b70f"
+  },
+  "modelExecutionLimit": 12,
+  "actualModelWakeAdmissionCount": 12,
+  "executionCountNote": "9 execution.started frames observed, plus one service startup recovery began before new subscriber attached. Count excludes resume:false non-executing HTTP probes; provider steps are separately recorded in native events.",
+  "fixtureSha256": {
+    "cancel-matrix.json": "5c950414d70a6537876b857503b8df204c1dedd3535eb20d1847498df7da93b6",
+    "create-matrix.json": "06a6139bdd19cfe4306977f669d60cc8a0260f8ebe7843c0196f32ca9674fe44",
+    "disconnect-reconnect.json": "af8853d1f9b40d24b7aeb44ed6cf6aa0f5d5dd889c410e216df1e9a0a3c03847",
+    "final-native-state.json": "665e957fe47bdb1eabeb75708b23d5bc54d54b77f1127e729a09789d22657a1a",
+    "interrupt-resume.json": "71847aab65c78a96e7c1bf6c7ffdac75f8fd532d4fe0849a282982ab80b0619f",
+    "matrix-events.json": "e426fb8646c9dbde14ca60c7acce46505db708ae9233987384f5858a6c692864",
+    "model-space-bunny-free.json": "4fba2bdf83c391628cdb05f2c628f7cbac40afc1d1f08636f72a677204ae4a58",
+    "promoted-delivery-replay.json": "e70be79482f327025cb0e914f1dfd9383217e7438b6db63a36fc984f385bbe1c",
+    "prompt-matrix.json": "6296ea6c8ccd687e5dc98045395728c055c3763049675194479df5b200271914",
+    "queue-steer-fledge-policy-denial.json": "1996e44f2442ae420b6026d3aed594bab71bdbd3f74d3c7a404f4d0be8f4ae8e",
+    "queue-steer-space-bunny.json": "161b372cfa3c5e624b19ddc0f1346903283c298fd6e89af957e60368a4556ef5",
+    "restart-durable-log-after-zero.json": "fd9e940fcdeb783fb28cf6e43f5653012c2c68d507337c9cd2c4d6e53c88f89d",
+    "restart-durable-log.json": "5511b03f3b7a6204c712563240e65919566ff160ff3a1c7398073037c2477e68",
+    "runtime.json": "8e925eca30ce959f99059d3d2843c3a9186104386009bad697a868a0953da7a4",
+    "service-restart.json": "2b1477987943a45aed4d79bd7a24b51d9a41418d4f1a099ede8cfd5416698dc8",
+    "shell-probe-space-bunny.json": "35e2b89e4018ad964d61e53873b61105d87bc01988e43c2f7afdc06b3a7aa0f0"
+  },
+  "captureCommands": [
+    "python3 /workspace/.cloud-tools/v2-005b-capture.py prepare",
+    "python3 /workspace/.cloud-tools/v2-005b-capture.py execution",
+    "python3 /workspace/.cloud-tools/v2-005b-capture.py restart",
+    "python3 /workspace/.cloud-tools/v2-005b-capture.py interruption",
+    "python3 /workspace/.cloud-tools/v2-005b-capture.py reconnect"
+  ],
+  "validationCommand": "python3 test/contract/fixtures/opencode/2.0.22/b/validate.py",
+  "credentialHandling": "Pairing codes/tokens held only in memory; native service command output withheld; credential fields and opaque provider state sanitized; no GET /api/credential.",
+  "limitations": [
+    "Linux x86_64 native managed service only; no other OS, browser, cellular or remote transport acceptance.",
+    "The disposable directory had git init without an initial commit. Native projectID was global; no distinct-project isolation claim. B made no saved permission changes.",
+    "The old global SSE connection closed before shutdown terminal delivery and the new subscriber attached after recovery began. Specific shutdown reason/startup execution.started were not observed live; recovery is established by native history, synthetic continuation, successful tool/text, changed process identity and preserved pending state.",
+    "Experimental durable-log reads after default/zero yielded only log.synced at seq29. No durable replay/cursor or V2-005E acceptance is claimed.",
+    "No session.retry.scheduled was emitted. Provider retry scheduling/backoff is not measured; the observed retry matrix concerns HTTP admission and same native IDs.",
+    "Fledge free requests returned native provider.auth403 during this capture; native Space Bunny Free then succeeded. No paid model, authentication workaround, request header bypass or provider credential collection.",
+    "First Space Bunny shell probe succeeded; its collector initially looked for tool name on tool.called instead of tool.input.started. The exact trace is retained separately; subsequent orchestration detects called input and native terminal types.",
+    "Controlled local HTTP proxies produced genuine before-forwarding and after-native-admission client TimeoutErrors. Their network-control diagnostics are labelled separately from native response bodies.",
+    "Native interruption is not universally permanent cancellation; see sibling c/post-restart-question-recovery.json for a dismissed question resumed after the coordinated restart. Hydrate active/inbox/history/interaction state after reconnect."
+  ],
+  "actualNativeExecutionCountIncludingRestartRecovery": 10,
+  "retrySafetyBoundary": "Suspend original send replay from cancellation request through submitting/uncertain cancel outcomes until authoritative inbox/history lifecycle reconciliation; a lost cancel response does not authorize send retry.",
+  "cancellationLifecycleEvidence": {
+    "fixture": "matrix-events.json",
+    "sameInboxId": true,
+    "aggregateSequence": [
+      1,
+      5,
+      6
+    ],
+    "nativeEventTypes": [
+      "session.inbox.enqueued",
+      "session.inbox.cancelled",
+      "session.inbox.enqueued"
+    ]
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "capturedAt": "2026-10-04T04:49:04.686847+00:00",
+  "calls": [
+    {
+      "name": "inboxBeforeCancel",
+      "startedAt": "2026-10-04T04:49:04.615342+00:00",
+      "completedAt": "2026-10-04T04:49:04.617848+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343500
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c3e0004b1e2a90760387",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344074
+            },
+            "type": "user",
+            "payload": {
+              "text": "Before timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7e51000a02fa23b246fe3",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344084
+            },
+            "type": "user",
+            "payload": {
+              "text": "After timeout prompt."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancelPending",
+      "startedAt": "2026-10-04T04:49:04.617873+00:00",
+      "completedAt": "2026-10-04T04:49:04.624144+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7ad3000a8b22017a68214",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "cancelAgainNoOp",
+      "startedAt": "2026-10-04T04:49:04.624156+00:00",
+      "completedAt": "2026-10-04T04:49:04.628008+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7ad3000a8b22017a68214",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "replayCancelledId",
+      "startedAt": "2026-10-04T04:49:04.628018+00:00",
+      "completedAt": "2026-10-04T04:49:04.636265+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7ad3000a8b22017a68214",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089344631
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "cancelledReplayStatesession",
+      "startedAt": "2026-10-04T04:49:04.636311+00:00",
+      "completedAt": "2026-10-04T04:49:04.639649+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089344631
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancelledReplayStateinbox",
+      "startedAt": "2026-10-04T04:49:04.639670+00:00",
+      "completedAt": "2026-10-04T04:49:04.642162+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c3e0004b1e2a90760387",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344074
+            },
+            "type": "user",
+            "payload": {
+              "text": "Before timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7e51000a02fa23b246fe3",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344084
+            },
+            "type": "user",
+            "payload": {
+              "text": "After timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344631
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancelledReplayStatehistory",
+      "startedAt": "2026-10-04T04:49:04.642187+00:00",
+      "completedAt": "2026-10-04T04:49:04.643945+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "name": "inboxCleanupList",
+      "startedAt": "2026-10-04T04:49:04.643961+00:00",
+      "completedAt": "2026-10-04T04:49:04.645670+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c3e0004b1e2a90760387",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344074
+            },
+            "type": "user",
+            "payload": {
+              "text": "Before timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7e51000a02fa23b246fe3",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344084
+            },
+            "type": "user",
+            "payload": {
+              "text": "After timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344631
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancelMatrixCleanup",
+      "startedAt": "2026-10-04T04:49:04.645694+00:00",
+      "completedAt": "2026-10-04T04:49:04.666538+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7c38000e6bc815bbbff60",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "cancelMatrixCleanup",
+      "startedAt": "2026-10-04T04:49:04.666557+00:00",
+      "completedAt": "2026-10-04T04:49:04.675822+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7c3e0004b1e2a90760387",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "cancelMatrixCleanup",
+      "startedAt": "2026-10-04T04:49:04.675837+00:00",
+      "completedAt": "2026-10-04T04:49:04.680736+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7e51000a02fa23b246fe3",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "cancelMatrixCleanup",
+      "startedAt": "2026-10-04T04:49:04.680752+00:00",
+      "completedAt": "2026-10-04T04:49:04.685146+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox/msg_1a1053e7ad3000a8b22017a68214",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "idleActiveList",
+      "startedAt": "2026-10-04T04:49:04.685159+00:00",
+      "completedAt": "2026-10-04T04:49:04.686833+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efac1c0beffe0vE6SyLsKaUF60": {
+            "type": "running"
+          },
+          "ses_efac1869cffewhJvqo54bHxH3n": {
+            "type": "running"
+          }
+        }
+      }
+    }
+  ]
+}

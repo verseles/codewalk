@@ -1,0 +1,2148 @@
+{
+  "capturedAt": "2026-10-04T05:28:39.344567+00:00",
+  "transport": "loopback Linux HTTP; not cellular",
+  "submittedAt": "2026-10-04T05:28:36.978927+00:00",
+  "sessionIDs": [
+    "ses_1a10562b337000043bf305e629b1",
+    "ses_1a10562b3510008af79f6c2f6c6a",
+    "ses_1a10562b3610006b0682d261a100"
+  ],
+  "calls": [
+    {
+      "name": "bandwidth-0Create",
+      "startedAt": "2026-10-04T05:28:36.919593+00:00",
+      "completedAt": "2026-10-04T05:28:36.945129+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10562b337000043bf305e629b1",
+        "title": "V2-005E bandwidth-0",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        },
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 495,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b337000043bf305e629b1",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091716939,
+            "updated": 1791091716939
+          },
+          "title": "V2-005E bandwidth-0",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "bandwidth-1Create",
+      "startedAt": "2026-10-04T05:28:36.945209+00:00",
+      "completedAt": "2026-10-04T05:28:36.961691+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10562b3510008af79f6c2f6c6a",
+        "title": "V2-005E bandwidth-1",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        },
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 495,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b3510008af79f6c2f6c6a",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091716957,
+            "updated": 1791091716957
+          },
+          "title": "V2-005E bandwidth-1",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "bandwidth-2Create",
+      "startedAt": "2026-10-04T05:28:36.961768+00:00",
+      "completedAt": "2026-10-04T05:28:36.976778+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10562b3610006b0682d261a100",
+        "title": "V2-005E bandwidth-2",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        },
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 495,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b3610006b0682d261a100",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091716972,
+            "updated": 1791091716972
+          },
+          "title": "V2-005E bandwidth-2",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "BandwidthPrompt0",
+      "startedAt": "2026-10-04T05:28:36.984214+00:00",
+      "completedAt": "2026-10-04T05:28:36.993552+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10562b337000043bf305e629b1/prompt",
+      "request": {
+        "id": "msg_1a10562b37800063c4d568085ce2",
+        "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 274,
+      "response": {
+        "data": {
+          "id": "msg_1a10562b37800063c4d568085ce2",
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "time": {
+            "created": 1791091716987
+          },
+          "type": "user",
+          "payload": {
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "BandwidthPrompt1",
+      "startedAt": "2026-10-04T05:28:36.985464+00:00",
+      "completedAt": "2026-10-04T05:28:37.000936+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10562b3510008af79f6c2f6c6a/prompt",
+      "request": {
+        "id": "msg_1a10562b37900033f7e690834ee7",
+        "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 274,
+      "response": {
+        "data": {
+          "id": "msg_1a10562b37900033f7e690834ee7",
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "time": {
+            "created": 1791091716996
+          },
+          "type": "user",
+          "payload": {
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "BandwidthPrompt2",
+      "startedAt": "2026-10-04T05:28:36.985794+00:00",
+      "completedAt": "2026-10-04T05:28:37.005987+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10562b3610006b0682d261a100/prompt",
+      "request": {
+        "id": "msg_1a10562b3790000cf4a794623730",
+        "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 274,
+      "response": {
+        "data": {
+          "id": "msg_1a10562b3790000cf4a794623730",
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "time": {
+            "created": 1791091717002
+          },
+          "type": "user",
+          "payload": {
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "BandwidthAftersession",
+      "startedAt": "2026-10-04T05:28:39.318432+00:00",
+      "completedAt": "2026-10-04T05:28:39.321583+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b337000043bf305e629b1",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 543,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b337000043bf305e629b1",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 84,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716939,
+            "updated": 1791091716987,
+            "idle": 1791091719261
+          },
+          "title": "V2-005E bandwidth-0",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "BandwidthAfterinbox",
+      "startedAt": "2026-10-04T05:28:39.321615+00:00",
+      "completedAt": "2026-10-04T05:28:39.326102+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b337000043bf305e629b1/inbox",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "BandwidthAfterhistory",
+      "startedAt": "2026-10-04T05:28:39.326126+00:00",
+      "completedAt": "2026-10-04T05:28:39.329608+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b337000043bf305e629b1/message?order=asc&limit=200",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 1366,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10562b37800063c4d568085ce2",
+            "time": {
+              "created": 1791091717013
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b39d001uDH23zL5oUUsKJ",
+            "time": {
+              "created": 1791091717111,
+              "streamed": 1791091719238,
+              "completed": 1791091719253
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "1. One apple is one count.\n2. Two hands can count to ten.\n3. Three groups make nine.\n4. Four sides form a square.\n5. Five fingers fit on one hand.\n6. Six eggs fill one dozen by half.\n7. Seven days make a week.\n8. Eight makes a complete octave.\n9. Nine comes before ten.\n10. Ten is a round number."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 84,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bc5d0016zfjiwiTc1TlQ5",
+            "time": {
+              "created": 1791091719261
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3ODAwMDYzYzRkNTY4MDg1Y2UyIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJjNWQwMDE2emZqaXdpVGMxVGxRNSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "BandwidthAftersession",
+      "startedAt": "2026-10-04T05:28:39.329640+00:00",
+      "completedAt": "2026-10-04T05:28:39.331274+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3510008af79f6c2f6c6a",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 543,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b3510008af79f6c2f6c6a",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 78,
+            "reasoning": 8,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716957,
+            "updated": 1791091716996,
+            "idle": 1791091719006
+          },
+          "title": "V2-005E bandwidth-1",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "BandwidthAfterinbox",
+      "startedAt": "2026-10-04T05:28:39.331319+00:00",
+      "completedAt": "2026-10-04T05:28:39.333908+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3510008af79f6c2f6c6a/inbox",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "BandwidthAfterhistory",
+      "startedAt": "2026-10-04T05:28:39.333925+00:00",
+      "completedAt": "2026-10-04T05:28:39.336352+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3510008af79f6c2f6c6a/message?order=asc&limit=200",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 1507,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10562b37900033f7e690834ee7",
+            "time": {
+              "created": 1791091717051
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b3c4001gIHTtfhvlH0uoN",
+            "time": {
+              "created": 1791091717118,
+              "streamed": 1791091718963,
+              "completed": 1791091718999
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "reasoning",
+                "text": "We need comply exact ten lines numbered.",
+                "state": "[REDACTED]",
+                "time": {
+                  "created": 1791091717927,
+                  "completed": 1791091718951
+                }
+              },
+              {
+                "type": "text",
+                "text": "1. One is the first count.\n2. Two comes after one.\n3. Three is two plus one.\n4. Four is two squared.\n5. Five is one more than four.\n6. Six is three doubled.\n7. Seven is five plus two.\n8. Eight is four doubled.\n9. Nine is three squared.\n10. Ten is five doubled."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 78,
+              "reasoning": 8,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bb5e001oO3tsFAO1PxcFN",
+            "time": {
+              "created": 1791091719006
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3OTAwMDMzZjdlNjkwODM0ZWU3Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJiNWUwMDFvTzN0c0ZBTzFQeGNGTiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "BandwidthAftersession",
+      "startedAt": "2026-10-04T05:28:39.336386+00:00",
+      "completedAt": "2026-10-04T05:28:39.338251+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3610006b0682d261a100",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 543,
+      "response": {
+        "data": {
+          "id": "ses_1a10562b3610006b0682d261a100",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716972,
+            "updated": 1791091717002,
+            "idle": 1791091719022
+          },
+          "title": "V2-005E bandwidth-2",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "BandwidthAfterinbox",
+      "startedAt": "2026-10-04T05:28:39.338662+00:00",
+      "completedAt": "2026-10-04T05:28:39.341848+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3610006b0682d261a100/inbox",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "BandwidthAfterhistory",
+      "startedAt": "2026-10-04T05:28:39.341864+00:00",
+      "completedAt": "2026-10-04T05:28:39.343832+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10562b3610006b0682d261a100/message?order=asc&limit=200",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 1331,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10562b3790000cf4a794623730",
+            "time": {
+              "created": 1791091717081
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b3e0001So2RSBuIx1yjXP",
+            "time": {
+              "created": 1791091717127,
+              "streamed": 1791091718990,
+              "completed": 1791091719017
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "1. One apple makes one.\n2. Two bells ring twice.\n3. Three cats sit quietly.\n4. Four birds fly high.\n5. Five stars shine bright.\n6. Six fish swim past.\n7. Seven days make a week.\n8. Eight ducks line up.\n9. Nine books fill the shelf.\n10. Ten fingers count to ten."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 75,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bb6e001WwrwkQcnfF1C02",
+            "time": {
+              "created": 1791091719022
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3OTAwMDBjZjRhNzk0NjIzNzMwIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJiNmUwMDFXd3J3a1FjbmZGMUMwMiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    }
+  ],
+  "stream": {
+    "path": "/api/event",
+    "openedAt": "2026-10-04T05:28:36.976820+00:00",
+    "closedAt": "2026-10-04T05:28:39.344574+00:00",
+    "status": 200,
+    "events": [
+      {
+        "id": "evt_10562b371001NlfmVLVA13Dk5X",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10562b37b001qKYs4i5GkOEmMC",
+        "created": 1791091716987,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10562b37800063c4d568085ce2",
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b384001eJy4FSvTRVSVF2",
+        "created": 1791091716996,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10562b37900033f7e690834ee7",
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b38a0014j30FGVM0yQwt7",
+        "created": 1791091717002,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10562b3790000cf4a794623730",
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b38e001Kk4uv066rV83vA",
+        "created": 1791091717006,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b3920018lB9iwZZJTbRkR",
+        "created": 1791091717010,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "delta": {
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "2f0607905bbfed79871cdb597e1cc5412e2f181492a7e54da0db702ea793c6cb"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10562b3950014Kncrk05iOeeiF",
+        "created": 1791091717013,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "inboxID": "msg_1a10562b37800063c4d568085ce2"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b3b00013fg9ou4LbsXKIe",
+        "created": 1791091717040,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b3b6001GPOe8hR2uvqjGd",
+        "created": 1791091717046,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "delta": {
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "2f0607905bbfed79871cdb597e1cc5412e2f181492a7e54da0db702ea793c6cb"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10562b3bb0016ZLghD4B5QWydM",
+        "created": 1791091717051,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "inboxID": "msg_1a10562b37900033f7e690834ee7"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b3d1001In2ZDH0ce97qpr",
+        "created": 1791091717073,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b3d7001tR5i5ZLp7HUBcm",
+        "created": 1791091717079,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "delta": {
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "2f0607905bbfed79871cdb597e1cc5412e2f181492a7e54da0db702ea793c6cb"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10562b3d9001g7UtvOwH6q8xiI",
+        "created": 1791091717081,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "inboxID": "msg_1a10562b3790000cf4a794623730"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b714001uAvOfy08DbB1Jt",
+        "created": 1791091717908,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "started": 1791091717111
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b71e001IWAW1RLth0bahV",
+        "created": 1791091717918,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b725001tTWu9tIII6lI0W",
+        "created": 1791091717925,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "started": 1791091717118
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b727001K1SGVZ4c1iT96T",
+        "created": 1791091717927,
+        "type": "session.reasoning.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "state": {
+            "reasoningField": "reasoning_content"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b73e001H4HFn8ohl2eSbN",
+        "created": 1791091717950,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "started": 1791091717127
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b741001HJIv4VE7bhS35R",
+        "created": 1791091717953,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b786001ifujIoTTiTuxTS",
+        "created": 1791091718022,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": "1. One apple is one count.\n2. Two hands"
+        }
+      },
+      {
+        "id": "evt_10562b78d001qgFyGVYJs1cqVM",
+        "created": 1791091718029,
+        "type": "session.reasoning.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": "We need comply exact ten lines numbered."
+        }
+      },
+      {
+        "id": "evt_10562b78f001XmZaS1w8b82nbF",
+        "created": 1791091718031,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562b7a8001stksXCwEr63iKe",
+        "created": 1791091718056,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": "1. One apple makes one.\n2. Two bells"
+        }
+      },
+      {
+        "id": "evt_10562b7f70018kTYlfNqd7ZYx4",
+        "created": 1791091718135,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": "1. One"
+        }
+      },
+      {
+        "id": "evt_10562b80f001VLOX1al1PFUjr7",
+        "created": 1791091718159,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": " ring twice.\n3. Three cats"
+        }
+      },
+      {
+        "id": "evt_10562b844001HFy8c7J2ORpKAw",
+        "created": 1791091718212,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " can count to"
+        }
+      },
+      {
+        "id": "evt_10562b89b0014s1cTId3FVoGVb",
+        "created": 1791091718299,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": " sit quietly.\n4. Four birds fly high.\n5. Five stars"
+        }
+      },
+      {
+        "id": "evt_10562b8f5001Wkt0SVLaMMSybY",
+        "created": 1791091718389,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": " is the first count.\n2. Two comes after one.\n3. Three is two plus one.\n4. Four is two squared.\n5. Five is one more than four.\n6. Six is three"
+        }
+      },
+      {
+        "id": "evt_10562b914001VzAbZKpSvgqUlz",
+        "created": 1791091718420,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " ten.\n3. Three groups make nine.\n4. Four sides form a square.\n5. Five fingers fit on one hand.\n6. Six eggs fill one"
+        }
+      },
+      {
+        "id": "evt_10562b931001XCvxtZbdE3fKx6",
+        "created": 1791091718449,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": " shine bright.\n6. Six fish swim"
+        }
+      },
+      {
+        "id": "evt_10562ba1a001M5HrJTfimdwUvT",
+        "created": 1791091718683,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " dozen"
+        }
+      },
+      {
+        "id": "evt_10562ba1d001tNYTNHU1KLaPtJ",
+        "created": 1791091718685,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": " doubled"
+        }
+      },
+      {
+        "id": "evt_10562ba240016ZXJW8MUFrHazm",
+        "created": 1791091718693,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": " past"
+        }
+      },
+      {
+        "id": "evt_10562baa0001bXqF6jnolt55c0",
+        "created": 1791091718816,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " by half.\n7. Seven days make a week.\n8. Eight makes"
+        }
+      },
+      {
+        "id": "evt_10562babd001KBlU4l7JN2lv5X",
+        "created": 1791091718845,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": ".\n7. Seven is five plus two.\n8. Eight is four doubled.\n9. Nine is three"
+        }
+      },
+      {
+        "id": "evt_10562bac20015nLDuX53ZaduAw",
+        "created": 1791091718850,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": ".\n7. Seven days make a week.\n8. Eight ducks line up.\n9. Nine books fill"
+        }
+      },
+      {
+        "id": "evt_10562bb06001mCceA27oaBEAV9",
+        "created": 1791091718918,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " a complete octave.\n9. Nine comes"
+        }
+      },
+      {
+        "id": "evt_10562bb27001rWSXR9ab1L8Xkd",
+        "created": 1791091718951,
+        "type": "session.reasoning.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "text": "We need comply exact ten lines numbered.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb2b0014ldZ0zt8EPCZKl",
+        "created": 1791091718955,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "delta": " squared.\n10. Ten is five doubled."
+        }
+      },
+      {
+        "id": "evt_10562bb2c001fbCZ6ZZX3CJcUE",
+        "created": 1791091718956,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "ordinal": 0,
+          "text": "1. One is the first count.\n2. Two comes after one.\n3. Three is two plus one.\n4. Four is two squared.\n5. Five is one more than four.\n6. Six is three doubled.\n7. Seven is five plus two.\n8. Eight is four doubled.\n9. Nine is three squared.\n10. Ten is five doubled."
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb33001wm9uyObAyQ1g5O",
+        "created": 1791091718963,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 10,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb43001MPAky3w8eV8qHu",
+        "created": 1791091718979,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "delta": " the shelf.\n10. Ten fingers count to ten."
+        }
+      },
+      {
+        "id": "evt_10562bb46001YrtsFjZK3I5qUm",
+        "created": 1791091718982,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "ordinal": 0,
+          "text": "1. One apple makes one.\n2. Two bells ring twice.\n3. Three cats sit quietly.\n4. Four birds fly high.\n5. Five stars shine bright.\n6. Six fish swim past.\n7. Seven days make a week.\n8. Eight ducks line up.\n9. Nine books fill the shelf.\n10. Ten fingers count to ten."
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb4d0014jNAayCbOE2rBR",
+        "created": 1791091718990,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb57001en7QHX3RYIStbx",
+        "created": 1791091718999,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "assistantMessageID": "msg_10562b3c4001gIHTtfhvlH0uoN",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 78,
+            "reasoning": 8,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 11,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb5b001je07wGnQmxMGuV",
+        "created": 1791091719003,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 78,
+            "reasoning": 8,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_10562bb5e001oO3tsFAO1PxcFN",
+        "created": 1791091719006,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10562b3510008af79f6c2f6c6a"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3510008af79f6c2f6c6a",
+          "seq": 12,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb69001sijdnoB4EXGLGX",
+        "created": 1791091719017,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "assistantMessageID": "msg_10562b3e0001So2RSBuIx1yjXP",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb6c001MpLo8a3DdABlPj",
+        "created": 1791091719020,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_10562bb6e001WwrwkQcnfF1C02",
+        "created": 1791091719022,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10562b3610006b0682d261a100"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b3610006b0682d261a100",
+          "seq": 10,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bb710014vCeoLUGEIme15",
+        "created": 1791091719025,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " before ten.\n10. Ten is a"
+        }
+      },
+      {
+        "id": "evt_10562bbf500124TKXEKTiHBs7L",
+        "created": 1791091719157,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "delta": " round number."
+        }
+      },
+      {
+        "id": "evt_10562bc41001P36cfkWhyXnIUp",
+        "created": 1791091719233,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "ordinal": 0,
+          "text": "1. One apple is one count.\n2. Two hands can count to ten.\n3. Three groups make nine.\n4. Four sides form a square.\n5. Five fingers fit on one hand.\n6. Six eggs fill one dozen by half.\n7. Seven days make a week.\n8. Eight makes a complete octave.\n9. Nine comes before ten.\n10. Ten is a round number."
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bc46001fFVflym4sCMFhk",
+        "created": 1791091719238,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bc55001FkKCdWr39AjOwC",
+        "created": 1791091719253,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "assistantMessageID": "msg_10562b39d001uDH23zL5oUUsKJ",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 84,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "snapshot": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10562bc5a001nunPtvba86dhrr",
+        "created": 1791091719258,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1",
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 84,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_10562bc5d0016zfjiwiTc1TlQ5",
+        "created": 1791091719261,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10562b337000043bf305e629b1"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10562b337000043bf305e629b1",
+          "seq": 10,
+          "version": 1
+        }
+      }
+    ],
+    "frames": null,
+    "totalHttpBodyBytes": 22686,
+    "ownedEventFrameBytes": 22673,
+    "heartbeatBytes": 13,
+    "ambientEventCount": 0,
+    "failure": null
+  },
+  "states": {
+    "ses_1a10562b337000043bf305e629b1": {
+      "session": {
+        "data": {
+          "id": "ses_1a10562b337000043bf305e629b1",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 84,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716939,
+            "updated": 1791091716987,
+            "idle": 1791091719261
+          },
+          "title": "V2-005E bandwidth-0",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      },
+      "inbox": {
+        "data": []
+      },
+      "history": {
+        "data": [
+          {
+            "id": "msg_1a10562b37800063c4d568085ce2",
+            "time": {
+              "created": 1791091717013
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b39d001uDH23zL5oUUsKJ",
+            "time": {
+              "created": 1791091717111,
+              "streamed": 1791091719238,
+              "completed": 1791091719253
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "1. One apple is one count.\n2. Two hands can count to ten.\n3. Three groups make nine.\n4. Four sides form a square.\n5. Five fingers fit on one hand.\n6. Six eggs fill one dozen by half.\n7. Seven days make a week.\n8. Eight makes a complete octave.\n9. Nine comes before ten.\n10. Ten is a round number."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 84,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bc5d0016zfjiwiTc1TlQ5",
+            "time": {
+              "created": 1791091719261
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3ODAwMDYzYzRkNTY4MDg1Y2UyIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJjNWQwMDE2emZqaXdpVGMxVGxRNSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    "ses_1a10562b3510008af79f6c2f6c6a": {
+      "session": {
+        "data": {
+          "id": "ses_1a10562b3510008af79f6c2f6c6a",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 78,
+            "reasoning": 8,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716957,
+            "updated": 1791091716996,
+            "idle": 1791091719006
+          },
+          "title": "V2-005E bandwidth-1",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      },
+      "inbox": {
+        "data": []
+      },
+      "history": {
+        "data": [
+          {
+            "id": "msg_1a10562b37900033f7e690834ee7",
+            "time": {
+              "created": 1791091717051
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b3c4001gIHTtfhvlH0uoN",
+            "time": {
+              "created": 1791091717118,
+              "streamed": 1791091718963,
+              "completed": 1791091718999
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "reasoning",
+                "text": "We need comply exact ten lines numbered.",
+                "state": "[REDACTED]",
+                "time": {
+                  "created": 1791091717927,
+                  "completed": 1791091718951
+                }
+              },
+              {
+                "type": "text",
+                "text": "1. One is the first count.\n2. Two comes after one.\n3. Three is two plus one.\n4. Four is two squared.\n5. Five is one more than four.\n6. Six is three doubled.\n7. Seven is five plus two.\n8. Eight is four doubled.\n9. Nine is three squared.\n10. Ten is five doubled."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 78,
+              "reasoning": 8,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bb5e001oO3tsFAO1PxcFN",
+            "time": {
+              "created": 1791091719006
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3OTAwMDMzZjdlNjkwODM0ZWU3Iiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJiNWUwMDFvTzN0c0ZBTzFQeGNGTiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    "ses_1a10562b3610006b0682d261a100": {
+      "session": {
+        "data": {
+          "id": "ses_1a10562b3610006b0682d261a100",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 372,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091716972,
+            "updated": 1791091717002,
+            "idle": 1791091719022
+          },
+          "title": "V2-005E bandwidth-2",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      },
+      "inbox": {
+        "data": []
+      },
+      "history": {
+        "data": [
+          {
+            "id": "msg_1a10562b3790000cf4a794623730",
+            "time": {
+              "created": 1791091717081
+            },
+            "text": "Write exactly ten brief lines numbered 1 through 10 about counting. Do not use any tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10562b3e0001So2RSBuIx1yjXP",
+            "time": {
+              "created": 1791091717127,
+              "streamed": 1791091718990,
+              "completed": 1791091719017
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "1. One apple makes one.\n2. Two bells ring twice.\n3. Three cats sit quietly.\n4. Four birds fly high.\n5. Five stars shine bright.\n6. Six fish swim past.\n7. Seven days make a week.\n8. Eight ducks line up.\n9. Nine books fill the shelf.\n10. Ten fingers count to ten."
+              }
+            ],
+            "snapshot": {
+              "start": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "end": "f4341bc2221ab07219f93768ed5838319c51a9ee",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 372,
+              "output": 75,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10562bb6e001WwrwkQcnfF1C02",
+            "time": {
+              "created": 1791091719022
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTYyYjM3OTAwMDBjZjRhNzk0NjIzNzMwIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU2MmJiNmUwMDFXd3J3a1FjbmZGMUMwMiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    }
+  },
+  "allNativeTerminalObserved": true,
+  "durationSeconds": 2.3394894049997674,
+  "observedProviderStepCount": 3,
+  "executionIntervals": [
+    {
+      "sessionID": "ses_1a10562b337000043bf305e629b1",
+      "startedMs": 1791091717006,
+      "endedMs": 1791091719261
+    },
+    {
+      "sessionID": "ses_1a10562b3510008af79f6c2f6c6a",
+      "startedMs": 1791091717040,
+      "endedMs": 1791091719006
+    },
+    {
+      "sessionID": "ses_1a10562b3610006b0682d261a100",
+      "startedMs": 1791091717073,
+      "endedMs": 1791091719022
+    }
+  ],
+  "threeExecutionOverlapMs": 1933,
+  "wireMeasurementBoundary": "HTTP body bytes consumed by this urllib SSE stream, excluding HTTP headers/TCP/IP; ambient native event bytes included in total but counted separately; owned frame bytes isolate selected session events",
+  "cellularAcceptance": "pending: no cellular interface or real mobile network"
+}

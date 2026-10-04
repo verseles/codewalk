@@ -1,0 +1,931 @@
+{
+  "sourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+  "sources": {
+    "packages/server/src/handlers/pty.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/server/src/handlers/pty.ts",
+      "sha256": "537e0f86abf23a5682a170bfbba88d586d53d7f0fec8f0bde317ce95ac7f92ba",
+      "excerpts": [
+        {
+          "line": 118,
+          "text": "        \"pty.connectToken\","
+        },
+        {
+          "line": 119,
+          "text": "        Effect.fn(function* (ctx) {"
+        },
+        {
+          "line": 120,
+          "text": "          const request = yield* HttpServerRequest.HttpServerRequest"
+        },
+        {
+          "line": 121,
+          "text": "          // The custom header forces a CORS preflight, so cross-origin browser pages cannot"
+        },
+        {
+          "line": 122,
+          "text": "          // mint tickets without passing the server's origin policy."
+        },
+        {
+          "line": 123,
+          "text": "          if ("
+        },
+        {
+          "line": 124,
+          "text": "            request.headers[PTY_CONNECT_TOKEN_HEADER] !== PTY_CONNECT_TOKEN_HEADER_VALUE ||"
+        },
+        {
+          "line": 125,
+          "text": "            !isAllowedRequestOrigin(request.headers.origin, request.headers.host, cors)"
+        },
+        {
+          "line": 126,
+          "text": "          )"
+        },
+        {
+          "line": 127,
+          "text": "            return yield* new ForbiddenError({ message: \"Invalid PTY connect token request\" })"
+        },
+        {
+          "line": 128,
+          "text": "          const pty = yield* Pty.Service"
+        },
+        {
+          "line": 129,
+          "text": "          yield* pty.get(ctx.params.ptyID).pipe("
+        },
+        {
+          "line": 130,
+          "text": "            Effect.catchTag("
+        },
+        {
+          "line": 131,
+          "text": "              \"Pty.NotFoundError\","
+        },
+        {
+          "line": 132,
+          "text": "              () =>"
+        },
+        {
+          "line": 133,
+          "text": "                new PtyNotFoundError({"
+        },
+        {
+          "line": 134,
+          "text": "                  ptyID: ctx.params.ptyID,"
+        },
+        {
+          "line": 135,
+          "text": "                  message: `PTY session not found: ${ctx.params.ptyID}`,"
+        },
+        {
+          "line": 136,
+          "text": "                }),"
+        },
+        {
+          "line": 137,
+          "text": "            ),"
+        },
+        {
+          "line": 138,
+          "text": "          )"
+        },
+        {
+          "line": 139,
+          "text": "          return yield* response(tickets.issue({ ptyID: ctx.params.ptyID, ...(yield* ticketScope) }))"
+        },
+        {
+          "line": 142,
+          "text": "      .handleRaw("
+        },
+        {
+          "line": 143,
+          "text": "        \"pty.connect\","
+        },
+        {
+          "line": 144,
+          "text": "        Effect.fn(\"PtyHandler.connect\")(function* (ctx) {"
+        },
+        {
+          "line": 145,
+          "text": "          const pty = yield* Pty.Service"
+        },
+        {
+          "line": 146,
+          "text": "          const exists = yield* pty.get(ctx.params.ptyID).pipe("
+        },
+        {
+          "line": 147,
+          "text": "            Effect.as(true),"
+        },
+        {
+          "line": 148,
+          "text": "            Effect.catchTag(\"Pty.NotFoundError\", () => Effect.succeed(false)),"
+        },
+        {
+          "line": 149,
+          "text": "          )"
+        },
+        {
+          "line": 150,
+          "text": "          if (!exists) return HttpServerResponse.empty({ status: 404 })"
+        },
+        {
+          "line": 151,
+          "text": ""
+        },
+        {
+          "line": 152,
+          "text": "          const url = new URL(ctx.request.url, \"http://localhost\")"
+        },
+        {
+          "line": 153,
+          "text": "          const ticket = url.searchParams.get(PTY_CONNECT_TICKET_QUERY)"
+        },
+        {
+          "line": 154,
+          "text": "          if (ticket) {"
+        },
+        {
+          "line": 155,
+          "text": "            const valid = isAllowedRequestOrigin(ctx.request.headers.origin, ctx.request.headers.host, cors)"
+        },
+        {
+          "line": 156,
+          "text": "              ? yield* tickets.consume({ ticket, ptyID: ctx.params.ptyID, ...(yield* ticketScope) })"
+        },
+        {
+          "line": 157,
+          "text": "              : false"
+        },
+        {
+          "line": 158,
+          "text": "            if (!valid) return HttpServerResponse.empty({ status: 403 })"
+        },
+        {
+          "line": 159,
+          "text": "          }"
+        },
+        {
+          "line": 160,
+          "text": "          const parsedCursor = url.searchParams.get(\"cursor\")"
+        },
+        {
+          "line": 161,
+          "text": "          const cursorNumber = parsedCursor === null ? undefined : Number(parsedCursor)"
+        },
+        {
+          "line": 162,
+          "text": "          const cursor ="
+        },
+        {
+          "line": 163,
+          "text": "            cursorNumber !== undefined && Number.isSafeInteger(cursorNumber) && cursorNumber >= -1"
+        },
+        {
+          "line": 164,
+          "text": "              ? cursorNumber"
+        },
+        {
+          "line": 165,
+          "text": "              : undefined"
+        },
+        {
+          "line": 178,
+          "text": "          // Outbound frames flow through one queue drained by a single writer so replay, live"
+        },
+        {
+          "line": 179,
+          "text": "          // output, and the close frame keep their order."
+        },
+        {
+          "line": 180,
+          "text": "          // TODO: Integrate graceful-shutdown socket tracking before clients migrate to this route."
+        },
+        {
+          "line": 181,
+          "text": "          const outbox = yield* Queue.unbounded<string | Uint8Array | Socket.CloseEvent>()"
+        },
+        {
+          "line": 182,
+          "text": "          const attachment = yield* pty"
+        },
+        {
+          "line": 183,
+          "text": "            .attach(ctx.params.ptyID, {"
+        },
+        {
+          "line": 184,
+          "text": "              cursor,"
+        },
+        {
+          "line": 185,
+          "text": "              onData: (chunk) => Queue.offerUnsafe(outbox, chunk),"
+        },
+        {
+          "line": 186,
+          "text": "              onEnd: () => Queue.offerUnsafe(outbox, new Socket.CloseEvent(1000)),"
+        },
+        {
+          "line": 187,
+          "text": "            })"
+        },
+        {
+          "line": 188,
+          "text": "            .pipe("
+        },
+        {
+          "line": 189,
+          "text": "              Effect.catchTags({"
+        },
+        {
+          "line": 190,
+          "text": "                \"Pty.NotFoundError\": () =>"
+        },
+        {
+          "line": 191,
+          "text": "                  closeAccepted(new Socket.CloseEvent(4404, \"session not found\")).pipe(Effect.as(undefined)),"
+        },
+        {
+          "line": 192,
+          "text": "                \"Pty.ExitedError\": () =>"
+        },
+        {
+          "line": 193,
+          "text": "                  closeAccepted(new Socket.CloseEvent(4404, \"session exited\")).pipe(Effect.as(undefined)),"
+        },
+        {
+          "line": 194,
+          "text": "              }),"
+        },
+        {
+          "line": 195,
+          "text": "            )"
+        },
+        {
+          "line": 196,
+          "text": "          if (!attachment) return HttpServerResponse.empty()"
+        },
+        {
+          "line": 197,
+          "text": ""
+        },
+        {
+          "line": 198,
+          "text": "          for (const chunk of PtyProtocol.chunks(attachment.replay)) Queue.offerUnsafe(outbox, chunk)"
+        },
+        {
+          "line": 199,
+          "text": "          Queue.offerUnsafe(outbox, PtyProtocol.metaFrame(attachment.cursor))"
+        },
+        {
+          "line": 200,
+          "text": "          attachment.activate()"
+        },
+        {
+          "line": 210,
+          "text": "          yield* runPtySocket("
+        },
+        {
+          "line": 211,
+          "text": "            drain,"
+        },
+        {
+          "line": 212,
+          "text": "            socket.runRaw((message) => {"
+        },
+        {
+          "line": 213,
+          "text": "              const decoded = PtyProtocol.decodeInput(message)"
+        },
+        {
+          "line": 214,
+          "text": "              if (decoded !== undefined) attachment.write(decoded)"
+        },
+        {
+          "line": 215,
+          "text": "            }),"
+        },
+        {
+          "line": 216,
+          "text": "            attachment.detach,"
+        },
+        {
+          "line": 217,
+          "text": "          ).pipe("
+        }
+      ]
+    },
+    "packages/core/src/pty/ticket.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/pty/ticket.ts",
+      "sha256": "5e310342ddbb8ceb8bc819d44a4a3712c8b19a10b76e82b405d9646c1747b071",
+      "excerpts": [
+        {
+          "line": 7,
+          "text": "import { makeGlobalNode } from \"@opencode/util/effect/app-node\""
+        },
+        {
+          "line": 8,
+          "text": ""
+        },
+        {
+          "line": 9,
+          "text": "const DEFAULT_TTL = Duration.seconds(60)"
+        },
+        {
+          "line": 10,
+          "text": "const CAPACITY = 10_000"
+        },
+        {
+          "line": 27,
+          "text": "function matches(record: Scope, input: Scope) {"
+        },
+        {
+          "line": 28,
+          "text": "  return ("
+        },
+        {
+          "line": 29,
+          "text": "    record.ptyID === input.ptyID && record.directory === input.directory && record.workspaceID === input.workspaceID"
+        },
+        {
+          "line": 30,
+          "text": "  )"
+        },
+        {
+          "line": 31,
+          "text": "}"
+        },
+        {
+          "line": 32,
+          "text": ""
+        },
+        {
+          "line": 33,
+          "text": "// Tickets are inserted via Cache.set and removed atomically via invalidateWhen. The lookup is"
+        },
+        {
+          "line": 34,
+          "text": "// never invoked; it dies if it ever is, which would signal a misuse of the Service interface."
+        },
+        {
+          "line": 35,
+          "text": "const noLookup = () => Effect.die(new Error(\"PtyTicket cache must be used via set/invalidateWhen, never get\"))"
+        },
+        {
+          "line": 36,
+          "text": ""
+        },
+        {
+          "line": 37,
+          "text": "// Visible for tests so the TTL can be shortened. Production uses `layer` with the default TTL."
+        },
+        {
+          "line": 38,
+          "text": "export const make = (ttl: Duration.Input = DEFAULT_TTL) =>"
+        },
+        {
+          "line": 39,
+          "text": "  Effect.gen(function* () {"
+        },
+        {
+          "line": 40,
+          "text": "    const cache = yield* Cache.make<string, Scope>({ capacity: CAPACITY, lookup: noLookup, timeToLive: ttl })"
+        },
+        {
+          "line": 41,
+          "text": "    const expiresIn = Math.max(1, Math.round(Duration.toSeconds(Duration.fromInputUnsafe(ttl))))"
+        },
+        {
+          "line": 42,
+          "text": "    return Service.of({"
+        },
+        {
+          "line": 43,
+          "text": "      issue: Effect.fn(\"PtyTicket.issue\")(function* (input) {"
+        },
+        {
+          "line": 44,
+          "text": "        const ticket = crypto.randomUUID()"
+        },
+        {
+          "line": 45,
+          "text": "        yield* Cache.set(cache, ticket, input)"
+        },
+        {
+          "line": 46,
+          "text": "        return { ticket, expires_in: expiresIn }"
+        },
+        {
+          "line": 47,
+          "text": "      }),"
+        },
+        {
+          "line": 48,
+          "text": "      consume: Effect.fn(\"PtyTicket.consume\")(function* (input) {"
+        },
+        {
+          "line": 49,
+          "text": "        return yield* Cache.invalidateWhen(cache, input.ticket, (stored) => matches(stored, input))"
+        },
+        {
+          "line": 50,
+          "text": "      }),"
+        }
+      ]
+    },
+    "packages/core/src/pty/protocol.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/pty/protocol.ts",
+      "sha256": "f5e822d5bff1ccfe3bb94c753b448a94e0bdab5b0115177f61225ff40bfb474c",
+      "excerpts": [
+        {
+          "line": 3,
+          "text": "// Wire protocol for PTY websocket transports. The PTY domain service is transport-free; server"
+        },
+        {
+          "line": 4,
+          "text": "// routes adapt Pty.attach to websockets with these helpers so every surface speaks one protocol."
+        },
+        {
+          "line": 5,
+          "text": "//"
+        },
+        {
+          "line": 6,
+          "text": "// Outbound frames are raw UTF-8 terminal chunks. One control frame \u2014 a 0x00 byte followed by"
+        },
+        {
+          "line": 7,
+          "text": "// UTF-8 JSON \u2014 carries the absolute output cursor after replay so clients can resume later."
+        },
+        {
+          "line": 8,
+          "text": ""
+        },
+        {
+          "line": 9,
+          "text": "const encoder = new TextEncoder()"
+        },
+        {
+          "line": 10,
+          "text": "const decoder = new TextDecoder(\"utf-8\", { fatal: true })"
+        },
+        {
+          "line": 11,
+          "text": ""
+        },
+        {
+          "line": 12,
+          "text": "// Replay can be megabytes; send it in bounded frames."
+        },
+        {
+          "line": 13,
+          "text": "export const REPLAY_CHUNK = 64 * 1024"
+        },
+        {
+          "line": 14,
+          "text": ""
+        },
+        {
+          "line": 15,
+          "text": "export function metaFrame(cursor: number) {"
+        },
+        {
+          "line": 16,
+          "text": "  const bytes = encoder.encode(JSON.stringify({ cursor }))"
+        },
+        {
+          "line": 17,
+          "text": "  const out = new Uint8Array(bytes.length + 1)"
+        },
+        {
+          "line": 18,
+          "text": "  out[0] = 0"
+        },
+        {
+          "line": 19,
+          "text": "  out.set(bytes, 1)"
+        },
+        {
+          "line": 20,
+          "text": "  return out"
+        },
+        {
+          "line": 21,
+          "text": "}"
+        },
+        {
+          "line": 22,
+          "text": ""
+        },
+        {
+          "line": 23,
+          "text": "export function chunks(data: string) {"
+        },
+        {
+          "line": 24,
+          "text": "  const out: string[] = []"
+        },
+        {
+          "line": 25,
+          "text": "  for (let i = 0; i < data.length; i += REPLAY_CHUNK) out.push(data.slice(i, i + REPLAY_CHUNK))"
+        },
+        {
+          "line": 26,
+          "text": "  return out"
+        },
+        {
+          "line": 27,
+          "text": "}"
+        },
+        {
+          "line": 28,
+          "text": ""
+        },
+        {
+          "line": 29,
+          "text": "// Inbound client frames are UTF-8 text or binary; invalid UTF-8 input is dropped."
+        },
+        {
+          "line": 30,
+          "text": "export function decodeInput(message: string | Uint8Array | ArrayBuffer) {"
+        },
+        {
+          "line": 31,
+          "text": "  if (typeof message === \"string\") return message"
+        },
+        {
+          "line": 32,
+          "text": "  try {"
+        },
+        {
+          "line": 33,
+          "text": "    return decoder.decode(message instanceof ArrayBuffer ? new Uint8Array(message) : message)"
+        },
+        {
+          "line": 34,
+          "text": "  } catch {"
+        },
+        {
+          "line": 35,
+          "text": "    return undefined"
+        }
+      ]
+    },
+    "packages/core/src/pty.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/pty.ts",
+      "sha256": "ee4f45b418e0a34994c67f2e9f7fad45a3dc3452411482be85b7a0e09fbc26e4",
+      "excerpts": [
+        {
+          "line": 204,
+          "text": "      session.listeners.push("
+        },
+        {
+          "line": 205,
+          "text": "        proc.onData((chunk) => {"
+        },
+        {
+          "line": 206,
+          "text": "          session.cursor += chunk.length"
+        },
+        {
+          "line": 207,
+          "text": "          for (const [token, subscriber] of session.subscribers.entries()) {"
+        },
+        {
+          "line": 208,
+          "text": "            if (!subscriber.active) {"
+        },
+        {
+          "line": 209,
+          "text": "              subscriber.pending.push(chunk)"
+        },
+        {
+          "line": 210,
+          "text": "              continue"
+        },
+        {
+          "line": 211,
+          "text": "            }"
+        },
+        {
+          "line": 273,
+          "text": "      const start = session.bufferCursor"
+        },
+        {
+          "line": 274,
+          "text": "      const end = session.cursor"
+        },
+        {
+          "line": 275,
+          "text": "      const from ="
+        },
+        {
+          "line": 276,
+          "text": "        input.cursor === -1"
+        },
+        {
+          "line": 277,
+          "text": "          ? end"
+        },
+        {
+          "line": 278,
+          "text": "          : typeof input.cursor === \"number\" && Number.isSafeInteger(input.cursor)"
+        },
+        {
+          "line": 279,
+          "text": "            ? Math.max(0, input.cursor)"
+        },
+        {
+          "line": 280,
+          "text": "            : 0"
+        },
+        {
+          "line": 281,
+          "text": "      const replay = (() => {"
+        },
+        {
+          "line": 282,
+          "text": "        if (!session.buffer || from >= end) return \"\""
+        },
+        {
+          "line": 283,
+          "text": "        const offset = Math.max(0, from - start)"
+        },
+        {
+          "line": 284,
+          "text": "        if (offset >= session.buffer.length) return \"\""
+        },
+        {
+          "line": 285,
+          "text": "        return session.buffer.slice(offset)"
+        },
+        {
+          "line": 286,
+          "text": "      })()"
+        },
+        {
+          "line": 287,
+          "text": "      return {"
+        },
+        {
+          "line": 288,
+          "text": "        replay,"
+        },
+        {
+          "line": 289,
+          "text": "        cursor: end,"
+        },
+        {
+          "line": 304,
+          "text": "        detach: () => {"
+        },
+        {
+          "line": 305,
+          "text": "          subscriber.detached = true"
+        },
+        {
+          "line": 306,
+          "text": "          subscriber.pending.length = 0"
+        },
+        {
+          "line": 307,
+          "text": "          subscriber.end = undefined"
+        },
+        {
+          "line": 308,
+          "text": "          session.subscribers.delete(token)"
+        },
+        {
+          "line": 309,
+          "text": "        },"
+        }
+      ]
+    },
+    "packages/server/src/cors.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/server/src/cors.ts",
+      "sha256": "80fd8c8962c7fe641e4aa24f7d6522d1d7cd8db5a46f43f2244e6aac0377c333",
+      "excerpts": [
+        {
+          "line": 11,
+          "text": "export function isAllowedCorsOrigin(input: string | undefined, opts?: CorsOptions) {"
+        },
+        {
+          "line": 12,
+          "text": "  if (!input) return true"
+        },
+        {
+          "line": 13,
+          "text": "  if (input.startsWith(\"http://localhost:\")) return true"
+        },
+        {
+          "line": 14,
+          "text": "  if (input.startsWith(\"http://127.0.0.1:\")) return true"
+        },
+        {
+          "line": 15,
+          "text": "  if (input.startsWith(\"oc://renderer\")) return true"
+        },
+        {
+          "line": 16,
+          "text": "  if (input === \"tauri://localhost\" || input === \"http://tauri.localhost\" || input === \"https://tauri.localhost\")"
+        },
+        {
+          "line": 17,
+          "text": "    return true"
+        },
+        {
+          "line": 18,
+          "text": "  if (opencodeOrigin.test(input)) return true"
+        },
+        {
+          "line": 19,
+          "text": "  return opts?.cors?.includes(input) ?? false"
+        },
+        {
+          "line": 20,
+          "text": "}"
+        },
+        {
+          "line": 21,
+          "text": ""
+        },
+        {
+          "line": 22,
+          "text": "export function isAllowedRequestOrigin(input: string | undefined, host: string | undefined, opts?: CorsOptions) {"
+        },
+        {
+          "line": 23,
+          "text": "  if (!input) return true"
+        },
+        {
+          "line": 24,
+          "text": "  if (host && sameHost(input, host)) return true"
+        },
+        {
+          "line": 25,
+          "text": "  return isAllowedCorsOrigin(input, opts)"
+        }
+      ]
+    },
+    "packages/cli/src/services/service-config.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/cli/src/services/service-config.ts",
+      "sha256": "29009f55d8990aaba6c12e06d20720415482d052588a54fc35b5250799c39c84",
+      "excerpts": [
+        {
+          "line": 147,
+          "text": "  const next = value ?? randomBytes(32).toString(\"base64url\")"
+        },
+        {
+          "line": 148,
+          "text": ""
+        },
+        {
+          "line": 149,
+          "text": "  // Keep one private credential across server restarts so discovered clients"
+        },
+        {
+          "line": 150,
+          "text": "  // can reconnect without exposing a password flag or environment variable."
+        },
+        {
+          "line": 151,
+          "text": "  yield* write({ ...existing, password: next })"
+        },
+        {
+          "line": 152,
+          "text": "  return next"
+        },
+        {
+          "line": 153,
+          "text": "})"
+        },
+        {
+          "line": 154,
+          "text": ""
+        },
+        {
+          "line": 155,
+          "text": "export const get = Effect.fn(\"cli.service-config.get\")(function* (key?: string, name?: string) {"
+        },
+        {
+          "line": 178,
+          "text": "    }"
+        },
+        {
+          "line": 179,
+          "text": "    case \"env\": {"
+        },
+        {
+          "line": 180,
+          "text": "      const env = (yield* read()).env ?? {}"
+        },
+        {
+          "line": 181,
+          "text": "      return name === undefined ? JSON.stringify(env, null, 2) : (env[name] ?? \"\")"
+        },
+        {
+          "line": 182,
+          "text": "    }"
+        },
+        {
+          "line": 183,
+          "text": "  }"
+        },
+        {
+          "line": 222,
+          "text": "    case \"cors\": {"
+        },
+        {
+          "line": 223,
+          "text": "      const cors = value.split(\",\").map((origin) => origin.trim())"
+        },
+        {
+          "line": 224,
+          "text": "      if ("
+        },
+        {
+          "line": 225,
+          "text": "        cors.some((origin) => {"
+        },
+        {
+          "line": 226,
+          "text": "          const url = URL.parse(origin)"
+        },
+        {
+          "line": 227,
+          "text": "          return !url || (url.protocol !== \"http:\" && url.protocol !== \"https:\") || url.origin !== origin"
+        },
+        {
+          "line": 228,
+          "text": "        })"
+        },
+        {
+          "line": 229,
+          "text": "      )"
+        },
+        {
+          "line": 230,
+          "text": "        throw new Error(\"CORS must be a comma-separated list of HTTP(S) origins without paths or trailing slashes\")"
+        },
+        {
+          "line": 231,
+          "text": "      yield* Service.stop(yield* options())"
+        },
+        {
+          "line": 232,
+          "text": "      yield* write({ ...(yield* read()), cors })"
+        },
+        {
+          "line": 233,
+          "text": "      return"
+        }
+      ]
+    },
+    "packages/protocol/src/groups/pty.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/protocol/src/groups/pty.ts",
+      "sha256": "724e1f0755d5439064ba90139df0b09da9f0bcd38cedf195cd652fc62ea47bda",
+      "excerpts": [
+        {
+          "line": 9,
+          "text": "export const PTY_CONNECT_TICKET_QUERY = \"ticket\""
+        },
+        {
+          "line": 10,
+          "text": "export const PTY_CONNECT_TOKEN_HEADER = \"x-opencode-ticket\""
+        },
+        {
+          "line": 11,
+          "text": "export const PTY_CONNECT_TOKEN_HEADER_VALUE = \"1\""
+        },
+        {
+          "line": 12,
+          "text": ""
+        },
+        {
+          "line": 13,
+          "text": "const PTY_CONNECT_PATH = /^\\/api\\/pty\\/[^/]+\\/connect$/"
+        },
+        {
+          "line": 14,
+          "text": ""
+        },
+        {
+          "line": 15,
+          "text": "// Authorization middleware skips credential checks when this matches; the PTY connect handler"
+        },
+        {
+          "line": 16,
+          "text": "// is then responsible for consuming and validating the ticket."
+        },
+        {
+          "line": 17,
+          "text": "export function hasPtyConnectTicketURL(url: URL) {"
+        },
+        {
+          "line": 18,
+          "text": "  return PTY_CONNECT_PATH.test(url.pathname) && !!url.searchParams.get(PTY_CONNECT_TICKET_QUERY)"
+        }
+      ]
+    }
+  }
+}

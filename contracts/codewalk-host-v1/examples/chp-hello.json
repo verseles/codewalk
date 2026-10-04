@@ -1,0 +1,20 @@
+{
+  "type": "hello",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "protocol": "codewalk-host/1",
+  "host": "host-α",
+  "harnesses": [
+    {
+      "ref": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1"
+      },
+      "kind": "syntheticHarness",
+      "version": "synthetic-1",
+      "stability": "unknown",
+      "compatibility": "untested"
+    }
+  ]
+}

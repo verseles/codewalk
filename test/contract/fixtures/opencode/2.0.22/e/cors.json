@@ -1,0 +1,171 @@
+{
+  "capturedAt": "2026-10-04T05:29:52.926710+00:00",
+  "calls": [
+    {
+      "name": "AllowedPreflight",
+      "startedAt": "2026-10-04T05:29:50.686334+00:00",
+      "completedAt": "2026-10-04T05:29:50.697706+00:00",
+      "method": "OPTIONS",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": "http://localhost:33291",
+      "status": 204,
+      "responseHeaders": {
+        "access-control-allow-origin": "http://localhost:33291",
+        "vary": "Access-Control-Request-Headers",
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "access-control-allow-headers": "authorization"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "AllowedNativeInfoWithOrigin",
+      "startedAt": "2026-10-04T05:29:50.697727+00:00",
+      "completedAt": "2026-10-04T05:29:50.700266+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": "http://localhost:33291",
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "access-control-allow-origin": "http://localhost:33291",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 136,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "name": "DeniedPreflight",
+      "startedAt": "2026-10-04T05:29:50.700314+00:00",
+      "completedAt": "2026-10-04T05:29:50.701267+00:00",
+      "method": "OPTIONS",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": "http://cw-e-denied.test:33291",
+      "status": 204,
+      "responseHeaders": {
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "vary": "Access-Control-Request-Headers",
+        "access-control-allow-headers": "authorization"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "DeniedNativeInfoWithOrigin",
+      "startedAt": "2026-10-04T05:29:50.701300+00:00",
+      "completedAt": "2026-10-04T05:29:50.702108+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": "http://cw-e-denied.test:33291",
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Accept-Encoding"
+      },
+      "responseBytes": 136,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "name": "CORSFinalInfo",
+      "startedAt": "2026-10-04T05:29:52.901173+00:00",
+      "completedAt": "2026-10-04T05:29:52.926681+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 136,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    }
+  ],
+  "browser": "Chromium",
+  "browserVersion": "151.0.7922.173",
+  "browserResults": [
+    {
+      "name": "allowed",
+      "actualPageOrigin": "http://localhost:33291",
+      "info": {
+        "readable": true,
+        "status": 200,
+        "version": "2.0.22",
+        "allowOrigin": null
+      },
+      "firstSseFrame": {
+        "readable": true,
+        "status": 200,
+        "firstType": "server.connected"
+      },
+      "consoleErrors": []
+    },
+    {
+      "name": "denied",
+      "actualPageOrigin": "http://cw-e-denied.test:33291",
+      "info": {
+        "readable": false,
+        "errorName": "TypeError"
+      },
+      "firstSseFrame": {
+        "readable": false,
+        "errorName": "TypeError"
+      },
+      "consoleErrors": [
+        "Access to fetch at 'http://127.0.0.1:49374/api/info' from origin 'http://cw-e-denied.test:33291' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED",
+        "Access to fetch at 'http://127.0.0.1:49374/api/event' from origin 'http://cw-e-denied.test:33291' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    }
+  ],
+  "nativeServiceConfigChanged": false,
+  "interpretationBoundary": "allowed/rejected Origin and browser readability on loopback; no Safari, HTTPS-to-LAN mixed-content or configured-custom-origin acceptance",
+  "finalInfo": {
+    "version": "2.0.22",
+    "pid": 126717,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+    }
+  }
+}

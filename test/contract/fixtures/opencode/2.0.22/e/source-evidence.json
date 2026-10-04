@@ -1,0 +1,454 @@
+{
+  "capturedAt": "2026-10-04T05:26:16.046415+00:00",
+  "sourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+  "sources": {
+    "packages/core/src/bus.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/bus.ts",
+      "sha256": "1bf5e97b3c3618a79487d75adcfddc602d2068c7759d2018eb9ad7d08f4b57f9",
+      "excerpts": [
+        {
+          "line": 201,
+          "text": "        const { db } = yield* Database.Service"
+        },
+        {
+          "line": 202,
+          "text": "        const logReadPageSize = options?.logReadPageSize ?? 512"
+        },
+        {
+          "line": 203,
+          "text": "        const persist = options?.persist ?? false"
+        },
+        {
+          "line": 204,
+          "text": "        const sessions = new Map<SessionID, Location.Ref>()"
+        },
+        {
+          "line": 205,
+          "text": "        // Keep routing separate from the public event, and retain its snapshot"
+        },
+        {
+          "line": 206,
+          "text": "        // while a slow subscriber drains events queued before a move or deletion."
+        },
+        {
+          "line": 207,
+          "text": "        const routes = new WeakMap<Event.Payload, readonly Location.Ref[]>()"
+        }
+      ]
+    },
+    "packages/core/src/filesystem.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/filesystem.ts",
+      "sha256": "dd4b80efbf9c23c5e042817d5276097e5425739426906503a981475a2741321b",
+      "excerpts": [
+        {
+          "line": 197,
+          "text": "      // server tmp directory, which the model is already told to prefer and permitted to access."
+        },
+        {
+          "line": 198,
+          "text": "      write: Effect.fn(\"FileSystem.write\")(function* (input) {"
+        },
+        {
+          "line": 199,
+          "text": "        const target = path.resolve(location.directory, input.path)"
+        },
+        {
+          "line": 200,
+          "text": "        yield* fs.writeWithDirs(target, input.data).pipe(Effect.orDie)"
+        },
+        {
+          "line": 201,
+          "text": "        return Write.make({ path: AbsolutePath.make(target) })"
+        },
+        {
+          "line": 202,
+          "text": "      }),"
+        },
+        {
+          "line": 203,
+          "text": "    })"
+        },
+        {
+          "line": 204,
+          "text": "  }),"
+        }
+      ]
+    },
+    "packages/core/src/session/runner/to-llm-message.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/session/runner/to-llm-message.ts",
+      "sha256": "f9c629b9cf9cd4eb3a9914a29f7cd53d3cdf0d7222aa8b7214f04b2270345160",
+      "excerpts": [
+        {
+          "line": 76,
+          "text": "  if (file.mime === \"text/plain\") return [textAttachment(file)]"
+        },
+        {
+          "line": 77,
+          "text": "  if (file.mime === \"application/x-directory\") return [directoryAttachment(file)]"
+        },
+        {
+          "line": 78,
+          "text": "  if (imageMimes.has(file.mime) || file.mime === \"application/pdf\") {"
+        },
+        {
+          "line": 79,
+          "text": "    const location = attachmentLocation(file)"
+        },
+        {
+          "line": 80,
+          "text": "    return [...(location === undefined ? [] : [Message.text(`Attached file: ${location}`)]), media(file)]"
+        },
+        {
+          "line": 81,
+          "text": "  }"
+        },
+        {
+          "line": 82,
+          "text": "  return []"
+        }
+      ]
+    },
+    "packages/core/src/session/prompt.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/session/prompt.ts",
+      "sha256": "4a453f9e57d3cc48fc7d6ea23504d1437c751620d7b97bff795c090f2941fc99",
+      "excerpts": []
+    },
+    "packages/schema/src/prompt-input.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/schema/src/prompt-input.ts",
+      "sha256": "7da46cec88bf36b9e4d7be1e78506e6fdf8c5629ca2fb3397e8504cb08bbbfe7",
+      "excerpts": []
+    },
+    "packages/protocol/src/groups/fs.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/protocol/src/groups/fs.ts",
+      "sha256": "0b7cc013f2c34bb42590400e62e381daf7e14d72496d437244060a0ba4aa1f25",
+      "excerpts": []
+    },
+    "packages/protocol/src/groups/session.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/protocol/src/groups/session.ts",
+      "sha256": "190c5ffe34c1b15bd836a58679842d8ac2ec0a9e05b2680745838bbdfead2504",
+      "excerpts": [
+        {
+          "line": 725,
+          "text": "    )"
+        },
+        {
+          "line": 726,
+          "text": "    .add("
+        },
+        {
+          "line": 727,
+          "text": "      HttpApiEndpoint.get(\"session.log\", \"/api/experimental/session/:sessionID/log\", {"
+        },
+        {
+          "line": 728,
+          "text": "        params: { sessionID: Session.ID },"
+        },
+        {
+          "line": 729,
+          "text": "        query: {"
+        },
+        {
+          "line": 730,
+          "text": "          after: Schema.NumberFromString.pipe(Schema.decodeTo(Event.Seq), Schema.optional),"
+        },
+        {
+          "line": 731,
+          "text": "          follow: BooleanFromString.pipe(Schema.optional),"
+        },
+        {
+          "line": 737,
+          "text": "      }).annotateMerge("
+        },
+        {
+          "line": 738,
+          "text": "        OpenApi.annotations({"
+        },
+        {
+          "line": 739,
+          "text": "          identifier: \"session.log\","
+        },
+        {
+          "line": 740,
+          "text": "          summary: \"Read the session log\","
+        },
+        {
+          "line": 741,
+          "text": "          description:"
+        },
+        {
+          "line": 742,
+          "text": "            \"Experimental durable session event log. Reads events after an exclusive aggregate sequence and continues with live events when follow=true.\","
+        },
+        {
+          "line": 743,
+          "text": "        }),"
+        }
+      ]
+    },
+    "packages/server/src/routes.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/server/src/routes.ts",
+      "sha256": "024a5ed216e01b68333d2c9bfad9f62e6c6233ad3b17f2b7af1bdb7cada8e4c5",
+      "excerpts": [
+        {
+          "line": 116,
+          "text": "    Database.node.replace(Database.configured(options.database)),"
+        },
+        {
+          "line": 117,
+          "text": "    PersistentPty.node.replace(PersistentPty.configured(options.pty)),"
+        },
+        {
+          "line": 118,
+          "text": "    Bus.node.replace(Bus.configured({ persist: options.events?.persist })),"
+        },
+        {
+          "line": 119,
+          "text": "    App.node.replace(App.configured(options.app)),"
+        },
+        {
+          "line": 120,
+          "text": "    ModelsDev.node.replace(ModelsDev.configured(options.models)),"
+        },
+        {
+          "line": 121,
+          "text": "    Watcher.node.replace(Watcher.configured({ enabled: options.fs?.filewatcher })),"
+        },
+        {
+          "line": 122,
+          "text": "    FileSystemSearch.node.replace(FileSystemSearch.configured({ fff: options.fs?.fff })),"
+        }
+      ]
+    },
+    "packages/server/src/cors.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/server/src/cors.ts",
+      "sha256": "80fd8c8962c7fe641e4aa24f7d6522d1d7cd8db5a46f43f2244e6aac0377c333",
+      "excerpts": [
+        {
+          "line": 9,
+          "text": "})"
+        },
+        {
+          "line": 10,
+          "text": ""
+        },
+        {
+          "line": 11,
+          "text": "export function isAllowedCorsOrigin(input: string | undefined, opts?: CorsOptions) {"
+        },
+        {
+          "line": 12,
+          "text": "  if (!input) return true"
+        },
+        {
+          "line": 13,
+          "text": "  if (input.startsWith(\"http://localhost:\")) return true"
+        },
+        {
+          "line": 14,
+          "text": "  if (input.startsWith(\"http://127.0.0.1:\")) return true"
+        },
+        {
+          "line": 15,
+          "text": "  if (input.startsWith(\"oc://renderer\")) return true"
+        },
+        {
+          "line": 23,
+          "text": "  if (!input) return true"
+        },
+        {
+          "line": 24,
+          "text": "  if (host && sameHost(input, host)) return true"
+        },
+        {
+          "line": 25,
+          "text": "  return isAllowedCorsOrigin(input, opts)"
+        },
+        {
+          "line": 26,
+          "text": "}"
+        },
+        {
+          "line": 27,
+          "text": ""
+        },
+        {
+          "line": 28,
+          "text": "function sameHost(origin: string, host: string) {"
+        },
+        {
+          "line": 29,
+          "text": "  try {"
+        }
+      ]
+    },
+    "packages/server/src/process.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/server/src/process.ts",
+      "sha256": "f92d9d249f8781ddecb26354e3d4f2e439f1152f3a946aebc9b8b85fdf090d9e",
+      "excerpts": [
+        {
+          "line": 13,
+          "text": "import { createServer } from \"node:http\""
+        },
+        {
+          "line": 14,
+          "text": "import { ServerAuth } from \"./auth\""
+        },
+        {
+          "line": 15,
+          "text": "import { isAllowedCorsOrigin } from \"./cors\""
+        },
+        {
+          "line": 16,
+          "text": "import { authorizedRequest, unauthorizedResponse } from \"./middleware/authorization\""
+        },
+        {
+          "line": 17,
+          "text": "import { withoutParentSpan } from \"./request-tracing\""
+        },
+        {
+          "line": 18,
+          "text": "import { createRoutes } from \"./routes\""
+        },
+        {
+          "line": 19,
+          "text": "import { ServerInfo } from \"./server-info\""
+        },
+        {
+          "line": 69,
+          "text": "      (transform ? transform(app) : app).pipe("
+        },
+        {
+          "line": 70,
+          "text": "        HttpMiddleware.compression(),"
+        },
+        {
+          "line": 71,
+          "text": "        HttpMiddleware.cors({ allowedOrigins: (origin) => isAllowedCorsOrigin(origin, options), maxAge: 86_400 }),"
+        },
+        {
+          "line": 72,
+          "text": "      ),"
+        },
+        {
+          "line": 73,
+          "text": "      errorResponseLogger,"
+        },
+        {
+          "line": 74,
+          "text": "    )"
+        },
+        {
+          "line": 75,
+          "text": "    .pipe(Effect.provide(NodeHttpServer.layerHttpServices), withoutParentSpan)"
+        }
+      ]
+    },
+    "packages/cli/src/server-process.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/cli/src/server-process.ts",
+      "sha256": "4d6cfc459c379010eef4e6d01ac819a3db22333f0e13487aabe42fc7d436f017",
+      "excerpts": []
+    },
+    "packages/cli/src/services/service-config.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/cli/src/services/service-config.ts",
+      "sha256": "29009f55d8990aaba6c12e06d20720415482d052588a54fc35b5250799c39c84",
+      "excerpts": [
+        {
+          "line": 171,
+          "text": "      return port === undefined ? \"\" : String(port)"
+        },
+        {
+          "line": 172,
+          "text": "    }"
+        },
+        {
+          "line": 173,
+          "text": "    case \"password\": {"
+        },
+        {
+          "line": 174,
+          "text": "      return yield* password()"
+        },
+        {
+          "line": 175,
+          "text": "    }"
+        },
+        {
+          "line": 176,
+          "text": "    case \"cors\": {"
+        },
+        {
+          "line": 177,
+          "text": "      return JSON.stringify((yield* read()).cors ?? [], null, 2)"
+        },
+        {
+          "line": 208,
+          "text": "      return"
+        },
+        {
+          "line": 209,
+          "text": "    }"
+        },
+        {
+          "line": 210,
+          "text": "    case \"password\": {"
+        },
+        {
+          "line": 211,
+          "text": "      yield* Service.stop(yield* options())"
+        },
+        {
+          "line": 212,
+          "text": "      yield* password(value)"
+        },
+        {
+          "line": 213,
+          "text": "      return"
+        },
+        {
+          "line": 214,
+          "text": "    }"
+        },
+        {
+          "line": 257,
+          "text": "      return"
+        },
+        {
+          "line": 258,
+          "text": "    }"
+        },
+        {
+          "line": 259,
+          "text": "    case \"password\": {"
+        },
+        {
+          "line": 260,
+          "text": "      yield* Service.stop(yield* options())"
+        },
+        {
+          "line": 261,
+          "text": "      const { password: _password, ...next } = yield* read()"
+        },
+        {
+          "line": 262,
+          "text": "      yield* write(next)"
+        },
+        {
+          "line": 263,
+          "text": "      return"
+        }
+      ]
+    },
+    "packages/cli/src/commands/handlers/service/get.ts": {
+      "url": "https://raw.githubusercontent.com/anomalyco/opencode/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/cli/src/commands/handlers/service/get.ts",
+      "sha256": "afddf2d529b4f8a6b9555ff9ef0d160f1baa5d2f82a2ecccbe8b36cdb2b7f7aa",
+      "excerpts": []
+    }
+  },
+  "olderPdfForwarding": {
+    "sourcePin": "8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72",
+    "path": "packages/core/src/session/runner/to-llm-message.ts",
+    "sha256": "f9c629b9cf9cd4eb3a9914a29f7cd53d3cdf0d7222aa8b7214f04b2270345160",
+    "containsPdfForwarding": true
+  },
+  "sourceEvidenceOnly": true
+}

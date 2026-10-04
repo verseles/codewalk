@@ -1,0 +1,10 @@
+{
+  "type": "project",
+  "project": {
+    "version": 1,
+    "host": "host-α",
+    "canonicalDirectory": "/canonical/project",
+    "upstreamProjectId": "global"
+  },
+  "harness": null
+}

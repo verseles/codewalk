@@ -1,0 +1,559 @@
+{
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "origin": "hand-authored",
+  "examples": [
+    {
+      "file": "identity-harness.json",
+      "definition": "#/definitions/CanonicalHarnessRef",
+      "family": "identity",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "identity-session.json",
+      "definition": "#/definitions/CanonicalSessionRef",
+      "family": "identity",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "identity-project.json",
+      "definition": "#/definitions/CanonicalProjectRef",
+      "family": "identity",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "stream-position.json",
+      "definition": "#/definitions/CanonicalStreamPosition",
+      "family": "ordering",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "owner-global.json",
+      "definition": "#/definitions/CanonicalDomainOwner",
+      "family": "ownership",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "owner-project-unscoped.json",
+      "definition": "#/definitions/CanonicalDomainOwner",
+      "family": "ownership",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "owner-unknown.json",
+      "definition": "#/definitions/CanonicalDomainOwner",
+      "family": "unknown",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "ownership-proof.json",
+      "definition": "#/definitions/CanonicalOwnershipProof",
+      "family": "ownership",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "ownership-info.json",
+      "definition": "#/definitions/CanonicalOwnershipInfo",
+      "family": "ownership",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-user-input.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-assistant-text.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-reasoning.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-tool-call.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-shell.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-notice.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-outcome.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "timeline",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "timeline-unknown.json",
+      "definition": "#/definitions/CanonicalTimelineItem",
+      "family": "unknown",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "interaction-permission.json",
+      "definition": "#/definitions/CanonicalInteractionRequest",
+      "family": "interaction",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "interaction-form.json",
+      "definition": "#/definitions/CanonicalInteractionRequest",
+      "family": "form",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "interaction-global.json",
+      "definition": "#/definitions/CanonicalInteractionRequest",
+      "family": "interaction",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "interaction-unknown-choice.json",
+      "definition": "#/definitions/CanonicalInteractionRequest",
+      "family": "unknown",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "form-response.json",
+      "definition": "#/definitions/CanonicalInteractionResponse",
+      "family": "form",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "work-independent-child.json",
+      "definition": "#/definitions/CanonicalWorkItem",
+      "family": "work",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "plan.json",
+      "definition": "#/definitions/CanonicalPlanSnapshot",
+      "family": "work",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "usage-partial-cumulative.json",
+      "definition": "#/definitions/CanonicalUsageObservation",
+      "family": "usage",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "capabilities.json",
+      "definition": "#/definitions/CanonicalCapabilitySet",
+      "family": "capability",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "error.json",
+      "definition": "#/definitions/CanonicalErrorInfo",
+      "family": "error",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "receipt-accepted.json",
+      "definition": "#/definitions/CanonicalCommandReceipt",
+      "family": "receipt",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "receipt-uncertain.json",
+      "definition": "#/definitions/CanonicalCommandReceipt",
+      "family": "receipt",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "receipt-duplicate-uncertain.json",
+      "definition": "#/definitions/CanonicalCommandReceipt",
+      "family": "receipt",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "receipt-unknown.json",
+      "definition": "#/definitions/CanonicalCommandReceipt",
+      "family": "unknown",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "snapshot-per-read.json",
+      "definition": "#/definitions/CanonicalSessionSnapshot",
+      "family": "snapshot",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "create-uncertain.json",
+      "definition": "#/definitions/CanonicalCreateResult",
+      "family": "receipt",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-itemUpserted.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-itemDelta.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-event-itemDelta.json",
+      "definition": "#/definitions/ChpEvent",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-itemsRemoved.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-executionChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-retryScheduled.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-pendingInputChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-interactionOpened.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-event-interactionOpened.json",
+      "definition": "#/definitions/ChpEvent",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-interactionResolved.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-workChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-planChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-usageObserved.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-selectionChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-revertChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-sessionInfoChanged.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-resyncRequired.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "event-unknownEvent.json",
+      "definition": "#/definitions/CanonicalSessionEvent",
+      "family": "event",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-event-unknownEvent.json",
+      "definition": "#/definitions/ChpEvent",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-hello.json",
+      "definition": "#/definitions/ChpHello",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-subscribe.json",
+      "definition": "#/definitions/ChpSubscribe",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-resync.json",
+      "definition": "#/definitions/ChpResync",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-ping.json",
+      "definition": "#/definitions/ChpPing",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-pong.json",
+      "definition": "#/definitions/ChpPong",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-receipt.json",
+      "definition": "#/definitions/ChpReceipt",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-snapshot.json",
+      "definition": "#/definitions/ChpSnapshot",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-capabilities.json",
+      "definition": "#/definitions/ChpCapabilities",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-session-page.json",
+      "definition": "#/definitions/ChpSessionPage",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-create-result.json",
+      "definition": "#/definitions/ChpCreateResult",
+      "family": "transport",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-prompt.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-create.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-respond.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-prompt-steer.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-prompt-default.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "command-original.json",
+      "definition": "#/definitions/CanonicalOriginalCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "operation-reconcile-only.json",
+      "definition": "#/definitions/CanonicalOperationContract",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    }
+  ]
+}

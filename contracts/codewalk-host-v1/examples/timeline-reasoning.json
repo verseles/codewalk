@@ -1,0 +1,25 @@
+{
+  "type": "reasoning",
+  "meta": {
+    "id": "reasoning-1",
+    "generation": "generation-1",
+    "status": "completed",
+    "source": {
+      "harness": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1"
+      },
+      "version": "synthetic-1",
+      "nativeType": "synthetic.domain",
+      "durability": "watermarkOnly",
+      "nativeCursor": "opaque:not-a-number",
+      "aggregateSeq": "184467440737095516160"
+    },
+    "turnId": "turn-1",
+    "ordinal": 0
+  },
+  "text": "Exposed synthetic reasoning",
+  "complete": true,
+  "prefixMissing": false
+}

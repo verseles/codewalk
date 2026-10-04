@@ -32,6 +32,36 @@ The docs call the Web UI password-protected. The pinned [web shell handler](../p
 
 Changing shared-service settings can stop/restart it; the official page describes applying configuration before restarting. These are operator-owned actions, not commands performed by this documentation unit. User-managed SSH/VPN/TLS connectivity remains distinct from the app's API protocol.
 
+## Observed Linux Chromium subset
+
+[E native 2.0.22 captures](../test/contract/fixtures/opencode/2.0.22/e/README.md)
+record authenticated `/api/info` and fetch-streamed global SSE from an allowed
+localhost origin in Chromium151. The foreign-origin browser reads were blocked;
+the fixture preserves actual HTTP/preflight headers separately from browser
+readability. Shared-service settings were not changed. This is a loopback Chrome
+subset, not Safari, HTTPS-to-LAN mixed-content, custom-origin configuration or
+PTY-ticket acceptance; SP-04 owns those remaining checks.
+
+## Observed compiled Flutter Web subset
+
+[SP-04 Chromium fixtures](../test/contract/fixtures/opencode/2.0.22/web/README.md)
+record a compiled standalone Flutter app using Dart package:web Authorization
+fetch, ReadableStream SSE and ticket WebSockets against native 2.0.22 on Linux
+localhost. The browser recovered a stream gap from an authoritative snapshot,
+then received live events. PTY reconnect replayed the missed marker once using
+the native UTF-16 cursor, then accepted live input/output. Mint-header enforcement,
+consumed/wrong-PTY/expired tickets and actual 62-second expiry were observed with
+live targets. Foreign-origin Dart info/SSE/mint reads were blocked by preflight.
+No native UTF-8 read boundary split was observed; controlled one-byte decoder
+rechunking is labelled separately. Immutable 2.0.22 source excerpts and hashes
+are in the fixture's `source-evidence.json`.
+
+This standalone spike does not implement CodeWalk's production transport or
+accept Safari, trusted HTTPS-to-actual-HTTP-LAN mixed content, configured-origin
+service restart, foreground/background recovery or the terminal-on-Web product
+decision. V2-008 remains partial. Browser origin, scheme and TLS checks were
+preserved; the Chromium process sandbox was disabled for the disposable container.
+
 ## Reference client and policy separation
 
 The [official event reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts) is implementation evidence for native event reconciliation, not a dependency the Flutter UI imports. The canonical reducer and capability-driven screens belong to CodeWalk; wire DTOs stay inside its adapter.

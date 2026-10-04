@@ -1,0 +1,1305 @@
+{
+  "unit": "V2-005D",
+  "validationMode": "offline-read-only-evidence-checks",
+  "outcome": "observed-subset-passed",
+  "allDRequirementsAccepted": false,
+  "checksPassed": 320,
+  "checksFailed": 0,
+  "observedActualExecutions": 11,
+  "executionCeiling": 12,
+  "observedCostUsd": 0,
+  "pending": [
+    {
+      "scenario": "natural-provider-retry",
+      "status": "pending/inconclusive",
+      "reason": "No natural session.retry.scheduled was captured; source shape is not a runtime pass."
+    },
+    {
+      "scenario": "natural-provider-quota-or-rate-limit",
+      "status": "pending/inconclusive",
+      "reason": "No natural quota/rate-limit failure was captured; no synthetic quota event proves it."
+    }
+  ],
+  "checks": [
+    {
+      "check": "files:readable:foreground-nested.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:background-interrupt.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:revert-file-effects.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:foreground-nested-collector-diagnostic.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:foreground-nested-collector-diagnostic-2.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:setup.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:execution-ledger.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:cleanup.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:offline-tool-correlation.json",
+      "passed": true
+    },
+    {
+      "check": "files:readable:provenance.json",
+      "passed": true
+    },
+    {
+      "check": "files:readmePresent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:nativeVersion",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:selectedFreeActiveToolModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:selectedModelMatchesCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:customAgentMatchesScopedCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:allPresentNativeCostsZero",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:uniqueEventIDs",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:durableIdentityAndSequence",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:noStreamFailures",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:committedProjectAndSelectedModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:onlyRootCreatedByCollector",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:durableRootAdmission",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_105656b81001WXf354FR1AsGRc:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_105656b81001WXf354FR1AsGRc:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_1056577aa001YJKPAI3z3X1vke:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_1056577aa001YJKPAI3z3X1vke:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_1056582b8001t6IDXo4y5PbrWX:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:admission:msg_1056582b8001t6IDXo4y5PbrWX:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a7d56ffe4yJlWC4DcnBJII:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a7d56ffe4yJlWC4DcnBJII:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a8862ffeuHE62WQvAHpGJ6:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a8862ffeuHE62WQvAHpGJ6:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a9492ffedN3lszVGGAkUUw:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:final:ses_efa9a9492ffedN3lszVGGAkUUw:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:toolBoundarySetsMatch",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_6Nppc2ty3QkZKKbPqaGx4Nau:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_6Nppc2ty3QkZKKbPqaGx4Nau:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_6Nppc2ty3QkZKKbPqaGx4Nau:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_6Nppc2ty3QkZKKbPqaGx4Nau:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_6Nppc2ty3QkZKKbPqaGx4Nau:projectedSuccessMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a105657fed74fbad0b22af:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a105657fed74fbad0b22af:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a105657fed74fbad0b22af:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a105657fed74fbad0b22af:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a105657fed74fbad0b22af:projectedSuccessMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a1056585a0717889cca634:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a1056585a0717889cca634:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a1056585a0717889cca634:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a1056585a0717889cca634:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:tool:call_01a1056585a0717889cca634:projectedSuccessMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:permission:per_10565773b001xjI0tKy5qMwWUN:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:permission:per_10565773b001xjI0tKy5qMwWUN:onceReplyRecorded",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:permission:per_1056581a3001z4JygA66S20Bbz:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:permission:per_1056581a3001z4JygA66S20Bbz:onceReplyRecorded",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested:approvedRequestsEqualOnceEvents",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:nativeVersion",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:selectedFreeActiveToolModel",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:selectedModelMatchesCatalog",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:customAgentMatchesScopedCatalog",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:allPresentNativeCostsZero",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:uniqueEventIDs",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:durableIdentityAndSequence",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:noStreamFailures",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:committedProjectAndSelectedModel",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:onlyRootCreatedByCollector",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:durableRootAdmission",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105678a64001e2S9GuJpzlTXt9:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105678a64001e2S9GuJpzlTXt9:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105679185001ig5I8MgDx0b1Mh:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105679185001ig5I8MgDx0b1Mh:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105679984001YWFbOogWUAt10x:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_105679984001YWFbOogWUAt10x:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_10567997e001k2ZrpLBujkPrTf:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:admission:msg_10567997e001k2ZrpLBujkPrTf:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:final:ses_efa986e87ffe0oLGxhhm7iPw6s:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:final:ses_efa986e87ffe0oLGxhhm7iPw6s:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:final:ses_efa9875b5ffeaqvb4EdPrsI1Hj:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:final:ses_efa9875b5ffeaqvb4EdPrsI1Hj:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:toolBoundarySetsMatch",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_01a1056790be77aa9eee197f:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_01a1056790be77aa9eee197f:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_01a1056790be77aa9eee197f:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_01a1056790be77aa9eee197f:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_01a1056790be77aa9eee197f:projectedSuccessMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_function_fedcb6phlpbo_1:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_function_fedcb6phlpbo_1:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_function_fedcb6phlpbo_1:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_function_fedcb6phlpbo_1:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:tool:call_function_fedcb6phlpbo_1:projectedFailureMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:permission:per_105679164001FJeA1XNd1sVcTu:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:permission:per_105679164001FJeA1XNd1sVcTu:onceReplyRecorded",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:permission:per_1056798b4001jozWKtOaZvX3tY:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:permission:per_1056798b4001jozWKtOaZvX3tY:heldRequestNotApproved",
+      "passed": true
+    },
+    {
+      "check": "background-interrupt:approvedRequestsEqualOnceEvents",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:nativeVersion",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:selectedFreeActiveToolModel",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:selectedModelMatchesCatalog",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:customAgentMatchesScopedCatalog",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:allPresentNativeCostsZero",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:uniqueEventIDs",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:durableIdentityAndSequence",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:noStreamFailures",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:committedProjectAndSelectedModel",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:onlyRootCreatedByCollector",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:durableRootAdmission",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:admission:msg_10568b7d5001ChYEAnjIpgj96g:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:admission:msg_10568b7d5001ChYEAnjIpgj96g:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:final:ses_efa974842ffeG3P1KAGCvAIQQ1:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:final:ses_efa974842ffeG3P1KAGCvAIQQ1:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:toolBoundarySetsMatch",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:tool:call_1xwm0Hr7UFD15gLlX4z8hbX0:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:tool:call_1xwm0Hr7UFD15gLlX4z8hbX0:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:tool:call_1xwm0Hr7UFD15gLlX4z8hbX0:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:tool:call_1xwm0Hr7UFD15gLlX4z8hbX0:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "revert-file-effects:tool:call_1xwm0Hr7UFD15gLlX4z8hbX0:projectedSuccessMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:nativeVersion",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:selectedFreeActiveToolModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:selectedModelMatchesCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:customAgentMatchesScopedCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:allPresentNativeCostsZero",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:uniqueEventIDs",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:durableIdentityAndSequence",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:noStreamFailures",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:committedProjectAndSelectedModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:onlyRootCreatedByCollector",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:durableRootAdmission",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:admission:msg_1056401a6001xzlIPb7fhSb7Ey:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:admission:msg_1056401a6001xzlIPb7fhSb7Ey:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:final:ses_efa9bfe8dffeCXhHIn8qzpbVdF:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:final:ses_efa9bfe8dffeCXhHIn8qzpbVdF:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:toolBoundarySetsMatch",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:tool:call_01a10564085f7067a6571977:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:tool:call_01a10564085f7067a6571977:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:tool:call_01a10564085f7067a6571977:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:tool:call_01a10564085f7067a6571977:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:tool:call_01a10564085f7067a6571977:projectedFailureMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:permission:per_1056408fd001FfpehWkn7vhpJQ:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:permission:per_1056408fd001FfpehWkn7vhpJQ:heldRequestNotApproved",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic:approvedRequestsEqualOnceEvents",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:nativeVersion",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:selectedFreeActiveToolModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:selectedModelMatchesCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:customAgentMatchesScopedCatalog",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:allPresentNativeCostsZero",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:uniqueEventIDs",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:durableIdentityAndSequence",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:noStreamFailures",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:committedProjectAndSelectedModel",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:onlyRootCreatedByCollector",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:durableRootAdmission",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:admission:msg_105648e9c001ZFgtAtD5CGn969:durablyDelivered",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:admission:msg_105648e9c001ZFgtAtD5CGn969:projectedNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:final:ses_efa9b717cffeAbV0JeC0qc149w:authoritativeAPIHistory",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:final:ses_efa9b717cffeAbV0JeC0qc149w:settledOwnedInteractions",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:toolBoundarySetsMatch",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:tool:call_01a10564a1697750be989b0c:nameOnlyOnInputStarted",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:tool:call_01a10564a1697750be989b0c:rawInputEqualsCalled",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:tool:call_01a10564a1697750be989b0c:projectedToolIdentityAndInput",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:tool:call_01a10564a1697750be989b0c:exactlyOneToolTerminal",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:tool:call_01a10564a1697750be989b0c:projectedFailureMatchesEvent",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:permission:per_10564a1ab0012cvQLEpn5f6Sdp:nativeToolOwnership",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:permission:per_10564a1ab0012cvQLEpn5f6Sdp:heldRequestNotApproved",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2:approvedRequestsEqualOnceEvents",
+      "passed": true
+    },
+    {
+      "check": "foreground:twoActualSubagentTools",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_6Nppc2ty3QkZKKbPqaGx4Nau:nativeParentChildCreation",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_6Nppc2ty3QkZKKbPqaGx4Nau:nativeChildAdmission",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_6Nppc2ty3QkZKKbPqaGx4Nau:foregroundToolRequested",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a105657fed74fbad0b22af:nativeParentChildCreation",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a105657fed74fbad0b22af:nativeChildAdmission",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a105657fed74fbad0b22af:foregroundToolRequested",
+      "passed": true
+    },
+    {
+      "check": "foreground:threeNativeSessionsAndExecutions",
+      "passed": true
+    },
+    {
+      "check": "foreground:markerAndTerminal:ses_efa9a9492ffedN3lszVGGAkUUw",
+      "passed": true
+    },
+    {
+      "check": "foreground:markerAndTerminal:ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "passed": true
+    },
+    {
+      "check": "foreground:markerAndTerminal:ses_efa9a7d56ffe4yJlWC4DcnBJII",
+      "passed": true
+    },
+    {
+      "check": "foreground:grandchildActuallyReadMarker",
+      "passed": true
+    },
+    {
+      "check": "foreground:childCompletedBeforeTool:call_6Nppc2ty3QkZKKbPqaGx4Nau",
+      "passed": true
+    },
+    {
+      "check": "foreground:childCompletedBeforeTool:call_01a105657fed74fbad0b22af",
+      "passed": true
+    },
+    {
+      "check": "foreground:noCollectorDiagnostics",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a1056790be77aa9eee197f:nativeParentChildCreation",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a1056790be77aa9eee197f:nativeChildAdmission",
+      "passed": true
+    },
+    {
+      "check": "lineage:call_01a1056790be77aa9eee197f:foregroundToolRequested",
+      "passed": true
+    },
+    {
+      "check": "background:actualNativeChild",
+      "passed": true
+    },
+    {
+      "check": "background:onlyParentAndChildCreated",
+      "passed": true
+    },
+    {
+      "check": "background:realNativeReadHeld",
+      "passed": true
+    },
+    {
+      "check": "background:nativeBackgroundRequest",
+      "passed": true
+    },
+    {
+      "check": "background:nativeSyntheticBackgroundNotice",
+      "passed": true
+    },
+    {
+      "check": "background:activeSnapshotsMatchSummary",
+      "passed": true
+    },
+    {
+      "check": "background:parentIdleDoesNotCompleteChild",
+      "passed": true
+    },
+    {
+      "check": "background:idleParentInterruptFalsePreservesChild",
+      "passed": true
+    },
+    {
+      "check": "background:explicitChildInterruptTrue",
+      "passed": true
+    },
+    {
+      "check": "background:childInterruptedByUser",
+      "passed": true
+    },
+    {
+      "check": "background:oneNativeCancelledCompletionOwnedByParent",
+      "passed": true
+    },
+    {
+      "check": "background:completionAdmissionMatchesNativeHistory",
+      "passed": true
+    },
+    {
+      "check": "background:parentResumesExactlyOnceForCompletion",
+      "passed": true
+    },
+    {
+      "check": "background:parentLaunchedBeforeChildTerminal",
+      "passed": true
+    },
+    {
+      "check": "background:noManualSyntheticOrContinuationPrompt",
+      "passed": true
+    },
+    {
+      "check": "background:noCollectorDiagnostics",
+      "passed": true
+    },
+    {
+      "check": "revert:allEightOrderedFileSnapshots",
+      "passed": true
+    },
+    {
+      "check": "revert:capturedNativeWriteDiff",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:baseline",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:after-native-write",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:stage-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:clear-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:stage-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:clear-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:stage-files-true-again",
+      "passed": true
+    },
+    {
+      "check": "revert:fileBytesHashAndDiff:commit",
+      "passed": true
+    },
+    {
+      "check": "revert:realNativeWriteTool",
+      "passed": true
+    },
+    {
+      "check": "revert:admissionIsBoundaryAndNativeWriteCompleted",
+      "passed": true
+    },
+    {
+      "check": "revert:writeSnapshotActuallyChangesTarget",
+      "passed": true
+    },
+    {
+      "check": "revert:threeNativeStageResponsesAndEvents",
+      "passed": true
+    },
+    {
+      "check": "revert:stageMatchesAuthoritativeAPIAndEvent:stage-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:stageFileEffects:stage-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:stageMatchesAuthoritativeAPIAndEvent:stage-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:stageFileEffects:stage-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:stageMatchesAuthoritativeAPIAndEvent:stage-files-true-again",
+      "passed": true
+    },
+    {
+      "check": "revert:stageFileEffects:stage-files-true-again",
+      "passed": true
+    },
+    {
+      "check": "revert:stagingPreservesOriginalHistory:stage-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:phaseHasMatchingAPISnapshot:stage-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:stagingPreservesOriginalHistory:clear-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:phaseHasMatchingAPISnapshot:clear-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:stagingPreservesOriginalHistory:stage-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:phaseHasMatchingAPISnapshot:stage-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:stagingPreservesOriginalHistory:clear-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:phaseHasMatchingAPISnapshot:clear-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:stagingPreservesOriginalHistory:stage-files-true-again",
+      "passed": true
+    },
+    {
+      "check": "revert:phaseHasMatchingAPISnapshot:stage-files-true-again",
+      "passed": true
+    },
+    {
+      "check": "revert:twoNativeClearCallsAndEvents",
+      "passed": true
+    },
+    {
+      "check": "revert:clearRestoresWriteAndRemovesStage:clear-files-true",
+      "passed": true
+    },
+    {
+      "check": "revert:clearRestoresWriteAndRemovesStage:clear-files-false",
+      "passed": true
+    },
+    {
+      "check": "revert:writePlusTwoAutomaticNativeDrains",
+      "passed": true
+    },
+    {
+      "check": "revert:clearGeneratedEmptyDrain:1",
+      "passed": true
+    },
+    {
+      "check": "revert:drainAddsOnlyNativeIdleMarker:1",
+      "passed": true
+    },
+    {
+      "check": "revert:clearGeneratedEmptyDrain:2",
+      "passed": true
+    },
+    {
+      "check": "revert:drainAddsOnlyNativeIdleMarker:2",
+      "passed": true
+    },
+    {
+      "check": "revert:commitRemovesHistoryAndInboxPreservesRevertedFile",
+      "passed": true
+    },
+    {
+      "check": "revert:stageClearCommitEventOrder",
+      "passed": true
+    },
+    {
+      "check": "revert:noCollectorDiagnosticsOrExtraPrompts",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic.json:collectorFailurePreserved",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic.json:noChildAcceptanceEvidence",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2.json:collectorFailurePreserved",
+      "passed": true
+    },
+    {
+      "check": "foreground-nested-collector-diagnostic-2.json:noChildAcceptanceEvidence",
+      "passed": true
+    },
+    {
+      "check": "diagnostics:initialEmptyModelCatalogPreserved",
+      "passed": true
+    },
+    {
+      "check": "ledger:globallyUniqueNativeEventIDs",
+      "passed": true
+    },
+    {
+      "check": "ledger:allElevenActualExecutionsIncludingDiagnosticsAndAutomaticDrains",
+      "passed": true
+    },
+    {
+      "check": "ledger:observedDistribution",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_105656b850014jcyLOkSWnX0qg",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_1056577ae001GRh3qAnJYDNHHO",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_1056582bc001eves9nv3LDbFud",
+      "passed": true
+    },
+    {
+      "check": "ledger:preservedCumulativeSnapshot:foreground-nested.json",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_105678a69001OCw2FEUEuW2Z5Y",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_10567918a0010eB99qm3oZvgc6",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_105679fe400150jILrGy8i4TFb",
+      "passed": true
+    },
+    {
+      "check": "ledger:preservedCumulativeSnapshot:background-interrupt.json",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_10568b7db001B6zATLCBl1VgOc",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_10568c3de001pQ1f0Mesj2J2yZ",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_10568c40b0017webLN8ggS8NYv",
+      "passed": true
+    },
+    {
+      "check": "ledger:preservedCumulativeSnapshot:revert-file-effects.json",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_1056401af001te3dhcKPtYmoS7",
+      "passed": true
+    },
+    {
+      "check": "ledger:preservedCumulativeSnapshot:foreground-nested-collector-diagnostic.json",
+      "passed": true
+    },
+    {
+      "check": "ledger:nativeStartAndTerminal:evt_105648ea4001jseZYh3NZ5vxE9",
+      "passed": true
+    },
+    {
+      "check": "ledger:preservedCumulativeSnapshot:foreground-nested-collector-diagnostic-2.json",
+      "passed": true
+    },
+    {
+      "check": "offline:fourPreservedCorrelations",
+      "passed": true
+    },
+    {
+      "check": "offline:correlationOwnershipSet",
+      "passed": true
+    },
+    {
+      "check": "offline:computedNativeCorrelation:call_01a10564085f7067a6571977",
+      "passed": true
+    },
+    {
+      "check": "offline:computedChildID:call_01a10564085f7067a6571977",
+      "passed": true
+    },
+    {
+      "check": "offline:computedNativeCorrelation:call_01a10564a1697750be989b0c",
+      "passed": true
+    },
+    {
+      "check": "offline:computedChildID:call_01a10564a1697750be989b0c",
+      "passed": true
+    },
+    {
+      "check": "offline:computedNativeCorrelation:call_6Nppc2ty3QkZKKbPqaGx4Nau",
+      "passed": true
+    },
+    {
+      "check": "offline:computedChildID:call_6Nppc2ty3QkZKKbPqaGx4Nau",
+      "passed": true
+    },
+    {
+      "check": "offline:computedNativeCorrelation:call_01a105657fed74fbad0b22af",
+      "passed": true
+    },
+    {
+      "check": "offline:computedChildID:call_01a105657fed74fbad0b22af",
+      "passed": true
+    },
+    {
+      "check": "setup:projectCommittedBeforeNativeAccess",
+      "passed": true
+    },
+    {
+      "check": "setup:scopedFreeModelAndSnapshots",
+      "passed": true
+    },
+    {
+      "check": "setup:knownDisposableInputBytes",
+      "passed": true
+    },
+    {
+      "check": "setup:retainedInputBytes:nested-marker.txt",
+      "passed": true
+    },
+    {
+      "check": "setup:retainedInputBytes:background-gate.txt",
+      "passed": true
+    },
+    {
+      "check": "setup:retainedInputBytes:revert-target.txt",
+      "passed": true
+    },
+    {
+      "check": "setup:retainedInputBytes:revert-target-after.txt",
+      "passed": true
+    },
+    {
+      "check": "cleanup:allEightOwnedSessionsThreeDisposedFiveRetained",
+      "passed": true
+    },
+    {
+      "check": "cleanup:noOwnedActiveSessions",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedSessionSettled:ses_efa974842ffeG3P1KAGCvAIQQ1",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa974842ffeG3P1KAGCvAIQQ1:permission",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa974842ffeG3P1KAGCvAIQQ1:form",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa974842ffeG3P1KAGCvAIQQ1:inbox",
+      "passed": true
+    },
+    {
+      "check": "cleanup:disposedNative404:ses_efa986e87ffe0oLGxhhm7iPw6s",
+      "passed": true
+    },
+    {
+      "check": "cleanup:recordedNativeDelete:ses_efa986e87ffe0oLGxhhm7iPw6s",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedSessionSettled:ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9875b5ffeaqvb4EdPrsI1Hj:permission",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9875b5ffeaqvb4EdPrsI1Hj:form",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9875b5ffeaqvb4EdPrsI1Hj:inbox",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedSessionSettled:ses_efa9a7d56ffe4yJlWC4DcnBJII",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a7d56ffe4yJlWC4DcnBJII:permission",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a7d56ffe4yJlWC4DcnBJII:form",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a7d56ffe4yJlWC4DcnBJII:inbox",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedSessionSettled:ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a8862ffeuHE62WQvAHpGJ6:permission",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a8862ffeuHE62WQvAHpGJ6:form",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a8862ffeuHE62WQvAHpGJ6:inbox",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedSessionSettled:ses_efa9a9492ffedN3lszVGGAkUUw",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a9492ffedN3lszVGGAkUUw:permission",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a9492ffedN3lszVGGAkUUw:form",
+      "passed": true
+    },
+    {
+      "check": "cleanup:retainedEmpty:ses_efa9a9492ffedN3lszVGGAkUUw:inbox",
+      "passed": true
+    },
+    {
+      "check": "cleanup:disposedNative404:ses_efa9b717cffeAbV0JeC0qc149w",
+      "passed": true
+    },
+    {
+      "check": "cleanup:recordedNativeDelete:ses_efa9b717cffeAbV0JeC0qc149w",
+      "passed": true
+    },
+    {
+      "check": "cleanup:disposedNative404:ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+      "passed": true
+    },
+    {
+      "check": "cleanup:recordedNativeDelete:ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+      "passed": true
+    },
+    {
+      "check": "cleanup:noSavedProjectGrants",
+      "passed": true
+    },
+    {
+      "check": "cleanup:summarySupportedByNativeCalls",
+      "passed": true
+    },
+    {
+      "check": "provenance:observedSubsetOnly",
+      "passed": true
+    },
+    {
+      "check": "provenance:actualBudgetAndCost",
+      "passed": true
+    },
+    {
+      "check": "provenance:committedNativeProject",
+      "passed": true
+    },
+    {
+      "check": "provenance:naturalRetryAndQuotaPending",
+      "passed": true
+    },
+    {
+      "check": "redaction:recursiveCredentialFields",
+      "passed": true
+    },
+    {
+      "check": "redaction:noCredentialEndpointCaptured",
+      "passed": true
+    },
+    {
+      "check": "manifest:manifestPresent",
+      "passed": true
+    },
+    {
+      "check": "manifest:allListedSHA256Digests",
+      "passed": true
+    },
+    {
+      "check": "manifest:allRequiredEvidenceIncluded",
+      "passed": true
+    },
+    {
+      "check": "coverage:noNaturalRetryScheduledEvent",
+      "passed": true
+    },
+    {
+      "check": "coverage:noNaturalQuotaOrRateLimitError",
+      "passed": true
+    }
+  ]
+}

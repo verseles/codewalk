@@ -1,0 +1,12 @@
+name: codewalk_core
+description: Pure Dart canonical domain, identity, policy and ports.
+publish_to: none
+version: 0.0.0
+resolution: workspace
+
+environment:
+  sdk: ^3.8.1
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.31.0

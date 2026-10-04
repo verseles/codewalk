@@ -1,0 +1,32 @@
+{
+  "type": "command",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "command": {
+    "id": "command-respond",
+    "harness": {
+      "version": 1,
+      "host": "host-α",
+      "harness": "profile-1"
+    },
+    "owner": {
+      "type": "session",
+      "session": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1",
+        "nativeId": " opaque/%session "
+      }
+    },
+    "operation": "respond",
+    "connectedVersion": "synthetic-1",
+    "intent": {
+      "interactionId": "interaction-1",
+      "response": {
+        "type": "approval",
+        "choiceId": "reject-native",
+        "note": "Synthetic note"
+      }
+    }
+  }
+}

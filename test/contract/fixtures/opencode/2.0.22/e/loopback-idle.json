@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-10-04T05:33:16.045211+00:00",
+  "durationSeconds": 32.00040911100223,
+  "stream": {
+    "path": "/api/event",
+    "openedAt": "2026-10-04T05:32:44.030886+00:00",
+    "closedAt": "2026-10-04T05:33:16.045227+00:00",
+    "status": 200,
+    "events": [
+      {
+        "id": "evt_105667889001ehgDNlb5SeIj4h",
+        "type": "server.connected",
+        "data": {}
+      }
+    ],
+    "frames": null,
+    "totalHttpBodyBytes": 1903,
+    "ownedEventFrameBytes": 83,
+    "heartbeatBytes": 39,
+    "ambientEventCount": 8,
+    "commentFrames": [
+      {
+        "lines": [
+          ": heartbeat"
+        ],
+        "bytes": 13,
+        "observedAt": "2026-10-04T05:32:44.044756+00:00"
+      },
+      {
+        "lines": [
+          ": heartbeat"
+        ],
+        "bytes": 13,
+        "observedAt": "2026-10-04T05:32:59.046892+00:00"
+      },
+      {
+        "lines": [
+          ": heartbeat"
+        ],
+        "bytes": 13,
+        "observedAt": "2026-10-04T05:33:14.050674+00:00"
+      }
+    ],
+    "failure": null
+  },
+  "transport": "loopback Linux HTTP; not cellular",
+  "measurementBoundary": "HTTP body bytes; comments distinguished from selected event frames; ambient native events excluded from persisted content"
+}
