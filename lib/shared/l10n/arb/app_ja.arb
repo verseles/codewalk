@@ -1,0 +1,13 @@
+{
+  "@@locale": "ja",
+  "chatAddServerToStart": "チャットを開始するにはサーバーを追加してください。",
+  "chatConversation": "会話",
+  "chatConversations": "会話一覧",
+  "commonCancel": "キャンセル",
+  "onboardingConnectRunningServer": "実行中のサーバーに接続",
+  "serversCopy": "コピー",
+  "settingsBack": "戻る",
+  "settingsServersTitle": "サーバー",
+  "settingsTitle": "設定",
+  "unsupportedLink": "このリンクはサポートされていません。"
+}

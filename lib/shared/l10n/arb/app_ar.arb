@@ -1,0 +1,12 @@
+{
+  "chatAddServerToStart": "أضف خادماً لبدء الدردشة.",
+  "chatConversation": "المحادثة",
+  "chatConversations": "المحادثات",
+  "commonCancel": "إلغاء",
+  "onboardingConnectRunningServer": "الاتصال بخادم قيد التشغيل",
+  "serversCopy": "نسخ",
+  "settingsBack": "رجوع",
+  "settingsServersTitle": "الخوادم",
+  "settingsTitle": "الإعدادات",
+  "unsupportedLink": "هذا الرابط غير مدعوم."
+}

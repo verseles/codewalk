@@ -1,0 +1,13 @@
+{
+  "@@locale": "fr",
+  "chatAddServerToStart": "Ajoutez un serveur pour commencer à discuter.",
+  "chatConversation": "Conversation",
+  "chatConversations": "Conversations",
+  "commonCancel": "Annuler",
+  "onboardingConnectRunningServer": "Se connecter à un serveur en cours d''exécution",
+  "serversCopy": "Copier",
+  "settingsBack": "Retour",
+  "settingsServersTitle": "Serveurs",
+  "settingsTitle": "Paramètres",
+  "unsupportedLink": "Ce lien n’est pas pris en charge."
+}

@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the explicit independent `lib/main_v2.dart` entry point. Its package public libraries are currently empty, compile-tested boundaries; domain/adapters arrive in their owning Issues.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage and evidence-based ownership; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. The harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -20,27 +20,79 @@
 The entries below are governed independently from the retained reference map:
 
 ```text
-lib/main_v2.dart                         # Explicit runApp entry point for the v2 foundation
-lib/app/v2_bootstrap.dart                # Minimal MaterialApp/Scaffold with a centered CodeWalk label
-packages/{codewalk_core,codewalk_net,harness_opencode,harness_host}/
-  pubspec.yaml                          # Workspace resolution and permitted package dependencies
-  analysis_options.yaml                 # Package analyzer rules
-  lib/<package>.dart                    # Empty public boundary until its owning implementation lands
-  test/public_surface_test.dart         # Independent public-library compilation check
-test/v2/bootstrap_smoke_test.dart       # Actual v2 entry point at compact/wide viewport sizes
+lib/main_v2.dart                         # Explicit entry point; composes dependencies before runApp
+lib/app/composition_root.dart           # Private GetIt instance; resolves the independent v2 graph
+lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
+lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, theme and locale bridges
+lib/app/app_{router,shell}.dart          # Responsive navigation and localized route placeholders
+lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
+lib/app/app_preferences_controller.dart # Transient theme mode, density, visual style and locale
+lib/shared/theme/                       # Independent Material3 shapes, theme and visual tokens
+lib/shared/layout/window_size_class.dart # Responsive viewport classes
+lib/shared/l10n/{arb,generated}/         # Scoped 10-key catalog and official generated delegates for 14 locales
+lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
+lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
+lib/platform/storage/storage.dart      # Storage API barrel; not initialized by the app graph
+lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
+lib/platform/storage/preferences_backend.dart # Guarded SharedPreferencesAsync adapter
+lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores and memory LRU
+lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
+lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
+packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
+packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
+packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
+packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
+packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
+packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
+test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
+test/v2/{shared,storage}/               # Scoped rendering, layout, l10n, theme and storage regressions
+tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
 tool/ci/architecture/widget_types.dart  # Widget ancestry by declaration identity and import/export visibility
+tool/ci/architecture/locator_values.dart # Escaping locator values versus ordinary resolved services
 tool/ci/v2_architecture_manifest.json   # New surface, retained reference and narrow vendor/generated scopes
 tool/ci/test/import_rules_test.dart     # Real CLI planted-violation regression cases
-tool/ci/check_v2_foundations.py         # Dynamic workspace discovery, package checks and explicit v2 targets
+tool/ci/check_v2_foundations.py         # Dynamic workspace discovery and explicit v2 analysis/test/build gate
 ```
 
+The composition root resolves a private locator before widgets mount and passes
+typed dependencies into the app. Widgets consume constructor/provider injection.
+Routes `/`, `/sessions`, `/hosts`, `/settings`, `/pair`, `/s/:host/:session` and
+`/unsupported` currently show placeholders. Navigation uses a bottom bar below
+840 logical pixels and a rail from 840 pixels. Deep links retain pending intents;
+native session identifiers do not establish a canonical session without a
+harness profile. Appearance changes are controller-driven and in memory.
+
+The shared localization catalog contains nine reused UI keys and one new
+unsupported-link key in 14 locales. Its generator leaves the retained catalog
+and `lib/l10n/` outputs intact. Shared rendering currently provides GFM and
+link/file callbacks; images render as text. Full rendering and settings parity
+remain in their owning Issues.
+
+`codewalk_core` is pure Dart and contains identities/ownership only at this
+stage. Project identity is host plus the caller-supplied canonical directory;
+the upstream project ID is an annotation. Ownership proof does not grant
+mutation authority. `codewalk_net` preserves HTTP statuses and raw response
+bodies, validates endpoint paths before obtaining authentication headers,
+disables automatic redirects and supports request cancellation. Its strict
+UTF-8 SSE decoder handles fragmented input and configurable EOF dispatch,
+without interpreting JSON or promising event replay. Browser transport,
+isolates, batching and connection watchdogs are not implemented here.
+
+Storage provides namespaced metadata, guarded schema migrations, bounded
+payloads and endpoint credentials independently of the app graph. IO payloads
+use the `cw2_payloads` directory and flushed temporary-file replacement; Web
+payloads use preferences. Native credentials use secure storage, while Web
+credentials remain instance-local memory. Migration hooks can read legacy data,
+but the v1 importer and installed-upgrade acceptance are separate work.
+
 `.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
-`v2_foundations` for discovered package analysis/tests, planted guards, VM/Chrome
-entry-point tests and the explicit v2 Web build. Native platform compilation and
-distribution evidence remain separate from these checks. Retained reference
-paths may not be imported directly or transitively by authored v2 source.
+`v2_foundations` for discovered package analysis/tests, planted guards, scoped
+localization checks, v2 Flutter analysis, VM/Chrome tests and the explicit v2 Web
+build. Native platform compilation and distribution evidence remain separate
+from these checks. Retained reference paths may not be imported directly or
+transitively by authored v2 source.
 
 ## Folder Structure
 
@@ -585,15 +637,17 @@ make test-chat                              # ChatPage smoke + extended suites
 make test-web                               # Browser capability tests (requires Chrome)
 make test-coverage-tools                    # Python stdlib coverage-gate fixtures
 make coverage                               # Flutter LCOV plus the 35% global and per-file coverage gates
-make check                                  # retained-reference root gate; does not discover package tests
+make check                                  # root Flutter gate; does not discover workspace package tests
 make v2-architecture                        # governed v2 source and transitive boundary checks
-make v2-foundations                         # discovered packages, planted guards, VM/Chrome v2 smoke, v2 Web build
+make v2-foundations                         # packages, guards, scoped l10n/analyze, VM/Chrome v2 tests and Web build
 make v2-smoke                               # explicit v2 Flutter tests in test/v2
 make v2-web                                 # lib/main_v2.dart Web build -> build/v2/web
 make check-fast                             # deps + gen + analyze + coverage fixtures + fast (non-slow, non-integration) tests
 dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
 dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
 flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
+python3 tool/l10n/generate_v2_localizations.py # Regenerate only lib/shared/l10n/generated/ using isolated Flutter config
+python3 tool/l10n/generate_v2_localizations.py --check # Check scoped v2 outputs without changing them
 make web
 make android
 make desktop

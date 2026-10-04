@@ -10,11 +10,38 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 ## Explicit v2 foundation
 
 - **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
-- **When** its root widget mounts on a compact or wide viewport
-- **Then** an independent Material app shows a centered `CodeWalk` label
+- **When** its root widget mounts
+- **Then** an independent Material3 app shows a `CodeWalk` app bar and navigation for conversations, hosts and settings
+- **Then** viewports below 840 logical pixels use bottom navigation, while wider viewports use a navigation rail
 
-Routing, session interaction and shared theme/localization bridges are tracked
-by their owning v2 Issues and are not part of this foundation behavior.
+- **Given** the user opens conversations, hosts or settings in this v2 app
+- **When** the corresponding route is displayed
+- **Then** localized placeholders are shown
+- **Then** the conversation placeholder offers an action that opens the hosts placeholder
+
+- **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
+- **When** the host and session identifiers are valid
+- **Then** navigation retains a pending session intent and displays the conversation placeholder
+- **Then** identifiers remain opaque, including valid percent-encoded characters
+
+- **Given** a `codewalk://pair` link or `/pair` route is opened
+- **When** its pairing intent is captured
+- **Then** the pairing placeholder is shown using a route without query parameters
+- **Then** the original pairing data is held privately in memory for a future pairing consumer
+
+- **Given** a link is unsupported or its encoded path is malformed
+- **When** navigation handles it
+- **Then** an unsupported-link placeholder is shown without displaying the original link
+
+- **Given** the v2 app resolves a device locale
+- **When** that language is among its 14 supported locales
+- **Then** its scoped UI copy uses that language, including right-to-left layout for Arabic and Urdu
+- **Then** regional variants resolve by language and unsupported locale lists fall back to English
+
+These routes currently provide navigation placeholders. The settings page has
+no preference controls; appearance and locale changes exposed by its controller
+are transient. Connections, pairing execution, session interaction and durable
+settings remain in their owning v2 Issues.
 
 ---
 

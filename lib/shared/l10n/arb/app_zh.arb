@@ -1,0 +1,13 @@
+{
+  "@@locale": "zh",
+  "chatAddServerToStart": "添加服务器以开始聊天。",
+  "chatConversation": "会话",
+  "chatConversations": "会话",
+  "commonCancel": "取消",
+  "onboardingConnectRunningServer": "连接到正在运行的服务器",
+  "serversCopy": "复制",
+  "settingsBack": "返回",
+  "settingsServersTitle": "服务器",
+  "settingsTitle": "设置",
+  "unsupportedLink": "不支持此链接。"
+}

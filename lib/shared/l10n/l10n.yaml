@@ -1,0 +1,10 @@
+arb-dir: lib/l10n/arb
+template-arb-file: app_en.arb
+output-localization-file: v2_localizations.dart
+output-class: V2Localizations
+output-dir: lib/l10n/generated
+nullable-getter: false
+use-escaping: true
+format: true
+preferred-supported-locales: [en]
+header: '// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.'

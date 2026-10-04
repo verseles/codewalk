@@ -57,6 +57,7 @@ dependencies:
 
   # State management
   provider: ^6.1.1
+  go_router: ^18.0.2
 
   # Local storage
   shared_preferences: ^2.5.5

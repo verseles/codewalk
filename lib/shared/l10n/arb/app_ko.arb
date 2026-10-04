@@ -1,0 +1,13 @@
+{
+  "@@locale": "ko",
+  "chatAddServerToStart": "대화를 시작하려면 서버를 추가하세요.",
+  "chatConversation": "대화",
+  "chatConversations": "대화 목록",
+  "commonCancel": "취소",
+  "onboardingConnectRunningServer": "실행 중인 서버에 연결",
+  "serversCopy": "복사",
+  "settingsBack": "뒤로",
+  "settingsServersTitle": "서버",
+  "settingsTitle": "설정",
+  "unsupportedLink": "이 링크는 지원되지 않습니다."
+}

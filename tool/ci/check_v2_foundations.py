@@ -55,7 +55,12 @@ def main():
         run(["dart", "test"], path)
 
     run(["dart", "test", "tool/ci/test/import_rules_test.dart"])
-    run(["flutter", "analyze", "--no-pub", "lib/app", "lib/main_v2.dart", "test/v2"])
+    run(["python3", "tool/l10n/generate_v2_localizations.py", "--check"])
+    app_paths = [
+        path for path in ("lib/app", "lib/features", "lib/platform", "lib/shared")
+        if (ROOT / path).is_dir()
+    ]
+    run(["flutter", "analyze", "--no-pub", *app_paths, "lib/main_v2.dart", "test/v2"])
     run(["flutter", "test", "--no-pub", "test/v2"])
     run(["flutter", "test", "--no-pub", "--platform", "chrome", "test/v2"])
     if not args.no_build:

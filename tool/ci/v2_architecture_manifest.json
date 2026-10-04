@@ -18,7 +18,23 @@
     {"path": "third_party/xterm/", "reason": "Existing vendored terminal package; migration has not moved it yet."},
     {"path": "third_party/tailscale/", "reason": "Existing vendored tunnel package; migration has not moved it yet."}
   ],
-  "generated": [],
+  "generated": [
+    {"path": "lib/shared/l10n/generated/v2_localizations.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_ar.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_bn.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_de.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_en.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_es.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_fr.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_hi.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_it.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_ja.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_ko.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_pt.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_ru.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_ur.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations_zh.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."}
+  ],
   "sizeExceptions": [],
   "compositionRoots": ["lib/app/composition_root.dart"],
   "packageDependencies": {

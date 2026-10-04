@@ -1,0 +1,13 @@
+{
+  "@@locale": "ur",
+  "chatAddServerToStart": "چیٹنگ شروع کرنے کے لیے ایک سرور شامل کریں۔",
+  "chatConversation": "بات چیت",
+  "chatConversations": "بات چیت",
+  "commonCancel": "منسوخ کریں۔",
+  "onboardingConnectRunningServer": "چلتے ہوئے سرور سے جڑیں۔",
+  "serversCopy": "کاپی",
+  "settingsBack": "پیچھے",
+  "settingsServersTitle": "سرورز",
+  "settingsTitle": "ترتیبات",
+  "unsupportedLink": "یہ لنک سپورٹ نہیں کیا جاتا۔"
+}
