@@ -20,3 +20,4 @@ export 'src/session.dart';
 export 'src/catalog.dart';
 export 'src/workspace.dart';
 export 'src/ports.dart';
+export 'src/reducer/reducer.dart';

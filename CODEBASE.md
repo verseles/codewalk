@@ -45,6 +45,8 @@ packages/codewalk_core/lib/src/{values,commands,capabilities,errors}.dart # Immu
 packages/codewalk_core/lib/src/{timeline,events,lifecycle,session}.dart # Canonical observations, independent lifecycle states and per-read snapshot boundaries
 packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit owners, manual choices/forms, work/plan and nullable usage contracts
 packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
+packages/codewalk_core/lib/src/reducer/ # Pure event/hydration reduction, effects and bounded full-reference session LRU
+packages/codewalk_core/test/reducer/    # Observed A prefix convergence and synthetic causality/bounds checks
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
 packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
@@ -84,7 +86,13 @@ fresh ownership evidence and affirmative restrictions before invoking a boundary
 Replay requires operation-specific evidence, unresolved admission, reconciliation,
 the original scope and encoded payload, and no cancellation fence. Snapshots
 retain a read-start barrier and hydration generation for each independent read;
-these model contracts do not implement reconciliation or native authority.
+these boundaries do not establish native authority. The separate pure reducer
+returns immutable session state and effects for the caller to execute. It merges
+events with authoritative full-text hydration, preserves independent read-start
+and generation barriers, and handles partial promotion observations without
+inventing replay cursors. Timeline retention is bounded to at most 500 items;
+the session store requires a configured LRU bound and keys full composite refs.
+The reducer is not wired to the app graph.
 `codewalk_net` preserves HTTP statuses and raw response
 bodies, validates endpoint paths before obtaining authentication headers,
 disables automatic redirects and supports request cancellation. Its strict
