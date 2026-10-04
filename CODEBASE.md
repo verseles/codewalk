@@ -47,6 +47,9 @@ packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit o
 packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
 packages/codewalk_core/lib/src/reducer/ # Pure event/hydration reduction, effects and bounded full-reference session LRU
 packages/codewalk_core/test/reducer/    # Observed A prefix convergence, synthetic causality/bounds checks, and controlled review-race interleavings
+packages/codewalk_core/test/scripted_harness_{adapter,reducer}_test.dart # Test-only port contract checks and six synthetic scenarios through the real SessionStore/reducer
+packages/codewalk_core/test/support/scripted_harness_adapter.dart # Finite test-only HarnessAdapter for real core ports, with a manually advanced clock
+packages/codewalk_core/test/support/scripted_harness_scenarios.dart # Six synthetic, finite scenarios consumed by the real reducer tests
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
 packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
@@ -102,7 +105,12 @@ clears that collection.
 Timeline retention is bounded to at most 500 items; the session store requires a
 configured LRU bound and keys full composite refs. The reducer is not wired to
 the app graph. `review_races_test.dart` adds 11 controlled synthetic
-interleavings; these are not native acceptance evidence.
+interleavings; these are not native acceptance evidence. Test-only
+`ScriptedHarnessAdapter` implements the real core ports with a manual clock and
+finite scripts; six synthetic scenarios are consumed by the real `SessionStore`
+and reducer. This adds no exported production adapter and exercises no UI, Host,
+native, provider or I/O path; it makes no G1/G2/G3/G5 acceptance claim. The
+production harness libraries remain empty public adapter boundaries.
 
 The separate CHP artifact defines canonical payloads and transport envelopes at
 the explicitly provisional `cw-canonical-1-provisional.2` and
