@@ -1,0 +1,56 @@
+{
+  "validation": "read-only offline correlation; no model/runtime calls",
+  "outcome": "passed",
+  "correlations": [
+    {
+      "fixture": "foreground-nested-collector-diagnostic.json",
+      "sessionID": "ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+      "assistantMessageID": "msg_1056401db001L5G0fThWticSRh",
+      "toolID": "call_01a10564085f7067a6571977",
+      "permissionRequestID": "per_1056408fd001FfpehWkn7vhpJQ",
+      "nameFromInputStarted": "subagent",
+      "nameOrToolAbsentOnCalled": true,
+      "rawInputEndedMatchesCalled": true,
+      "childID": null,
+      "childIDSource": "none: collector diagnostic stopped before approving child"
+    },
+    {
+      "fixture": "foreground-nested-collector-diagnostic-2.json",
+      "sessionID": "ses_efa9b717cffeAbV0JeC0qc149w",
+      "assistantMessageID": "msg_105648ebb001yYM7qKC00QzRDJ",
+      "toolID": "call_01a10564a1697750be989b0c",
+      "permissionRequestID": "per_10564a1ab0012cvQLEpn5f6Sdp",
+      "nameFromInputStarted": "subagent",
+      "nameOrToolAbsentOnCalled": true,
+      "rawInputEndedMatchesCalled": true,
+      "childID": null,
+      "childIDSource": "none: collector diagnostic stopped before approving child"
+    },
+    {
+      "fixture": "foreground-nested.json",
+      "sessionID": "ses_efa9a9492ffedN3lszVGGAkUUw",
+      "assistantMessageID": "msg_105656b9b0019a9wKxm3zCrMKn",
+      "toolID": "call_6Nppc2ty3QkZKKbPqaGx4Nau",
+      "permissionRequestID": "per_10565773b001xjI0tKy5qMwWUN",
+      "nameFromInputStarted": "subagent",
+      "nameOrToolAbsentOnCalled": true,
+      "rawInputEndedMatchesCalled": true,
+      "childID": "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "childIDSource": "native tool.progress and completed projected tool metadata"
+    },
+    {
+      "fixture": "foreground-nested.json",
+      "sessionID": "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "assistantMessageID": "msg_1056577bd001GJbPUcEyHAtLLm",
+      "toolID": "call_01a105657fed74fbad0b22af",
+      "permissionRequestID": "per_1056581a3001z4JygA66S20Bbz",
+      "nameFromInputStarted": "subagent",
+      "nameOrToolAbsentOnCalled": true,
+      "rawInputEndedMatchesCalled": true,
+      "childID": "ses_efa9a7d56ffe4yJlWC4DcnBJII",
+      "childIDSource": "native tool.progress and completed projected tool metadata"
+    }
+  ],
+  "sanitizer": "A.sanitize leaves native IDs/name/input/tool state with status intact; opaque provider state omitted, credential fields redacted",
+  "sourceReference": "Official packages/schema/src/session-event.ts Tool.Input.Started and Tool.Called; preserved plan/opencode-v2-src/schema/session-event.ts lines479\u2013520 match observed2.0.22 names."
+}

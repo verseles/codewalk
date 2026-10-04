@@ -66,6 +66,27 @@ Preserve the exact original payload, identity and scope. Reconcile authoritative
 
 Use the preserved [official reference reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts) and [event/schema dossier](../plan/12-opencode-v2-events-and-schemas.md), with native schema/handler citations. The CodeWalk domain, receipt states and CHP stream sequence remain CodeWalk contracts, not additional OpenCode wire fields.
 
+## Version-scoped children, interruption and revert
+
+[D Linux 2.0.22 fixtures](../test/contract/fixtures/opencode/2.0.22/d/README.md)
+observe native parent→child→grandchild lineage under an explicitly bounded
+project test-agent/depth configuration; this does not assert stock agents allow
+nested delegation. A real foreground child moves to background while the parent
+becomes idle. Idle parent interruption preserves that active child; direct child
+interruption terminates its own execution and produces native parent notification
+and continuation. A child completion notice can arrive before the child's own
+terminal event; preserve independent child lifecycle and notification provenance.
+
+An actual tracked-file edit followed by stage(files=true), clear,
+stage(files=false), repeated stage and commit preserves each recorded physical
+byte/digest effect and native history boundary. **Clear calls `execution.wake`**:
+two clear operations produced empty native execution-start/success drains with
+no additional assistant/provider output. Do not treat every execution start as
+a new provider message or assume uncertain revert mutations are replay-safe.
+D records 11 actual executions including two collector diagnostics and those two
+empty drains, within its ceiling12 and USD0; natural retry/quota evidence remains
+pending, so the whole child/aggregate acceptance is not passed.
+
 ## Version-scoped attachments and service access
 
 [E fixtures](../test/contract/fixtures/opencode/2.0.22/e/README.md) use the supported

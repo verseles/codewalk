@@ -1,0 +1,409 @@
+{
+  "outcome": "passed",
+  "observedAt": "2026-10-04T05:37:32.313948+00:00",
+  "allOwnedSessionIDs": [
+    "ses_efa974842ffeG3P1KAGCvAIQQ1",
+    "ses_efa986e87ffe0oLGxhhm7iPw6s",
+    "ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+    "ses_efa9a7d56ffe4yJlWC4DcnBJII",
+    "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+    "ses_efa9a9492ffedN3lszVGGAkUUw",
+    "ses_efa9b717cffeAbV0JeC0qc149w",
+    "ses_efa9bfe8dffeCXhHIn8qzpbVdF"
+  ],
+  "removedDisposableSessionIDs": [
+    "ses_efa986e87ffe0oLGxhhm7iPw6s",
+    "ses_efa9b717cffeAbV0JeC0qc149w",
+    "ses_efa9bfe8dffeCXhHIn8qzpbVdF"
+  ],
+  "ownedActiveAfter": {},
+  "allRetainedOwnedInteractionsAndInboxEmpty": true,
+  "savedProjectGrantsEmpty": true,
+  "calls": [
+    {
+      "at": "2026-10-04T05:37:32.288131+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "status": 200,
+      "response": {
+        "data": {}
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.289596+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa974842ffeG3P1KAGCvAIQQ1/permission",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.290646+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa974842ffeG3P1KAGCvAIQQ1/form",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.291677+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa974842ffeG3P1KAGCvAIQQ1/inbox",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.292941+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa974842ffeG3P1KAGCvAIQQ1",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_efa974842ffeG3P1KAGCvAIQQ1",
+          "projectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+          "agent": "capture-d",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 1636,
+            "output": 51,
+            "reasoning": 0,
+            "cache": {
+              "read": 1848,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791092111307,
+            "updated": 1791092114498,
+            "idle": 1791092114446
+          },
+          "title": "V2-005D real write and reversible file boundaries",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.294076+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa986e87ffe0oLGxhhm7iPw6s",
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_efa986e87ffe0oLGxhhm7iPw6s",
+        "message": "Session not found: ses_efa986e87ffe0oLGxhhm7iPw6s"
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.295559+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9875b5ffeaqvb4EdPrsI1Hj/permission",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.296837+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9875b5ffeaqvb4EdPrsI1Hj/form",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.298489+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9875b5ffeaqvb4EdPrsI1Hj/inbox",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.299447+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+          "projectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+          "agent": "capture-d",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 1961,
+            "output": 117,
+            "reasoning": 10,
+            "cache": {
+              "read": 3910,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791092034140,
+            "updated": 1791092039648,
+            "idle": 1791092041992
+          },
+          "title": "V2-005D foreground moved background then child interrupt",
+          "permissions": [
+            {
+              "action": "read",
+              "resource": "background-gate.txt",
+              "effect": "ask"
+            }
+          ],
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.300492+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a7d56ffe4yJlWC4DcnBJII/permission",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.301716+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a7d56ffe4yJlWC4DcnBJII/form",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.302619+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a7d56ffe4yJlWC4DcnBJII/inbox",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.303689+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a7d56ffe4yJlWC4DcnBJII",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_efa9a7d56ffe4yJlWC4DcnBJII",
+          "parentID": "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+          "projectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+          "agent": "capture-d",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 1642,
+            "output": 39,
+            "reasoning": 0,
+            "cache": {
+              "read": 1831,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091901107,
+            "updated": 1791091901113,
+            "idle": 1791091902870
+          },
+          "title": "Nested grandchild capture",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.304823+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a8862ffeuHE62WQvAHpGJ6/permission",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.305764+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a8862ffeuHE62WQvAHpGJ6/form",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.306719+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a8862ffeuHE62WQvAHpGJ6/inbox",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.307573+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+          "parentID": "ses_efa9a9492ffedN3lszVGGAkUUw",
+          "projectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+          "agent": "capture-d",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 1762,
+            "output": 97,
+            "reasoning": 0,
+            "cache": {
+              "read": 1876,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091898278,
+            "updated": 1791091898283,
+            "idle": 1791091905349
+          },
+          "title": "Foreground nested child capture",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.308654+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a9492ffedN3lszVGGAkUUw/permission",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.309575+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a9492ffedN3lszVGGAkUUw/form",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.310413+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a9492ffedN3lszVGGAkUUw/inbox",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.311216+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9a9492ffedN3lszVGGAkUUw",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_efa9a9492ffedN3lszVGGAkUUw",
+          "projectID": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+          "agent": "capture-d",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 1844,
+            "output": 142,
+            "reasoning": 0,
+            "cache": {
+              "read": 1936,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791091895158,
+            "updated": 1791091895170,
+            "idle": 1791091906590
+          },
+          "title": "V2-005D foreground nested lineage",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d"
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.312145+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9b717cffeAbV0JeC0qc149w",
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_efa9b717cffeAbV0JeC0qc149w",
+        "message": "Session not found: ses_efa9b717cffeAbV0JeC0qc149w"
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.312921+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+        "message": "Session not found: ses_efa9bfe8dffeCXhHIn8qzpbVdF"
+      }
+    },
+    {
+      "at": "2026-10-04T05:37:32.313942+00:00",
+      "method": "GET",
+      "path": "/api/permission/saved?projectID=a8428d2df1249d57369eadf3d6205a4259f3a048",
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    }
+  ]
+}

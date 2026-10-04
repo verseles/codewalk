@@ -1,0 +1,60 @@
+{
+  "preparedAt": "2026-10-04T05:30:01.414318+00:00",
+  "directory": "/workspace/.cloud-runtime/opencode-v2/capture-d",
+  "initialGitCommit": "a8428d2df1249d57369eadf3d6205a4259f3a048",
+  "config": {
+    "model": "opencode/space-bunny-free#low",
+    "warming": false,
+    "snapshots": true,
+    "experimental": {
+      "subagent_depth": 2
+    },
+    "agents": {
+      "capture-d": {
+        "mode": "all",
+        "model": "opencode/space-bunny-free#low",
+        "steps": 8,
+        "description": "Disposable native contract capture agent, only used on explicitly requested fixture work.",
+        "system": "Follow the exact bounded capture instructions. Never spawn an extra child or change the selected free model. Use only the named files in this disposable project; do not use shell, network, credentials, or unrelated tools.",
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          },
+          {
+            "action": "read",
+            "resource": "nested-marker.txt",
+            "effect": "allow"
+          },
+          {
+            "action": "read",
+            "resource": "background-gate.txt",
+            "effect": "allow"
+          },
+          {
+            "action": "read",
+            "resource": "revert-target.txt",
+            "effect": "allow"
+          },
+          {
+            "action": "edit",
+            "resource": "revert-target.txt",
+            "effect": "allow"
+          },
+          {
+            "action": "subagent",
+            "resource": "capture-d",
+            "effect": "ask"
+          }
+        ]
+      }
+    }
+  },
+  "inputs": {
+    "nested-marker.txt": "D_NESTED_MARKER_OK\n",
+    "background-gate.txt": "D_BACKGROUND_MARKER_OK\n",
+    "revert-target.txt": "D_REVERT_BEFORE\n"
+  },
+  "nativeAccessBeforeInitialCommit": false
+}

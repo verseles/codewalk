@@ -1,0 +1,106 @@
+{
+  "ceilingActualExecutions": 12,
+  "targetActualExecutions": "7–8",
+  "startedAt": "2026-10-04T05:30:01.493557+00:00",
+  "executions": [
+    {
+      "eventID": "evt_1056401af001te3dhcKPtYmoS7",
+      "sessionID": "ses_efa9bfe8dffeCXhHIn8qzpbVdF",
+      "started": 1791091802543,
+      "phase": "foreground-nested",
+      "terminal": "session.execution.interrupted",
+      "finished": 1791091804518,
+      "reason": "user"
+    },
+    {
+      "eventID": "evt_105648ea4001jseZYh3NZ5vxE9",
+      "sessionID": "ses_efa9b717cffeAbV0JeC0qc149w",
+      "started": 1791091838629,
+      "phase": "foreground-nested",
+      "terminal": "session.execution.interrupted",
+      "finished": 1791091843546,
+      "reason": "user"
+    },
+    {
+      "eventID": "evt_105656b850014jcyLOkSWnX0qg",
+      "sessionID": "ses_efa9a9492ffedN3lszVGGAkUUw",
+      "started": 1791091895173,
+      "phase": "foreground-nested",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791091906590,
+      "reason": null
+    },
+    {
+      "eventID": "evt_1056577ae001GRh3qAnJYDNHHO",
+      "sessionID": "ses_efa9a8862ffeuHE62WQvAHpGJ6",
+      "started": 1791091898286,
+      "phase": "foreground-nested",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791091905349,
+      "reason": null
+    },
+    {
+      "eventID": "evt_1056582bc001eves9nv3LDbFud",
+      "sessionID": "ses_efa9a7d56ffe4yJlWC4DcnBJII",
+      "started": 1791091901116,
+      "phase": "foreground-nested",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791091902870,
+      "reason": null
+    },
+    {
+      "eventID": "evt_105678a69001OCw2FEUEuW2Z5Y",
+      "sessionID": "ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+      "started": 1791092034153,
+      "phase": "background-interrupt",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791092039596,
+      "reason": null
+    },
+    {
+      "eventID": "evt_10567918a0010eB99qm3oZvgc6",
+      "sessionID": "ses_efa986e87ffe0oLGxhhm7iPw6s",
+      "started": 1791092035978,
+      "phase": "background-interrupt",
+      "terminal": "session.execution.interrupted",
+      "finished": 1791092039650,
+      "reason": "user"
+    },
+    {
+      "eventID": "evt_105679fe400150jILrGy8i4TFb",
+      "sessionID": "ses_efa9875b5ffeaqvb4EdPrsI1Hj",
+      "started": 1791092039652,
+      "phase": "background-interrupt",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791092041992,
+      "reason": null
+    },
+    {
+      "eventID": "evt_10568b7db001B6zATLCBl1VgOc",
+      "sessionID": "ses_efa974842ffeG3P1KAGCvAIQQ1",
+      "started": 1791092111323,
+      "phase": "revert-file-effects",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791092114215,
+      "reason": null
+    },
+    {
+      "eventID": "evt_10568c3de001pQ1f0Mesj2J2yZ",
+      "sessionID": "ses_efa974842ffeG3P1KAGCvAIQQ1",
+      "started": 1791092114398,
+      "phase": "revert-file-effects",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791092114402,
+      "reason": null
+    },
+    {
+      "eventID": "evt_10568c40b0017webLN8ggS8NYv",
+      "sessionID": "ses_efa974842ffeG3P1KAGCvAIQQ1",
+      "started": 1791092114443,
+      "phase": "revert-file-effects",
+      "terminal": "session.execution.succeeded",
+      "finished": 1791092114446,
+      "reason": null
+    }
+  ]
+}
