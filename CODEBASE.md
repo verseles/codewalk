@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage and evidence-based ownership; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. The harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. The harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -40,6 +40,10 @@ lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password 
 lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
 packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
 packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
+packages/codewalk_core/lib/src/{values,commands,capabilities,errors}.dart # Immutable unknown values, scoped mutation/replay guards and typed failures
+packages/codewalk_core/lib/src/{timeline,events,lifecycle,session}.dart # Canonical observations, independent lifecycle states and per-read snapshot boundaries
+packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit owners, manual choices/forms, work/plan and nullable usage contracts
+packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
 packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
@@ -70,10 +74,17 @@ and `lib/l10n/` outputs intact. Shared rendering currently provides GFM and
 link/file callbacks; images render as text. Full rendering and settings parity
 remain in their owning Issues.
 
-`codewalk_core` is pure Dart and contains identities/ownership only at this
-stage. Project identity is host plus the caller-supplied canonical directory;
-the upstream project ID is an annotation. Ownership proof does not grant
-mutation authority. `codewalk_net` preserves HTTP statuses and raw response
+`codewalk_core` is pure Dart. Project identity is host plus the caller-supplied
+canonical directory; the upstream project ID is an annotation. Canonical models
+retain unknown values and distinguish admission, execution, connection,
+interactions, work and revert. Ports observe history separately from explicit
+resume commands. Mutation guards require installation/version/scope agreement,
+fresh ownership evidence and affirmative restrictions before invoking a boundary.
+Replay requires operation-specific evidence, unresolved admission, reconciliation,
+the original scope and encoded payload, and no cancellation fence. Snapshots
+retain a read-start barrier and hydration generation for each independent read;
+these model contracts do not implement reconciliation or native authority.
+`codewalk_net` preserves HTTP statuses and raw response
 bodies, validates endpoint paths before obtaining authentication headers,
 disables automatic redirects and supports request cancellation. Its strict
 UTF-8 SSE decoder handles fragmented input and configurable EOF dispatch,
