@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "rootPackage": "codewalk",
+  "governed": {
+    "paths": ["lib/app/", "lib/features/", "lib/platform/", "lib/shared/"],
+    "entrypoints": ["lib/main_v2.dart"],
+    "packagePrefixes": ["codewalk_", "harness_"]
+  },
+  "retainedLegacy": [
+    {"path": "lib/core/", "reason": "Retained v1 reference; remove at V2-084."},
+    {"path": "lib/data/", "reason": "Retained v1 reference; remove at V2-084."},
+    {"path": "lib/domain/", "reason": "Retained v1 reference; remove at V2-084."},
+    {"path": "lib/presentation/", "reason": "Retained v1 reference; remove at V2-084."},
+    {"path": "lib/l10n/", "reason": "Retained v1 generated localization; port governed leaves before reuse."},
+    {"path": "lib/main.dart", "reason": "Retained v1 entry point until final cutover."}
+  ],
+  "vendored": [
+    {"path": "third_party/xterm/", "reason": "Existing vendored terminal package; migration has not moved it yet."},
+    {"path": "third_party/tailscale/", "reason": "Existing vendored tunnel package; migration has not moved it yet."}
+  ],
+  "generated": [],
+  "sizeExceptions": [],
+  "compositionRoots": ["lib/app/composition_root.dart"],
+  "packageDependencies": {
+    "codewalk_core": [],
+    "codewalk_net": ["codewalk_core"],
+    "harness_opencode": ["codewalk_core", "codewalk_net"],
+    "harness_host": ["codewalk_core", "codewalk_net"]
+  },
+  "harnessNames": ["opencode", "codex", "claude", "claude_code", "pi", "muse", "grok", "dsh"]
+}

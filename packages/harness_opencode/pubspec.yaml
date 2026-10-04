@@ -1,0 +1,16 @@
+name: harness_opencode
+description: OpenCode v2 wire boundary, independent of the Flutter app.
+publish_to: none
+version: 0.0.0
+resolution: workspace
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  codewalk_core: ^0.0.0
+  codewalk_net: ^0.0.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.31.0

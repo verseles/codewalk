@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Enforce v2 architecture and retained-reference boundaries
+        run: make v2-architecture
+
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
 
@@ -63,6 +66,32 @@ jobs:
         with:
           name: analyze-log
           path: /tmp/flutter_analyze.log
+
+  v2_foundations:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Check discovered v2 packages, architecture guards and explicit entry point
+        run: make v2-foundations
 
   test_shards:
     # Keep PR/branch feedback fast; main/tag pushes run the coverage job instead.

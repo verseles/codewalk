@@ -3,6 +3,19 @@
 > How CodeWalk behaves from the user's perspective.
 > Only documents **current, implemented** behavior. Planned features live in GitHub Issues.
 
+The existing feature sections below describe the retained legacy runtime started
+by `lib/main.dart`. The active v2 implementation currently has the independent
+foundation described here; planned v2 behavior remains in GitHub Issues.
+
+## Explicit v2 foundation
+
+- **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
+- **When** its root widget mounts on a compact or wide viewport
+- **Then** an independent Material app shows a centered `CodeWalk` label
+
+Routing, session interaction and shared theme/localization bridges are tracked
+by their owning v2 Issues and are not part of this foundation behavior.
+
 ---
 
 ## Internationalization (i18n)

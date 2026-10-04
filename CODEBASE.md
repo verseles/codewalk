@@ -3,7 +3,8 @@
 ## Project Snapshot
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
-- Architecture follows `presentation -> domain -> data` with `get_it` + `provider`.
+- The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the explicit independent `lib/main_v2.dart` entry point. Its package public libraries are currently empty, compile-tested boundaries; domain/adapters arrive in their owning Issues.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -13,6 +14,32 @@
 - Session attention adds encrypted completion snapshots, root-session aggregation, and Android, desktop, and iOS presentation hosts.
 - Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; their tab menu offers up to five scope-matched cached root-session alternatives on mobile/compact layouts or while the desktop conversations pane is hidden, plus a searchable responsive picker for the full cached set; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab; project grouping renders a per-project inline new-chat accessory after each draft-free group (issue #200).
 - Browser-style session tab switcher (issue #171): hold-to-cycle MRU overlay (`Ctrl+Tab` / `Ctrl+Shift+Tab`) with commit-on-release orchestration in ChatPage.
+
+## Active v2 foundation on `main`
+
+The entries below are governed independently from the retained reference map:
+
+```text
+lib/main_v2.dart                         # Explicit runApp entry point for the v2 foundation
+lib/app/v2_bootstrap.dart                # Minimal MaterialApp/Scaffold with a centered CodeWalk label
+packages/{codewalk_core,codewalk_net,harness_opencode,harness_host}/
+  pubspec.yaml                          # Workspace resolution and permitted package dependencies
+  analysis_options.yaml                 # Package analyzer rules
+  lib/<package>.dart                    # Empty public boundary until its owning implementation lands
+  test/public_surface_test.dart         # Independent public-library compilation check
+test/v2/bootstrap_smoke_test.dart       # Actual v2 entry point at compact/wide viewport sizes
+tool/ci/import_rules.dart               # CI entry point for governed architecture checks
+tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
+tool/ci/v2_architecture_manifest.json   # New surface, retained reference and narrow vendor/generated scopes
+tool/ci/test/import_rules_test.dart     # Real CLI planted-violation regression cases
+tool/ci/check_v2_foundations.py         # Dynamic workspace discovery, package checks and explicit v2 targets
+```
+
+`.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
+`v2_foundations` for discovered package analysis/tests, planted guards, VM/Chrome
+entry-point tests and the explicit v2 Web build. Native platform compilation and
+distribution evidence remain separate from these checks. Retained reference
+paths may not be imported directly or transitively by authored v2 source.
 
 ## Folder Structure
 
@@ -557,7 +584,11 @@ make test-chat                              # ChatPage smoke + extended suites
 make test-web                               # Browser capability tests (requires Chrome)
 make test-coverage-tools                    # Python stdlib coverage-gate fixtures
 make coverage                               # Flutter LCOV plus the 35% global and per-file coverage gates
-make check                                  # deps + gen + analyze + coverage fixtures + full test suite
+make check                                  # retained-reference root gate; does not discover package tests
+make v2-architecture                        # governed v2 source and transitive boundary checks
+make v2-foundations                         # discovered packages, planted guards, VM/Chrome v2 smoke, v2 Web build
+make v2-smoke                               # explicit v2 Flutter tests in test/v2
+make v2-web                                 # lib/main_v2.dart Web build -> build/v2/web
 make check-fast                             # deps + gen + analyze + coverage fixtures + fast (non-slow, non-integration) tests
 dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
 dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
@@ -573,6 +604,7 @@ flutter test
 flutter run -d linux
 flutter run -d android
 flutter run -d chrome
+flutter run --target lib/main_v2.dart -d chrome # explicit active v2 foundation
 ```
 
 The full-suite `make test` defaults to four Flutter workers (`TEST_JOBS=4`); set `TEST_JOBS` to override Makefile targets that use it.

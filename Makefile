@@ -1,4 +1,4 @@
-.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-integration test-shard coverage smoke check check-fast web desktop android precommit clean release
+.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-smoke v2-web web desktop android precommit clean release
 
 APK_DIR = build/app/outputs/flutter-apk
 APK_PATH = $(APK_DIR)/codewalk.apk
@@ -60,6 +60,10 @@ help:
 	@echo "  make smoke      Run integration smoke test against OpenCode server"
 	@echo "  make check      deps + gen + analyze + coverage-tool fixtures + test"
 	@echo "  make check-fast deps + gen + analyze + coverage-tool fixtures + test-fast"
+	@echo "  make v2-architecture Check the governed v2 surface and retained-reference boundary"
+	@echo "  make v2-foundations Discover/check every v2 package, guards, bootstrap and Web build"
+	@echo "  make v2-smoke   Exercise the explicit v2 entry point in widget tests"
+	@echo "  make v2-web     Build the explicit v2 entry point into build/v2/web"
 	@echo "  make web        Build Flutter web app into build/web"
 	@echo "  make desktop    Build desktop app for current host OS"
 	@echo "  make android    Build Android APK (arm64)"
@@ -289,6 +293,20 @@ smoke:
 check: deps gen analyze test-coverage-tools test
 
 check-fast: deps gen analyze test-coverage-tools test-fast
+
+# Coexistence: check/check-fast retain the reference suite. These targets
+# explicitly select the active v2 surface; native platform aggregation is 020C.
+v2-architecture:
+	dart run tool/ci/import_rules.dart
+
+v2-foundations:
+	python3 tool/ci/check_v2_foundations.py
+
+v2-smoke:
+	flutter test --no-pub test/v2
+
+v2-web:
+	flutter build web --no-pub --target lib/main_v2.dart --output build/v2/web
 
 web:
 	flutter build web --release --base-href "$(WEB_BASE_HREF)" $(QUIET)
