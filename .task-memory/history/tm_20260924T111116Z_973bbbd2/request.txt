@@ -1,0 +1,1 @@
+Agora vamos ver a 192, estamos num linux ubuntu. Reproduzir no app agora. Resultado: 2 (UI ouvindo, sem texto).

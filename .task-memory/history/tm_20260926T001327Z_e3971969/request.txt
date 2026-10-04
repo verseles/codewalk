@@ -1,0 +1,1 @@
+Agrupa elas por similaridade no código para fazermos mais de uma em grupos de "flow"
