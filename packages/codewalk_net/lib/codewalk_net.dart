@@ -1,4 +1,8 @@
-/// Shared transport primitives for v2 harness adapters.
+/// Platform-neutral HTTP and SSE primitives for harness adapters.
 ///
-/// This public library intentionally has no implementation in V2-020A.
+/// IO implementations are exposed separately by `codewalk_net_io.dart`.
 library;
+
+export 'src/http_transport.dart';
+export 'src/sse_decoder.dart';
+export 'src/sse_http.dart';
