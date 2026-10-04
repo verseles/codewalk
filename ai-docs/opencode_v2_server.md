@@ -45,7 +45,14 @@ Location-scoped calls use `location[directory]` or the URI-encoded `x-opencode-d
 
 Exact payloads, errors and response wrappers come from [session protocol](../plan/opencode-v2-src/protocol-groups/session.ts), [filesystem protocol](../plan/opencode-v2-src/protocol-groups/fs.ts), the generated client and the owning schemas. This table is not an exhaustive API inventory.
 
-Prompt replay/conflict behavior and create replay/conflict behavior are separate SP-01 experiments. Preserve the original mutation payload and correlation; automatic replay is allowed only for operations with a demonstrated guarantee on the connected version. Otherwise reconcile authoritative state and retain uncertainty rather than create another turn/session. Experimental file write remains unavailable without verified remote physical containment, including symlinks/junctions and concurrent path replacement; lexical checks alone are insufficient.
+Prompt replay/conflict behavior and create replay/conflict behavior are separate experiments. [V2-005B native Linux 2.0.22 evidence](../test/contract/fixtures/opencode/2.0.22/b/README.md) establishes the following bounded matrix; it is not an automatic compatibility claim for the primary 2.0.21 pin or later versions.
+
+- Same-ID create returns the original session, ignoring changed title/metadata; controlled lost-response probes reconcile it without creating another session.
+- Pending same-ID prompt replay returns the original admission, including changed text/delivery; cross-session ID reuse yields 409. Changed content in one pending session is not a verified conflict detector.
+- Cancelling pending input returns 204, and repeating cancellation is a no-op. Reposting the cancelled ID **re-enqueues** it; there is no permanent deduplication tombstone.
+- Promoted replay preserves original user history but can echo the requested delivery; replay may wake execution unless `resume:false`. Do not compare admission responses byte-for-byte or assume an echoed mode changed delivered work.
+
+Preserve the exact original payload, identity and scope. Reconcile authoritative state; automatic replay requires a verified operation/version/lifecycle-phase guarantee for an unresolved command. Cancellation requested, submitting or uncertain fences original-send replay until reconciled; known cancellation or settlement never automatically resends. Otherwise retain uncertainty rather than create another turn/session. Experimental file write remains unavailable without verified remote physical containment, including symlinks/junctions and concurrent path replacement; lexical checks alone are insufficient.
 
 ## Event stream and lifecycle
 
@@ -54,6 +61,7 @@ Prompt replay/conflict behavior and create replay/conflict behavior are separate
 - The event envelope uses `type`, `data`, identity/time and optional location/durable metadata. Do not reuse the v1 `properties`/global-event wrapper as the v2 DTO.
 - Streaming text/reasoning/tool input uses started/delta/ended events. The authoritative ended value replaces an incomplete prefix; execution uses `session.execution.*` and the active list. The declared `session.status` event is not a substitute publisher.
 - Parent idle does not prove child completion. Keep parent/child lineage and each child's execution/interaction ownership explicit.
+- [V2-005C](../test/contract/fixtures/opencode/2.0.22/c/README.md) observes native permissions/forms and restart recovery: interruption with reason `shutdown` can resume and re-ask a dismissed question after service restart. Refresh interactions during authoritative hydration; interruption is not permanent queued-work cancellation. A Git directory without an initial commit can resolve to upstream `projectID: "global"`; key projects by host plus canonical directory, and require a committed disposable project to prove saved-approval isolation.
 - The experimental durable session log does not replay ephemeral deltas. Its per-aggregate sequence may include internal-record skips; those are not automatically a lost public event. SP-01 owns replay/cursor acceptance before enabling it.
 
 Use the preserved [official reference reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts) and [event/schema dossier](../plan/12-opencode-v2-events-and-schemas.md), with native schema/handler citations. The CodeWalk domain, receipt states and CHP stream sequence remain CodeWalk contracts, not additional OpenCode wire fields.

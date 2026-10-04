@@ -1,0 +1,1577 @@
+{
+  "capturedAt": "2026-10-04T04:59:38.869378+00:00",
+  "calls": [
+    {
+      "name": "liveReconnectCreate",
+      "startedAt": "2026-10-04T04:59:35.370453+00:00",
+      "completedAt": "2026-10-04T04:59:35.387179+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10548204a0007f0a42202e750e",
+        "title": "V2-005B liveReconnect",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10548204a0007f0a42202e750e",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089975383,
+            "updated": 1791089975383
+          },
+          "title": "V2-005B liveReconnect",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "reconnectExecutingPrompt",
+      "startedAt": "2026-10-04T04:59:35.389784+00:00",
+      "completedAt": "2026-10-04T04:59:35.394647+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/prompt",
+      "request": {
+        "id": "msg_1a10548205d000f6e574b2e4aaab",
+        "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.",
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10548205d000f6e574b2e4aaab",
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "time": {
+            "created": 1791089975391
+          },
+          "type": "user",
+          "payload": {
+            "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "disconnectedHydrationWhileExecutionsession",
+      "startedAt": "2026-10-04T04:59:38.643619+00:00",
+      "completedAt": "2026-10-04T04:59:38.646383+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10548204a0007f0a42202e750e",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 3520,
+            "output": 28,
+            "reasoning": 0,
+            "cache": {
+              "read": 1536,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089975383,
+            "updated": 1791089975391
+          },
+          "title": "V2-005B liveReconnect",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "disconnectedHydrationWhileExecutioninbox",
+      "startedAt": "2026-10-04T04:59:38.646405+00:00",
+      "completedAt": "2026-10-04T04:59:38.647699+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "disconnectedHydrationWhileExecutionhistory",
+      "startedAt": "2026-10-04T04:59:38.647708+00:00",
+      "completedAt": "2026-10-04T04:59:38.649296+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10548205d000f6e574b2e4aaab",
+            "time": {
+              "created": 1791089975404
+            },
+            "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105482071001PKu9uVXLt8i5QI",
+            "time": {
+              "created": 1791089975425,
+              "streamed": 1791089977110,
+              "completed": 1791089977122
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_9dfac4afc23b4bcdb4645c44",
+                "name": "read",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "path": "marker.txt"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Read file marker.txt, lines 1-1\n1: SP01_B_NATIVE_RECONNECT_OK"
+                    }
+                  ],
+                  "metadata": {
+                    "truncated": false
+                  }
+                },
+                "time": {
+                  "created": 1791089977099,
+                  "ran": 1791089977108,
+                  "completed": 1791089977115
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 3520,
+              "output": 28,
+              "reasoning": 0,
+              "cache": {
+                "read": 1536,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10548272d00130Y9yBybcHgL1J",
+            "time": {
+              "created": 1791089977149
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": ""
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2"
+            }
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ4MjA1ZDAwMGY2ZTU3NGIyZTRhYWFiIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0ODI3MmQwMDEzMFk5eUJ5YmNIZ0wxSiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "completedWhileDisconnectedsession",
+      "startedAt": "2026-10-04T04:59:38.800461+00:00",
+      "completedAt": "2026-10-04T04:59:38.802947+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10548204a0007f0a42202e750e",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 3776,
+            "output": 38,
+            "reasoning": 0,
+            "cache": {
+              "read": 6400,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089975383,
+            "updated": 1791089975391,
+            "idle": 1791089978758
+          },
+          "title": "V2-005B liveReconnect",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "completedWhileDisconnectedinbox",
+      "startedAt": "2026-10-04T04:59:38.802968+00:00",
+      "completedAt": "2026-10-04T04:59:38.804402+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "completedWhileDisconnectedhistory",
+      "startedAt": "2026-10-04T04:59:38.804411+00:00",
+      "completedAt": "2026-10-04T04:59:38.806283+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10548205d000f6e574b2e4aaab",
+            "time": {
+              "created": 1791089975404
+            },
+            "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105482071001PKu9uVXLt8i5QI",
+            "time": {
+              "created": 1791089975425,
+              "streamed": 1791089977110,
+              "completed": 1791089977122
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_9dfac4afc23b4bcdb4645c44",
+                "name": "read",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "path": "marker.txt"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Read file marker.txt, lines 1-1\n1: SP01_B_NATIVE_RECONNECT_OK"
+                    }
+                  ],
+                  "metadata": {
+                    "truncated": false
+                  }
+                },
+                "time": {
+                  "created": 1791089977099,
+                  "ran": 1791089977108,
+                  "completed": 1791089977115
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 3520,
+              "output": 28,
+              "reasoning": 0,
+              "cache": {
+                "read": 1536,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10548272d00130Y9yBybcHgL1J",
+            "time": {
+              "created": 1791089977149,
+              "streamed": 1791089978746,
+              "completed": 1791089978754
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "SP01_B_NATIVE_RECONNECT_OK"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 256,
+              "output": 10,
+              "reasoning": 0,
+              "cache": {
+                "read": 4864,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105482d86001G1QxWz10BotT4F",
+            "time": {
+              "created": 1791089978758
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ4MjA1ZDAwMGY2ZTU3NGIyZTRhYWFiIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0ODJkODYwMDFHMVF4V3oxMEJvdFQ0RiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "renameAfterReconnect",
+      "startedAt": "2026-10-04T04:59:38.808009+00:00",
+      "completedAt": "2026-10-04T04:59:38.812577+00:00",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e",
+      "request": {
+        "title": "V2-005B reconnect observed live after hydration"
+      },
+      "status": 204,
+      "response": null
+    },
+    {
+      "name": "reconnectedHydrationsession",
+      "startedAt": "2026-10-04T04:59:38.862713+00:00",
+      "completedAt": "2026-10-04T04:59:38.864871+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a10548204a0007f0a42202e750e",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 3776,
+            "output": 38,
+            "reasoning": 0,
+            "cache": {
+              "read": 6400,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089975383,
+            "updated": 1791089978810,
+            "idle": 1791089978758
+          },
+          "title": "V2-005B reconnect observed live after hydration",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "reconnectedHydrationinbox",
+      "startedAt": "2026-10-04T04:59:38.864889+00:00",
+      "completedAt": "2026-10-04T04:59:38.866129+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "reconnectedHydrationhistory",
+      "startedAt": "2026-10-04T04:59:38.866138+00:00",
+      "completedAt": "2026-10-04T04:59:38.867950+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10548204a0007f0a42202e750e/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10548205d000f6e574b2e4aaab",
+            "time": {
+              "created": 1791089975404
+            },
+            "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_105482071001PKu9uVXLt8i5QI",
+            "time": {
+              "created": 1791089975425,
+              "streamed": 1791089977110,
+              "completed": 1791089977122
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_9dfac4afc23b4bcdb4645c44",
+                "name": "read",
+                "executed": false,
+                "state": {
+                  "status": "completed",
+                  "input": {
+                    "path": "marker.txt"
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Read file marker.txt, lines 1-1\n1: SP01_B_NATIVE_RECONNECT_OK"
+                    }
+                  ],
+                  "metadata": {
+                    "truncated": false
+                  }
+                },
+                "time": {
+                  "created": 1791089977099,
+                  "ran": 1791089977108,
+                  "completed": 1791089977115
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "tool-calls",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 3520,
+              "output": 28,
+              "reasoning": 0,
+              "cache": {
+                "read": 1536,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_10548272d00130Y9yBybcHgL1J",
+            "time": {
+              "created": 1791089977149,
+              "streamed": 1791089978746,
+              "completed": 1791089978754
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "SP01_B_NATIVE_RECONNECT_OK"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 256,
+              "output": 10,
+              "reasoning": 0,
+              "cache": {
+                "read": 4864,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105482d86001G1QxWz10BotT4F",
+            "time": {
+              "created": 1791089978758
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ4MjA1ZDAwMGY2ZTU3NGIyZTRhYWFiIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0ODJkODYwMDFHMVF4V3oxMEJvdFQ0RiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "activeAfterReconnect",
+      "startedAt": "2026-10-04T04:59:38.867984+00:00",
+      "completedAt": "2026-10-04T04:59:38.868912+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          }
+        }
+      }
+    }
+  ],
+  "referenceStream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": null
+    },
+    "events": [
+      {
+        "id": "evt_10548205c001rPc0aaXzCPxdfn",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10548205f001ZYBLUMc0Q1A47H",
+        "created": 1791089975391,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10548205d000f6e574b2e4aaab",
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054820620016Sj0ffHBsghYv0",
+        "created": 1791089975394,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482069001IzfviwJVEFtzgd",
+        "created": 1791089975401,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "delta": {
+            "core/codemode": "3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1",
+            "core/skill-guidance": "8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9",
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10548206c001o6OOZw3wkJcWLi",
+        "created": 1791089975404,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "inboxID": "msg_1a10548205d000f6e574b2e4aaab"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827070013mmthRajy4VJdZ",
+        "created": 1791089977095,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089975425
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10548270b001FnVFjoSx1hyqdQ",
+        "created": 1791089977099,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "name": "read"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827120013YV3a5bYbAWod2",
+        "created": 1791089977106,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "text": "{\"path\":\"marker.txt\"}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482714001Jf5muZsskUdm0Q",
+        "created": 1791089977108,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "input": {
+            "path": "marker.txt"
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482716001fFK7y9YJDVRwST",
+        "created": 1791089977110,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10548271b001nNIeam31V1GDHG",
+        "created": 1791089977115,
+        "type": "session.tool.success",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read file marker.txt, lines 1-1\n1: SP01_B_NATIVE_RECONNECT_OK"
+            }
+          ],
+          "metadata": {
+            "truncated": false
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 10,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_105482722001yzf0JgSFUuO7eX",
+        "created": 1791089977122,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "finish": "tool-calls",
+          "rawFinish": "tool_calls",
+          "cost": 0,
+          "tokens": {
+            "input": 3520,
+            "output": 28,
+            "reasoning": 0,
+            "cache": {
+              "read": 1536,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 11,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827250019uVdc2oTo7ARkF",
+        "created": 1791089977125,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "cost": 0,
+          "tokens": {
+            "input": 3520,
+            "output": 28,
+            "reasoning": 0,
+            "cache": {
+              "read": 1536,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105482ca70014m1geQBmrCvv6C",
+        "created": 1791089978535,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089977149
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 12,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482cab001HLRr7b3gyPmigD",
+        "created": 1791089978539,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 13,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482d11001gNplXucTu1flCK",
+        "created": 1791089978641,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "ordinal": 0,
+          "delta": "SP01_B_NATIVE_RECONNECT_OK"
+        }
+      },
+      {
+        "id": "evt_105482d77001Oruv7vOcuxEauu",
+        "created": 1791089978743,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "ordinal": 0,
+          "text": "SP01_B_NATIVE_RECONNECT_OK"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 14,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482d7a0015EpKXe4TMJL8nS",
+        "created": 1791089978746,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 15,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482d82001smv3A5ZYEYeWdj",
+        "created": 1791089978754,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 256,
+            "output": 10,
+            "reasoning": 0,
+            "cache": {
+              "read": 4864,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 16,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482d85001FM1px9gLJg2WQ0",
+        "created": 1791089978757,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "cost": 0,
+          "tokens": {
+            "input": 3776,
+            "output": 38,
+            "reasoning": 0,
+            "cache": {
+              "read": 6400,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105482d86001G1QxWz10BotT4F",
+        "created": 1791089978758,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 17,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482dba001sG8yy1WBmKNDlp",
+        "created": 1791089978810,
+        "type": "session.renamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "title": "V2-005B reconnect observed live after hydration"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 18,
+          "version": 1
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_10548205c001rPc0aaXzCPxdfn\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548205f001ZYBLUMc0Q1A47H\", \"created\": 1791089975391, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10548205d000f6e574b2e4aaab\", \"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 1, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054820620016Sj0ffHBsghYv0\", \"created\": 1791089975394, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 2, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482069001IzfviwJVEFtzgd\", \"created\": 1791089975401, \"metadata\": {\"instructions\": {\"initial\": true}}, \"type\": \"session.instructions.updated\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"delta\": {\"core/codemode\": \"3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1\", \"core/skill-guidance\": \"8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9\", \"core/date\": \"49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12\", \"core/environment\": \"8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e\"}}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 3, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548206c001o6OOZw3wkJcWLi\", \"created\": 1791089975404, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"inboxID\": \"msg_1a10548205d000f6e574b2e4aaab\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 4, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827070013mmthRajy4VJdZ\", \"created\": 1791089977095, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089975425}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 5, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548270b001FnVFjoSx1hyqdQ\", \"created\": 1791089977099, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"name\": \"read\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 6, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827120013YV3a5bYbAWod2\", \"created\": 1791089977106, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"text\": \"{\\\"path\\\":\\\"marker.txt\\\"}\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 7, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482714001Jf5muZsskUdm0Q\", \"created\": 1791089977108, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"input\": {\"path\": \"marker.txt\"}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 8, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482716001fFK7y9YJDVRwST\", \"created\": 1791089977110, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 9, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548271b001nNIeam31V1GDHG\", \"created\": 1791089977115, \"type\": \"session.tool.success\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"content\": [{\"type\": \"text\", \"text\": \"Read file marker.txt, lines 1-1\\n1: SP01_B_NATIVE_RECONNECT_OK\"}], \"metadata\": {\"truncated\": false}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 10, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482722001yzf0JgSFUuO7eX\", \"created\": 1791089977122, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"finish\": \"tool-calls\", \"rawFinish\": \"tool_calls\", \"cost\": 0, \"tokens\": {\"input\": 3520, \"output\": 28, \"reasoning\": 0, \"cache\": {\"read\": 1536, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 11, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827250019uVdc2oTo7ARkF\", \"created\": 1791089977125, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"cost\": 0, \"tokens\": {\"input\": 3520, \"output\": 28, \"reasoning\": 0, \"cache\": {\"read\": 1536, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482ca70014m1geQBmrCvv6C\", \"created\": 1791089978535, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089977149}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 12, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482cab001HLRr7b3gyPmigD\", \"created\": 1791089978539, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 13, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d11001gNplXucTu1flCK\", \"created\": 1791089978641, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"ordinal\": 0, \"delta\": \"SP01_B_NATIVE_RECONNECT_OK\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d77001Oruv7vOcuxEauu\", \"created\": 1791089978743, \"type\": \"session.text.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"ordinal\": 0, \"text\": \"SP01_B_NATIVE_RECONNECT_OK\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 14, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d7a0015EpKXe4TMJL8nS\", \"created\": 1791089978746, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 15, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d82001smv3A5ZYEYeWdj\", \"created\": 1791089978754, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"finish\": \"stop\", \"rawFinish\": \"stop\", \"cost\": 0, \"tokens\": {\"input\": 256, \"output\": 10, \"reasoning\": 0, \"cache\": {\"read\": 4864, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 16, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d85001FM1px9gLJg2WQ0\", \"created\": 1791089978757, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"cost\": 0, \"tokens\": {\"input\": 3776, \"output\": 38, \"reasoning\": 0, \"cache\": {\"read\": 6400, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d86001G1QxWz10BotT4F\", \"created\": 1791089978758, \"type\": \"session.execution.succeeded\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 17, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482dba001sG8yy1WBmKNDlp\", \"created\": 1791089978810, \"type\": \"session.renamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"title\": \"V2-005B reconnect observed live after hydration\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 18, \"version\": 1}}"
+      ]
+    ],
+    "failure": null
+  },
+  "partialStream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": null
+    },
+    "events": [
+      {
+        "id": "evt_10548205d00100swEgy01FwVwk",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10548205f001ZYBLUMc0Q1A47H",
+        "created": 1791089975391,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10548205d000f6e574b2e4aaab",
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054820620016Sj0ffHBsghYv0",
+        "created": 1791089975394,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482069001IzfviwJVEFtzgd",
+        "created": 1791089975401,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "delta": {
+            "core/codemode": "3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1",
+            "core/skill-guidance": "8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9",
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_10548206c001o6OOZw3wkJcWLi",
+        "created": 1791089975404,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "inboxID": "msg_1a10548205d000f6e574b2e4aaab"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827070013mmthRajy4VJdZ",
+        "created": 1791089977095,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089975425
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10548270b001FnVFjoSx1hyqdQ",
+        "created": 1791089977099,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "name": "read"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827120013YV3a5bYbAWod2",
+        "created": 1791089977106,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "text": "{\"path\":\"marker.txt\"}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482714001Jf5muZsskUdm0Q",
+        "created": 1791089977108,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "input": {
+            "path": "marker.txt"
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482716001fFK7y9YJDVRwST",
+        "created": 1791089977110,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10548271b001nNIeam31V1GDHG",
+        "created": 1791089977115,
+        "type": "session.tool.success",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "id": "call_9dfac4afc23b4bcdb4645c44",
+          "content": [
+            {
+              "type": "text",
+              "text": "Read file marker.txt, lines 1-1\n1: SP01_B_NATIVE_RECONNECT_OK"
+            }
+          ],
+          "metadata": {
+            "truncated": false
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 10,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_105482722001yzf0JgSFUuO7eX",
+        "created": 1791089977122,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_105482071001PKu9uVXLt8i5QI",
+          "finish": "tool-calls",
+          "rawFinish": "tool_calls",
+          "cost": 0,
+          "tokens": {
+            "input": 3520,
+            "output": 28,
+            "reasoning": 0,
+            "cache": {
+              "read": 1536,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 11,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054827250019uVdc2oTo7ARkF",
+        "created": 1791089977125,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "cost": 0,
+          "tokens": {
+            "input": 3520,
+            "output": 28,
+            "reasoning": 0,
+            "cache": {
+              "read": 1536,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105482ca70014m1geQBmrCvv6C",
+        "created": 1791089978535,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089977149
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 12,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482cab001HLRr7b3gyPmigD",
+        "created": 1791089978539,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 13,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105482d11001gNplXucTu1flCK",
+        "created": 1791089978641,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "assistantMessageID": "msg_10548272d00130Y9yBybcHgL1J",
+          "ordinal": 0,
+          "delta": "SP01_B_NATIVE_RECONNECT_OK"
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_10548205d00100swEgy01FwVwk\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548205f001ZYBLUMc0Q1A47H\", \"created\": 1791089975391, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10548205d000f6e574b2e4aaab\", \"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Use your read tool once to read marker.txt in the current project, then reply exactly the marker. Do not modify files or use shell or network tools.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 1, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054820620016Sj0ffHBsghYv0\", \"created\": 1791089975394, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 2, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482069001IzfviwJVEFtzgd\", \"created\": 1791089975401, \"metadata\": {\"instructions\": {\"initial\": true}}, \"type\": \"session.instructions.updated\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"delta\": {\"core/codemode\": \"3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1\", \"core/skill-guidance\": \"8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9\", \"core/date\": \"49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12\", \"core/environment\": \"8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e\"}}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 3, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548206c001o6OOZw3wkJcWLi\", \"created\": 1791089975404, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"inboxID\": \"msg_1a10548205d000f6e574b2e4aaab\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 4, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827070013mmthRajy4VJdZ\", \"created\": 1791089977095, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089975425}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 5, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548270b001FnVFjoSx1hyqdQ\", \"created\": 1791089977099, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"name\": \"read\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 6, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827120013YV3a5bYbAWod2\", \"created\": 1791089977106, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"text\": \"{\\\"path\\\":\\\"marker.txt\\\"}\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 7, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482714001Jf5muZsskUdm0Q\", \"created\": 1791089977108, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"input\": {\"path\": \"marker.txt\"}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 8, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482716001fFK7y9YJDVRwST\", \"created\": 1791089977110, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 9, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10548271b001nNIeam31V1GDHG\", \"created\": 1791089977115, \"type\": \"session.tool.success\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"id\": \"call_9dfac4afc23b4bcdb4645c44\", \"content\": [{\"type\": \"text\", \"text\": \"Read file marker.txt, lines 1-1\\n1: SP01_B_NATIVE_RECONNECT_OK\"}], \"metadata\": {\"truncated\": false}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 10, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482722001yzf0JgSFUuO7eX\", \"created\": 1791089977122, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_105482071001PKu9uVXLt8i5QI\", \"finish\": \"tool-calls\", \"rawFinish\": \"tool_calls\", \"cost\": 0, \"tokens\": {\"input\": 3520, \"output\": 28, \"reasoning\": 0, \"cache\": {\"read\": 1536, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 11, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054827250019uVdc2oTo7ARkF\", \"created\": 1791089977125, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"cost\": 0, \"tokens\": {\"input\": 3520, \"output\": 28, \"reasoning\": 0, \"cache\": {\"read\": 1536, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482ca70014m1geQBmrCvv6C\", \"created\": 1791089978535, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089977149}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 12, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482cab001HLRr7b3gyPmigD\", \"created\": 1791089978539, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 13, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482d11001gNplXucTu1flCK\", \"created\": 1791089978641, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"assistantMessageID\": \"msg_10548272d00130Y9yBybcHgL1J\", \"ordinal\": 0, \"delta\": \"SP01_B_NATIVE_RECONNECT_OK\"}}"
+      ]
+    ],
+    "failure": null
+  },
+  "reconnectedStream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": "evt_105482d11001gNplXucTu1flCK"
+    },
+    "events": [
+      {
+        "id": "evt_105482db7001eQLUe8fduFbBaF",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_105482dba001sG8yy1WBmKNDlp",
+        "created": 1791089978810,
+        "type": "session.renamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10548204a0007f0a42202e750e",
+          "title": "V2-005B reconnect observed live after hydration"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10548204a0007f0a42202e750e",
+          "seq": 18,
+          "version": 1
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_105482db7001eQLUe8fduFbBaF\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105482dba001sG8yy1WBmKNDlp\", \"created\": 1791089978810, \"type\": \"session.renamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a10548204a0007f0a42202e750e\", \"title\": \"V2-005B reconnect observed live after hydration\"}, \"durable\": {\"aggregateID\": \"ses_1a10548204a0007f0a42202e750e\", \"seq\": 18, \"version\": 1}}"
+      ]
+    ],
+    "failure": null
+  },
+  "eventsBeforeNewMutation": [
+    {
+      "id": "evt_105482db7001eQLUe8fduFbBaF",
+      "type": "server.connected",
+      "data": {}
+    }
+  ],
+  "disconnectedOnFirstNativeDelta": true,
+  "completionWhileDisconnectedObserved": true,
+  "newLiveEventAfterReconnectObserved": true,
+  "modelWakeAdmissionCount": 1
+}

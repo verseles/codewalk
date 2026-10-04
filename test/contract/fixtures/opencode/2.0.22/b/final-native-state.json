@@ -1,0 +1,84 @@
+{
+  "capturedAt": "2026-10-04T05:03:26.415627+00:00",
+  "ownedSessions": [
+    {
+      "sessionID": "ses_1a10548204a0007f0a42202e750e",
+      "title": "V2-005B reconnect observed live after hydration",
+      "projectID": "global",
+      "outcome": "succeeded",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a105474386000b3a2629b179368",
+      "title": "V2-005B interruptResume",
+      "projectID": "global",
+      "outcome": "succeeded",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a10546195b00024e913db8b70bc",
+      "title": "V2-005B liveQueueSteer",
+      "projectID": "global",
+      "outcome": "succeeded",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a10544fefd000988b1fefcc176a",
+      "title": "V2-005B activeAcrossRestart",
+      "projectID": "global",
+      "outcome": "succeeded",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a10544fed90006d9c5107f9ef8f",
+      "title": "V2-005B parkedAcrossRestart",
+      "projectID": "global",
+      "outcome": null,
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a10542a037000b62360a32b7f3d",
+      "title": "V2-005B liveQueueSteer",
+      "projectID": "global",
+      "outcome": "succeeded",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a105403b8800054800ae75ff8e8",
+      "title": "V2-005B liveQueueSteer",
+      "projectID": "global",
+      "outcome": "failed",
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+      "title": "V2-005B createReplay",
+      "projectID": "global",
+      "outcome": null,
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a1053e7c19000d2121d1835401d",
+      "title": "V2-005B crossSessionConflict",
+      "projectID": "global",
+      "outcome": null,
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a1053e78a700081efce6322b4e2",
+      "title": "V2-005B timeout after create",
+      "projectID": "global",
+      "outcome": null,
+      "pendingInboxCount": 0
+    },
+    {
+      "sessionID": "ses_1a1053e767e0007673bee3f465f2",
+      "title": "V2-005B timeout before create",
+      "projectID": "global",
+      "outcome": null,
+      "pendingInboxCount": 0
+    }
+  ],
+  "activeOwnedSessionIds": [],
+  "pendingOwnedInboxTotal": 0
+}

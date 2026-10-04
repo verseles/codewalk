@@ -1,0 +1,661 @@
+{
+  "capturedAt": "2026-10-04T04:49:04.613267+00:00",
+  "calls": [
+    {
+      "name": "promptOriginal",
+      "startedAt": "2026-10-04T04:49:03.187216+00:00",
+      "completedAt": "2026-10-04T04:49:03.504009+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7ad3000a8b22017a68214",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089343500
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "promptIdenticalReplay",
+      "startedAt": "2026-10-04T04:49:03.504036+00:00",
+      "completedAt": "2026-10-04T04:49:03.507086+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7ad3000a8b22017a68214",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089343500
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "promptChangedTextReplay",
+      "startedAt": "2026-10-04T04:49:03.507107+00:00",
+      "completedAt": "2026-10-04T04:49:03.511875+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Changed text must not replace original.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7ad3000a8b22017a68214",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089343500
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "promptChangedDeliveryReplay",
+      "startedAt": "2026-10-04T04:49:03.511892+00:00",
+      "completedAt": "2026-10-04T04:49:03.513938+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "steer",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7ad3000a8b22017a68214",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089343500
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "crossSessionConflictCreate",
+      "startedAt": "2026-10-04T04:49:03.513970+00:00",
+      "completedAt": "2026-10-04T04:49:03.535824+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a1053e7c19000d2121d1835401d",
+        "title": "V2-005B crossSessionConflict",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e7c19000d2121d1835401d",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089343531,
+            "updated": 1791089343531
+          },
+          "title": "V2-005B crossSessionConflict",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "promptCrossSessionConflict",
+      "startedAt": "2026-10-04T04:49:03.535856+00:00",
+      "completedAt": "2026-10-04T04:49:03.544055+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e7c19000d2121d1835401d/prompt",
+      "request": {
+        "id": "msg_1a1053e7ad3000a8b22017a68214",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 409,
+      "response": {
+        "_tag": "ConflictError",
+        "message": "Prompt message ID conflicts with an existing durable record: msg_1a1053e7ad3000a8b22017a68214",
+        "resource": "msg_1a1053e7ad3000a8b22017a68214"
+      }
+    },
+    {
+      "name": "sameTextNewId",
+      "startedAt": "2026-10-04T04:49:03.544092+00:00",
+      "completedAt": "2026-10-04T04:49:03.550977+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7c38000e6bc815bbbff60",
+        "text": "Reply exactly B_PARKED_ORIGINAL.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7c38000e6bc815bbbff60",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089343547
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "beforePromptBeforeRetrysession",
+      "startedAt": "2026-10-04T04:49:04.053743+00:00",
+      "completedAt": "2026-10-04T04:49:04.062341+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089343547
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "beforePromptBeforeRetryinbox",
+      "startedAt": "2026-10-04T04:49:04.062363+00:00",
+      "completedAt": "2026-10-04T04:49:04.070991+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343500
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "beforePromptBeforeRetryhistory",
+      "startedAt": "2026-10-04T04:49:04.071007+00:00",
+      "completedAt": "2026-10-04T04:49:04.072305+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "name": "beforePromptSameIdRetry",
+      "startedAt": "2026-10-04T04:49:04.072318+00:00",
+      "completedAt": "2026-10-04T04:49:04.081034+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7c3e0004b1e2a90760387",
+        "text": "Before timeout prompt.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7c3e0004b1e2a90760387",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089344074
+          },
+          "type": "user",
+          "payload": {
+            "text": "Before timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "afterPromptNativeForward",
+      "startedAt": "2026-10-04T04:49:04.082359+00:00",
+      "completedAt": "2026-10-04T04:49:04.091439+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7e51000a02fa23b246fe3",
+        "text": "After timeout prompt.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7e51000a02fa23b246fe3",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089344084
+          },
+          "type": "user",
+          "payload": {
+            "text": "After timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "afterPromptBeforeRetrysession",
+      "startedAt": "2026-10-04T04:49:04.585653+00:00",
+      "completedAt": "2026-10-04T04:49:04.590222+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089344084
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterPromptBeforeRetryinbox",
+      "startedAt": "2026-10-04T04:49:04.590245+00:00",
+      "completedAt": "2026-10-04T04:49:04.592895+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343500
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c3e0004b1e2a90760387",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344074
+            },
+            "type": "user",
+            "payload": {
+              "text": "Before timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7e51000a02fa23b246fe3",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344084
+            },
+            "type": "user",
+            "payload": {
+              "text": "After timeout prompt."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "afterPromptBeforeRetryhistory",
+      "startedAt": "2026-10-04T04:49:04.592938+00:00",
+      "completedAt": "2026-10-04T04:49:04.596669+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "name": "afterPromptSameIdReplay",
+      "startedAt": "2026-10-04T04:49:04.596690+00:00",
+      "completedAt": "2026-10-04T04:49:04.601221+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7e51000a02fa23b246fe3",
+        "text": "After timeout prompt.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a1053e7e51000a02fa23b246fe3",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089344084
+          },
+          "type": "user",
+          "payload": {
+            "text": "After timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "allAdmissionsParkedsession",
+      "startedAt": "2026-10-04T04:49:04.601245+00:00",
+      "completedAt": "2026-10-04T04:49:04.604520+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1053e76490008743dfb6f9d536",
+          "projectID": "global",
+          "model": {
+            "id": "fledge-alpha-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089342066,
+            "updated": 1791089344084
+          },
+          "title": "V2-005B createReplay",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "allAdmissionsParkedinbox",
+      "startedAt": "2026-10-04T04:49:04.604544+00:00",
+      "completedAt": "2026-10-04T04:49:04.607853+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a1053e7ad3000a8b22017a68214",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343500
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c38000e6bc815bbbff60",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089343547
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_PARKED_ORIGINAL."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7c3e0004b1e2a90760387",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344074
+            },
+            "type": "user",
+            "payload": {
+              "text": "Before timeout prompt."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a1053e7e51000a02fa23b246fe3",
+            "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+            "time": {
+              "created": 1791089344084
+            },
+            "type": "user",
+            "payload": {
+              "text": "After timeout prompt."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "allAdmissionsParkedhistory",
+      "startedAt": "2026-10-04T04:49:04.607878+00:00",
+      "completedAt": "2026-10-04T04:49:04.613240+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    }
+  ],
+  "networkControls": [
+    {
+      "control": "withhold before forwarding",
+      "forwardedToNative": false,
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7c3e0004b1e2a90760387",
+        "text": "Before timeout prompt.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "clientOutcome": "TimeoutError"
+    },
+    {
+      "control": "forward then withhold response",
+      "forwardedToNative": true,
+      "method": "POST",
+      "path": "/api/session/ses_1a1053e76490008743dfb6f9d536/prompt",
+      "request": {
+        "id": "msg_1a1053e7e51000a02fa23b246fe3",
+        "text": "After timeout prompt.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "nativeStatus": 200,
+      "nativeResponse": {
+        "data": {
+          "id": "msg_1a1053e7e51000a02fa23b246fe3",
+          "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+          "time": {
+            "created": 1791089344084
+          },
+          "type": "user",
+          "payload": {
+            "text": "After timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      },
+      "clientOutcome": "TimeoutError"
+    }
+  ]
+}

@@ -1,0 +1,1214 @@
+{
+  "capturedAt": "2026-10-04T04:58:41.211805+00:00",
+  "calls": [
+    {
+      "name": "interruptResumeCreate",
+      "startedAt": "2026-10-04T04:58:38.854327+00:00",
+      "completedAt": "2026-10-04T04:58:38.868472+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a105474386000b3a2629b179368",
+        "title": "V2-005B interruptResume",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "model": {
+          "id": "space-bunny-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a105474386000b3a2629b179368",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089918865,
+            "updated": 1791089918865
+          },
+          "title": "V2-005B interruptResume",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "interruptiblePrompt",
+      "startedAt": "2026-10-04T04:58:38.870745+00:00",
+      "completedAt": "2026-10-04T04:58:38.875205+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/prompt",
+      "request": {
+        "id": "msg_1a105474396000b3e0bfd24ff7be",
+        "text": "Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools.",
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a105474396000b3e0bfd24ff7be",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "time": {
+            "created": 1791089918873
+          },
+          "type": "user",
+          "payload": {
+            "text": "Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "activeBeforeInterrupt",
+      "startedAt": "2026-10-04T04:58:40.328701+00:00",
+      "completedAt": "2026-10-04T04:58:40.330610+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          },
+          "ses_1a105474386000b3a2629b179368": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "queueBeforeInterrupt",
+      "startedAt": "2026-10-04T04:58:40.330651+00:00",
+      "completedAt": "2026-10-04T04:58:40.336223+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/prompt",
+      "request": {
+        "id": "msg_1a10547494a0005d5bfbc7ade681",
+        "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools.",
+        "delivery": "queue",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10547494a0005d5bfbc7ade681",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "time": {
+            "created": 1791089920333
+          },
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools."
+          },
+          "delivery": "queue"
+        }
+      }
+    },
+    {
+      "name": "steerBeforeInterrupt",
+      "startedAt": "2026-10-04T04:58:40.336245+00:00",
+      "completedAt": "2026-10-04T04:58:40.340538+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/prompt",
+      "request": {
+        "id": "msg_1a10547494a00064ff90fe16aaa4",
+        "text": "After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools.",
+        "delivery": "steer",
+        "resume": false
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_1a10547494a00064ff90fe16aaa4",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "time": {
+            "created": 1791089920338
+          },
+          "type": "user",
+          "payload": {
+            "text": "After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools."
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "name": "beforeInterruptsession",
+      "startedAt": "2026-10-04T04:58:40.340560+00:00",
+      "completedAt": "2026-10-04T04:58:40.341915+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a105474386000b3a2629b179368",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791089918865,
+            "updated": 1791089920338
+          },
+          "title": "V2-005B interruptResume",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "beforeInterruptinbox",
+      "startedAt": "2026-10-04T04:58:40.341939+00:00",
+      "completedAt": "2026-10-04T04:58:40.343859+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10547494a0005d5bfbc7ade681",
+            "sessionID": "ses_1a105474386000b3a2629b179368",
+            "time": {
+              "created": 1791089920333
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools."
+            },
+            "delivery": "queue"
+          },
+          {
+            "id": "msg_1a10547494a00064ff90fe16aaa4",
+            "sessionID": "ses_1a105474386000b3a2629b179368",
+            "time": {
+              "created": 1791089920338
+            },
+            "type": "user",
+            "payload": {
+              "text": "After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools."
+            },
+            "delivery": "steer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "beforeInterrupthistory",
+      "startedAt": "2026-10-04T04:58:40.343881+00:00",
+      "completedAt": "2026-10-04T04:58:40.345786+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105474396000b3e0bfd24ff7be",
+            "time": {
+              "created": 1791089918885
+            },
+            "text": "Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1054743aa001zGKPGtPRB72fvL",
+            "time": {
+              "created": 1791089918907,
+              "streamed": 1791089920310
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_01a1054748e877f7b1d16b28",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "running",
+                  "input": {
+                    "command": "sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'",
+                    "workdir": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+                  },
+                  "metadata": {}
+                },
+                "time": {
+                  "created": 1791089920264,
+                  "ran": 1791089920308
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2"
+            }
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ3NDM5NjAwMGIzZTBiZmQyNGZmN2JlIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NzQzYWEwMDF6R0tQR3RQUkI3MmZ2TCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "interruptAndResumeSteering",
+      "startedAt": "2026-10-04T04:58:40.345815+00:00",
+      "completedAt": "2026-10-04T04:58:40.348625+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/interrupt?resume=true",
+      "request": null,
+      "status": 200,
+      "response": {
+        "interrupted": true
+      }
+    },
+    {
+      "name": "afterInterruptResumesession",
+      "startedAt": "2026-10-04T04:58:41.200749+00:00",
+      "completedAt": "2026-10-04T04:58:41.202636+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a105474386000b3a2629b179368",
+          "projectID": "global",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "cost": 0,
+          "tokens": {
+            "input": 5067,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 5204,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1791089918865,
+            "updated": 1791089920338,
+            "idle": 1791089921192
+          },
+          "title": "V2-005B interruptResume",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "afterInterruptResumeinbox",
+      "startedAt": "2026-10-04T04:58:41.202655+00:00",
+      "completedAt": "2026-10-04T04:58:41.204072+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10547494a0005d5bfbc7ade681",
+            "sessionID": "ses_1a105474386000b3a2629b179368",
+            "time": {
+              "created": 1791089920333
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "afterInterruptResumehistory",
+      "startedAt": "2026-10-04T04:58:41.204084+00:00",
+      "completedAt": "2026-10-04T04:58:41.205728+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a105474396000b3e0bfd24ff7be",
+            "time": {
+              "created": 1791089918885
+            },
+            "text": "Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_1054743aa001zGKPGtPRB72fvL",
+            "time": {
+              "created": 1791089918907,
+              "streamed": 1791089920310,
+              "completed": 1791089920360
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "tool",
+                "id": "call_01a1054748e877f7b1d16b28",
+                "name": "shell",
+                "executed": false,
+                "state": {
+                  "status": "error",
+                  "input": {
+                    "command": "sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'",
+                    "workdir": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+                  },
+                  "error": {
+                    "type": "aborted",
+                    "message": "Tool execution interrupted"
+                  },
+                  "metadata": {
+                    "shellID": "sh_10547493b001YmvrIY6wrMCcnp"
+                  }
+                },
+                "time": {
+                  "created": 1791089920264,
+                  "ran": 1791089920308,
+                  "completed": 1791089920349
+                }
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "error",
+            "rawFinish": "tool_calls",
+            "cost": 0,
+            "tokens": {
+              "input": 4948,
+              "output": 64,
+              "reasoning": 0,
+              "cache": {
+                "read": 128,
+                "write": 0
+              }
+            },
+            "error": {
+              "type": "aborted",
+              "message": "Step interrupted"
+            }
+          },
+          {
+            "id": "msg_10547496c001Bl5FnQjA3bldn0",
+            "time": {
+              "created": 1791089920364
+            },
+            "type": "idle",
+            "outcome": "interrupted"
+          },
+          {
+            "id": "msg_1a10547494a00064ff90fe16aaa4",
+            "time": {
+              "created": 1791089920373
+            },
+            "text": "After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools.",
+            "type": "user"
+          },
+          {
+            "id": "msg_10547497a001Gu8xK3Au6KN2EV",
+            "time": {
+              "created": 1791089920396,
+              "streamed": 1791089921181,
+              "completed": 1791089921188
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "space-bunny-free",
+              "providerID": "opencode",
+              "variant": "low"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "B_INTERRUPT_STEER_RESUMED"
+              }
+            ],
+            "snapshot": {
+              "start": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "end": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+              "files": []
+            },
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 119,
+              "output": 11,
+              "reasoning": 0,
+              "cache": {
+                "read": 5076,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_105474ca8001Vr47ApeF7o67Sq",
+            "time": {
+              "created": 1791089921192
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xYTEwNTQ3NDM5NjAwMGIzZTBiZmQyNGZmN2JlIiwib3JkZXIiOiJhc2MiLCJkaXJlY3Rpb24iOiJwcmV2aW91cyJ9",
+          "next": "eyJpZCI6Im1zZ18xMDU0NzRjYTgwMDFWcjQ3QXBlRjdvNjdTcSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "name": "activeAfterInterruptResume",
+      "startedAt": "2026-10-04T04:58:41.205767+00:00",
+      "completedAt": "2026-10-04T04:58:41.206570+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "ses_efabf1e8dffeuwPEDpAHiZ4uRZ": {
+            "type": "running"
+          }
+        }
+      }
+    },
+    {
+      "name": "idleInterruptNoOp",
+      "startedAt": "2026-10-04T04:58:41.206579+00:00",
+      "completedAt": "2026-10-04T04:58:41.208018+00:00",
+      "method": "POST",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/interrupt",
+      "request": null,
+      "status": 200,
+      "response": {
+        "interrupted": false
+      }
+    },
+    {
+      "name": "interruptCleanupPending",
+      "startedAt": "2026-10-04T04:58:41.208026+00:00",
+      "completedAt": "2026-10-04T04:58:41.209081+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_1a10547494a0005d5bfbc7ade681",
+            "sessionID": "ses_1a105474386000b3a2629b179368",
+            "time": {
+              "created": 1791089920333
+            },
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools."
+            },
+            "delivery": "queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "interruptCleanupCancel",
+      "startedAt": "2026-10-04T04:58:41.209093+00:00",
+      "completedAt": "2026-10-04T04:58:41.211674+00:00",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a105474386000b3a2629b179368/inbox/msg_1a10547494a0005d5bfbc7ade681",
+      "request": null,
+      "status": 204,
+      "response": null
+    }
+  ],
+  "stream": {
+    "request": {
+      "path": "/api/event",
+      "lastEventId": null
+    },
+    "events": [
+      {
+        "id": "evt_105474396001yxaDOeGEShRKG5",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_1054743990010HyZWzBhAXwFgO",
+        "created": 1791089918873,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a105474396000b3e0bfd24ff7be",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10547439b001bT9lxEbALvco8s",
+        "created": 1791089918875,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 2,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054743a30011QsMyGozYIt3YC",
+        "created": 1791089918883,
+        "metadata": {
+          "instructions": {
+            "initial": true
+          }
+        },
+        "type": "session.instructions.updated",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "delta": {
+            "core/codemode": "3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1",
+            "core/skill-guidance": "8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9",
+            "core/date": "49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12",
+            "core/environment": "8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 3,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_1054743a5001zTkOh9LXC4LlHt",
+        "created": 1791089918885,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "inboxID": "msg_1a105474396000b3e0bfd24ff7be"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 4,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474905001bTgHyJ7ixSnsBH",
+        "created": 1791089920261,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089918907
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 5,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_1054749080014kBR2ayrrZcRsM",
+        "created": 1791089920264,
+        "type": "session.tool.input.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "id": "call_01a1054748e877f7b1d16b28",
+          "name": "shell"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 6,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474931001yDjlovh2haPtmX",
+        "created": 1791089920305,
+        "type": "session.tool.input.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "id": "call_01a1054748e877f7b1d16b28",
+          "text": "{\"command\":\"sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\\\n'\",\"workdir\":\"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 7,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474934001OuMfHZJcx0Bb37",
+        "created": 1791089920308,
+        "type": "session.tool.called",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "id": "call_01a1054748e877f7b1d16b28",
+          "input": {
+            "command": "sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\n'",
+            "workdir": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 8,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474936001Fz0ZXVldT4IIib",
+        "created": 1791089920310,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 9,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10547493f001c9RjbeVH7ZFZBg",
+        "created": 1791089920319,
+        "type": "session.tool.progress",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "id": "call_01a1054748e877f7b1d16b28",
+          "metadata": {
+            "shellID": "sh_10547493b001YmvrIY6wrMCcnp"
+          }
+        }
+      },
+      {
+        "id": "evt_10547494d001aUtEKcIFCy63jo",
+        "created": 1791089920333,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10547494a0005d5bfbc7ade681",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools."
+            },
+            "delivery": "queue"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 10,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474952001n1fhnumWPPe5xB",
+        "created": 1791089920338,
+        "type": "session.inbox.enqueued",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "inboxID": "msg_1a10547494a00064ff90fe16aaa4",
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "item": {
+            "type": "user",
+            "payload": {
+              "text": "After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools."
+            },
+            "delivery": "steer"
+          }
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 11,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10547495d001HM6tL6429AZrwq",
+        "created": 1791089920349,
+        "type": "session.tool.failed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "id": "call_01a1054748e877f7b1d16b28",
+          "error": {
+            "type": "aborted",
+            "message": "Tool execution interrupted"
+          },
+          "metadata": {
+            "shellID": "sh_10547493b001YmvrIY6wrMCcnp"
+          },
+          "executed": false
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 12,
+          "version": 2
+        }
+      },
+      {
+        "id": "evt_1054749680010o7hOBPIn2lPtb",
+        "created": 1791089920360,
+        "type": "session.step.failed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_1054743aa001zGKPGtPRB72fvL",
+          "error": {
+            "type": "aborted",
+            "message": "Step interrupted"
+          },
+          "rawFinish": "tool_calls",
+          "cost": 0,
+          "tokens": {
+            "input": 4948,
+            "output": 64,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 13,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10547496b001Cu9EVrqtBFkHDp",
+        "created": 1791089920363,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "cost": 0,
+          "tokens": {
+            "input": 4948,
+            "output": 64,
+            "reasoning": 0,
+            "cache": {
+              "read": 128,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_10547496c001Bl5FnQjA3bldn0",
+        "created": 1791089920364,
+        "type": "session.execution.interrupted",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "reason": "user"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 14,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10547496e001vGzewu0P06qyFh",
+        "created": 1791089920366,
+        "type": "session.execution.started",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 15,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474975001C8wiHJ59XkbXq6",
+        "created": 1791089920373,
+        "type": "session.inbox.delivered",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "inboxID": "msg_1a10547494a00064ff90fe16aaa4"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 16,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474c31001neOKlZMTvISD0M",
+        "created": 1791089921073,
+        "type": "session.step.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "agent": "build",
+          "model": {
+            "id": "space-bunny-free",
+            "providerID": "opencode",
+            "variant": "low"
+          },
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV",
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "started": 1791089920396
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 17,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474c35001svlsEBe9c2DMjq",
+        "created": 1791089921077,
+        "type": "session.text.started",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV",
+          "ordinal": 0
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 18,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474c99001HTz5ZQdYr6XaUx",
+        "created": 1791089921177,
+        "type": "session.text.delta",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV",
+          "ordinal": 0,
+          "delta": "B_INTERRUPT_STEER_RESUMED"
+        }
+      },
+      {
+        "id": "evt_105474c9b001lB5vaFYuqX0H7e",
+        "created": 1791089921179,
+        "type": "session.text.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV",
+          "ordinal": 0,
+          "text": "B_INTERRUPT_STEER_RESUMED"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 19,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474c9d001ICRJjsX7sFvgyz",
+        "created": 1791089921181,
+        "type": "session.step.streamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 20,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474ca4001lgp2QTugBJDbG3",
+        "created": 1791089921188,
+        "type": "session.step.ended",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "assistantMessageID": "msg_10547497a001Gu8xK3Au6KN2EV",
+          "finish": "stop",
+          "rawFinish": "stop",
+          "cost": 0,
+          "tokens": {
+            "input": 119,
+            "output": 11,
+            "reasoning": 0,
+            "cache": {
+              "read": 5076,
+              "write": 0
+            }
+          },
+          "snapshot": "61a7a86f2e618f591e47af48ed42d8a02cccd4a2",
+          "files": []
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 21,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_105474ca70017a37yFMwKqsOSx",
+        "created": 1791089921191,
+        "type": "session.usage.updated",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368",
+          "cost": 0,
+          "tokens": {
+            "input": 5067,
+            "output": 75,
+            "reasoning": 0,
+            "cache": {
+              "read": 5204,
+              "write": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "evt_105474ca8001Vr47ApeF7o67Sq",
+        "created": 1791089921192,
+        "type": "session.execution.succeeded",
+        "data": {
+          "sessionID": "ses_1a105474386000b3a2629b179368"
+        },
+        "durable": {
+          "aggregateID": "ses_1a105474386000b3a2629b179368",
+          "seq": 22,
+          "version": 1
+        }
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"id\": \"evt_105474396001yxaDOeGEShRKG5\", \"type\": \"server.connected\", \"data\": {}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054743990010HyZWzBhAXwFgO\", \"created\": 1791089918873, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a105474396000b3e0bfd24ff7be\", \"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Use the shell tool once to execute exactly `sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\\\n'` in the current project, foreground. Then reply exactly B_INTERRUPTABLE_DONE. Do not modify files or call network tools.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 1, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547439b001bT9lxEbALvco8s\", \"created\": 1791089918875, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 2, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054743a30011QsMyGozYIt3YC\", \"created\": 1791089918883, \"metadata\": {\"instructions\": {\"initial\": true}}, \"type\": \"session.instructions.updated\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"delta\": {\"core/codemode\": \"3a6c896ca4366410e84edccbf179835337f464e16493a692c18b854a528ce2e1\", \"core/skill-guidance\": \"8394362d28c82fa4d13c7a9f5568c05680f6687e07db8f426a0e3c92f3027dc9\", \"core/date\": \"49ba66bdcb32fae56d237a84ca9f5f108241bba42211442fc80de2740a349b12\", \"core/environment\": \"8f502d144ecef2236e891be6f8bc448ba5eaea53f521ea0a1f001c3ab3d37d3e\"}}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 3, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054743a5001zTkOh9LXC4LlHt\", \"created\": 1791089918885, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"inboxID\": \"msg_1a105474396000b3e0bfd24ff7be\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 4, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474905001bTgHyJ7ixSnsBH\", \"created\": 1791089920261, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089918907}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 5, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054749080014kBR2ayrrZcRsM\", \"created\": 1791089920264, \"type\": \"session.tool.input.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"id\": \"call_01a1054748e877f7b1d16b28\", \"name\": \"shell\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 6, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474931001yDjlovh2haPtmX\", \"created\": 1791089920305, \"type\": \"session.tool.input.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"id\": \"call_01a1054748e877f7b1d16b28\", \"text\": \"{\\\"command\\\":\\\"sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\\\\\\\n'\\\",\\\"workdir\\\":\\\"/workspace/.cloud-runtime/opencode-v2/capture-b/project\\\"}\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 7, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474934001OuMfHZJcx0Bb37\", \"created\": 1791089920308, \"type\": \"session.tool.called\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"id\": \"call_01a1054748e877f7b1d16b28\", \"input\": {\"command\": \"sleep 20; printf 'B_INTERRUPTABLE_TOOL_DONE\\\\n'\", \"workdir\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 8, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474936001Fz0ZXVldT4IIib\", \"created\": 1791089920310, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 9, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547493f001c9RjbeVH7ZFZBg\", \"created\": 1791089920319, \"type\": \"session.tool.progress\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"id\": \"call_01a1054748e877f7b1d16b28\", \"metadata\": {\"shellID\": \"sh_10547493b001YmvrIY6wrMCcnp\"}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547494d001aUtEKcIFCy63jo\", \"created\": 1791089920333, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10547494a0005d5bfbc7ade681\", \"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_INTERRUPT_QUEUE_PARKED. No tools.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 10, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474952001n1fhnumWPPe5xB\", \"created\": 1791089920338, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a10547494a00064ff90fe16aaa4\", \"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"After interruption, reply exactly B_INTERRUPT_STEER_RESUMED. No tools.\"}, \"delivery\": \"steer\"}}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 11, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547495d001HM6tL6429AZrwq\", \"created\": 1791089920349, \"type\": \"session.tool.failed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"id\": \"call_01a1054748e877f7b1d16b28\", \"error\": {\"type\": \"aborted\", \"message\": \"Tool execution interrupted\"}, \"metadata\": {\"shellID\": \"sh_10547493b001YmvrIY6wrMCcnp\"}, \"executed\": false}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 12, \"version\": 2}}"
+      ],
+      [
+        "data: {\"id\": \"evt_1054749680010o7hOBPIn2lPtb\", \"created\": 1791089920360, \"type\": \"session.step.failed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_1054743aa001zGKPGtPRB72fvL\", \"error\": {\"type\": \"aborted\", \"message\": \"Step interrupted\"}, \"rawFinish\": \"tool_calls\", \"cost\": 0, \"tokens\": {\"input\": 4948, \"output\": 64, \"reasoning\": 0, \"cache\": {\"read\": 128, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 13, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547496b001Cu9EVrqtBFkHDp\", \"created\": 1791089920363, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"cost\": 0, \"tokens\": {\"input\": 4948, \"output\": 64, \"reasoning\": 0, \"cache\": {\"read\": 128, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547496c001Bl5FnQjA3bldn0\", \"created\": 1791089920364, \"type\": \"session.execution.interrupted\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"reason\": \"user\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 14, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_10547496e001vGzewu0P06qyFh\", \"created\": 1791089920366, \"type\": \"session.execution.started\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 15, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474975001C8wiHJ59XkbXq6\", \"created\": 1791089920373, \"type\": \"session.inbox.delivered\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"inboxID\": \"msg_1a10547494a00064ff90fe16aaa4\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 16, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474c31001neOKlZMTvISD0M\", \"created\": 1791089921073, \"type\": \"session.step.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"agent\": \"build\", \"model\": {\"id\": \"space-bunny-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}, \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\", \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"started\": 1791089920396}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 17, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474c35001svlsEBe9c2DMjq\", \"created\": 1791089921077, \"type\": \"session.text.started\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\", \"ordinal\": 0}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 18, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474c99001HTz5ZQdYr6XaUx\", \"created\": 1791089921177, \"type\": \"session.text.delta\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\", \"ordinal\": 0, \"delta\": \"B_INTERRUPT_STEER_RESUMED\"}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474c9b001lB5vaFYuqX0H7e\", \"created\": 1791089921179, \"type\": \"session.text.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\", \"ordinal\": 0, \"text\": \"B_INTERRUPT_STEER_RESUMED\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 19, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474c9d001ICRJjsX7sFvgyz\", \"created\": 1791089921181, \"type\": \"session.step.streamed\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 20, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474ca4001lgp2QTugBJDbG3\", \"created\": 1791089921188, \"type\": \"session.step.ended\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"assistantMessageID\": \"msg_10547497a001Gu8xK3Au6KN2EV\", \"finish\": \"stop\", \"rawFinish\": \"stop\", \"cost\": 0, \"tokens\": {\"input\": 119, \"output\": 11, \"reasoning\": 0, \"cache\": {\"read\": 5076, \"write\": 0}}, \"snapshot\": \"61a7a86f2e618f591e47af48ed42d8a02cccd4a2\", \"files\": []}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 21, \"version\": 1}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474ca70017a37yFMwKqsOSx\", \"created\": 1791089921191, \"type\": \"session.usage.updated\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\", \"cost\": 0, \"tokens\": {\"input\": 5067, \"output\": 75, \"reasoning\": 0, \"cache\": {\"read\": 5204, \"write\": 0}}}}"
+      ],
+      [
+        "data: {\"id\": \"evt_105474ca8001Vr47ApeF7o67Sq\", \"created\": 1791089921192, \"type\": \"session.execution.succeeded\", \"data\": {\"sessionID\": \"ses_1a105474386000b3a2629b179368\"}, \"durable\": {\"aggregateID\": \"ses_1a105474386000b3a2629b179368\", \"seq\": 22, \"version\": 1}}"
+      ]
+    ],
+    "failure": null
+  },
+  "toolCalledObserved": true,
+  "interruptedObserved": true,
+  "resumedSucceededObserved": true,
+  "promptIds": {
+    "first": "msg_1a105474396000b3e0bfd24ff7be",
+    "queued": "msg_1a10547494a0005d5bfbc7ade681",
+    "steered": "msg_1a10547494a00064ff90fe16aaa4"
+  },
+  "modelWakeAdmissionCount": 1
+}

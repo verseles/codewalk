@@ -1,0 +1,335 @@
+{
+  "request": {
+    "path": "/api/event",
+    "lastEventId": null
+  },
+  "events": [
+    {
+      "id": "evt_1053e7648001n5bSI4pEIm7sON",
+      "type": "server.connected",
+      "data": {}
+    },
+    {
+      "id": "evt_1053e7672001JuwofVBLT4hbIN",
+      "created": 1791089342066,
+      "type": "session.created",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "slug": "silent-circuit",
+        "version": "2.0.22",
+        "projectID": "global",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "subpath": "",
+        "title": "V2-005B createReplay",
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e78e80015k49w275YQ1So4",
+      "created": 1791089342696,
+      "type": "session.created",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "sessionID": "ses_1a1053e78a700081efce6322b4e2",
+        "slug": "quiet-otter",
+        "version": "2.0.22",
+        "projectID": "global",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "subpath": "",
+        "title": "V2-005B timeout after create",
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e78a700081efce6322b4e2",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e7c0c001Oh6dJFCi4Zq0Vp",
+      "created": 1791089343500,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "inboxID": "msg_1a1053e7ad3000a8b22017a68214",
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e7c2b0017XbbsNT5yuqLIA",
+      "created": 1791089343531,
+      "type": "session.created",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "sessionID": "ses_1a1053e7c19000d2121d1835401d",
+        "slug": "proud-orchid",
+        "version": "2.0.22",
+        "projectID": "global",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+        },
+        "subpath": "",
+        "title": "V2-005B crossSessionConflict",
+        "model": {
+          "id": "fledge-alpha-free",
+          "providerID": "opencode",
+          "variant": "low"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e7c19000d2121d1835401d",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e7c3b001IFr6oYG5B54rAS",
+      "created": 1791089343547,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "inboxID": "msg_1a1053e7c38000e6bc815bbbff60",
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e7e4a001CrM6Mr23dgj3qm",
+      "created": 1791089344074,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "inboxID": "msg_1a1053e7c3e0004b1e2a90760387",
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "Before timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 3,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e7e54001a3pwNpjhSobNEq",
+      "created": 1791089344084,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "inboxID": "msg_1a1053e7e51000a02fa23b246fe3",
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "After timeout prompt."
+          },
+          "delivery": "queue"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e806b001V2Hahznys1pEYF",
+      "created": 1791089344619,
+      "type": "session.inbox.cancelled",
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "inboxID": "msg_1a1053e7ad3000a8b22017a68214"
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e8077001P711rs5lOmj3x9",
+      "created": 1791089344631,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "/workspace/.cloud-runtime/opencode-v2/capture-b/project"
+      },
+      "data": {
+        "inboxID": "msg_1a1053e7ad3000a8b22017a68214",
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "Reply exactly B_PARKED_ORIGINAL."
+          },
+          "delivery": "queue"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e8086001o925ctbW0DjhNe",
+      "created": 1791089344646,
+      "type": "session.inbox.cancelled",
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "inboxID": "msg_1a1053e7c38000e6bc815bbbff60"
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e809c001rIoC8dHN8dJz7a",
+      "created": 1791089344668,
+      "type": "session.inbox.cancelled",
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "inboxID": "msg_1a1053e7c3e0004b1e2a90760387"
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e80a5001lKC4TN6QY7WDXw",
+      "created": 1791089344677,
+      "type": "session.inbox.cancelled",
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "inboxID": "msg_1a1053e7e51000a02fa23b246fe3"
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_1053e80aa001IYLjw49vAYbuEn",
+      "created": 1791089344682,
+      "type": "session.inbox.cancelled",
+      "data": {
+        "sessionID": "ses_1a1053e76490008743dfb6f9d536",
+        "inboxID": "msg_1a1053e7ad3000a8b22017a68214"
+      },
+      "durable": {
+        "aggregateID": "ses_1a1053e76490008743dfb6f9d536",
+        "seq": 10,
+        "version": 1
+      }
+    }
+  ],
+  "frames": [
+    [
+      "data: {\"id\": \"evt_1053e7648001n5bSI4pEIm7sON\", \"type\": \"server.connected\", \"data\": {}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7672001JuwofVBLT4hbIN\", \"created\": 1791089342066, \"type\": \"session.created\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"slug\": \"silent-circuit\", \"version\": \"2.0.22\", \"projectID\": \"global\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"subpath\": \"\", \"title\": \"V2-005B createReplay\", \"model\": {\"id\": \"fledge-alpha-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 0, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e78e80015k49w275YQ1So4\", \"created\": 1791089342696, \"type\": \"session.created\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a1053e78a700081efce6322b4e2\", \"slug\": \"quiet-otter\", \"version\": \"2.0.22\", \"projectID\": \"global\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"subpath\": \"\", \"title\": \"V2-005B timeout after create\", \"model\": {\"id\": \"fledge-alpha-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e78a700081efce6322b4e2\", \"seq\": 0, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7c0c001Oh6dJFCi4Zq0Vp\", \"created\": 1791089343500, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a1053e7ad3000a8b22017a68214\", \"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_PARKED_ORIGINAL.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 1, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7c2b0017XbbsNT5yuqLIA\", \"created\": 1791089343531, \"type\": \"session.created\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"sessionID\": \"ses_1a1053e7c19000d2121d1835401d\", \"slug\": \"proud-orchid\", \"version\": \"2.0.22\", \"projectID\": \"global\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"subpath\": \"\", \"title\": \"V2-005B crossSessionConflict\", \"model\": {\"id\": \"fledge-alpha-free\", \"providerID\": \"opencode\", \"variant\": \"low\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e7c19000d2121d1835401d\", \"seq\": 0, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7c3b001IFr6oYG5B54rAS\", \"created\": 1791089343547, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a1053e7c38000e6bc815bbbff60\", \"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_PARKED_ORIGINAL.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 2, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7e4a001CrM6Mr23dgj3qm\", \"created\": 1791089344074, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a1053e7c3e0004b1e2a90760387\", \"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Before timeout prompt.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 3, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e7e54001a3pwNpjhSobNEq\", \"created\": 1791089344084, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a1053e7e51000a02fa23b246fe3\", \"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"After timeout prompt.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 4, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e806b001V2Hahznys1pEYF\", \"created\": 1791089344619, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"inboxID\": \"msg_1a1053e7ad3000a8b22017a68214\"}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 5, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e8077001P711rs5lOmj3x9\", \"created\": 1791089344631, \"type\": \"session.inbox.enqueued\", \"location\": {\"directory\": \"/workspace/.cloud-runtime/opencode-v2/capture-b/project\"}, \"data\": {\"inboxID\": \"msg_1a1053e7ad3000a8b22017a68214\", \"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"item\": {\"type\": \"user\", \"payload\": {\"text\": \"Reply exactly B_PARKED_ORIGINAL.\"}, \"delivery\": \"queue\"}}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 6, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e8086001o925ctbW0DjhNe\", \"created\": 1791089344646, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"inboxID\": \"msg_1a1053e7c38000e6bc815bbbff60\"}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 7, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e809c001rIoC8dHN8dJz7a\", \"created\": 1791089344668, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"inboxID\": \"msg_1a1053e7c3e0004b1e2a90760387\"}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 8, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e80a5001lKC4TN6QY7WDXw\", \"created\": 1791089344677, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"inboxID\": \"msg_1a1053e7e51000a02fa23b246fe3\"}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 9, \"version\": 1}}"
+    ],
+    [
+      "data: {\"id\": \"evt_1053e80aa001IYLjw49vAYbuEn\", \"created\": 1791089344682, \"type\": \"session.inbox.cancelled\", \"data\": {\"sessionID\": \"ses_1a1053e76490008743dfb6f9d536\", \"inboxID\": \"msg_1a1053e7ad3000a8b22017a68214\"}, \"durable\": {\"aggregateID\": \"ses_1a1053e76490008743dfb6f9d536\", \"seq\": 10, \"version\": 1}}"
+    ]
+  ],
+  "failure": null
+}
