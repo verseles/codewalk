@@ -38,6 +38,7 @@ lib/platform/storage/preferences_backend.dart # Guarded SharedPreferencesAsync a
 lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores and memory LRU
 lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
 lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
+lib/platform/migration/                # Unwired read-only legacy sources, restartable v1 importer and sanitized report
 packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
 packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
 packages/codewalk_core/lib/src/{values,commands,capabilities,errors}.dart # Immutable unknown values, scoped mutation/replay guards and typed failures
@@ -49,7 +50,7 @@ packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart I
 packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
-test/v2/{shared,storage}/               # Scoped rendering, layout, l10n, theme and storage regressions
+test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions
 tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
@@ -95,8 +96,17 @@ Storage provides namespaced metadata, guarded schema migrations, bounded
 payloads and endpoint credentials independently of the app graph. IO payloads
 use the `cw2_payloads` directory and flushed temporary-file replacement; Web
 payloads use preferences. Native credentials use secure storage, while Web
-credentials remain instance-local memory. Migration hooks can read legacy data,
-but the v1 importer and installed-upgrade acceptance are separate work.
+credentials remain instance-local memory. The separate importer reads legacy
+preferences, explicitly scoped secure keys and known SHA1 payload-file keys,
+writes only v2 destinations and checkpoints confirmed writes. Source absence is
+distinct from failure, corruption or refused size; those failures cannot select
+an older fallback and make it final. It preserves explicit AllowAll OFF and
+existing destinations during sequential resume, and records unmapped drafts for
+later review. The library requires an explicit exclusive-startup precondition;
+it supplies no lease or protection against concurrent writers. It is not wired
+to bootstrap. Actual Android legacy-backend configuration, pre-engine source
+preservation, report/recovered-draft UI, credential boundaries and a real
+installed v1.266 upgrade remain separate acceptance work.
 
 `.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
 `v2_foundations` for discovered package analysis/tests, planted guards, scoped
