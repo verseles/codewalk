@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. The harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -52,7 +52,12 @@ packages/codewalk_core/test/support/scripted_harness_adapter.dart # Finite test-
 packages/codewalk_core/test/support/scripted_harness_scenarios.dart # Six synthetic, finite scenarios consumed by the real reducer tests
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
-packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
+packages/harness_opencode/lib/harness_opencode.dart # Empty public OpenCode adapter boundary
+packages/harness_opencode/test/support/fixture_replay.dart # Immutable finite scenarios from accepted OpenCode 2.0.22 captures, with strict request matching
+packages/harness_opencode/test/support/fake_auth.dart # Synthetic Basic/pairing auth with a manually advanced five-minute clock
+packages/harness_opencode/test/support/fake_opencode_server.dart # IPv4-loopback HTTP/SSE fake with admission faults, explicit SSE epochs and async teardown
+packages/harness_opencode/test/fake_opencode_{server,stream}_test.dart # Real codewalk_net IO transport HTTP/SSE tests
+packages/harness_host/lib/             # Empty public host adapter boundary
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
 test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions, including VM payload-preservation composition coverage
@@ -705,6 +710,8 @@ make test-web                               # Browser capability tests (requires
 make test-coverage-tools                    # Python stdlib coverage-gate fixtures
 make coverage                               # Flutter LCOV plus the 35% global and per-file coverage gates
 make check                                  # root Flutter gate; does not discover workspace package tests
+# From packages/harness_opencode:
+export PATH="$HOME/flutter/bin:$PATH" && dart format --output=none --set-exit-if-changed test && dart analyze --fatal-infos && dart test
 make v2-architecture                        # governed v2 source and transitive boundary checks
 make v2-foundations                         # packages, guards, scoped l10n/analyze, VM/Chrome v2 tests and Web build
 make v2-smoke                               # explicit v2 Flutter tests in test/v2
