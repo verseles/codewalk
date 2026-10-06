@@ -1,0 +1,1816 @@
+{
+  "startedAt": "2026-10-06T21:18:28.627Z",
+  "calls": [
+    {
+      "label": "ReadinessInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791321511556,
+      "atMs": 1791321511570
+    },
+    {
+      "label": "CreateOwnedSession",
+      "method": "POST",
+      "path": "/api/session",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791321515155,
+      "atMs": 1791321515188,
+      "title": "SP04 managed initial"
+    },
+    {
+      "label": "RenameFirst",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791321516188,
+      "atMs": 1791321516238,
+      "title": "SP04 managed live 🚀"
+    },
+    {
+      "label": "ReadinessInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791321518406,
+      "atMs": 1791321518420
+    },
+    {
+      "label": "RenameResumedLive",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791321518900,
+      "atMs": 1791321518961,
+      "title": "SP04 managed resumed live"
+    },
+    {
+      "label": "DeleteOwnedSession",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791321519380,
+      "atMs": 1791321519472
+    },
+    {
+      "label": "VerifyDeletedSession",
+      "method": "GET",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "status": 404,
+      "listenerOwned": true,
+      "startedMs": 1791321519707,
+      "atMs": 1791321519713
+    }
+  ],
+  "operations": [
+    {
+      "label": "ConfigureAllowed",
+      "page": "allowed",
+      "atMs": 1791321512049,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701"
+      }
+    },
+    {
+      "label": "AllowedInfo",
+      "page": "allowed",
+      "atMs": 1791321512553,
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "version": "2.0.22",
+          "pid": 2730197,
+          "urls": [
+            "http://127.0.0.1:41767"
+          ],
+          "paths": {
+            "tmp": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/tmp/opencode"
+          }
+        }
+      }
+    },
+    {
+      "label": "ConfigureBadAuth",
+      "page": "allowed",
+      "atMs": 1791321512794,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701"
+      }
+    },
+    {
+      "label": "BadAuthInfo",
+      "page": "allowed",
+      "atMs": 1791321513269,
+      "result": {
+        "ok": true,
+        "status": 401,
+        "body": {
+          "bytes": 64
+        }
+      }
+    },
+    {
+      "label": "ConfigureDenied",
+      "page": "denied",
+      "atMs": 1791321513959,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-denied.test:42701"
+      }
+    },
+    {
+      "label": "DeniedInfo",
+      "page": "denied",
+      "atMs": 1791321514434,
+      "result": {
+        "ok": false,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "DeniedSSE",
+      "page": "denied",
+      "atMs": 1791321514921,
+      "result": {
+        "ok": false,
+        "errorType": "minified:bq"
+      }
+    },
+    {
+      "label": "ConfigureOwnedSession",
+      "page": "allowed",
+      "atMs": 1791321515452,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701"
+      }
+    },
+    {
+      "label": "InitialConnected",
+      "page": "allowed",
+      "atMs": 1791321515943,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 1,
+        "maxActiveReaders": 1,
+        "activeAttempts": 1,
+        "milestones": [],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": null,
+            "endedMs": null,
+            "outcome": null,
+            "errorType": null,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "BeforeRestart",
+      "page": "allowed",
+      "atMs": 1791321516354,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 1,
+        "maxActiveReaders": 1,
+        "activeAttempts": 1,
+        "milestones": [],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": null,
+            "endedMs": null,
+            "outcome": null,
+            "errorType": null,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+                  "created": 1791321516235,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321516241,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321516204
+              },
+              {
+                "bytes": 354,
+                "atMs": 1791321516240
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "NaturalDisconnected",
+      "page": "allowed",
+      "atMs": 1791321516932,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 0,
+        "maxActiveReaders": 1,
+        "activeAttempts": 0,
+        "milestones": [
+          {
+            "kind": "naturalDisconnect",
+            "atMs": 1791321516820,
+            "attempt": 1,
+            "outcome": "read-error"
+          }
+        ],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": 1791321516819,
+            "endedMs": 1791321516819,
+            "outcome": "read-error",
+            "errorType": "JSObject",
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+                  "created": 1791321516235,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321516241,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321516204
+              },
+              {
+                "bytes": 354,
+                "atMs": 1791321516240
+              },
+              {
+                "bytes": 1748,
+                "atMs": 1791321516741
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "Recovered",
+      "page": "allowed",
+      "atMs": 1791321518663,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 1,
+        "maxActiveReaders": 1,
+        "activeAttempts": 1,
+        "milestones": [
+          {
+            "kind": "naturalDisconnect",
+            "atMs": 1791321516820,
+            "attempt": 1,
+            "outcome": "read-error"
+          },
+          {
+            "kind": "streamRecovered",
+            "atMs": 1791321518177,
+            "fromAttempt": 1,
+            "attempt": 3,
+            "id": "ses_1a1131523a90007bb2fdacfb7529",
+            "title": "SP04 managed live 🚀"
+          }
+        ],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": 1791321516819,
+            "endedMs": 1791321516819,
+            "outcome": "read-error",
+            "errorType": "JSObject",
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+                  "created": 1791321516235,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321516241,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321516204
+              },
+              {
+                "bytes": 354,
+                "atMs": 1791321516240
+              },
+              {
+                "bytes": 1748,
+                "atMs": 1791321516741
+              }
+            ]
+          },
+          {
+            "number": 2,
+            "status": null,
+            "mediaType": null,
+            "connected": false,
+            "ended": true,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321517071,
+            "readerMs": null,
+            "releasedMs": null,
+            "endedMs": 1791321517079,
+            "outcome": "unowned-listener",
+            "errorType": null,
+            "events": [],
+            "chunks": []
+          },
+          {
+            "number": 3,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321517372,
+            "readerMs": 1791321517751,
+            "releasedMs": null,
+            "endedMs": null,
+            "outcome": null,
+            "errorType": null,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152eb3001WfvIOC5T7KucYH",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321517752,
+                "read": 1
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321517752
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321517752
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "FinalObservedState",
+      "page": "allowed",
+      "atMs": 1791321519074,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 1,
+        "maxActiveReaders": 1,
+        "activeAttempts": 1,
+        "milestones": [
+          {
+            "kind": "naturalDisconnect",
+            "atMs": 1791321516820,
+            "attempt": 1,
+            "outcome": "read-error"
+          },
+          {
+            "kind": "streamRecovered",
+            "atMs": 1791321518177,
+            "fromAttempt": 1,
+            "attempt": 3,
+            "id": "ses_1a1131523a90007bb2fdacfb7529",
+            "title": "SP04 managed live 🚀"
+          }
+        ],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": 1791321516819,
+            "endedMs": 1791321516819,
+            "outcome": "read-error",
+            "errorType": "JSObject",
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+                  "created": 1791321516235,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321516241,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321516204
+              },
+              {
+                "bytes": 354,
+                "atMs": 1791321516240
+              },
+              {
+                "bytes": 1748,
+                "atMs": 1791321516741
+              }
+            ]
+          },
+          {
+            "number": 2,
+            "status": null,
+            "mediaType": null,
+            "connected": false,
+            "ended": true,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321517071,
+            "readerMs": null,
+            "releasedMs": null,
+            "endedMs": 1791321517079,
+            "outcome": "unowned-listener",
+            "errorType": null,
+            "events": [],
+            "chunks": []
+          },
+          {
+            "number": 3,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321517372,
+            "readerMs": 1791321517751,
+            "releasedMs": null,
+            "endedMs": null,
+            "outcome": null,
+            "errorType": null,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152eb3001WfvIOC5T7KucYH",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321517752,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_11315336c001D9zicASst77b9z",
+                  "created": 1791321518956,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed resumed live"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 2,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321518966,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321517752
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321517752
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321518924
+              },
+              {
+                "bytes": 357,
+                "atMs": 1791321518965
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "label": "FinalShutdown",
+      "page": "allowed",
+      "atMs": 1791321519082,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:42701",
+        "visibility": "visible",
+        "activeReaders": 0,
+        "maxActiveReaders": 1,
+        "activeAttempts": 0,
+        "milestones": [
+          {
+            "kind": "naturalDisconnect",
+            "atMs": 1791321516820,
+            "attempt": 1,
+            "outcome": "read-error"
+          },
+          {
+            "kind": "streamRecovered",
+            "atMs": 1791321518177,
+            "fromAttempt": 1,
+            "attempt": 3,
+            "id": "ses_1a1131523a90007bb2fdacfb7529",
+            "title": "SP04 managed live 🚀"
+          }
+        ],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321515687,
+            "readerMs": 1791321515928,
+            "releasedMs": 1791321516819,
+            "endedMs": 1791321516819,
+            "outcome": "read-error",
+            "errorType": "JSObject",
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152795001sQOOEQ1kT4JYxF",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321515931,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+                  "created": 1791321516235,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321516241,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321515930
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321515931
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321516204
+              },
+              {
+                "bytes": 354,
+                "atMs": 1791321516240
+              },
+              {
+                "bytes": 1748,
+                "atMs": 1791321516741
+              }
+            ]
+          },
+          {
+            "number": 2,
+            "status": null,
+            "mediaType": null,
+            "connected": false,
+            "ended": true,
+            "released": false,
+            "locallyAborted": false,
+            "fatal": false,
+            "startedMs": 1791321517071,
+            "readerMs": null,
+            "releasedMs": null,
+            "endedMs": 1791321517079,
+            "outcome": "unowned-listener",
+            "errorType": null,
+            "events": [],
+            "chunks": []
+          },
+          {
+            "number": 3,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "locallyAborted": true,
+            "fatal": false,
+            "startedMs": 1791321517372,
+            "readerMs": 1791321517751,
+            "releasedMs": 1791321519078,
+            "endedMs": 1791321519078,
+            "outcome": "local-abort",
+            "errorType": "JSObject",
+            "events": [
+              {
+                "event": {
+                  "id": "evt_113152eb3001WfvIOC5T7KucYH",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791321517752,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_11315336c001D9zicASst77b9z",
+                  "created": 1791321518956,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "title": "SP04 managed resumed live"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                    "seq": 2,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791321518966,
+                "read": 4
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 83,
+                "atMs": 1791321517752
+              },
+              {
+                "bytes": 13,
+                "atMs": 1791321517752
+              },
+              {
+                "bytes": 411,
+                "atMs": 1791321518924
+              },
+              {
+                "bytes": 357,
+                "atMs": 1791321518965
+              }
+            ]
+          }
+        ],
+        "credentialsCleared": true
+      }
+    },
+    {
+      "label": "FinalShutdown",
+      "page": "denied",
+      "atMs": 1791321519086,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-denied.test:42701",
+        "visibility": "hidden",
+        "activeReaders": 0,
+        "maxActiveReaders": 0,
+        "activeAttempts": 0,
+        "milestones": [],
+        "recoveryError": null,
+        "attempts": [
+          {
+            "number": 1,
+            "status": null,
+            "mediaType": null,
+            "connected": false,
+            "ended": true,
+            "released": false,
+            "locallyAborted": true,
+            "fatal": false,
+            "startedMs": 1791321514667,
+            "readerMs": null,
+            "releasedMs": null,
+            "endedMs": 1791321514905,
+            "outcome": "read-error",
+            "errorType": "JSObject",
+            "events": [],
+            "chunks": []
+          }
+        ],
+        "credentialsCleared": true
+      }
+    }
+  ],
+  "network": [
+    {
+      "page": "allowed",
+      "id": "2729983.11",
+      "path": "/api/info",
+      "method": "GET",
+      "atMs": 1791321512547,
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "61597BEEFEC8B24D0187D1F4C8BC51AA",
+      "path": "/api/info",
+      "method": "OPTIONS",
+      "atMs": 1791321512547,
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "2729983.13",
+      "path": "/api/info",
+      "method": "GET",
+      "atMs": 1791321513265,
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 401,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "denied",
+      "id": "2730003.11",
+      "path": "/api/info",
+      "method": "GET",
+      "atMs": 1791321514429,
+      "authorizationPresent": true,
+      "request": {},
+      "failure": {
+        "canceled": false,
+        "cors": "PreflightMissingAllowOriginHeader",
+        "blocked": null
+      }
+    },
+    {
+      "page": "denied",
+      "id": "164F7994191A5FD5015E1ADDFC41F69D",
+      "path": "/api/info",
+      "method": "OPTIONS",
+      "atMs": 1791321514430,
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-denied.test:42701"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "page": "denied",
+      "id": "2730003.13",
+      "path": "/api/event",
+      "method": "GET",
+      "atMs": 1791321514904,
+      "authorizationPresent": true,
+      "request": {},
+      "failure": {
+        "canceled": false,
+        "cors": "PreflightMissingAllowOriginHeader",
+        "blocked": null
+      }
+    },
+    {
+      "page": "denied",
+      "id": "B29AD32EF0813BF5B9FF89ACBF79DD8F",
+      "path": "/api/event",
+      "method": "OPTIONS",
+      "atMs": 1791321514904,
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-denied.test:42701"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "2729983.15",
+      "path": "/api/event",
+      "method": "GET",
+      "atMs": 1791321515922,
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701",
+        "content-type": "text/event-stream"
+      },
+      "failure": {
+        "canceled": false,
+        "cors": null,
+        "blocked": null
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "F63B48B34C3EADE28E0E1B73C1D31DB6",
+      "path": "/api/event",
+      "method": "OPTIONS",
+      "atMs": 1791321515923,
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "2729983.18",
+      "path": "/api/event",
+      "method": "GET",
+      "atMs": 1791321517745,
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701",
+        "content-type": "text/event-stream"
+      },
+      "failure": {
+        "canceled": true,
+        "cors": null,
+        "blocked": null
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "2729983.20",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "method": "GET",
+      "atMs": 1791321518167,
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "16CDE1F946EBE290304F91484F59232D",
+      "path": "/api/session/ses_1a1131523a90007bb2fdacfb7529",
+      "method": "OPTIONS",
+      "atMs": 1791321518167,
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:42701"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:42701"
+      }
+    }
+  ],
+  "services": [
+    {
+      "atMs": 1791321511570,
+      "pid": 2730197,
+      "socket": "354990621",
+      "id": "30d9f4a1-4d13-43a4-b1c3-00ee83e7d40d",
+      "version": "2.0.22",
+      "url": "http://127.0.0.1:41767",
+      "passwordStable": true,
+      "config": {
+        "cors": [
+          "http://cw-sp04-allowed.test:42701"
+        ],
+        "port": 41767,
+        "passwordPresent": true
+      }
+    },
+    {
+      "atMs": 1791321518420,
+      "pid": 2730566,
+      "socket": "354991035",
+      "id": "b3c83579-8ebd-4950-9a81-06d3f747f2c5",
+      "version": "2.0.22",
+      "url": "http://127.0.0.1:41767",
+      "passwordStable": true,
+      "config": {
+        "cors": [
+          "http://cw-sp04-allowed.test:42701"
+        ],
+        "port": 41767,
+        "passwordPresent": true
+      }
+    }
+  ],
+  "cli": [
+    {
+      "args": [
+        "service",
+        "set",
+        "port",
+        "41767"
+      ],
+      "startMs": 1791321510009,
+      "atMs": 1791321510168,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "set",
+        "cors",
+        "http://cw-sp04-allowed.test:42701"
+      ],
+      "startMs": 1791321510168,
+      "atMs": 1791321510298,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "get",
+        "password"
+      ],
+      "startMs": 1791321511198,
+      "atMs": 1791321511321,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "set",
+        "cors",
+        "http://cw-sp04-allowed.test:42701"
+      ],
+      "startMs": 1791321516665,
+      "atMs": 1791321516927,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "get",
+        "password"
+      ],
+      "startMs": 1791321517978,
+      "atMs": 1791321518163,
+      "ok": true
+    }
+  ],
+  "authenticationGuards": [
+    {
+      "atMs": 1791321512542,
+      "owned": true,
+      "pid": 2730197,
+      "socket": "354990621"
+    },
+    {
+      "atMs": 1791321513262,
+      "owned": true,
+      "pid": 2730197,
+      "socket": "354990621"
+    },
+    {
+      "atMs": 1791321514426,
+      "owned": true,
+      "pid": 2730197,
+      "socket": "354990621"
+    },
+    {
+      "atMs": 1791321514901,
+      "owned": true,
+      "pid": 2730197,
+      "socket": "354990621"
+    },
+    {
+      "atMs": 1791321515918,
+      "owned": true,
+      "pid": 2730197,
+      "socket": "354990621"
+    },
+    {
+      "atMs": 1791321517077,
+      "owned": false
+    },
+    {
+      "atMs": 1791321517740,
+      "owned": true,
+      "pid": 2730566,
+      "socket": "354991035"
+    },
+    {
+      "atMs": 1791321518161,
+      "owned": true,
+      "pid": 2730566,
+      "socket": "354991035"
+    }
+  ],
+  "bootstrap": [
+    {
+      "page": "allowed",
+      "atMs": 1791321509426,
+      "kind": "response",
+      "path": "/",
+      "status": 200,
+      "mediaType": "text/html"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509472,
+      "kind": "response",
+      "path": "/flutter_bootstrap.js",
+      "status": 200,
+      "mediaType": "application/javascript"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509503,
+      "kind": "Log.entryAdded",
+      "text": "[]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content."
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509509,
+      "kind": "response",
+      "path": "/canvaskit/canvaskit.js",
+      "status": 200,
+      "mediaType": "application/javascript"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509510,
+      "kind": "response",
+      "path": "/canvaskit/canvaskit.wasm",
+      "status": 200,
+      "mediaType": "application/wasm"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509609,
+      "kind": "response",
+      "path": "/main.dart.js",
+      "status": 200,
+      "mediaType": "application/javascript"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509844,
+      "kind": "Log.entryAdded",
+      "text": "[]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content."
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509849,
+      "kind": "Log.entryAdded",
+      "text": "[]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content."
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509852,
+      "kind": "response",
+      "path": "/assets/FontManifest.json",
+      "status": 200,
+      "mediaType": "application/octet-stream"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509857,
+      "kind": "response",
+      "path": "/favicon.ico",
+      "status": 404,
+      "mediaType": "text/plain"
+    },
+    {
+      "page": "allowed",
+      "atMs": 1791321509857,
+      "kind": "Log.entryAdded",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "isolation": {
+    "privateEnvironment": true,
+    "inheritedProviderCredentials": false
+  },
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "npmIntegrity": "sha512-t/yuu9Dqd/M44dFH95bphu7ikO6FATMQuVk/91QBnCMzsP8zVrXU7zAxD1wVLpYYUDqIonEmi80XETlFqx7chw==",
+  "nativeArgv": [
+    "serve",
+    "--service",
+    "--log-level",
+    "none"
+  ],
+  "sourceSHA256": "f0afe1a3f46fa1f7435a8a5c26fd4795e45c7d4ae1e3b65fca8f8507c4c2bb17",
+  "buildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+  "buildProvenance": {
+    "inputsSHA256": {
+      "lib/main.dart": "f0afe1a3f46fa1f7435a8a5c26fd4795e45c7d4ae1e3b65fca8f8507c4c2bb17",
+      "pubspec.yaml": "f2a4874ebfe47a939deb78aa396e4dad24b32d3a0d2500b48f5237fcf4a88a95",
+      "pubspec.lock": "45f817a778c436da6889bee77bc25303a84687930e0077d8bb75ae540231d5c4",
+      "web/index.html": "7fd953d335b3bc19c370629def303fd0105f4420842caea41dc244583351e2db"
+    },
+    "buildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+    "argv": [
+      "rtk",
+      "proxy",
+      "flutter",
+      "build",
+      "web",
+      "--release",
+      "--no-pub",
+      "--no-web-resources-cdn"
+    ],
+    "analyzeArgv": [
+      "rtk",
+      "proxy",
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "startedAt": 1791319720.3772404,
+    "finishedAt": 1791319748.1851206
+  },
+  "staticPort": 42701,
+  "allowedOrigin": "http://cw-sp04-allowed.test:42701",
+  "deniedOrigin": "http://cw-sp04-denied.test:42701",
+  "nativePort": 41767,
+  "browserRoots": {
+    "home": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/home",
+    "config": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/config",
+    "data": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/data",
+    "cache": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/cache",
+    "state": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/state",
+    "tmp": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/tmp",
+    "run": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/run"
+  },
+  "cdpPort": 40061,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "servedBuildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+  "initialConfig": {
+    "cors": [
+      "http://cw-sp04-allowed.test:42701"
+    ],
+    "port": 41767,
+    "passwordPresent": false
+  },
+  "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+  "before": {
+    "ok": true,
+    "origin": "http://cw-sp04-allowed.test:42701",
+    "visibility": "visible",
+    "activeReaders": 1,
+    "maxActiveReaders": 1,
+    "activeAttempts": 1,
+    "milestones": [],
+    "recoveryError": null,
+    "attempts": [
+      {
+        "number": 1,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": false,
+        "released": false,
+        "locallyAborted": false,
+        "fatal": false,
+        "startedMs": 1791321515687,
+        "readerMs": 1791321515928,
+        "releasedMs": null,
+        "endedMs": null,
+        "outcome": null,
+        "errorType": null,
+        "events": [
+          {
+            "event": {
+              "id": "evt_113152795001sQOOEQ1kT4JYxF",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791321515931,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+              "created": 1791321516235,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                "title": "SP04 managed live 🚀"
+              },
+              "durable": {
+                "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                "seq": 1,
+                "version": 1
+              }
+            },
+            "atMs": 1791321516241,
+            "read": 4
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 83,
+            "atMs": 1791321515930
+          },
+          {
+            "bytes": 13,
+            "atMs": 1791321515931
+          },
+          {
+            "bytes": 411,
+            "atMs": 1791321516204
+          },
+          {
+            "bytes": 354,
+            "atMs": 1791321516240
+          }
+        ]
+      }
+    ]
+  },
+  "restartStartedMs": 1791321516354,
+  "oldListenerGoneMs": 1791321516929,
+  "disconnected": {
+    "ok": true,
+    "origin": "http://cw-sp04-allowed.test:42701",
+    "visibility": "visible",
+    "activeReaders": 0,
+    "maxActiveReaders": 1,
+    "activeAttempts": 0,
+    "milestones": [
+      {
+        "kind": "naturalDisconnect",
+        "atMs": 1791321516820,
+        "attempt": 1,
+        "outcome": "read-error"
+      }
+    ],
+    "recoveryError": null,
+    "attempts": [
+      {
+        "number": 1,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": true,
+        "released": true,
+        "locallyAborted": false,
+        "fatal": false,
+        "startedMs": 1791321515687,
+        "readerMs": 1791321515928,
+        "releasedMs": 1791321516819,
+        "endedMs": 1791321516819,
+        "outcome": "read-error",
+        "errorType": "JSObject",
+        "events": [
+          {
+            "event": {
+              "id": "evt_113152795001sQOOEQ1kT4JYxF",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791321515931,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+              "created": 1791321516235,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                "title": "SP04 managed live 🚀"
+              },
+              "durable": {
+                "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                "seq": 1,
+                "version": 1
+              }
+            },
+            "atMs": 1791321516241,
+            "read": 4
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 83,
+            "atMs": 1791321515930
+          },
+          {
+            "bytes": 13,
+            "atMs": 1791321515931
+          },
+          {
+            "bytes": 411,
+            "atMs": 1791321516204
+          },
+          {
+            "bytes": 354,
+            "atMs": 1791321516240
+          },
+          {
+            "bytes": 1748,
+            "atMs": 1791321516741
+          }
+        ]
+      }
+    ]
+  },
+  "final": {
+    "ok": true,
+    "origin": "http://cw-sp04-allowed.test:42701",
+    "visibility": "visible",
+    "activeReaders": 1,
+    "maxActiveReaders": 1,
+    "activeAttempts": 1,
+    "milestones": [
+      {
+        "kind": "naturalDisconnect",
+        "atMs": 1791321516820,
+        "attempt": 1,
+        "outcome": "read-error"
+      },
+      {
+        "kind": "streamRecovered",
+        "atMs": 1791321518177,
+        "fromAttempt": 1,
+        "attempt": 3,
+        "id": "ses_1a1131523a90007bb2fdacfb7529",
+        "title": "SP04 managed live 🚀"
+      }
+    ],
+    "recoveryError": null,
+    "attempts": [
+      {
+        "number": 1,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": true,
+        "released": true,
+        "locallyAborted": false,
+        "fatal": false,
+        "startedMs": 1791321515687,
+        "readerMs": 1791321515928,
+        "releasedMs": 1791321516819,
+        "endedMs": 1791321516819,
+        "outcome": "read-error",
+        "errorType": "JSObject",
+        "events": [
+          {
+            "event": {
+              "id": "evt_113152795001sQOOEQ1kT4JYxF",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791321515931,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_1131528cb001nyXQ3YGye5cJP8",
+              "created": 1791321516235,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                "title": "SP04 managed live 🚀"
+              },
+              "durable": {
+                "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                "seq": 1,
+                "version": 1
+              }
+            },
+            "atMs": 1791321516241,
+            "read": 4
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 83,
+            "atMs": 1791321515930
+          },
+          {
+            "bytes": 13,
+            "atMs": 1791321515931
+          },
+          {
+            "bytes": 411,
+            "atMs": 1791321516204
+          },
+          {
+            "bytes": 354,
+            "atMs": 1791321516240
+          },
+          {
+            "bytes": 1748,
+            "atMs": 1791321516741
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "status": null,
+        "mediaType": null,
+        "connected": false,
+        "ended": true,
+        "released": false,
+        "locallyAborted": false,
+        "fatal": false,
+        "startedMs": 1791321517071,
+        "readerMs": null,
+        "releasedMs": null,
+        "endedMs": 1791321517079,
+        "outcome": "unowned-listener",
+        "errorType": null,
+        "events": [],
+        "chunks": []
+      },
+      {
+        "number": 3,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": false,
+        "released": false,
+        "locallyAborted": false,
+        "fatal": false,
+        "startedMs": 1791321517372,
+        "readerMs": 1791321517751,
+        "releasedMs": null,
+        "endedMs": null,
+        "outcome": null,
+        "errorType": null,
+        "events": [
+          {
+            "event": {
+              "id": "evt_113152eb3001WfvIOC5T7KucYH",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791321517752,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_11315336c001D9zicASst77b9z",
+              "created": 1791321518956,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a1131523a90007bb2fdacfb7529",
+                "title": "SP04 managed resumed live"
+              },
+              "durable": {
+                "aggregateID": "ses_1a1131523a90007bb2fdacfb7529",
+                "seq": 2,
+                "version": 1
+              }
+            },
+            "atMs": 1791321518966,
+            "read": 4
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 83,
+            "atMs": 1791321517752
+          },
+          {
+            "bytes": 13,
+            "atMs": 1791321517752
+          },
+          {
+            "bytes": 411,
+            "atMs": 1791321518924
+          },
+          {
+            "bytes": 357,
+            "atMs": 1791321518965
+          }
+        ]
+      }
+    ]
+  },
+  "result": "managed-restart-browser-subset-pass",
+  "cleanup": {
+    "errors": [],
+    "session404": true,
+    "processGroupsAbsent": true,
+    "snapPrivateRootAbsent": true,
+    "listenersAbsent": true,
+    "nativeRuntimeAbsent": true
+  }
+}

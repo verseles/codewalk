@@ -1,0 +1,156 @@
+{
+  "startedAt": "2026-10-06T20:58:46.623Z",
+  "calls": [
+    {
+      "label": "ReadinessInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791320328217,
+      "atMs": 1791320328246
+    }
+  ],
+  "operations": [],
+  "network": [],
+  "services": [
+    {
+      "atMs": 1791320328246,
+      "pid": 2666668,
+      "socket": "354722129",
+      "id": "9caa8388-6926-4844-9b00-0f920c7e1d81",
+      "version": "2.0.22",
+      "url": "http://127.0.0.1:43383",
+      "passwordStable": true,
+      "config": {
+        "cors": [
+          "http://cw-sp04-allowed.test:39863"
+        ],
+        "port": 43383,
+        "passwordPresent": true
+      }
+    }
+  ],
+  "cli": [
+    {
+      "args": [
+        "service",
+        "set",
+        "port",
+        "43383"
+      ],
+      "startMs": 1791320326637,
+      "atMs": 1791320326823,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "set",
+        "cors",
+        "http://cw-sp04-allowed.test:39863"
+      ],
+      "startMs": 1791320326823,
+      "atMs": 1791320326949,
+      "ok": true
+    },
+    {
+      "args": [
+        "service",
+        "get",
+        "password"
+      ],
+      "startMs": 1791320327853,
+      "atMs": 1791320327980,
+      "ok": true
+    }
+  ],
+  "authenticationGuards": [],
+  "isolation": {
+    "privateEnvironment": true,
+    "inheritedProviderCredentials": false
+  },
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "npmIntegrity": "sha512-t/yuu9Dqd/M44dFH95bphu7ikO6FATMQuVk/91QBnCMzsP8zVrXU7zAxD1wVLpYYUDqIonEmi80XETlFqx7chw==",
+  "nativeArgv": [
+    "serve",
+    "--service",
+    "--log-level",
+    "none"
+  ],
+  "sourceSHA256": "f0afe1a3f46fa1f7435a8a5c26fd4795e45c7d4ae1e3b65fca8f8507c4c2bb17",
+  "buildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+  "buildProvenance": {
+    "inputsSHA256": {
+      "lib/main.dart": "f0afe1a3f46fa1f7435a8a5c26fd4795e45c7d4ae1e3b65fca8f8507c4c2bb17",
+      "pubspec.yaml": "f2a4874ebfe47a939deb78aa396e4dad24b32d3a0d2500b48f5237fcf4a88a95",
+      "pubspec.lock": "45f817a778c436da6889bee77bc25303a84687930e0077d8bb75ae540231d5c4",
+      "web/index.html": "7fd953d335b3bc19c370629def303fd0105f4420842caea41dc244583351e2db"
+    },
+    "buildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+    "argv": [
+      "rtk",
+      "proxy",
+      "flutter",
+      "build",
+      "web",
+      "--release",
+      "--no-pub",
+      "--no-web-resources-cdn"
+    ],
+    "analyzeArgv": [
+      "rtk",
+      "proxy",
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "startedAt": 1791319720.3772404,
+    "finishedAt": 1791319748.1851206
+  },
+  "staticPort": 39863,
+  "allowedOrigin": "http://cw-sp04-allowed.test:39863",
+  "deniedOrigin": "http://cw-sp04-denied.test:39863",
+  "nativePort": 43383,
+  "initialConfig": {
+    "cors": [
+      "http://cw-sp04-allowed.test:39863"
+    ],
+    "port": 43383,
+    "passwordPresent": false
+  },
+  "browserRoots": {
+    "home": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/home",
+    "config": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/config",
+    "data": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/data",
+    "cache": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/cache",
+    "state": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/state",
+    "tmp": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/tmp",
+    "run": "/tmp/opencode/codewalk-sp04-managed-j8Qctjqn/run"
+  },
+  "cdpPort": 32789,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "servedBuildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+  "result": "failed",
+  "failure": {
+    "phase": "browser",
+    "type": "Error",
+    "message": "bounded observation timeout"
+  },
+  "cleanup": {
+    "errors": [],
+    "processGroupsAbsent": true,
+    "snapPrivateRootAbsent": true,
+    "listenersAbsent": true,
+    "nativeRuntimeAbsent": true
+  }
+}

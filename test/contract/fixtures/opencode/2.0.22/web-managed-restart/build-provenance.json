@@ -1,0 +1,28 @@
+{
+  "inputsSHA256": {
+    "lib/main.dart": "f0afe1a3f46fa1f7435a8a5c26fd4795e45c7d4ae1e3b65fca8f8507c4c2bb17",
+    "pubspec.yaml": "f2a4874ebfe47a939deb78aa396e4dad24b32d3a0d2500b48f5237fcf4a88a95",
+    "pubspec.lock": "45f817a778c436da6889bee77bc25303a84687930e0077d8bb75ae540231d5c4",
+    "web/index.html": "7fd953d335b3bc19c370629def303fd0105f4420842caea41dc244583351e2db"
+  },
+  "buildSHA256": "3634a2b7a78d3c7c88b3fa1d3c98f0c8e1885a118cd5e290d3ed527efd71138f",
+  "argv": [
+    "rtk",
+    "proxy",
+    "flutter",
+    "build",
+    "web",
+    "--release",
+    "--no-pub",
+    "--no-web-resources-cdn"
+  ],
+  "analyzeArgv": [
+    "rtk",
+    "proxy",
+    "flutter",
+    "analyze",
+    "--no-pub"
+  ],
+  "startedAt": 1791319720.3772404,
+  "finishedAt": 1791319748.1851206
+}
