@@ -78,6 +78,5 @@ scorecard.png
 # ai-memory persistent storage (MCP)
 ai-memory*
 
-# Local agent task checkpoint
+# Obsolete single-file checkpoint; canonical .task-memory/ is tracked per AGENTS.md
 /TASK_MEMORY.md
-/.task-memory/
