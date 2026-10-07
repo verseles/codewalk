@@ -1,0 +1,1250 @@
+{
+  "startedAt": "2026-10-07T16:05:25.053Z",
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "sourceSHA256": "305f850e3bcb60b26b8525e3fb7aa5b4f3ca471df9eac83a5f58e445628320b1",
+  "buildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "buildProvenance": {
+    "inputsSHA256": {
+      "lib/main.dart": "305f850e3bcb60b26b8525e3fb7aa5b4f3ca471df9eac83a5f58e445628320b1",
+      "pubspec.yaml": "f2a4874ebfe47a939deb78aa396e4dad24b32d3a0d2500b48f5237fcf4a88a95",
+      "pubspec.lock": "45f817a778c436da6889bee77bc25303a84687930e0077d8bb75ae540231d5c4",
+      "web/index.html": "7fd953d335b3bc19c370629def303fd0105f4420842caea41dc244583351e2db"
+    },
+    "buildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+    "argv": [
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "pub",
+        "get",
+        "--offline"
+      ],
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "build",
+        "web",
+        "--release",
+        "--no-pub",
+        "--no-web-resources-cdn"
+      ]
+    ],
+    "startedAt": 1791387174.2137642,
+    "finishedAt": 1791387219.3058758
+  },
+  "scope": "private-Tailscale-HTTPS-origin-to-distinct-peer-HTTP; not public Pages",
+  "budgets": {
+    "setupSeconds": 1200,
+    "collectionSeconds": 180,
+    "cleanupSeconds": 120,
+    "preparationDebitSeconds": 49
+  },
+  "securityOverrides": [],
+  "nativeArgv": [
+    "serve",
+    "--hostname",
+    "100.123.123.3",
+    "--port",
+    "45131",
+    "--cors",
+    "https://coolify.uaru-nase.ts.net:8443"
+  ],
+  "guards": [
+    {
+      "id": 1,
+      "label": "Configure",
+      "atMs": 1791389134261,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 2,
+      "label": "BrowserInfo",
+      "atMs": 1791389134440,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 3,
+      "label": "BrowserSnapshot",
+      "atMs": 1791389134622,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 4,
+      "label": "BrowserSSEStart",
+      "atMs": 1791389134799,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 5,
+      "label": "BrowserSSELive",
+      "atMs": 1791389135188,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 6,
+      "label": "BrowserSSEStop",
+      "atMs": 1791389135360,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 7,
+      "label": "BrowserTicket",
+      "atMs": 1791389135609,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 8,
+      "label": "BrowserWSOpen",
+      "atMs": 1791389135790,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 9,
+      "label": "BrowserWSReady",
+      "atMs": 1791389136024,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 10,
+      "label": "BrowserWSSend",
+      "atMs": 1791389136193,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 11,
+      "label": "BrowserWSEcho",
+      "atMs": 1791389136364,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    },
+    {
+      "id": 12,
+      "label": "BrowserWSClose",
+      "atMs": 1791389136534,
+      "pid": 3570910,
+      "socket": "581827008",
+      "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+      "address": "100.123.123.3",
+      "port": 45131,
+      "listenerOwned": true
+    }
+  ],
+  "operations": [
+    {
+      "label": "Configure",
+      "atMs": 1791389134273,
+      "guardId": 1,
+      "result": {
+        "ok": true,
+        "implementation": "compiled Dart package:web",
+        "pageOrigin": "https://coolify.uaru-nase.ts.net:8443"
+      }
+    },
+    {
+      "label": "BrowserInfo",
+      "atMs": 1791389134455,
+      "guardId": 2,
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "version": "2.0.22",
+          "pid": 3570910,
+          "urls": [
+            "http://100.123.123.3:45131"
+          ],
+          "paths": {
+            "tmp": "[OWNED_CAPTURE_ROOT]/runtime/tmp/opencode"
+          }
+        }
+      }
+    },
+    {
+      "label": "BrowserSnapshot",
+      "atMs": 1791389134634,
+      "guardId": 3,
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "data": {
+            "id": "ses_1a1171cda81000c1ed2eaa64f222",
+            "projectID": "8c72eadf823130c1254ddcad41f8e52fa9a5817c",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            },
+            "time": {
+              "created": 1791389129504,
+              "updated": 1791389129504
+            },
+            "title": "SP04 Tailpeer",
+            "location": {
+              "directory": "[OWNED_CAPTURE_ROOT]/runtime/project"
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "BrowserSSEStart",
+      "atMs": 1791389134861,
+      "guardId": 4,
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_1171cefd6001nZeLdbG6jBfuL4",
+            "type": "server.connected",
+            "data": {}
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791389134810
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": false,
+        "controlledByteCount": 0,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "BrowserSSELive",
+      "atMs": 1791389135191,
+      "guardId": 5,
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_1171cefd6001nZeLdbG6jBfuL4",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_1171cf0a9001QrxQ8QLJJRoeA1",
+            "created": 1791389135017,
+            "type": "session.renamed",
+            "location": {
+              "directory": "[OWNED_CAPTURE_ROOT]/runtime/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1171cda81000c1ed2eaa64f222",
+              "title": "Tailpeer native 🚀"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1171cda81000c1ed2eaa64f222",
+              "seq": 1,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791389134810
+          },
+          {
+            "bytes": 353,
+            "receivedMs": 1791389135023
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 345,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "BrowserSSEStop",
+      "atMs": 1791389135442,
+      "guardId": 6,
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_1171cefd6001nZeLdbG6jBfuL4",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_1171cf0a9001QrxQ8QLJJRoeA1",
+            "created": 1791389135017,
+            "type": "session.renamed",
+            "location": {
+              "directory": "[OWNED_CAPTURE_ROOT]/runtime/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1171cda81000c1ed2eaa64f222",
+              "title": "Tailpeer native 🚀"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1171cda81000c1ed2eaa64f222",
+              "seq": 1,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791389134810
+          },
+          {
+            "bytes": 353,
+            "receivedMs": 1791389135023
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 345,
+        "aborted": true,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "BrowserTicket",
+      "atMs": 1791389135622,
+      "guardId": 7,
+      "result": {
+        "ok": true,
+        "status": 200,
+        "handle": "own",
+        "expiresIn": 60
+      }
+    },
+    {
+      "label": "BrowserWSOpen",
+      "atMs": 1791389135849,
+      "guardId": 8,
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "TAILPEER_READY\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "TAILPEER_READY\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 16
+          }
+        ],
+        "metaCursor": 16,
+        "trackedCursor": 16
+      }
+    },
+    {
+      "label": "BrowserWSReady",
+      "atMs": 1791389136027,
+      "guardId": 9,
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "TAILPEER_READY\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "TAILPEER_READY\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 16
+          }
+        ],
+        "metaCursor": 16,
+        "trackedCursor": 16
+      }
+    },
+    {
+      "label": "BrowserWSSend",
+      "atMs": 1791389136195,
+      "guardId": 10,
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "label": "BrowserWSEcho",
+      "atMs": 1791389136367,
+      "guardId": 11,
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "TAILPEER_READY\r\nTAILPEER_PING\r\nECHO:TAILPEER_PING\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "TAILPEER_READY\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 16
+          },
+          {
+            "kind": "text",
+            "text": "TAILPEER_PING\r\nECHO:TAILPEER_PING\r\n",
+            "utf16Units": 35
+          }
+        ],
+        "metaCursor": 16,
+        "trackedCursor": 51
+      }
+    },
+    {
+      "label": "BrowserWSClose",
+      "atMs": 1791389136638,
+      "guardId": 12,
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": 1005,
+        "text": "TAILPEER_READY\r\nTAILPEER_PING\r\nECHO:TAILPEER_PING\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "TAILPEER_READY\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 16
+          },
+          {
+            "kind": "text",
+            "text": "TAILPEER_PING\r\nECHO:TAILPEER_PING\r\n",
+            "utf16Units": 35
+          }
+        ],
+        "metaCursor": 16,
+        "trackedCursor": 51
+      }
+    }
+  ],
+  "network": [
+    {
+      "id": "2014515.10",
+      "path": "/api/info",
+      "atMs": 1791389134443,
+      "guardId": 2,
+      "method": "GET",
+      "request": {
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": true,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443",
+        "content-type": "application/json"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "2555D6227CA1DC1FB3C3F1D913FDDD2B",
+      "path": "/api/info",
+      "atMs": 1791389134445,
+      "guardId": 2,
+      "method": "OPTIONS",
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": false,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "16681E5D068E051488BA09B0B4019A5E",
+      "path": "/api/session/ses_1a1171cda81000c1ed2eaa64f222",
+      "atMs": 1791389134625,
+      "guardId": 3,
+      "method": "OPTIONS",
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": false,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "2014515.11",
+      "path": "/api/session/ses_1a1171cda81000c1ed2eaa64f222",
+      "atMs": 1791389134626,
+      "guardId": 3,
+      "method": "GET",
+      "request": {
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": true,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443",
+        "content-type": "application/json"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "2014515.12",
+      "path": "/api/event",
+      "atMs": 1791389134802,
+      "guardId": 4,
+      "method": "GET",
+      "request": {
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": true,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443",
+        "content-type": "text/event-stream"
+      },
+      "resourceIPAddressSpace": "Local",
+      "failure": {
+        "canceled": true,
+        "cors": null,
+        "blocked": null,
+        "errorCode": "net::ERR_ABORTED"
+      }
+    },
+    {
+      "id": "0579F7B68985153A42846B519EC5476F",
+      "path": "/api/event",
+      "atMs": 1791389134803,
+      "guardId": 4,
+      "method": "OPTIONS",
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": false,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "1F20536D4F0F584EA879E12BEFBD019A",
+      "path": "/api/pty/pty_1171cdbf3001AoB5pmkXiS9YoC/connect-token",
+      "atMs": 1791389135613,
+      "guardId": 7,
+      "method": "OPTIONS",
+      "request": {
+        "access-control-request-headers": "authorization,x-opencode-ticket",
+        "access-control-request-method": "POST",
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": false,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization,x-opencode-ticket",
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "2014515.13",
+      "path": "/api/pty/pty_1171cdbf3001AoB5pmkXiS9YoC/connect-token",
+      "atMs": 1791389135613,
+      "guardId": 7,
+      "method": "POST",
+      "request": {
+        "origin": "https://coolify.uaru-nase.ts.net:8443"
+      },
+      "authorizationPresent": true,
+      "ticketPresent": false,
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Local",
+        "localNetworkAccessRequestPolicy": "PermissionBlock"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "https://coolify.uaru-nase.ts.net:8443",
+        "content-type": "application/json"
+      },
+      "resourceIPAddressSpace": "Local"
+    },
+    {
+      "id": "2014515.14",
+      "path": "/api/pty/pty_1171cdbf3001AoB5pmkXiS9YoC/connect",
+      "atMs": 1791389135795,
+      "guardId": 8,
+      "method": "WS",
+      "request": {},
+      "authorizationPresent": false,
+      "ticketPresent": true,
+      "status": 101,
+      "response": {}
+    }
+  ],
+  "bootstrap": [
+    {
+      "path": "/",
+      "atMs": 1791389132823
+    },
+    {
+      "path": "/",
+      "id": "0833CF3FB764448717122499AA8F39E2",
+      "status": 200,
+      "mediaType": "text/html",
+      "atMs": 1791389132888,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/flutter_bootstrap.js",
+      "atMs": 1791389132926
+    },
+    {
+      "path": "/flutter_bootstrap.js",
+      "id": "2014515.2",
+      "status": 200,
+      "mediaType": "text/javascript",
+      "atMs": 1791389132944,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/canvaskit/chromium/canvaskit.wasm",
+      "atMs": 1791389132984
+    },
+    {
+      "path": "/canvaskit/chromium/canvaskit.js",
+      "atMs": 1791389132984
+    },
+    {
+      "path": "/main.dart.js",
+      "atMs": 1791389132985
+    },
+    {
+      "path": "/canvaskit/chromium/canvaskit.wasm",
+      "id": "2014515.4",
+      "status": 200,
+      "mediaType": "application/wasm",
+      "atMs": 1791389132987,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/favicon.ico",
+      "atMs": 1791389132988
+    },
+    {
+      "path": "/canvaskit/chromium/canvaskit.js",
+      "id": "2014515.5",
+      "status": 200,
+      "mediaType": "text/javascript",
+      "atMs": 1791389133057,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/favicon.ico",
+      "id": "2014515.7",
+      "status": 404,
+      "mediaType": "text/html",
+      "atMs": 1791389133069,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/main.dart.js",
+      "id": "2014515.6",
+      "status": 200,
+      "mediaType": "text/javascript",
+      "atMs": 1791389133188,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    },
+    {
+      "path": "/assets/FontManifest.json",
+      "atMs": 1791389133413
+    },
+    {
+      "path": "/assets/FontManifest.json",
+      "id": "2014515.8",
+      "status": 200,
+      "mediaType": "application/json",
+      "atMs": 1791389133421,
+      "remoteIP": "100.123.123.3",
+      "securityState": "secure",
+      "tls": {
+        "protocol": "TLS 1.3",
+        "subjectName": "coolify.uaru-nase.ts.net",
+        "issuer": "YE1"
+      }
+    }
+  ],
+  "policyLogs": [
+    {
+      "atMs": 1791389132974,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389133070,
+      "level": "error",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389133420,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389133420,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389133990,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389133991,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134283,
+      "guardId": 1,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134443,
+      "guardId": 2,
+      "level": "warning",
+      "mixedContent": true,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134465,
+      "guardId": 2,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134624,
+      "guardId": 3,
+      "level": "warning",
+      "mixedContent": true,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134645,
+      "guardId": 3,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389134802,
+      "guardId": 4,
+      "level": "warning",
+      "mixedContent": true,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389135612,
+      "guardId": 7,
+      "level": "warning",
+      "mixedContent": true,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389135794,
+      "guardId": 8,
+      "level": "warning",
+      "mixedContent": true,
+      "nativeWebSocket": true,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    },
+    {
+      "atMs": 1791389135794,
+      "guardId": 8,
+      "level": "warning",
+      "mixedContent": false,
+      "nativeWebSocket": false,
+      "localNetwork": false,
+      "cors": false,
+      "certificate": false
+    }
+  ],
+  "cleanup": {
+    "errors": [],
+    "browserCredentialsCleared": true,
+    "browserProcessesStopped": true,
+    "remote": {
+      "errors": [
+        "baseline:OSError"
+      ],
+      "calls": [
+        {
+          "label": "ReadinessInfo",
+          "method": "GET",
+          "path": "/api/info",
+          "status": 200,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "CreateSession",
+          "method": "POST",
+          "path": "/api/session",
+          "status": 200,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "CreatePty",
+          "method": "POST",
+          "path": "/api/pty",
+          "status": 200,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "NativeRename",
+          "method": "PATCH",
+          "path": "/api/session/ses_1a1171cda81000c1ed2eaa64f222",
+          "status": 204,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "DeletePty",
+          "method": "DELETE",
+          "path": "/api/pty/pty_1171cdbf3001AoB5pmkXiS9YoC",
+          "status": 204,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "VerifyPtyAbsent",
+          "method": "GET",
+          "path": "/api/pty/pty_1171cdbf3001AoB5pmkXiS9YoC",
+          "status": 404,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "DeleteSession",
+          "method": "DELETE",
+          "path": "/api/session/ses_1a1171cda81000c1ed2eaa64f222",
+          "status": 204,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        },
+        {
+          "label": "VerifySessionAbsent",
+          "method": "GET",
+          "path": "/api/session/ses_1a1171cda81000c1ed2eaa64f222",
+          "status": 404,
+          "pid": 3570910,
+          "socket": "581827008",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        }
+      ],
+      "serveNotAttempted": false,
+      "sessionNotAttempted": false,
+      "ptyNotAttempted": false,
+      "ptyAbsent": true,
+      "ptyProcessAbsent": true,
+      "sessionAbsent": true,
+      "serveSupervisor": {
+        "event": "stopped",
+        "pid": 3570935,
+        "childReaped": true,
+        "exitCode": -15,
+        "reason": "stop"
+      },
+      "serveBaselineRestored": true,
+      "elapsedSeconds": 0.7591557819396257,
+      "budgetSeconds": 50
+    },
+    "snapRootAbsent": true,
+    "localServeBaselinePreserved": true,
+    "elapsedMs": 1176.110032999999
+  },
+  "localIPs": [
+    "100.123.123.1",
+    "fd7a:115c:a1e0::ac33:6176"
+  ],
+  "localServeBaseline": {
+    "TCP": {
+      "443": {
+        "HTTPS": true
+      }
+    },
+    "Web": {
+      "mercury.uaru-nase.ts.net:443": {
+        "Handlers": {
+          "/": {
+            "Proxy": "http://127.0.0.1:8082"
+          }
+        }
+      }
+    }
+  },
+  "setupElapsedMs": 3043.590231,
+  "native": {
+    "version": "2.0.22",
+    "cliVersionStdout": "opencode v2.0.22",
+    "base": "http://100.123.123.3:45131",
+    "origin": "https://coolify.uaru-nase.ts.net:8443",
+    "directory": "[OWNED_CAPTURE_ROOT]/runtime/project",
+    "peerIPs": [
+      "100.123.123.3",
+      "fd7a:115c:a1e0::4932:df1d"
+    ],
+    "static": {
+      "pid": 3570909,
+      "socket": "581826394",
+      "binarySHA256": "c86f21d0da9290ece2d7d49a3f7ed52aed59cb029abdf0ea25c79634f6cbe960",
+      "address": "127.0.0.1",
+      "port": 45130,
+      "listenerOwned": true
+    },
+    "baselinePreserved": true,
+    "foreground": {
+      "layer": "Foreground",
+      "sessionId": "0e4b3b59cce2506e",
+      "config": {
+        "TCP": {
+          "8443": {
+            "HTTPS": true
+          }
+        },
+        "Web": {
+          "coolify.uaru-nase.ts.net:8443": {
+            "Handlers": {
+              "/": {
+                "Proxy": "http://127.0.0.1:45130"
+              }
+            }
+          }
+        }
+      },
+      "supervisor": {
+        "event": "started",
+        "pid": 3570935,
+        "uid": 0
+      }
+    },
+    "isolation": {
+      "privateEnvironment": true,
+      "inheritedProviderCredentials": false
+    },
+    "pid": 3570910,
+    "socket": "581827008",
+    "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+    "address": "100.123.123.3",
+    "port": 45131,
+    "listenerOwned": true
+  },
+  "session": "ses_1a1171cda81000c1ed2eaa64f222",
+  "pty": "pty_1171cdbf3001AoB5pmkXiS9YoC",
+  "browserRoots": {
+    "home": "[OWNED_CAPTURE_ROOT]/home",
+    "config": "[OWNED_CAPTURE_ROOT]/config",
+    "data": "[OWNED_CAPTURE_ROOT]/data",
+    "cache": "[OWNED_CAPTURE_ROOT]/cache",
+    "state": "[OWNED_CAPTURE_ROOT]/state",
+    "tmp": "[OWNED_CAPTURE_ROOT]/tmp",
+    "run": "[OWNED_CAPTURE_ROOT]/run"
+  },
+  "browserArgs": [
+    "--headless=new",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--password-store=basic",
+    "--disable-background-networking",
+    "--no-proxy-server",
+    "--remote-debugging-port=0",
+    "--remote-debugging-address=127.0.0.1",
+    "--user-data-dir=[OWNED_CAPTURE_ROOT]/browser",
+    "about:blank"
+  ],
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "page": {
+    "origin": "https://coolify.uaru-nase.ts.net:8443",
+    "secureContext": true
+  },
+  "servedBuildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+  "wsObservation": "opened-with-native-echo",
+  "observation": "browser-http-readable",
+  "result": "inconclusive",
+  "collectionElapsedMs": 8797.262463,
+  "finishedAt": "2026-10-07T16:05:37.814Z"
+}

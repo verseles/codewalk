@@ -1,0 +1,23 @@
+{
+  "rawValidator": "expected-rejection-inconclusive",
+  "observedSubsetChecks": "pass",
+  "observations": [
+    "authenticated HTTP200 info and owned snapshot",
+    "SSE200 with connected and later owned Unicode rename in distinct reads",
+    "browser-obtained PTY ticket200",
+    "WebSocket101 with native ready and echo"
+  ],
+  "independentCleanup": "pass-see-recovery-3.json",
+  "sourceSHA256": "305f850e3bcb60b26b8525e3fb7aa5b4f3ca471df9eac83a5f58e445628320b1",
+  "buildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+  "collectorSHA256": {
+    "capture.mjs": "9e03e662a016240ccfc7a8280dd0fd89ac6ff34eb501b9de5989ff02e4ca90e9",
+    "cdp.mjs": "98083a92c259cd42c60b45467dd7648691204e33425d6028553975d60ab77577",
+    "budget.mjs": "ae2dec0eb078aaba8f54e17052f0b5d4cac3a3515feaf41bcf8b30b8a883477e",
+    "peer.py": "6ce6d9b60f48caabbea40c1aa034347253dee249882d00704f6ad3bcf2fa2fff",
+    "serve_supervisor.py": "43a247d7cc4391a94ad8ddb79452aaec4768387106691ebf77ba695abd99d305",
+    "validate.py": "a7dd01bcb85246c0dab938ebca15598b7e73a940accc319510c3f12a25114c28"
+  },
+  "checkpointAccepted": false,
+  "publicOriginLANTested": false
+}

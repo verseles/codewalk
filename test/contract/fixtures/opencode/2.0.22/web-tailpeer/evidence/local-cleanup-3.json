@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-07T16:12:10.812661+00:00",
+  "localInvocationRootRemoved": true,
+  "ownedInvocationProcessPids": [],
+  "archivedCaptureSHA256": "f82250338862fbc6aba4672bb1ecfee8f836ce4c24a5acbf8bf34e33728f4772",
+  "compiledBuildHashCheckedBeforeRemoval": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+  "dartSourceRegenerationMatchesCapture": true,
+  "retainedInputFixtureHashesMatchCapture": true,
+  "collectorSourceHashes": "validation-3.json",
+  "previousCapturedRootsUntouched": true
+}

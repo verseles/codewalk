@@ -1,0 +1,20 @@
+{
+  "kind": "independent-post-capture-verification",
+  "captureSHA256": "d560cf7ca7569025c85ff1a9377ab29a1b13d190f5a4e16cd217ffcfe2d4b3ad",
+  "verifiedAt": "2026-10-07T13:20:29.781964+00:00",
+  "peerIP": "100.123.123.3",
+  "remoteRoot": "/tmp/opencode/codewalk-sp04-tailpeer-yyggvfln",
+  "remoteRootAbsent": true,
+  "nativePid": 2698679,
+  "nativePidAbsent": true,
+  "selectedPorts": [45130, 45131, 8443],
+  "selectedPortsAbsent": true,
+  "serveBaselinePreserved": true,
+  "existingServePorts": [3001, 4097],
+  "localServeBaselinePreserved": true,
+  "ownedInvocationProcessPids": [],
+  "sameTailscaleBinaryAcrossPaths": true,
+  "tailscaleVersion": "1.102.4",
+  "originalCaptureUnmodified": true,
+  "localPreparedRootRetainedForProvenance": true
+}

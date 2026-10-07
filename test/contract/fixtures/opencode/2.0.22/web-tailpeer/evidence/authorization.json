@@ -1,0 +1,20 @@
+{
+  "kind": "read-only-localapi-authorization-verification",
+  "verifiedAt": "2026-10-07T13:52:40.133084+00:00",
+  "method": "GET",
+  "path": "/localapi/v0/check-prefs",
+  "callerUid": 1001,
+  "status": 403,
+  "responseMatchesWriteAccessDenied": true,
+  "permitWrite": false,
+  "tailscaleVersion": "1.102.4-t3caf7d9e7-g084ee3b64",
+  "newServeSessions": 0,
+  "configWrites": 0,
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "priorChildExitCauseEstablished": false,
+  "source": {
+    "readOnlyGate": "https://github.com/tailscale/tailscale/blob/v1.102.4/ipn/localapi/localapi.go#L1047-L1055",
+    "serveWriteGate": "https://github.com/tailscale/tailscale/blob/v1.102.4/ipn/localapi/serve.go#L45-L49"
+  }
+}

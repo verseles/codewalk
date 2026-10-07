@@ -1,0 +1,135 @@
+{
+  "startedAt": "2026-10-07T13:16:38.440Z",
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "sourceSHA256": "305f850e3bcb60b26b8525e3fb7aa5b4f3ca471df9eac83a5f58e445628320b1",
+  "buildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "buildProvenance": {
+    "inputsSHA256": {
+      "lib/main.dart": "305f850e3bcb60b26b8525e3fb7aa5b4f3ca471df9eac83a5f58e445628320b1",
+      "pubspec.yaml": "f2a4874ebfe47a939deb78aa396e4dad24b32d3a0d2500b48f5237fcf4a88a95",
+      "pubspec.lock": "45f817a778c436da6889bee77bc25303a84687930e0077d8bb75ae540231d5c4",
+      "web/index.html": "7fd953d335b3bc19c370629def303fd0105f4420842caea41dc244583351e2db"
+    },
+    "buildSHA256": "6b057c1c80c0ee56c1725c08170433511b6fed0023e8cb8fbd593943320c5c21",
+    "argv": [
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "pub",
+        "get",
+        "--offline"
+      ],
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      [
+        "rtk",
+        "proxy",
+        "flutter",
+        "build",
+        "web",
+        "--release",
+        "--no-pub",
+        "--no-web-resources-cdn"
+      ]
+    ],
+    "startedAt": 1791378825.0929828,
+    "finishedAt": 1791378871.9514673
+  },
+  "scope": "private-Tailscale-HTTPS-origin-to-distinct-peer-HTTP; not public Pages",
+  "budgets": {
+    "setupSeconds": 1200,
+    "collectionSeconds": 180,
+    "cleanupSeconds": 120,
+    "preparationDebitSeconds": 51
+  },
+  "securityOverrides": [],
+  "nativeArgv": [
+    "serve",
+    "--hostname",
+    "100.123.123.3",
+    "--port",
+    "45131",
+    "--cors",
+    "https://coolify.uaru-nase.ts.net:8443"
+  ],
+  "guards": [],
+  "operations": [],
+  "network": [],
+  "bootstrap": [],
+  "policyLogs": [],
+  "cleanup": {
+    "errors": [],
+    "browserProcessesStopped": true,
+    "remote": {
+      "errors": [],
+      "calls": [
+        {
+          "label": "ReadinessInfo",
+          "method": "GET",
+          "path": "/api/info",
+          "status": 200,
+          "pid": 2698679,
+          "socket": "578466123",
+          "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+          "address": "100.123.123.3",
+          "port": 45131,
+          "listenerOwned": true
+        }
+      ],
+      "sessionNotAttempted": true,
+      "ptyNotAttempted": true,
+      "serveBaselineRestored": true,
+      "portsAbsent": true,
+      "ownedProcessesStopped": true,
+      "elapsedSeconds": 0.047046873020008206,
+      "budgetSeconds": 50
+    },
+    "remoteRootAbsent": true,
+    "snapRootAbsent": true,
+    "localServeBaselinePreserved": true,
+    "elapsedMs": 816.0682370000004
+  },
+  "localIPs": [
+    "100.123.123.1",
+    "fd7a:115c:a1e0::ac33:6176"
+  ],
+  "localServeBaseline": {
+    "TCP": {
+      "443": {
+        "HTTPS": true
+      }
+    },
+    "Web": {
+      "mercury.uaru-nase.ts.net:443": {
+        "Handlers": {
+          "/": {
+            "Proxy": "http://127.0.0.1:8082"
+          }
+        }
+      }
+    }
+  },
+  "setupElapsedMs": 3095.608671,
+  "result": "inconclusive",
+  "failure": {
+    "type": "Error",
+    "message": "remote control failed: foreground-admission/AssertionError",
+    "remote": {
+      "id": 1,
+      "errorType": "AssertionError",
+      "phase": "foreground-admission",
+      "serveExitCode": 1
+    }
+  },
+  "collectionElapsedMs": 1474.598066,
+  "finishedAt": "2026-10-07T13:16:43.577Z"
+}

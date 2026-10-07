@@ -1,0 +1,58 @@
+{
+  "captureSHA256": "f82250338862fbc6aba4672bb1ecfee8f836ce4c24a5acbf8bf34e33728f4772",
+  "rawCaptureResult": "inconclusive",
+  "rawFailure": "baseline:OSError during post-process socket bind checks; errno and port were not captured",
+  "exactRuntimeCause": "unproven; later socket absence and successful bind do not reconstruct the earlier errno",
+  "remote": {
+    "at": "2026-10-07T16:08:14.651859+00:00",
+    "action": "removed-only-owned-remote-invocation-root-after-independent-guards",
+    "root": "[OWNED_CAPTURE_ROOT]",
+    "rootAbsent": true,
+    "ownedInvocationProcessPids": [],
+    "knownPIDsAbsent": [
+      3570909,
+      3570910,
+      3570935
+    ],
+    "selectedPortSocketRows": [],
+    "selectedPortsBindable": [
+      45130,
+      45131,
+      8443
+    ],
+    "serveBaselinePreserved": true,
+    "serveBaseline": {
+      "TCP": {
+        "3001": {
+          "HTTPS": true
+        },
+        "4097": {
+          "HTTPS": true
+        }
+      },
+      "Web": {
+        "coolify.uaru-nase.ts.net:3001": {
+          "Handlers": {
+            "/": {
+              "Proxy": "http://0.0.0.0:3000"
+            }
+          }
+        },
+        "coolify.uaru-nase.ts.net:4097": {
+          "Handlers": {
+            "/": {
+              "Proxy": "http://0.0.0.0:4096"
+            }
+          }
+        }
+      }
+    }
+  },
+  "localServeBaselinePreserved": true,
+  "browserCleanupProvenInCapture": true,
+  "sessionAndPty404ProvenInCapture": true,
+  "rawCaptureUnmodified": true,
+  "localPreparedRootRetainedForProvenance": true,
+  "checkpointAccepted": false,
+  "publicOriginLANTested": false
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "independent-post-failure-recovery",
+  "captureSHA256": "f0e6bd646ebd00ff4feb907e2acbdf2f4fe314a58bf9d9fc7f1404c43e8b754d",
+  "verifiedAt": "2026-10-07T11:58:14.732539+00:00",
+  "peerIP": "100.123.123.3",
+  "remoteRoot": "/tmp/opencode/codewalk-sp04-tailpeer-79s3q9u3",
+  "callerOwnedRootValidated": true,
+  "ownedRootRemoved": true,
+  "remoteRootAbsent": true,
+  "ownedProcessesAbsent": true,
+  "nativePid": 2220388,
+  "nativePidAbsent": true,
+  "selectedPorts": [45130, 45131, 8443],
+  "selectedPortsAbsent": true,
+  "serveBaselinePreserved": true,
+  "existingServePorts": [3001, 4097],
+  "sessionAndPtyCreationReached": false,
+  "recoveryOnly": true,
+  "originalCaptureUnmodified": true,
+  "localPreparedRootRetainedForProvenance": true
+}
