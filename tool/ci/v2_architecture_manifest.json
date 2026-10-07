@@ -19,6 +19,10 @@
     {"path": "third_party/tailscale/", "reason": "Existing vendored tunnel package; migration has not moved it yet."}
   ],
   "generated": [
+    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","reason":"Offline snapshot port of the consolidated 37-preset registry; reproduced by tool/theme/port_v2_appearance.py."},
+    {"path":"lib/shared/theme/opencode_theme_presets.dart","reason":"Selective theme resolver/token port reproduced offline from the retained consolidated snapshot."},
+    {"path":"lib/shared/theme/opencode_theme_preferences.dart","reason":"Stable preset identity codecs selectively ported from the retained snapshot."},
+    {"path":"lib/shared/theme/brand_colors.dart","reason":"Consolidated brand seeds selectively ported from the retained snapshot."},
     {"path": "lib/shared/l10n/generated/v2_localizations.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_ar.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_bn.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
@@ -35,7 +39,9 @@
     {"path": "lib/shared/l10n/generated/v2_localizations_ur.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_zh.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."}
   ],
-  "sizeExceptions": [],
+  "sizeExceptions": [
+    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","category":"generated","reason":"The consolidated 37-preset data snapshot exceeds 1500 lines; no import-boundary exemption."}
+  ],
   "compositionRoots": ["lib/app/composition_root.dart"],
   "packageDependencies": {
     "codewalk_core": [],

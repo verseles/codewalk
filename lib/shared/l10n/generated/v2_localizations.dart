@@ -182,6 +182,276 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'This link is not supported.'**
   String get unsupportedLink;
+
+  /// CodeWalk UI string — chatRetry
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get chatRetry;
+
+  /// CodeWalk UI string — settingsAppearanceAmoledDark
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED dark mode'**
+  String get settingsAppearanceAmoledDark;
+
+  /// CodeWalk UI string — settingsAppearanceAmoledDarkActive
+  ///
+  /// In en, this message translates to:
+  /// **'Use pure black surfaces while dark mode is active.'**
+  String get settingsAppearanceAmoledDarkActive;
+
+  /// CodeWalk UI string — settingsAppearanceAmoledDarkInactive
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode to enable AMOLED surfaces.'**
+  String get settingsAppearanceAmoledDarkInactive;
+
+  /// CodeWalk UI string — settingsAppearanceBrandColor
+  ///
+  /// In en, this message translates to:
+  /// **'Brand color'**
+  String get settingsAppearanceBrandColor;
+
+  /// CodeWalk UI string — settingsAppearanceBrandColorDynamicBlocked
+  ///
+  /// In en, this message translates to:
+  /// **'Disable wallpaper colors to pick a brand color.'**
+  String get settingsAppearanceBrandColorDynamicBlocked;
+
+  /// CodeWalk UI string — settingsAppearanceBrandColorNormal
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a seed color for the app palette.'**
+  String get settingsAppearanceBrandColorNormal;
+
+  /// CodeWalk UI string — settingsAppearanceBrandColorPresetBlocked
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to CodeWalk Classic to pick a brand color.'**
+  String get settingsAppearanceBrandColorPresetBlocked;
+
+  /// CodeWalk UI string — settingsAppearanceCodeWalkClassic
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk Classic'**
+  String get settingsAppearanceCodeWalkClassic;
+
+  /// CodeWalk UI string — settingsAppearanceContrast
+  ///
+  /// In en, this message translates to:
+  /// **'Contrast'**
+  String get settingsAppearanceContrast;
+
+  /// CodeWalk UI string — settingsAppearanceContrastDynamicBlocked
+  ///
+  /// In en, this message translates to:
+  /// **'Disable wallpaper colors to adjust contrast.'**
+  String get settingsAppearanceContrastDynamicBlocked;
+
+  /// CodeWalk UI string — settingsAppearanceContrastHigh
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get settingsAppearanceContrastHigh;
+
+  /// CodeWalk UI string — settingsAppearanceContrastLow
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get settingsAppearanceContrastLow;
+
+  /// CodeWalk UI string — settingsAppearanceContrastMedium
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get settingsAppearanceContrastMedium;
+
+  /// CodeWalk UI string — settingsAppearanceContrastMediumHigh
+  ///
+  /// In en, this message translates to:
+  /// **'Medium High'**
+  String get settingsAppearanceContrastMediumHigh;
+
+  /// CodeWalk UI string — settingsAppearanceContrastNormal
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the contrast level of the color scheme.'**
+  String get settingsAppearanceContrastNormal;
+
+  /// CodeWalk UI string — settingsAppearanceContrastPresetBlocked
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to CodeWalk Classic to adjust contrast.'**
+  String get settingsAppearanceContrastPresetBlocked;
+
+  /// CodeWalk UI string — settingsAppearanceContrastReduced
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced'**
+  String get settingsAppearanceContrastReduced;
+
+  /// CodeWalk UI string — settingsAppearanceContrastStandard
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get settingsAppearanceContrastStandard;
+
+  /// CodeWalk UI string — settingsAppearanceDark
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsAppearanceDark;
+
+  /// CodeWalk UI string — settingsAppearanceDensity
+  ///
+  /// In en, this message translates to:
+  /// **'Density'**
+  String get settingsAppearanceDensity;
+
+  /// CodeWalk UI string — settingsAppearanceDensityDense
+  ///
+  /// In en, this message translates to:
+  /// **'Dense'**
+  String get settingsAppearanceDensityDense;
+
+  /// CodeWalk UI string — settingsAppearanceDensityDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Apply spacing and component density across the app.'**
+  String get settingsAppearanceDensityDescription;
+
+  /// CodeWalk UI string — settingsAppearanceDensityExtraDense
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Dense'**
+  String get settingsAppearanceDensityExtraDense;
+
+  /// CodeWalk UI string — settingsAppearanceDensityExtraSpacious
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Spacious'**
+  String get settingsAppearanceDensityExtraSpacious;
+
+  /// CodeWalk UI string — settingsAppearanceDensityNormal
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get settingsAppearanceDensityNormal;
+
+  /// CodeWalk UI string — settingsAppearanceDensitySpacious
+  ///
+  /// In en, this message translates to:
+  /// **'Spacious'**
+  String get settingsAppearanceDensitySpacious;
+
+  /// CodeWalk UI string — settingsAppearanceLight
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsAppearanceLight;
+
+  /// CodeWalk UI string — settingsAppearanceNoPresets
+  ///
+  /// In en, this message translates to:
+  /// **'No preset palettes found'**
+  String get settingsAppearanceNoPresets;
+
+  /// CodeWalk UI string — settingsAppearanceOpenCodePresets
+  ///
+  /// In en, this message translates to:
+  /// **'OpenCode Presets'**
+  String get settingsAppearanceOpenCodePresets;
+
+  /// CodeWalk UI string — settingsAppearancePresetHelper
+  ///
+  /// In en, this message translates to:
+  /// **'Mirrors the official OpenCode Web built-in theme list.'**
+  String get settingsAppearancePresetHelper;
+
+  /// CodeWalk UI string — settingsAppearancePresetPalette
+  ///
+  /// In en, this message translates to:
+  /// **'Preset palette'**
+  String get settingsAppearancePresetPalette;
+
+  /// CodeWalk UI string — settingsAppearanceSearchPreset
+  ///
+  /// In en, this message translates to:
+  /// **'Search preset palette'**
+  String get settingsAppearanceSearchPreset;
+
+  /// CodeWalk UI string — settingsAppearanceSectionTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearanceSectionTitle;
+
+  /// CodeWalk UI string — settingsAppearanceSystem
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsAppearanceSystem;
+
+  /// CodeWalk UI string — settingsAppearanceTheme
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsAppearanceTheme;
+
+  /// CodeWalk UI string — settingsAppearanceThemeDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Choose light, dark, or system mode, then keep the CodeWalk classic palette or switch to an OpenCode preset.'**
+  String get settingsAppearanceThemeDescription;
+
+  /// CodeWalk UI string — settingsAppearanceVisualStyle
+  ///
+  /// In en, this message translates to:
+  /// **'Visual style'**
+  String get settingsAppearanceVisualStyle;
+
+  /// CodeWalk UI string — settingsAppearanceVisualStyleClassic
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get settingsAppearanceVisualStyleClassic;
+
+  /// CodeWalk UI string — settingsAppearanceVisualStyleDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Classic or softer Refined surfaces.'**
+  String get settingsAppearanceVisualStyleDescription;
+
+  /// CodeWalk UI string — settingsAppearanceVisualStyleRefined
+  ///
+  /// In en, this message translates to:
+  /// **'Refined'**
+  String get settingsAppearanceVisualStyleRefined;
+
+  /// CodeWalk UI string — settingsAppearanceWallpaperColors
+  ///
+  /// In en, this message translates to:
+  /// **'Use wallpaper colors'**
+  String get settingsAppearanceWallpaperColors;
+
+  /// CodeWalk UI string — settingsAppearanceWallpaperNormal
+  ///
+  /// In en, this message translates to:
+  /// **'Extract color scheme from your device wallpaper.'**
+  String get settingsAppearanceWallpaperNormal;
+
+  /// CodeWalk UI string — settingsAppearanceWallpaperPresetBlocked
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to CodeWalk Classic to use wallpaper colors.'**
+  String get settingsAppearanceWallpaperPresetBlocked;
+
+  /// Appearance persistence failure; settings may be temporary
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.'**
+  String get appearanceStorageError;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

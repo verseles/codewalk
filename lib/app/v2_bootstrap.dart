@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../platform/appearance/dynamic_color_adapter.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/theme/app_theme.dart';
+import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
 import 'app_preferences_controller.dart';
 
 /// Owns a composed v2 graph; widgets receive typed dependencies, not a locator.
 class CodeWalkV2Bootstrap extends StatefulWidget {
-  const CodeWalkV2Bootstrap({super.key, required this.dependencies});
+  const CodeWalkV2Bootstrap({
+    super.key,
+    required this.dependencies,
+    this.dynamicColors = platformDynamicColors,
+  });
 
   final AppDependencies dependencies;
+  final DynamicColorSource dynamicColors;
 
   @override
   State<CodeWalkV2Bootstrap> createState() => _CodeWalkV2BootstrapState();
@@ -42,39 +49,52 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         Provider.value(value: dependencies.localizations),
       ],
       child: Consumer<AppPreferencesController>(
-        builder: (context, preferences, child) => MaterialApp.router(
-          title: 'CodeWalk',
-          routerConfig: dependencies.router,
-          theme: AppTheme.lightFrom(
-            ColorScheme.fromSeed(seedColor: AppTheme.seedColor),
-            appDensity: preferences.density,
+        builder: (context, preferences, child) => widget.dynamicColors((
+          light,
+          dark,
+        ) {
+          final available = light != null || dark != null;
+          if (available != preferences.dynamicColorAvailable) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && identical(widget.dependencies, dependencies)) {
+                preferences.setDynamicColorAvailable(available);
+              }
+            });
+          }
+          final themes = resolveAppearanceThemes(
+            preset: preferences.themePreset,
+            customColorSeed: preferences.customColorSeed,
+            contrastLevel: preferences.contrastLevel,
+            useDynamicColor: preferences.useDynamicColor,
+            useAmoledDark: preferences.useAmoledDark,
+            density: preferences.density,
             visualStyle: preferences.visualStyle,
-          ),
-          darkTheme: AppTheme.darkFrom(
-            ColorScheme.fromSeed(
-              seedColor: AppTheme.seedColor,
-              brightness: Brightness.dark,
-            ),
-            appDensity: preferences.density,
-            visualStyle: preferences.visualStyle,
-          ),
-          themeMode: preferences.themeMode,
-          locale: preferences.locale,
-          supportedLocales: V2Localizations.supportedLocales,
-          localizationsDelegates: V2Localizations.localizationsDelegates,
-          localeListResolutionCallback: resolveV2LocaleList,
-          builder: (context, child) {
-            dependencies.localizations.update(V2Localizations.of(context));
-            return Theme(
-              data: AppTheme.withResponsiveSnackBars(
-                Theme.of(context),
-                MediaQuery.of(context),
-                textDirection: Directionality.of(context),
-              ),
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
-        ),
+            lightDynamic: light,
+            darkDynamic: dark,
+          );
+          return MaterialApp.router(
+            title: 'CodeWalk',
+            routerConfig: dependencies.router,
+            theme: themes.light,
+            darkTheme: themes.dark,
+            themeMode: preferences.themeMode,
+            locale: preferences.locale,
+            supportedLocales: V2Localizations.supportedLocales,
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            localeListResolutionCallback: resolveV2LocaleList,
+            builder: (context, child) {
+              dependencies.localizations.update(V2Localizations.of(context));
+              return Theme(
+                data: AppTheme.withResponsiveSnackBars(
+                  Theme.of(context),
+                  MediaQuery.of(context),
+                  textDirection: Directionality.of(context),
+                ),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
+          );
+        }),
       ),
     );
   }

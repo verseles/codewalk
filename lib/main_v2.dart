@@ -4,6 +4,7 @@ import 'app/composition_root.dart';
 import 'app/v2_bootstrap.dart';
 
 /// Temporary explicit entry point while the legacy reference is retained.
-void main() => runApp(
-  CodeWalkV2Bootstrap(dependencies: createAppDependencies()),
-);
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(CodeWalkV2Bootstrap(dependencies: await loadAppDependencies()));
+}

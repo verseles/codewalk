@@ -39,5 +39,185 @@
   "unsupportedLink": "This link is not supported.",
   "@unsupportedLink": {
     "description": "Shown when CodeWalk cannot resolve an incoming navigation link."
+  },
+  "chatRetry": "Retry",
+  "@chatRetry": {
+    "description": "CodeWalk UI string — chatRetry"
+  },
+  "settingsAppearanceAmoledDark": "AMOLED dark mode",
+  "@settingsAppearanceAmoledDark": {
+    "description": "CodeWalk UI string — settingsAppearanceAmoledDark"
+  },
+  "settingsAppearanceAmoledDarkActive": "Use pure black surfaces while dark mode is active.",
+  "@settingsAppearanceAmoledDarkActive": {
+    "description": "CodeWalk UI string — settingsAppearanceAmoledDarkActive"
+  },
+  "settingsAppearanceAmoledDarkInactive": "Switch to dark mode to enable AMOLED surfaces.",
+  "@settingsAppearanceAmoledDarkInactive": {
+    "description": "CodeWalk UI string — settingsAppearanceAmoledDarkInactive"
+  },
+  "settingsAppearanceBrandColor": "Brand color",
+  "@settingsAppearanceBrandColor": {
+    "description": "CodeWalk UI string — settingsAppearanceBrandColor"
+  },
+  "settingsAppearanceBrandColorDynamicBlocked": "Disable wallpaper colors to pick a brand color.",
+  "@settingsAppearanceBrandColorDynamicBlocked": {
+    "description": "CodeWalk UI string — settingsAppearanceBrandColorDynamicBlocked"
+  },
+  "settingsAppearanceBrandColorNormal": "Pick a seed color for the app palette.",
+  "@settingsAppearanceBrandColorNormal": {
+    "description": "CodeWalk UI string — settingsAppearanceBrandColorNormal"
+  },
+  "settingsAppearanceBrandColorPresetBlocked": "Switch to CodeWalk Classic to pick a brand color.",
+  "@settingsAppearanceBrandColorPresetBlocked": {
+    "description": "CodeWalk UI string — settingsAppearanceBrandColorPresetBlocked"
+  },
+  "settingsAppearanceCodeWalkClassic": "CodeWalk Classic",
+  "@settingsAppearanceCodeWalkClassic": {
+    "description": "CodeWalk UI string — settingsAppearanceCodeWalkClassic"
+  },
+  "settingsAppearanceContrast": "Contrast",
+  "@settingsAppearanceContrast": {
+    "description": "CodeWalk UI string — settingsAppearanceContrast"
+  },
+  "settingsAppearanceContrastDynamicBlocked": "Disable wallpaper colors to adjust contrast.",
+  "@settingsAppearanceContrastDynamicBlocked": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastDynamicBlocked"
+  },
+  "settingsAppearanceContrastHigh": "High",
+  "@settingsAppearanceContrastHigh": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastHigh"
+  },
+  "settingsAppearanceContrastLow": "Low",
+  "@settingsAppearanceContrastLow": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastLow"
+  },
+  "settingsAppearanceContrastMedium": "Medium",
+  "@settingsAppearanceContrastMedium": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastMedium"
+  },
+  "settingsAppearanceContrastMediumHigh": "Medium High",
+  "@settingsAppearanceContrastMediumHigh": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastMediumHigh"
+  },
+  "settingsAppearanceContrastNormal": "Adjust the contrast level of the color scheme.",
+  "@settingsAppearanceContrastNormal": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastNormal"
+  },
+  "settingsAppearanceContrastPresetBlocked": "Switch to CodeWalk Classic to adjust contrast.",
+  "@settingsAppearanceContrastPresetBlocked": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastPresetBlocked"
+  },
+  "settingsAppearanceContrastReduced": "Reduced",
+  "@settingsAppearanceContrastReduced": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastReduced"
+  },
+  "settingsAppearanceContrastStandard": "Standard",
+  "@settingsAppearanceContrastStandard": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastStandard"
+  },
+  "settingsAppearanceDark": "Dark",
+  "@settingsAppearanceDark": {
+    "description": "CodeWalk UI string — settingsAppearanceDark"
+  },
+  "settingsAppearanceDensity": "Density",
+  "@settingsAppearanceDensity": {
+    "description": "CodeWalk UI string — settingsAppearanceDensity"
+  },
+  "settingsAppearanceDensityDense": "Dense",
+  "@settingsAppearanceDensityDense": {
+    "description": "CodeWalk UI string — settingsAppearanceDensityDense"
+  },
+  "settingsAppearanceDensityDescription": "Apply spacing and component density across the app.",
+  "@settingsAppearanceDensityDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceDensityDescription"
+  },
+  "settingsAppearanceDensityExtraDense": "Extra Dense",
+  "@settingsAppearanceDensityExtraDense": {
+    "description": "CodeWalk UI string — settingsAppearanceDensityExtraDense"
+  },
+  "settingsAppearanceDensityExtraSpacious": "Extra Spacious",
+  "@settingsAppearanceDensityExtraSpacious": {
+    "description": "CodeWalk UI string — settingsAppearanceDensityExtraSpacious"
+  },
+  "settingsAppearanceDensityNormal": "Normal",
+  "@settingsAppearanceDensityNormal": {
+    "description": "CodeWalk UI string — settingsAppearanceDensityNormal"
+  },
+  "settingsAppearanceDensitySpacious": "Spacious",
+  "@settingsAppearanceDensitySpacious": {
+    "description": "CodeWalk UI string — settingsAppearanceDensitySpacious"
+  },
+  "settingsAppearanceLight": "Light",
+  "@settingsAppearanceLight": {
+    "description": "CodeWalk UI string — settingsAppearanceLight"
+  },
+  "settingsAppearanceNoPresets": "No preset palettes found",
+  "@settingsAppearanceNoPresets": {
+    "description": "CodeWalk UI string — settingsAppearanceNoPresets"
+  },
+  "settingsAppearanceOpenCodePresets": "OpenCode Presets",
+  "@settingsAppearanceOpenCodePresets": {
+    "description": "CodeWalk UI string — settingsAppearanceOpenCodePresets"
+  },
+  "settingsAppearancePresetHelper": "Mirrors the official OpenCode Web built-in theme list.",
+  "@settingsAppearancePresetHelper": {
+    "description": "CodeWalk UI string — settingsAppearancePresetHelper"
+  },
+  "settingsAppearancePresetPalette": "Preset palette",
+  "@settingsAppearancePresetPalette": {
+    "description": "CodeWalk UI string — settingsAppearancePresetPalette"
+  },
+  "settingsAppearanceSearchPreset": "Search preset palette",
+  "@settingsAppearanceSearchPreset": {
+    "description": "CodeWalk UI string — settingsAppearanceSearchPreset"
+  },
+  "settingsAppearanceSectionTitle": "Appearance",
+  "@settingsAppearanceSectionTitle": {
+    "description": "CodeWalk UI string — settingsAppearanceSectionTitle"
+  },
+  "settingsAppearanceSystem": "System",
+  "@settingsAppearanceSystem": {
+    "description": "CodeWalk UI string — settingsAppearanceSystem"
+  },
+  "settingsAppearanceTheme": "Theme",
+  "@settingsAppearanceTheme": {
+    "description": "CodeWalk UI string — settingsAppearanceTheme"
+  },
+  "settingsAppearanceThemeDescription": "Choose light, dark, or system mode, then keep the CodeWalk classic palette or switch to an OpenCode preset.",
+  "@settingsAppearanceThemeDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceThemeDescription"
+  },
+  "settingsAppearanceVisualStyle": "Visual style",
+  "@settingsAppearanceVisualStyle": {
+    "description": "CodeWalk UI string — settingsAppearanceVisualStyle"
+  },
+  "settingsAppearanceVisualStyleClassic": "Classic",
+  "@settingsAppearanceVisualStyleClassic": {
+    "description": "CodeWalk UI string — settingsAppearanceVisualStyleClassic"
+  },
+  "settingsAppearanceVisualStyleDescription": "Choose Classic or softer Refined surfaces.",
+  "@settingsAppearanceVisualStyleDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceVisualStyleDescription"
+  },
+  "settingsAppearanceVisualStyleRefined": "Refined",
+  "@settingsAppearanceVisualStyleRefined": {
+    "description": "CodeWalk UI string — settingsAppearanceVisualStyleRefined"
+  },
+  "settingsAppearanceWallpaperColors": "Use wallpaper colors",
+  "@settingsAppearanceWallpaperColors": {
+    "description": "CodeWalk UI string — settingsAppearanceWallpaperColors"
+  },
+  "settingsAppearanceWallpaperNormal": "Extract color scheme from your device wallpaper.",
+  "@settingsAppearanceWallpaperNormal": {
+    "description": "CodeWalk UI string — settingsAppearanceWallpaperNormal"
+  },
+  "settingsAppearanceWallpaperPresetBlocked": "Switch to CodeWalk Classic to use wallpaper colors.",
+  "@settingsAppearanceWallpaperPresetBlocked": {
+    "description": "CodeWalk UI string — settingsAppearanceWallpaperPresetBlocked"
+  },
+  "appearanceStorageError": "Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.",
+  "@appearanceStorageError": {
+    "description": "Appearance persistence failure; settings may be temporary"
   }
 }

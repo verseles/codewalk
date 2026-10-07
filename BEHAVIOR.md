@@ -14,7 +14,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an independent Material3 app shows a `CodeWalk` app bar and navigation for conversations, hosts and settings
 - **Then** viewports below 840 logical pixels use bottom navigation, while wider viewports use a navigation rail
 
-- **Given** the user opens conversations, hosts or settings in this v2 app
+- **Given** the user opens conversations or hosts in this v2 app
 - **When** the corresponding route is displayed
 - **Then** localized placeholders are shown
 - **Then** the conversation placeholder offers an action that opens the hosts placeholder
@@ -38,10 +38,34 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** its scoped UI copy uses that language, including right-to-left layout for Arabic and Urdu
 - **Then** regional variants resolve by language and unsupported locale lists fall back to English
 
-These routes currently provide navigation placeholders. The settings page has
-no preference controls; appearance and locale changes exposed by its controller
-are transient. Connections, pairing execution, session interaction and durable
-settings remain in their owning v2 Issues.
+### V2 appearance preferences
+
+- **Given** the user opens `/settings` in the explicit v2 app
+- **When** appearance controls are displayed
+- **Then** the user can choose system/light/dark mode, classic/refined visual style, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
+- **Then** the searchable preset picker and five density tiers work in compact and wide layouts, with dropdown alternatives for narrow screens or enlarged text
+- **Then** the controls use the scoped 14-language catalog, including right-to-left layout
+
+- **Given** a preset or platform dynamic palette is available
+- **When** the v2 app resolves its light and dark themes
+- **Then** a selected preset takes precedence, followed by enabled dynamic colors for that brightness, followed by the brand seed with contrast
+- **Then** brand-seed and contrast controls are disabled while a preset or available dynamic palette supplies the colors
+- **Then** the dynamic-color toggle is shown when the platform supplies a palette and is disabled while a preset is selected
+- **Then** AMOLED can be toggled in dark mode; it blacks the eight Material dark surface roles while preserving preset semantic tokens
+
+- **Given** the explicit v2 app starts or the user changes appearance
+- **When** its preferences are loaded or saved
+- **Then** startup hydrates appearance before mounting the app, and accepted changes persist under the isolated `cw2.settings.*` namespace
+- **Then** defaults are system mode, refined style, normal density, dynamic colors enabled, no selected preset or custom seed, standard contrast and AMOLED disabled
+- **Then** an explicitly stored classic style is preserved; missing or invalid fields do not cause default values to be written over stored preferences
+- **Then** nullable preset and seed selections can be cleared without altering unrelated settings
+- **Then** a load/save failure keeps the app usable and shows an appearance-storage error with a retry action
+
+Conversations, hosts, pairing and session routes retain their navigation
+placeholders. Locale changes exposed by the v2 controller remain transient;
+the broader settings shell and other feature controls remain in their owning
+Issues. Appearance widget/golden tests cover mobile and desktop viewports on
+the Flutter VM; they do not certify installed native targets.
 
 ---
 

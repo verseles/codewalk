@@ -3,13 +3,13 @@
 ## Project Snapshot
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
-- The retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph, responsive route placeholders, transient appearance preferences and a scoped 14-locale catalog; its storage APIs are not yet connected to that graph.
+- Retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B now hydrates persisted appearance before mount and provides a responsive `/settings` appearance page. Broader settings shell #305 and the other routes remain placeholders.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
-- Theme system follows Material You (MD3): user-controlled theme mode, dynamic color toggle, AMOLED dark toggle, brand color seeds, contrast level, and responsive window size classes.
-- Visual style layer (issue #86): `VisualStyle` (`classic` / `refined`) persisted in `ExperienceSettings`, exposed via `SettingsProvider`, and propagated through `AppVisualStyleTokens` `ThemeExtension` so chat surfaces can consume shape/surface tokens while `OpenCodeThemeTokens` continue to drive markdown/syntax palettes. New installs default to `VisualStyle.refined`; legacy persisted JSON missing the `visualStyle` key falls back to `VisualStyle.classic` for backward compatibility.
+- Retained v1 appearance uses Material You (MD3): user-controlled theme mode, dynamic color toggle, AMOLED dark toggle, brand color seeds, contrast level, and responsive window size classes.
+- Retained v1 visual style layer (issue #86): `VisualStyle` (`classic` / `refined`) persisted in `ExperienceSettings`, exposed via `SettingsProvider`, and propagated through `AppVisualStyleTokens` `ThemeExtension` so chat surfaces can consume shape/surface tokens while `OpenCodeThemeTokens` continue to drive markdown/syntax palettes. New installs default to `VisualStyle.refined`; legacy persisted JSON missing the `visualStyle` key falls back to `VisualStyle.classic` for backward compatibility.
 - LaTeX math rendering (`$...$` and `$$...$$`) supported in chat messages via `flutter_math_fork` with custom markdown syntaxes and styled fallback on parse failure.
 - Session attention adds encrypted completion snapshots, root-session aggregation, and Android, desktop, and iOS presentation hosts.
 - Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; their tab menu offers up to five scope-matched cached root-session alternatives on mobile/compact layouts or while the desktop conversations pane is hidden, plus a searchable responsive picker for the full cached set; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab; project grouping renders a per-project inline new-chat accessory after each draft-free group (issue #200).
@@ -20,21 +20,28 @@
 The entries below are governed independently from the retained reference map:
 
 ```text
-lib/main_v2.dart                         # Explicit entry point; composes dependencies before runApp
-lib/app/composition_root.dart           # Private GetIt instance; resolves the independent v2 graph
+lib/main_v2.dart                         # Explicit entry point; awaits dependency/appearance hydration before runApp
+lib/app/composition_root.dart           # Private GetIt instance; loadAppDependencies hydrates the v2 graph before mount
 lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
-lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, theme and locale bridges
-lib/app/app_{router,shell}.dart          # Responsive navigation and localized route placeholders
+lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, resolved theme and locale/dynamic-color bridges
+lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts appearance controls, other routes remain placeholders
 lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
-lib/app/app_preferences_controller.dart # Transient theme mode, density, visual style and locale
-lib/shared/theme/                       # Independent Material3 shapes, theme and visual tokens
+lib/app/app_preferences_controller.dart # Persists appearance in cw2.settings.*; refined default when style is absent, explicit classic retained; locale transient
+lib/shared/theme/                       # Independent Material3 theme, shapes, brand colors and semantic visual tokens
+lib/shared/theme/appearance_theme_resolver.dart # Pure preset/dynamic/seed theme resolution with AMOLED, density and visual-style application
+lib/shared/theme/opencode_theme_preferences.dart # Stable OpenCode preset identities and key codecs
+lib/shared/theme/opencode_theme_presets.dart # Preset palette resolver and semantic Markdown/syntax theme tokens
+lib/shared/theme/opencode_web_theme_registry.dart # Offline generated snapshot of 37 OpenCode Web presets; low-32-bit Color normalization
+lib/shared/theme/brand_colors.dart      # Five CodeWalk seed-color choices
+lib/platform/appearance/dynamic_color_adapter.dart # Bridges material_ui dynamic schemes to Flutter ColorScheme
+lib/features/settings/appearance_settings_page.dart # Responsive appearance controls, searchable presets and persistence-error retry
 lib/shared/layout/window_size_class.dart # Responsive viewport classes
-lib/shared/l10n/{arb,generated}/         # Scoped 10-key catalog and official generated delegates for 14 locales
+lib/shared/l10n/{arb,generated}/         # Scoped route and appearance catalog with generated delegates for 14 locales
 lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
 lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
-lib/platform/storage/storage.dart      # Storage API barrel; not initialized by the app graph
+lib/platform/storage/storage.dart      # Storage API barrel; appearance uses its metadata-store path
 lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
-lib/platform/storage/preferences_backend.dart # Guarded SharedPreferencesAsync adapter
+lib/platform/storage/preferences_backend.dart # Allow-listed SharedPreferencesAsync metadata adapter used by appearance
 lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores, strict non-destructive presence checks, and memory LRU
 lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
 lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
@@ -60,33 +67,47 @@ packages/harness_opencode/test/fake_opencode_{server,stream}_test.dart # Real co
 packages/harness_host/lib/             # Empty public host adapter boundary
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
+test/v2/appearance/                    # Persistence, resolver, responsive widgets and four VM light/dark goldens (390x844 and 1280x800)
 test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions, including VM payload-preservation composition coverage
 test/contract/chp/prompt_delivery_test.dart # Prompt intent delivery-shape and optional-default contract regressions
 contracts/codewalk-host-v1/             # Provisional canonical/CHP schema, examples, model map and revision hashes
 test/contract/chp/                     # Offline Draft 7 validation and synthetic model/edge parity checks
-tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
+tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped 14-locale output check
+tool/theme/port_v2_appearance.py         # Offline appearance snapshot reproduction/check; normalizes legacy Color values to low 32 bits
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
 tool/ci/architecture/widget_types.dart  # Widget ancestry by declaration identity and import/export visibility
 tool/ci/architecture/locator_values.dart # Escaping locator values versus ordinary resolved services
-tool/ci/v2_architecture_manifest.json   # New surface, retained reference and narrow vendor/generated scopes
+tool/ci/v2_architecture_manifest.json   # New surface and retained-reference boundaries; only the >1500-line generated registry has a size exception, not an import exemption
 tool/ci/test/import_rules_test.dart     # Real CLI planted-violation regression cases
 tool/ci/check_v2_foundations.py         # Dynamic workspace discovery and explicit v2 analysis/test/build gate
 ```
 
 The composition root resolves a private locator before widgets mount and passes
-typed dependencies into the app. Widgets consume constructor/provider injection.
-Routes `/`, `/sessions`, `/hosts`, `/settings`, `/pair`, `/s/:host/:session` and
-`/unsupported` currently show placeholders. Navigation uses a bottom bar below
-840 logical pixels and a rail from 840 pixels. Deep links retain pending intents;
-native session identifiers do not establish a canonical session without a
-harness profile. Appearance changes are controller-driven and in memory.
+typed dependencies into the app. Production `loadAppDependencies()` uses
+`V2MetadataStore` with `PreferencesMetadataBackend` and awaits appearance
+hydration before `runApp`. `AppPreferencesController` persists theme mode,
+visual style, OpenCode preset, density, custom seed, contrast, AMOLED dark and
+dynamic-color choice under `cw2.settings.*`; locale remains transient. Missing
+visual-style state defaults to refined, while an explicit persisted classic
+choice is preserved. Settings surfaces metadata load/save errors and provides
+retry; selected values remain usable but temporary until persistence recovers.
 
-The shared localization catalog contains nine reused UI keys and one new
-unsupported-link key in 14 locales. Its generator leaves the retained catalog
-and `lib/l10n/` outputs intact. Shared rendering currently provides GFM and
-link/file callbacks; images render as text. Full rendering and settings parity
-remain in their owning Issues.
+Only `/settings` has moved beyond a placeholder: it mounts responsive appearance
+controls with a searchable 37-preset picker. Broader settings shell #305 and
+routes `/`, `/sessions`, `/hosts`, `/pair`, `/s/:host/:session` and
+`/unsupported` remain out of scope/placeholders. Navigation uses a bottom bar
+below 840 logical pixels and a rail from 840 pixels. Deep links retain pending
+intents; native session identifiers do not establish a canonical session
+without a harness profile. Appearance tests cover persistence, resolution and
+responsive widgets, plus four VM light/dark goldens at 390x844 mobile and
+1280x800 desktop sizes; these are not native-platform certification.
+
+The shared localization catalog contains scoped route and appearance strings
+across 14 locales. Its isolated generator writes only v2 outputs, leaving the
+retained catalog and `lib/l10n/` outputs intact. Shared rendering currently
+provides GFM and link/file callbacks; images render as text. Full rendering and
+the broader settings shell remain in their owning Issues.
 
 `codewalk_core` is pure Dart. Project identity is host plus the caller-supplied
 canonical directory; the upstream project ID is an annotation. Canonical models
@@ -722,6 +743,8 @@ dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs m
 flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
 python3 tool/l10n/generate_v2_localizations.py # Regenerate only lib/shared/l10n/generated/ using isolated Flutter config
 python3 tool/l10n/generate_v2_localizations.py --check # Check scoped v2 outputs without changing them
+python3 tool/theme/port_v2_appearance.py        # Reproduce the offline v2 appearance snapshot
+python3 tool/theme/port_v2_appearance.py --check # Verify the snapshot without writing
 make web
 make android
 make desktop

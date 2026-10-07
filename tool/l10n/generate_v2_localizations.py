@@ -33,6 +33,62 @@ KEYS = {
     "settingsBack",
     "unsupportedLink",
 }
+APPEARANCE_KEYS = {
+    "settingsAppearanceSectionTitle", "settingsAppearanceTheme",
+    "settingsAppearanceThemeDescription", "settingsAppearanceSystem",
+    "settingsAppearanceLight", "settingsAppearanceDark",
+    "settingsAppearanceCodeWalkClassic", "settingsAppearanceOpenCodePresets",
+    "settingsAppearancePresetPalette", "settingsAppearancePresetHelper",
+    "settingsAppearanceSearchPreset", "settingsAppearanceNoPresets",
+    "settingsAppearanceVisualStyle", "settingsAppearanceVisualStyleDescription",
+    "settingsAppearanceVisualStyleClassic", "settingsAppearanceVisualStyleRefined",
+    "settingsAppearanceAmoledDark", "settingsAppearanceAmoledDarkActive",
+    "settingsAppearanceAmoledDarkInactive", "settingsAppearanceWallpaperColors",
+    "settingsAppearanceWallpaperPresetBlocked", "settingsAppearanceWallpaperNormal",
+    "settingsAppearanceBrandColor", "settingsAppearanceBrandColorDynamicBlocked",
+    "settingsAppearanceBrandColorPresetBlocked", "settingsAppearanceBrandColorNormal",
+    "settingsAppearanceContrast", "settingsAppearanceContrastDynamicBlocked",
+    "settingsAppearanceContrastPresetBlocked", "settingsAppearanceContrastNormal",
+    "settingsAppearanceContrastReduced", "settingsAppearanceContrastLow",
+    "settingsAppearanceContrastStandard", "settingsAppearanceContrastMedium",
+    "settingsAppearanceContrastMediumHigh", "settingsAppearanceContrastHigh",
+    "settingsAppearanceDensity", "settingsAppearanceDensityDescription",
+    "settingsAppearanceDensityExtraDense", "settingsAppearanceDensityDense",
+    "settingsAppearanceDensityNormal", "settingsAppearanceDensitySpacious",
+    "settingsAppearanceDensityExtraSpacious", "chatRetry",
+}
+KEYS |= APPEARANCE_KEYS | {"appearanceStorageError"}
+STORAGE_ERRORS = {
+    "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
+    "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
+    "de": "Darstellungseinstellungen konnten nicht geladen oder gespeichert werden. Änderungen bleiben bis zum erfolgreichen Wiederholen vorübergehend.",
+    "en": "Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.",
+    "es": "No se pudo cargar o guardar la configuración de apariencia. Los cambios son temporales hasta que el reintento tenga éxito.",
+    "fr": "Les réglages d’apparence n’ont pas pu être chargés ou enregistrés. Les modifications restent temporaires jusqu’à une nouvelle tentative réussie.",
+    "hi": "दिखावट की सेटिंग लोड या सहेजी नहीं जा सकीं। दोबारा कोशिश सफल होने तक बदलाव अस्थायी रहेंगे।",
+    "it": "Impossibile caricare o salvare le impostazioni dell’aspetto. Le modifiche restano temporanee finché il nuovo tentativo non riesce.",
+    "ja": "外観設定を読み込むか保存できませんでした。再試行が成功するまで変更は一時的なものになります。",
+    "ko": "모양 설정을 불러오거나 저장하지 못했습니다. 다시 시도에 성공할 때까지 변경 사항은 임시로 유지됩니다.",
+    "pt": "Não foi possível carregar ou salvar as configurações de aparência. As alterações ficam temporárias até a nova tentativa funcionar.",
+    "ru": "Не удалось загрузить или сохранить настройки внешнего вида. Изменения остаются временными до успешной повторной попытки.",
+    "ur": "ظاہری شکل کی ترتیبات لوڈ یا محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کامیاب ہونے تک تبدیلیاں عارضی رہیں گی۔",
+    "zh": "无法加载或保存外观设置。重试成功之前，更改仅为临时更改。",
+}
+
+
+def port_appearance_copy() -> None:
+    """Extend only the bounded v2 catalog from consolidated translations."""
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        legacy = json.loads((ROOT / "lib/l10n" / f"app_{locale}.arb").read_text(encoding="utf-8"))
+        for key in sorted(APPEARANCE_KEYS):
+            arb[key] = legacy[key]
+            if "@" + key in legacy:
+                arb["@" + key] = legacy["@" + key]
+        arb["appearanceStorageError"] = STORAGE_ERRORS[locale]
+        arb["@appearanceStorageError"] = {"description": "Appearance persistence failure; settings may be temporary"}
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -99,8 +155,13 @@ def generate(check: bool) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="Fail on stale outputs without editing files.")
+    parser.add_argument("--port-appearance", action="store_true", help="Selectively import consolidated appearance translations into v2 sources.")
     args = parser.parse_args()
     try:
+        if args.port_appearance:
+            if args.check:
+                raise ValueError("--port-appearance cannot be combined with --check")
+            port_appearance_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)
