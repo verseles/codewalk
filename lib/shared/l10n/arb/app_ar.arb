@@ -56,5 +56,97 @@
   "appearanceStorageError": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "اختر المظاهر والألوان وحجم النص وعرض الدردشة",
+  "settingsAppearanceTitle": "المظهر",
+  "settingsNavigationGroupExperience": "التجربة",
+  "settingsNavigationGroupInput": "الإدخال",
+  "settingsNavigationGroupSetup": "الإعداد",
+  "settingsNavigationNoResults": "لا توجد إعدادات",
+  "settingsNavigationSearchHint": "ابحث في الإعدادات",
+  "settingsProvenanceCodeWalkLocal": "محلي في CodeWalk",
+  "settingsShortcutsDescription": "ابحث عن اختصارات لوحة المفاتيح وخصصها",
+  "settingsShortcutsEdit": "تعديل الاختصار",
+  "settingsShortcutsReset": "إعادة تعيين الاختصار",
+  "settingsShortcutsSearch": "البحث في الاختصارات",
+  "settingsShortcutsTitle": "الاختصارات",
+  "shortcutCloseApp": "إغلاق علامة التبويب/التطبيق",
+  "shortcutCloseAppDesc": "إغلاق علامة تبويب الجلسة الحالية عند توفرها، وإلا إغلاق التطبيق وفق سلوك المنصة",
+  "shortcutFocusCloseDrawer": "تركيز/إغلاق الدرج",
+  "shortcutFocusCloseDrawerDesc": "التركيز على المدخلات افتراضياً، أو إغلاق الدرج عندما يكون مفتوحاً",
+  "shortcutFocusInput": "التركيز على المدخلات",
+  "shortcutFocusInputDesc": "نقل التركيز إلى مدخلات النص",
+  "shortcutGroupApplication": "التطبيق",
+  "shortcutGroupGeneral": "عام",
+  "shortcutGroupModelAndAgent": "النموذج والعميل",
+  "shortcutGroupNavigation": "التنقل",
+  "shortcutGroupPrompt": "المطالبة",
+  "shortcutGroupSession": "الجلسة",
+  "shortcutNewConversation": "محادثة جديدة",
+  "shortcutNewConversationDesc": "إنشاء جلسة دردشة جديدة",
+  "shortcutNextAgent": "العميل التالي",
+  "shortcutNextAgentDesc": "التبديل إلى العميل المتاح التالي",
+  "shortcutNextRecentModel": "النموذج الحديث التالي",
+  "shortcutNextRecentModelDesc": "التبديل بين النماذج المستخدمة مؤخراً",
+  "shortcutNextTab": "علامة التبويب التالية",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "إظهار مبدّل علامات التبويب والانتقال إلى التالية",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "المتغير التالي",
+  "shortcutNextVariantDesc": "التبديل بين متغيرات النموذج المتاحة",
+  "shortcutOpenSettings": "افتح الإعدادات",
+  "shortcutOpenSettingsDesc": "افتح صفحة الإعدادات",
+  "shortcutPreviousAgent": "العميل السابق",
+  "shortcutPreviousAgentDesc": "التبديل إلى العميل المتاح السابق",
+  "shortcutPreviousTab": "علامة التبويب السابقة",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "إظهار مبدّل علامات التبويب والانتقال إلى السابقة",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "فتح سريع للملفات",
+  "shortcutQuickOpenFilesDesc": "افتح البحث السريع عن الملفات",
+  "shortcutQuitApp": "إنهاء التطبيق",
+  "shortcutQuitAppDesc": "فرض الخروج من التطبيق",
+  "shortcutRefreshData": "تحديث البيانات",
+  "shortcutRefreshDataDesc": "تحديث بيانات الدردشة الحالية",
+  "shortcutToggleVoiceInput": "تبديل الإدخال الصوتي",
+  "shortcutToggleVoiceInputDesc": "بدء أو إيقاف الإملاء الصوتي في المحرر",
+  "shortcutsApply": "تطبيق",
+  "shortcutsConflictConflict": "تعارض مع {conflict}",
+  "shortcutsErrorConflict": "يتعارض مع \"{conflict}\"",
+  "shortcutsErrorInvalid": "اختصار غير صالح",
+  "shortcutsErrorUnsupportedKey": "مفتاح اختصار غير مدعوم",
+  "shortcutsKeyboardShortcuts": "اختصارات لوحة المفاتيح",
+  "shortcutsPressKeyCombination": "اضغط مجموعة المفاتيح الآن",
+  "shortcutsReset": "إعادة تعيين الكل",
+  "shortcutsSearchEditBindings": "البحث، وتعديل الروابط، وحل التعارضات قبل الحفظ.",
+  "shortcutsSetShortcutWidget": "تعيين اختصار: {label}",
+  "shortcutsTheseBindingsStored": "يتم تخزين هذه الروابط في CodeWalk لوقت تشغيل التطبيق الحالي ولا تقوم بتعديل روابط مفاتيح `tui.json` لـ OpenCode.",
+  "shortcutsUnassigned": "غير معيّن",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "إلغاء التعيين",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "هذا الإجراء غير متاح في هذا الإصدار.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "تعذر تحميل الإعدادات أو حفظها. أعد المحاولة؛ قد تكون التغييرات مؤقتة.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "مسح البحث",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

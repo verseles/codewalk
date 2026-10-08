@@ -189,4 +189,218 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'Choose themes, colors, text size, and chat display';
+
+  @override
+  String get settingsAppearanceTitle => 'Appearance';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Experience';
+
+  @override
+  String get settingsNavigationGroupInput => 'Input';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Setup';
+
+  @override
+  String get settingsNavigationNoResults => 'No settings found';
+
+  @override
+  String get settingsNavigationSearchHint => 'Search settings';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk-local';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'Find and customize keyboard shortcuts';
+
+  @override
+  String get settingsShortcutsEdit => 'Edit shortcut';
+
+  @override
+  String get settingsShortcutsReset => 'Reset shortcut';
+
+  @override
+  String get settingsShortcutsSearch => 'Search shortcuts';
+
+  @override
+  String get settingsShortcutsTitle => 'Shortcuts';
+
+  @override
+  String get shortcutCloseApp => 'Close tab/application';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'Close the current session tab when available, otherwise close the app using platform behavior';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'Focus/close drawer';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'Focus composer by default, or close drawer when open';
+
+  @override
+  String get shortcutFocusInput => 'Focus input';
+
+  @override
+  String get shortcutFocusInputDesc => 'Move focus to the prompt input';
+
+  @override
+  String get shortcutGroupApplication => 'Application';
+
+  @override
+  String get shortcutGroupGeneral => 'General';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'Model and agent';
+
+  @override
+  String get shortcutGroupNavigation => 'Navigation';
+
+  @override
+  String get shortcutGroupPrompt => 'Prompt';
+
+  @override
+  String get shortcutGroupSession => 'Session';
+
+  @override
+  String get shortcutNewConversation => 'New conversation';
+
+  @override
+  String get shortcutNewConversationDesc => 'Create a new chat session';
+
+  @override
+  String get shortcutNextAgent => 'Next agent';
+
+  @override
+  String get shortcutNextAgentDesc => 'Cycle to next available agent';
+
+  @override
+  String get shortcutNextRecentModel => 'Next recent model';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'Cycle through recently used models';
+
+  @override
+  String get shortcutNextTab => 'Next tab';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Show the tab switcher and cycle to the next tab';
+
+  @override
+  String get shortcutNextVariant => 'Next variant';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'Cycle through available model variants';
+
+  @override
+  String get shortcutOpenSettings => 'Open settings';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'Open settings page';
+
+  @override
+  String get shortcutPreviousAgent => 'Previous agent';
+
+  @override
+  String get shortcutPreviousAgentDesc => 'Cycle to previous available agent';
+
+  @override
+  String get shortcutPreviousTab => 'Previous tab';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Show the tab switcher and cycle to the previous tab';
+
+  @override
+  String get shortcutQuickOpenFiles => 'Quick open files';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'Open file quick search';
+
+  @override
+  String get shortcutQuitApp => 'Quit application';
+
+  @override
+  String get shortcutQuitAppDesc => 'Force-exit the app';
+
+  @override
+  String get shortcutRefreshData => 'Refresh data';
+
+  @override
+  String get shortcutRefreshDataDesc => 'Refresh current chat data';
+
+  @override
+  String get shortcutToggleVoiceInput => 'Toggle voice input';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'Start or stop speech-to-text in the composer';
+
+  @override
+  String get shortcutsApply => 'Apply';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'Conflict with $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'Conflicts with \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'Invalid shortcut';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'Unsupported shortcut key';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsPressKeyCombination => 'Press the key combination now';
+
+  @override
+  String get shortcutsReset => 'Reset all';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'Search, edit bindings, and resolve conflicts before saving.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'Set shortcut: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'These bindings are stored in CodeWalk for the current app runtime and do not edit OpenCode `tui.json` keybinds.';
+
+  @override
+  String get shortcutsUnassigned => 'Unassigned';
+
+  @override
+  String get shortcutsUnassign => 'Unassign';
+
+  @override
+  String get shortcutsUnavailable =>
+      'This action is unavailable in this version.';
+
+  @override
+  String get settingsStorageError =>
+      'Settings could not be loaded or saved. Retry; changes may be temporary.';
+
+  @override
+  String get settingsSearchClear => 'Clear search';
 }

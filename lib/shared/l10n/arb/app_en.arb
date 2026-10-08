@@ -219,5 +219,280 @@
   "appearanceStorageError": "Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "Choose themes, colors, text size, and chat display",
+  "@settingsAppearanceDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceDescription"
+  },
+  "settingsAppearanceTitle": "Appearance",
+  "@settingsAppearanceTitle": {
+    "description": "CodeWalk UI string — settingsAppearanceTitle"
+  },
+  "settingsNavigationGroupExperience": "Experience",
+  "@settingsNavigationGroupExperience": {
+    "description": "CodeWalk UI string — settingsNavigationGroupExperience"
+  },
+  "settingsNavigationGroupInput": "Input",
+  "@settingsNavigationGroupInput": {
+    "description": "CodeWalk UI string — settingsNavigationGroupInput"
+  },
+  "settingsNavigationGroupSetup": "Setup",
+  "@settingsNavigationGroupSetup": {
+    "description": "CodeWalk UI string — settingsNavigationGroupSetup"
+  },
+  "settingsNavigationNoResults": "No settings found",
+  "@settingsNavigationNoResults": {
+    "description": "CodeWalk UI string — settingsNavigationNoResults"
+  },
+  "settingsNavigationSearchHint": "Search settings",
+  "@settingsNavigationSearchHint": {
+    "description": "CodeWalk UI string — settingsNavigationSearchHint"
+  },
+  "settingsProvenanceCodeWalkLocal": "CodeWalk-local",
+  "@settingsProvenanceCodeWalkLocal": {
+    "description": "CodeWalk UI string — settingsProvenanceCodeWalkLocal"
+  },
+  "settingsShortcutsDescription": "Find and customize keyboard shortcuts",
+  "@settingsShortcutsDescription": {
+    "description": "CodeWalk UI string — settingsShortcutsDescription"
+  },
+  "settingsShortcutsEdit": "Edit shortcut",
+  "@settingsShortcutsEdit": {
+    "description": "CodeWalk UI string — settingsShortcutsEdit"
+  },
+  "settingsShortcutsReset": "Reset shortcut",
+  "@settingsShortcutsReset": {
+    "description": "CodeWalk UI string — settingsShortcutsReset"
+  },
+  "settingsShortcutsSearch": "Search shortcuts",
+  "@settingsShortcutsSearch": {
+    "description": "CodeWalk UI string — settingsShortcutsSearch"
+  },
+  "settingsShortcutsTitle": "Shortcuts",
+  "@settingsShortcutsTitle": {
+    "description": "CodeWalk UI string — settingsShortcutsTitle"
+  },
+  "shortcutCloseApp": "Close tab/application",
+  "@shortcutCloseApp": {
+    "description": "CodeWalk UI string — shortcutCloseApp"
+  },
+  "shortcutCloseAppDesc": "Close the current session tab when available, otherwise close the app using platform behavior",
+  "@shortcutCloseAppDesc": {
+    "description": "CodeWalk UI string — shortcutCloseAppDesc"
+  },
+  "shortcutFocusCloseDrawer": "Focus/close drawer",
+  "@shortcutFocusCloseDrawer": {
+    "description": "CodeWalk UI string — shortcutFocusCloseDrawer"
+  },
+  "shortcutFocusCloseDrawerDesc": "Focus composer by default, or close drawer when open",
+  "@shortcutFocusCloseDrawerDesc": {
+    "description": "CodeWalk UI string — shortcutFocusCloseDrawerDesc"
+  },
+  "shortcutFocusInput": "Focus input",
+  "@shortcutFocusInput": {
+    "description": "CodeWalk UI string — shortcutFocusInput"
+  },
+  "shortcutFocusInputDesc": "Move focus to the prompt input",
+  "@shortcutFocusInputDesc": {
+    "description": "CodeWalk UI string — shortcutFocusInputDesc"
+  },
+  "shortcutGroupApplication": "Application",
+  "@shortcutGroupApplication": {
+    "description": "CodeWalk UI string — shortcutGroupApplication"
+  },
+  "shortcutGroupGeneral": "General",
+  "@shortcutGroupGeneral": {
+    "description": "CodeWalk UI string — shortcutGroupGeneral"
+  },
+  "shortcutGroupModelAndAgent": "Model and agent",
+  "@shortcutGroupModelAndAgent": {
+    "description": "CodeWalk UI string — shortcutGroupModelAndAgent"
+  },
+  "shortcutGroupNavigation": "Navigation",
+  "@shortcutGroupNavigation": {
+    "description": "CodeWalk UI string — shortcutGroupNavigation"
+  },
+  "shortcutGroupPrompt": "Prompt",
+  "@shortcutGroupPrompt": {
+    "description": "CodeWalk UI string — shortcutGroupPrompt"
+  },
+  "shortcutGroupSession": "Session",
+  "@shortcutGroupSession": {
+    "description": "CodeWalk UI string — shortcutGroupSession"
+  },
+  "shortcutNewConversation": "New conversation",
+  "@shortcutNewConversation": {
+    "description": "CodeWalk UI string — shortcutNewConversation"
+  },
+  "shortcutNewConversationDesc": "Create a new chat session",
+  "@shortcutNewConversationDesc": {
+    "description": "CodeWalk UI string — shortcutNewConversationDesc"
+  },
+  "shortcutNextAgent": "Next agent",
+  "@shortcutNextAgent": {
+    "description": "CodeWalk UI string — shortcutNextAgent"
+  },
+  "shortcutNextAgentDesc": "Cycle to next available agent",
+  "@shortcutNextAgentDesc": {
+    "description": "CodeWalk UI string — shortcutNextAgentDesc"
+  },
+  "shortcutNextRecentModel": "Next recent model",
+  "@shortcutNextRecentModel": {
+    "description": "CodeWalk UI string — shortcutNextRecentModel"
+  },
+  "shortcutNextRecentModelDesc": "Cycle through recently used models",
+  "@shortcutNextRecentModelDesc": {
+    "description": "CodeWalk UI string — shortcutNextRecentModelDesc"
+  },
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string — shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string — shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "Next variant",
+  "@shortcutNextVariant": {
+    "description": "CodeWalk UI string — shortcutNextVariant"
+  },
+  "shortcutNextVariantDesc": "Cycle through available model variants",
+  "@shortcutNextVariantDesc": {
+    "description": "CodeWalk UI string — shortcutNextVariantDesc"
+  },
+  "shortcutOpenSettings": "Open settings",
+  "@shortcutOpenSettings": {
+    "description": "CodeWalk UI string — shortcutOpenSettings"
+  },
+  "shortcutOpenSettingsDesc": "Open settings page",
+  "@shortcutOpenSettingsDesc": {
+    "description": "CodeWalk UI string — shortcutOpenSettingsDesc"
+  },
+  "shortcutPreviousAgent": "Previous agent",
+  "@shortcutPreviousAgent": {
+    "description": "CodeWalk UI string — shortcutPreviousAgent"
+  },
+  "shortcutPreviousAgentDesc": "Cycle to previous available agent",
+  "@shortcutPreviousAgentDesc": {
+    "description": "CodeWalk UI string — shortcutPreviousAgentDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string — shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string — shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "Quick open files",
+  "@shortcutQuickOpenFiles": {
+    "description": "CodeWalk UI string — shortcutQuickOpenFiles"
+  },
+  "shortcutQuickOpenFilesDesc": "Open file quick search",
+  "@shortcutQuickOpenFilesDesc": {
+    "description": "CodeWalk UI string — shortcutQuickOpenFilesDesc"
+  },
+  "shortcutQuitApp": "Quit application",
+  "@shortcutQuitApp": {
+    "description": "CodeWalk UI string — shortcutQuitApp"
+  },
+  "shortcutQuitAppDesc": "Force-exit the app",
+  "@shortcutQuitAppDesc": {
+    "description": "CodeWalk UI string — shortcutQuitAppDesc"
+  },
+  "shortcutRefreshData": "Refresh data",
+  "@shortcutRefreshData": {
+    "description": "CodeWalk UI string — shortcutRefreshData"
+  },
+  "shortcutRefreshDataDesc": "Refresh current chat data",
+  "@shortcutRefreshDataDesc": {
+    "description": "CodeWalk UI string — shortcutRefreshDataDesc"
+  },
+  "shortcutToggleVoiceInput": "Toggle voice input",
+  "@shortcutToggleVoiceInput": {
+    "description": "CodeWalk UI string — shortcutToggleVoiceInput"
+  },
+  "shortcutToggleVoiceInputDesc": "Start or stop speech-to-text in the composer",
+  "@shortcutToggleVoiceInputDesc": {
+    "description": "CodeWalk UI string — shortcutToggleVoiceInputDesc"
+  },
+  "shortcutsApply": "Apply",
+  "@shortcutsApply": {
+    "description": "CodeWalk UI string — shortcutsApply"
+  },
+  "shortcutsConflictConflict": "Conflict with {conflict}",
+  "@shortcutsConflictConflict": {
+    "description": "CodeWalk UI string — shortcutsConflictConflict",
+    "placeholders": {
+      "conflict": {
+        "type": "String"
+      }
+    }
+  },
+  "shortcutsErrorConflict": "Conflicts with \"{conflict}\"",
+  "@shortcutsErrorConflict": {
+    "description": "CodeWalk UI string — shortcutsErrorConflict",
+    "placeholders": {
+      "conflict": {
+        "type": "String"
+      }
+    }
+  },
+  "shortcutsErrorInvalid": "Invalid shortcut",
+  "@shortcutsErrorInvalid": {
+    "description": "CodeWalk UI string — shortcutsErrorInvalid"
+  },
+  "shortcutsErrorUnsupportedKey": "Unsupported shortcut key",
+  "@shortcutsErrorUnsupportedKey": {
+    "description": "CodeWalk UI string — shortcutsErrorUnsupportedKey"
+  },
+  "shortcutsKeyboardShortcuts": "Keyboard shortcuts",
+  "@shortcutsKeyboardShortcuts": {
+    "description": "CodeWalk UI string — shortcutsKeyboardShortcuts"
+  },
+  "shortcutsPressKeyCombination": "Press the key combination now",
+  "@shortcutsPressKeyCombination": {
+    "description": "CodeWalk UI string — shortcutsPressKeyCombination"
+  },
+  "shortcutsReset": "Reset all",
+  "@shortcutsReset": {
+    "description": "CodeWalk UI string — shortcutsReset"
+  },
+  "shortcutsSearchEditBindings": "Search, edit bindings, and resolve conflicts before saving.",
+  "@shortcutsSearchEditBindings": {
+    "description": "CodeWalk UI string — shortcutsSearchEditBindings"
+  },
+  "shortcutsSetShortcutWidget": "Set shortcut: {label}",
+  "@shortcutsSetShortcutWidget": {
+    "description": "CodeWalk UI string — shortcutsSetShortcutWidget",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shortcutsTheseBindingsStored": "These bindings are stored in CodeWalk for the current app runtime and do not edit OpenCode `tui.json` keybinds.",
+  "@shortcutsTheseBindingsStored": {
+    "description": "CodeWalk UI string — shortcutsTheseBindingsStored"
+  },
+  "shortcutsUnassigned": "Unassigned",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "Unassign",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "This action is unavailable in this version.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "Settings could not be loaded or saved. Retry; changes may be temporary.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "Clear search",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

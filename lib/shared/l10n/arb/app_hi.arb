@@ -57,5 +57,97 @@
   "appearanceStorageError": "दिखावट की सेटिंग लोड या सहेजी नहीं जा सकीं। दोबारा कोशिश सफल होने तक बदलाव अस्थायी रहेंगे।",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "थीम, रंग, टेक्स्ट आकार और चैट प्रदर्शन चुनें",
+  "settingsAppearanceTitle": "रूप-रंग",
+  "settingsNavigationGroupExperience": "अनुभव",
+  "settingsNavigationGroupInput": "इनपुट",
+  "settingsNavigationGroupSetup": "सेटअप",
+  "settingsNavigationNoResults": "कोई सेटिंग नहीं मिली",
+  "settingsNavigationSearchHint": "सेटिंग खोजें",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk-स्थानीय",
+  "settingsShortcutsDescription": "कीबोर्ड शॉर्टकट खोजें और अनुकूलित करें",
+  "settingsShortcutsEdit": "शॉर्टकट संपादित करें",
+  "settingsShortcutsReset": "शॉर्टकट रीसेट करें",
+  "settingsShortcutsSearch": "शॉर्टकट खोजें",
+  "settingsShortcutsTitle": "शॉर्टकट",
+  "shortcutCloseApp": "टैब/ऐप्लिकेशन बंद करें",
+  "shortcutCloseAppDesc": "वर्तमान सत्र टैब उपलब्ध हो तो उसे बंद करें; अन्यथा प्लेटफ़ॉर्म व्यवहार के अनुसार ऐप बंद करें",
+  "shortcutFocusCloseDrawer": "दराज पर ध्यान केंद्रित करें/बंद करें",
+  "shortcutFocusCloseDrawerDesc": "डिफ़ॉल्ट रूप से इनपुट पर ध्यान केंद्रित करें, या खुला होने पर दराज बंद करें",
+  "shortcutFocusInput": "इनपुट पर ध्यान केंद्रित करें",
+  "shortcutFocusInputDesc": "ध्यान टेक्स्ट इनपुट पर ले जाएं",
+  "shortcutGroupApplication": "एप्लिकेशन",
+  "shortcutGroupGeneral": "सामान्य",
+  "shortcutGroupModelAndAgent": "मॉडल और एजेंट",
+  "shortcutGroupNavigation": "नेविगेशन",
+  "shortcutGroupPrompt": "प्रॉम्प्ट",
+  "shortcutGroupSession": "सत्र",
+  "shortcutNewConversation": "नई बातचीत",
+  "shortcutNewConversationDesc": "एक नया चैट सत्र बनाएं",
+  "shortcutNextAgent": "अगला एजेंट",
+  "shortcutNextAgentDesc": "अगले उपलब्ध एजेंट पर जाएं",
+  "shortcutNextRecentModel": "अगला हालिया मॉडल",
+  "shortcutNextRecentModelDesc": "हाल ही में उपयोग किए गए मॉडल के बीच चक्र करें",
+  "shortcutNextTab": "अगला टैब",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "टैब स्विचर दिखाएँ और अगले टैब पर जाएँ",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "अगला संस्करण",
+  "shortcutNextVariantDesc": "उपलब्ध मॉडल संस्करणों के बीच चक्र करें",
+  "shortcutOpenSettings": "सेटिंग्स खोलें",
+  "shortcutOpenSettingsDesc": "सेटिंग्स पेज खोलें",
+  "shortcutPreviousAgent": "पिछला एजेंट",
+  "shortcutPreviousAgentDesc": "पिछले उपलब्ध एजेंट पर जाएं",
+  "shortcutPreviousTab": "पिछला टैब",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "टैब स्विचर दिखाएँ और पिछले टैब पर जाएँ",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "फाइलें जल्दी खोलें",
+  "shortcutQuickOpenFilesDesc": "फाइल त्वरित खोज खोलें",
+  "shortcutQuitApp": "एप्लिकेशन से बाहर निकलें",
+  "shortcutQuitAppDesc": "ऐप को जबरन बंद करें",
+  "shortcutRefreshData": "डेटा रिफ्रेश करें",
+  "shortcutRefreshDataDesc": "वर्तमान चैट डेटा रिफ्रेश करें",
+  "shortcutToggleVoiceInput": "आवाज इनपुट टॉगल करें",
+  "shortcutToggleVoiceInputDesc": "संपादक में आवाज श्रुतलेख शुरू या बंद करें",
+  "shortcutsApply": "लागू करें",
+  "shortcutsConflictConflict": "{conflict} के साथ विरोध",
+  "shortcutsErrorConflict": "\"{conflict}\" से टकराता है",
+  "shortcutsErrorInvalid": "अमान्य शॉर्टकट",
+  "shortcutsErrorUnsupportedKey": "असमर्थित शॉर्टकट कुंजी",
+  "shortcutsKeyboardShortcuts": "कीबोर्ड शॉर्टकट",
+  "shortcutsPressKeyCombination": "अब की-कॉम्बिनेशन दबाएँ",
+  "shortcutsReset": "सभी रीसेट करें",
+  "shortcutsSearchEditBindings": "सहेजने से पहले बाइंडिंग खोजें, संपादित करें और संघर्षों (conflicts) को हल करें।",
+  "shortcutsSetShortcutWidget": "शॉर्टकट सेट करें: {label}",
+  "shortcutsTheseBindingsStored": "ये बाइंडिंग वर्तमान ऐप रनटाइम के लिए CodeWalk में संग्रहीत हैं और OpenCode `tui.json` की-बाइंड को संपादित नहीं करती हैं।",
+  "shortcutsUnassigned": "असाइन नहीं किया गया",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "असाइनमेंट हटाएँ",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "यह कार्रवाई इस संस्करण में उपलब्ध नहीं है।",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "सेटिंग लोड या सहेजी नहीं जा सकीं। दोबारा कोशिश करें; बदलाव अस्थायी हो सकते हैं।",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "खोज साफ़ करें",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

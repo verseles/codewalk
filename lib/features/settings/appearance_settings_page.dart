@@ -35,13 +35,9 @@ class AppearanceSettingsPage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
         child: ListView(
+          key: const ValueKey('appearance_settings_list'),
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              l.settingsTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
             Text(
               l.settingsAppearanceSectionTitle,
               style: Theme.of(context).textTheme.titleLarge,
@@ -53,7 +49,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l.appearanceStorageError),
+                      Text(l.settingsStorageError),
                       TextButton(
                         onPressed: p.retryPersistence,
                         child: Text(l.chatRetry),

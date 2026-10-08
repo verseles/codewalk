@@ -26,7 +26,11 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.text('Appearance'), findsOneWidget);
+        await tester.tap(
+          find.byKey(const ValueKey('settings_destination_appearance')),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Appearance'), findsWidgets);
         expect(
           tester
               .widget<SwitchListTile>(
@@ -58,10 +62,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(
+        find.byKey(const ValueKey('settings_destination_appearance')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
         find.byKey(const ValueKey('settings_theme_preset_dropdown')),
       );
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'dracula');
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'dracula',
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Dracula'));
       await tester.pumpAndSettle();
@@ -69,7 +83,12 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('settings_contrast_slider')),
         200,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const ValueKey('appearance_settings_list')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       expect(
         tester
@@ -97,6 +116,10 @@ void main() {
         dependencies: graph,
         dynamicColors: (builder) => builder(null, null),
       ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('settings_destination_appearance')),
     );
     await tester.pumpAndSettle();
     expect(

@@ -191,4 +191,216 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'ظاہری شکل کی ترتیبات لوڈ یا محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کامیاب ہونے تک تبدیلیاں عارضی رہیں گی۔';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'تھیمز، رنگ، متن کا سائز اور چیٹ ڈسپلے منتخب کریں';
+
+  @override
+  String get settingsAppearanceTitle => 'ظاہری شکل';
+
+  @override
+  String get settingsNavigationGroupExperience => 'تجربہ';
+
+  @override
+  String get settingsNavigationGroupInput => 'ان پٹ';
+
+  @override
+  String get settingsNavigationGroupSetup => 'سیٹ اپ';
+
+  @override
+  String get settingsNavigationNoResults => 'کوئی سیٹنگز نہیں ملیں';
+
+  @override
+  String get settingsNavigationSearchHint => 'سیٹنگز تلاش کریں';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk مقامی';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'کی بورڈ شارٹ کٹس تلاش کریں اور اپنی مرضی کے مطابق بنائیں';
+
+  @override
+  String get settingsShortcutsEdit => 'شارٹ کٹ میں ترمیم کریں۔';
+
+  @override
+  String get settingsShortcutsReset => 'شارٹ کٹ کو دوبارہ ترتیب دیں۔';
+
+  @override
+  String get settingsShortcutsSearch => 'شارٹ کٹ تلاش کریں۔';
+
+  @override
+  String get settingsShortcutsTitle => 'شارٹ کٹس';
+
+  @override
+  String get shortcutCloseApp => 'ٹیب/ایپلیکیشن بند کریں';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'موجودہ سیشن ٹیب دستیاب ہو تو اسے بند کریں؛ ورنہ پلیٹ فارم کے رویے کے مطابق ایپ بند کریں';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'دراز پر توجہ مرکوز کریں/بند کریں';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'ڈیفالٹ کے طور پر ان پٹ پر توجہ مرکوز کریں، یا دراز کھلا ہونے پر بند کریں';
+
+  @override
+  String get shortcutFocusInput => 'ان پٹ پر توجہ مرکوز کریں';
+
+  @override
+  String get shortcutFocusInputDesc => 'توجہ کو ٹیکسٹ ان پٹ پر منتقل کریں';
+
+  @override
+  String get shortcutGroupApplication => 'ایپلیکیشن';
+
+  @override
+  String get shortcutGroupGeneral => 'عمومی';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'ماڈل اور ایجنٹ';
+
+  @override
+  String get shortcutGroupNavigation => 'نیویگیشن';
+
+  @override
+  String get shortcutGroupPrompt => 'پرامپٹ';
+
+  @override
+  String get shortcutGroupSession => 'سیشن';
+
+  @override
+  String get shortcutNewConversation => 'نئی گفتگو';
+
+  @override
+  String get shortcutNewConversationDesc => 'ایک نیا چیٹ سیشن شروع کریں';
+
+  @override
+  String get shortcutNextAgent => 'اگلا ایجنٹ';
+
+  @override
+  String get shortcutNextAgentDesc => 'اگلے دستیاب ایجنٹ پر جائیں';
+
+  @override
+  String get shortcutNextRecentModel => 'اگلا حالیہ ماڈل';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'حالیہ استعمال شدہ ماڈلز کے درمیان سوئچ کریں';
+
+  @override
+  String get shortcutNextTab => 'اگلی ٹیب';
+
+  @override
+  String get shortcutNextTabDesc => 'ٹیب سوئچر دکھائیں اور اگلی ٹیب پر جائیں';
+
+  @override
+  String get shortcutNextVariant => 'اگلی قسم';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'دستیاب ماڈل کی اقسام کے درمیان سوئچ کریں';
+
+  @override
+  String get shortcutOpenSettings => 'ترتیبات کھولیں';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'ترتیبات کا صفحہ کھولیں';
+
+  @override
+  String get shortcutPreviousAgent => 'پچھلا ایجنٹ';
+
+  @override
+  String get shortcutPreviousAgentDesc => 'پچھلے دستیاب ایجنٹ پر جائیں';
+
+  @override
+  String get shortcutPreviousTab => 'پچھلی ٹیب';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'ٹیب سوئچر دکھائیں اور پچھلی ٹیب پر جائیں';
+
+  @override
+  String get shortcutQuickOpenFiles => 'فائلیں جلدی کھولیں';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'فائلوں کی فوری تلاش کھولیں';
+
+  @override
+  String get shortcutQuitApp => 'ایپلیکیشن سے باہر نکلیں';
+
+  @override
+  String get shortcutQuitAppDesc => 'ایپ سے زبردستی باہر نکلیں';
+
+  @override
+  String get shortcutRefreshData => 'ڈیٹا ریفریش کریں';
+
+  @override
+  String get shortcutRefreshDataDesc => 'موجودہ چیٹ کے ڈیٹا کو ریفریش کریں';
+
+  @override
+  String get shortcutToggleVoiceInput => 'صوتی ان پٹ کو تبدیل کریں';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'ایڈیٹر میں صوتی ڈکٹیشن شروع کریں یا روکیں';
+
+  @override
+  String get shortcutsApply => 'لگائیں';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return '$conflict کے ساتھ تصادم';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '\"$conflict\" سے ٹکراؤ';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'غلط شارٹ کٹ';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'غیر تعاون یافتہ شارٹ کٹ کلید';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'کی بورڈ شارٹ کٹس';
+
+  @override
+  String get shortcutsPressKeyCombination => 'اب کلیدوں کا مجموعہ دبائیں';
+
+  @override
+  String get shortcutsReset => 'سب کو ری سیٹ کریں۔';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'تلاش کریں، بائنڈنگز میں ترمیم کریں، اور محفوظ کرنے سے پہلے تنازعات کو حل کریں۔';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'شارٹ کٹ سیٹ کریں: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'یہ بائنڈنگز موجودہ ایپ رن ٹائم کے لیے CodeWalk میں محفوظ ہیں اور OpenCode `tui.json` کی بائنڈز میں ترمیم نہیں کرتی ہیں۔';
+
+  @override
+  String get shortcutsUnassigned => 'تفویض نہیں کیا گیا';
+
+  @override
+  String get shortcutsUnassign => 'تفویض ہٹائیں';
+
+  @override
+  String get shortcutsUnavailable => 'یہ عمل اس ورژن میں دستیاب نہیں ہے۔';
+
+  @override
+  String get settingsStorageError =>
+      'ترتیبات لوڈ یا محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں؛ تبدیلیاں عارضی ہو سکتی ہیں۔';
+
+  @override
+  String get settingsSearchClear => 'تلاش صاف کریں';
 }

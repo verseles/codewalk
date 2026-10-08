@@ -192,4 +192,219 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'Не удалось загрузить или сохранить настройки внешнего вида. Изменения остаются временными до успешной повторной попытки.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'Выбор темы, цветов, размера текста и отображения чата';
+
+  @override
+  String get settingsAppearanceTitle => 'Внешний вид';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Опыт';
+
+  @override
+  String get settingsNavigationGroupInput => 'Ввод';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Настройка';
+
+  @override
+  String get settingsNavigationNoResults => 'Настройки не найдены';
+
+  @override
+  String get settingsNavigationSearchHint => 'Поиск настроек';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'Локально для CodeWalk';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'Поиск и настройка сочетаний клавиш';
+
+  @override
+  String get settingsShortcutsEdit => 'Редактировать ярлык';
+
+  @override
+  String get settingsShortcutsReset => 'Сбросить ярлык';
+
+  @override
+  String get settingsShortcutsSearch => 'Поиск горячих клавиш';
+
+  @override
+  String get settingsShortcutsTitle => 'Ярлыки';
+
+  @override
+  String get shortcutCloseApp => 'Закрыть вкладку/приложение';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'Закрыть текущую вкладку сеанса, если она доступна; иначе закрыть приложение согласно поведению платформы';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'Фокусировать/закрыть панель';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'Фокусировать редактор по умолчанию или закрыть панель, если она открыта';
+
+  @override
+  String get shortcutFocusInput => 'Фокус на вводе';
+
+  @override
+  String get shortcutFocusInputDesc => 'Переместить фокус на ввод запроса';
+
+  @override
+  String get shortcutGroupApplication => 'Приложение';
+
+  @override
+  String get shortcutGroupGeneral => 'Общие';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'Модель и агент';
+
+  @override
+  String get shortcutGroupNavigation => 'Навигация';
+
+  @override
+  String get shortcutGroupPrompt => 'Запрос';
+
+  @override
+  String get shortcutGroupSession => 'Сессия';
+
+  @override
+  String get shortcutNewConversation => 'Новая беседа';
+
+  @override
+  String get shortcutNewConversationDesc => 'Создать новую сессию чата';
+
+  @override
+  String get shortcutNextAgent => 'Следующий агент';
+
+  @override
+  String get shortcutNextAgentDesc =>
+      'Переключиться на следующего доступного агента';
+
+  @override
+  String get shortcutNextRecentModel => 'Следующая недавняя модель';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'Переключиться на недавно использовавшиеся модели';
+
+  @override
+  String get shortcutNextTab => 'Следующая вкладка';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Показать переключатель вкладок и перейти к следующей';
+
+  @override
+  String get shortcutNextVariant => 'Следующий вариант';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'Переключиться на доступные варианты модели';
+
+  @override
+  String get shortcutOpenSettings => 'Открыть настройки';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'Открыть страницу настроек';
+
+  @override
+  String get shortcutPreviousAgent => 'Предыдущий агент';
+
+  @override
+  String get shortcutPreviousAgentDesc =>
+      'Переключиться на предыдущего доступного агента';
+
+  @override
+  String get shortcutPreviousTab => 'Предыдущая вкладка';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Показать переключатель вкладок и перейти к предыдущей';
+
+  @override
+  String get shortcutQuickOpenFiles => 'Быстрое открытие файлов';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'Открыть быстрый поиск файлов';
+
+  @override
+  String get shortcutQuitApp => 'Выйти из приложения';
+
+  @override
+  String get shortcutQuitAppDesc => 'Принудительно закрыть приложение';
+
+  @override
+  String get shortcutRefreshData => 'Обновить данные';
+
+  @override
+  String get shortcutRefreshDataDesc => 'Обновить данные текущего чата';
+
+  @override
+  String get shortcutToggleVoiceInput => 'Переключить голосовой ввод';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'Запустить или остановить преобразование речи в текст в редакторе';
+
+  @override
+  String get shortcutsApply => 'Применить';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'Конфликт с $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'Конфликт с \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'Недопустимое сочетание клавиш';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'Неподдерживаемая клавиша';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'Горячие клавиши';
+
+  @override
+  String get shortcutsPressKeyCombination => 'Нажмите комбинацию клавиш сейчас';
+
+  @override
+  String get shortcutsReset => 'Сбросить все';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'Ищите, редактируйте привязки клавиш и устраняйте конфликты перед сохранением.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'Задать ярлык: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'Эти привязки хранятся в CodeWalk для текущего времени выполнения приложения и не изменяют горячие клавиши в `tui.json` OpenCode.';
+
+  @override
+  String get shortcutsUnassigned => 'Не назначено';
+
+  @override
+  String get shortcutsUnassign => 'Снять назначение';
+
+  @override
+  String get shortcutsUnavailable => 'Это действие недоступно в этой версии.';
+
+  @override
+  String get settingsStorageError =>
+      'Не удалось загрузить или сохранить настройки. Повторите попытку; изменения могут быть временными.';
+
+  @override
+  String get settingsSearchClear => 'Очистить поиск';
 }

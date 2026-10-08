@@ -192,4 +192,221 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'Impossibile caricare o salvare le impostazioni dell’aspetto. Le modifiche restano temporanee finché il nuovo tentativo non riesce.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'Scegli temi, colori, dimensione del testo e visualizzazione della chat';
+
+  @override
+  String get settingsAppearanceTitle => 'Aspetto';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Esperienza';
+
+  @override
+  String get settingsNavigationGroupInput => 'Input';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Configurazione';
+
+  @override
+  String get settingsNavigationNoResults => 'Nessuna impostazione trovata';
+
+  @override
+  String get settingsNavigationSearchHint => 'Cerca impostazioni';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'Locale di CodeWalk';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'Trova e personalizza le scorciatoie da tastiera';
+
+  @override
+  String get settingsShortcutsEdit => 'Modifica scorciatoia';
+
+  @override
+  String get settingsShortcutsReset => 'Ripristina scorciatoia';
+
+  @override
+  String get settingsShortcutsSearch => 'Cerca scorciatoie';
+
+  @override
+  String get settingsShortcutsTitle => 'Scorciatoie';
+
+  @override
+  String get shortcutCloseApp => 'Chiudi scheda/applicazione';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'Chiudi la scheda della sessione corrente quando disponibile; altrimenti chiudi l\'app secondo il comportamento della piattaforma';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'Focus/chiudi pannello';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'Focus sull\'input per impostazione predefinita, o chiudi il pannello se aperto';
+
+  @override
+  String get shortcutFocusInput => 'Focus sullinput';
+
+  @override
+  String get shortcutFocusInputDesc => 'Sposta il focus sull\'input di testo';
+
+  @override
+  String get shortcutGroupApplication => 'Applicazione';
+
+  @override
+  String get shortcutGroupGeneral => 'Generale';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'Modello e agente';
+
+  @override
+  String get shortcutGroupNavigation => 'Navigazione';
+
+  @override
+  String get shortcutGroupPrompt => 'Prompt';
+
+  @override
+  String get shortcutGroupSession => 'Sessione';
+
+  @override
+  String get shortcutNewConversation => 'Nuova conversazione';
+
+  @override
+  String get shortcutNewConversationDesc => 'Crea una nuova sessione di chat';
+
+  @override
+  String get shortcutNextAgent => 'Prossimo agente';
+
+  @override
+  String get shortcutNextAgentDesc => 'Cicla al prossimo agente disponibile';
+
+  @override
+  String get shortcutNextRecentModel => 'Prossimo modello recente';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'Cicla tra i modelli usati recentemente';
+
+  @override
+  String get shortcutNextTab => 'Scheda successiva';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Mostra il selettore schede e passa alla successiva';
+
+  @override
+  String get shortcutNextVariant => 'Prossima variante';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'Cicla tra le varianti di modello disponibili';
+
+  @override
+  String get shortcutOpenSettings => 'Apri impostazioni';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'Apri la pagina delle impostazioni';
+
+  @override
+  String get shortcutPreviousAgent => 'Agente precedente';
+
+  @override
+  String get shortcutPreviousAgentDesc =>
+      'Cicla all\'agente precedente disponibile';
+
+  @override
+  String get shortcutPreviousTab => 'Scheda precedente';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Mostra il selettore schede e passa alla precedente';
+
+  @override
+  String get shortcutQuickOpenFiles => 'Apertura rapida file';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'Apri la ricerca rapida dei file';
+
+  @override
+  String get shortcutQuitApp => 'Esci dallapplicazione';
+
+  @override
+  String get shortcutQuitAppDesc => 'Forza l\'uscita dall\'app';
+
+  @override
+  String get shortcutRefreshData => 'Aggiorna dati';
+
+  @override
+  String get shortcutRefreshDataDesc => 'Aggiorna i dati della chat corrente';
+
+  @override
+  String get shortcutToggleVoiceInput => 'Attiva/disattiva input vocale';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'Avvia o ferma il dettato vocale nelleditor';
+
+  @override
+  String get shortcutsApply => 'Applica';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'Conflitto con $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'In conflitto con \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'Scorciatoia non valida';
+
+  @override
+  String get shortcutsErrorUnsupportedKey =>
+      'Tasto di scorciatoia non supportato';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'Scorciatoie da tastiera';
+
+  @override
+  String get shortcutsPressKeyCombination =>
+      'Premi ora la combinazione di tasti';
+
+  @override
+  String get shortcutsReset => 'Ripristina tutto';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'Cerca, modifica associazioni e risolvi i conflitti prima di salvare.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'Imposta scorciatoia: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'Queste associazioni sono memorizzate in CodeWalk per il runtime dell\'app corrente e non modificano le associazioni di tasti `tui.json` di OpenCode.';
+
+  @override
+  String get shortcutsUnassigned => 'Non assegnato';
+
+  @override
+  String get shortcutsUnassign => 'Rimuovi assegnazione';
+
+  @override
+  String get shortcutsUnavailable =>
+      'Questa azione non è disponibile in questa versione.';
+
+  @override
+  String get settingsStorageError =>
+      'Impossibile caricare o salvare le impostazioni. Riprova; le modifiche possono essere temporanee.';
+
+  @override
+  String get settingsSearchClear => 'Cancella ricerca';
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/settings/appearance_settings_page.dart';
+import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
 import 'app_shell.dart';
@@ -43,7 +43,7 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const AppearanceSettingsPage(),
+            builder: (context, state) => const SettingsShellPage(),
           ),
           GoRoute(
             path: '/pair',

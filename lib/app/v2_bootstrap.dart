@@ -7,6 +7,7 @@ import '../shared/l10n/l10n_bridge.dart';
 import '../shared/theme/app_theme.dart';
 import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
+import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
 
 /// Owns a composed v2 graph; widgets receive typed dependencies, not a locator.
@@ -90,7 +91,11 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
                   MediaQuery.of(context),
                   textDirection: Directionality.of(context),
                 ),
-                child: child ?? const SizedBox.shrink(),
+                child: AppKeyboardShortcuts(
+                  preferences: preferences,
+                  openSettings: () => dependencies.router.go('/settings'),
+                  child: child ?? const SizedBox.shrink(),
+                ),
               );
             },
           );

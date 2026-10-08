@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../platform/storage/metadata_store.dart';
+import '../shared/shortcuts/shortcut_action.dart';
+import '../shared/shortcuts/shortcut_binding_codec.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
 import '../shared/theme/theme_preferences.dart';
 
@@ -21,6 +25,10 @@ class AppPreferencesController extends ChangeNotifier {
   bool _dynamicColorAvailable = false;
   bool _disposed = false;
   bool _loadFailed = false;
+  bool _shortcutLoadFailed = false;
+  bool _hasPhysicalKeyboard = false;
+  Map<String, dynamic> _shortcutOverrides = {};
+  final Map<String, String?> _shortcutEdits = {};
   Future<void>? _initialization;
   final Map<String, int> _revisions = {};
   final Set<String> _failedKeys = {};
@@ -36,8 +44,76 @@ class AppPreferencesController extends ChangeNotifier {
   bool get useAmoledDark => _useAmoledDark;
   bool get useDynamicColor => _useDynamicColor;
   bool get dynamicColorAvailable => _dynamicColorAvailable;
-  bool get hasPersistenceError => _loadFailed || _failedKeys.isNotEmpty;
+  bool get hasPersistenceError =>
+      _loadFailed || _shortcutLoadFailed || _failedKeys.isNotEmpty;
   bool get isDisposed => _disposed;
+  bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
+
+  String shortcutBindingFor(ShortcutAction action) {
+    if (!_shortcutOverrides.containsKey(action.key)) {
+      return action.defaultBinding;
+    }
+    final value = _shortcutOverrides[action.key];
+    return value is String ? value : '';
+  }
+
+  bool shortcutIsInvalid(ShortcutAction action) =>
+      (_shortcutOverrides.containsKey(action.key) &&
+          _shortcutOverrides[action.key] is! String) ||
+      (shortcutBindingFor(action).isNotEmpty &&
+          ShortcutBindingCodec.parse(shortcutBindingFor(action)) == null);
+
+  ShortcutAction? shortcutConflict(ShortcutAction action, String binding) {
+    final fingerprint = ShortcutBindingCodec.fingerprint(binding);
+    if (fingerprint == null) return null;
+    for (final other in ShortcutAction.values) {
+      if (other != action &&
+          fingerprint ==
+              ShortcutBindingCodec.fingerprint(shortcutBindingFor(other))) {
+        return other;
+      }
+    }
+    return null;
+  }
+
+  /// Empty disables an action; null resets its override to the portable default.
+  void setShortcutBinding(ShortcutAction action, String? binding) {
+    if (_disposed) return;
+    if (binding != null && binding.length > 128) {
+      throw ArgumentError('Oversized shortcut');
+    }
+    final normalized = binding == null
+        ? null
+        : ShortcutBindingCodec.normalize(binding);
+    if (normalized != null &&
+        normalized.isNotEmpty &&
+        (ShortcutBindingCodec.parse(normalized) == null ||
+            shortcutConflict(action, normalized) != null)) {
+      throw ArgumentError('Invalid or conflicting shortcut');
+    }
+    _shortcutEdits[action.key] = normalized;
+    if (normalized == null) {
+      _shortcutOverrides.remove(action.key);
+    } else {
+      _shortcutOverrides[action.key] = normalized;
+    }
+    _changed('shortcuts');
+  }
+
+  void resetAllShortcuts() {
+    if (_disposed) return;
+    for (final action in ShortcutAction.values) {
+      _shortcutEdits[action.key] = null;
+      _shortcutOverrides.remove(action.key);
+    }
+    _changed('shortcuts');
+  }
+
+  void observePhysicalKeyboard() {
+    if (_disposed || _hasPhysicalKeyboard) return;
+    _hasPhysicalKeyboard = true;
+    notifyListeners();
+  }
 
   Map<String, Object?> get _values => {
     'themeMode': _themeMode.name,
@@ -54,6 +130,8 @@ class AppPreferencesController extends ChangeNotifier {
     'contrastLevel': _contrastLevel,
     'useAmoledDark': _useAmoledDark,
     'useDynamicColor': _useDynamicColor,
+    // Shortcut JSON is serialized after hydration, preserving unknown fields.
+    'shortcuts': null,
   };
 
   Future<void> initialize() => _initialization ??= _load();
@@ -61,6 +139,7 @@ class AppPreferencesController extends ChangeNotifier {
   Future<void> _load() async {
     final store = _store;
     if (store == null || _disposed) return;
+    _shortcutLoadFailed = true;
     final revisions = Map<String, int>.of(_revisions);
     try {
       await store.ensureSchema();
@@ -68,6 +147,8 @@ class AppPreferencesController extends ChangeNotifier {
       for (final key in _values.keys) {
         values[key] = await store.read('cw2.settings.$key');
       }
+      // Accepted shortcut writes must still merge their snapshot after disposal.
+      _hydrateShortcuts(values['shortcuts']);
       if (_disposed) return;
       // A choice made while storage was loading always wins over the snapshot.
       Object? value(String key) =>
@@ -120,6 +201,45 @@ class AppPreferencesController extends ChangeNotifier {
     }
   }
 
+  void _hydrateShortcuts(Object? raw) {
+    try {
+      var loaded = <String, dynamic>{};
+      if (raw != null) {
+        if (raw is! String || raw.length > V2MetadataStore.maxPreferenceChars) {
+          throw const FormatException('Invalid shortcut metadata');
+        }
+        final decoded = jsonDecode(raw);
+        if (decoded is! Map<String, dynamic>) {
+          throw const FormatException('Invalid shortcut metadata');
+        }
+        loaded = decoded;
+      }
+      for (final edit in _shortcutEdits.entries) {
+        if (edit.value == null) {
+          loaded.remove(edit.key);
+        } else {
+          loaded[edit.key] = edit.value;
+        }
+      }
+      _shortcutOverrides = loaded;
+      _shortcutLoadFailed = false;
+    } on FormatException {
+      // Do not turn an unrelated edit into destruction of unreadable metadata.
+      _shortcutLoadFailed = true;
+    }
+  }
+
+  Future<bool> _persistShortcuts() async {
+    await initialize();
+    if (_shortcutLoadFailed) {
+      throw const FormatException('Shortcut metadata could not be loaded');
+    }
+    final store = _store!;
+    return _shortcutOverrides.isEmpty
+        ? store.remove('cw2.settings.shortcuts')
+        : store.write('cw2.settings.shortcuts', jsonEncode(_shortcutOverrides));
+  }
+
   void _changed(String key) {
     final revision = (_revisions[key] ?? 0) + 1;
     _revisions[key] = revision;
@@ -130,7 +250,9 @@ class AppPreferencesController extends ChangeNotifier {
   void _persist(String key, Object? value, int revision) {
     final store = _store;
     if (store == null) return;
-    final operation = value == null
+    final operation = key == 'shortcuts'
+        ? _persistShortcuts()
+        : value == null
         ? store.remove('cw2.settings.$key')
         : store.write('cw2.settings.$key', value);
     late final Future<void> pending;
@@ -157,7 +279,7 @@ class AppPreferencesController extends ChangeNotifier {
 
   Future<void> retryPersistence() async {
     if (_disposed) return;
-    if (_loadFailed) {
+    if (_loadFailed || _shortcutLoadFailed) {
       _initialization = null;
       await initialize();
     }

@@ -57,5 +57,97 @@
   "appearanceStorageError": "Не удалось загрузить или сохранить настройки внешнего вида. Изменения остаются временными до успешной повторной попытки.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "Выбор темы, цветов, размера текста и отображения чата",
+  "settingsAppearanceTitle": "Внешний вид",
+  "settingsNavigationGroupExperience": "Опыт",
+  "settingsNavigationGroupInput": "Ввод",
+  "settingsNavigationGroupSetup": "Настройка",
+  "settingsNavigationNoResults": "Настройки не найдены",
+  "settingsNavigationSearchHint": "Поиск настроек",
+  "settingsProvenanceCodeWalkLocal": "Локально для CodeWalk",
+  "settingsShortcutsDescription": "Поиск и настройка сочетаний клавиш",
+  "settingsShortcutsEdit": "Редактировать ярлык",
+  "settingsShortcutsReset": "Сбросить ярлык",
+  "settingsShortcutsSearch": "Поиск горячих клавиш",
+  "settingsShortcutsTitle": "Ярлыки",
+  "shortcutCloseApp": "Закрыть вкладку/приложение",
+  "shortcutCloseAppDesc": "Закрыть текущую вкладку сеанса, если она доступна; иначе закрыть приложение согласно поведению платформы",
+  "shortcutFocusCloseDrawer": "Фокусировать/закрыть панель",
+  "shortcutFocusCloseDrawerDesc": "Фокусировать редактор по умолчанию или закрыть панель, если она открыта",
+  "shortcutFocusInput": "Фокус на вводе",
+  "shortcutFocusInputDesc": "Переместить фокус на ввод запроса",
+  "shortcutGroupApplication": "Приложение",
+  "shortcutGroupGeneral": "Общие",
+  "shortcutGroupModelAndAgent": "Модель и агент",
+  "shortcutGroupNavigation": "Навигация",
+  "shortcutGroupPrompt": "Запрос",
+  "shortcutGroupSession": "Сессия",
+  "shortcutNewConversation": "Новая беседа",
+  "shortcutNewConversationDesc": "Создать новую сессию чата",
+  "shortcutNextAgent": "Следующий агент",
+  "shortcutNextAgentDesc": "Переключиться на следующего доступного агента",
+  "shortcutNextRecentModel": "Следующая недавняя модель",
+  "shortcutNextRecentModelDesc": "Переключиться на недавно использовавшиеся модели",
+  "shortcutNextTab": "Следующая вкладка",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Показать переключатель вкладок и перейти к следующей",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "Следующий вариант",
+  "shortcutNextVariantDesc": "Переключиться на доступные варианты модели",
+  "shortcutOpenSettings": "Открыть настройки",
+  "shortcutOpenSettingsDesc": "Открыть страницу настроек",
+  "shortcutPreviousAgent": "Предыдущий агент",
+  "shortcutPreviousAgentDesc": "Переключиться на предыдущего доступного агента",
+  "shortcutPreviousTab": "Предыдущая вкладка",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Показать переключатель вкладок и перейти к предыдущей",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "Быстрое открытие файлов",
+  "shortcutQuickOpenFilesDesc": "Открыть быстрый поиск файлов",
+  "shortcutQuitApp": "Выйти из приложения",
+  "shortcutQuitAppDesc": "Принудительно закрыть приложение",
+  "shortcutRefreshData": "Обновить данные",
+  "shortcutRefreshDataDesc": "Обновить данные текущего чата",
+  "shortcutToggleVoiceInput": "Переключить голосовой ввод",
+  "shortcutToggleVoiceInputDesc": "Запустить или остановить преобразование речи в текст в редакторе",
+  "shortcutsApply": "Применить",
+  "shortcutsConflictConflict": "Конфликт с {conflict}",
+  "shortcutsErrorConflict": "Конфликт с \"{conflict}\"",
+  "shortcutsErrorInvalid": "Недопустимое сочетание клавиш",
+  "shortcutsErrorUnsupportedKey": "Неподдерживаемая клавиша",
+  "shortcutsKeyboardShortcuts": "Горячие клавиши",
+  "shortcutsPressKeyCombination": "Нажмите комбинацию клавиш сейчас",
+  "shortcutsReset": "Сбросить все",
+  "shortcutsSearchEditBindings": "Ищите, редактируйте привязки клавиш и устраняйте конфликты перед сохранением.",
+  "shortcutsSetShortcutWidget": "Задать ярлык: {label}",
+  "shortcutsTheseBindingsStored": "Эти привязки хранятся в CodeWalk для текущего времени выполнения приложения и не изменяют горячие клавиши в `tui.json` OpenCode.",
+  "shortcutsUnassigned": "Не назначено",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "Снять назначение",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "Это действие недоступно в этой версии.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "Не удалось загрузить или сохранить настройки. Повторите попытку; изменения могут быть временными.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "Очистить поиск",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

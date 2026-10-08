@@ -57,5 +57,97 @@
   "appearanceStorageError": "外観設定を読み込むか保存できませんでした。再試行が成功するまで変更は一時的なものになります。",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "テーマ、配色、文字サイズ、チャット表示を選択",
+  "settingsAppearanceTitle": "外観",
+  "settingsNavigationGroupExperience": "操作感",
+  "settingsNavigationGroupInput": "入力",
+  "settingsNavigationGroupSetup": "セットアップ",
+  "settingsNavigationNoResults": "設定が見つかりません",
+  "settingsNavigationSearchHint": "設定を検索",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk ローカル",
+  "settingsShortcutsDescription": "キーボードショートカットを検索・カスタマイズ",
+  "settingsShortcutsEdit": "ショートカットを編集",
+  "settingsShortcutsReset": "ショートカットをリセット",
+  "settingsShortcutsSearch": "ショートカットを検索",
+  "settingsShortcutsTitle": "ショートカット",
+  "shortcutCloseApp": "タブ/アプリを閉じる",
+  "shortcutCloseAppDesc": "現在のセッションタブがある場合は閉じ、それ以外はプラットフォームの動作でアプリを閉じる",
+  "shortcutFocusCloseDrawer": "フォーカス/ドロワーを閉じる",
+  "shortcutFocusCloseDrawerDesc": "デフォルトで入力にフォーカス、または開いている場合はドロワーを閉じる",
+  "shortcutFocusInput": "入力にフォーカス",
+  "shortcutFocusInputDesc": "テキスト入力にフォーカスを移動",
+  "shortcutGroupApplication": "アプリケーション",
+  "shortcutGroupGeneral": "全般",
+  "shortcutGroupModelAndAgent": "モデルとエージェント",
+  "shortcutGroupNavigation": "ナビゲーション",
+  "shortcutGroupPrompt": "プロンプト",
+  "shortcutGroupSession": "セッション",
+  "shortcutNewConversation": "新しい会話",
+  "shortcutNewConversationDesc": "新しいチャットセッションを作成",
+  "shortcutNextAgent": "次のエージェント",
+  "shortcutNextAgentDesc": "次の利用可能なエージェントに切り替え",
+  "shortcutNextRecentModel": "次の最近のモデル",
+  "shortcutNextRecentModelDesc": "最近使用したモデルを切り替え",
+  "shortcutNextTab": "次のタブ",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "タブ切り替えを表示して次のタブへ",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "次のバリアント",
+  "shortcutNextVariantDesc": "利用可能なモデルバリアントを切り替え",
+  "shortcutOpenSettings": "設定を開く",
+  "shortcutOpenSettingsDesc": "設定ページを開く",
+  "shortcutPreviousAgent": "前のエージェント",
+  "shortcutPreviousAgentDesc": "前の利用可能なエージェントに切り替え",
+  "shortcutPreviousTab": "前のタブ",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "タブ切り替えを表示して前のタブへ",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "ファイルをクイックオープン",
+  "shortcutQuickOpenFilesDesc": "ファイルクイック検索を開く",
+  "shortcutQuitApp": "アプリを終了",
+  "shortcutQuitAppDesc": "アプリを強制終了",
+  "shortcutRefreshData": "データを更新",
+  "shortcutRefreshDataDesc": "現在のチャットデータを更新",
+  "shortcutToggleVoiceInput": "音声入力を切り替え",
+  "shortcutToggleVoiceInputDesc": "エディタで音声入力を開始または停止",
+  "shortcutsApply": "適用",
+  "shortcutsConflictConflict": "{conflict}と競合",
+  "shortcutsErrorConflict": "「{conflict}」と競合",
+  "shortcutsErrorInvalid": "無効なショートカット",
+  "shortcutsErrorUnsupportedKey": "サポートされていないショートカットキー",
+  "shortcutsKeyboardShortcuts": "キーボードショートカット",
+  "shortcutsPressKeyCombination": "キーの組み合わせを押してください",
+  "shortcutsReset": "すべてリセット",
+  "shortcutsSearchEditBindings": "保存する前に、検索、バインディングの編集、および競合の解決を行います。",
+  "shortcutsSetShortcutWidget": "ショートカットを設定: {label}",
+  "shortcutsTheseBindingsStored": "これらのバインディングは現在のアプリ実行時のために CodeWalk に保存され、OpenCode の `tui.json` キーバインドは編集しません。",
+  "shortcutsUnassigned": "未割り当て",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "割り当てを解除",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "この操作はこのバージョンでは利用できません。",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "設定を読み込むか保存できませんでした。再試行してください。変更は一時的な場合があります。",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "検索をクリア",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

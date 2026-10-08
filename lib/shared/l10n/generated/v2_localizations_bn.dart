@@ -191,4 +191,216 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'থিম, রঙ, টেক্সট সাইজ এবং চ্যাট প্রদর্শন চয়ন করুন';
+
+  @override
+  String get settingsAppearanceTitle => 'চেহারা';
+
+  @override
+  String get settingsNavigationGroupExperience => 'অভিজ্ঞতা';
+
+  @override
+  String get settingsNavigationGroupInput => 'ইনপুট';
+
+  @override
+  String get settingsNavigationGroupSetup => 'সেটআপ';
+
+  @override
+  String get settingsNavigationNoResults => 'কোনো সেটিংস পাওয়া যায়নি';
+
+  @override
+  String get settingsNavigationSearchHint => 'সেটিংস অনুসন্ধান করুন';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk-স্থানীয়';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'কীবোর্ড শর্টকাট খুঁজুন এবং কাস্টমাইজ করুন';
+
+  @override
+  String get settingsShortcutsEdit => 'শর্টকাট সম্পাদনা করুন';
+
+  @override
+  String get settingsShortcutsReset => 'শর্টকাট রিসেট করুন';
+
+  @override
+  String get settingsShortcutsSearch => 'শর্টকাট অনুসন্ধান করুন';
+
+  @override
+  String get settingsShortcutsTitle => 'শর্টকাট';
+
+  @override
+  String get shortcutCloseApp => 'ট্যাব/অ্যাপ্লিকেশন বন্ধ করুন';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'বর্তমান সেশন ট্যাব থাকলে সেটি বন্ধ করুন; অন্যথায় প্ল্যাটফর্মের নিয়মে অ্যাপ বন্ধ করুন';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'ফোকাস/ড্রয়ার বন্ধ করুন';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'ডিফল্টভাবে ইনপুটে ফোকাস করুন, অথবা খোলা থাকলে ড্রয়ার বন্ধ করুন';
+
+  @override
+  String get shortcutFocusInput => 'ইনপুটে ফোকাস করুন';
+
+  @override
+  String get shortcutFocusInputDesc => 'টেক্সট ইনপুটে ফোকাস সরান';
+
+  @override
+  String get shortcutGroupApplication => 'অ্যাপ্লিকেশন';
+
+  @override
+  String get shortcutGroupGeneral => 'সাধারণ';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'মডেল এবং এজেন্ট';
+
+  @override
+  String get shortcutGroupNavigation => 'নেভিগেশন';
+
+  @override
+  String get shortcutGroupPrompt => 'প্রম্পট';
+
+  @override
+  String get shortcutGroupSession => 'সেশন';
+
+  @override
+  String get shortcutNewConversation => 'নতুন কথোপকথন';
+
+  @override
+  String get shortcutNewConversationDesc => 'একটি নতুন চ্যাট সেশন তৈরি করুন';
+
+  @override
+  String get shortcutNextAgent => 'পরবর্তী এজেন্ট';
+
+  @override
+  String get shortcutNextAgentDesc => 'পরবর্তী উপলব্ধ এজেন্টে যান';
+
+  @override
+  String get shortcutNextRecentModel => 'পরবর্তী সাম্প্রতিক মডেল';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'সম্প্রতি ব্যবহৃত মডেলগুলির মধ্যে পরিবর্তন করুন';
+
+  @override
+  String get shortcutNextTab => 'পরবর্তী ট্যাব';
+
+  @override
+  String get shortcutNextTabDesc => 'ট্যাব সুইচার দেখান এবং পরবর্তী ট্যাবে যান';
+
+  @override
+  String get shortcutNextVariant => 'পরবর্তী ভেরিয়েন্ট';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'উপলব্ধ মডেল ভেরিয়েন্টগুলির মধ্যে পরিবর্তন করুন';
+
+  @override
+  String get shortcutOpenSettings => 'সেটিংস খুলুন';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'সেটিংস পৃষ্ঠা খুলুন';
+
+  @override
+  String get shortcutPreviousAgent => 'পূর্ববর্তী এজেন্ট';
+
+  @override
+  String get shortcutPreviousAgentDesc => 'পূর্ববর্তী উপলব্ধ এজেন্টে যান';
+
+  @override
+  String get shortcutPreviousTab => 'পূর্ববর্তী ট্যাব';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'ট্যাব সুইচার দেখান এবং পূর্ববর্তী ট্যাবে যান';
+
+  @override
+  String get shortcutQuickOpenFiles => 'ফাইলগুলি দ্রুত খুলুন';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'ফাইল দ্রুত অনুসন্ধান খুলুন';
+
+  @override
+  String get shortcutQuitApp => 'অ্যাপ্লিকেশন থেকে প্রস্থান করুন';
+
+  @override
+  String get shortcutQuitAppDesc => 'অ্যাপ থেকে জোরপূর্বক প্রস্থান করুন';
+
+  @override
+  String get shortcutRefreshData => 'ডেটা রিফ্রেশ করুন';
+
+  @override
+  String get shortcutRefreshDataDesc => 'বর্তমান চ্যাট ডেটা রিফ্রেশ করুন';
+
+  @override
+  String get shortcutToggleVoiceInput => 'ভয়েস ইনপুট টগল করুন';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'এডিটরে ভয়েস ডিক্টেশন শুরু বা বন্ধ করুন';
+
+  @override
+  String get shortcutsApply => 'আবেদন করুন';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return '$conflict এর সাথে দ্বন্দ্ব';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '\"$conflict\"-এর সাথে সংঘর্ষ';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'অবৈধ শর্টকাট';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'অসমর্থিত শর্টকাট কী';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'কীবোর্ড শর্টকাট';
+
+  @override
+  String get shortcutsPressKeyCombination => 'এখন কী কম্বিনেশন টিপুন';
+
+  @override
+  String get shortcutsReset => 'সব রিসেট করুন';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'সংরক্ষণ করার আগে অনুসন্ধান করুন, বাইন্ডিং সম্পাদনা করুন এবং দ্বন্দ্ব সমাধান করুন।';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'শর্টকাট সেট করুন: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'এই বাইন্ডিংগুলি বর্তমান অ্যাপ রানটাইমের জন্য CodeWalk-এ সংরক্ষিত থাকে এবং OpenCode `tui.json` কীবাইন্ড এডিট করে না।';
+
+  @override
+  String get shortcutsUnassigned => 'নির্ধারিত নয়';
+
+  @override
+  String get shortcutsUnassign => 'নির্ধারণ সরান';
+
+  @override
+  String get shortcutsUnavailable => 'এই সংস্করণে কাজটি উপলব্ধ নয়।';
+
+  @override
+  String get settingsStorageError =>
+      'সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন; পরিবর্তন অস্থায়ী হতে পারে।';
+
+  @override
+  String get settingsSearchClear => 'অনুসন্ধান মুছুন';
 }

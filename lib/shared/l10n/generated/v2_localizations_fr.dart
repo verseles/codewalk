@@ -193,4 +193,224 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'Les réglages d’apparence n’ont pas pu être chargés ou enregistrés. Les modifications restent temporaires jusqu’à une nouvelle tentative réussie.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'Choisissez les thèmes, couleurs, taille du texte et affichage du chat';
+
+  @override
+  String get settingsAppearanceTitle => 'Apparence';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Expérience';
+
+  @override
+  String get settingsNavigationGroupInput => 'Saisie';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Configuration';
+
+  @override
+  String get settingsNavigationNoResults => 'Aucun réglage trouvé';
+
+  @override
+  String get settingsNavigationSearchHint => 'Rechercher des réglages';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'Local à CodeWalk';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'Trouvez et personnalisez les raccourcis clavier';
+
+  @override
+  String get settingsShortcutsEdit => 'Modifier le raccourci';
+
+  @override
+  String get settingsShortcutsReset => 'Réinitialiser le raccourci';
+
+  @override
+  String get settingsShortcutsSearch => 'Rechercher des raccourcis';
+
+  @override
+  String get settingsShortcutsTitle => 'Raccourcis';
+
+  @override
+  String get shortcutCloseApp => 'Fermer l\'onglet/l\'application';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'Fermer l\'onglet de session actuel s\'il est disponible, sinon fermer l\'application selon le comportement de la plateforme';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'Focus/fermer le tiroir';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'Focus sur l\'entrée par défaut, ou fermer le tiroir s\'il est ouvert';
+
+  @override
+  String get shortcutFocusInput => 'Focus sur lentrée';
+
+  @override
+  String get shortcutFocusInputDesc =>
+      'Déplacer le focus vers l\'entrée de texte';
+
+  @override
+  String get shortcutGroupApplication => 'Application';
+
+  @override
+  String get shortcutGroupGeneral => 'Général';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'Modèle et agent';
+
+  @override
+  String get shortcutGroupNavigation => 'Navigation';
+
+  @override
+  String get shortcutGroupPrompt => 'Invite';
+
+  @override
+  String get shortcutGroupSession => 'Session';
+
+  @override
+  String get shortcutNewConversation => 'Nouvelle conversation';
+
+  @override
+  String get shortcutNewConversationDesc =>
+      'Créer une nouvelle session de chat';
+
+  @override
+  String get shortcutNextAgent => 'Agent suivant';
+
+  @override
+  String get shortcutNextAgentDesc => 'Passer à l\'agent disponible suivant';
+
+  @override
+  String get shortcutNextRecentModel => 'Modèle récent suivant';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'Passer d\'un modèle récemment utilisé à l\'autre';
+
+  @override
+  String get shortcutNextTab => 'Onglet suivant';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Afficher le sélecteur d\'onglets et passer au suivant';
+
+  @override
+  String get shortcutNextVariant => 'Variante suivante';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'Passer d\'une variante de modèle disponible à l\'autre';
+
+  @override
+  String get shortcutOpenSettings => 'Ouvrir les paramètres';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'Ouvrir la page des paramètres';
+
+  @override
+  String get shortcutPreviousAgent => 'Agent précédent';
+
+  @override
+  String get shortcutPreviousAgentDesc =>
+      'Passer à l\'agent disponible précédent';
+
+  @override
+  String get shortcutPreviousTab => 'Onglet précédent';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Afficher le sélecteur d\'onglets et passer au précédent';
+
+  @override
+  String get shortcutQuickOpenFiles => 'Ouverture rapide de fichiers';
+
+  @override
+  String get shortcutQuickOpenFilesDesc =>
+      'Ouvrir la recherche rapide de fichiers';
+
+  @override
+  String get shortcutQuitApp => 'Quitter lapplication';
+
+  @override
+  String get shortcutQuitAppDesc => 'Forcer la sortie de l\'application';
+
+  @override
+  String get shortcutRefreshData => 'Actualiser les données';
+
+  @override
+  String get shortcutRefreshDataDesc => 'Actualiser les données du chat actuel';
+
+  @override
+  String get shortcutToggleVoiceInput => 'Basculer la saisie vocale';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'Démarrer ou arrêter la saisie vocale dans léditeur';
+
+  @override
+  String get shortcutsApply => 'Appliquer';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'Conflit avec $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'Conflit avec \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'Raccourci invalide';
+
+  @override
+  String get shortcutsErrorUnsupportedKey =>
+      'Touche de raccourci non prise en charge';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'Raccourcis clavier';
+
+  @override
+  String get shortcutsPressKeyCombination =>
+      'Appuyez maintenant sur la combinaison de touches';
+
+  @override
+  String get shortcutsReset => 'Tout réinitialiser';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'Recherchez, modifiez les affectations et résolvez les conflits avant d\'enregistrer.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'Définir le raccourci : $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'Ces affectations sont stockées dans CodeWalk pour la durée d\'exécution actuelle de l\'application et ne modifient pas les raccourcis clavier `tui.json` d\'OpenCode.';
+
+  @override
+  String get shortcutsUnassigned => 'Non attribué';
+
+  @override
+  String get shortcutsUnassign => 'Retirer l’attribution';
+
+  @override
+  String get shortcutsUnavailable =>
+      'Cette action n’est pas disponible dans cette version.';
+
+  @override
+  String get settingsStorageError =>
+      'Impossible de charger ou d’enregistrer les réglages. Réessayez ; les modifications peuvent être temporaires.';
+
+  @override
+  String get settingsSearchClear => 'Effacer la recherche';
 }

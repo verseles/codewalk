@@ -191,4 +191,216 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'اختر المظاهر والألوان وحجم النص وعرض الدردشة';
+
+  @override
+  String get settingsAppearanceTitle => 'المظهر';
+
+  @override
+  String get settingsNavigationGroupExperience => 'التجربة';
+
+  @override
+  String get settingsNavigationGroupInput => 'الإدخال';
+
+  @override
+  String get settingsNavigationGroupSetup => 'الإعداد';
+
+  @override
+  String get settingsNavigationNoResults => 'لا توجد إعدادات';
+
+  @override
+  String get settingsNavigationSearchHint => 'ابحث في الإعدادات';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'محلي في CodeWalk';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'ابحث عن اختصارات لوحة المفاتيح وخصصها';
+
+  @override
+  String get settingsShortcutsEdit => 'تعديل الاختصار';
+
+  @override
+  String get settingsShortcutsReset => 'إعادة تعيين الاختصار';
+
+  @override
+  String get settingsShortcutsSearch => 'البحث في الاختصارات';
+
+  @override
+  String get settingsShortcutsTitle => 'الاختصارات';
+
+  @override
+  String get shortcutCloseApp => 'إغلاق علامة التبويب/التطبيق';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'إغلاق علامة تبويب الجلسة الحالية عند توفرها، وإلا إغلاق التطبيق وفق سلوك المنصة';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'تركيز/إغلاق الدرج';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'التركيز على المدخلات افتراضياً، أو إغلاق الدرج عندما يكون مفتوحاً';
+
+  @override
+  String get shortcutFocusInput => 'التركيز على المدخلات';
+
+  @override
+  String get shortcutFocusInputDesc => 'نقل التركيز إلى مدخلات النص';
+
+  @override
+  String get shortcutGroupApplication => 'التطبيق';
+
+  @override
+  String get shortcutGroupGeneral => 'عام';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'النموذج والعميل';
+
+  @override
+  String get shortcutGroupNavigation => 'التنقل';
+
+  @override
+  String get shortcutGroupPrompt => 'المطالبة';
+
+  @override
+  String get shortcutGroupSession => 'الجلسة';
+
+  @override
+  String get shortcutNewConversation => 'محادثة جديدة';
+
+  @override
+  String get shortcutNewConversationDesc => 'إنشاء جلسة دردشة جديدة';
+
+  @override
+  String get shortcutNextAgent => 'العميل التالي';
+
+  @override
+  String get shortcutNextAgentDesc => 'التبديل إلى العميل المتاح التالي';
+
+  @override
+  String get shortcutNextRecentModel => 'النموذج الحديث التالي';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'التبديل بين النماذج المستخدمة مؤخراً';
+
+  @override
+  String get shortcutNextTab => 'علامة التبويب التالية';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'إظهار مبدّل علامات التبويب والانتقال إلى التالية';
+
+  @override
+  String get shortcutNextVariant => 'المتغير التالي';
+
+  @override
+  String get shortcutNextVariantDesc => 'التبديل بين متغيرات النموذج المتاحة';
+
+  @override
+  String get shortcutOpenSettings => 'افتح الإعدادات';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'افتح صفحة الإعدادات';
+
+  @override
+  String get shortcutPreviousAgent => 'العميل السابق';
+
+  @override
+  String get shortcutPreviousAgentDesc => 'التبديل إلى العميل المتاح السابق';
+
+  @override
+  String get shortcutPreviousTab => 'علامة التبويب السابقة';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'إظهار مبدّل علامات التبويب والانتقال إلى السابقة';
+
+  @override
+  String get shortcutQuickOpenFiles => 'فتح سريع للملفات';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'افتح البحث السريع عن الملفات';
+
+  @override
+  String get shortcutQuitApp => 'إنهاء التطبيق';
+
+  @override
+  String get shortcutQuitAppDesc => 'فرض الخروج من التطبيق';
+
+  @override
+  String get shortcutRefreshData => 'تحديث البيانات';
+
+  @override
+  String get shortcutRefreshDataDesc => 'تحديث بيانات الدردشة الحالية';
+
+  @override
+  String get shortcutToggleVoiceInput => 'تبديل الإدخال الصوتي';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'بدء أو إيقاف الإملاء الصوتي في المحرر';
+
+  @override
+  String get shortcutsApply => 'تطبيق';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'تعارض مع $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'يتعارض مع \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'اختصار غير صالح';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'مفتاح اختصار غير مدعوم';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'اختصارات لوحة المفاتيح';
+
+  @override
+  String get shortcutsPressKeyCombination => 'اضغط مجموعة المفاتيح الآن';
+
+  @override
+  String get shortcutsReset => 'إعادة تعيين الكل';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'البحث، وتعديل الروابط، وحل التعارضات قبل الحفظ.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'تعيين اختصار: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'يتم تخزين هذه الروابط في CodeWalk لوقت تشغيل التطبيق الحالي ولا تقوم بتعديل روابط مفاتيح `tui.json` لـ OpenCode.';
+
+  @override
+  String get shortcutsUnassigned => 'غير معيّن';
+
+  @override
+  String get shortcutsUnassign => 'إلغاء التعيين';
+
+  @override
+  String get shortcutsUnavailable => 'هذا الإجراء غير متاح في هذا الإصدار.';
+
+  @override
+  String get settingsStorageError =>
+      'تعذر تحميل الإعدادات أو حفظها. أعد المحاولة؛ قد تكون التغييرات مؤقتة.';
+
+  @override
+  String get settingsSearchClear => 'مسح البحث';
 }

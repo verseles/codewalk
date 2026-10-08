@@ -192,4 +192,221 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get appearanceStorageError =>
       'Não foi possível carregar ou salvar as configurações de aparência. As alterações ficam temporárias até a nova tentativa funcionar.';
+
+  @override
+  String get settingsAppearanceDescription =>
+      'Escolha temas, cores, tamanho do texto e exibição do chat';
+
+  @override
+  String get settingsAppearanceTitle => 'Aparência';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Experiência';
+
+  @override
+  String get settingsNavigationGroupInput => 'Entrada';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Configuração';
+
+  @override
+  String get settingsNavigationNoResults => 'Nenhuma configuração encontrada';
+
+  @override
+  String get settingsNavigationSearchHint => 'Pesquisar configurações';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'Local do CodeWalk';
+
+  @override
+  String get settingsShortcutsDescription =>
+      'Encontre e personalize os atalhos de teclado';
+
+  @override
+  String get settingsShortcutsEdit => 'Editar atalho';
+
+  @override
+  String get settingsShortcutsReset => 'Redefinir atalho';
+
+  @override
+  String get settingsShortcutsSearch => 'Buscar atalhos';
+
+  @override
+  String get settingsShortcutsTitle => 'Atalhos';
+
+  @override
+  String get shortcutCloseApp => 'Fechar aba/aplicativo';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      'Fechar a aba da sessão atual quando disponível; caso contrário, fechar o aplicativo usando o comportamento da plataforma';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'Focar/fechar painel';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'Focar entrada por padrão, ou fechar painel quando aberto';
+
+  @override
+  String get shortcutFocusInput => 'Focar entrada';
+
+  @override
+  String get shortcutFocusInputDesc => 'Mover o foco para a entrada de texto';
+
+  @override
+  String get shortcutGroupApplication => 'Aplicativo';
+
+  @override
+  String get shortcutGroupGeneral => 'Geral';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'Modelo e agente';
+
+  @override
+  String get shortcutGroupNavigation => 'Navegação';
+
+  @override
+  String get shortcutGroupPrompt => 'Prompt';
+
+  @override
+  String get shortcutGroupSession => 'Sessão';
+
+  @override
+  String get shortcutNewConversation => 'Nova conversa';
+
+  @override
+  String get shortcutNewConversationDesc => 'Criar uma nova sessão de chat';
+
+  @override
+  String get shortcutNextAgent => 'Próximo agente';
+
+  @override
+  String get shortcutNextAgentDesc =>
+      'Alternar para o próximo agente disponível';
+
+  @override
+  String get shortcutNextRecentModel => 'Próximo modelo recente';
+
+  @override
+  String get shortcutNextRecentModelDesc =>
+      'Alternar entre os modelos usados recentemente';
+
+  @override
+  String get shortcutNextTab => 'Próxima aba';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Mostrar o seletor de abas e ir para a próxima';
+
+  @override
+  String get shortcutNextVariant => 'Próxima variante';
+
+  @override
+  String get shortcutNextVariantDesc =>
+      'Alternar entre as variantes de modelo disponíveis';
+
+  @override
+  String get shortcutOpenSettings => 'Abrir configurações';
+
+  @override
+  String get shortcutOpenSettingsDesc => 'Abrir a página de configurações';
+
+  @override
+  String get shortcutPreviousAgent => 'Agente anterior';
+
+  @override
+  String get shortcutPreviousAgentDesc =>
+      'Alternar para o agente anterior disponível';
+
+  @override
+  String get shortcutPreviousTab => 'Aba anterior';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Mostrar o seletor de abas e ir para a aba anterior';
+
+  @override
+  String get shortcutQuickOpenFiles => 'Abertura rápida de arquivos';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'Abrir busca rápida de arquivos';
+
+  @override
+  String get shortcutQuitApp => 'Sair do aplicativo';
+
+  @override
+  String get shortcutQuitAppDesc => 'Forçar a saída do aplicativo';
+
+  @override
+  String get shortcutRefreshData => 'Atualizar dados';
+
+  @override
+  String get shortcutRefreshDataDesc => 'Atualizar os dados do chat atual';
+
+  @override
+  String get shortcutToggleVoiceInput => 'Alternar entrada de voz';
+
+  @override
+  String get shortcutToggleVoiceInputDesc =>
+      'Iniciar ou parar o ditado de voz no editor';
+
+  @override
+  String get shortcutsApply => 'Aplicar';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return 'Conflito com $conflict';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'Conflita com \"$conflict\"';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => 'Atalho inválido';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'Tecla de atalho não suportada';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'Atalhos de teclado';
+
+  @override
+  String get shortcutsPressKeyCombination =>
+      'Pressione a combinação de teclas agora';
+
+  @override
+  String get shortcutsReset => 'Restaurar tudo';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      'Pesquisar, editar atalhos e resolver conflitos antes de salvar.';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'Definir atalho: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'Esses atalhos são armazenados no CodeWalk para a execução atual do app e não editam os atalhos de teclado do `tui.json` do OpenCode.';
+
+  @override
+  String get shortcutsUnassigned => 'Não atribuído';
+
+  @override
+  String get shortcutsUnassign => 'Desatribuir';
+
+  @override
+  String get shortcutsUnavailable =>
+      'Esta ação não está disponível nesta versão.';
+
+  @override
+  String get settingsStorageError =>
+      'Não foi possível carregar ou salvar as configurações. Tente novamente; as alterações podem ser temporárias.';
+
+  @override
+  String get settingsSearchClear => 'Limpar busca';
 }

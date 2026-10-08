@@ -186,4 +186,210 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get appearanceStorageError =>
       '外観設定を読み込むか保存できませんでした。再試行が成功するまで変更は一時的なものになります。';
+
+  @override
+  String get settingsAppearanceDescription => 'テーマ、配色、文字サイズ、チャット表示を選択';
+
+  @override
+  String get settingsAppearanceTitle => '外観';
+
+  @override
+  String get settingsNavigationGroupExperience => '操作感';
+
+  @override
+  String get settingsNavigationGroupInput => '入力';
+
+  @override
+  String get settingsNavigationGroupSetup => 'セットアップ';
+
+  @override
+  String get settingsNavigationNoResults => '設定が見つかりません';
+
+  @override
+  String get settingsNavigationSearchHint => '設定を検索';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk ローカル';
+
+  @override
+  String get settingsShortcutsDescription => 'キーボードショートカットを検索・カスタマイズ';
+
+  @override
+  String get settingsShortcutsEdit => 'ショートカットを編集';
+
+  @override
+  String get settingsShortcutsReset => 'ショートカットをリセット';
+
+  @override
+  String get settingsShortcutsSearch => 'ショートカットを検索';
+
+  @override
+  String get settingsShortcutsTitle => 'ショートカット';
+
+  @override
+  String get shortcutCloseApp => 'タブ/アプリを閉じる';
+
+  @override
+  String get shortcutCloseAppDesc =>
+      '現在のセッションタブがある場合は閉じ、それ以外はプラットフォームの動作でアプリを閉じる';
+
+  @override
+  String get shortcutFocusCloseDrawer => 'フォーカス/ドロワーを閉じる';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc =>
+      'デフォルトで入力にフォーカス、または開いている場合はドロワーを閉じる';
+
+  @override
+  String get shortcutFocusInput => '入力にフォーカス';
+
+  @override
+  String get shortcutFocusInputDesc => 'テキスト入力にフォーカスを移動';
+
+  @override
+  String get shortcutGroupApplication => 'アプリケーション';
+
+  @override
+  String get shortcutGroupGeneral => '全般';
+
+  @override
+  String get shortcutGroupModelAndAgent => 'モデルとエージェント';
+
+  @override
+  String get shortcutGroupNavigation => 'ナビゲーション';
+
+  @override
+  String get shortcutGroupPrompt => 'プロンプト';
+
+  @override
+  String get shortcutGroupSession => 'セッション';
+
+  @override
+  String get shortcutNewConversation => '新しい会話';
+
+  @override
+  String get shortcutNewConversationDesc => '新しいチャットセッションを作成';
+
+  @override
+  String get shortcutNextAgent => '次のエージェント';
+
+  @override
+  String get shortcutNextAgentDesc => '次の利用可能なエージェントに切り替え';
+
+  @override
+  String get shortcutNextRecentModel => '次の最近のモデル';
+
+  @override
+  String get shortcutNextRecentModelDesc => '最近使用したモデルを切り替え';
+
+  @override
+  String get shortcutNextTab => '次のタブ';
+
+  @override
+  String get shortcutNextTabDesc => 'タブ切り替えを表示して次のタブへ';
+
+  @override
+  String get shortcutNextVariant => '次のバリアント';
+
+  @override
+  String get shortcutNextVariantDesc => '利用可能なモデルバリアントを切り替え';
+
+  @override
+  String get shortcutOpenSettings => '設定を開く';
+
+  @override
+  String get shortcutOpenSettingsDesc => '設定ページを開く';
+
+  @override
+  String get shortcutPreviousAgent => '前のエージェント';
+
+  @override
+  String get shortcutPreviousAgentDesc => '前の利用可能なエージェントに切り替え';
+
+  @override
+  String get shortcutPreviousTab => '前のタブ';
+
+  @override
+  String get shortcutPreviousTabDesc => 'タブ切り替えを表示して前のタブへ';
+
+  @override
+  String get shortcutQuickOpenFiles => 'ファイルをクイックオープン';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => 'ファイルクイック検索を開く';
+
+  @override
+  String get shortcutQuitApp => 'アプリを終了';
+
+  @override
+  String get shortcutQuitAppDesc => 'アプリを強制終了';
+
+  @override
+  String get shortcutRefreshData => 'データを更新';
+
+  @override
+  String get shortcutRefreshDataDesc => '現在のチャットデータを更新';
+
+  @override
+  String get shortcutToggleVoiceInput => '音声入力を切り替え';
+
+  @override
+  String get shortcutToggleVoiceInputDesc => 'エディタで音声入力を開始または停止';
+
+  @override
+  String get shortcutsApply => '適用';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return '$conflictと競合';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '「$conflict」と競合';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => '無効なショートカット';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'サポートされていないショートカットキー';
+
+  @override
+  String get shortcutsKeyboardShortcuts => 'キーボードショートカット';
+
+  @override
+  String get shortcutsPressKeyCombination => 'キーの組み合わせを押してください';
+
+  @override
+  String get shortcutsReset => 'すべてリセット';
+
+  @override
+  String get shortcutsSearchEditBindings =>
+      '保存する前に、検索、バインディングの編集、および競合の解決を行います。';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return 'ショートカットを設定: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      'これらのバインディングは現在のアプリ実行時のために CodeWalk に保存され、OpenCode の `tui.json` キーバインドは編集しません。';
+
+  @override
+  String get shortcutsUnassigned => '未割り当て';
+
+  @override
+  String get shortcutsUnassign => '割り当てを解除';
+
+  @override
+  String get shortcutsUnavailable => 'この操作はこのバージョンでは利用できません。';
+
+  @override
+  String get settingsStorageError =>
+      '設定を読み込むか保存できませんでした。再試行してください。変更は一時的な場合があります。';
+
+  @override
+  String get settingsSearchClear => '検索をクリア';
 }

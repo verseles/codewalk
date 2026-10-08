@@ -57,5 +57,97 @@
   "appearanceStorageError": "ظاہری شکل کی ترتیبات لوڈ یا محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کامیاب ہونے تک تبدیلیاں عارضی رہیں گی۔",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "تھیمز، رنگ، متن کا سائز اور چیٹ ڈسپلے منتخب کریں",
+  "settingsAppearanceTitle": "ظاہری شکل",
+  "settingsNavigationGroupExperience": "تجربہ",
+  "settingsNavigationGroupInput": "ان پٹ",
+  "settingsNavigationGroupSetup": "سیٹ اپ",
+  "settingsNavigationNoResults": "کوئی سیٹنگز نہیں ملیں",
+  "settingsNavigationSearchHint": "سیٹنگز تلاش کریں",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk مقامی",
+  "settingsShortcutsDescription": "کی بورڈ شارٹ کٹس تلاش کریں اور اپنی مرضی کے مطابق بنائیں",
+  "settingsShortcutsEdit": "شارٹ کٹ میں ترمیم کریں۔",
+  "settingsShortcutsReset": "شارٹ کٹ کو دوبارہ ترتیب دیں۔",
+  "settingsShortcutsSearch": "شارٹ کٹ تلاش کریں۔",
+  "settingsShortcutsTitle": "شارٹ کٹس",
+  "shortcutCloseApp": "ٹیب/ایپلیکیشن بند کریں",
+  "shortcutCloseAppDesc": "موجودہ سیشن ٹیب دستیاب ہو تو اسے بند کریں؛ ورنہ پلیٹ فارم کے رویے کے مطابق ایپ بند کریں",
+  "shortcutFocusCloseDrawer": "دراز پر توجہ مرکوز کریں/بند کریں",
+  "shortcutFocusCloseDrawerDesc": "ڈیفالٹ کے طور پر ان پٹ پر توجہ مرکوز کریں، یا دراز کھلا ہونے پر بند کریں",
+  "shortcutFocusInput": "ان پٹ پر توجہ مرکوز کریں",
+  "shortcutFocusInputDesc": "توجہ کو ٹیکسٹ ان پٹ پر منتقل کریں",
+  "shortcutGroupApplication": "ایپلیکیشن",
+  "shortcutGroupGeneral": "عمومی",
+  "shortcutGroupModelAndAgent": "ماڈل اور ایجنٹ",
+  "shortcutGroupNavigation": "نیویگیشن",
+  "shortcutGroupPrompt": "پرامپٹ",
+  "shortcutGroupSession": "سیشن",
+  "shortcutNewConversation": "نئی گفتگو",
+  "shortcutNewConversationDesc": "ایک نیا چیٹ سیشن شروع کریں",
+  "shortcutNextAgent": "اگلا ایجنٹ",
+  "shortcutNextAgentDesc": "اگلے دستیاب ایجنٹ پر جائیں",
+  "shortcutNextRecentModel": "اگلا حالیہ ماڈل",
+  "shortcutNextRecentModelDesc": "حالیہ استعمال شدہ ماڈلز کے درمیان سوئچ کریں",
+  "shortcutNextTab": "اگلی ٹیب",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "ٹیب سوئچر دکھائیں اور اگلی ٹیب پر جائیں",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "اگلی قسم",
+  "shortcutNextVariantDesc": "دستیاب ماڈل کی اقسام کے درمیان سوئچ کریں",
+  "shortcutOpenSettings": "ترتیبات کھولیں",
+  "shortcutOpenSettingsDesc": "ترتیبات کا صفحہ کھولیں",
+  "shortcutPreviousAgent": "پچھلا ایجنٹ",
+  "shortcutPreviousAgentDesc": "پچھلے دستیاب ایجنٹ پر جائیں",
+  "shortcutPreviousTab": "پچھلی ٹیب",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "ٹیب سوئچر دکھائیں اور پچھلی ٹیب پر جائیں",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "فائلیں جلدی کھولیں",
+  "shortcutQuickOpenFilesDesc": "فائلوں کی فوری تلاش کھولیں",
+  "shortcutQuitApp": "ایپلیکیشن سے باہر نکلیں",
+  "shortcutQuitAppDesc": "ایپ سے زبردستی باہر نکلیں",
+  "shortcutRefreshData": "ڈیٹا ریفریش کریں",
+  "shortcutRefreshDataDesc": "موجودہ چیٹ کے ڈیٹا کو ریفریش کریں",
+  "shortcutToggleVoiceInput": "صوتی ان پٹ کو تبدیل کریں",
+  "shortcutToggleVoiceInputDesc": "ایڈیٹر میں صوتی ڈکٹیشن شروع کریں یا روکیں",
+  "shortcutsApply": "لگائیں",
+  "shortcutsConflictConflict": "{conflict} کے ساتھ تصادم",
+  "shortcutsErrorConflict": "\"{conflict}\" سے ٹکراؤ",
+  "shortcutsErrorInvalid": "غلط شارٹ کٹ",
+  "shortcutsErrorUnsupportedKey": "غیر تعاون یافتہ شارٹ کٹ کلید",
+  "shortcutsKeyboardShortcuts": "کی بورڈ شارٹ کٹس",
+  "shortcutsPressKeyCombination": "اب کلیدوں کا مجموعہ دبائیں",
+  "shortcutsReset": "سب کو ری سیٹ کریں۔",
+  "shortcutsSearchEditBindings": "تلاش کریں، بائنڈنگز میں ترمیم کریں، اور محفوظ کرنے سے پہلے تنازعات کو حل کریں۔",
+  "shortcutsSetShortcutWidget": "شارٹ کٹ سیٹ کریں: {label}",
+  "shortcutsTheseBindingsStored": "یہ بائنڈنگز موجودہ ایپ رن ٹائم کے لیے CodeWalk میں محفوظ ہیں اور OpenCode `tui.json` کی بائنڈز میں ترمیم نہیں کرتی ہیں۔",
+  "shortcutsUnassigned": "تفویض نہیں کیا گیا",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "تفویض ہٹائیں",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "یہ عمل اس ورژن میں دستیاب نہیں ہے۔",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "ترتیبات لوڈ یا محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں؛ تبدیلیاں عارضی ہو سکتی ہیں۔",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "تلاش صاف کریں",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

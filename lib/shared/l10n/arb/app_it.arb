@@ -57,5 +57,97 @@
   "appearanceStorageError": "Impossibile caricare o salvare le impostazioni dell’aspetto. Le modifiche restano temporanee finché il nuovo tentativo non riesce.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "Scegli temi, colori, dimensione del testo e visualizzazione della chat",
+  "settingsAppearanceTitle": "Aspetto",
+  "settingsNavigationGroupExperience": "Esperienza",
+  "settingsNavigationGroupInput": "Input",
+  "settingsNavigationGroupSetup": "Configurazione",
+  "settingsNavigationNoResults": "Nessuna impostazione trovata",
+  "settingsNavigationSearchHint": "Cerca impostazioni",
+  "settingsProvenanceCodeWalkLocal": "Locale di CodeWalk",
+  "settingsShortcutsDescription": "Trova e personalizza le scorciatoie da tastiera",
+  "settingsShortcutsEdit": "Modifica scorciatoia",
+  "settingsShortcutsReset": "Ripristina scorciatoia",
+  "settingsShortcutsSearch": "Cerca scorciatoie",
+  "settingsShortcutsTitle": "Scorciatoie",
+  "shortcutCloseApp": "Chiudi scheda/applicazione",
+  "shortcutCloseAppDesc": "Chiudi la scheda della sessione corrente quando disponibile; altrimenti chiudi l''app secondo il comportamento della piattaforma",
+  "shortcutFocusCloseDrawer": "Focus/chiudi pannello",
+  "shortcutFocusCloseDrawerDesc": "Focus sull''input per impostazione predefinita, o chiudi il pannello se aperto",
+  "shortcutFocusInput": "Focus sullinput",
+  "shortcutFocusInputDesc": "Sposta il focus sull''input di testo",
+  "shortcutGroupApplication": "Applicazione",
+  "shortcutGroupGeneral": "Generale",
+  "shortcutGroupModelAndAgent": "Modello e agente",
+  "shortcutGroupNavigation": "Navigazione",
+  "shortcutGroupPrompt": "Prompt",
+  "shortcutGroupSession": "Sessione",
+  "shortcutNewConversation": "Nuova conversazione",
+  "shortcutNewConversationDesc": "Crea una nuova sessione di chat",
+  "shortcutNextAgent": "Prossimo agente",
+  "shortcutNextAgentDesc": "Cicla al prossimo agente disponibile",
+  "shortcutNextRecentModel": "Prossimo modello recente",
+  "shortcutNextRecentModelDesc": "Cicla tra i modelli usati recentemente",
+  "shortcutNextTab": "Scheda successiva",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Mostra il selettore schede e passa alla successiva",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "Prossima variante",
+  "shortcutNextVariantDesc": "Cicla tra le varianti di modello disponibili",
+  "shortcutOpenSettings": "Apri impostazioni",
+  "shortcutOpenSettingsDesc": "Apri la pagina delle impostazioni",
+  "shortcutPreviousAgent": "Agente precedente",
+  "shortcutPreviousAgentDesc": "Cicla all''agente precedente disponibile",
+  "shortcutPreviousTab": "Scheda precedente",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Mostra il selettore schede e passa alla precedente",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "Apertura rapida file",
+  "shortcutQuickOpenFilesDesc": "Apri la ricerca rapida dei file",
+  "shortcutQuitApp": "Esci dallapplicazione",
+  "shortcutQuitAppDesc": "Forza l''uscita dall''app",
+  "shortcutRefreshData": "Aggiorna dati",
+  "shortcutRefreshDataDesc": "Aggiorna i dati della chat corrente",
+  "shortcutToggleVoiceInput": "Attiva/disattiva input vocale",
+  "shortcutToggleVoiceInputDesc": "Avvia o ferma il dettato vocale nelleditor",
+  "shortcutsApply": "Applica",
+  "shortcutsConflictConflict": "Conflitto con {conflict}",
+  "shortcutsErrorConflict": "In conflitto con \"{conflict}\"",
+  "shortcutsErrorInvalid": "Scorciatoia non valida",
+  "shortcutsErrorUnsupportedKey": "Tasto di scorciatoia non supportato",
+  "shortcutsKeyboardShortcuts": "Scorciatoie da tastiera",
+  "shortcutsPressKeyCombination": "Premi ora la combinazione di tasti",
+  "shortcutsReset": "Ripristina tutto",
+  "shortcutsSearchEditBindings": "Cerca, modifica associazioni e risolvi i conflitti prima di salvare.",
+  "shortcutsSetShortcutWidget": "Imposta scorciatoia: {label}",
+  "shortcutsTheseBindingsStored": "Queste associazioni sono memorizzate in CodeWalk per il runtime dell''app corrente e non modificano le associazioni di tasti `tui.json` di OpenCode.",
+  "shortcutsUnassigned": "Non assegnato",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "Rimuovi assegnazione",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "Questa azione non è disponibile in questa versione.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "Impossibile caricare o salvare le impostazioni. Riprova; le modifiche possono essere temporanee.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "Cancella ricerca",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

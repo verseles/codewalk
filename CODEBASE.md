@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - Retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B now hydrates persisted appearance before mount and provides a responsive `/settings` appearance page. Broader settings shell #305 and the other routes remain placeholders.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B hydrates persisted appearance before mount, while #305/V2-071C adds an adaptive `/settings` shell and scoped keyboard routing. Appearance and shortcuts are working settings destinations; Servers links to the existing `/hosts` placeholder, and other routes remain placeholders.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -24,9 +24,12 @@ lib/main_v2.dart                         # Explicit entry point; awaits dependen
 lib/app/composition_root.dart           # Private GetIt instance; loadAppDependencies hydrates the v2 graph before mount
 lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
 lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, resolved theme and locale/dynamic-color bridges
-lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts appearance controls, other routes remain placeholders
+lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts the adaptive appearance/shortcuts shell, other routes remain placeholders
 lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
-lib/app/app_preferences_controller.dart # Persists appearance in cw2.settings.*; refined default when style is absent, explicit classic retained; locale transient
+lib/app/app_keyboard_shortcuts.dart      # One shortcut manager, typed intents, inherited action scopes, guarded routing, and detection-only physical-keyboard observation
+lib/app/app_preferences_controller.dart # Persists appearance and explicit shortcut overrides in cw2.settings.*; merges per-action edits during hydration; locale and keyboard detection remain transient
+lib/shared/shortcuts/shortcut_action.dart # Fifteen stable local action IDs/default bindings with localized labels, descriptions, and groups
+lib/shared/shortcuts/shortcut_binding_codec.dart # Strict chord parsing, platform-aware `mod`, display/capture and normalized chord-conflict fingerprints
 lib/shared/theme/                       # Independent Material3 theme, shapes, brand colors and semantic visual tokens
 lib/shared/theme/appearance_theme_resolver.dart # Pure preset/dynamic/seed theme resolution with AMOLED, density and visual-style application
 lib/shared/theme/opencode_theme_preferences.dart # Stable OpenCode preset identities and key codecs
@@ -35,8 +38,10 @@ lib/shared/theme/opencode_web_theme_registry.dart # Offline generated snapshot o
 lib/shared/theme/brand_colors.dart      # Five CodeWalk seed-color choices
 lib/platform/appearance/dynamic_color_adapter.dart # Bridges material_ui dynamic schemes to Flutter ColorScheme
 lib/features/settings/appearance_settings_page.dart # Responsive appearance controls, searchable presets and persistence-error retry
+lib/features/settings/settings_shell_page.dart # Adaptive master/detail settings navigation, grouped destination search, retained selection, and narrow-detail Back/Escape
+lib/features/settings/shortcuts_settings_page.dart # Searchable shortcut catalog, key capture/conflict repair, unassign/reset and persistence-error retry
 lib/shared/layout/window_size_class.dart # Responsive viewport classes
-lib/shared/l10n/{arb,generated}/         # Scoped route and appearance catalog with generated delegates for 14 locales
+lib/shared/l10n/{arb,generated}/         # Scoped route, appearance, and settings/shortcut catalog with generated delegates for 14 locales
 lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
 lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
 lib/platform/storage/storage.dart      # Storage API barrel; appearance uses its metadata-store path
@@ -68,11 +73,13 @@ packages/harness_host/lib/             # Empty public host adapter boundary
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
 test/v2/appearance/                    # Persistence, resolver, responsive widgets and four VM light/dark goldens (390x844 and 1280x800)
+test/v2/settings/shortcut_preferences_test.dart # Strict codec, conflicts, unknown/malformed metadata, hydration races, write failures and retry
+test/v2/settings/settings_shell_test.dart # Responsive master/detail, mobile keyboard detection, routing guards, capture, Back/Escape, resizing and RTL
 test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions, including VM payload-preservation composition coverage
 test/contract/chp/prompt_delivery_test.dart # Prompt intent delivery-shape and optional-default contract regressions
 contracts/codewalk-host-v1/             # Provisional canonical/CHP schema, examples, model map and revision hashes
 test/contract/chp/                     # Offline Draft 7 validation and synthetic model/edge parity checks
-tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped 14-locale output check
+tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation/check for 14 locales; optional selective appearance/settings translation ports write only v2 sources
 tool/theme/port_v2_appearance.py         # Offline appearance snapshot reproduction/check; normalizes legacy Color values to low 32 bits
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
@@ -88,26 +95,50 @@ typed dependencies into the app. Production `loadAppDependencies()` uses
 `V2MetadataStore` with `PreferencesMetadataBackend` and awaits appearance
 hydration before `runApp`. `AppPreferencesController` persists theme mode,
 visual style, OpenCode preset, density, custom seed, contrast, AMOLED dark and
-dynamic-color choice under `cw2.settings.*`; locale remains transient. Missing
-visual-style state defaults to refined, while an explicit persisted classic
-choice is preserved. Settings surfaces metadata load/save errors and provides
-retry; selected values remain usable but temporary until persistence recovers.
+dynamic-color choice under `cw2.settings.*`; locale and physical-keyboard
+detection remain transient. Missing visual-style state defaults to refined,
+while an explicit persisted classic choice is preserved. Shortcut overrides
+share the existing metadata store as JSON at `cw2.settings.shortcuts`: only
+explicit edits are stored, empty unassigns an action, and resetting its override
+restores the portable default. Hydration/edit merging and writes preserve unknown
+shortcut fields; malformed or invalid imported values are not silently
+rewritten. Load/save failures remain visible and can be retried.
 
-Only `/settings` has moved beyond a placeholder: it mounts responsive appearance
-controls with a searchable 37-preset picker. Broader settings shell #305 and
-routes `/`, `/sessions`, `/hosts`, `/pair`, `/s/:host/:session` and
-`/unsupported` remain out of scope/placeholders. Navigation uses a bottom bar
-below 840 logical pixels and a rail from 840 pixels. Deep links retain pending
-intents; native session identifiers do not establish a canonical session
-without a harness profile. Appearance tests cover persistence, resolution and
-responsive widgets, plus four VM light/dark goldens at 390x844 mobile and
-1280x800 desktop sizes; these are not native-platform certification.
+The app-level keyboard layer owns one shortcut manager and maps parsed bindings
+to typed intents; nested `KeyboardActionScope`s provide only handlers available
+in that subtree. The root currently handles Open Settings, and a compact
+settings detail handles Escape as local Back; other catalog actions remain
+visible for repair but are inactive until a feature registers them. Routing
+ignores synthesized/repeat events and guards popup/non-current routes, ordinary
+editable-text input, AltGraph, and active IME composition. The hardware-key
+observer only detects physical input and does not consume events. The shared
+codec defines 15 stable local action IDs/defaults, strict single-trigger chords,
+platform-aware `mod`, explicit Ctrl bindings, display/capture, and physical
+chord conflict comparison.
 
-The shared localization catalog contains scoped route and appearance strings
-across 14 locales. Its isolated generator writes only v2 outputs, leaving the
-retained catalog and `lib/l10n/` outputs intact. Shared rendering currently
-provides GFM and link/file callbacks; images render as text. Full rendering and
-the broader settings shell remain in their owning Issues.
+`/settings` now provides the responsive shell around appearance and shortcuts.
+Compact layouts show a searchable master list and then a detail with Back;
+expanded layouts (840 logical pixels and above) keep a 320-pixel master beside
+the detail and initially select Appearance. Search text and selection survive
+layout changes, and a keyed detail subtree retains forms and pending modal
+state. System Back and Escape return from a compact detail to the list. Servers
+links to the existing `/hosts` placeholder; no other settings destinations are
+implemented. Shortcut settings are visible on Web and desktop and appear on
+mobile after physical keyboard input is detected. The shortcut page searches
+formatted bindings and localized action metadata, captures key chords
+(including bare Escape), reports conflicts, supports individual unassign/reset,
+and exposes persistence-error retry.
+
+The scoped localization catalog covers routes, appearance, and settings/shortcut
+strings across 14 locales. `tool/l10n/generate_v2_localizations.py --port-settings`
+selectively ports 60 reused and 5 new settings/shortcut keys, then regenerates
+only v2 outputs; retained catalogs and `lib/l10n/` outputs are not edited.
+Settings tests in `test/v2/settings/` cover codec and persistence edge cases,
+responsive navigation, physical-keyboard visibility, routing guards, capture,
+Back/Escape and localization/layout behavior. The focused settings/appearance
+suite and four VM light/dark appearance goldens pass; VM widget/golden results do
+not certify native platforms, browser behavior, or remote CI. Shared rendering
+currently provides GFM and link/file callbacks; images render as text.
 
 `codewalk_core` is pure Dart. Project identity is host plus the caller-supplied
 canonical directory; the upstream project ID is an annotation. Canonical models
@@ -742,6 +773,7 @@ dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.
 dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
 flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
 python3 tool/l10n/generate_v2_localizations.py # Regenerate only lib/shared/l10n/generated/ using isolated Flutter config
+python3 tool/l10n/generate_v2_localizations.py --port-settings # Port 60 reused + 5 new settings/shortcut keys, then regenerate v2-only outputs
 python3 tool/l10n/generate_v2_localizations.py --check # Check scoped v2 outputs without changing them
 python3 tool/theme/port_v2_appearance.py        # Reproduce the offline v2 appearance snapshot
 python3 tool/theme/port_v2_appearance.py --check # Verify the snapshot without writing

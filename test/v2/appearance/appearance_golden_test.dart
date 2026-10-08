@@ -40,6 +40,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('settings_destination_appearance')),
+        );
+        await tester.pumpAndSettle();
         await expectLater(
           find.byKey(const ValueKey('appearance_golden')),
           matchesGoldenFile('goldens/$name.png'),

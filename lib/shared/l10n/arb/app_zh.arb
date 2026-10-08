@@ -57,5 +57,97 @@
   "appearanceStorageError": "无法加载或保存外观设置。重试成功之前，更改仅为临时更改。",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "选择主题、颜色、文字大小和聊天显示方式",
+  "settingsAppearanceTitle": "外观",
+  "settingsNavigationGroupExperience": "体验",
+  "settingsNavigationGroupInput": "输入",
+  "settingsNavigationGroupSetup": "设置",
+  "settingsNavigationNoResults": "未找到设置",
+  "settingsNavigationSearchHint": "搜索设置",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk 本地",
+  "settingsShortcutsDescription": "查找和自定义键盘快捷键",
+  "settingsShortcutsEdit": "编辑快捷键",
+  "settingsShortcutsReset": "重置快捷键",
+  "settingsShortcutsSearch": "搜索快捷键",
+  "settingsShortcutsTitle": "快捷键",
+  "shortcutCloseApp": "关闭标签页/应用",
+  "shortcutCloseAppDesc": "如果当前会话标签页可用则将其关闭，否则按平台行为关闭应用",
+  "shortcutFocusCloseDrawer": "聚焦/关闭侧边栏",
+  "shortcutFocusCloseDrawerDesc": "默认聚焦输入框，或在打开时关闭侧边栏",
+  "shortcutFocusInput": "聚焦输入框",
+  "shortcutFocusInputDesc": "将焦点移动到文本输入框",
+  "shortcutGroupApplication": "应用",
+  "shortcutGroupGeneral": "通用",
+  "shortcutGroupModelAndAgent": "模型与代理",
+  "shortcutGroupNavigation": "导航",
+  "shortcutGroupPrompt": "提示词",
+  "shortcutGroupSession": "会话",
+  "shortcutNewConversation": "新会话",
+  "shortcutNewConversationDesc": "创建一个新的聊天会话",
+  "shortcutNextAgent": "下一个代理",
+  "shortcutNextAgentDesc": "切换到下一个可用代理",
+  "shortcutNextRecentModel": "下一个近期模型",
+  "shortcutNextRecentModelDesc": "在最近使用的模型之间切换",
+  "shortcutNextTab": "下一个标签页",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "显示标签页切换器并切换到下一个",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "下一个变体",
+  "shortcutNextVariantDesc": "在可用的模型变体之间切换",
+  "shortcutOpenSettings": "打开设置",
+  "shortcutOpenSettingsDesc": "打开设置页面",
+  "shortcutPreviousAgent": "上一个代理",
+  "shortcutPreviousAgentDesc": "切换到上一个可用代理",
+  "shortcutPreviousTab": "上一个标签页",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "显示标签页切换器并切换到上一个",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "快速打开文件",
+  "shortcutQuickOpenFilesDesc": "打开文件快速搜索",
+  "shortcutQuitApp": "退出应用",
+  "shortcutQuitAppDesc": "强制退出应用",
+  "shortcutRefreshData": "刷新数据",
+  "shortcutRefreshDataDesc": "刷新当前聊天数据",
+  "shortcutToggleVoiceInput": "切换语音输入",
+  "shortcutToggleVoiceInputDesc": "在编辑器中开始或停止语音听写",
+  "shortcutsApply": "应用",
+  "shortcutsConflictConflict": "与{conflict}冲突",
+  "shortcutsErrorConflict": "与“{conflict}”冲突",
+  "shortcutsErrorInvalid": "无效的快捷键",
+  "shortcutsErrorUnsupportedKey": "不支持的快捷键",
+  "shortcutsKeyboardShortcuts": "键盘快捷键",
+  "shortcutsPressKeyCombination": "现在请按下组合键",
+  "shortcutsReset": "全部重置",
+  "shortcutsSearchEditBindings": "在保存前进行搜索、编辑绑定并解决冲突。",
+  "shortcutsSetShortcutWidget": "设置快捷键: {label}",
+  "shortcutsTheseBindingsStored": "这些绑定存储在 CodeWalk 中用于当前应用运行时，不会修改 OpenCode `tui.json` 按键绑定。",
+  "shortcutsUnassigned": "未分配",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "取消分配",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "此版本不支持此操作。",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "无法加载或保存设置。请重试；更改可能是临时的。",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "清除搜索",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

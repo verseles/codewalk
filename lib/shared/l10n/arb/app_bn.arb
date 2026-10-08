@@ -57,5 +57,97 @@
   "appearanceStorageError": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "থিম, রঙ, টেক্সট সাইজ এবং চ্যাট প্রদর্শন চয়ন করুন",
+  "settingsAppearanceTitle": "চেহারা",
+  "settingsNavigationGroupExperience": "অভিজ্ঞতা",
+  "settingsNavigationGroupInput": "ইনপুট",
+  "settingsNavigationGroupSetup": "সেটআপ",
+  "settingsNavigationNoResults": "কোনো সেটিংস পাওয়া যায়নি",
+  "settingsNavigationSearchHint": "সেটিংস অনুসন্ধান করুন",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk-স্থানীয়",
+  "settingsShortcutsDescription": "কীবোর্ড শর্টকাট খুঁজুন এবং কাস্টমাইজ করুন",
+  "settingsShortcutsEdit": "শর্টকাট সম্পাদনা করুন",
+  "settingsShortcutsReset": "শর্টকাট রিসেট করুন",
+  "settingsShortcutsSearch": "শর্টকাট অনুসন্ধান করুন",
+  "settingsShortcutsTitle": "শর্টকাট",
+  "shortcutCloseApp": "ট্যাব/অ্যাপ্লিকেশন বন্ধ করুন",
+  "shortcutCloseAppDesc": "বর্তমান সেশন ট্যাব থাকলে সেটি বন্ধ করুন; অন্যথায় প্ল্যাটফর্মের নিয়মে অ্যাপ বন্ধ করুন",
+  "shortcutFocusCloseDrawer": "ফোকাস/ড্রয়ার বন্ধ করুন",
+  "shortcutFocusCloseDrawerDesc": "ডিফল্টভাবে ইনপুটে ফোকাস করুন, অথবা খোলা থাকলে ড্রয়ার বন্ধ করুন",
+  "shortcutFocusInput": "ইনপুটে ফোকাস করুন",
+  "shortcutFocusInputDesc": "টেক্সট ইনপুটে ফোকাস সরান",
+  "shortcutGroupApplication": "অ্যাপ্লিকেশন",
+  "shortcutGroupGeneral": "সাধারণ",
+  "shortcutGroupModelAndAgent": "মডেল এবং এজেন্ট",
+  "shortcutGroupNavigation": "নেভিগেশন",
+  "shortcutGroupPrompt": "প্রম্পট",
+  "shortcutGroupSession": "সেশন",
+  "shortcutNewConversation": "নতুন কথোপকথন",
+  "shortcutNewConversationDesc": "একটি নতুন চ্যাট সেশন তৈরি করুন",
+  "shortcutNextAgent": "পরবর্তী এজেন্ট",
+  "shortcutNextAgentDesc": "পরবর্তী উপলব্ধ এজেন্টে যান",
+  "shortcutNextRecentModel": "পরবর্তী সাম্প্রতিক মডেল",
+  "shortcutNextRecentModelDesc": "সম্প্রতি ব্যবহৃত মডেলগুলির মধ্যে পরিবর্তন করুন",
+  "shortcutNextTab": "পরবর্তী ট্যাব",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "ট্যাব সুইচার দেখান এবং পরবর্তী ট্যাবে যান",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "পরবর্তী ভেরিয়েন্ট",
+  "shortcutNextVariantDesc": "উপলব্ধ মডেল ভেরিয়েন্টগুলির মধ্যে পরিবর্তন করুন",
+  "shortcutOpenSettings": "সেটিংস খুলুন",
+  "shortcutOpenSettingsDesc": "সেটিংস পৃষ্ঠা খুলুন",
+  "shortcutPreviousAgent": "পূর্ববর্তী এজেন্ট",
+  "shortcutPreviousAgentDesc": "পূর্ববর্তী উপলব্ধ এজেন্টে যান",
+  "shortcutPreviousTab": "পূর্ববর্তী ট্যাব",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "ট্যাব সুইচার দেখান এবং পূর্ববর্তী ট্যাবে যান",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "ফাইলগুলি দ্রুত খুলুন",
+  "shortcutQuickOpenFilesDesc": "ফাইল দ্রুত অনুসন্ধান খুলুন",
+  "shortcutQuitApp": "অ্যাপ্লিকেশন থেকে প্রস্থান করুন",
+  "shortcutQuitAppDesc": "অ্যাপ থেকে জোরপূর্বক প্রস্থান করুন",
+  "shortcutRefreshData": "ডেটা রিফ্রেশ করুন",
+  "shortcutRefreshDataDesc": "বর্তমান চ্যাট ডেটা রিফ্রেশ করুন",
+  "shortcutToggleVoiceInput": "ভয়েস ইনপুট টগল করুন",
+  "shortcutToggleVoiceInputDesc": "এডিটরে ভয়েস ডিক্টেশন শুরু বা বন্ধ করুন",
+  "shortcutsApply": "আবেদন করুন",
+  "shortcutsConflictConflict": "{conflict} এর সাথে দ্বন্দ্ব",
+  "shortcutsErrorConflict": "\"{conflict}\"-এর সাথে সংঘর্ষ",
+  "shortcutsErrorInvalid": "অবৈধ শর্টকাট",
+  "shortcutsErrorUnsupportedKey": "অসমর্থিত শর্টকাট কী",
+  "shortcutsKeyboardShortcuts": "কীবোর্ড শর্টকাট",
+  "shortcutsPressKeyCombination": "এখন কী কম্বিনেশন টিপুন",
+  "shortcutsReset": "সব রিসেট করুন",
+  "shortcutsSearchEditBindings": "সংরক্ষণ করার আগে অনুসন্ধান করুন, বাইন্ডিং সম্পাদনা করুন এবং দ্বন্দ্ব সমাধান করুন।",
+  "shortcutsSetShortcutWidget": "শর্টকাট সেট করুন: {label}",
+  "shortcutsTheseBindingsStored": "এই বাইন্ডিংগুলি বর্তমান অ্যাপ রানটাইমের জন্য CodeWalk-এ সংরক্ষিত থাকে এবং OpenCode `tui.json` কীবাইন্ড এডিট করে না।",
+  "shortcutsUnassigned": "নির্ধারিত নয়",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "নির্ধারণ সরান",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "এই সংস্করণে কাজটি উপলব্ধ নয়।",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন; পরিবর্তন অস্থায়ী হতে পারে।",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "অনুসন্ধান মুছুন",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

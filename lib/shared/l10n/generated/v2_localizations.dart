@@ -452,6 +452,396 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Appearance settings could not be loaded or saved. Changes remain temporary until retry succeeds.'**
   String get appearanceStorageError;
+
+  /// CodeWalk UI string — settingsAppearanceDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Choose themes, colors, text size, and chat display'**
+  String get settingsAppearanceDescription;
+
+  /// CodeWalk UI string — settingsAppearanceTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearanceTitle;
+
+  /// CodeWalk UI string — settingsNavigationGroupExperience
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get settingsNavigationGroupExperience;
+
+  /// CodeWalk UI string — settingsNavigationGroupInput
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get settingsNavigationGroupInput;
+
+  /// CodeWalk UI string — settingsNavigationGroupSetup
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get settingsNavigationGroupSetup;
+
+  /// CodeWalk UI string — settingsNavigationNoResults
+  ///
+  /// In en, this message translates to:
+  /// **'No settings found'**
+  String get settingsNavigationNoResults;
+
+  /// CodeWalk UI string — settingsNavigationSearchHint
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get settingsNavigationSearchHint;
+
+  /// CodeWalk UI string — settingsProvenanceCodeWalkLocal
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk-local'**
+  String get settingsProvenanceCodeWalkLocal;
+
+  /// CodeWalk UI string — settingsShortcutsDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Find and customize keyboard shortcuts'**
+  String get settingsShortcutsDescription;
+
+  /// CodeWalk UI string — settingsShortcutsEdit
+  ///
+  /// In en, this message translates to:
+  /// **'Edit shortcut'**
+  String get settingsShortcutsEdit;
+
+  /// CodeWalk UI string — settingsShortcutsReset
+  ///
+  /// In en, this message translates to:
+  /// **'Reset shortcut'**
+  String get settingsShortcutsReset;
+
+  /// CodeWalk UI string — settingsShortcutsSearch
+  ///
+  /// In en, this message translates to:
+  /// **'Search shortcuts'**
+  String get settingsShortcutsSearch;
+
+  /// CodeWalk UI string — settingsShortcutsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get settingsShortcutsTitle;
+
+  /// CodeWalk UI string — shortcutCloseApp
+  ///
+  /// In en, this message translates to:
+  /// **'Close tab/application'**
+  String get shortcutCloseApp;
+
+  /// CodeWalk UI string — shortcutCloseAppDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Close the current session tab when available, otherwise close the app using platform behavior'**
+  String get shortcutCloseAppDesc;
+
+  /// CodeWalk UI string — shortcutFocusCloseDrawer
+  ///
+  /// In en, this message translates to:
+  /// **'Focus/close drawer'**
+  String get shortcutFocusCloseDrawer;
+
+  /// CodeWalk UI string — shortcutFocusCloseDrawerDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Focus composer by default, or close drawer when open'**
+  String get shortcutFocusCloseDrawerDesc;
+
+  /// CodeWalk UI string — shortcutFocusInput
+  ///
+  /// In en, this message translates to:
+  /// **'Focus input'**
+  String get shortcutFocusInput;
+
+  /// CodeWalk UI string — shortcutFocusInputDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Move focus to the prompt input'**
+  String get shortcutFocusInputDesc;
+
+  /// CodeWalk UI string — shortcutGroupApplication
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get shortcutGroupApplication;
+
+  /// CodeWalk UI string — shortcutGroupGeneral
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get shortcutGroupGeneral;
+
+  /// CodeWalk UI string — shortcutGroupModelAndAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Model and agent'**
+  String get shortcutGroupModelAndAgent;
+
+  /// CodeWalk UI string — shortcutGroupNavigation
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get shortcutGroupNavigation;
+
+  /// CodeWalk UI string — shortcutGroupPrompt
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get shortcutGroupPrompt;
+
+  /// CodeWalk UI string — shortcutGroupSession
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get shortcutGroupSession;
+
+  /// CodeWalk UI string — shortcutNewConversation
+  ///
+  /// In en, this message translates to:
+  /// **'New conversation'**
+  String get shortcutNewConversation;
+
+  /// CodeWalk UI string — shortcutNewConversationDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new chat session'**
+  String get shortcutNewConversationDesc;
+
+  /// CodeWalk UI string — shortcutNextAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Next agent'**
+  String get shortcutNextAgent;
+
+  /// CodeWalk UI string — shortcutNextAgentDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle to next available agent'**
+  String get shortcutNextAgentDesc;
+
+  /// CodeWalk UI string — shortcutNextRecentModel
+  ///
+  /// In en, this message translates to:
+  /// **'Next recent model'**
+  String get shortcutNextRecentModel;
+
+  /// CodeWalk UI string — shortcutNextRecentModelDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle through recently used models'**
+  String get shortcutNextRecentModelDesc;
+
+  /// CodeWalk UI string — shortcutNextTab
+  ///
+  /// In en, this message translates to:
+  /// **'Next tab'**
+  String get shortcutNextTab;
+
+  /// CodeWalk UI string — shortcutNextTabDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Show the tab switcher and cycle to the next tab'**
+  String get shortcutNextTabDesc;
+
+  /// CodeWalk UI string — shortcutNextVariant
+  ///
+  /// In en, this message translates to:
+  /// **'Next variant'**
+  String get shortcutNextVariant;
+
+  /// CodeWalk UI string — shortcutNextVariantDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle through available model variants'**
+  String get shortcutNextVariantDesc;
+
+  /// CodeWalk UI string — shortcutOpenSettings
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get shortcutOpenSettings;
+
+  /// CodeWalk UI string — shortcutOpenSettingsDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings page'**
+  String get shortcutOpenSettingsDesc;
+
+  /// CodeWalk UI string — shortcutPreviousAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Previous agent'**
+  String get shortcutPreviousAgent;
+
+  /// CodeWalk UI string — shortcutPreviousAgentDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle to previous available agent'**
+  String get shortcutPreviousAgentDesc;
+
+  /// CodeWalk UI string — shortcutPreviousTab
+  ///
+  /// In en, this message translates to:
+  /// **'Previous tab'**
+  String get shortcutPreviousTab;
+
+  /// CodeWalk UI string — shortcutPreviousTabDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Show the tab switcher and cycle to the previous tab'**
+  String get shortcutPreviousTabDesc;
+
+  /// CodeWalk UI string — shortcutQuickOpenFiles
+  ///
+  /// In en, this message translates to:
+  /// **'Quick open files'**
+  String get shortcutQuickOpenFiles;
+
+  /// CodeWalk UI string — shortcutQuickOpenFilesDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Open file quick search'**
+  String get shortcutQuickOpenFilesDesc;
+
+  /// CodeWalk UI string — shortcutQuitApp
+  ///
+  /// In en, this message translates to:
+  /// **'Quit application'**
+  String get shortcutQuitApp;
+
+  /// CodeWalk UI string — shortcutQuitAppDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Force-exit the app'**
+  String get shortcutQuitAppDesc;
+
+  /// CodeWalk UI string — shortcutRefreshData
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh data'**
+  String get shortcutRefreshData;
+
+  /// CodeWalk UI string — shortcutRefreshDataDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh current chat data'**
+  String get shortcutRefreshDataDesc;
+
+  /// CodeWalk UI string — shortcutToggleVoiceInput
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle voice input'**
+  String get shortcutToggleVoiceInput;
+
+  /// CodeWalk UI string — shortcutToggleVoiceInputDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Start or stop speech-to-text in the composer'**
+  String get shortcutToggleVoiceInputDesc;
+
+  /// CodeWalk UI string — shortcutsApply
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get shortcutsApply;
+
+  /// CodeWalk UI string — shortcutsConflictConflict
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict with {conflict}'**
+  String shortcutsConflictConflict(String conflict);
+
+  /// CodeWalk UI string — shortcutsErrorConflict
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts with \"{conflict}\"'**
+  String shortcutsErrorConflict(String conflict);
+
+  /// CodeWalk UI string — shortcutsErrorInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid shortcut'**
+  String get shortcutsErrorInvalid;
+
+  /// CodeWalk UI string — shortcutsErrorUnsupportedKey
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported shortcut key'**
+  String get shortcutsErrorUnsupportedKey;
+
+  /// CodeWalk UI string — shortcutsKeyboardShortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get shortcutsKeyboardShortcuts;
+
+  /// CodeWalk UI string — shortcutsPressKeyCombination
+  ///
+  /// In en, this message translates to:
+  /// **'Press the key combination now'**
+  String get shortcutsPressKeyCombination;
+
+  /// CodeWalk UI string — shortcutsReset
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all'**
+  String get shortcutsReset;
+
+  /// CodeWalk UI string — shortcutsSearchEditBindings
+  ///
+  /// In en, this message translates to:
+  /// **'Search, edit bindings, and resolve conflicts before saving.'**
+  String get shortcutsSearchEditBindings;
+
+  /// CodeWalk UI string — shortcutsSetShortcutWidget
+  ///
+  /// In en, this message translates to:
+  /// **'Set shortcut: {label}'**
+  String shortcutsSetShortcutWidget(String label);
+
+  /// CodeWalk UI string — shortcutsTheseBindingsStored
+  ///
+  /// In en, this message translates to:
+  /// **'These bindings are stored in CodeWalk for the current app runtime and do not edit OpenCode `tui.json` keybinds.'**
+  String get shortcutsTheseBindingsStored;
+
+  /// V2 local settings and shortcut UI
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get shortcutsUnassigned;
+
+  /// V2 local settings and shortcut UI
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign'**
+  String get shortcutsUnassign;
+
+  /// V2 local settings and shortcut UI
+  ///
+  /// In en, this message translates to:
+  /// **'This action is unavailable in this version.'**
+  String get shortcutsUnavailable;
+
+  /// V2 local settings and shortcut UI
+  ///
+  /// In en, this message translates to:
+  /// **'Settings could not be loaded or saved. Retry; changes may be temporary.'**
+  String get settingsStorageError;
+
+  /// V2 local settings and shortcut UI
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get settingsSearchClear;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

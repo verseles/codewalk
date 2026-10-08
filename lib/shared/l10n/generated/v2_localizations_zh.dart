@@ -178,4 +178,206 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get appearanceStorageError => '无法加载或保存外观设置。重试成功之前，更改仅为临时更改。';
+
+  @override
+  String get settingsAppearanceDescription => '选择主题、颜色、文字大小和聊天显示方式';
+
+  @override
+  String get settingsAppearanceTitle => '外观';
+
+  @override
+  String get settingsNavigationGroupExperience => '体验';
+
+  @override
+  String get settingsNavigationGroupInput => '输入';
+
+  @override
+  String get settingsNavigationGroupSetup => '设置';
+
+  @override
+  String get settingsNavigationNoResults => '未找到设置';
+
+  @override
+  String get settingsNavigationSearchHint => '搜索设置';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk 本地';
+
+  @override
+  String get settingsShortcutsDescription => '查找和自定义键盘快捷键';
+
+  @override
+  String get settingsShortcutsEdit => '编辑快捷键';
+
+  @override
+  String get settingsShortcutsReset => '重置快捷键';
+
+  @override
+  String get settingsShortcutsSearch => '搜索快捷键';
+
+  @override
+  String get settingsShortcutsTitle => '快捷键';
+
+  @override
+  String get shortcutCloseApp => '关闭标签页/应用';
+
+  @override
+  String get shortcutCloseAppDesc => '如果当前会话标签页可用则将其关闭，否则按平台行为关闭应用';
+
+  @override
+  String get shortcutFocusCloseDrawer => '聚焦/关闭侧边栏';
+
+  @override
+  String get shortcutFocusCloseDrawerDesc => '默认聚焦输入框，或在打开时关闭侧边栏';
+
+  @override
+  String get shortcutFocusInput => '聚焦输入框';
+
+  @override
+  String get shortcutFocusInputDesc => '将焦点移动到文本输入框';
+
+  @override
+  String get shortcutGroupApplication => '应用';
+
+  @override
+  String get shortcutGroupGeneral => '通用';
+
+  @override
+  String get shortcutGroupModelAndAgent => '模型与代理';
+
+  @override
+  String get shortcutGroupNavigation => '导航';
+
+  @override
+  String get shortcutGroupPrompt => '提示词';
+
+  @override
+  String get shortcutGroupSession => '会话';
+
+  @override
+  String get shortcutNewConversation => '新会话';
+
+  @override
+  String get shortcutNewConversationDesc => '创建一个新的聊天会话';
+
+  @override
+  String get shortcutNextAgent => '下一个代理';
+
+  @override
+  String get shortcutNextAgentDesc => '切换到下一个可用代理';
+
+  @override
+  String get shortcutNextRecentModel => '下一个近期模型';
+
+  @override
+  String get shortcutNextRecentModelDesc => '在最近使用的模型之间切换';
+
+  @override
+  String get shortcutNextTab => '下一个标签页';
+
+  @override
+  String get shortcutNextTabDesc => '显示标签页切换器并切换到下一个';
+
+  @override
+  String get shortcutNextVariant => '下一个变体';
+
+  @override
+  String get shortcutNextVariantDesc => '在可用的模型变体之间切换';
+
+  @override
+  String get shortcutOpenSettings => '打开设置';
+
+  @override
+  String get shortcutOpenSettingsDesc => '打开设置页面';
+
+  @override
+  String get shortcutPreviousAgent => '上一个代理';
+
+  @override
+  String get shortcutPreviousAgentDesc => '切换到上一个可用代理';
+
+  @override
+  String get shortcutPreviousTab => '上一个标签页';
+
+  @override
+  String get shortcutPreviousTabDesc => '显示标签页切换器并切换到上一个';
+
+  @override
+  String get shortcutQuickOpenFiles => '快速打开文件';
+
+  @override
+  String get shortcutQuickOpenFilesDesc => '打开文件快速搜索';
+
+  @override
+  String get shortcutQuitApp => '退出应用';
+
+  @override
+  String get shortcutQuitAppDesc => '强制退出应用';
+
+  @override
+  String get shortcutRefreshData => '刷新数据';
+
+  @override
+  String get shortcutRefreshDataDesc => '刷新当前聊天数据';
+
+  @override
+  String get shortcutToggleVoiceInput => '切换语音输入';
+
+  @override
+  String get shortcutToggleVoiceInputDesc => '在编辑器中开始或停止语音听写';
+
+  @override
+  String get shortcutsApply => '应用';
+
+  @override
+  String shortcutsConflictConflict(String conflict) {
+    return '与$conflict冲突';
+  }
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '与“$conflict”冲突';
+  }
+
+  @override
+  String get shortcutsErrorInvalid => '无效的快捷键';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => '不支持的快捷键';
+
+  @override
+  String get shortcutsKeyboardShortcuts => '键盘快捷键';
+
+  @override
+  String get shortcutsPressKeyCombination => '现在请按下组合键';
+
+  @override
+  String get shortcutsReset => '全部重置';
+
+  @override
+  String get shortcutsSearchEditBindings => '在保存前进行搜索、编辑绑定并解决冲突。';
+
+  @override
+  String shortcutsSetShortcutWidget(String label) {
+    return '设置快捷键: $label';
+  }
+
+  @override
+  String get shortcutsTheseBindingsStored =>
+      '这些绑定存储在 CodeWalk 中用于当前应用运行时，不会修改 OpenCode `tui.json` 按键绑定。';
+
+  @override
+  String get shortcutsUnassigned => '未分配';
+
+  @override
+  String get shortcutsUnassign => '取消分配';
+
+  @override
+  String get shortcutsUnavailable => '此版本不支持此操作。';
+
+  @override
+  String get settingsStorageError => '无法加载或保存设置。请重试；更改可能是临时的。';
+
+  @override
+  String get settingsSearchClear => '清除搜索';
 }

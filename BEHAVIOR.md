@@ -38,9 +38,39 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** its scoped UI copy uses that language, including right-to-left layout for Arabic and Urdu
 - **Then** regional variants resolve by language and unsupported locale lists fall back to English
 
-### V2 appearance preferences
+### V2 settings shell and local shortcuts
 
 - **Given** the user opens `/settings` in the explicit v2 app
+- **When** the viewport is below 840 logical pixels
+- **Then** a grouped, localized destination list opens first; selecting Appearance or Shortcuts opens its detail with a back action
+- **Then** detail Back, system Back and the configured Escape action return to the list while retaining its search query
+- **When** the viewport is at least 840 logical pixels
+- **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
+- **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
+- **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
+- **Then** Servers opens the existing hosts route; unimplemented feature settings and diagnostics remain with their owning Issues
+
+- **Given** the user opens Shortcuts
+- **When** the local bindings are displayed or edited
+- **Then** all 15 stable actions are inspectable and individually editable, including unavailable actions whose imported overrides may need conflict repair
+- **Then** search matches both stored binding tokens and visible platform labels such as `Ctrl+,` and `Cmd+,`
+- **Then** key capture supports bare Escape; Cancel or tapping the dialog barrier dismisses without applying
+- **Then** an empty binding explicitly unassigns an action, whereas Reset removes its override and restores its default
+- **Then** bindings persist as JSON at `cw2.settings.shortcuts`, preserving unknown fields, and malformed metadata is not automatically overwritten
+- **Then** conflicts and invalid bindings stay inactive; load/save failures show a retry action without claiming the temporary choice is saved
+
+- **Given** a shortcut reaches the v2 app's keyboard scope
+- **When** its binding is valid, non-conflicting and has an available handler
+- **Then** Open Settings navigates to `/settings`, and the configured Escape action performs Back only within a compact settings detail
+- **Then** unavailable chat, model, voice, tab and native-exit effects are not executed or consumed
+- **Then** synthesized and repeated key events do not invoke app actions; modals, composing text and ordinary/AltGraph editing retain priority
+- **Then** `mod` resolves to Cmd on macOS and Ctrl elsewhere; explicit Ctrl+Tab remains Ctrl on every platform
+- **Then** the Shortcuts destination is visible on desktop/Web and appears on mobile after physical keyboard input is detected in the current app instance
+- **Then** these CodeWalk-local preferences never write OpenCode `tui.json` keybinds or server configuration
+
+### V2 appearance preferences
+
+- **Given** the user opens Settings > Appearance in the explicit v2 app
 - **When** appearance controls are displayed
 - **Then** the user can choose system/light/dark mode, classic/refined visual style, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
 - **Then** the searchable preset picker and five density tiers work in compact and wide layouts, with dropdown alternatives for narrow screens or enlarged text
@@ -63,8 +93,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 Conversations, hosts, pairing and session routes retain their navigation
 placeholders. Locale changes exposed by the v2 controller remain transient;
-the broader settings shell and other feature controls remain in their owning
-Issues. Appearance widget/golden tests cover mobile and desktop viewports on
+feature-specific settings controls, diagnostics and full rendering parity remain
+in their owning Issues. Settings and appearance widget/golden tests cover mobile and desktop viewports on
 the Flutter VM; they do not certify installed native targets.
 
 ---

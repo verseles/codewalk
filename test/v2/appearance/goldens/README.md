@@ -1,7 +1,8 @@
 # Appearance goldens
 
-These snapshots render the actual v2 appearance controls at 390×844 and
-1280×800 in light and OC-2 dark mode. They use Flutter's deterministic Ahem
+These snapshots render the actual v2 appearance controls through the settings
+shell at 390×844 and 1280×800 in light and OC-2 dark mode. They include compact
+detail Back or the wide destination rail. They use Flutter's deterministic Ahem
 test font, English, DPR 1, fixed settings and an injected no-dynamic-color
 source. Linux Flutter 3.44.1/Dart 3.12.1 generated the initial snapshots;
 CI currently uses Flutter 3.44.0. Pixel parity on another renderer/SDK is

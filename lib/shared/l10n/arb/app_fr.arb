@@ -57,5 +57,97 @@
   "appearanceStorageError": "Les réglages d’apparence n’ont pas pu être chargés ou enregistrés. Les modifications restent temporaires jusqu’à une nouvelle tentative réussie.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "Choisissez les thèmes, couleurs, taille du texte et affichage du chat",
+  "settingsAppearanceTitle": "Apparence",
+  "settingsNavigationGroupExperience": "Expérience",
+  "settingsNavigationGroupInput": "Saisie",
+  "settingsNavigationGroupSetup": "Configuration",
+  "settingsNavigationNoResults": "Aucun réglage trouvé",
+  "settingsNavigationSearchHint": "Rechercher des réglages",
+  "settingsProvenanceCodeWalkLocal": "Local à CodeWalk",
+  "settingsShortcutsDescription": "Trouvez et personnalisez les raccourcis clavier",
+  "settingsShortcutsEdit": "Modifier le raccourci",
+  "settingsShortcutsReset": "Réinitialiser le raccourci",
+  "settingsShortcutsSearch": "Rechercher des raccourcis",
+  "settingsShortcutsTitle": "Raccourcis",
+  "shortcutCloseApp": "Fermer l''onglet/l''application",
+  "shortcutCloseAppDesc": "Fermer l''onglet de session actuel s''il est disponible, sinon fermer l''application selon le comportement de la plateforme",
+  "shortcutFocusCloseDrawer": "Focus/fermer le tiroir",
+  "shortcutFocusCloseDrawerDesc": "Focus sur l''entrée par défaut, ou fermer le tiroir s''il est ouvert",
+  "shortcutFocusInput": "Focus sur lentrée",
+  "shortcutFocusInputDesc": "Déplacer le focus vers l''entrée de texte",
+  "shortcutGroupApplication": "Application",
+  "shortcutGroupGeneral": "Général",
+  "shortcutGroupModelAndAgent": "Modèle et agent",
+  "shortcutGroupNavigation": "Navigation",
+  "shortcutGroupPrompt": "Invite",
+  "shortcutGroupSession": "Session",
+  "shortcutNewConversation": "Nouvelle conversation",
+  "shortcutNewConversationDesc": "Créer une nouvelle session de chat",
+  "shortcutNextAgent": "Agent suivant",
+  "shortcutNextAgentDesc": "Passer à l''agent disponible suivant",
+  "shortcutNextRecentModel": "Modèle récent suivant",
+  "shortcutNextRecentModelDesc": "Passer d''un modèle récemment utilisé à l''autre",
+  "shortcutNextTab": "Onglet suivant",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Afficher le sélecteur d''onglets et passer au suivant",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "Variante suivante",
+  "shortcutNextVariantDesc": "Passer d''une variante de modèle disponible à l''autre",
+  "shortcutOpenSettings": "Ouvrir les paramètres",
+  "shortcutOpenSettingsDesc": "Ouvrir la page des paramètres",
+  "shortcutPreviousAgent": "Agent précédent",
+  "shortcutPreviousAgentDesc": "Passer à l''agent disponible précédent",
+  "shortcutPreviousTab": "Onglet précédent",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Afficher le sélecteur d''onglets et passer au précédent",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "Ouverture rapide de fichiers",
+  "shortcutQuickOpenFilesDesc": "Ouvrir la recherche rapide de fichiers",
+  "shortcutQuitApp": "Quitter lapplication",
+  "shortcutQuitAppDesc": "Forcer la sortie de l''application",
+  "shortcutRefreshData": "Actualiser les données",
+  "shortcutRefreshDataDesc": "Actualiser les données du chat actuel",
+  "shortcutToggleVoiceInput": "Basculer la saisie vocale",
+  "shortcutToggleVoiceInputDesc": "Démarrer ou arrêter la saisie vocale dans léditeur",
+  "shortcutsApply": "Appliquer",
+  "shortcutsConflictConflict": "Conflit avec {conflict}",
+  "shortcutsErrorConflict": "Conflit avec \"{conflict}\"",
+  "shortcutsErrorInvalid": "Raccourci invalide",
+  "shortcutsErrorUnsupportedKey": "Touche de raccourci non prise en charge",
+  "shortcutsKeyboardShortcuts": "Raccourcis clavier",
+  "shortcutsPressKeyCombination": "Appuyez maintenant sur la combinaison de touches",
+  "shortcutsReset": "Tout réinitialiser",
+  "shortcutsSearchEditBindings": "Recherchez, modifiez les affectations et résolvez les conflits avant d''enregistrer.",
+  "shortcutsSetShortcutWidget": "Définir le raccourci : {label}",
+  "shortcutsTheseBindingsStored": "Ces affectations sont stockées dans CodeWalk pour la durée d''exécution actuelle de l''application et ne modifient pas les raccourcis clavier `tui.json` d''OpenCode.",
+  "shortcutsUnassigned": "Non attribué",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "Retirer l’attribution",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "Cette action n’est pas disponible dans cette version.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "Impossible de charger ou d’enregistrer les réglages. Réessayez ; les modifications peuvent être temporaires.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "Effacer la recherche",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }

@@ -57,5 +57,97 @@
   "appearanceStorageError": "Não foi possível carregar ou salvar as configurações de aparência. As alterações ficam temporárias até a nova tentativa funcionar.",
   "@appearanceStorageError": {
     "description": "Appearance persistence failure; settings may be temporary"
+  },
+  "settingsAppearanceDescription": "Escolha temas, cores, tamanho do texto e exibição do chat",
+  "settingsAppearanceTitle": "Aparência",
+  "settingsNavigationGroupExperience": "Experiência",
+  "settingsNavigationGroupInput": "Entrada",
+  "settingsNavigationGroupSetup": "Configuração",
+  "settingsNavigationNoResults": "Nenhuma configuração encontrada",
+  "settingsNavigationSearchHint": "Pesquisar configurações",
+  "settingsProvenanceCodeWalkLocal": "Local do CodeWalk",
+  "settingsShortcutsDescription": "Encontre e personalize os atalhos de teclado",
+  "settingsShortcutsEdit": "Editar atalho",
+  "settingsShortcutsReset": "Redefinir atalho",
+  "settingsShortcutsSearch": "Buscar atalhos",
+  "settingsShortcutsTitle": "Atalhos",
+  "shortcutCloseApp": "Fechar aba/aplicativo",
+  "shortcutCloseAppDesc": "Fechar a aba da sessão atual quando disponível; caso contrário, fechar o aplicativo usando o comportamento da plataforma",
+  "shortcutFocusCloseDrawer": "Focar/fechar painel",
+  "shortcutFocusCloseDrawerDesc": "Focar entrada por padrão, ou fechar painel quando aberto",
+  "shortcutFocusInput": "Focar entrada",
+  "shortcutFocusInputDesc": "Mover o foco para a entrada de texto",
+  "shortcutGroupApplication": "Aplicativo",
+  "shortcutGroupGeneral": "Geral",
+  "shortcutGroupModelAndAgent": "Modelo e agente",
+  "shortcutGroupNavigation": "Navegação",
+  "shortcutGroupPrompt": "Prompt",
+  "shortcutGroupSession": "Sessão",
+  "shortcutNewConversation": "Nova conversa",
+  "shortcutNewConversationDesc": "Criar uma nova sessão de chat",
+  "shortcutNextAgent": "Próximo agente",
+  "shortcutNextAgentDesc": "Alternar para o próximo agente disponível",
+  "shortcutNextRecentModel": "Próximo modelo recente",
+  "shortcutNextRecentModelDesc": "Alternar entre os modelos usados recentemente",
+  "shortcutNextTab": "Próxima aba",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Mostrar o seletor de abas e ir para a próxima",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutNextVariant": "Próxima variante",
+  "shortcutNextVariantDesc": "Alternar entre as variantes de modelo disponíveis",
+  "shortcutOpenSettings": "Abrir configurações",
+  "shortcutOpenSettingsDesc": "Abrir a página de configurações",
+  "shortcutPreviousAgent": "Agente anterior",
+  "shortcutPreviousAgentDesc": "Alternar para o agente anterior disponível",
+  "shortcutPreviousTab": "Aba anterior",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Mostrar o seletor de abas e ir para a aba anterior",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "shortcutQuickOpenFiles": "Abertura rápida de arquivos",
+  "shortcutQuickOpenFilesDesc": "Abrir busca rápida de arquivos",
+  "shortcutQuitApp": "Sair do aplicativo",
+  "shortcutQuitAppDesc": "Forçar a saída do aplicativo",
+  "shortcutRefreshData": "Atualizar dados",
+  "shortcutRefreshDataDesc": "Atualizar os dados do chat atual",
+  "shortcutToggleVoiceInput": "Alternar entrada de voz",
+  "shortcutToggleVoiceInputDesc": "Iniciar ou parar o ditado de voz no editor",
+  "shortcutsApply": "Aplicar",
+  "shortcutsConflictConflict": "Conflito com {conflict}",
+  "shortcutsErrorConflict": "Conflita com \"{conflict}\"",
+  "shortcutsErrorInvalid": "Atalho inválido",
+  "shortcutsErrorUnsupportedKey": "Tecla de atalho não suportada",
+  "shortcutsKeyboardShortcuts": "Atalhos de teclado",
+  "shortcutsPressKeyCombination": "Pressione a combinação de teclas agora",
+  "shortcutsReset": "Restaurar tudo",
+  "shortcutsSearchEditBindings": "Pesquisar, editar atalhos e resolver conflitos antes de salvar.",
+  "shortcutsSetShortcutWidget": "Definir atalho: {label}",
+  "shortcutsTheseBindingsStored": "Esses atalhos são armazenados no CodeWalk para a execução atual do app e não editam os atalhos de teclado do `tui.json` do OpenCode.",
+  "shortcutsUnassigned": "Não atribuído",
+  "@shortcutsUnassigned": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnassign": "Desatribuir",
+  "@shortcutsUnassign": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "shortcutsUnavailable": "Esta ação não está disponível nesta versão.",
+  "@shortcutsUnavailable": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsStorageError": "Não foi possível carregar ou salvar as configurações. Tente novamente; as alterações podem ser temporárias.",
+  "@settingsStorageError": {
+    "description": "V2 local settings and shortcut UI"
+  },
+  "settingsSearchClear": "Limpar busca",
+  "@settingsSearchClear": {
+    "description": "V2 local settings and shortcut UI"
   }
 }
