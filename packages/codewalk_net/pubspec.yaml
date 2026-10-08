@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   codewalk_core: ^0.0.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   lints: ^6.1.0

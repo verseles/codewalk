@@ -40,6 +40,12 @@ final class SseFrame {
   final int? retryMilliseconds;
 }
 
+/// Encoded field-value bytes; object overhead is bounded separately by count.
+int sseFrameBytes(SseFrame frame) =>
+    utf8.encode(frame.data).length +
+    utf8.encode(frame.event ?? '').length +
+    utf8.encode(frame.id ?? '').length;
+
 /// Strict UTF-8 SSE framing with byte limits independent of chunk length.
 /// The frame cap counts all wire bytes through its delimiter; the line cap
 /// counts line content bytes excluding CR/LF. No background isolate is implied.
@@ -60,16 +66,42 @@ final class SseDecoder extends StreamTransformerBase<List<int>, SseFrame> {
 
   @override
   Stream<SseFrame> bind(Stream<List<int>> stream) async* {
-    final state = _SseState(maxFrameBytes, maxLineBytes, eofPolicy);
+    final state = SseFrameParser(
+      maxFrameBytes: maxFrameBytes,
+      maxLineBytes: maxLineBytes,
+      eofPolicy: eofPolicy,
+    );
     await for (final chunk in stream) {
-      for (final byte in chunk) {
-        final frame = state.add(byte);
-        if (frame != null) yield frame;
-      }
+      yield* Stream.fromIterable(state.add(chunk));
     }
     final finalFrame = state.finish();
     if (finalFrame != null) yield finalFrame;
   }
+}
+
+/// Incremental state used by the IO worker, with exactly the same wire limits.
+final class SseFrameParser {
+  SseFrameParser({
+    int maxFrameBytes = defaultTransportByteLimit,
+    int maxLineBytes = defaultTransportByteLimit,
+    SseEofPolicy eofPolicy = SseEofPolicy.discard,
+  }) {
+    if (maxFrameBytes <= 0 || maxLineBytes <= 0) {
+      throw ArgumentError('SSE byte limits must be positive.');
+    }
+    _state = _SseState(maxFrameBytes, maxLineBytes, eofPolicy);
+  }
+
+  late final _SseState _state;
+
+  Iterable<SseFrame> add(List<int> chunk) sync* {
+    for (final byte in chunk) {
+      final frame = _state.add(byte);
+      if (frame != null) yield frame;
+    }
+  }
+
+  SseFrame? finish() => _state.finish();
 }
 
 final class _SseState {

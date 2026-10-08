@@ -6,3 +6,6 @@ library;
 export 'src/http_transport.dart';
 export 'src/sse_decoder.dart';
 export 'src/sse_http.dart';
+export 'src/endpoint_auth.dart';
+export 'src/websocket_transport.dart';
+export 'src/sse_recovery.dart';

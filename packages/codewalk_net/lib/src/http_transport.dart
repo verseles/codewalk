@@ -7,6 +7,7 @@ const defaultTransportByteLimit = 16 * 1024 * 1024;
 enum TransportFailure {
   invalidTarget,
   invalidRequest,
+  invalidResponse,
   closed,
   cancelled,
   timeout,
@@ -14,6 +15,7 @@ enum TransportFailure {
   bodyTooLarge,
   unexpectedStatus,
   unsupportedContentType,
+  bufferOverflow,
 }
 
 /// Safe diagnostics deliberately omit URLs, headers, bodies and native causes.

@@ -185,9 +185,50 @@ remain pending.
 `codewalk_net` preserves HTTP statuses and raw response
 bodies, validates endpoint paths before obtaining authentication headers,
 disables automatic redirects and supports request cancellation. Its strict
-UTF-8 SSE decoder handles fragmented input and configurable EOF dispatch,
-without interpreting JSON or promising event replay. Browser transport,
-isolates, batching and connection watchdogs are not implemented here.
+UTF-8 SSE parser handles fragmented input and configurable EOF dispatch without
+interpreting JSON or promising event replay. The package also provides native IO
+WebSocket transport, isolate SSE parsing and bounded recovery; browser transport
+parity remains future work. See
+[`packages/codewalk_net/README.md`](packages/codewalk_net/README.md) for package
+behavior, limits, verification commands and platform-evidence boundaries.
+
+### #360/V2-028D native transport producer
+
+The producer adds native IO transport APIs to the `codewalk_net` package. The
+portable barrel exposes endpoint-scoped HTTP/SSE and WebSocket contracts,
+endpoint-safe Basic/Bearer header providers and composition; the separate IO
+barrel exports the native implementations.
+
+```text
+packages/codewalk_net/lib/codewalk_net.dart             # Platform-neutral HTTP/SSE/WebSocket contracts and auth/recovery policies
+packages/codewalk_net/lib/codewalk_net_io.dart          # IO HTTP, WebSocket, isolate parser and recovery exports
+packages/codewalk_net/lib/src/endpoint_target.dart       # Origin/path validation before credentials are requested
+packages/codewalk_net/lib/src/endpoint_auth.dart         # Basic/Bearer providers and case-insensitive header composition
+packages/codewalk_net/lib/src/{http_transport,sse_http}.dart # HTTP request/response, cancellation and SSE bridge contracts
+packages/codewalk_net/lib/src/io_endpoint_transport.dart # Strict IO HTTP: no redirects or retries, bounded lifecycle, TLS verification intact
+packages/codewalk_net/lib/src/io_network_options.dart   # Proxy finder and socket factory hooks
+packages/codewalk_net/lib/src/websocket_transport.dart  # Portable text/binary messages and WebSocket contracts
+packages/codewalk_net/lib/src/websocket_frames.dart    # Incremental uncompressed RFC 6455 frame codec and size checks
+packages/codewalk_net/lib/src/io_websocket_transport.dart # Manual HTTP 101 validation and detached native socket
+packages/codewalk_net/lib/src/io_websocket_session.dart # Masked writes, control handling, cancellation and bounded queues/close
+packages/codewalk_net/lib/src/sse_decoder.dart          # Shared incremental SSE frame parser
+packages/codewalk_net/lib/src/io_isolate_sse.dart      # Credit/ACK-controlled isolate parsing with pause and cancellation
+packages/codewalk_net/lib/src/sse_recovery.dart        # Recovery policy and generation-tagged update contracts
+packages/codewalk_net/lib/src/io_sse_recovery.dart     # Borrowed-HTTP GET recovery, readiness, hydration release and bounded batching
+```
+
+IO networking exposes proxy/socket hooks without a TLS-verification bypass.
+WebSocket handling validates the upgrade, parses uncompressed frames with
+declared-size limits, and does not automatically replay sends. Isolate SSE
+parsing propagates pause/cancellation and bounds input/output credits. Recovery
+uses an adapter readiness predicate, discards pre-readiness events, fences stale
+generations, and releases frames only after hydration; defaults include a
+45-second raw-byte watchdog, jittered 1–30-second retries, 100-ms batches and
+bounded queues. Package tests cover auth, HTTP, frame parsing, native WebSocket
+handshake/session, isolate parsing and recovery under
+`packages/codewalk_net/test/`. This is package-level implementation only: it
+does not establish installed Android/Linux app migration evidence or MVP
+acceptance; v2 app-host and conversation hydration remain separate work.
 
 Storage provides namespaced metadata, guarded schema migrations, bounded
 payloads and endpoint credentials independently of the app graph. IO payloads

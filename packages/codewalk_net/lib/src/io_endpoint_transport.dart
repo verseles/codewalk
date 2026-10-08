@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'http_transport.dart';
+import 'endpoint_target.dart';
+import 'io_network_options.dart';
 
 /// Per-endpoint raw HTTP on the Dart VM. It never follows redirects or retries.
 /// TLS uses the system defaults; no certificate-verification bypass is exposed.
@@ -11,7 +13,8 @@ final class IoEndpointHttpTransport implements EndpointHttpTransport {
     EndpointHeaders? headers,
     Duration headerTimeout = const Duration(seconds: 30),
     Duration connectionTimeout = const Duration(seconds: 15),
-  }) : endpoint = _validateEndpoint(endpoint),
+    IoNetworkOptions networkOptions = const IoNetworkOptions(),
+  }) : _targetPolicy = EndpointTarget(endpoint),
        _headers = headers,
        _headerTimeout = headerTimeout {
     if (headerTimeout <= Duration.zero || connectionTimeout <= Duration.zero) {
@@ -19,10 +22,12 @@ final class IoEndpointHttpTransport implements EndpointHttpTransport {
     }
     _client.connectionTimeout = connectionTimeout;
     _client.autoUncompress = false;
+    networkOptions.apply(_client);
   }
 
   @override
-  final Uri endpoint;
+  Uri get endpoint => _targetPolicy.endpoint;
+  final EndpointTarget _targetPolicy;
   final EndpointHeaders? _headers;
   final Duration _headerTimeout;
   final _client = io.HttpClient();
@@ -31,55 +36,6 @@ final class IoEndpointHttpTransport implements EndpointHttpTransport {
 
   @override
   bool get isClosed => _closed;
-
-  static Uri _validateEndpoint(Uri endpoint) {
-    if (!{'http', 'https'}.contains(endpoint.scheme) ||
-        endpoint.host.isEmpty ||
-        endpoint.userInfo.isNotEmpty ||
-        endpoint.hasQuery ||
-        endpoint.hasFragment ||
-        endpoint.port <= 0 ||
-        endpoint.port > 65535) {
-      throw const TransportException(TransportFailure.invalidTarget);
-    }
-    return endpoint.replace(
-      path: endpoint.path.endsWith('/') ? endpoint.path : '${endpoint.path}/',
-    );
-  }
-
-  Uri _target(String path) {
-    try {
-      final route = Uri.parse(path);
-      if (route.hasScheme ||
-          route.hasAuthority ||
-          route.hasFragment ||
-          route.pathSegments.any(
-            // pathSegments decodes percent escapes. A proxy may then treat
-            // decoded slash/backslash as a separator before normalizing dots.
-            (part) => part
-                .split(RegExp(r'[/\\]'))
-                .any(
-                  (decodedPart) => decodedPart == '.' || decodedPart == '..',
-                ),
-          )) {
-        throw const TransportException(TransportFailure.invalidTarget);
-      }
-      final relative = route.path.startsWith('/')
-          ? route.replace(path: route.path.substring(1))
-          : route;
-      final target = endpoint.resolveUri(relative);
-      if (target.scheme != endpoint.scheme ||
-          target.host != endpoint.host ||
-          target.port != endpoint.port ||
-          target.userInfo.isNotEmpty ||
-          !target.path.startsWith(endpoint.path)) {
-        throw const TransportException(TransportFailure.invalidTarget);
-      }
-      return target;
-    } on FormatException {
-      throw const TransportException(TransportFailure.invalidTarget);
-    }
-  }
 
   @override
   Future<TransportResponse> send(
@@ -93,7 +49,11 @@ final class IoEndpointHttpTransport implements EndpointHttpTransport {
       return Future.error(const TransportException(TransportFailure.cancelled));
     }
     try {
-      final operation = _Operation(this, request, _target(request.path));
+      final operation = _Operation(
+        this,
+        request,
+        _targetPolicy.resolve(request.path),
+      );
       _operations.add(operation);
       operation.start(cancellation);
       return operation.result.future;
