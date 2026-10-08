@@ -80,6 +80,9 @@ environment:
       write('lib/core/legacy.dart', 'class OldService {}\n');
       final fixtureManifest =
           jsonDecode(jsonEncode(manifest)) as Map<String, dynamic>;
+      // Application-generated files are not part of this synthetic tree.
+      fixtureManifest['generated'] = <dynamic>[];
+      fixtureManifest['sizeExceptions'] = <dynamic>[];
       changeManifest?.call(fixtureManifest);
       write(
         'tool/ci/v2_architecture_manifest.json',
@@ -308,6 +311,28 @@ abstract class State<T> {}
     );
     expect(result.exitCode, 1);
     expect(result.stderr.toString(), contains('[manifest]'));
+  });
+
+  test('size exception for a missing fixture file fails', () async {
+    const path = 'lib/shared/missing_generated.dart';
+    final result = await run(
+      changeManifest: (value) {
+        (value['generated'] as List).add({
+          'path': path,
+          'reason': 'Recorded fixture generator output.',
+        });
+        (value['sizeExceptions'] as List).add({
+          'path': path,
+          'category': 'generated',
+          'reason': 'Recorded fixture generator emits a large library.',
+        });
+      },
+    );
+    expect(result.exitCode, 1);
+    expect(
+      result.stderr.toString(),
+      contains('$path [manifest] Stale size exception names a missing file.'),
+    );
   });
 
   for (final path in [
