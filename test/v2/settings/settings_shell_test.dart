@@ -8,6 +8,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/settings/shortcuts_settings_page.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/shortcuts/shortcut_action.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -173,12 +174,12 @@ void main() {
   });
 
   settingsTest(
-    'mobile discovers shortcuts only after physical input',
+    'native mobile discovers shortcuts after input; Web exposes them immediately',
     (tester) async {
       final graph = await mount(tester);
       expect(
         find.byKey(const ValueKey('settings_destination_shortcuts')),
-        findsNothing,
+        kIsWeb ? findsOneWidget : findsNothing,
       );
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
       await tester.pumpAndSettle();
