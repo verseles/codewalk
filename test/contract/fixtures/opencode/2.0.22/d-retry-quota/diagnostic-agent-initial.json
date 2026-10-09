@@ -1,0 +1,89 @@
+{
+  "result": {
+    "capturedAt": "2026-10-09T18:31:00.539701+00:00",
+    "status": "blocked-before-input",
+    "budget": {
+      "observationSeconds": 1800,
+      "executionCeiling": 4,
+      "maximumAuthoredInputs": 2,
+      "costUSD": 0
+    },
+    "config": {
+      "update": "disable",
+      "share": "disabled",
+      "snapshots": false,
+      "warming": false,
+      "permissions": [
+        {
+          "action": "*",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ],
+      "agents": {
+        "capture-rq": {
+          "mode": "primary",
+          "steps": 1,
+          "system": "Respond only with the requested short text. Never use tools or create child sessions.",
+          "permissions": [
+            {
+              "action": "*",
+              "resource": "*",
+              "effect": "deny"
+            }
+          ]
+        },
+        "title": {
+          "disabled": true
+        },
+        "compaction": {
+          "disabled": true
+        }
+      }
+    },
+    "initialGitCommit": "8ad77b1cd43ce4d5640c9874d2dcbdb93a3252eb",
+    "project": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/project",
+    "nativeAccessBeforeInitialCommit": false,
+    "runtime": {
+      "version": "2.0.22",
+      "pid": 3067293,
+      "urls": [
+        "http://127.0.0.1:55605"
+      ],
+      "paths": {
+        "tmp": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/tmp/opencode"
+      }
+    },
+    "url": "http://127.0.0.1:55605",
+    "failure": "StopIteration: ",
+    "seconds": 1.002,
+    "actualExecutionStarts": 0,
+    "providerSteps": 0,
+    "eventCounts": {},
+    "streamFaults": [],
+    "sessions": [],
+    "cleanup": [],
+    "serverPID": 3067293,
+    "serverExit": 130,
+    "serverProcessAbsent": true,
+    "retryCoverage": "inconclusive",
+    "quotaCoverage": "inconclusive"
+  },
+  "calls": [
+    {
+      "elapsed": 0.632,
+      "method": "GET",
+      "path": "/api/agent",
+      "payload": null,
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/project"
+        },
+        "data": []
+      }
+    }
+  ],
+  "events": [],
+  "snapshots": []
+}

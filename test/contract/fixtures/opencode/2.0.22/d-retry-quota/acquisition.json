@@ -1,0 +1,22 @@
+{
+  "package": "@opencode/cli-linux-arm64",
+  "version": "2.0.22",
+  "platform": "Linux aarch64",
+  "registryIntegrity": "sha512-t/yuu9Dqd/M44dFH95bphu7ikO6FATMQuVk/91QBnCMzsP8zVrXU7zAxD1wVLpYYUDqIonEmi80XETlFqx7chw==",
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "scriptsExecuted": false,
+  "versionOutput": "opencode v2.0.22",
+  "privatePaths": {
+    "PATH": "/usr/bin:/bin",
+    "LANG": "C.UTF-8",
+    "HOME": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/home",
+    "TMPDIR": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/tmp",
+    "XDG_CONFIG_HOME": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/config",
+    "XDG_DATA_HOME": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/data",
+    "XDG_CACHE_HOME": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/cache",
+    "XDG_STATE_HOME": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/state",
+    "XDG_RUNTIME_DIR": "/tmp/opencode/codewalk-retry-v2005d-qZuS9b/run"
+  },
+  "seconds": 3.39
+}

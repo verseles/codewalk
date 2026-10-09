@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "checks": 82,
+  "events": 42,
+  "nativeExecutionStarts": 2,
+  "providerSteps": 2,
+  "nativeCostUSD": 0,
+  "retryCoverage": "inconclusive",
+  "quotaCoverage": "inconclusive",
+  "maximumStepInstructionObserved": true,
+  "executedBy": "tester",
+  "executionCount": 1
+}

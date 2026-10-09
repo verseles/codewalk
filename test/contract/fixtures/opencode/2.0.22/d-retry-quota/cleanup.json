@@ -1,0 +1,38 @@
+{
+  "source": "capture results",
+  "diagnostic": {
+    "pid": 3067293,
+    "processAbsent": true,
+    "sessions": []
+  },
+  "observation": {
+    "pid": 3076601,
+    "processAbsent": true,
+    "sessions": [
+      {
+        "sessionID": "ses_ede0e7506ffegVuJ1Kr2xpaL8D",
+        "activeBeforeRemoval": {},
+        "pendingPermissions": {
+          "data": []
+        },
+        "pendingForms": {
+          "data": []
+        },
+        "removeStatus": 204,
+        "getAfterRemovalStatus": 404
+      },
+      {
+        "sessionID": "ses_ede0e6efaffe1jUUcKRWiB305p",
+        "activeBeforeRemoval": {},
+        "pendingPermissions": {
+          "data": []
+        },
+        "pendingForms": {
+          "data": []
+        },
+        "removeStatus": 204,
+        "getAfterRemovalStatus": 404
+      }
+    ]
+  }
+}

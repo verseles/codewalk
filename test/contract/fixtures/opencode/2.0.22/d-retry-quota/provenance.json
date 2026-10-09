@@ -1,0 +1,45 @@
+{
+  "unit": "V2-005D",
+  "issue": "https://github.com/verseles/codewalk/issues/243",
+  "preflight": "https://github.com/verseles/codewalk/issues/243#issuecomment-6086896252",
+  "status": "inconclusive",
+  "capturedOn": "2026-10-09",
+  "platform": "Linux aarch64",
+  "sourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+  "runtimeVersion": "2.0.22",
+  "implementationLine": "main",
+  "parentCommit": "aa6b8a9b57f03953d1ef66b35ed47a7b0575cf29",
+  "retry": "inconclusive",
+  "quota": "inconclusive",
+  "rateLimit": "not-observed",
+  "authorizedMaximumObservationSeconds": 1800,
+  "authorizedMaximumExecutionStarts": 4,
+  "authoredInputs": 2,
+  "actualExecutionStarts": 2,
+  "providerSteps": 2,
+  "nativeCostUSD": 0,
+  "diagnosticExecutionStarts": 0,
+  "diagnosticSeconds": 1.002,
+  "correctedSeconds": 4.311,
+  "nativeAutomaticRetryPolicyModified": false,
+  "operationalCommand": "python3 /tmp/opencode/codewalk-retry-v2005d-qZuS9b/capture.py",
+  "collectorSHA256": "052a5560656ab91f0f96c85a3b35a8af95717d0905560f07e70d5bb017ea6eb8",
+  "auditSHA256": "c6ea401a89a7065a40a29cdf1f2e5373858125e0b145290244af5a82b3fc71b2",
+  "auditCommand": "python3 /tmp/opencode/codewalk-retry-v2005d-qZuS9b/audit.py",
+  "redactions": [
+    "Secret fields redacted before disk writes",
+    "Authorization headers not recorded",
+    "Opaque providerState omitted"
+  ],
+  "limitations": [
+    "No naturally observed retry, quota or rate-limit event",
+    "One-step restricted agent changes prompting conditions; first marker instruction was not fulfilled",
+    "Two successful native terminals are not acceptance of unrestricted/default behavior",
+    "No Android/installed-client/parent SP-01/consumer acceptance",
+    "Initial empty-agent diagnostic retained; exact initial collector digest was not retained before its bounded-wait correction"
+  ],
+  "derivedFiles": {
+    "execution-ledger.json": "Native execution events selected unchanged from capture.json",
+    "cleanup.json": "Process and session cleanup observations selected from the capture results"
+  }
+}
