@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 
 import 'storage_support.dart';
 
-enum EndpointCredentialKind { endpointPassword, pairingToken }
+enum EndpointCredentialKind { endpointPassword, pairingToken, activeCredential }
 
 /// A profile is deliberately separate from an origin: aliases are not merged
 /// and a changed port is never rewritten to the native service default.

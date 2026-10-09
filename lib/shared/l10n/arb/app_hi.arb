@@ -208,5 +208,53 @@
   "hostsCheckConnection": "कनेक्शन जाँचें",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "सर्वर जोड़ें",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "QR स्कैन करें",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "QR चित्र खोलें",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "जोड़ने का लिंक",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "पुष्टि करके जोड़ें",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "लिंक अमान्य, समाप्त या इस्तेमाल हो चुका है। नया लिंक बनाएँ।",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "परिणाम अज्ञात है। नया लिंक बनाएँ; अनुरोध दोहराया नहीं जाएगा।",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "QR पढ़ नहीं सके। PNG/JPEG या लिंक का उपयोग करें।",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "टोकन नवीनीकरण",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "फिर से जोड़ें",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "टोकन की घोषित समाप्ति",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "जुड़ा हुआ",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

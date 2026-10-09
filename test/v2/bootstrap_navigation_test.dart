@@ -57,7 +57,7 @@ void main() {
   }
 
   testWidgets(
-    'pairing route retains the private link and exposes no credentials',
+    'pairing consumer takes the private link once without exposing credentials',
     (tester) async {
       final link = Uri.parse(
         'codewalk://pair?code=private-code&token=private-token',
@@ -76,7 +76,6 @@ void main() {
       );
       expect(find.textContaining('private-code'), findsNothing);
       expect(find.textContaining('private-token'), findsNothing);
-      expect(dependencies.navigation.consumePairingLink(), link);
       expect(dependencies.navigation.consumePairingLink(), isNull);
 
       dependencies.router.go('/pair?code=next-private');
@@ -85,10 +84,7 @@ void main() {
         dependencies.router.routeInformationProvider.value.uri.toString(),
         '/pair',
       );
-      expect(
-        dependencies.navigation.consumePairingLink()?.queryParameters['code'],
-        'next-private',
-      );
+      expect(dependencies.navigation.consumePairingLink(), isNull);
       expect(find.textContaining('next-private'), findsNothing);
       await tester.pumpWidget(const SizedBox.shrink());
     },

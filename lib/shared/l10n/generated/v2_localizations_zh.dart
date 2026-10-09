@@ -460,4 +460,40 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get hostsCheckConnection => '检查连接';
+
+  @override
+  String get pairingTitle => '配对服务器';
+
+  @override
+  String get pairingScanQr => '扫描二维码';
+
+  @override
+  String get pairingImageQr => '打开二维码图片';
+
+  @override
+  String get pairingLink => '配对链接';
+
+  @override
+  String get pairingConfirm => '确认并配对';
+
+  @override
+  String get pairingRejected => '链接无效、已过期或已使用。请生成新链接。';
+
+  @override
+  String get pairingUncertain => '配对结果未知。请生成新链接；不会重复此请求。';
+
+  @override
+  String get pairingCaptureError => '无法读取二维码。请使用PNG/JPEG图片或粘贴链接。';
+
+  @override
+  String get pairingRenew => '续期令牌';
+
+  @override
+  String get pairingAgain => '重新配对';
+
+  @override
+  String get pairingExpires => '令牌声明的到期时间';
+
+  @override
+  String get pairingPaired => '已配对';
 }

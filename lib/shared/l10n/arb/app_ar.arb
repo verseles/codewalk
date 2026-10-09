@@ -207,5 +207,53 @@
   "hostsCheckConnection": "التحقق من الاتصال",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "إقران خادم",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "مسح QR",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "فتح صورة QR",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "رابط الإقران",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "تأكيد الإقران",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "الرابط غير صالح أو منتهي أو مستخدم. أنشئ رابطًا جديدًا.",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "نتيجة الإقران غير معروفة. أنشئ رابطًا جديدًا؛ لن يُكرر الطلب.",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "تعذرت قراءة QR. استخدم PNG/JPEG أو الصق الرابط.",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "تجديد الرمز",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "الإقران مجددًا",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "انتهاء الرمز المعلن",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "مقترن",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

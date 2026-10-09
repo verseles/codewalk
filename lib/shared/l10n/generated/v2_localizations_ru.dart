@@ -493,4 +493,43 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get hostsCheckConnection => 'Проверить подключение';
+
+  @override
+  String get pairingTitle => 'Подключить сервер';
+
+  @override
+  String get pairingScanQr => 'Сканировать QR';
+
+  @override
+  String get pairingImageQr => 'Открыть изображение QR';
+
+  @override
+  String get pairingLink => 'Ссылка подключения';
+
+  @override
+  String get pairingConfirm => 'Подтвердить подключение';
+
+  @override
+  String get pairingRejected =>
+      'Ссылка недействительна, истекла или использована. Создайте новую.';
+
+  @override
+  String get pairingUncertain =>
+      'Результат неизвестен. Создайте новую ссылку; запрос не повторяется.';
+
+  @override
+  String get pairingCaptureError =>
+      'QR не распознан. Используйте PNG/JPEG или вставьте ссылку.';
+
+  @override
+  String get pairingRenew => 'Обновить токен';
+
+  @override
+  String get pairingAgain => 'Подключить снова';
+
+  @override
+  String get pairingExpires => 'Заявленный срок токена';
+
+  @override
+  String get pairingPaired => 'Подключено';
 }

@@ -208,5 +208,53 @@
   "hostsCheckConnection": "Comprobar conexión",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "Emparejar servidor",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "Escanear QR",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "Abrir imagen QR",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "Enlace de emparejamiento",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "Confirmar y emparejar",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "El enlace no es válido, caducó o ya se usó. Genera otro.",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "El resultado es desconocido. Genera otro enlace; la solicitud no se repetirá.",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "No se pudo leer el QR. Usa PNG/JPEG o pega el enlace.",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "Renovar token",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "Emparejar de nuevo",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "Caducidad declarada del token",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "Emparejado",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

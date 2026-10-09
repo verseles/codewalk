@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../pairing/pairing_controller.dart';
 import 'hosts_controller.dart';
 
 const legacyDownloadUrl =
@@ -56,6 +58,14 @@ class _HostsPageState extends State<HostsPage> {
                   icon: const Icon(Icons.add),
                   label: Text(l.serversAddServer),
                 ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    context.read<PairingController>().empty();
+                    context.go('/pair');
+                  },
+                  icon: const Icon(Icons.qr_code),
+                  label: Text(l.pairingTitle),
+                ),
               ],
             ),
             if (hosts.loading) const LinearProgressIndicator(),
@@ -92,6 +102,22 @@ class _HostsPageState extends State<HostsPage> {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SelectableText(profile.endpoint.toString()),
+                      if (hosts.credentialUnreadable(profile))
+                        Text(l.hostsProfileStorageError),
+                      if (hosts.credentialFor(profile)?.kind ==
+                          EndpointAuthKind.paired) ...[
+                        Text(l.pairingPaired),
+                        if (hosts.credentialFor(profile)?.expiresAt
+                            case final expiry?)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${l.pairingExpires}: ${expiry.toLocal()}'),
+                              if (!expiry.isAfter(DateTime.now().toUtc()))
+                                Text(l.hostsAuthRequired),
+                            ],
+                          ),
+                      ],
                       if (hosts.assessments[profile.id] case final assessment?)
                         EndpointStatusView(assessment: assessment),
                       if (hosts.isChecking(profile))
@@ -112,6 +138,36 @@ class _HostsPageState extends State<HostsPage> {
                             onPressed: () => hosts.remove(profile),
                             child: Text(l.commonDelete),
                           ),
+                          TextButton(
+                            onPressed: () {
+                              context.read<PairingController>().empty(
+                                profile: profile,
+                              );
+                              context.go('/pair');
+                            },
+                            child: Text(l.pairingAgain),
+                          ),
+                          if (hosts.credentialFor(profile)?.kind ==
+                                  EndpointAuthKind.paired &&
+                              hosts.assessments[profile.id]?.version ==
+                                  '2.0.22')
+                            TextButton(
+                              onPressed: () {
+                                final pairing = context
+                                    .read<PairingController>();
+                                context.go('/pair');
+                                pairing.renew(profile);
+                              },
+                              child: Text(l.pairingRenew),
+                            ),
+                          TextButton(
+                            onPressed: () => showDialog<void>(
+                              context: context,
+                              builder: (_) =>
+                                  _ProfileDialog(hosts: hosts, repair: profile),
+                            ),
+                            child: Text(l.onboardingPassword),
+                          ),
                         ],
                       ),
                     ],
@@ -126,8 +182,9 @@ class _HostsPageState extends State<HostsPage> {
 }
 
 class _ProfileDialog extends StatefulWidget {
-  const _ProfileDialog({required this.hosts});
+  const _ProfileDialog({required this.hosts, this.repair});
   final HostsController hosts;
+  final EndpointProfile? repair;
   @override
   State<_ProfileDialog> createState() => _ProfileDialogState();
 }
@@ -144,6 +201,15 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   bool _saving = false;
   bool _saveFailed = false;
   Timer? _retryTimer;
+  @override
+  void initState() {
+    super.initState();
+    final profile = widget.repair;
+    if (profile != null) {
+      _url.text = profile.endpoint.toString();
+      _label.text = profile.label;
+    }
+  }
 
   void _invalidate() {
     _retryTimer?.cancel();
@@ -158,7 +224,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
 
   Future<void> _check() async {
     if (!_form.currentState!.validate()) return;
-    final url = _url.text.trim();
+    final url = widget.repair?.endpoint.toString() ?? _url.text.trim();
     final secret = _secret.text;
     setState(() {
       _checking = true;
@@ -196,6 +262,8 @@ class _ProfileDialogState extends State<_ProfileDialog> {
         !result.canUse ||
         _testedUrl != _url.text.trim() ||
         _testedSecret != _secret.text ||
+        (widget.repair != null &&
+            _testedUrl != widget.repair!.endpoint.toString()) ||
         _saving) {
       return;
     }
@@ -203,12 +271,20 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       _saving = true;
       _saveFailed = false;
     });
-    final saved = await widget.hosts.add(
-      Uri.parse(_testedUrl!),
-      _label.text,
-      _secret.text,
-      result,
-    );
+    final saved = widget.repair != null
+        ? await widget.hosts.repair(
+            widget.repair!,
+            EndpointCredential(
+              kind: EndpointAuthKind.password,
+              secret: _secret.text,
+            ),
+          )
+        : await widget.hosts.add(
+            Uri.parse(_testedUrl!),
+            _label.text,
+            _secret.text,
+            result,
+          );
     if (!mounted) return;
     if (saved) {
       Navigator.of(context).pop();
@@ -254,7 +330,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 controller: _url,
                 keyboardType: TextInputType.url,
                 autocorrect: false,
-                enabled: !_saving,
+                enabled: !_saving && widget.repair == null,
                 decoration: InputDecoration(labelText: l.onboardingServerUrl),
                 onChanged: (_) => _invalidate(),
                 validator: (text) {
@@ -270,7 +346,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
               TextFormField(
                 key: const ValueKey('endpoint-label'),
                 controller: _label,
-                enabled: !_saving,
+                enabled: !_saving && widget.repair == null,
                 maxLength: 160,
                 decoration: InputDecoration(labelText: l.onboardingLabel),
               ),

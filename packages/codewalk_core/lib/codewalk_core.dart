@@ -21,4 +21,5 @@ export 'src/catalog.dart';
 export 'src/workspace.dart';
 export 'src/ports.dart';
 export 'src/endpoints.dart';
+export 'src/authentication.dart';
 export 'src/reducer/reducer.dart';

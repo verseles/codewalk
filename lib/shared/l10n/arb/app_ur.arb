@@ -208,5 +208,53 @@
   "hostsCheckConnection": "کنکشن چیک کریں",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "سرور جوڑیں",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "QR اسکین کریں",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "QR تصویر کھولیں",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "جوڑنے کا لنک",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "تصدیق کرکے جوڑیں",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "لنک غلط، ختم شدہ یا استعمال شدہ ہے۔ نیا لنک بنائیں۔",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "نتیجہ نامعلوم ہے۔ نیا لنک بنائیں؛ درخواست دہرائی نہیں جائے گی۔",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "QR پڑھا نہیں جا سکا۔ PNG/JPEG استعمال کریں یا لنک چسپاں کریں۔",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "ٹوکن کی تجدید",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "دوبارہ جوڑیں",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "ٹوکن کی بیان کردہ میعاد",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "جڑا ہوا",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

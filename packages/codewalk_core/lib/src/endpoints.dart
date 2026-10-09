@@ -1,3 +1,5 @@
+import 'authentication.dart';
+
 enum EndpointStatus {
   compatible,
   untested,
@@ -88,5 +90,15 @@ abstract interface class EndpointProfileRepository {
   Future<List<EndpointProfile>> load();
   Future<void> save(EndpointProfile profile, String secret);
   Future<String?> readSecret(EndpointProfile profile);
+  Future<EndpointCredential?> readCredential(EndpointProfile profile);
+  Future<void> saveCredential(
+    EndpointProfile profile,
+    EndpointCredential credential,
+  );
+  Future<void> replaceCredential(
+    EndpointProfile profile,
+    EndpointCredential credential, {
+    required EndpointCredential? expected,
+  });
   Future<void> remove(EndpointProfile profile);
 }

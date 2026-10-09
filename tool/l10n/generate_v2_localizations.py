@@ -18,6 +18,7 @@ import sys
 import tempfile
 
 from hosts_catalog import PORT_KEYS as HOST_KEYS, NEW_KEYS as HOST_NEW_KEYS, COPY as HOST_COPY
+from pairing_catalog import KEYS as PAIRING_KEYS, COPY as PAIRING_COPY
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,6 +106,7 @@ SETTINGS_COPY = {
 }
 KEYS |= SETTINGS_KEYS | set(SETTINGS_NEW_KEYS)
 KEYS |= HOST_KEYS | set(HOST_NEW_KEYS)
+KEYS |= set(PAIRING_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -178,6 +180,16 @@ def port_hosts_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_pairing_copy() -> None:
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in zip(PAIRING_KEYS, PAIRING_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 pairing and credential lifecycle"}
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -247,6 +259,7 @@ def main() -> int:
     parser.add_argument("--port-appearance", action="store_true", help="Selectively import consolidated appearance translations into v2 sources.")
     parser.add_argument("--port-settings", action="store_true", help="Selectively import consolidated settings and shortcut translations into v2 sources.")
     parser.add_argument("--port-hosts", action="store_true", help="Selectively import endpoint copy into v2 sources.")
+    parser.add_argument("--port-pairing", action="store_true", help="Add scoped pairing copy only.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -261,6 +274,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-hosts cannot be combined with --check")
             port_hosts_copy()
+        if args.port_pairing:
+            if args.check:
+                raise ValueError("--port-pairing cannot be combined with --check")
+            port_pairing_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

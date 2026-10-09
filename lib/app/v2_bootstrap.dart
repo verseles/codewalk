@@ -48,6 +48,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         ChangeNotifierProvider.value(value: dependencies.preferences),
         ChangeNotifierProvider.value(value: dependencies.navigation),
         ChangeNotifierProvider.value(value: dependencies.hosts),
+        if (dependencies.pairing case final pairing?)
+          ChangeNotifierProvider.value(value: pairing),
         Provider.value(value: dependencies.localizations),
       ],
       child: Consumer<AppPreferencesController>(

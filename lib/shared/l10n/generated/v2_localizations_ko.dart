@@ -472,4 +472,40 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get hostsCheckConnection => '연결 확인';
+
+  @override
+  String get pairingTitle => '서버 페어링';
+
+  @override
+  String get pairingScanQr => 'QR 스캔';
+
+  @override
+  String get pairingImageQr => 'QR 이미지 열기';
+
+  @override
+  String get pairingLink => '페어링 링크';
+
+  @override
+  String get pairingConfirm => '확인 후 페어링';
+
+  @override
+  String get pairingRejected => '링크가 잘못되었거나 만료 또는 사용되었습니다. 새 링크를 만드세요.';
+
+  @override
+  String get pairingUncertain => '결과를 알 수 없습니다. 새 링크를 만드세요. 요청은 재전송되지 않습니다.';
+
+  @override
+  String get pairingCaptureError => 'QR을 읽지 못했습니다. PNG/JPEG 또는 링크를 사용하세요.';
+
+  @override
+  String get pairingRenew => '토큰 갱신';
+
+  @override
+  String get pairingAgain => '다시 페어링';
+
+  @override
+  String get pairingExpires => '토큰의 명시된 만료';
+
+  @override
+  String get pairingPaired => '페어링됨';
 }

@@ -473,4 +473,40 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get hostsCheckConnection => '接続を確認';
+
+  @override
+  String get pairingTitle => 'サーバーをペアリング';
+
+  @override
+  String get pairingScanQr => 'QRをスキャン';
+
+  @override
+  String get pairingImageQr => 'QR画像を開く';
+
+  @override
+  String get pairingLink => 'ペアリングリンク';
+
+  @override
+  String get pairingConfirm => '確認してペアリング';
+
+  @override
+  String get pairingRejected => 'リンクが無効、期限切れ、または使用済みです。新しいリンクを作成してください。';
+
+  @override
+  String get pairingUncertain => '結果が不明です。新しいリンクを作成してください。要求は再送されません。';
+
+  @override
+  String get pairingCaptureError => 'QRを読み取れません。PNG/JPEG画像またはリンクを使用してください。';
+
+  @override
+  String get pairingRenew => 'トークンを更新';
+
+  @override
+  String get pairingAgain => '再ペアリング';
+
+  @override
+  String get pairingExpires => 'トークンの申告有効期限';
+
+  @override
+  String get pairingPaired => 'ペアリング済み';
 }

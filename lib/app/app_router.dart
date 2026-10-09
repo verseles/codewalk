@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_page.dart';
+import '../features/pairing/pairing_page.dart';
 import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
@@ -10,8 +11,10 @@ import 'app_shell.dart';
 GoRouter createAppRouter({
   required AppNavigationController navigation,
   required String initialLocation,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) {
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: initialLocation,
     overridePlatformDefaultLocation: true,
     debugLogDiagnostics: false,
@@ -45,10 +48,7 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: '/pair',
-            builder: (context, state) => _Placeholder(
-              title: context.v2L10n.onboardingConnectRunningServer,
-              message: context.v2L10n.chatAddServerToStart,
-            ),
+            builder: (context, state) => const PairingPage(),
           ),
           GoRoute(
             path: '/s/:host/:session',

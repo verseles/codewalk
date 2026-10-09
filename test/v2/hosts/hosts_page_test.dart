@@ -9,6 +9,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
 
+class _TrackingProber extends FakeProber {
+  final endpoints = <Uri>[];
+  @override
+  EndpointProbeTask start(Uri endpoint, String secret) {
+    endpoints.add(endpoint);
+    return super.start(endpoint, secret);
+  }
+}
+
 Future<void> openForm(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('add-endpoint')));
   await tester.pumpAndSettle();
@@ -23,6 +32,54 @@ Future<void> openForm(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets(
+    'password repair locks identity and all probes use the original endpoint',
+    (tester) async {
+      final profile = EndpointProfile(
+        id: 'endpoint_one',
+        label: 'Original',
+        endpoint: Uri.parse('http://127.0.0.1:4096/'),
+      );
+      final repo = MemoryProfiles()
+        ..profiles.add(profile)
+        ..secrets[profile.id] = 'fake-old';
+      final prober = _TrackingProber();
+      final graph = createAppDependencies(
+        initialLink: Uri(path: '/hosts'),
+        profileRepository: repo,
+        endpointProber: prober,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: graph));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Password'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const ValueKey('endpoint-url')))
+            .enabled,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const ValueKey('endpoint-label')))
+            .enabled,
+        isFalse,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('endpoint-secret')),
+        'fake-new',
+      );
+      await tester.tap(find.byKey(const ValueKey('probe-endpoint')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('save-endpoint')));
+      await tester.pumpAndSettle();
+      expect(prober.endpoints, [profile.endpoint, profile.endpoint]);
+      expect(repo.profiles.single, same(profile));
+      expect(repo.profiles.single.label, 'Original');
+      expect(await repo.readSecret(profile), 'fake-new');
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
   testWidgets('hosts form remains usable in RTL with enlarged text on mobile', (
     tester,
   ) async {

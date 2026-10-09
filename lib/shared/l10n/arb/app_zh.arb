@@ -208,5 +208,53 @@
   "hostsCheckConnection": "检查连接",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "配对服务器",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "扫描二维码",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "打开二维码图片",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "配对链接",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "确认并配对",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "链接无效、已过期或已使用。请生成新链接。",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "配对结果未知。请生成新链接；不会重复此请求。",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "无法读取二维码。请使用PNG/JPEG图片或粘贴链接。",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "续期令牌",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "重新配对",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "令牌声明的到期时间",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "已配对",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

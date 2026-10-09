@@ -142,6 +142,8 @@ dependencies:
     path: third_party/tailscale
   flutter_svg: ^2.3.0
   image: ^4.8.0
+  mobile_scanner: 7.4.2
+  zxing_lib: 1.1.4
   re_editor: ^0.10.0
   re_highlight: ^0.0.3
   web_socket_channel: ^3.0.3

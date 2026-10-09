@@ -208,5 +208,53 @@
   "hostsCheckConnection": "সংযোগ পরীক্ষা করুন",
   "@hostsCheckConnection": {
     "description": "V2 endpoint profile and compatibility UI"
+  },
+  "pairingTitle": "সার্ভার জোড়া দিন",
+  "@pairingTitle": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingScanQr": "QR স্ক্যান করুন",
+  "@pairingScanQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingImageQr": "QR ছবি খুলুন",
+  "@pairingImageQr": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingLink": "জোড়া দেওয়ার লিংক",
+  "@pairingLink": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingConfirm": "নিশ্চিত করে জোড়া দিন",
+  "@pairingConfirm": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRejected": "লিংক অবৈধ, মেয়াদোত্তীর্ণ বা ব্যবহৃত। নতুন লিংক তৈরি করুন।",
+  "@pairingRejected": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingUncertain": "ফলাফল অজানা। নতুন লিংক তৈরি করুন; অনুরোধ পুনরাবৃত্তি হবে না।",
+  "@pairingUncertain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingCaptureError": "QR পড়া যায়নি। PNG/JPEG ব্যবহার করুন বা লিংক পেস্ট করুন।",
+  "@pairingCaptureError": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingRenew": "টোকেন নবায়ন",
+  "@pairingRenew": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingAgain": "আবার জোড়া দিন",
+  "@pairingAgain": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingExpires": "টোকেনের ঘোষিত মেয়াদ",
+  "@pairingExpires": {
+    "description": "V2 pairing and credential lifecycle"
+  },
+  "pairingPaired": "জোড়া দেওয়া",
+  "@pairingPaired": {
+    "description": "V2 pairing and credential lifecycle"
   }
 }

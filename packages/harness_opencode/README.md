@@ -1,10 +1,15 @@
 # harness_opencode
 
-The production boundary now exports the read-only endpoint probe delivered by
+The production boundary exports the endpoint probe delivered by
 [V2-040 / #272](https://github.com/verseles/codewalk/issues/272):
 `OpenCodeEndpointProbe`, strict server-info parsing, the compatibility policy and
 manual `RetryAfterHint` presentation. Features consume canonical core results;
 wire DTOs remain at the adapter edge.
+
+[V2-041 / #273](https://github.com/verseles/codewalk/issues/273) adds
+`OpenCodePairing`: validated pairing inputs, single-use JSON redemption and
+explicit, version-gated successor renewal. Session APIs and realtime hydration
+remain separate work items.
 
 The fixture-backed fake below is **VM-only test support**, delivered by
 [V2-056A / #296](https://github.com/verseles/codewalk/issues/296). It is not
@@ -40,8 +45,41 @@ versions at or above the minimum are explicitly untested. Complete SemVer syntax
 is validated before build metadata is ignored for compatibility precedence.
 Retry hints inform manual checks only: there is no automatic HTTP replay, and
 delays beyond the one-day presentation budget stay deferred rather than clamped.
-Cancellation fences stale results. Pairing, session APIs and stream hydration
-remain with their owning work items.
+Cancellation fences stale results. Session APIs and stream hydration remain with
+their owning work items.
+
+## Pairing
+
+`OpenCodePairing` receives an endpoint-specific transport factory. A `null`
+credential selects anonymous redemption; a non-null credential is used only for
+the chosen endpoint's Basic-auth requests, with fixed username `opencode`.
+
+- Official HTTP(S) connect links and the private `codewalk://pair?url=...`
+  wrapper are parsed without traffic. UI confirmation is required before
+  redemption, and profile repair binds the exact endpoint and prefix.
+- `GET /auth/connect/{code}` uses `Accept: application/json`, rejects redirects
+  and non-JSON results, and is never automatically replayed. Uncertain outcomes
+  require a fresh challenge. A received token can instead be reverified without
+  consuming that challenge again.
+- The received token is verified through `/api/info`. Declared epoch expiry is
+  interpreted only for the source-verified `2.0.21`/`2.0.22` token format; this is
+  advisory metadata, not client-side signature validation or JWT processing.
+- Manual renewal checks the connected `2.0.22` version before authenticated
+  `POST /api/pair`, then redeems and verifies its successor. Captured evidence
+  establishes that both the old and new tokens remain accepted.
+
+The app stores one versioned active credential record in its secure vault and
+uses expected-value/readback reconciliation for replacement. Authentication
+refusal does not erase profiles or credentials. A retained V2-040 password is
+read only when the active record is absent, never when it is unreadable/future.
+
+Focused adapter checks run `dart test test/pairing_client_test.dart`. The app's
+`test/v2/pairing/live_pairing_test.dart` is explicitly opt-in; it requires an
+approved isolated server and a launcher coordinating private password rotation
+at `CODEWALK_PAIRING_QA_ROTATE`. Merely setting its environment variables does
+not start or rotate a server. The recorded ARM64 OpenCode `2.0.22` runs exercised
+production Dart code with in-memory storage backends and no provider turns;
+they do not certify installed cameras, keychains, OS handlers or MVP acceptance.
 
 ## Test support
 

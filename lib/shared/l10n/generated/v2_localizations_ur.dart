@@ -487,4 +487,43 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get hostsCheckConnection => 'کنکشن چیک کریں';
+
+  @override
+  String get pairingTitle => 'سرور جوڑیں';
+
+  @override
+  String get pairingScanQr => 'QR اسکین کریں';
+
+  @override
+  String get pairingImageQr => 'QR تصویر کھولیں';
+
+  @override
+  String get pairingLink => 'جوڑنے کا لنک';
+
+  @override
+  String get pairingConfirm => 'تصدیق کرکے جوڑیں';
+
+  @override
+  String get pairingRejected =>
+      'لنک غلط، ختم شدہ یا استعمال شدہ ہے۔ نیا لنک بنائیں۔';
+
+  @override
+  String get pairingUncertain =>
+      'نتیجہ نامعلوم ہے۔ نیا لنک بنائیں؛ درخواست دہرائی نہیں جائے گی۔';
+
+  @override
+  String get pairingCaptureError =>
+      'QR پڑھا نہیں جا سکا۔ PNG/JPEG استعمال کریں یا لنک چسپاں کریں۔';
+
+  @override
+  String get pairingRenew => 'ٹوکن کی تجدید';
+
+  @override
+  String get pairingAgain => 'دوبارہ جوڑیں';
+
+  @override
+  String get pairingExpires => 'ٹوکن کی بیان کردہ میعاد';
+
+  @override
+  String get pairingPaired => 'جڑا ہوا';
 }

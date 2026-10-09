@@ -82,18 +82,91 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       );
 
   @override
-  Future<String?> readSecret(EndpointProfile profile) => _run(() async {
-    if (!(await _index()).contains(profile.id)) return null;
-    final stored = await _read(profile.id);
-    if (stored.endpoint != profile.endpoint) return null;
-    return credentials.read(
-      _scope(stored),
-      EndpointCredentialKind.endpointPassword,
-    );
-  });
+  Future<String?> readSecret(EndpointProfile profile) async =>
+      (await readCredential(profile))?.secret;
 
   @override
-  Future<void> save(EndpointProfile profile, String secret) => _run(() async {
+  Future<EndpointCredential?> readCredential(EndpointProfile profile) =>
+      _run(() async {
+        if (!(await _index()).contains(profile.id)) return null;
+        final stored = await _read(profile.id);
+        if (stored.endpoint != profile.endpoint) return null;
+        return _readCredential(stored);
+      });
+
+  Future<EndpointCredential?> _readCredential(EndpointProfile profile) async {
+    final active = await credentials.read(
+      _scope(profile),
+      EndpointCredentialKind.activeCredential,
+    );
+    if (active != null) return _decodeCredential(active);
+    // Only absence authorizes reading the retained local password slot.
+    final password = await credentials.read(
+      _scope(profile),
+      EndpointCredentialKind.endpointPassword,
+    );
+    return password == null
+        ? null
+        : EndpointCredential(kind: EndpointAuthKind.password, secret: password);
+  }
+
+  String _encodeCredential(EndpointCredential credential) => jsonEncode({
+    'version': 1,
+    'kind': credential.kind.name,
+    'secret': credential.secret,
+    'expiresAt': credential.expiresAt?.millisecondsSinceEpoch,
+  });
+
+  EndpointCredential _decodeCredential(String raw) {
+    if (raw.length > 32768) {
+      throw const FormatException('Unreadable credential; preserved.');
+    }
+    final data = jsonDecode(raw);
+    if (data is! Map ||
+        data['version'] != 1 ||
+        data['secret'] is! String ||
+        !{'password', 'paired'}.contains(data['kind']) ||
+        data.keys.any(
+          (key) => !{'version', 'kind', 'secret', 'expiresAt'}.contains(key),
+        ) ||
+        (data['expiresAt'] != null &&
+            (data['expiresAt'] is! int ||
+                (data['expiresAt'] as int).abs() > 8640000000000000))) {
+      throw const FormatException('Unreadable credential; preserved.');
+    }
+    return EndpointCredential(
+      kind: data['kind'] == 'paired'
+          ? EndpointAuthKind.paired
+          : EndpointAuthKind.password,
+      secret: data['secret'] as String,
+      expiresAt: data['expiresAt'] == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(
+              data['expiresAt'] as int,
+              isUtc: true,
+            ),
+    );
+  }
+
+  @override
+  Future<void> save(EndpointProfile profile, String secret) => _save(
+    profile,
+    EndpointCredential(kind: EndpointAuthKind.password, secret: secret),
+    legacy: true,
+  );
+
+  @override
+  Future<void> saveCredential(
+    EndpointProfile profile,
+    EndpointCredential credential,
+  ) => _save(profile, credential, legacy: false);
+
+  Future<void> _save(
+    EndpointProfile profile,
+    EndpointCredential credential, {
+    required bool legacy,
+  }) => _run(() async {
+    final secret = credential.secret;
     if (secret.isEmpty || secret.runes.any((c) => c < 32 || c == 127)) {
       throw const FormatException('Invalid endpoint credential.');
     }
@@ -107,11 +180,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     if (index.length >= maxProfiles ||
         index.contains(profile.id) ||
         await metadata.read(itemKey(profile.id)) != null ||
-        await credentials.read(
-              _scope(profile),
-              EndpointCredentialKind.endpointPassword,
-            ) !=
-            null) {
+        await _hasCredential(profile)) {
       throw const FormatException(
         'Profile identity exists or catalog is full.',
       );
@@ -124,6 +193,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
         'id': profile.id,
         'label': profile.label,
         'url': profile.endpoint.toString(),
+        'credentialFormat': legacy ? 'legacy' : 'active',
       }),
     );
     try {
@@ -138,14 +208,68 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       );
       await credentials.write(
         _scope(profile),
-        EndpointCredentialKind.endpointPassword,
-        secret,
+        legacy
+            ? EndpointCredentialKind.endpointPassword
+            : EndpointCredentialKind.activeCredential,
+        legacy ? secret : _encodeCredential(credential),
       );
       await metadata.write(indexKey, [...index, profile.id]);
       await metadata.remove(creationKey);
     } on Object {
       if (await _finishCreation()) return;
       rethrow;
+    }
+  });
+
+  Future<bool> _hasCredential(EndpointProfile profile) async {
+    for (final kind in EndpointCredentialKind.values) {
+      if (await credentials.read(_scope(profile), kind) != null) return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<void> replaceCredential(
+    EndpointProfile profile,
+    EndpointCredential credential, {
+    required EndpointCredential? expected,
+  }) => _run(() async {
+    await metadata.ensureSchema();
+    await _finishCreation();
+    await _finishRemoval();
+    if (!(await _index()).contains(profile.id) ||
+        (await _read(profile.id)).endpoint != profile.endpoint) {
+      throw const FormatException('Profile changed; credentials preserved.');
+    }
+    final current = await _readCredential(profile);
+    if (!(current == null ? expected == null : current.matches(expected))) {
+      throw const FormatException('Credential changed; preserved.');
+    }
+    final encoded = _encodeCredential(credential);
+    try {
+      await credentials.write(
+        _scope(profile),
+        EndpointCredentialKind.activeCredential,
+        encoded,
+      );
+    } on Object {
+      // A failed write can already be committed. Never overwrite or roll back
+      // an unknown outcome; the one secure record is authoritative after restart.
+      if (await credentials.read(
+            _scope(profile),
+            EndpointCredentialKind.activeCredential,
+          ) ==
+          encoded) {
+        return;
+      }
+      throw StateError('Credential update unconfirmed; data preserved.');
+    }
+    if (await credentials.read(
+          _scope(profile),
+          EndpointCredentialKind.activeCredential,
+        ) !=
+        encoded) {
+      throw StateError('Credential update unconfirmed; data preserved.');
     }
   });
 
@@ -178,6 +302,13 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     if (raw == null) return false;
     await metadata.ensureSchema();
     final pending = _decodeProfile(raw);
+    final format = (jsonDecode(raw as String) as Map)['credentialFormat'];
+    if (format != null && format != 'legacy' && format != 'active') {
+      throw const FormatException('Unknown creation format; preserved.');
+    }
+    final kind = format == 'active'
+        ? EndpointCredentialKind.activeCredential
+        : EndpointCredentialKind.endpointPassword;
     final index = await _index();
     final item = await metadata.read(itemKey(pending.id));
     if (item != null &&
@@ -188,18 +319,14 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     final committed = index.contains(pending.id);
     if (committed) {
       if (item == null ||
-          await credentials.read(
-                _scope(pending),
-                EndpointCredentialKind.endpointPassword,
-              ) ==
-              null) {
+          await credentials.read(_scope(pending), kind) == null) {
         throw const FormatException('Incomplete published profile; preserved.');
       }
+      if (kind == EndpointCredentialKind.activeCredential) {
+        await _readCredential(pending);
+      }
     } else {
-      await credentials.remove(
-        _scope(pending),
-        EndpointCredentialKind.endpointPassword,
-      );
+      await credentials.remove(_scope(pending), kind);
       await metadata.remove(itemKey(pending.id));
     }
     await metadata.remove(creationKey);
@@ -222,10 +349,9 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       indexKey,
       index.where((id) => id != pending.id).toList(),
     );
-    await credentials.remove(
-      _scope(pending),
-      EndpointCredentialKind.endpointPassword,
-    );
+    for (final kind in EndpointCredentialKind.values) {
+      await credentials.remove(_scope(pending), kind);
+    }
     await metadata.remove(itemKey(pending.id));
     await metadata.remove(removalKey);
   }

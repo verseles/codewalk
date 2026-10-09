@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:codewalk/features/hosts/hosts_controller.dart';
+import 'package:codewalk/platform/profiles/endpoint_profile_store.dart';
+import 'package:codewalk/platform/storage/endpoint_credentials.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
+import 'profile_store_test.dart' show Metadata, Secrets;
 
 class GatedProber implements EndpointProber {
   final tasks = <FakeProbeTask>[];
@@ -64,6 +68,53 @@ class UnknownCommitProfiles extends MemoryProfiles {
 
 void main() {
   final endpoint = Uri.parse('http://127.0.0.1:4096/');
+  test(
+    'one unreadable active credential does not hide healthy profile metadata',
+    () async {
+      final backend = Metadata();
+      final secrets = Secrets();
+      final metadata = V2MetadataStore(backend: backend);
+      final repository = EndpointProfileStore(
+        metadata: metadata,
+        credentials: EndpointCredentialVault(
+          backend: secrets,
+          beforeMutation: metadata.ensureSchema,
+        ),
+      );
+      final broken = EndpointProfile(
+        id: 'endpoint_bad',
+        label: 'Broken',
+        endpoint: endpoint,
+      );
+      final healthy = EndpointProfile(
+        id: 'endpoint_good',
+        label: 'Healthy',
+        endpoint: endpoint,
+      );
+      await repository.save(broken, 'fake-old');
+      await repository.save(healthy, 'fake-good');
+      final key = EndpointCredentialScope(
+        endpoint: endpoint,
+        profileId: broken.id,
+      ).key(EndpointCredentialKind.activeCredential);
+      secrets.values[key] =
+          '{"version":99,"kind":"paired","secret":"fake-future"}';
+      final controller = HostsController(
+        repository: repository,
+        prober: FakeProber(),
+      );
+      addTearDown(controller.dispose);
+      await controller.load();
+      expect(controller.profiles.map((p) => p.id), [broken.id, healthy.id]);
+      expect(controller.credentialUnreadable(broken), isTrue);
+      expect(controller.credentialFor(healthy)!.secret, 'fake-good');
+      expect(secrets.values[key], contains('fake-future'));
+      await expectLater(repository.readSecret(broken), throwsFormatException);
+      await controller.remove(broken);
+      expect(controller.profiles.single.id, healthy.id);
+      expect(await repository.readSecret(healthy), 'fake-good');
+    },
+  );
   test(
     'superseded probe cannot save or update a changed credential/target',
     () async {

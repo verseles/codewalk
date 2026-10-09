@@ -3,6 +3,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 class MemoryProfiles implements EndpointProfileRepository {
   final profiles = <EndpointProfile>[];
   final secrets = <String, String>{};
+  final credentials = <String, EndpointCredential>{};
   bool failSave = false;
   bool failLoad = false;
   @override
@@ -22,9 +23,42 @@ class MemoryProfiles implements EndpointProfileRepository {
   Future<String?> readSecret(EndpointProfile profile) async =>
       secrets[profile.id];
   @override
+  Future<EndpointCredential?> readCredential(EndpointProfile profile) async =>
+      credentials[profile.id] ??
+      (secrets[profile.id] == null
+          ? null
+          : EndpointCredential(
+              kind: EndpointAuthKind.password,
+              secret: secrets[profile.id]!,
+            ));
+  @override
+  Future<void> saveCredential(
+    EndpointProfile profile,
+    EndpointCredential credential,
+  ) async {
+    await save(profile, credential.secret);
+    credentials[profile.id] = credential;
+  }
+
+  @override
+  Future<void> replaceCredential(
+    EndpointProfile profile,
+    EndpointCredential credential, {
+    required EndpointCredential? expected,
+  }) async {
+    final old = await readCredential(profile);
+    if (failSave || !(old == null ? expected == null : old.matches(expected))) {
+      throw StateError('controlled replacement failure');
+    }
+    credentials[profile.id] = credential;
+    secrets[profile.id] = credential.secret;
+  }
+
+  @override
   Future<void> remove(EndpointProfile profile) async {
     profiles.removeWhere((p) => p.id == profile.id);
     secrets.remove(profile.id);
+    credentials.remove(profile.id);
   }
 }
 

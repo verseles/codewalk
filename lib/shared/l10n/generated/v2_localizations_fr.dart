@@ -499,4 +499,43 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get hostsCheckConnection => 'Vérifier la connexion';
+
+  @override
+  String get pairingTitle => 'Appairer un serveur';
+
+  @override
+  String get pairingScanQr => 'Scanner le QR';
+
+  @override
+  String get pairingImageQr => 'Ouvrir une image QR';
+
+  @override
+  String get pairingLink => 'Lien d’appairage';
+
+  @override
+  String get pairingConfirm => 'Confirmer et appairer';
+
+  @override
+  String get pairingRejected =>
+      'Lien invalide, expiré ou déjà utilisé. Générez un nouveau lien.';
+
+  @override
+  String get pairingUncertain =>
+      'Résultat inconnu. Générez un nouveau lien ; la requête ne sera pas répétée.';
+
+  @override
+  String get pairingCaptureError =>
+      'QR illisible. Utilisez PNG/JPEG ou collez le lien.';
+
+  @override
+  String get pairingRenew => 'Renouveler le jeton';
+
+  @override
+  String get pairingAgain => 'Appairer à nouveau';
+
+  @override
+  String get pairingExpires => 'Expiration déclarée du jeton';
+
+  @override
+  String get pairingPaired => 'Appairé';
 }

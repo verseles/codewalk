@@ -26,8 +26,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** a `codewalk://pair` link or `/pair` route is opened
 - **When** its pairing intent is captured
-- **Then** the pairing placeholder is shown using a route without query parameters
-- **Then** the original pairing data is held privately in memory for a future pairing consumer
+- **Then** the pairing page consumes the original link once from private memory while the visible route remains `/pair`, without query parameters
+- **Then** bare pairing links open the form; a supported `url` wrapper is validated and presents its destination for confirmation, while invalid or duplicate parameters never authorize a request
 
 - **Given** a link is unsupported or its encoded path is malformed
 - **When** navigation handles it
@@ -114,7 +114,31 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an uncertain create must be reconciled before another identity is allocated, and a failed save requires a fresh connection check before retrying
 - **Then** browser endpoint probing reports unsupported rather than attempting an unverified transport
 
-Conversations, pairing and session routes retain their navigation
+### V2 pairing and credential recovery
+
+- **Given** the user opens pairing from Hosts, a private deep link, or a native launch argument
+- **When** a pairing link is pasted or obtained from a QR
+- **Then** Android offers camera capture and Android/Linux offer PNG/JPEG image import; the user confirms the validated destination before any server request
+- **Then** code, token and password values remain out of routes, status messages and diagnostics; input containing pairing material is masked
+- **Then** a single JSON redemption verifies the received token before saving; expired/used or uncertain challenges require a new link rather than automatic replay
+- **Then** if a token was received but verification or storage failed, it can be rechecked without redeeming the same challenge again
+
+- **Given** a saved paired profile needs a new credential
+- **When** the user selects Pair again, Renew token, or password repair
+- **Then** the profile ID, label, URL, port and proxy prefix remain unchanged; a repair link must match the exact selected endpoint
+- **Then** password repair keeps URL and label read-only and sends the password only to the selected profile's endpoint
+- **Then** renewal is manual and issues a successor only after verifying the connected server is OpenCode `2.0.22`
+- **Then** declared expiry is displayed only for the known token format verified on `2.0.21`/`2.0.22`; opaque credentials have no invented expiry date
+- **Then** expired or refused authentication offers Pair again without deleting profiles, credentials or local data
+
+- **Given** a profile credential or pairing operation cannot be reconciled
+- **When** the catalog is loaded or a save finishes asynchronously
+- **Then** an unreadable credential is reported on its own profile while healthy profiles remain visible, and corrupt/future secure records never fall back to an older password
+- **Then** a save from an obsolete pairing session does not clear a newer link or received token; a verification invalidated before persistence cannot start a replacement
+- **Then** an already-started, authorized write can finish, with its outcome reconciled without blind rollback
+- **Then** image decoding caps app-retained input and geometry, validates PNG/JPEG dimensions before raster allocation and waits for the decoding worker to exit after cancellation; these are not OS-cache or absolute-memory guarantees
+
+Conversations and session routes retain their navigation
 placeholders. Locale changes exposed by the v2 controller remain transient;
 feature-specific settings controls, diagnostics and full rendering parity remain
 in their owning Issues. Hosts, settings and appearance widget/golden tests cover mobile and desktop viewports on

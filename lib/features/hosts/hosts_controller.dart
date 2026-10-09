@@ -31,6 +31,12 @@ class HostsController extends ChangeNotifier {
   String? _verifiedSecret;
   EndpointAssessment? _verifiedAssessment;
   int _catalogRevision = 0;
+  final Map<String, EndpointCredential> _credentials = {};
+  final Set<String> _credentialErrors = {};
+  bool credentialUnreadable(EndpointProfile profile) =>
+      _credentialErrors.contains(profile.id);
+  EndpointCredential? credentialFor(EndpointProfile profile) =>
+      _credentials[profile.id];
   bool _adding = false;
   String? _checkingProfileId;
   EndpointProfile? _pendingCreation;
@@ -53,7 +59,31 @@ class HostsController extends ChangeNotifier {
     _notify();
     try {
       final loaded = await repository.load();
-      if (!_disposed && revision == _catalogRevision) _profiles = loaded;
+      if (_disposed || revision != _catalogRevision) return;
+      _profiles = loaded;
+      _credentials.clear();
+      _credentialErrors.clear();
+      _notify();
+      final credentials = <String, EndpointCredential>{};
+      final errors = <String>{};
+      for (final profile in loaded) {
+        try {
+          final credential = await repository.readCredential(profile);
+          if (credential != null) credentials[profile.id] = credential;
+        } on Object {
+          errors.add(profile.id);
+        }
+        if (_disposed || revision != _catalogRevision) return;
+      }
+      if (!_disposed && revision == _catalogRevision) {
+        _profiles = loaded;
+        _credentials
+          ..clear()
+          ..addAll(credentials);
+        _credentialErrors
+          ..clear()
+          ..addAll(errors);
+      }
     } on Object {
       if (!_disposed) storageError = true;
     } finally {
@@ -115,7 +145,20 @@ class HostsController extends ChangeNotifier {
     String label,
     String secret,
     EndpointAssessment assessment,
+  ) => addCredential(
+    endpoint,
+    label,
+    EndpointCredential(kind: EndpointAuthKind.password, secret: secret),
+    assessment,
+  );
+
+  Future<bool> addCredential(
+    Uri endpoint,
+    String label,
+    EndpointCredential credential,
+    EndpointAssessment assessment,
   ) async {
+    final secret = credential.secret;
     if (_disposed || _adding || !assessment.canUse) return false;
     if (_verifiedEndpoint != EndpointProfile.validateEndpoint(endpoint) ||
         _verifiedSecret != secret ||
@@ -168,7 +211,11 @@ class HostsController extends ChangeNotifier {
       );
       _pendingCreation = profile;
       _pendingCreationSecret = secret;
-      await repository.save(profile, secret);
+      if (credential.kind == EndpointAuthKind.password) {
+        await repository.save(profile, secret);
+      } else {
+        await repository.saveCredential(profile, credential);
+      }
       _pendingCreation = null;
       _pendingCreationSecret = null;
       // A committed save must not become a second create when refresh fails.
@@ -178,11 +225,53 @@ class HostsController extends ChangeNotifier {
         if (!_disposed && revision == _catalogRevision) {
           _profiles = loaded;
           _assessments[profile.id] = assessment;
+          _credentials[profile.id] = credential;
         }
       } on Object {
         if (!_disposed && revision == _catalogRevision) storageError = true;
       }
       _notify();
+      return true;
+    } on Object {
+      storageError = true;
+      _notify();
+      return false;
+    } finally {
+      _adding = false;
+    }
+  }
+
+  Future<bool> repair(
+    EndpointProfile profile,
+    EndpointCredential credential, {
+    bool Function()? isCurrent,
+  }) async {
+    if (_disposed || _adding) return false;
+    _adding = true;
+    final revision = ++_catalogRevision;
+    try {
+      final previous = await repository.readCredential(profile);
+      if (isCurrent?.call() == false) return false;
+      final assessment = await probe(profile.endpoint, credential.secret);
+      if (assessment?.canUse != true ||
+          _disposed ||
+          revision != _catalogRevision ||
+          isCurrent?.call() == false) {
+        return false;
+      }
+      cancelProbe();
+      await repository.replaceCredential(
+        profile,
+        credential,
+        expected: previous,
+      );
+      if (!_disposed && revision == _catalogRevision) {
+        _credentials[profile.id] = credential;
+        _credentialErrors.remove(profile.id);
+        _assessments[profile.id] = assessment!;
+        storageError = false;
+        _notify();
+      }
       return true;
     } on Object {
       storageError = true;
@@ -266,6 +355,7 @@ class HostsController extends ChangeNotifier {
       if (revision == _catalogRevision) {
         _profiles = loaded;
         _assessments.remove(profile.id);
+        _credentials.remove(profile.id);
         _armRetryTimer();
       }
       storageError = false;

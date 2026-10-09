@@ -488,4 +488,43 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get hostsCheckConnection => 'التحقق من الاتصال';
+
+  @override
+  String get pairingTitle => 'إقران خادم';
+
+  @override
+  String get pairingScanQr => 'مسح QR';
+
+  @override
+  String get pairingImageQr => 'فتح صورة QR';
+
+  @override
+  String get pairingLink => 'رابط الإقران';
+
+  @override
+  String get pairingConfirm => 'تأكيد الإقران';
+
+  @override
+  String get pairingRejected =>
+      'الرابط غير صالح أو منتهي أو مستخدم. أنشئ رابطًا جديدًا.';
+
+  @override
+  String get pairingUncertain =>
+      'نتيجة الإقران غير معروفة. أنشئ رابطًا جديدًا؛ لن يُكرر الطلب.';
+
+  @override
+  String get pairingCaptureError =>
+      'تعذرت قراءة QR. استخدم PNG/JPEG أو الصق الرابط.';
+
+  @override
+  String get pairingRenew => 'تجديد الرمز';
+
+  @override
+  String get pairingAgain => 'الإقران مجددًا';
+
+  @override
+  String get pairingExpires => 'انتهاء الرمز المعلن';
+
+  @override
+  String get pairingPaired => 'مقترن';
 }

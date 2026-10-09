@@ -90,6 +90,104 @@ void main() {
   });
 
   test(
+    'paired credential survives restart without secrets in metadata',
+    () async {
+      final credential = EndpointCredential(
+        kind: EndpointAuthKind.paired,
+        secret: 'fake-paired-secret',
+        expiresAt: DateTime.utc(2026, 11),
+      );
+      await store.saveCredential(profile('endpoint_one'), credential);
+      final reopened = openStore(backend);
+      expect(
+        (await reopened.readCredential(
+          profile('endpoint_one'),
+        ))!.matches(credential),
+        isTrue,
+      );
+      expect(
+        await reopened.readSecret(profile('endpoint_one')),
+        'fake-paired-secret',
+      );
+      expect(
+        backend.values.values.join(),
+        isNot(contains('fake-paired-secret')),
+      );
+      await reopened.remove(profile('endpoint_one'));
+      expect(secrets.values, isEmpty);
+    },
+  );
+
+  test(
+    'repair and failed post-write reconciliation retain the same profile and other credentials',
+    () async {
+      await store.save(profile('endpoint_one'), 'fake-old');
+      await store.save(profile('endpoint_two'), 'fake-other');
+      final old = (await store.readCredential(profile('endpoint_one')))!;
+      final paired = EndpointCredential(
+        kind: EndpointAuthKind.paired,
+        secret: 'fake-new',
+      );
+      secrets.failAfterWrite = true;
+      await store.replaceCredential(
+        profile('endpoint_one'),
+        paired,
+        expected: old,
+      );
+      expect((await store.load()).map((p) => p.id), [
+        'endpoint_one',
+        'endpoint_two',
+      ]);
+      expect(
+        (await store.readCredential(profile('endpoint_one')))!.matches(paired),
+        isTrue,
+      );
+      expect(await store.readSecret(profile('endpoint_two')), 'fake-other');
+      await expectLater(
+        store.replaceCredential(profile('endpoint_one'), old, expected: old),
+        throwsFormatException,
+      );
+      expect(await store.readSecret(profile('endpoint_one')), 'fake-new');
+    },
+  );
+
+  test(
+    'present corrupt or future active record never falls back to the previous password',
+    () async {
+      await store.save(profile('endpoint_one'), 'fake-old');
+      final scope = EndpointCredentialScope(
+        endpoint: profile('endpoint_one').endpoint,
+        profileId: 'endpoint_one',
+      );
+      for (final raw in [
+        'broken JSON',
+        jsonEncode({'version': 99, 'kind': 'paired', 'secret': 'fake-future'}),
+      ]) {
+        secrets.values[scope.key(EndpointCredentialKind.activeCredential)] =
+            raw;
+        final before = Map.of(secrets.values);
+        await expectLater(
+          store.readSecret(profile('endpoint_one')),
+          throwsFormatException,
+        );
+        await expectLater(
+          store.replaceCredential(
+            profile('endpoint_one'),
+            EndpointCredential(
+              kind: EndpointAuthKind.password,
+              secret: 'fake-repair',
+            ),
+            expected: null,
+          ),
+          throwsFormatException,
+        );
+        expect(secrets.values, before);
+        expect((await store.load()).single.id, 'endpoint_one');
+      }
+    },
+  );
+
+  test(
     'catalog persists profiles and ports, but no password in metadata',
     () async {
       backend.values['cw2.profiles.legacy-record'] = 'owned importer record';

@@ -10,3 +10,4 @@ Categories=Development;Utility;
 StartupNotify=true
 StartupWMClass=com.verseles.codewalk
 Keywords=AI;Code;Assistant;OpenCode;
+MimeType=x-scheme-handler/codewalk;

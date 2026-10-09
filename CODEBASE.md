@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - Retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership, canonical model/port contracts and endpoint-profile contracts; `codewalk_net` provides endpoint-scoped HTTP, manually validated native WebSocket upgrades and isolate SSE parsing. `harness_opencode` now publicly exports production read-only endpoint probing and version/retry policy; session and pairing flows remain placeholders, as does the `harness_host` public boundary. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B hydrates persisted appearance before mount, while #305/V2-071C adds an adaptive `/settings` shell and scoped keyboard routing. Appearance, shortcuts and endpoint profiles at `/hosts` are implemented destinations; `/sessions`, `/pair` and other routes remain placeholders.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership, canonical model/port contracts and endpoint-profile contracts; `codewalk_net` provides endpoint-scoped HTTP, manually validated native WebSocket upgrades and isolate SSE parsing. `harness_opencode` publicly exports production read-only endpoint probing, version/retry policy and single-use endpoint pairing; OpenCode session and realtime-stream adapters remain unimplemented, and the `harness_host` public boundary is empty. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B hydrates persisted appearance before mount, while #305/V2-071C adds an adaptive `/settings` shell and scoped keyboard routing. Appearance, shortcuts, endpoint profiles at `/hosts`, and pairing at `/pair` are implemented destinations; `/sessions` and other routes remain placeholders.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -24,7 +24,7 @@ lib/main_v2.dart                         # Explicit entry point; awaits dependen
 lib/app/composition_root.dart           # Private GetIt instance; loadAppDependencies hydrates the v2 graph before mount
 lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
 lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, resolved theme and locale/dynamic-color bridges
-lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts the adaptive appearance/shortcuts shell, /hosts manages endpoint profiles, and /sessions and /pair remain placeholders
+lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts the adaptive appearance/shortcuts shell, /hosts manages endpoint profiles, /pair provides pairing, and /sessions remains a placeholder
 lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
 lib/app/app_keyboard_shortcuts.dart      # One shortcut manager, typed intents, inherited action scopes, guarded routing, and detection-only physical-keyboard observation
 lib/app/app_preferences_controller.dart # Persists appearance and explicit shortcut overrides in cw2.settings.*; merges per-action edits during hydration; locale and keyboard detection remain transient
@@ -41,18 +41,18 @@ lib/features/settings/appearance_settings_page.dart # Responsive appearance cont
 lib/features/settings/settings_shell_page.dart # Adaptive master/detail settings navigation, grouped destination search, retained selection, and narrow-detail Back/Escape
 lib/features/settings/shortcuts_settings_page.dart # Searchable shortcut catalog, key capture/conflict repair, unassign/reset and persistence-error retry
 lib/shared/layout/window_size_class.dart # Responsive viewport classes
-lib/shared/l10n/{arb,generated}/         # Scoped route, appearance, and settings/shortcut catalog with generated delegates for 14 locales
+lib/shared/l10n/{arb,generated}/         # Scoped route, appearance, settings/shortcut, and 12 pairing strings with generated delegates for 14 locales
 lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
 lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
 lib/platform/storage/storage.dart      # Storage API barrel; appearance uses its metadata-store path
 lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
 lib/platform/storage/preferences_backend.dart # Allow-listed SharedPreferencesAsync metadata adapter; normalizes Linux string lists and preserves malformed values for caller validation
 lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores, strict non-destructive presence checks, and memory LRU
-lib/platform/storage/endpoint_credentials.dart # Hashed origin/profile/kind-scoped credential keys; endpoint password is used and pairing-token kind is reserved
+lib/platform/storage/endpoint_credentials.dart # Hashed origin/profile/kind-scoped credential keys; activeCredential stores password or paired credentials, with the endpointPassword slot retained for fallback
 lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends; native endpoint credentials use secure storage and Web credentials are instance-local memory
 lib/platform/profiles/endpoint_profile_store.dart # cw2 endpoint-profile catalog with non-secret creation/removal intents and restart reconciliation
 lib/platform/endpoints/probe_factory*.dart # Conditional native IO endpoint prober and unsupported-platform stub
-lib/features/hosts/{hosts_controller,hosts_page}.dart # Endpoint-profile CRUD, explicit manual detection/checks, retry guidance and storage-error recovery
+lib/features/hosts/{hosts_controller,hosts_page}.dart # Endpoint-profile CRUD, explicit manual checks, retry/storage recovery, pairing renewal and password repair
 lib/platform/migration/                # Unwired read-only legacy sources, restartable v1 importer and sanitized report
 packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
 packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
@@ -68,7 +68,7 @@ packages/codewalk_core/test/support/scripted_harness_adapter.dart # Finite test-
 packages/codewalk_core/test/support/scripted_harness_scenarios.dart # Six synthetic, finite scenarios consumed by the real reducer tests
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
-packages/harness_opencode/lib/harness_opencode.dart # Public endpoint-probe, server-info, version-policy and retry-after exports; no session adapter
+packages/harness_opencode/lib/harness_opencode.dart # Public endpoint-probe, pairing, server-info, version-policy and retry-after exports; no session adapter
 packages/harness_opencode/lib/src/{endpoint_probe,server_info,version_policy,retry_after}.dart # Read-only OpenCode endpoint detection, strict server-info parsing, compatibility policy and Retry-After hints
 packages/harness_opencode/test/support/fixture_replay.dart # Immutable finite scenarios from accepted OpenCode 2.0.22 captures, with strict request matching
 packages/harness_opencode/test/support/fake_auth.dart # Synthetic Basic/pairing auth with a manually advanced five-minute clock
@@ -127,17 +127,17 @@ expanded layouts (840 logical pixels and above) keep a 320-pixel master beside
 the detail and initially select Appearance. Search text and selection survive
 layout changes, and a keyed detail subtree retains forms and pending modal
 state. System Back and Escape return from a compact detail to the list. Servers
-links to the existing `/hosts` placeholder; no other settings destinations are
-implemented. Shortcut settings are visible on Web and desktop and appear on
+links to the implemented `/hosts` endpoint-profile destination; no other settings
+destinations are implemented. Shortcut settings are visible on Web and desktop and appear on
 mobile after physical keyboard input is detected. The shortcut page searches
 formatted bindings and localized action metadata, captures key chords
 (including bare Escape), reports conflicts, supports individual unassign/reset,
 and exposes persistence-error retry.
 
-The scoped localization catalog covers routes, appearance, and settings/shortcut
-strings across 14 locales. `tool/l10n/generate_v2_localizations.py --port-settings`
-selectively ports 60 reused and 5 new settings/shortcut keys, then regenerates
-only v2 outputs; retained catalogs and `lib/l10n/` outputs are not edited.
+The scoped localization catalog covers routes, appearance, settings/shortcut, and pairing strings
+across 14 locales; the 12 pairing keys exist in each locale's ARB and generated output.
+`tool/l10n/generate_v2_localizations.py --port-settings` selectively ports 60 reused and 5 new
+settings/shortcut keys, then regenerates only v2 outputs; retained catalogs and `lib/l10n/` outputs are not edited.
 Settings tests in `test/v2/settings/` cover codec and persistence edge cases,
 responsive navigation, physical-keyboard visibility, routing guards, capture,
 Back/Escape and localization/layout behavior. The focused settings/appearance
@@ -172,7 +172,7 @@ interleavings; these are not native acceptance evidence. Test-only
 finite scripts; six synthetic scenarios are consumed by the real `SessionStore`
 and reducer. This adds no exported production adapter and exercises no UI, Host,
 native, provider or I/O path; it makes no G1/G2/G3/G5 acceptance claim. The
-production harness libraries remain empty public adapter boundaries.
+OpenCode session and `harness_host` adapters remain unimplemented.
 
 The separate CHP artifact defines canonical payloads and transport envelopes at
 the explicitly provisional `cw-canonical-1-provisional.2` and
@@ -831,6 +831,11 @@ export PATH="$HOME/flutter/bin:$PATH" && dart format --output=none --set-exit-if
 make v2-architecture                        # governed v2 source and transitive boundary checks
 make v2-foundations                         # packages, guards, scoped l10n/analyze, VM/Chrome v2 tests and Web build
 make v2-smoke                               # explicit v2 Flutter tests in test/v2
+export PATH="$HOME/flutter/bin:$PATH" && flutter test test/v2/pairing
+(cd packages/harness_opencode && export PATH="$HOME/flutter/bin:$PATH" && dart test test/pairing_client_test.dart)
+# Opt-in only; the test neither starts nor rotates the server. `CODEWALK_PAIR_QA_*` alone is insufficient: an authorized isolated coordinator must rotate its private password on stdout marker `CODEWALK_PAIRING_QA_ROTATE` (180s timeout).
+# The QA coordinator used was unit-owned under `/tmp`, not a distributed project command; no launcher command is documented here.
+export PATH="$HOME/flutter/bin:$PATH" && flutter test test/v2/pairing/live_pairing_test.dart --timeout=180s
 make v2-web                                 # lib/main_v2.dart Web build -> build/v2/web
 make check-fast                             # deps + gen + analyze + coverage fixtures + fast (non-slow, non-integration) tests
 dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
@@ -856,6 +861,80 @@ flutter run --target lib/main_v2.dart -d chrome # explicit active v2 foundation
 ```
 
 The full-suite `make test` defaults to four Flutter workers (`TEST_JOBS=4`); set `TEST_JOBS` to override Makefile targets that use it.
+
+## #273/V2-041 Pairing and Credential Recovery
+
+```text
+packages/codewalk_core/lib/src/authentication.dart # Password/paired credential, one-time pairing candidate, task and QR-input contracts; credential values redact secrets
+packages/codewalk_core/lib/src/endpoints.dart      # Validated endpoint/profile, assessment and probe/repository ports; profile metadata excludes credentials
+packages/harness_opencode/lib/src/pairing_client.dart # OpenCode single-use redemption, token verification and manual 2.0.22 renewal
+lib/features/pairing/{pairing_controller,pairing_page}.dart # Explicit-confirm pairing, existing-profile endpoint guard, QR/link input, save or same-profile repair
+lib/features/hosts/{hosts_controller,hosts_page}.dart # Profile list/status, per-profile credential errors, manual paired renewal and password repair
+lib/platform/endpoints/pairing_factory*.dart      # Conditional native pairing transport and unsupported-platform adapter
+lib/platform/pairing/{qr_input*,qr_camera_page,qr_image_decoder_io,native_pairing_links,native_link_support_*}.dart # Native QR/image sources and Android pairing-link bridge
+lib/platform/profiles/endpoint_profile_store.dart # Non-secret profile catalog plus serialized credential creation/replacement and recovery
+lib/platform/storage/{endpoint_credentials,credential_factory*}.dart # Hashed per-origin/profile/kind vault keys; native secure-storage and Web memory backends
+android/app/src/main/{AndroidManifest.xml,kotlin/com/verseles/codewalk/MainActivity.kt} # Flutter implicit deep links disabled; private pending-link method channel
+linux/runner/{my_application.cc,resources/com.verseles.codewalk.desktop} # Desktop entry advertises `x-scheme-handler/codewalk` via `%U`; runner forwards arguments under `G_APPLICATION_NON_UNIQUE`
+lib/main_v2.dart                                # Accepts bounded `codewalk://pair` startup arguments; composes native link listener
+lib/shared/l10n/{arb,generated}/                 # 12 pairing labels/status strings across all 14 v2 locales
+packages/harness_opencode/test/pairing_client_test.dart # Single-use flow, version-gated renewal, uncertain responses and fake-server fixture
+test/v2/pairing/                                 # Controller/page/camera/link tests, QR decoder tests and opt-in native pairing QA
+test/v2/pairing/qr_image_decoder_test.dart      # Five QR tests: upstream ZXing PNG/JPEG payload, dimension preflight and worker-exit cancellation
+test/v2/pairing/fixtures/reference_qr.png        # Independent upstream ZXing black-box fixture (not produced by the decoder under test)
+test/v2/pairing/fixtures/README.md               # Fixture provenance, expected payload and license
+test/v2/pairing/live_pairing_test.dart           # Opt-in isolated-server native QA; requires CODEWALK_PAIR_QA_* environment
+```
+
+Pairing links are parsed without sending credentials; confirmation consumes a
+challenge once, then the received token is checked through a read-only endpoint
+probe. A lost/uncertain redemption is not retried. Manual renewal is offered only
+for an already paired profile whose latest assessment reports OpenCode `2.0.22`;
+the harness performs its own version check before the mutating request. An epoch
+expiry is exposed only for the known token form on `2.0.21`/`2.0.22`; unknown or
+opaque tokens receive no inferred date. This is version-scoped token metadata,
+not generic JWT parsing or validation.
+
+Profile/catalog metadata excludes credential secrets and carries only
+identity, label, endpoint and non-secret compatibility/recovery fields. The
+`activeCredential` record is JSON version 1 in the credential vault (native
+secure storage; Web instance-local memory); replacement checks the expected
+prior credential and confirms the write by readback. Unknown/future or unreadable
+credential data is preserved, and a credential read error is tracked per profile
+instead of hiding the rest of the catalog. Pair-again and password repair retain
+the existing profile identity and replace credentials only after verification.
+
+QR camera capture is available on Android; PNG/JPEG image input is available on
+native IO targets, including Linux. Admission is capped at 8 MiB, 4096 pixels
+per side and 4 MP; PNG dimensions and JPEG SOF are checked before `image` 4.9.2
+raster allocation, then image/ZXing work runs in an isolate and cancellation
+completes on worker exit. These are input/image bounds, not an absolute
+process-memory quota or an Android/provider cache cap. Unit/widget and source
+coverage do not establish physical camera operation, deployed OS-keychain
+behavior, an installed/deployed native artifact, or MVP acceptance.
+
+Android receives links through the private pairing channel, with Flutter's
+implicit deep-link handling disabled. The Linux desktop entry advertises the
+`x-scheme-handler/codewalk` association and passes `%U`; the non-unique runner
+forwards each launched process's URI arguments to the v2 entry point. System
+association/installation and cold- or warm-start delivery are not certified.
+The catalog adds `pairingTitle`, `pairingScanQr`,
+`pairingImageQr`, `pairingLink`, `pairingConfirm`, `pairingRejected`,
+`pairingUncertain`, `pairingCaptureError`, `pairingRenew`, `pairingAgain`,
+`pairingExpires` and `pairingPaired` in each of the 14 v2 locales.
+
+`test/v2/pairing/live_pairing_test.dart` is opt-in through
+`CODEWALK_PAIR_QA_ENDPOINT`, `CODEWALK_PAIR_QA_PASSWORD` and
+`CODEWALK_PAIR_QA_PASSWORD_NEXT`; these variables do not start or rotate the
+server. An authorized isolated coordinator must own the private server/password
+rotation, observe stdout marker `CODEWALK_PAIRING_QA_ROTATE` and change its
+password; the test then verifies the re-pair flow. The coordinator used for the
+reported QA was an operational, unit-owned `/tmp` launcher, not a distributed
+project command. The test uses in-memory metadata/credential backends. Reported
+OpenCode `2.0.22` ARM64 QA preserved the existing profile identity across
+re-pairing. This QA and the
+independent ZXing image fixture are not physical-camera, deployed-keychain, or
+MVP acceptance evidence.
 
 ## Testing/Quality Gates
 

@@ -58,6 +58,9 @@ class MainActivity : FlutterActivity() {
 
     private var sessionOverlayActivationChannel: MethodChannel? = null
     private var systemChannel: MethodChannel? = null
+    private var pairingChannel: MethodChannel? = null
+    private val pendingPairing = ArrayDeque<Pair<Int, String>>()
+    private var pairingSequence = 0
     private var activeOAuthFlowId: String? = null
     private var activityWasRecreated = false
     private var lastTrimMemoryLevel = -1
@@ -85,6 +88,23 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngineIdentity = System.identityHashCode(flutterEngine)
+        capturePairingIntent(intent)
+        pairingChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
+            "com.verseles.codewalk/v2-pairing").also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getPending" -> result.success(pendingPairing.firstOrNull()?.let {
+                        mapOf("id" to it.first, "uri" to it.second)
+                    })
+                    "ack" -> {
+                        val id = (call.arguments as? Number)?.toInt()
+                        pendingPairing.removeAll { it.first == id }
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -331,6 +351,19 @@ class MainActivity : FlutterActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         dispatchSessionOverlayActivation(intent)
+        capturePairingIntent(intent)
+        pairingChannel?.invokeMethod("pending", null)
+    }
+
+    override fun getInitialRoute(): String = "/"
+
+    private fun capturePairingIntent(incoming: Intent?) {
+        val uri = incoming?.data ?: return
+        if (uri.scheme != "codewalk" || uri.host != "pair") return
+        val raw = uri.toString()
+        if (raw.length > 4096 || pendingPairing.size >= 4) return
+        pendingPairing.addLast(Pair(++pairingSequence, raw))
+        incoming.data = null
     }
 
     private fun readClipboardContentUri(rawUri: String): Map<String, Any?>? {

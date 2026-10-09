@@ -4,7 +4,11 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
+import '../features/pairing/pairing_controller.dart';
+import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
+import '../platform/pairing/native_pairing_links.dart';
+import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
@@ -21,9 +25,12 @@ AppDependencies createAppDependencies({
   V2MetadataStore? metadataStore,
   EndpointProfileRepository? profileRepository,
   EndpointProber? endpointProber,
+  EndpointPairing? endpointPairing,
+  QrInput? qrInput,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
+  final navigator = GlobalKey<NavigatorState>();
   final metadata =
       metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend());
   locator.registerSingleton(
@@ -40,6 +47,13 @@ AppDependencies createAppDependencies({
   locator.registerSingleton(AppPreferencesController(store: metadataStore));
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
+  locator.registerSingleton(
+    PairingController(
+      pairing: endpointPairing ?? createEndpointPairing(),
+      hosts: locator<HostsController>(),
+      qr: qrInput ?? createQrInput(navigator),
+    ),
+  );
   final navigation = locator<AppNavigationController>();
   final platformLocation =
       WidgetsBinding.instance.platformDispatcher.defaultRouteName;
@@ -48,6 +62,7 @@ AppDependencies createAppDependencies({
   locator.registerSingleton<GoRouter>(
     createAppRouter(
       navigation: navigation,
+      navigatorKey: navigator,
       initialLocation: navigation.prepareLink(initial),
     ),
   );
@@ -57,6 +72,7 @@ AppDependencies createAppDependencies({
     localizations: locator<L10nBridge>(),
     router: locator<GoRouter>(),
     hosts: locator<HostsController>(),
+    pairing: locator<PairingController>(),
   );
 }
 
@@ -64,6 +80,7 @@ AppDependencies createAppDependencies({
 Future<AppDependencies> loadAppDependencies({
   Uri? initialLink,
   V2MetadataStore? metadataStore,
+  bool listenNativeLinks = false,
 }) async {
   final dependencies = createAppDependencies(
     initialLink: initialLink,
@@ -71,5 +88,17 @@ Future<AppDependencies> loadAppDependencies({
         metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend()),
   );
   await dependencies.preferences.initialize();
+  if (listenNativeLinks) {
+    final links = dependencies.links = NativePairingLinks((uri) {
+      if (dependencies.isDisposed) return;
+      dependencies.pairing?.empty();
+      final route = dependencies.navigation.prepareLink(uri);
+      if (route == '/pair' && uri.hasQuery) {
+        dependencies.pairing?.input(uri.toString());
+      }
+      dependencies.router.go(route);
+    });
+    await links.start();
+  }
   return dependencies;
 }

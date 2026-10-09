@@ -34,6 +34,8 @@ class AppNavigationController extends ChangeNotifier {
   PendingNavigationIntent? _pending;
   Uri? _pairingLink;
   bool _disposed = false;
+  int _pairingRevision = 0;
+  int get pairingRevision => _pairingRevision;
 
   PendingNavigationIntent? get pendingIntent => _pending;
   bool get isDisposed => _disposed;
@@ -57,6 +59,7 @@ class AppNavigationController extends ChangeNotifier {
         link.userInfo.isEmpty &&
         !link.hasPort) {
       _pairingLink = link;
+      _pairingRevision++;
       _pending = const PairingNavigationIntent();
       notifyListeners();
       return '/pair';

@@ -998,6 +998,78 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Check connection'**
   String get hostsCheckConnection;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Pair a server'**
+  String get pairingTitle;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR'**
+  String get pairingScanQr;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Open QR image'**
+  String get pairingImageQr;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing link'**
+  String get pairingLink;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and pair'**
+  String get pairingConfirm;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'This link is invalid, expired or already used. Generate a new link.'**
+  String get pairingRejected;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'The pairing outcome is unknown. Generate a new link; this request will not be repeated.'**
+  String get pairingUncertain;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this QR. Use a PNG/JPEG image or paste the link.'**
+  String get pairingCaptureError;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Renew token'**
+  String get pairingRenew;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Pair again'**
+  String get pairingAgain;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Declared token expiry'**
+  String get pairingExpires;
+
+  /// V2 pairing and credential lifecycle
+  ///
+  /// In en, this message translates to:
+  /// **'Paired'**
+  String get pairingPaired;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

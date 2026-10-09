@@ -488,4 +488,43 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get hostsCheckConnection => 'সংযোগ পরীক্ষা করুন';
+
+  @override
+  String get pairingTitle => 'সার্ভার জোড়া দিন';
+
+  @override
+  String get pairingScanQr => 'QR স্ক্যান করুন';
+
+  @override
+  String get pairingImageQr => 'QR ছবি খুলুন';
+
+  @override
+  String get pairingLink => 'জোড়া দেওয়ার লিংক';
+
+  @override
+  String get pairingConfirm => 'নিশ্চিত করে জোড়া দিন';
+
+  @override
+  String get pairingRejected =>
+      'লিংক অবৈধ, মেয়াদোত্তীর্ণ বা ব্যবহৃত। নতুন লিংক তৈরি করুন।';
+
+  @override
+  String get pairingUncertain =>
+      'ফলাফল অজানা। নতুন লিংক তৈরি করুন; অনুরোধ পুনরাবৃত্তি হবে না।';
+
+  @override
+  String get pairingCaptureError =>
+      'QR পড়া যায়নি। PNG/JPEG ব্যবহার করুন বা লিংক পেস্ট করুন।';
+
+  @override
+  String get pairingRenew => 'টোকেন নবায়ন';
+
+  @override
+  String get pairingAgain => 'আবার জোড়া দিন';
+
+  @override
+  String get pairingExpires => 'টোকেনের ঘোষিত মেয়াদ';
+
+  @override
+  String get pairingPaired => 'জোড়া দেওয়া';
 }
