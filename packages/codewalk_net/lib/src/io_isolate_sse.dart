@@ -138,12 +138,13 @@ final class _SseBridge {
       }
       if (!_closed) _commands!.send([_Input.eof.index]);
     } on Object {
-      if (!_closed)
+      if (!_closed) {
         _output!.sendPort.send([
           _Output.error.index,
           'transport',
           TransportFailure.connection.index,
         ]);
+      }
     }
   }
 
@@ -170,12 +171,13 @@ final class _SseBridge {
       );
       unawaited(
         _exitSignal.future.then((_) {
-          if (!_closed)
+          if (!_closed) {
             _output!.sendPort.send([
               _Output.error.index,
               'transport',
               TransportFailure.connection.index,
             ]);
+          }
         }),
       );
       while (!_closed && await _messages!.moveNext()) {
@@ -235,8 +237,9 @@ final class _SseBridge {
         if (!_userCancelled) _controller.addError(error);
         if (!_finished.isCompleted) _finished.completeError(error);
       } finally {
-        if (!_exitSignal.isCompleted)
+        if (!_exitSignal.isCompleted) {
           _isolate?.kill(priority: Isolate.immediate);
+        }
         await _messages?.cancel();
         await _exitSubscription?.cancel();
         _output?.close();

@@ -408,4 +408,90 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'Borrar búsqueda';
+
+  @override
+  String get commonDelete => 'Eliminar';
+
+  @override
+  String get commonSave => 'Guardar';
+
+  @override
+  String get onboardingCouldNotVerify =>
+      'No se pudo verificar la conexión al servidor.';
+
+  @override
+  String get onboardingFailed => 'Falló';
+
+  @override
+  String get onboardingInvalidUrl => 'URL inválida';
+
+  @override
+  String get onboardingLabel => 'Etiqueta (opcional)';
+
+  @override
+  String get onboardingNotAvailable => 'no disponible';
+
+  @override
+  String get onboardingPassword => 'Contraseña';
+
+  @override
+  String get onboardingPasswordRequired => 'Introduzca la contraseña';
+
+  @override
+  String get onboardingReady => 'Listo';
+
+  @override
+  String get onboardingServerUrl => 'URL del servidor';
+
+  @override
+  String get onboardingStarting => 'Iniciando';
+
+  @override
+  String get onboardingStopping => 'Deteniendo';
+
+  @override
+  String get serversAddServer => 'Añadir Servidor';
+
+  @override
+  String get serversNoServersFound => 'No se encontraron servidores';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'Este servidor ejecuta OpenCode 1. CodeWalk 2 necesita OpenCode 2.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'Ejecuta opencode upgrade en el servidor. Mínimo: 2.0.20; probado: 2.0.21–2.0.22. CodeWalk no instala ni modifica el servidor.';
+
+  @override
+  String get hostsLegacyDownload => 'Descargar CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => 'Se requiere actualizar el servidor';
+
+  @override
+  String get hostsUntested => 'Versión no probada';
+
+  @override
+  String get hostsTransportHelp =>
+      'No se pudo alcanzar el servidor. Comprueba la URL, TLS y la conexión VPN.';
+
+  @override
+  String get hostsNativeOnly =>
+      'En este MVP, la detección está disponible en Android y Linux nativos.';
+
+  @override
+  String get hostsAuthRequired =>
+      'Comprueba la contraseña o las credenciales de emparejamiento.';
+
+  @override
+  String get hostsProfileStorageError =>
+      'No se pudieron cargar o guardar los perfiles. Reintenta para comprobar el estado guardado.';
+
+  @override
+  String get hostsRetryLater =>
+      'El servidor solicitó una espera. Reintenta después de la hora indicada; no hay reintento automático.';
+
+  @override
+  String get hostsCheckConnection => 'Comprobar conexión';
 }

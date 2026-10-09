@@ -53,8 +53,9 @@ final class ControlledTransport implements EndpointHttpTransport {
 Future<void> waitFor(bool Function() condition) async {
   final end = DateTime.now().add(const Duration(seconds: 3));
   while (!condition()) {
-    if (DateTime.now().isAfter(end))
+    if (DateTime.now().isAfter(end)) {
       throw StateError('Condition did not settle.');
+    }
     await Future<void>.delayed(const Duration(milliseconds: 5));
   }
 }

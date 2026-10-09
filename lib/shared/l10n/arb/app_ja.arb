@@ -149,5 +149,64 @@
   "settingsSearchClear": "検索をクリア",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "削除",
+  "commonSave": "保存",
+  "onboardingCouldNotVerify": "サーバー接続を確認できませんでした。",
+  "onboardingFailed": "失敗",
+  "onboardingInvalidUrl": "無効な URL",
+  "onboardingLabel": "ラベル（任意）",
+  "onboardingNotAvailable": "利用不可",
+  "onboardingPassword": "パスワード",
+  "onboardingPasswordRequired": "パスワードを入力",
+  "onboardingReady": "準備完了",
+  "onboardingServerUrl": "サーバーURL",
+  "onboardingStarting": "起動中",
+  "onboardingStopping": "停止中",
+  "serversAddServer": "サーバーを追加",
+  "serversNoServersFound": "サーバーが見つかりません",
+  "hostsLegacyExplanation": "このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "サーバーで opencode upgrade を実行してください。最低：2.0.20、テスト済み：2.0.21–2.0.22。CodeWalk はサーバーをインストールまたは変更しません。",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "CodeWalk 1 をダウンロード",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "サーバーの更新が必要",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "未テストのバージョン",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "サーバーに接続できません。URL、TLS、VPN 接続を確認してください。",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "この MVP の検出はネイティブ Android と Linux で利用できます。",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "サーバーのパスワードまたはペアリング認証情報を確認してください。",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "プロファイルを読み込みまたは保存できません。保存状態を確認するため再試行してください。",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "サーバーが待機を要求しています。指定時刻後に再試行してください。自動再試行は行いません。",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "接続を確認",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

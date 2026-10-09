@@ -4,5 +4,5 @@ import 'package:harness_opencode/harness_opencode.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('empty public surface compiles on the Dart VM', () {});
+  test('production adapter surface compiles on the Dart VM', () {});
 }

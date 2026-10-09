@@ -407,4 +407,90 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'Очистить поиск';
+
+  @override
+  String get commonDelete => 'Удалить';
+
+  @override
+  String get commonSave => 'Сохранить';
+
+  @override
+  String get onboardingCouldNotVerify =>
+      'Не удалось проверить подключение к серверу.';
+
+  @override
+  String get onboardingFailed => 'Сбой';
+
+  @override
+  String get onboardingInvalidUrl => 'Некорректный URL';
+
+  @override
+  String get onboardingLabel => 'Ярлык (необязательно)';
+
+  @override
+  String get onboardingNotAvailable => 'недоступен';
+
+  @override
+  String get onboardingPassword => 'Пароль';
+
+  @override
+  String get onboardingPasswordRequired => 'Введите пароль';
+
+  @override
+  String get onboardingReady => 'Готово';
+
+  @override
+  String get onboardingServerUrl => 'URL сервера';
+
+  @override
+  String get onboardingStarting => 'Запуск';
+
+  @override
+  String get onboardingStopping => 'Остановка';
+
+  @override
+  String get serversAddServer => 'Добавить сервер';
+
+  @override
+  String get serversNoServersFound => 'Серверы не найдены';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'Этот сервер использует OpenCode 1. CodeWalk 2 нужен OpenCode 2.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'Запустите opencode upgrade на сервере. Минимум: 2.0.20; проверено: 2.0.21–2.0.22. CodeWalk не устанавливает и не изменяет сервер.';
+
+  @override
+  String get hostsLegacyDownload => 'Скачать CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => 'Нужно обновить сервер';
+
+  @override
+  String get hostsUntested => 'Непроверенная версия';
+
+  @override
+  String get hostsTransportHelp =>
+      'Сервер недоступен. Проверьте URL, TLS и подключение VPN.';
+
+  @override
+  String get hostsNativeOnly =>
+      'В этом MVP обнаружение доступно на нативных Android и Linux.';
+
+  @override
+  String get hostsAuthRequired =>
+      'Проверьте пароль сервера или данные сопряжения.';
+
+  @override
+  String get hostsProfileStorageError =>
+      'Не удалось загрузить или сохранить профили. Повторите попытку, чтобы проверить сохранённое состояние.';
+
+  @override
+  String get hostsRetryLater =>
+      'Сервер запросил задержку. Повторите после указанного времени; автоматических попыток нет.';
+
+  @override
+  String get hostsCheckConnection => 'Проверить подключение';
 }

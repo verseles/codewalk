@@ -403,4 +403,88 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'تلاش صاف کریں';
+
+  @override
+  String get commonDelete => 'حذف کریں۔';
+
+  @override
+  String get commonSave => 'محفوظ کریں۔';
+
+  @override
+  String get onboardingCouldNotVerify => 'سرور کنکشن کی تصدیق نہیں ہو سکی۔';
+
+  @override
+  String get onboardingFailed => 'ناکام';
+
+  @override
+  String get onboardingInvalidUrl => 'غلط URL';
+
+  @override
+  String get onboardingLabel => 'لیبل (اختیاری)';
+
+  @override
+  String get onboardingNotAvailable => 'دستیاب نہیں';
+
+  @override
+  String get onboardingPassword => 'پاس ورڈ';
+
+  @override
+  String get onboardingPasswordRequired => 'پاس ورڈ درج کریں۔';
+
+  @override
+  String get onboardingReady => 'تیار';
+
+  @override
+  String get onboardingServerUrl => 'سرور URL';
+
+  @override
+  String get onboardingStarting => 'شروع ہو رہا ہے';
+
+  @override
+  String get onboardingStopping => 'روک رہا ہے';
+
+  @override
+  String get serversAddServer => 'سرور شامل کریں۔';
+
+  @override
+  String get serversNoServersFound => 'کوئی سرور نہیں ملا';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'یہ سرور OpenCode 1 چلاتا ہے۔ CodeWalk 2 کو OpenCode 2 درکار ہے۔';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20؛ آزمودہ: 2.0.21–2.0.22۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔';
+
+  @override
+  String get hostsLegacyDownload => 'CodeWalk 1 ڈاؤن لوڈ کریں';
+
+  @override
+  String get hostsUpgradeRequired => 'سرور اپ گریڈ درکار ہے';
+
+  @override
+  String get hostsUntested => 'غیر آزمودہ ورژن';
+
+  @override
+  String get hostsTransportHelp =>
+      'سرور تک رسائی نہیں ہو سکی۔ URL، TLS اور VPN کنکشن دیکھیں۔';
+
+  @override
+  String get hostsNativeOnly =>
+      'اس MVP میں شناخت نیٹو Android اور Linux پر دستیاب ہے۔';
+
+  @override
+  String get hostsAuthRequired => 'سرور کا پاس ورڈ یا پیئرنگ کی اسناد دیکھیں۔';
+
+  @override
+  String get hostsProfileStorageError =>
+      'پروفائل لوڈ یا محفوظ نہیں ہو سکے۔ محفوظ شدہ حالت دیکھنے کے لیے دوبارہ کوشش کریں۔';
+
+  @override
+  String get hostsRetryLater =>
+      'سرور نے انتظار طلب کیا ہے۔ بتائے گئے وقت کے بعد کوشش کریں؛ خودکار کوشش نہیں ہو رہی۔';
+
+  @override
+  String get hostsCheckConnection => 'کنکشن چیک کریں';
 }

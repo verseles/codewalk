@@ -413,4 +413,90 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'Effacer la recherche';
+
+  @override
+  String get commonDelete => 'Supprimer';
+
+  @override
+  String get commonSave => 'Enregistrer';
+
+  @override
+  String get onboardingCouldNotVerify =>
+      'Impossible de vérifier la connexion au serveur.';
+
+  @override
+  String get onboardingFailed => 'Échec';
+
+  @override
+  String get onboardingInvalidUrl => 'URL invalide';
+
+  @override
+  String get onboardingLabel => 'Libellé (facultatif)';
+
+  @override
+  String get onboardingNotAvailable => 'non disponible';
+
+  @override
+  String get onboardingPassword => 'Mot de passe';
+
+  @override
+  String get onboardingPasswordRequired => 'Entrez le mot de passe';
+
+  @override
+  String get onboardingReady => 'Prêt';
+
+  @override
+  String get onboardingServerUrl => 'URL du serveur';
+
+  @override
+  String get onboardingStarting => 'Démarrage';
+
+  @override
+  String get onboardingStopping => 'Arrêt';
+
+  @override
+  String get serversAddServer => 'Ajouter un serveur';
+
+  @override
+  String get serversNoServersFound => 'Aucun serveur trouvé';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'Ce serveur utilise OpenCode 1. CodeWalk 2 nécessite OpenCode 2.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20 ; testé : 2.0.21–2.0.22. CodeWalk ne modifie ni n’installe votre serveur.';
+
+  @override
+  String get hostsLegacyDownload => 'Télécharger CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => 'Mise à niveau du serveur requise';
+
+  @override
+  String get hostsUntested => 'Version non testée';
+
+  @override
+  String get hostsTransportHelp =>
+      'Serveur inaccessible. Vérifiez l’URL, TLS et la connexion VPN.';
+
+  @override
+  String get hostsNativeOnly =>
+      'Dans ce MVP, la détection est disponible sur Android et Linux natifs.';
+
+  @override
+  String get hostsAuthRequired =>
+      'Vérifiez le mot de passe ou les identifiants d’appairage.';
+
+  @override
+  String get hostsProfileStorageError =>
+      'Impossible de charger ou sauvegarder les profils. Réessayez pour vérifier l’état enregistré.';
+
+  @override
+  String get hostsRetryLater =>
+      'Le serveur demande un délai. Réessayez après l’heure indiquée ; aucun nouvel essai automatique.';
+
+  @override
+  String get hostsCheckConnection => 'Vérifier la connexion';
 }

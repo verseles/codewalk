@@ -392,4 +392,85 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get settingsSearchClear => '検索をクリア';
+
+  @override
+  String get commonDelete => '削除';
+
+  @override
+  String get commonSave => '保存';
+
+  @override
+  String get onboardingCouldNotVerify => 'サーバー接続を確認できませんでした。';
+
+  @override
+  String get onboardingFailed => '失敗';
+
+  @override
+  String get onboardingInvalidUrl => '無効な URL';
+
+  @override
+  String get onboardingLabel => 'ラベル（任意）';
+
+  @override
+  String get onboardingNotAvailable => '利用不可';
+
+  @override
+  String get onboardingPassword => 'パスワード';
+
+  @override
+  String get onboardingPasswordRequired => 'パスワードを入力';
+
+  @override
+  String get onboardingReady => '準備完了';
+
+  @override
+  String get onboardingServerUrl => 'サーバーURL';
+
+  @override
+  String get onboardingStarting => '起動中';
+
+  @override
+  String get onboardingStopping => '停止中';
+
+  @override
+  String get serversAddServer => 'サーバーを追加';
+
+  @override
+  String get serversNoServersFound => 'サーバーが見つかりません';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'サーバーで opencode upgrade を実行してください。最低：2.0.20、テスト済み：2.0.21–2.0.22。CodeWalk はサーバーをインストールまたは変更しません。';
+
+  @override
+  String get hostsLegacyDownload => 'CodeWalk 1 をダウンロード';
+
+  @override
+  String get hostsUpgradeRequired => 'サーバーの更新が必要';
+
+  @override
+  String get hostsUntested => '未テストのバージョン';
+
+  @override
+  String get hostsTransportHelp => 'サーバーに接続できません。URL、TLS、VPN 接続を確認してください。';
+
+  @override
+  String get hostsNativeOnly => 'この MVP の検出はネイティブ Android と Linux で利用できます。';
+
+  @override
+  String get hostsAuthRequired => 'サーバーのパスワードまたはペアリング認証情報を確認してください。';
+
+  @override
+  String get hostsProfileStorageError =>
+      'プロファイルを読み込みまたは保存できません。保存状態を確認するため再試行してください。';
+
+  @override
+  String get hostsRetryLater => 'サーバーが待機を要求しています。指定時刻後に再試行してください。自動再試行は行いません。';
+
+  @override
+  String get hostsCheckConnection => '接続を確認';
 }

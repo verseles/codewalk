@@ -6,14 +6,23 @@ import 'storage_support.dart';
 /// Filter reads to the requested v2 key; never load or clear the legacy set.
 final class PreferencesMetadataBackend implements MetadataBackend {
   PreferencesMetadataBackend({SharedPreferencesAsync? preferences})
-    : _preferences = preferences ?? SharedPreferencesAsync();
+    : _providedPreferences = preferences;
 
-  final SharedPreferencesAsync _preferences;
+  final SharedPreferencesAsync? _providedPreferences;
+  // Building an injected graph does not access a platform plugin. Actual reads
+  // still require registration and surface failures through the storage caller.
+  late final SharedPreferencesAsync _preferences =
+      _providedPreferences ?? SharedPreferencesAsync();
 
   @override
   Future<Object?> read(String key) async {
     requireV2Key(key);
-    return (await _preferences.getAll(allowList: {key}))[key];
+    final value = (await _preferences.getAll(allowList: {key}))[key];
+    // Linux JSON reloads erase list type arguments. Preserve malformed values
+    // for the caller's corruption guard instead of dropping invalid elements.
+    return value is List && value.every((item) => item is String)
+        ? List<String>.unmodifiable(value)
+        : value;
   }
 
   @override

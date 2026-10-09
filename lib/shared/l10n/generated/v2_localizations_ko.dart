@@ -390,4 +390,86 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get settingsSearchClear => '검색 지우기';
+
+  @override
+  String get commonDelete => '삭제';
+
+  @override
+  String get commonSave => '저장';
+
+  @override
+  String get onboardingCouldNotVerify => '서버 연결을 확인할 수 없습니다.';
+
+  @override
+  String get onboardingFailed => '실패';
+
+  @override
+  String get onboardingInvalidUrl => '유효하지 않은 URL';
+
+  @override
+  String get onboardingLabel => '라벨 (선택 사항)';
+
+  @override
+  String get onboardingNotAvailable => '사용 불가';
+
+  @override
+  String get onboardingPassword => '비밀번호';
+
+  @override
+  String get onboardingPasswordRequired => '비밀번호 입력';
+
+  @override
+  String get onboardingReady => '준비됨';
+
+  @override
+  String get onboardingServerUrl => '서버 URL';
+
+  @override
+  String get onboardingStarting => '시작 중';
+
+  @override
+  String get onboardingStopping => '중지 중';
+
+  @override
+  String get serversAddServer => '서버 추가';
+
+  @override
+  String get serversNoServersFound => '서버를 찾을 수 없음';
+
+  @override
+  String get hostsLegacyExplanation =>
+      '이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      '서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20, 테스트됨: 2.0.21–2.0.22. CodeWalk는 서버를 설치하거나 변경하지 않습니다.';
+
+  @override
+  String get hostsLegacyDownload => 'CodeWalk 1 다운로드';
+
+  @override
+  String get hostsUpgradeRequired => '서버 업그레이드 필요';
+
+  @override
+  String get hostsUntested => '테스트되지 않은 버전';
+
+  @override
+  String get hostsTransportHelp => '서버에 연결할 수 없습니다. URL, TLS 및 VPN 연결을 확인하세요.';
+
+  @override
+  String get hostsNativeOnly => '이 MVP의 감지는 네이티브 Android와 Linux에서 사용할 수 있습니다.';
+
+  @override
+  String get hostsAuthRequired => '서버 비밀번호 또는 페어링 인증 정보를 확인하세요.';
+
+  @override
+  String get hostsProfileStorageError =>
+      '프로필을 불러오거나 저장할 수 없습니다. 저장 상태를 확인하려면 다시 시도하세요.';
+
+  @override
+  String get hostsRetryLater =>
+      '서버가 대기를 요청했습니다. 지정 시간 이후 다시 시도하세요. 자동 재시도는 없습니다.';
+
+  @override
+  String get hostsCheckConnection => '연결 확인';
 }

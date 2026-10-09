@@ -842,6 +842,162 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Clear search'**
   String get settingsSearchClear;
+
+  /// CodeWalk UI string — commonDelete
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// CodeWalk UI string — commonSave
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// CodeWalk UI string — onboardingCouldNotVerify
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify the server connection.'**
+  String get onboardingCouldNotVerify;
+
+  /// CodeWalk UI string — onboardingFailed
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get onboardingFailed;
+
+  /// CodeWalk UI string — onboardingInvalidUrl
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get onboardingInvalidUrl;
+
+  /// CodeWalk UI string — onboardingLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get onboardingLabel;
+
+  /// CodeWalk UI string — onboardingNotAvailable
+  ///
+  /// In en, this message translates to:
+  /// **'not available'**
+  String get onboardingNotAvailable;
+
+  /// CodeWalk UI string — onboardingPassword
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get onboardingPassword;
+
+  /// CodeWalk UI string — onboardingPasswordRequired
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get onboardingPasswordRequired;
+
+  /// CodeWalk UI string — onboardingReady
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get onboardingReady;
+
+  /// CodeWalk UI string — onboardingServerUrl
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get onboardingServerUrl;
+
+  /// CodeWalk UI string — onboardingStarting
+  ///
+  /// In en, this message translates to:
+  /// **'Starting'**
+  String get onboardingStarting;
+
+  /// CodeWalk UI string — onboardingStopping
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping'**
+  String get onboardingStopping;
+
+  /// CodeWalk UI string — serversAddServer
+  ///
+  /// In en, this message translates to:
+  /// **'Add Server'**
+  String get serversAddServer;
+
+  /// CodeWalk UI string — serversNoServersFound
+  ///
+  /// In en, this message translates to:
+  /// **'No servers found'**
+  String get serversNoServersFound;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'This server runs OpenCode 1. CodeWalk 2 needs OpenCode 2.'**
+  String get hostsLegacyExplanation;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.'**
+  String get hostsUpgradeInstructions;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Download CodeWalk 1'**
+  String get hostsLegacyDownload;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Server upgrade required'**
+  String get hostsUpgradeRequired;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Untested version'**
+  String get hostsUntested;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check the URL, TLS and VPN connection.'**
+  String get hostsTransportHelp;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint detection is available on native Android and Linux in this MVP.'**
+  String get hostsNativeOnly;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Check the server password or pairing credentials.'**
+  String get hostsAuthRequired;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load or save profiles. Retry to reconcile the saved state.'**
+  String get hostsProfileStorageError;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'The server requested a delay. Retry after the indicated time; no automatic retry is running.'**
+  String get hostsRetryLater;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Check connection'**
+  String get hostsCheckConnection;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

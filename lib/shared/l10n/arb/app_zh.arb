@@ -149,5 +149,64 @@
   "settingsSearchClear": "清除搜索",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "删除",
+  "commonSave": "保存",
+  "onboardingCouldNotVerify": "无法验证服务器连接。",
+  "onboardingFailed": "失败",
+  "onboardingInvalidUrl": "无效的 URL",
+  "onboardingLabel": "标签（可选）",
+  "onboardingNotAvailable": "不可用",
+  "onboardingPassword": "密码",
+  "onboardingPasswordRequired": "输入密码",
+  "onboardingReady": "就绪",
+  "onboardingServerUrl": "服务器 URL",
+  "onboardingStarting": "正在启动",
+  "onboardingStopping": "正在停止",
+  "serversAddServer": "添加服务器",
+  "serversNoServersFound": "未找到服务器",
+  "hostsLegacyExplanation": "此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "请在服务器上运行 opencode upgrade。最低版本：2.0.20；已测试：2.0.21–2.0.22。CodeWalk 不会安装或更改服务器。",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "下载 CodeWalk 1",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "需要升级服务器",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "未经测试的版本",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "无法连接服务器。请检查 URL、TLS 和 VPN 连接。",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "此 MVP 的端点检测仅适用于原生 Android 和 Linux。",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "请检查服务器密码或配对凭据。",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "无法加载或保存配置。请重试以确认保存状态。",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "服务器要求等待。请在指定时间后重试；不会自动重试。",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "检查连接",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

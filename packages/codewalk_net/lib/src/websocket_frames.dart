@@ -189,7 +189,9 @@ Uint8List encodeClientWebSocketFrame(int opcode, List<int> payload) {
     bytes[i] = n & 255;
   }
   final random = Random.secure();
-  for (var i = 0; i < 4; i++) bytes[size + i] = random.nextInt(256);
+  for (var i = 0; i < 4; i++) {
+    bytes[size + i] = random.nextInt(256);
+  }
   for (var i = 0; i < length; i++) {
     bytes[size + 4 + i] = payload[i] ^ bytes[size + i % 4];
   }

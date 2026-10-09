@@ -148,5 +148,64 @@
   "settingsSearchClear": "مسح البحث",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "حذف",
+  "commonSave": "حفظ",
+  "onboardingCouldNotVerify": "تعذر التحقق من اتصال الخادم.",
+  "onboardingFailed": "فشل",
+  "onboardingInvalidUrl": "عنوان URL غير صالح",
+  "onboardingLabel": "تسمية (اختياري)",
+  "onboardingNotAvailable": "غير متاح",
+  "onboardingPassword": "كلمة المرور",
+  "onboardingPasswordRequired": "أدخل كلمة المرور",
+  "onboardingReady": "جاهز",
+  "onboardingServerUrl": "عنوان URL للخادم",
+  "onboardingStarting": "بدء التشغيل",
+  "onboardingStopping": "إيقاف",
+  "serversAddServer": "إضافة خادم",
+  "serversNoServersFound": "لم يتم العثور على خوادم",
+  "hostsLegacyExplanation": "يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20؛ المختبر: 2.0.21–2.0.22. لا يثبت CodeWalk خادمك أو يغيره.",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "تنزيل CodeWalk 1",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "يلزم تحديث الخادم",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "إصدار غير مختبر",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "تعذر الوصول إلى الخادم. تحقق من عنوان URL وTLS واتصال VPN.",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "يتوفر الكشف في هذا MVP على Android وLinux الأصليين.",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "تحقق من كلمة مرور الخادم أو بيانات الاقتران.",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "تعذر تحميل الملفات التعريفية أو حفظها. أعد المحاولة للتحقق من الحالة المحفوظة.",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "طلب الخادم الانتظار. أعد المحاولة بعد الوقت المحدد؛ لا توجد إعادة محاولة تلقائية.",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "التحقق من الاتصال",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

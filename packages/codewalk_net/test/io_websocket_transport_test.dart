@@ -225,7 +225,9 @@ void main() {
         }, onError: (Object _) {});
       });
       addTearDown(() async {
-        for (final socket in sockets) socket.destroy();
+        for (final socket in sockets) {
+          socket.destroy();
+        }
         await raw.close();
       });
       final socket = await client(

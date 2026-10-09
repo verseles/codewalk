@@ -403,4 +403,89 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'مسح البحث';
+
+  @override
+  String get commonDelete => 'حذف';
+
+  @override
+  String get commonSave => 'حفظ';
+
+  @override
+  String get onboardingCouldNotVerify => 'تعذر التحقق من اتصال الخادم.';
+
+  @override
+  String get onboardingFailed => 'فشل';
+
+  @override
+  String get onboardingInvalidUrl => 'عنوان URL غير صالح';
+
+  @override
+  String get onboardingLabel => 'تسمية (اختياري)';
+
+  @override
+  String get onboardingNotAvailable => 'غير متاح';
+
+  @override
+  String get onboardingPassword => 'كلمة المرور';
+
+  @override
+  String get onboardingPasswordRequired => 'أدخل كلمة المرور';
+
+  @override
+  String get onboardingReady => 'جاهز';
+
+  @override
+  String get onboardingServerUrl => 'عنوان URL للخادم';
+
+  @override
+  String get onboardingStarting => 'بدء التشغيل';
+
+  @override
+  String get onboardingStopping => 'إيقاف';
+
+  @override
+  String get serversAddServer => 'إضافة خادم';
+
+  @override
+  String get serversNoServersFound => 'لم يتم العثور على خوادم';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20؛ المختبر: 2.0.21–2.0.22. لا يثبت CodeWalk خادمك أو يغيره.';
+
+  @override
+  String get hostsLegacyDownload => 'تنزيل CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => 'يلزم تحديث الخادم';
+
+  @override
+  String get hostsUntested => 'إصدار غير مختبر';
+
+  @override
+  String get hostsTransportHelp =>
+      'تعذر الوصول إلى الخادم. تحقق من عنوان URL وTLS واتصال VPN.';
+
+  @override
+  String get hostsNativeOnly =>
+      'يتوفر الكشف في هذا MVP على Android وLinux الأصليين.';
+
+  @override
+  String get hostsAuthRequired =>
+      'تحقق من كلمة مرور الخادم أو بيانات الاقتران.';
+
+  @override
+  String get hostsProfileStorageError =>
+      'تعذر تحميل الملفات التعريفية أو حفظها. أعد المحاولة للتحقق من الحالة المحفوظة.';
+
+  @override
+  String get hostsRetryLater =>
+      'طلب الخادم الانتظار. أعد المحاولة بعد الوقت المحدد؛ لا توجد إعادة محاولة تلقائية.';
+
+  @override
+  String get hostsCheckConnection => 'التحقق من الاتصال';
 }

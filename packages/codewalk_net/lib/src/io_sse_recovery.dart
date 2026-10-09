@@ -171,8 +171,9 @@ final class IoSseRecovery implements RecoveringSseConnection {
                     if (connectedWhen!(frame)) {
                       _ready = true;
                       _readyTimer?.cancel();
-                      if (!_emit(SseConnected(generation, firstFrame: frame)))
+                      if (!_emit(SseConnected(generation, firstFrame: frame))) {
                         return;
+                      }
                     }
                     // Only events subsequent to readiness are hydrated/applied.
                     continue;
@@ -321,8 +322,9 @@ final class IoSseRecovery implements RecoveringSseConnection {
         _paused ||
         !_released ||
         _buffer.isEmpty ||
-        _batchTimer != null)
+        _batchTimer != null) {
       return;
+    }
     _batchTimer = Timer(policy.batchInterval, () {
       _batchTimer = null;
       if (_closed || _paused || !_released) return;

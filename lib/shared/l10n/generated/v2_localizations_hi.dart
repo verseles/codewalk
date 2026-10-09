@@ -402,4 +402,90 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'खोज साफ़ करें';
+
+  @override
+  String get commonDelete => 'हटाएं';
+
+  @override
+  String get commonSave => 'सहेजें';
+
+  @override
+  String get onboardingCouldNotVerify =>
+      'सर्वर कनेक्शन को सत्यापित नहीं किया जा सका।';
+
+  @override
+  String get onboardingFailed => 'विफल';
+
+  @override
+  String get onboardingInvalidUrl => 'अमान्य URL';
+
+  @override
+  String get onboardingLabel => 'लेबल (वैकल्पिक)';
+
+  @override
+  String get onboardingNotAvailable => 'उपलब्ध नहीं';
+
+  @override
+  String get onboardingPassword => 'पासवर्ड';
+
+  @override
+  String get onboardingPasswordRequired => 'पासवर्ड दर्ज करें';
+
+  @override
+  String get onboardingReady => 'तैयार';
+
+  @override
+  String get onboardingServerUrl => 'सर्वर URL';
+
+  @override
+  String get onboardingStarting => 'शुरू हो रहा है';
+
+  @override
+  String get onboardingStopping => 'रुक रहा है';
+
+  @override
+  String get serversAddServer => 'सर्वर जोड़ें';
+
+  @override
+  String get serversNoServersFound => 'कोई सर्वर नहीं मिला';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'यह सर्वर OpenCode 1 चलाता है। CodeWalk 2 को OpenCode 2 चाहिए।';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20; जाँचा गया: 2.0.21–2.0.22। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।';
+
+  @override
+  String get hostsLegacyDownload => 'CodeWalk 1 डाउनलोड करें';
+
+  @override
+  String get hostsUpgradeRequired => 'सर्वर अपग्रेड आवश्यक';
+
+  @override
+  String get hostsUntested => 'अपरिक्षित संस्करण';
+
+  @override
+  String get hostsTransportHelp =>
+      'सर्वर तक नहीं पहुँच सके। URL, TLS और VPN कनेक्शन जाँचें।';
+
+  @override
+  String get hostsNativeOnly =>
+      'इस MVP में पहचान नेटिव Android और Linux पर उपलब्ध है।';
+
+  @override
+  String get hostsAuthRequired =>
+      'सर्वर पासवर्ड या पेयरिंग क्रेडेंशियल जाँचें।';
+
+  @override
+  String get hostsProfileStorageError =>
+      'प्रोफ़ाइल लोड या सेव नहीं हुईं। सेव की गई स्थिति जाँचने के लिए फिर कोशिश करें।';
+
+  @override
+  String get hostsRetryLater =>
+      'सर्वर ने प्रतीक्षा करने को कहा है। बताए समय के बाद कोशिश करें; कोई स्वचालित पुनः प्रयास नहीं है।';
+
+  @override
+  String get hostsCheckConnection => 'कनेक्शन जाँचें';
 }

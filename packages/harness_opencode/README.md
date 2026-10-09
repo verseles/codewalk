@@ -1,7 +1,12 @@
 # harness_opencode
 
-The OpenCode v2 wire boundary is still an empty production surface. The
-fixture-backed fake below is **VM-only test support**, delivered by
+The production boundary now exports the read-only endpoint probe delivered by
+[V2-040 / #272](https://github.com/verseles/codewalk/issues/272):
+`OpenCodeEndpointProbe`, strict server-info parsing, the compatibility policy and
+manual `RetryAfterHint` presentation. Features consume canonical core results;
+wire DTOs remain at the adapter edge.
+
+The fixture-backed fake below is **VM-only test support**, delivered by
 [V2-056A / #296](https://github.com/verseles/codewalk/issues/296). It is not
 exported by `lib/harness_opencode.dart`.
 
@@ -11,7 +16,7 @@ From `packages/harness_opencode`, with the Flutter SDK on `PATH`:
 
 ```sh
 export PATH="$HOME/flutter/bin:$PATH"
-dart format --output=none --set-exit-if-changed test
+dart format --output=none --set-exit-if-changed lib test
 dart analyze --fatal-infos
 dart test
 ```
@@ -20,6 +25,23 @@ The repository's `make v2-foundations` separately discovers and checks the v2
 packages, architecture guards and explicit app entry point. `make check` checks
 the retained root Flutter suite. No native OpenCode service, provider, model,
 credentials or device is needed for this package's tests.
+
+## Endpoint detection
+
+An authenticated `GET /api/info` runs through the injected endpoint-scoped HTTP
+transport, with a 20-second overall deadline and 64-KiB response limit. Validated
+`ServerInfo` and service-error envelopes produce canonical assessments without
+adopting server-published URLs, PID or ports. The limited legacy fallback checks
+healthy OpenCode 1 JSON from `GET /global/health`; HTML success responses and
+authentication failures never authorize profile creation.
+
+The minimum is `2.0.20`; tested versions are `2.0.21` and `2.0.22`. Other valid
+versions at or above the minimum are explicitly untested. Complete SemVer syntax
+is validated before build metadata is ignored for compatibility precedence.
+Retry hints inform manual checks only: there is no automatic HTTP replay, and
+delays beyond the one-day presentation budget stay deferred rather than clamped.
+Cancellation fences stale results. Pairing, session APIs and stream hydration
+remain with their owning work items.
 
 ## Test support
 

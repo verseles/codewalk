@@ -403,4 +403,89 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'অনুসন্ধান মুছুন';
+
+  @override
+  String get commonDelete => 'মুছে দিন';
+
+  @override
+  String get commonSave => 'সংরক্ষণ করুন';
+
+  @override
+  String get onboardingCouldNotVerify => 'সার্ভার সংযোগ যাচাই করা যায়নি।';
+
+  @override
+  String get onboardingFailed => 'ব্যর্থ';
+
+  @override
+  String get onboardingInvalidUrl => 'অকার্যকর URL';
+
+  @override
+  String get onboardingLabel => 'লেবেল (ঐচ্ছিক)';
+
+  @override
+  String get onboardingNotAvailable => 'উপলব্ধ নয়';
+
+  @override
+  String get onboardingPassword => 'পাসওয়ার্ড';
+
+  @override
+  String get onboardingPasswordRequired => 'পাসওয়ার্ড লিখুন';
+
+  @override
+  String get onboardingReady => 'প্রস্তুত';
+
+  @override
+  String get onboardingServerUrl => 'সার্ভার URL';
+
+  @override
+  String get onboardingStarting => 'শুরু হচ্ছে';
+
+  @override
+  String get onboardingStopping => 'বন্ধ হচ্ছে';
+
+  @override
+  String get serversAddServer => 'সার্ভার যোগ করুন';
+
+  @override
+  String get serversNoServersFound => 'কোনো সার্ভার পাওয়া যায়নি';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'এই সার্ভার OpenCode 1 চালায়। CodeWalk 2-এর জন্য OpenCode 2 দরকার।';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'সার্ভারে opencode upgrade চালান। সর্বনিম্ন: 2.0.20; পরীক্ষিত: 2.0.21–2.0.22। CodeWalk সার্ভার ইনস্টল বা পরিবর্তন করে না।';
+
+  @override
+  String get hostsLegacyDownload => 'CodeWalk 1 ডাউনলোড করুন';
+
+  @override
+  String get hostsUpgradeRequired => 'সার্ভার আপগ্রেড প্রয়োজন';
+
+  @override
+  String get hostsUntested => 'অপরীক্ষিত সংস্করণ';
+
+  @override
+  String get hostsTransportHelp =>
+      'সার্ভারে পৌঁছানো যায়নি। URL, TLS ও VPN সংযোগ পরীক্ষা করুন।';
+
+  @override
+  String get hostsNativeOnly =>
+      'এই MVP-তে শনাক্তকরণ নেটিভ Android ও Linux-এ উপলব্ধ।';
+
+  @override
+  String get hostsAuthRequired =>
+      'সার্ভারের পাসওয়ার্ড বা পেয়ারিং শংসাপত্র পরীক্ষা করুন।';
+
+  @override
+  String get hostsProfileStorageError =>
+      'প্রোফাইল লোড বা সংরক্ষণ করা যায়নি। সংরক্ষিত অবস্থা যাচাই করতে আবার চেষ্টা করুন।';
+
+  @override
+  String get hostsRetryLater =>
+      'সার্ভার অপেক্ষা করতে বলেছে। নির্দিষ্ট সময়ের পরে চেষ্টা করুন; স্বয়ংক্রিয় পুনরায় চেষ্টা হচ্ছে না।';
+
+  @override
+  String get hostsCheckConnection => 'সংযোগ পরীক্ষা করুন';
 }

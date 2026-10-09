@@ -494,5 +494,109 @@
   "settingsSearchClear": "Clear search",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "CodeWalk UI string — commonDelete"
+  },
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "CodeWalk UI string — commonSave"
+  },
+  "onboardingCouldNotVerify": "Could not verify the server connection.",
+  "@onboardingCouldNotVerify": {
+    "description": "CodeWalk UI string — onboardingCouldNotVerify"
+  },
+  "onboardingFailed": "Failed",
+  "@onboardingFailed": {
+    "description": "CodeWalk UI string — onboardingFailed"
+  },
+  "onboardingInvalidUrl": "Invalid URL",
+  "@onboardingInvalidUrl": {
+    "description": "CodeWalk UI string — onboardingInvalidUrl"
+  },
+  "onboardingLabel": "Label (optional)",
+  "@onboardingLabel": {
+    "description": "CodeWalk UI string — onboardingLabel"
+  },
+  "onboardingNotAvailable": "not available",
+  "@onboardingNotAvailable": {
+    "description": "CodeWalk UI string — onboardingNotAvailable"
+  },
+  "onboardingPassword": "Password",
+  "@onboardingPassword": {
+    "description": "CodeWalk UI string — onboardingPassword"
+  },
+  "onboardingPasswordRequired": "Enter password",
+  "@onboardingPasswordRequired": {
+    "description": "CodeWalk UI string — onboardingPasswordRequired"
+  },
+  "onboardingReady": "Ready",
+  "@onboardingReady": {
+    "description": "CodeWalk UI string — onboardingReady"
+  },
+  "onboardingServerUrl": "Server URL",
+  "@onboardingServerUrl": {
+    "description": "CodeWalk UI string — onboardingServerUrl"
+  },
+  "onboardingStarting": "Starting",
+  "@onboardingStarting": {
+    "description": "CodeWalk UI string — onboardingStarting"
+  },
+  "onboardingStopping": "Stopping",
+  "@onboardingStopping": {
+    "description": "CodeWalk UI string — onboardingStopping"
+  },
+  "serversAddServer": "Add Server",
+  "@serversAddServer": {
+    "description": "CodeWalk UI string — serversAddServer"
+  },
+  "serversNoServersFound": "No servers found",
+  "@serversNoServersFound": {
+    "description": "CodeWalk UI string — serversNoServersFound"
+  },
+  "hostsLegacyExplanation": "This server runs OpenCode 1. CodeWalk 2 needs OpenCode 2.",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "Download CodeWalk 1",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "Server upgrade required",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "Untested version",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "Could not reach the server. Check the URL, TLS and VPN connection.",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "Endpoint detection is available on native Android and Linux in this MVP.",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "Check the server password or pairing credentials.",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "Could not load or save profiles. Retry to reconcile the saved state.",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "The server requested a delay. Retry after the indicated time; no automatic retry is running.",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "Check connection",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

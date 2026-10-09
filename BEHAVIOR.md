@@ -14,10 +14,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an independent Material3 app shows a `CodeWalk` app bar and navigation for conversations, hosts and settings
 - **Then** viewports below 840 logical pixels use bottom navigation, while wider viewports use a navigation rail
 
-- **Given** the user opens conversations or hosts in this v2 app
+- **Given** the user opens conversations in this v2 app
 - **When** the corresponding route is displayed
 - **Then** localized placeholders are shown
-- **Then** the conversation placeholder offers an action that opens the hosts placeholder
+- **Then** the conversation placeholder offers an action that opens the hosts page
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
 - **When** the host and session identifiers are valid
@@ -91,10 +91,33 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** nullable preset and seed selections can be cleared without altering unrelated settings
 - **Then** a load/save failure keeps the app usable and shows an appearance-storage error with a retry action
 
-Conversations, hosts, pairing and session routes retain their navigation
+### V2 endpoint profiles and compatibility
+
+- **Given** the user opens `/hosts` in the explicit v2 app
+- **When** native profile storage is available
+- **Then** saved servers retain their labels, authored URLs, proxy paths and ports across restarts; passwords remain in the origin/profile-scoped credential vault, never in profile metadata
+- **Then** compact and wide layouts expose localized add, check and delete actions; an in-flight saved-server check shows progress and disables repeated checks
+- **Then** a catalog read failure displays a retry action rather than claiming there are no saved servers; malformed records and future schemas are preserved
+
+- **Given** the user enters an HTTP(S) endpoint and password
+- **When** Check connection runs on an IO platform
+- **Then** a bounded, authenticated, read-only `/api/info` probe verifies OpenCode 2 without adopting response URLs or rewriting the authored port
+- **Then** credentials, HTML responses, unrecognized data, unreachable servers and service starting/stopping/failure states have distinct localized outcomes
+- **Then** only a restricted fallback to healthy OpenCode 1 JSON at `/global/health` opens a full-screen upgrade explainer with server upgrade guidance and the stable CodeWalk 1 download link
+- **Then** versions below `2.0.20` cannot be saved; `2.0.21` and `2.0.22` are marked tested, while other valid supported versions remain selectable with an untested-version chip
+- **Then** retry hints delay manual checks without automatic HTTP replay, and changed input or a superseding probe invalidates the previous save authorization
+
+- **Given** a checked, usable endpoint is saved or deleted
+- **When** persistence is interrupted or reports an uncertain result
+- **Then** nonsecret, explicitly scoped creation/removal intents allow catalog recovery without scanning credentials or touching importer-owned records
+- **Then** a committed save still succeeds when the subsequent list refresh fails; the error card retries only catalog loading
+- **Then** an uncertain create must be reconciled before another identity is allocated, and a failed save requires a fresh connection check before retrying
+- **Then** browser endpoint probing reports unsupported rather than attempting an unverified transport
+
+Conversations, pairing and session routes retain their navigation
 placeholders. Locale changes exposed by the v2 controller remain transient;
 feature-specific settings controls, diagnostics and full rendering parity remain
-in their owning Issues. Settings and appearance widget/golden tests cover mobile and desktop viewports on
+in their owning Issues. Hosts, settings and appearance widget/golden tests cover mobile and desktop viewports on
 the Flutter VM; they do not certify installed native targets.
 
 ---

@@ -403,4 +403,90 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get settingsSearchClear => 'Clear search';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get onboardingCouldNotVerify =>
+      'Could not verify the server connection.';
+
+  @override
+  String get onboardingFailed => 'Failed';
+
+  @override
+  String get onboardingInvalidUrl => 'Invalid URL';
+
+  @override
+  String get onboardingLabel => 'Label (optional)';
+
+  @override
+  String get onboardingNotAvailable => 'not available';
+
+  @override
+  String get onboardingPassword => 'Password';
+
+  @override
+  String get onboardingPasswordRequired => 'Enter password';
+
+  @override
+  String get onboardingReady => 'Ready';
+
+  @override
+  String get onboardingServerUrl => 'Server URL';
+
+  @override
+  String get onboardingStarting => 'Starting';
+
+  @override
+  String get onboardingStopping => 'Stopping';
+
+  @override
+  String get serversAddServer => 'Add Server';
+
+  @override
+  String get serversNoServersFound => 'No servers found';
+
+  @override
+  String get hostsLegacyExplanation =>
+      'This server runs OpenCode 1. CodeWalk 2 needs OpenCode 2.';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      'Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.';
+
+  @override
+  String get hostsLegacyDownload => 'Download CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => 'Server upgrade required';
+
+  @override
+  String get hostsUntested => 'Untested version';
+
+  @override
+  String get hostsTransportHelp =>
+      'Could not reach the server. Check the URL, TLS and VPN connection.';
+
+  @override
+  String get hostsNativeOnly =>
+      'Endpoint detection is available on native Android and Linux in this MVP.';
+
+  @override
+  String get hostsAuthRequired =>
+      'Check the server password or pairing credentials.';
+
+  @override
+  String get hostsProfileStorageError =>
+      'Could not load or save profiles. Retry to reconcile the saved state.';
+
+  @override
+  String get hostsRetryLater =>
+      'The server requested a delay. Retry after the indicated time; no automatic retry is running.';
+
+  @override
+  String get hostsCheckConnection => 'Check connection';
 }

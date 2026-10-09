@@ -34,8 +34,9 @@ final class ControlledSocket extends Stream<Uint8List> implements Socket {
   void destroy() {
     if (destroyed) return;
     destroyed = true;
-    if (!flushSignal.isCompleted)
+    if (!flushSignal.isCompleted) {
       flushSignal.completeError(const SocketException('closed'));
+    }
     unawaited(input.close());
   }
 

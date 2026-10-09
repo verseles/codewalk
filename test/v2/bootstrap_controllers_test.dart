@@ -2,11 +2,14 @@ import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/app_navigation_controller.dart';
 import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/composition_root.dart';
+import 'package:codewalk/features/hosts/hosts_controller.dart';
 import 'package:codewalk/shared/l10n/l10n_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+
+import 'hosts/fakes.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +41,11 @@ void main() {
       navigation: _Navigation(events),
       localizations: L10nBridge(),
       router: _Router(events),
+      hosts: _Hosts(events),
     );
     dependencies.dispose();
     dependencies.dispose();
-    expect(events, ['router', 'navigation', 'preferences']);
+    expect(events, ['router', 'navigation', 'hosts', 'preferences']);
     expect(dependencies.isDisposed, isTrue);
   });
 
@@ -107,6 +111,17 @@ void main() {
     expect(navigation.consumePairingLink(), isNull);
     expect(navigation.pendingIntent, isNull);
   });
+}
+
+class _Hosts extends HostsController {
+  _Hosts(this.events)
+    : super(repository: MemoryProfiles(), prober: FakeProber());
+  final List<String> events;
+  @override
+  void dispose() {
+    events.add('hosts');
+    super.dispose();
+  }
 }
 
 class _LegacyMarker {}

@@ -380,4 +380,84 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get settingsSearchClear => '清除搜索';
+
+  @override
+  String get commonDelete => '删除';
+
+  @override
+  String get commonSave => '保存';
+
+  @override
+  String get onboardingCouldNotVerify => '无法验证服务器连接。';
+
+  @override
+  String get onboardingFailed => '失败';
+
+  @override
+  String get onboardingInvalidUrl => '无效的 URL';
+
+  @override
+  String get onboardingLabel => '标签（可选）';
+
+  @override
+  String get onboardingNotAvailable => '不可用';
+
+  @override
+  String get onboardingPassword => '密码';
+
+  @override
+  String get onboardingPasswordRequired => '输入密码';
+
+  @override
+  String get onboardingReady => '就绪';
+
+  @override
+  String get onboardingServerUrl => '服务器 URL';
+
+  @override
+  String get onboardingStarting => '正在启动';
+
+  @override
+  String get onboardingStopping => '正在停止';
+
+  @override
+  String get serversAddServer => '添加服务器';
+
+  @override
+  String get serversNoServersFound => '未找到服务器';
+
+  @override
+  String get hostsLegacyExplanation =>
+      '此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。';
+
+  @override
+  String get hostsUpgradeInstructions =>
+      '请在服务器上运行 opencode upgrade。最低版本：2.0.20；已测试：2.0.21–2.0.22。CodeWalk 不会安装或更改服务器。';
+
+  @override
+  String get hostsLegacyDownload => '下载 CodeWalk 1';
+
+  @override
+  String get hostsUpgradeRequired => '需要升级服务器';
+
+  @override
+  String get hostsUntested => '未经测试的版本';
+
+  @override
+  String get hostsTransportHelp => '无法连接服务器。请检查 URL、TLS 和 VPN 连接。';
+
+  @override
+  String get hostsNativeOnly => '此 MVP 的端点检测仅适用于原生 Android 和 Linux。';
+
+  @override
+  String get hostsAuthRequired => '请检查服务器密码或配对凭据。';
+
+  @override
+  String get hostsProfileStorageError => '无法加载或保存配置。请重试以确认保存状态。';
+
+  @override
+  String get hostsRetryLater => '服务器要求等待。请在指定时间后重试；不会自动重试。';
+
+  @override
+  String get hostsCheckConnection => '检查连接';
 }

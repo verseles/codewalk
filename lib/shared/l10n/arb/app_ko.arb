@@ -149,5 +149,64 @@
   "settingsSearchClear": "검색 지우기",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "삭제",
+  "commonSave": "저장",
+  "onboardingCouldNotVerify": "서버 연결을 확인할 수 없습니다.",
+  "onboardingFailed": "실패",
+  "onboardingInvalidUrl": "유효하지 않은 URL",
+  "onboardingLabel": "라벨 (선택 사항)",
+  "onboardingNotAvailable": "사용 불가",
+  "onboardingPassword": "비밀번호",
+  "onboardingPasswordRequired": "비밀번호 입력",
+  "onboardingReady": "준비됨",
+  "onboardingServerUrl": "서버 URL",
+  "onboardingStarting": "시작 중",
+  "onboardingStopping": "중지 중",
+  "serversAddServer": "서버 추가",
+  "serversNoServersFound": "서버를 찾을 수 없음",
+  "hostsLegacyExplanation": "이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20, 테스트됨: 2.0.21–2.0.22. CodeWalk는 서버를 설치하거나 변경하지 않습니다.",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "CodeWalk 1 다운로드",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "서버 업그레이드 필요",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "테스트되지 않은 버전",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "서버에 연결할 수 없습니다. URL, TLS 및 VPN 연결을 확인하세요.",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "이 MVP의 감지는 네이티브 Android와 Linux에서 사용할 수 있습니다.",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "서버 비밀번호 또는 페어링 인증 정보를 확인하세요.",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "프로필을 불러오거나 저장할 수 없습니다. 저장 상태를 확인하려면 다시 시도하세요.",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "서버가 대기를 요청했습니다. 지정 시간 이후 다시 시도하세요. 자동 재시도는 없습니다.",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "연결 확인",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

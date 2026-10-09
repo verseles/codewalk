@@ -1,7 +1,12 @@
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/hosts/hosts_controller.dart';
+import '../platform/endpoints/probe_factory.dart';
+import '../platform/profiles/endpoint_profile_store.dart';
+import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/preferences_backend.dart';
 import '../shared/l10n/l10n_bridge.dart';
@@ -14,9 +19,24 @@ import 'app_router.dart';
 AppDependencies createAppDependencies({
   Uri? initialLink,
   V2MetadataStore? metadataStore,
+  EndpointProfileRepository? profileRepository,
+  EndpointProber? endpointProber,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
+  final metadata =
+      metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend());
+  locator.registerSingleton(
+    HostsController(
+      repository:
+          profileRepository ??
+          EndpointProfileStore(
+            metadata: metadata,
+            credentials: createV2EndpointCredentials(metadata),
+          ),
+      prober: endpointProber ?? createEndpointProber(),
+    ),
+  );
   locator.registerSingleton(AppPreferencesController(store: metadataStore));
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
@@ -36,6 +56,7 @@ AppDependencies createAppDependencies({
     navigation: navigation,
     localizations: locator<L10nBridge>(),
     router: locator<GoRouter>(),
+    hosts: locator<HostsController>(),
   );
 }
 

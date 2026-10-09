@@ -149,5 +149,64 @@
   "settingsSearchClear": "Очистить поиск",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "Удалить",
+  "commonSave": "Сохранить",
+  "onboardingCouldNotVerify": "Не удалось проверить подключение к серверу.",
+  "onboardingFailed": "Сбой",
+  "onboardingInvalidUrl": "Некорректный URL",
+  "onboardingLabel": "Ярлык (необязательно)",
+  "onboardingNotAvailable": "недоступен",
+  "onboardingPassword": "Пароль",
+  "onboardingPasswordRequired": "Введите пароль",
+  "onboardingReady": "Готово",
+  "onboardingServerUrl": "URL сервера",
+  "onboardingStarting": "Запуск",
+  "onboardingStopping": "Остановка",
+  "serversAddServer": "Добавить сервер",
+  "serversNoServersFound": "Серверы не найдены",
+  "hostsLegacyExplanation": "Этот сервер использует OpenCode 1. CodeWalk 2 нужен OpenCode 2.",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "Запустите opencode upgrade на сервере. Минимум: 2.0.20; проверено: 2.0.21–2.0.22. CodeWalk не устанавливает и не изменяет сервер.",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "Скачать CodeWalk 1",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "Нужно обновить сервер",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "Непроверенная версия",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "Сервер недоступен. Проверьте URL, TLS и подключение VPN.",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "В этом MVP обнаружение доступно на нативных Android и Linux.",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "Проверьте пароль сервера или данные сопряжения.",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "Не удалось загрузить или сохранить профили. Повторите попытку, чтобы проверить сохранённое состояние.",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "Сервер запросил задержку. Повторите после указанного времени; автоматических попыток нет.",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "Проверить подключение",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

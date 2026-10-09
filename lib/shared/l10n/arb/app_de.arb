@@ -149,5 +149,64 @@
   "settingsSearchClear": "Suche löschen",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "Löschen",
+  "commonSave": "Speichern",
+  "onboardingCouldNotVerify": "Serververbindung konnte nicht verifiziert werden.",
+  "onboardingFailed": "Fehlgeschlagen",
+  "onboardingInvalidUrl": "Ungültige URL",
+  "onboardingLabel": "Bezeichnung (optional)",
+  "onboardingNotAvailable": "nicht verfügbar",
+  "onboardingPassword": "Passwort",
+  "onboardingPasswordRequired": "Passwort eingeben",
+  "onboardingReady": "Bereit",
+  "onboardingServerUrl": "Server-URL",
+  "onboardingStarting": "Startet",
+  "onboardingStopping": "Stoppt",
+  "serversAddServer": "Server hinzufügen",
+  "serversNoServersFound": "Keine Server gefunden",
+  "hostsLegacyExplanation": "Dieser Server verwendet OpenCode 1. CodeWalk 2 benötigt OpenCode 2.",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "Führen Sie opencode upgrade auf dem Server aus. Minimum: 2.0.20; getestet: 2.0.21–2.0.22. CodeWalk installiert oder verändert Ihren Server nicht.",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "CodeWalk 1 herunterladen",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "Server-Upgrade erforderlich",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "Ungetestete Version",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "Server nicht erreichbar. Prüfen Sie URL, TLS und VPN-Verbindung.",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "In diesem MVP ist die Erkennung auf nativem Android und Linux verfügbar.",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "Prüfen Sie das Serverpasswort oder die Kopplungsdaten.",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "Profile konnten nicht geladen oder gespeichert werden. Erneut versuchen, um den gespeicherten Zustand zu prüfen.",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "Der Server fordert eine Wartezeit. Versuchen Sie es nach der angegebenen Zeit; kein automatischer Wiederholungsversuch.",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "Verbindung prüfen",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

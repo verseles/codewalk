@@ -10,6 +10,8 @@ environment:
 dependencies:
   codewalk_core: ^0.0.0
   codewalk_net: ^0.0.0
+  pub_semver: ^2.2.1
+  http_parser: ^4.1.2
 
 dev_dependencies:
   lints: ^6.1.0

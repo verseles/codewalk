@@ -4,7 +4,7 @@
 
 - Flutter client for OpenCode-compatible servers (ADR-023: contract-first compatibility policy).
 - Retained v1 runtime follows `presentation -> domain -> data` with `get_it` + `provider`; its default entry point remains `lib/main.dart`.
-- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership and canonical model/port contracts; the net package implements endpoint-scoped HTTP on IO platforms and portable SSE framing. `harness_opencode` adds VM-only fixture-replay and fake-server test support; both harness packages retain empty public boundaries. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B hydrates persisted appearance before mount, while #305/V2-071C adds an adaptive `/settings` shell and scoped keyboard routing. Appearance and shortcuts are working settings destinations; Servers links to the existing `/hosts` placeholder, and other routes remain placeholders.
+- The active v2 foundation is a Dart pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` and `harness_host`, plus the independent `lib/main_v2.dart` entry point. The core package implements opaque identities, lineage, ownership, canonical model/port contracts and endpoint-profile contracts; `codewalk_net` provides endpoint-scoped HTTP, manually validated native WebSocket upgrades and isolate SSE parsing. `harness_opencode` now publicly exports production read-only endpoint probing and version/retry policy; session and pairing flows remain placeholders, as does the `harness_host` public boundary. The v2 app has its own composition graph and scoped 14-locale catalog; #304/V2-071B hydrates persisted appearance before mount, while #305/V2-071C adds an adaptive `/settings` shell and scoped keyboard routing. Appearance, shortcuts and endpoint profiles at `/hosts` are implemented destinations; `/sessions`, `/pair` and other routes remain placeholders.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
 - Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
@@ -24,7 +24,7 @@ lib/main_v2.dart                         # Explicit entry point; awaits dependen
 lib/app/composition_root.dart           # Private GetIt instance; loadAppDependencies hydrates the v2 graph before mount
 lib/app/app_dependencies.dart           # Typed graph and idempotent router/controller disposal
 lib/app/v2_bootstrap.dart                # Provider injection, MaterialApp.router, resolved theme and locale/dynamic-color bridges
-lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts the adaptive appearance/shortcuts shell, other routes remain placeholders
+lib/app/app_{router,shell}.dart          # Responsive navigation; /settings mounts the adaptive appearance/shortcuts shell, /hosts manages endpoint profiles, and /sessions and /pair remain placeholders
 lib/app/app_navigation_controller.dart  # Pending deep-link intents; pairing data retained privately in memory
 lib/app/app_keyboard_shortcuts.dart      # One shortcut manager, typed intents, inherited action scopes, guarded routing, and detection-only physical-keyboard observation
 lib/app/app_preferences_controller.dart # Persists appearance and explicit shortcut overrides in cw2.settings.*; merges per-action edits during hydration; locale and keyboard detection remain transient
@@ -46,10 +46,13 @@ lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and Engli
 lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
 lib/platform/storage/storage.dart      # Storage API barrel; appearance uses its metadata-store path
 lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
-lib/platform/storage/preferences_backend.dart # Allow-listed SharedPreferencesAsync metadata adapter used by appearance
+lib/platform/storage/preferences_backend.dart # Allow-listed SharedPreferencesAsync metadata adapter; normalizes Linux string lists and preserves malformed values for caller validation
 lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores, strict non-destructive presence checks, and memory LRU
-lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
-lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
+lib/platform/storage/endpoint_credentials.dart # Hashed origin/profile/kind-scoped credential keys; endpoint password is used and pairing-token kind is reserved
+lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends; native endpoint credentials use secure storage and Web credentials are instance-local memory
+lib/platform/profiles/endpoint_profile_store.dart # cw2 endpoint-profile catalog with non-secret creation/removal intents and restart reconciliation
+lib/platform/endpoints/probe_factory*.dart # Conditional native IO endpoint prober and unsupported-platform stub
+lib/features/hosts/{hosts_controller,hosts_page}.dart # Endpoint-profile CRUD, explicit manual detection/checks, retry guidance and storage-error recovery
 lib/platform/migration/                # Unwired read-only legacy sources, restartable v1 importer and sanitized report
 packages/codewalk_core/lib/src/identity.dart # Opaque IDs, composite refs, parent and fork lineage
 packages/codewalk_core/lib/src/ownership.dart # Ownership proof, freshness and unknown-state handling
@@ -57,6 +60,7 @@ packages/codewalk_core/lib/src/{values,commands,capabilities,errors}.dart # Immu
 packages/codewalk_core/lib/src/{timeline,events,lifecycle,session}.dart # Canonical observations, independent lifecycle states and per-read snapshot boundaries
 packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit owners, manual choices/forms, work/plan and nullable usage contracts
 packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
+packages/codewalk_core/lib/src/endpoints.dart # Endpoint status/profile values, URL validation, probe-task and profile-repository ports
 packages/codewalk_core/lib/src/reducer/ # Pure event/hydration reduction, effects and bounded full-reference session LRU
 packages/codewalk_core/test/reducer/    # Observed A prefix convergence, synthetic causality/bounds checks, and controlled review-race interleavings
 packages/codewalk_core/test/scripted_harness_{adapter,reducer}_test.dart # Test-only port contract checks and six synthetic scenarios through the real SessionStore/reducer
@@ -64,10 +68,11 @@ packages/codewalk_core/test/support/scripted_harness_adapter.dart # Finite test-
 packages/codewalk_core/test/support/scripted_harness_scenarios.dart # Six synthetic, finite scenarios consumed by the real reducer tests
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
-packages/harness_opencode/lib/harness_opencode.dart # Empty public OpenCode adapter boundary
+packages/harness_opencode/lib/harness_opencode.dart # Public endpoint-probe, server-info, version-policy and retry-after exports; no session adapter
+packages/harness_opencode/lib/src/{endpoint_probe,server_info,version_policy,retry_after}.dart # Read-only OpenCode endpoint detection, strict server-info parsing, compatibility policy and Retry-After hints
 packages/harness_opencode/test/support/fixture_replay.dart # Immutable finite scenarios from accepted OpenCode 2.0.22 captures, with strict request matching
 packages/harness_opencode/test/support/fake_auth.dart # Synthetic Basic/pairing auth with a manually advanced five-minute clock
-packages/harness_opencode/test/support/fake_opencode_server.dart # IPv4-loopback HTTP/SSE fake with admission faults, explicit SSE epochs and async teardown
+packages/harness_opencode/test/support/fake_opencode_server.dart # Test-only IPv4-loopback HTTP/SSE fake with admission faults, explicit SSE epochs and async teardown; not publicly exported
 packages/harness_opencode/test/fake_opencode_{server,stream}_test.dart # Real codewalk_net IO transport HTTP/SSE tests
 packages/harness_host/lib/             # Empty public host adapter boundary
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
@@ -251,6 +256,24 @@ precondition; it supplies no lease or protection against concurrent writers. It
 is not wired to bootstrap. Actual Android legacy-backend configuration,
 pre-engine source preservation, report/recovered-draft UI, credential boundaries
 and a real installed v1.266 upgrade remain separate acceptance work.
+
+### #272/V2-040 endpoint profiles and detection
+
+The native IO factory backs the implemented `/hosts` profile flow; non-IO targets
+return an unsupported-platform assessment. Detection is explicit and read-only:
+Basic auth uses strict `/api/info` parsing, with a bounded v1 `/global/health`
+fallback only for missing/HTML-info cases. A probe has a 20-second deadline and
+64 KiB response-body cap, presents `Retry-After` guidance without automatic
+retry/replay, and never adopts server-advertised response URLs. Endpoint URL
+validation retains the configured port. Profile metadata contains no credential;
+native passwords use secure storage and credential keys are scoped to profile ID
+and canonical origin (Web uses instance-local memory). Non-secret
+creation/removal intents make unknown write outcomes restart-reconcilable without
+scanning vault keys; unreadable/corrupt catalogs and identity mismatches are
+preserved, and future-schema markers block mutation without altering data.
+Serialization is local to a store instance, not cross-engine atomicity. The
+native implementation is source evidence only, not installed Android/Linux
+migration evidence or MVP acceptance.
 
 `.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
 `v2_foundations` for discovered package analysis/tests, planted guards, scoped

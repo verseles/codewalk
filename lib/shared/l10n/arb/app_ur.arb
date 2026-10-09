@@ -149,5 +149,64 @@
   "settingsSearchClear": "تلاش صاف کریں",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "حذف کریں۔",
+  "commonSave": "محفوظ کریں۔",
+  "onboardingCouldNotVerify": "سرور کنکشن کی تصدیق نہیں ہو سکی۔",
+  "onboardingFailed": "ناکام",
+  "onboardingInvalidUrl": "غلط URL",
+  "onboardingLabel": "لیبل (اختیاری)",
+  "onboardingNotAvailable": "دستیاب نہیں",
+  "onboardingPassword": "پاس ورڈ",
+  "onboardingPasswordRequired": "پاس ورڈ درج کریں۔",
+  "onboardingReady": "تیار",
+  "onboardingServerUrl": "سرور URL",
+  "onboardingStarting": "شروع ہو رہا ہے",
+  "onboardingStopping": "روک رہا ہے",
+  "serversAddServer": "سرور شامل کریں۔",
+  "serversNoServersFound": "کوئی سرور نہیں ملا",
+  "hostsLegacyExplanation": "یہ سرور OpenCode 1 چلاتا ہے۔ CodeWalk 2 کو OpenCode 2 درکار ہے۔",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20؛ آزمودہ: 2.0.21–2.0.22۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "CodeWalk 1 ڈاؤن لوڈ کریں",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "سرور اپ گریڈ درکار ہے",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "غیر آزمودہ ورژن",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "سرور تک رسائی نہیں ہو سکی۔ URL، TLS اور VPN کنکشن دیکھیں۔",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "اس MVP میں شناخت نیٹو Android اور Linux پر دستیاب ہے۔",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "سرور کا پاس ورڈ یا پیئرنگ کی اسناد دیکھیں۔",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "پروفائل لوڈ یا محفوظ نہیں ہو سکے۔ محفوظ شدہ حالت دیکھنے کے لیے دوبارہ کوشش کریں۔",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "سرور نے انتظار طلب کیا ہے۔ بتائے گئے وقت کے بعد کوشش کریں؛ خودکار کوشش نہیں ہو رہی۔",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "کنکشن چیک کریں",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

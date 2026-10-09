@@ -17,6 +17,8 @@ import subprocess
 import sys
 import tempfile
 
+from hosts_catalog import PORT_KEYS as HOST_KEYS, NEW_KEYS as HOST_NEW_KEYS, COPY as HOST_COPY
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "lib/shared/l10n"
@@ -102,6 +104,7 @@ SETTINGS_COPY = {
     "zh": ("未分配", "取消分配", "此版本不支持此操作。", "无法加载或保存设置。请重试；更改可能是临时的。", "清除搜索"),
 }
 KEYS |= SETTINGS_KEYS | set(SETTINGS_NEW_KEYS)
+KEYS |= HOST_KEYS | set(HOST_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -152,6 +155,24 @@ def port_settings_copy() -> None:
         for key, value in zip(SETTINGS_NEW_KEYS, SETTINGS_COPY[locale], strict=True):
             arb[key] = value
             arb["@" + key] = {"description": "V2 local settings and shortcut UI"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def port_hosts_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        legacy = json.loads((ROOT / "lib/l10n" / f"app_{locale}.arb").read_text(encoding="utf-8"))
+        for key in sorted(HOST_KEYS):
+            arb[key] = legacy[key]
+            if "@" + key in legacy:
+                arb["@" + key] = legacy["@" + key]
+        for key, value in zip(HOST_NEW_KEYS, HOST_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 endpoint profile and compatibility UI"}
         ports.append((path, arb))
     for path, arb in ports:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -225,6 +246,7 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="Fail on stale outputs without editing files.")
     parser.add_argument("--port-appearance", action="store_true", help="Selectively import consolidated appearance translations into v2 sources.")
     parser.add_argument("--port-settings", action="store_true", help="Selectively import consolidated settings and shortcut translations into v2 sources.")
+    parser.add_argument("--port-hosts", action="store_true", help="Selectively import endpoint copy into v2 sources.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -235,6 +257,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-settings cannot be combined with --check")
             port_settings_copy()
+        if args.port_hosts:
+            if args.check:
+                raise ValueError("--port-hosts cannot be combined with --check")
+            port_hosts_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

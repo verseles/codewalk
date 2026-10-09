@@ -149,5 +149,64 @@
   "settingsSearchClear": "खोज साफ़ करें",
   "@settingsSearchClear": {
     "description": "V2 local settings and shortcut UI"
+  },
+  "commonDelete": "हटाएं",
+  "commonSave": "सहेजें",
+  "onboardingCouldNotVerify": "सर्वर कनेक्शन को सत्यापित नहीं किया जा सका।",
+  "onboardingFailed": "विफल",
+  "onboardingInvalidUrl": "अमान्य URL",
+  "onboardingLabel": "लेबल (वैकल्पिक)",
+  "onboardingNotAvailable": "उपलब्ध नहीं",
+  "onboardingPassword": "पासवर्ड",
+  "onboardingPasswordRequired": "पासवर्ड दर्ज करें",
+  "onboardingReady": "तैयार",
+  "onboardingServerUrl": "सर्वर URL",
+  "onboardingStarting": "शुरू हो रहा है",
+  "onboardingStopping": "रुक रहा है",
+  "serversAddServer": "सर्वर जोड़ें",
+  "serversNoServersFound": "कोई सर्वर नहीं मिला",
+  "hostsLegacyExplanation": "यह सर्वर OpenCode 1 चलाता है। CodeWalk 2 को OpenCode 2 चाहिए।",
+  "@hostsLegacyExplanation": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeInstructions": "सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20; जाँचा गया: 2.0.21–2.0.22। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।",
+  "@hostsUpgradeInstructions": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsLegacyDownload": "CodeWalk 1 डाउनलोड करें",
+  "@hostsLegacyDownload": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUpgradeRequired": "सर्वर अपग्रेड आवश्यक",
+  "@hostsUpgradeRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsUntested": "अपरिक्षित संस्करण",
+  "@hostsUntested": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsTransportHelp": "सर्वर तक नहीं पहुँच सके। URL, TLS और VPN कनेक्शन जाँचें।",
+  "@hostsTransportHelp": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsNativeOnly": "इस MVP में पहचान नेटिव Android और Linux पर उपलब्ध है।",
+  "@hostsNativeOnly": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsAuthRequired": "सर्वर पासवर्ड या पेयरिंग क्रेडेंशियल जाँचें।",
+  "@hostsAuthRequired": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsProfileStorageError": "प्रोफ़ाइल लोड या सेव नहीं हुईं। सेव की गई स्थिति जाँचने के लिए फिर कोशिश करें।",
+  "@hostsProfileStorageError": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsRetryLater": "सर्वर ने प्रतीक्षा करने को कहा है। बताए समय के बाद कोशिश करें; कोई स्वचालित पुनः प्रयास नहीं है।",
+  "@hostsRetryLater": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsCheckConnection": "कनेक्शन जाँचें",
+  "@hostsCheckConnection": {
+    "description": "V2 endpoint profile and compatibility UI"
   }
 }

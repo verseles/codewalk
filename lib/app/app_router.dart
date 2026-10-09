@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/hosts/hosts_page.dart';
 import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
@@ -36,10 +37,7 @@ GoRouter createAppRouter({
           GoRoute(path: '/sessions', builder: _sessions),
           GoRoute(
             path: '/hosts',
-            builder: (context, state) => _Placeholder(
-              title: context.v2L10n.settingsServersTitle,
-              message: context.v2L10n.chatAddServerToStart,
-            ),
+            builder: (context, state) => const HostsPage(),
           ),
           GoRoute(
             path: '/settings',
