@@ -256,5 +256,84 @@
   "pairingPaired": "Подключено",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "Загрузить еще",
+  "chatRefresh": "Обновить",
+  "commonCopiedToClipboard": "Скопировано в буфер обмена",
+  "logsAppLogs": "Логи приложения",
+  "logsClear": "Очистить логи",
+  "logsCopyFiltered": "Копировать отфильтрованные логи",
+  "logsEnableLogging": "Включить логи приложения",
+  "logsEnableLoggingDescription": "Сохраняет диагностические логи в памяти. Оставляйте выключенным, если не устраняете проблему.",
+  "logsFilterAll": "Все",
+  "logsLevel": "Уровень",
+  "logsLoggingDisabledDescription": "CodeWalk не собирает подробные логи приложения. Включайте логи только когда нужна диагностика.",
+  "logsLoggingDisabledTitle": "Логи отключены",
+  "logsNoLogsYet": "Логи пока не записаны.",
+  "logsNoMatchingLogs": "Нет логов, соответствующих текущим фильтрам.",
+  "logsTaskStatusCanceled": "отменено",
+  "logsTaskStatusError": "ошибка",
+  "logsTaskStatusOk": "ok",
+  "releaseHistoryDescription": "Недавние объявления и изменения",
+  "releaseHistoryLoadError": "Не удалось загрузить историю. Проверьте подключение и повторите попытку.",
+  "releaseHistoryStale": "Показана сохранённая копия. Обновить данные не удалось; последние заметки могут отсутствовать.",
+  "releaseHistoryTitle": "История версий",
+  "settingsGroupHelp": "Справка",
+  "diagnosticsHostCatalog": "Загрузка списка серверов",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "Проверка сервера",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "Сохранение профиля",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "Удаление профиля",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "Загрузка настроек",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "Сохранение настроек",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "Загрузка истории версий",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "Сохранение истории версий",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "Информация",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "Предупреждение",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "Ошибка",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "Не удалось скопировать журналы.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "Журналы скопированы; копия ограничена 64 KiB.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "Только в памяти: операция, результат, уровень, время UTC и ограниченная длительность. Содержимое, учётные данные и адреса не собираются.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} мс"
 }

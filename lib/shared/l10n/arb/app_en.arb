@@ -646,5 +646,158 @@
   "pairingPaired": "Paired",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
+  },
+  "chatLoadMore": "Load more",
+  "@chatLoadMore": {
+    "description": "CodeWalk UI string — chatLoadMore"
+  },
+  "chatRefresh": "Refresh",
+  "@chatRefresh": {
+    "description": "CodeWalk UI string — chatRefresh"
+  },
+  "commonCopiedToClipboard": "Copied to clipboard",
+  "@commonCopiedToClipboard": {
+    "description": "CodeWalk UI string — commonCopiedToClipboard"
+  },
+  "logsAppLogs": "App Logs",
+  "@logsAppLogs": {
+    "description": "CodeWalk UI string — logsAppLogs"
+  },
+  "logsClear": "Clear logs",
+  "@logsClear": {
+    "description": "CodeWalk UI string — logsClear"
+  },
+  "logsCopyFiltered": "Copy filtered logs",
+  "@logsCopyFiltered": {
+    "description": "CodeWalk UI string — logsCopyFiltered"
+  },
+  "logsEnableLogging": "Enable app logging",
+  "@logsEnableLogging": {
+    "description": "CodeWalk UI string — logsEnableLogging"
+  },
+  "logsEnableLoggingDescription": "Collect in-memory diagnostic logs. Keep this off unless you are troubleshooting.",
+  "@logsEnableLoggingDescription": {
+    "description": "CodeWalk UI string — logsEnableLoggingDescription"
+  },
+  "logsFilterAll": "All",
+  "@logsFilterAll": {
+    "description": "CodeWalk UI string — logsFilterAll"
+  },
+  "logsLevel": "Level",
+  "@logsLevel": {
+    "description": "CodeWalk UI string — logsLevel"
+  },
+  "logsLoggingDisabledDescription": "CodeWalk is not collecting detailed app logs. Enable logging only when you need diagnostics.",
+  "@logsLoggingDisabledDescription": {
+    "description": "CodeWalk UI string — logsLoggingDisabledDescription"
+  },
+  "logsLoggingDisabledTitle": "Logging is disabled",
+  "@logsLoggingDisabledTitle": {
+    "description": "CodeWalk UI string — logsLoggingDisabledTitle"
+  },
+  "logsNoLogsYet": "No logs captured yet.",
+  "@logsNoLogsYet": {
+    "description": "CodeWalk UI string — logsNoLogsYet"
+  },
+  "logsNoMatchingLogs": "No logs match the current filters.",
+  "@logsNoMatchingLogs": {
+    "description": "CodeWalk UI string — logsNoMatchingLogs"
+  },
+  "logsTaskStatusCanceled": "canceled",
+  "@logsTaskStatusCanceled": {
+    "description": "CodeWalk UI string — logsTaskStatusCanceled"
+  },
+  "logsTaskStatusError": "error",
+  "@logsTaskStatusError": {
+    "description": "CodeWalk UI string — logsTaskStatusError"
+  },
+  "logsTaskStatusOk": "ok",
+  "@logsTaskStatusOk": {
+    "description": "CodeWalk UI string — logsTaskStatusOk"
+  },
+  "releaseHistoryDescription": "Recent announcements and changelogs",
+  "@releaseHistoryDescription": {
+    "description": "About release history entry subtitle"
+  },
+  "releaseHistoryLoadError": "Unable to load release history. Check your connection and try again.",
+  "@releaseHistoryLoadError": {
+    "description": "No cached changelog available after a failed fetch"
+  },
+  "releaseHistoryStale": "Showing a saved copy. Refresh failed; newer notes may be missing.",
+  "@releaseHistoryStale": {
+    "description": "Cached release notes remain readable after a failed refresh"
+  },
+  "releaseHistoryTitle": "Release history",
+  "@releaseHistoryTitle": {
+    "description": "Permanent release history entry and page title"
+  },
+  "settingsGroupHelp": "Help",
+  "@settingsGroupHelp": {
+    "description": "CodeWalk UI string — settingsGroupHelp"
+  },
+  "diagnosticsHostCatalog": "Load host catalog",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "Check host",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "Save profile",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "Remove profile",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "Load preferences",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "Save preferences",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "Load release history",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "Save release history",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "Information",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "Warning",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "Error",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "Unable to copy logs.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "Logs copied; the copy was limited to 64 KiB.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "Memory only: operation, outcome, severity, UTC time and bounded duration. No content, credentials or addresses are collected.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "@logsPerformanceDuration": {
+    "description": "CodeWalk UI string — logsPerformanceDuration",
+    "placeholders": {
+      "elapsedMs": {
+        "type": "int"
+      }
+    }
   }
 }

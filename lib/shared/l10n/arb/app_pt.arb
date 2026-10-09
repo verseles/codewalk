@@ -256,5 +256,84 @@
   "pairingPaired": "Pareado",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "Carregar mais",
+  "chatRefresh": "Atualizar",
+  "commonCopiedToClipboard": "Copiado para a área de transferência",
+  "logsAppLogs": "Logs do App",
+  "logsClear": "Limpar logs",
+  "logsCopyFiltered": "Copiar logs filtrados",
+  "logsEnableLogging": "Ativar logs do app",
+  "logsEnableLoggingDescription": "Coleta logs de diagnóstico em memória. Mantenha desligado, exceto ao solucionar problemas.",
+  "logsFilterAll": "Todos",
+  "logsLevel": "Nível",
+  "logsLoggingDisabledDescription": "O CodeWalk não está coletando logs detalhados do app. Ative logs apenas quando precisar diagnosticar problemas.",
+  "logsLoggingDisabledTitle": "Logs desativados",
+  "logsNoLogsYet": "Nenhum log capturado ainda.",
+  "logsNoMatchingLogs": "Nenhum log corresponde aos filtros atuais.",
+  "logsTaskStatusCanceled": "cancelada",
+  "logsTaskStatusError": "erro",
+  "logsTaskStatusOk": "ok",
+  "releaseHistoryDescription": "Anúncios e alterações recentes",
+  "releaseHistoryLoadError": "Não foi possível carregar o histórico. Verifique sua conexão e tente novamente.",
+  "releaseHistoryStale": "Exibindo uma cópia salva. A atualização falhou; novidades mais recentes podem estar ausentes.",
+  "releaseHistoryTitle": "Histórico de versões",
+  "settingsGroupHelp": "Ajuda",
+  "diagnosticsHostCatalog": "Carregar catálogo de servidores",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "Verificar servidor",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "Salvar perfil",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "Remover perfil",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "Carregar preferências",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "Salvar preferências",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "Carregar histórico de versões",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "Salvar histórico de versões",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "Informação",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "Aviso",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "Erro",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "Não foi possível copiar os logs.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "Logs copiados; a cópia foi limitada a 64 KiB.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "Somente em memória: operação, resultado, nível, horário UTC e duração limitada. Conteúdo, credenciais e endereços não são coletados.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

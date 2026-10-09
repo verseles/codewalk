@@ -48,7 +48,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
-- **Then** Servers opens the existing hosts route; unimplemented feature settings and diagnostics remain with their owning Issues
+- **Then** Servers opens the existing hosts route; Help exposes App Logs and Release history, while other unimplemented feature settings remain with their owning Issues
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited
@@ -138,9 +138,34 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an already-started, authorized write can finish, with its outcome reconciled without blind rollback
 - **Then** image decoding caps app-retained input and geometry, validates PNG/JPEG dimensions before raster allocation and waits for the decoding worker to exit after cancellation; these are not OS-cache or absolute-memory guarantees
 
+### V2 diagnostics and release history
+
+- **Given** the user opens Settings > App Logs
+- **When** diagnostic collection has not been explicitly enabled
+- **Then** collection is OFF and no event timestamps or diagnostic context are constructed
+- **Then** the local choice persists under `cw2.settings.loggingEnabled`; an unreadable initial preference stays OFF, while a failed reload preserves already known intent
+- **When** collection is enabled
+- **Then** only finite operation/outcome/severity values, timestamps and bounded durations are retained in memory, with at most 1,000 events and 256 KiB of serialized data
+- **Then** URLs, profile IDs, headers, credentials, raw payloads, messages, errors and stacks have no input path into this diagnostic buffer
+- **Then** disabling clears the buffer immediately; failed preference saves show retry without claiming the choice is saved
+- **Then** filters select operation, outcome and severity; explicit clipboard copy is limited to 64 KiB and reports failure or truncation without raw exception text
+- **Then** changing consent invalidates pending copy-success feedback; contents already written to the operating-system clipboard cannot be revoked
+- **Then** a committed profile removal is reported separately from a failed subsequent catalog refresh
+
+- **Given** the user opens Settings > Release history
+- **When** native loading is available
+- **Then** the public fixed GitHub changelog is read without profile authentication, redirects or automatic replay, with a 256 KiB body limit and bounded timeouts
+- **Then** the isolated `cw2.releaseHistory.cache` stores a validated envelope of at most 512 KiB, with one-hour freshness and coalesced loading
+- **Then** invalid, shortened, unavailable or unsavable refreshes preserve the previous saved copy and offer manual retry; a future cache timestamp cannot establish freshness
+- **Then** strict stable-version headings, real calendar dates, duplicate detection and nonempty release content are checked; BOM/CRLF and original-language leading multiline announcements are preserved
+- **Then** an empty announcement marker cannot replace valid cached notes; announcement-only releases containing text remain valid
+- **Then** versions appear newest first in batches of 20, with highlighted announcements and expandable selectable plain-text notes
+- **Then** opening or refreshing this page neither acknowledges update announcements nor installs an update
+- **Then** disposed or superseded loads cannot publish stale results; unsupported fetch platforms can still display a previously saved copy
+
 Conversations and session routes retain their navigation
 placeholders. Locale changes exposed by the v2 controller remain transient;
-feature-specific settings controls, diagnostics and full rendering parity remain
+other feature-specific settings controls and full rendering parity remain
 in their owning Issues. Hosts, settings and appearance widget/golden tests cover mobile and desktop viewports on
 the Flutter VM; they do not certify installed native targets.
 

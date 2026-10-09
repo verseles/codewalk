@@ -526,4 +526,124 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get pairingPaired => 'جڑا ہوا';
+
+  @override
+  String get chatLoadMore => 'مزید لوڈ کریں۔';
+
+  @override
+  String get chatRefresh => 'ریفریش کریں۔';
+
+  @override
+  String get commonCopiedToClipboard => 'کلپ بورڈ پر کاپی ہو گیا';
+
+  @override
+  String get logsAppLogs => 'ایپ لاگز';
+
+  @override
+  String get logsClear => 'نوشتہ جات صاف کریں۔';
+
+  @override
+  String get logsCopyFiltered => 'فلٹر شدہ لاگز کو کاپی کریں۔';
+
+  @override
+  String get logsEnableLogging => 'ایپ لاگز فعال کریں';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'میموری میں تشخیصی لاگز جمع کرتا ہے۔ مسئلہ حل کرنے کے علاوہ اسے بند رکھیں۔';
+
+  @override
+  String get logsFilterAll => 'تمام';
+
+  @override
+  String get logsLevel => 'سطح';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk تفصیلی ایپ لاگز جمع نہیں کر رہا۔ تشخیص کی ضرورت ہو تو ہی لاگز فعال کریں۔';
+
+  @override
+  String get logsLoggingDisabledTitle => 'لاگز غیر فعال ہیں';
+
+  @override
+  String get logsNoLogsYet => 'ابھی تک کوئی لاگز جمع نہیں ہوئے۔';
+
+  @override
+  String get logsNoMatchingLogs =>
+      'موجودہ فلٹرز سے کوئی لاگز مطابقت نہیں رکھتے۔';
+
+  @override
+  String get logsTaskStatusCanceled => 'منسوخ';
+
+  @override
+  String get logsTaskStatusError => 'خرابی';
+
+  @override
+  String get logsTaskStatusOk => 'ٹھیک';
+
+  @override
+  String get releaseHistoryDescription => 'حالیہ اعلانات اور تبدیلیاں';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'ورژنز کی تاریخ لوڈ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get releaseHistoryStale =>
+      'محفوظ شدہ نقل دکھائی جا رہی ہے۔ ریفریش ناکام ہوا؛ نئی معلومات موجود نہیں ہو سکتیں۔';
+
+  @override
+  String get releaseHistoryTitle => 'ورژنز کی تاریخ';
+
+  @override
+  String get settingsGroupHelp => 'مدد';
+
+  @override
+  String get diagnosticsHostCatalog => 'سرور فہرست لوڈ کریں';
+
+  @override
+  String get diagnosticsHostProbe => 'سرور کی جانچ';
+
+  @override
+  String get diagnosticsProfileSave => 'پروفائل محفوظ کریں';
+
+  @override
+  String get diagnosticsProfileRemove => 'پروفائل ہٹائیں';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'ترجیحات لوڈ کریں';
+
+  @override
+  String get diagnosticsPreferencesSave => 'ترجیحات محفوظ کریں';
+
+  @override
+  String get diagnosticsArchiveLoad => 'ورژن کی تاریخ لوڈ کریں';
+
+  @override
+  String get diagnosticsArchiveSave => 'ورژن کی تاریخ محفوظ کریں';
+
+  @override
+  String get diagnosticsInfo => 'معلومات';
+
+  @override
+  String get diagnosticsWarning => 'انتباہ';
+
+  @override
+  String get diagnosticsError => 'خرابی';
+
+  @override
+  String get diagnosticsCopyFailed => 'لاگز کاپی نہیں ہو سکے۔';
+
+  @override
+  String get diagnosticsCopyTruncated =>
+      'لاگز کاپی ہو گئے؛ کاپی 64 KiB تک محدود ہے۔';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'صرف میموری میں: عمل، نتیجہ، سطح، UTC وقت اور محدود دورانیہ۔ مواد، اسناد یا پتے جمع نہیں کیے جاتے۔';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

@@ -256,5 +256,84 @@
   "pairingPaired": "जुड़ा हुआ",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "और लोड करें",
+  "chatRefresh": "रीफ़्रेश करें",
+  "commonCopiedToClipboard": "क्लिपबोर्ड पर कॉपी किया गया",
+  "logsAppLogs": "ऐप लॉग",
+  "logsClear": "लॉग साफ़ करें",
+  "logsCopyFiltered": "फ़िल्टर किए गए लॉग कॉपी करें",
+  "logsEnableLogging": "ऐप लॉगिंग चालू करें",
+  "logsEnableLoggingDescription": "मेमोरी में निदान लॉग इकट्ठा करता है। समस्या हल करते समय ही इसे चालू रखें।",
+  "logsFilterAll": "सभी",
+  "logsLevel": "स्तर (Level)",
+  "logsLoggingDisabledDescription": "CodeWalk विस्तृत ऐप लॉग इकट्ठा नहीं कर रहा है। निदान की ज़रूरत होने पर ही लॉगिंग चालू करें।",
+  "logsLoggingDisabledTitle": "लॉगिंग बंद है",
+  "logsNoLogsYet": "अभी तक कोई लॉग कैप्चर नहीं किया गया है।",
+  "logsNoMatchingLogs": "कोई भी लॉग वर्तमान फ़िल्टर से मेल नहीं खाता है।",
+  "logsTaskStatusCanceled": "रद्द",
+  "logsTaskStatusError": "त्रुटि",
+  "logsTaskStatusOk": "ठीक",
+  "releaseHistoryDescription": "हाल की घोषणाएँ और बदलाव",
+  "releaseHistoryLoadError": "संस्करण इतिहास लोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
+  "releaseHistoryStale": "सहेजी गई प्रति दिखाई जा रही है। रीफ़्रेश विफल रहा; नई जानकारी उपलब्ध नहीं हो सकती।",
+  "releaseHistoryTitle": "संस्करण इतिहास",
+  "settingsGroupHelp": "सहायता",
+  "diagnosticsHostCatalog": "सर्वर सूची लोड करें",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "सर्वर जाँचें",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "प्रोफ़ाइल सहेजें",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "प्रोफ़ाइल हटाएँ",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "प्राथमिकताएँ लोड करें",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "प्राथमिकताएँ सहेजें",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "संस्करण इतिहास लोड करें",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "संस्करण इतिहास सहेजें",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "जानकारी",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "चेतावनी",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "त्रुटि",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "लॉग कॉपी नहीं हो सके।",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "लॉग कॉपी हुए; कॉपी 64 KiB तक सीमित है।",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "केवल मेमोरी में: कार्य, परिणाम, स्तर, UTC समय और सीमित अवधि। सामग्री, क्रेडेंशियल या पते एकत्र नहीं किए जाते।",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

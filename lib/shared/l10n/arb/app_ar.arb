@@ -255,5 +255,84 @@
   "pairingPaired": "مقترن",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "تحميل المزيد",
+  "chatRefresh": "تحديث",
+  "commonCopiedToClipboard": "تم النسخ إلى الحافظة",
+  "logsAppLogs": "سجلات التطبيق",
+  "logsClear": "مسح السجلات",
+  "logsCopyFiltered": "نسخ السجلات المصفاة",
+  "logsEnableLogging": "تفعيل سجلات التطبيق",
+  "logsEnableLoggingDescription": "يجمع سجلات تشخيصية في الذاكرة. اتركه معطلاً إلا عند استكشاف مشكلة.",
+  "logsFilterAll": "الكل",
+  "logsLevel": "المستوى",
+  "logsLoggingDisabledDescription": "لا يجمع CodeWalk سجلات تفصيلية للتطبيق. فعّل السجلات فقط عند الحاجة إلى التشخيص.",
+  "logsLoggingDisabledTitle": "السجلات معطلة",
+  "logsNoLogsYet": "لم يتم التقاط أي سجلات بعد.",
+  "logsNoMatchingLogs": "لا توجد سجلات تطابق الفلاتر الحالية.",
+  "logsTaskStatusCanceled": "ملغاة",
+  "logsTaskStatusError": "خطأ",
+  "logsTaskStatusOk": "حسنًا",
+  "releaseHistoryDescription": "الإعلانات والتغييرات الأخيرة",
+  "releaseHistoryLoadError": "تعذر تحميل سجل الإصدارات. تحقق من اتصالك وحاول مرة أخرى.",
+  "releaseHistoryStale": "تُعرض نسخة محفوظة. فشل التحديث؛ قد تكون الملاحظات الأحدث غير موجودة.",
+  "releaseHistoryTitle": "سجل الإصدارات",
+  "settingsGroupHelp": "المساعدة",
+  "diagnosticsHostCatalog": "تحميل قائمة الخوادم",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "فحص الخادم",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "حفظ الملف",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "إزالة الملف",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "تحميل التفضيلات",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "حفظ التفضيلات",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "تحميل سجل الإصدارات",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "حفظ سجل الإصدارات",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "معلومات",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "تحذير",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "خطأ",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "تعذر نسخ السجلات.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "تم نسخ السجلات؛ اقتصر النسخ على 64 KiB.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "في الذاكرة فقط: العملية والنتيجة والمستوى ووقت UTC ومدة محدودة. لا يُجمع المحتوى أو بيانات الاعتماد أو العناوين.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

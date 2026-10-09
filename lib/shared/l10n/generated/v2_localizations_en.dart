@@ -528,4 +528,123 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get pairingPaired => 'Paired';
+
+  @override
+  String get chatLoadMore => 'Load more';
+
+  @override
+  String get chatRefresh => 'Refresh';
+
+  @override
+  String get commonCopiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get logsAppLogs => 'App Logs';
+
+  @override
+  String get logsClear => 'Clear logs';
+
+  @override
+  String get logsCopyFiltered => 'Copy filtered logs';
+
+  @override
+  String get logsEnableLogging => 'Enable app logging';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'Collect in-memory diagnostic logs. Keep this off unless you are troubleshooting.';
+
+  @override
+  String get logsFilterAll => 'All';
+
+  @override
+  String get logsLevel => 'Level';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk is not collecting detailed app logs. Enable logging only when you need diagnostics.';
+
+  @override
+  String get logsLoggingDisabledTitle => 'Logging is disabled';
+
+  @override
+  String get logsNoLogsYet => 'No logs captured yet.';
+
+  @override
+  String get logsNoMatchingLogs => 'No logs match the current filters.';
+
+  @override
+  String get logsTaskStatusCanceled => 'canceled';
+
+  @override
+  String get logsTaskStatusError => 'error';
+
+  @override
+  String get logsTaskStatusOk => 'ok';
+
+  @override
+  String get releaseHistoryDescription => 'Recent announcements and changelogs';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Unable to load release history. Check your connection and try again.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Showing a saved copy. Refresh failed; newer notes may be missing.';
+
+  @override
+  String get releaseHistoryTitle => 'Release history';
+
+  @override
+  String get settingsGroupHelp => 'Help';
+
+  @override
+  String get diagnosticsHostCatalog => 'Load host catalog';
+
+  @override
+  String get diagnosticsHostProbe => 'Check host';
+
+  @override
+  String get diagnosticsProfileSave => 'Save profile';
+
+  @override
+  String get diagnosticsProfileRemove => 'Remove profile';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'Load preferences';
+
+  @override
+  String get diagnosticsPreferencesSave => 'Save preferences';
+
+  @override
+  String get diagnosticsArchiveLoad => 'Load release history';
+
+  @override
+  String get diagnosticsArchiveSave => 'Save release history';
+
+  @override
+  String get diagnosticsInfo => 'Information';
+
+  @override
+  String get diagnosticsWarning => 'Warning';
+
+  @override
+  String get diagnosticsError => 'Error';
+
+  @override
+  String get diagnosticsCopyFailed => 'Unable to copy logs.';
+
+  @override
+  String get diagnosticsCopyTruncated =>
+      'Logs copied; the copy was limited to 64 KiB.';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'Memory only: operation, outcome, severity, UTC time and bounded duration. No content, credentials or addresses are collected.';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

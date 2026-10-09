@@ -256,5 +256,84 @@
   "pairingPaired": "Gekoppelt",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "Mehr laden",
+  "chatRefresh": "Aktualisieren",
+  "commonCopiedToClipboard": "In die Zwischenablage kopiert",
+  "logsAppLogs": "App-Protokolle",
+  "logsClear": "Protokolle löschen",
+  "logsCopyFiltered": "Gefilterte Protokolle kopieren",
+  "logsEnableLogging": "App-Logging aktivieren",
+  "logsEnableLoggingDescription": "Sammelt Diagnose-Logs im Arbeitsspeicher. Lassen Sie dies außer zur Fehlersuche deaktiviert.",
+  "logsFilterAll": "Alle",
+  "logsLevel": "Ebene",
+  "logsLoggingDisabledDescription": "CodeWalk sammelt keine detaillierten App-Logs. Aktivieren Sie Logging nur, wenn Sie Diagnosedaten benötigen.",
+  "logsLoggingDisabledTitle": "Logging ist deaktiviert",
+  "logsNoLogsYet": "Noch keine Logs erfasst.",
+  "logsNoMatchingLogs": "Keine Logs entsprechen den aktuellen Filtern.",
+  "logsTaskStatusCanceled": "abgebrochen",
+  "logsTaskStatusError": "Fehler",
+  "logsTaskStatusOk": "ok",
+  "releaseHistoryDescription": "Aktuelle Ankündigungen und Änderungen",
+  "releaseHistoryLoadError": "Der Versionsverlauf konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "releaseHistoryStale": "Eine gespeicherte Kopie wird angezeigt. Die Aktualisierung ist fehlgeschlagen; neuere Hinweise können fehlen.",
+  "releaseHistoryTitle": "Versionsverlauf",
+  "settingsGroupHelp": "Hilfe",
+  "diagnosticsHostCatalog": "Serverkatalog laden",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "Server prüfen",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "Profil speichern",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "Profil entfernen",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "Einstellungen laden",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "Einstellungen speichern",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "Versionsverlauf laden",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "Versionsverlauf speichern",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "Information",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "Warnung",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "Fehler",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "Protokolle konnten nicht kopiert werden.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "Protokolle kopiert; die Kopie wurde auf 64 KiB begrenzt.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "Nur im Speicher: Vorgang, Ergebnis, Stufe, UTC-Zeit und begrenzte Dauer. Keine Inhalte, Zugangsdaten oder Adressen werden erfasst.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

@@ -508,4 +508,121 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get pairingPaired => '페어링됨';
+
+  @override
+  String get chatLoadMore => '더 보기';
+
+  @override
+  String get chatRefresh => '새로고침';
+
+  @override
+  String get commonCopiedToClipboard => '클립보드에 복사됨';
+
+  @override
+  String get logsAppLogs => '앱 로그';
+
+  @override
+  String get logsClear => '로그 지우기';
+
+  @override
+  String get logsCopyFiltered => '필터링된 로그 복사';
+
+  @override
+  String get logsEnableLogging => '앱 로그 켜기';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      '메모리에 진단 로그를 수집합니다. 문제를 진단할 때가 아니면 꺼두세요.';
+
+  @override
+  String get logsFilterAll => '전체';
+
+  @override
+  String get logsLevel => '로그 레벨';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk가 자세한 앱 로그를 수집하지 않습니다. 진단이 필요할 때만 로그를 켜세요.';
+
+  @override
+  String get logsLoggingDisabledTitle => '로그가 꺼져 있습니다';
+
+  @override
+  String get logsNoLogsYet => '아직 캡처된 로그가 없습니다.';
+
+  @override
+  String get logsNoMatchingLogs => '현재 필터와 일치하는 로그가 없습니다.';
+
+  @override
+  String get logsTaskStatusCanceled => '취소됨';
+
+  @override
+  String get logsTaskStatusError => '오류';
+
+  @override
+  String get logsTaskStatusOk => '정상';
+
+  @override
+  String get releaseHistoryDescription => '최근 공지 및 변경 사항';
+
+  @override
+  String get releaseHistoryLoadError => '버전 기록을 불러올 수 없습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get releaseHistoryStale =>
+      '저장된 사본을 표시합니다. 새로고침에 실패하여 최신 내용이 없을 수 있습니다.';
+
+  @override
+  String get releaseHistoryTitle => '버전 기록';
+
+  @override
+  String get settingsGroupHelp => '도움말';
+
+  @override
+  String get diagnosticsHostCatalog => '서버 목록 불러오기';
+
+  @override
+  String get diagnosticsHostProbe => '서버 확인';
+
+  @override
+  String get diagnosticsProfileSave => '프로필 저장';
+
+  @override
+  String get diagnosticsProfileRemove => '프로필 삭제';
+
+  @override
+  String get diagnosticsPreferencesLoad => '환경설정 불러오기';
+
+  @override
+  String get diagnosticsPreferencesSave => '환경설정 저장';
+
+  @override
+  String get diagnosticsArchiveLoad => '버전 기록 불러오기';
+
+  @override
+  String get diagnosticsArchiveSave => '버전 기록 저장';
+
+  @override
+  String get diagnosticsInfo => '정보';
+
+  @override
+  String get diagnosticsWarning => '경고';
+
+  @override
+  String get diagnosticsError => '오류';
+
+  @override
+  String get diagnosticsCopyFailed => '로그를 복사할 수 없습니다.';
+
+  @override
+  String get diagnosticsCopyTruncated => '로그를 복사했습니다. 복사는 64 KiB로 제한되었습니다.';
+
+  @override
+  String get diagnosticsPrivacy =>
+      '메모리에만 저장: 작업, 결과, 수준, UTC 시간과 제한된 소요 시간. 콘텐츠, 인증 정보 또는 주소는 수집하지 않습니다.';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

@@ -256,5 +256,84 @@
   "pairingPaired": "ペアリング済み",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "さらに読み込む",
+  "chatRefresh": "更新",
+  "commonCopiedToClipboard": "クリップボードにコピーしました",
+  "logsAppLogs": "アプリログ",
+  "logsClear": "ログをクリア",
+  "logsCopyFiltered": "コピーフィルター済みログ",
+  "logsEnableLogging": "アプリログを有効化",
+  "logsEnableLoggingDescription": "メモリ内に診断ログを収集します。トラブルシュート時以外はオフのままにしてください。",
+  "logsFilterAll": "すべて",
+  "logsLevel": "レベル",
+  "logsLoggingDisabledDescription": "CodeWalk は詳細なアプリログを収集していません。診断が必要な場合のみログを有効にしてください。",
+  "logsLoggingDisabledTitle": "ログは無効です",
+  "logsNoLogsYet": "ログはまだ記録されていません。",
+  "logsNoMatchingLogs": "現在のフィルタに一致するログはありません。",
+  "logsTaskStatusCanceled": "キャンセル済み",
+  "logsTaskStatusError": "エラー",
+  "logsTaskStatusOk": "ok",
+  "releaseHistoryDescription": "最近のお知らせと変更履歴",
+  "releaseHistoryLoadError": "履歴を読み込めませんでした。接続を確認して再試行してください。",
+  "releaseHistoryStale": "保存済みのコピーを表示しています。更新に失敗したため、最新の情報が含まれていない場合があります。",
+  "releaseHistoryTitle": "バージョン履歴",
+  "settingsGroupHelp": "ヘルプ",
+  "diagnosticsHostCatalog": "サーバー一覧を読み込む",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "サーバーを確認",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "プロファイルを保存",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "プロファイルを削除",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "設定を読み込む",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "設定を保存",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "バージョン履歴を読み込む",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "バージョン履歴を保存",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "情報",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "警告",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "エラー",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "ログをコピーできませんでした。",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "ログをコピーしました。コピーは64 KiBに制限されました。",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "メモリのみ：操作、結果、レベル、UTC時刻、制限付き所要時間。内容、認証情報、アドレスは収集しません。",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

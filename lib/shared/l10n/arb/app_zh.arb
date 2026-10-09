@@ -256,5 +256,84 @@
   "pairingPaired": "已配对",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "加载更多",
+  "chatRefresh": "刷新",
+  "commonCopiedToClipboard": "已复制到剪贴板",
+  "logsAppLogs": "应用日志",
+  "logsClear": "清除日志",
+  "logsCopyFiltered": "复制已过滤的日志",
+  "logsEnableLogging": "启用应用日志",
+  "logsEnableLoggingDescription": "在内存中收集诊断日志。除非排查问题，否则保持关闭。",
+  "logsFilterAll": "全部",
+  "logsLevel": "级别",
+  "logsLoggingDisabledDescription": "CodeWalk 未收集详细应用日志。仅在需要诊断时启用日志。",
+  "logsLoggingDisabledTitle": "日志已关闭",
+  "logsNoLogsYet": "尚未捕获日志。",
+  "logsNoMatchingLogs": "没有符合当前过滤条件的日志。",
+  "logsTaskStatusCanceled": "已取消",
+  "logsTaskStatusError": "错误",
+  "logsTaskStatusOk": "正常",
+  "releaseHistoryDescription": "近期公告和更新日志",
+  "releaseHistoryLoadError": "无法加载版本历史。请检查网络连接后重试。",
+  "releaseHistoryStale": "正在显示已保存的副本。刷新失败，可能缺少最新说明。",
+  "releaseHistoryTitle": "版本历史",
+  "settingsGroupHelp": "帮助",
+  "diagnosticsHostCatalog": "加载服务器列表",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "检查服务器",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "保存配置",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "删除配置",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "加载偏好设置",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "保存偏好设置",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "加载版本历史",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "保存版本历史",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "信息",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "警告",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "错误",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "无法复制日志。",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "日志已复制；副本限制为64 KiB。",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "仅保存在内存中：操作、结果、级别、UTC时间和有限时长。不收集内容、凭据或地址。",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} 毫秒"
 }

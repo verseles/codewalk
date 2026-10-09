@@ -527,4 +527,123 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get pairingPaired => 'জোড়া দেওয়া';
+
+  @override
+  String get chatLoadMore => 'আরো লোড';
+
+  @override
+  String get chatRefresh => 'রিফ্রেশ';
+
+  @override
+  String get commonCopiedToClipboard => 'ক্লিপবোর্ডে কপি করা হয়েছে';
+
+  @override
+  String get logsAppLogs => 'অ্যাপ লগ';
+
+  @override
+  String get logsClear => 'সাফ লগ';
+
+  @override
+  String get logsCopyFiltered => 'ফিল্টার করা লগ কপি করুন';
+
+  @override
+  String get logsEnableLogging => 'অ্যাপ লগ চালু করুন';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'মেমরিতে ডায়াগনস্টিক লগ সংগ্রহ করে। সমস্যা সমাধান না করলে বন্ধ রাখুন।';
+
+  @override
+  String get logsFilterAll => 'সব';
+
+  @override
+  String get logsLevel => 'স্তর';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk বিস্তারিত অ্যাপ লগ সংগ্রহ করছে না। ডায়াগনস্টিক প্রয়োজন হলে তবেই লগ চালু করুন।';
+
+  @override
+  String get logsLoggingDisabledTitle => 'লগ বন্ধ আছে';
+
+  @override
+  String get logsNoLogsYet => 'এখনও কোনো লগ ক্যাপচার করা হয়নি।';
+
+  @override
+  String get logsNoMatchingLogs =>
+      'বর্তমান ফিল্টারগুলির সাথে কোনো লগ মিলছে না।';
+
+  @override
+  String get logsTaskStatusCanceled => 'বাতিল';
+
+  @override
+  String get logsTaskStatusError => 'ত্রুটি';
+
+  @override
+  String get logsTaskStatusOk => 'ঠিক আছে';
+
+  @override
+  String get releaseHistoryDescription => 'সাম্প্রতিক ঘোষণা ও পরিবর্তন';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'সংস্করণের ইতিহাস লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
+
+  @override
+  String get releaseHistoryStale =>
+      'সংরক্ষিত অনুলিপি দেখানো হচ্ছে। রিফ্রেশ ব্যর্থ হয়েছে; নতুন তথ্য নাও থাকতে পারে।';
+
+  @override
+  String get releaseHistoryTitle => 'সংস্করণের ইতিহাস';
+
+  @override
+  String get settingsGroupHelp => 'সহায়তা';
+
+  @override
+  String get diagnosticsHostCatalog => 'সার্ভার তালিকা লোড';
+
+  @override
+  String get diagnosticsHostProbe => 'সার্ভার পরীক্ষা';
+
+  @override
+  String get diagnosticsProfileSave => 'প্রোফাইল সংরক্ষণ';
+
+  @override
+  String get diagnosticsProfileRemove => 'প্রোফাইল সরান';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'পছন্দ লোড';
+
+  @override
+  String get diagnosticsPreferencesSave => 'পছন্দ সংরক্ষণ';
+
+  @override
+  String get diagnosticsArchiveLoad => 'সংস্করণের ইতিহাস লোড';
+
+  @override
+  String get diagnosticsArchiveSave => 'সংস্করণের ইতিহাস সংরক্ষণ';
+
+  @override
+  String get diagnosticsInfo => 'তথ্য';
+
+  @override
+  String get diagnosticsWarning => 'সতর্কতা';
+
+  @override
+  String get diagnosticsError => 'ত্রুটি';
+
+  @override
+  String get diagnosticsCopyFailed => 'লগ কপি করা যায়নি।';
+
+  @override
+  String get diagnosticsCopyTruncated => 'লগ কপি হয়েছে; কপি 64 KiB-তে সীমিত।';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'শুধু মেমরিতে: কাজ, ফলাফল, স্তর, UTC সময় ও সীমিত সময়কাল। বিষয়বস্তু, পরিচয়পত্র বা ঠিকানা সংগ্রহ করা হয় না।';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

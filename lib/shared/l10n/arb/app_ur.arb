@@ -256,5 +256,84 @@
   "pairingPaired": "جڑا ہوا",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "مزید لوڈ کریں۔",
+  "chatRefresh": "ریفریش کریں۔",
+  "commonCopiedToClipboard": "کلپ بورڈ پر کاپی ہو گیا",
+  "logsAppLogs": "ایپ لاگز",
+  "logsClear": "نوشتہ جات صاف کریں۔",
+  "logsCopyFiltered": "فلٹر شدہ لاگز کو کاپی کریں۔",
+  "logsEnableLogging": "ایپ لاگز فعال کریں",
+  "logsEnableLoggingDescription": "میموری میں تشخیصی لاگز جمع کرتا ہے۔ مسئلہ حل کرنے کے علاوہ اسے بند رکھیں۔",
+  "logsFilterAll": "تمام",
+  "logsLevel": "سطح",
+  "logsLoggingDisabledDescription": "CodeWalk تفصیلی ایپ لاگز جمع نہیں کر رہا۔ تشخیص کی ضرورت ہو تو ہی لاگز فعال کریں۔",
+  "logsLoggingDisabledTitle": "لاگز غیر فعال ہیں",
+  "logsNoLogsYet": "ابھی تک کوئی لاگز جمع نہیں ہوئے۔",
+  "logsNoMatchingLogs": "موجودہ فلٹرز سے کوئی لاگز مطابقت نہیں رکھتے۔",
+  "logsTaskStatusCanceled": "منسوخ",
+  "logsTaskStatusError": "خرابی",
+  "logsTaskStatusOk": "ٹھیک",
+  "releaseHistoryDescription": "حالیہ اعلانات اور تبدیلیاں",
+  "releaseHistoryLoadError": "ورژنز کی تاریخ لوڈ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+  "releaseHistoryStale": "محفوظ شدہ نقل دکھائی جا رہی ہے۔ ریفریش ناکام ہوا؛ نئی معلومات موجود نہیں ہو سکتیں۔",
+  "releaseHistoryTitle": "ورژنز کی تاریخ",
+  "settingsGroupHelp": "مدد",
+  "diagnosticsHostCatalog": "سرور فہرست لوڈ کریں",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "سرور کی جانچ",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "پروفائل محفوظ کریں",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "پروفائل ہٹائیں",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "ترجیحات لوڈ کریں",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "ترجیحات محفوظ کریں",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "ورژن کی تاریخ لوڈ کریں",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "ورژن کی تاریخ محفوظ کریں",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "معلومات",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "انتباہ",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "خرابی",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "لاگز کاپی نہیں ہو سکے۔",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "لاگز کاپی ہو گئے؛ کاپی 64 KiB تک محدود ہے۔",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "صرف میموری میں: عمل، نتیجہ، سطح، UTC وقت اور محدود دورانیہ۔ مواد، اسناد یا پتے جمع نہیں کیے جاتے۔",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

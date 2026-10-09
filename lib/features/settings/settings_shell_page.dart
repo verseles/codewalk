@@ -9,9 +9,11 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import 'appearance_settings_page.dart';
+import 'diagnostics_settings_page.dart';
+import 'release_history_settings_page.dart';
 import 'shortcuts_settings_page.dart';
 
-enum SettingsSection { appearance, shortcuts }
+enum SettingsSection { appearance, shortcuts, logs, releaseHistory }
 
 class SettingsShellPage extends StatefulWidget {
   const SettingsShellPage({super.key});
@@ -106,9 +108,12 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     // Keep section form state and pending modal callbacks across reparenting.
     final detail = KeyedSubtree(
       key: _detailKey,
-      child: section == SettingsSection.shortcuts
-          ? const ShortcutsSettingsPage()
-          : const AppearanceSettingsPage(),
+      child: switch (section) {
+        SettingsSection.shortcuts => const ShortcutsSettingsPage(),
+        SettingsSection.logs => const DiagnosticsSettingsPage(),
+        SettingsSection.releaseHistory => const ReleaseHistorySettingsPage(),
+        _ => const AppearanceSettingsPage(),
+      },
     );
     return KeyboardActionScope(
       handlers: {if (!wide && section != null) ShortcutAction.escape: _back},
@@ -180,6 +185,16 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
           l.settingsShortcutsDescription,
           l.settingsNavigationGroupInput,
         );
+    final logs = matches(
+      l.logsAppLogs,
+      l.logsEnableLoggingDescription,
+      l.settingsGroupHelp,
+    );
+    final history = matches(
+      l.releaseHistoryTitle,
+      l.releaseHistoryDescription,
+      l.settingsGroupHelp,
+    );
     return ListView(
       key: const ValueKey('settings_destinations'),
       padding: const EdgeInsets.all(16),
@@ -203,7 +218,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
                   ),
           ),
         ),
-        if (!servers && !appearance && !shortcuts)
+        if (!servers && !appearance && !shortcuts && !logs && !history)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l.settingsNavigationNoResults),
@@ -236,6 +251,21 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             Icons.keyboard_outlined,
           ),
         ],
+        if (logs || history) _group(context, l.settingsGroupHelp),
+        if (logs)
+          _destination(
+            SettingsSection.logs,
+            l.logsAppLogs,
+            l.logsEnableLoggingDescription,
+            Icons.receipt_long_outlined,
+          ),
+        if (history)
+          _destination(
+            SettingsSection.releaseHistory,
+            l.releaseHistoryTitle,
+            l.releaseHistoryDescription,
+            Icons.history_outlined,
+          ),
       ],
     );
   }

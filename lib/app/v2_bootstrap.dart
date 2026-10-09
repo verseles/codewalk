@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/settings/release_history_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
+import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/theme/app_theme.dart';
@@ -48,6 +50,14 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         ChangeNotifierProvider.value(value: dependencies.preferences),
         ChangeNotifierProvider.value(value: dependencies.navigation),
         ChangeNotifierProvider.value(value: dependencies.hosts),
+        if (dependencies.diagnostics case final diagnostics?)
+          ChangeNotifierProvider<DiagnosticsController>.value(
+            value: diagnostics,
+          ),
+        if (dependencies.releaseHistory case final history?)
+          ChangeNotifierProvider<ReleaseHistoryController>.value(
+            value: history,
+          ),
         if (dependencies.pairing case final pairing?)
           ChangeNotifierProvider.value(value: pairing),
         Provider.value(value: dependencies.localizations),

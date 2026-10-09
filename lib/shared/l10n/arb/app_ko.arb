@@ -256,5 +256,84 @@
   "pairingPaired": "페어링됨",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "더 보기",
+  "chatRefresh": "새로고침",
+  "commonCopiedToClipboard": "클립보드에 복사됨",
+  "logsAppLogs": "앱 로그",
+  "logsClear": "로그 지우기",
+  "logsCopyFiltered": "필터링된 로그 복사",
+  "logsEnableLogging": "앱 로그 켜기",
+  "logsEnableLoggingDescription": "메모리에 진단 로그를 수집합니다. 문제를 진단할 때가 아니면 꺼두세요.",
+  "logsFilterAll": "전체",
+  "logsLevel": "로그 레벨",
+  "logsLoggingDisabledDescription": "CodeWalk가 자세한 앱 로그를 수집하지 않습니다. 진단이 필요할 때만 로그를 켜세요.",
+  "logsLoggingDisabledTitle": "로그가 꺼져 있습니다",
+  "logsNoLogsYet": "아직 캡처된 로그가 없습니다.",
+  "logsNoMatchingLogs": "현재 필터와 일치하는 로그가 없습니다.",
+  "logsTaskStatusCanceled": "취소됨",
+  "logsTaskStatusError": "오류",
+  "logsTaskStatusOk": "정상",
+  "releaseHistoryDescription": "최근 공지 및 변경 사항",
+  "releaseHistoryLoadError": "버전 기록을 불러올 수 없습니다. 연결을 확인하고 다시 시도하세요.",
+  "releaseHistoryStale": "저장된 사본을 표시합니다. 새로고침에 실패하여 최신 내용이 없을 수 있습니다.",
+  "releaseHistoryTitle": "버전 기록",
+  "settingsGroupHelp": "도움말",
+  "diagnosticsHostCatalog": "서버 목록 불러오기",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "서버 확인",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "프로필 저장",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "프로필 삭제",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "환경설정 불러오기",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "환경설정 저장",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "버전 기록 불러오기",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "버전 기록 저장",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "정보",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "경고",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "오류",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "로그를 복사할 수 없습니다.",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "로그를 복사했습니다. 복사는 64 KiB로 제한되었습니다.",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "메모리에만 저장: 작업, 결과, 수준, UTC 시간과 제한된 소요 시간. 콘텐츠, 인증 정보 또는 주소는 수집하지 않습니다.",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }

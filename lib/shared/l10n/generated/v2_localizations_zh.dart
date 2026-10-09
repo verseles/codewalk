@@ -496,4 +496,118 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get pairingPaired => '已配对';
+
+  @override
+  String get chatLoadMore => '加载更多';
+
+  @override
+  String get chatRefresh => '刷新';
+
+  @override
+  String get commonCopiedToClipboard => '已复制到剪贴板';
+
+  @override
+  String get logsAppLogs => '应用日志';
+
+  @override
+  String get logsClear => '清除日志';
+
+  @override
+  String get logsCopyFiltered => '复制已过滤的日志';
+
+  @override
+  String get logsEnableLogging => '启用应用日志';
+
+  @override
+  String get logsEnableLoggingDescription => '在内存中收集诊断日志。除非排查问题，否则保持关闭。';
+
+  @override
+  String get logsFilterAll => '全部';
+
+  @override
+  String get logsLevel => '级别';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk 未收集详细应用日志。仅在需要诊断时启用日志。';
+
+  @override
+  String get logsLoggingDisabledTitle => '日志已关闭';
+
+  @override
+  String get logsNoLogsYet => '尚未捕获日志。';
+
+  @override
+  String get logsNoMatchingLogs => '没有符合当前过滤条件的日志。';
+
+  @override
+  String get logsTaskStatusCanceled => '已取消';
+
+  @override
+  String get logsTaskStatusError => '错误';
+
+  @override
+  String get logsTaskStatusOk => '正常';
+
+  @override
+  String get releaseHistoryDescription => '近期公告和更新日志';
+
+  @override
+  String get releaseHistoryLoadError => '无法加载版本历史。请检查网络连接后重试。';
+
+  @override
+  String get releaseHistoryStale => '正在显示已保存的副本。刷新失败，可能缺少最新说明。';
+
+  @override
+  String get releaseHistoryTitle => '版本历史';
+
+  @override
+  String get settingsGroupHelp => '帮助';
+
+  @override
+  String get diagnosticsHostCatalog => '加载服务器列表';
+
+  @override
+  String get diagnosticsHostProbe => '检查服务器';
+
+  @override
+  String get diagnosticsProfileSave => '保存配置';
+
+  @override
+  String get diagnosticsProfileRemove => '删除配置';
+
+  @override
+  String get diagnosticsPreferencesLoad => '加载偏好设置';
+
+  @override
+  String get diagnosticsPreferencesSave => '保存偏好设置';
+
+  @override
+  String get diagnosticsArchiveLoad => '加载版本历史';
+
+  @override
+  String get diagnosticsArchiveSave => '保存版本历史';
+
+  @override
+  String get diagnosticsInfo => '信息';
+
+  @override
+  String get diagnosticsWarning => '警告';
+
+  @override
+  String get diagnosticsError => '错误';
+
+  @override
+  String get diagnosticsCopyFailed => '无法复制日志。';
+
+  @override
+  String get diagnosticsCopyTruncated => '日志已复制；副本限制为64 KiB。';
+
+  @override
+  String get diagnosticsPrivacy => '仅保存在内存中：操作、结果、级别、UTC时间和有限时长。不收集内容、凭据或地址。';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs 毫秒';
+  }
 }

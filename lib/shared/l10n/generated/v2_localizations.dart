@@ -1070,6 +1070,228 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Paired'**
   String get pairingPaired;
+
+  /// CodeWalk UI string — chatLoadMore
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get chatLoadMore;
+
+  /// CodeWalk UI string — chatRefresh
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get chatRefresh;
+
+  /// CodeWalk UI string — commonCopiedToClipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get commonCopiedToClipboard;
+
+  /// CodeWalk UI string — logsAppLogs
+  ///
+  /// In en, this message translates to:
+  /// **'App Logs'**
+  String get logsAppLogs;
+
+  /// CodeWalk UI string — logsClear
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs'**
+  String get logsClear;
+
+  /// CodeWalk UI string — logsCopyFiltered
+  ///
+  /// In en, this message translates to:
+  /// **'Copy filtered logs'**
+  String get logsCopyFiltered;
+
+  /// CodeWalk UI string — logsEnableLogging
+  ///
+  /// In en, this message translates to:
+  /// **'Enable app logging'**
+  String get logsEnableLogging;
+
+  /// CodeWalk UI string — logsEnableLoggingDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Collect in-memory diagnostic logs. Keep this off unless you are troubleshooting.'**
+  String get logsEnableLoggingDescription;
+
+  /// CodeWalk UI string — logsFilterAll
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get logsFilterAll;
+
+  /// CodeWalk UI string — logsLevel
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get logsLevel;
+
+  /// CodeWalk UI string — logsLoggingDisabledDescription
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk is not collecting detailed app logs. Enable logging only when you need diagnostics.'**
+  String get logsLoggingDisabledDescription;
+
+  /// CodeWalk UI string — logsLoggingDisabledTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Logging is disabled'**
+  String get logsLoggingDisabledTitle;
+
+  /// CodeWalk UI string — logsNoLogsYet
+  ///
+  /// In en, this message translates to:
+  /// **'No logs captured yet.'**
+  String get logsNoLogsYet;
+
+  /// CodeWalk UI string — logsNoMatchingLogs
+  ///
+  /// In en, this message translates to:
+  /// **'No logs match the current filters.'**
+  String get logsNoMatchingLogs;
+
+  /// CodeWalk UI string — logsTaskStatusCanceled
+  ///
+  /// In en, this message translates to:
+  /// **'canceled'**
+  String get logsTaskStatusCanceled;
+
+  /// CodeWalk UI string — logsTaskStatusError
+  ///
+  /// In en, this message translates to:
+  /// **'error'**
+  String get logsTaskStatusError;
+
+  /// CodeWalk UI string — logsTaskStatusOk
+  ///
+  /// In en, this message translates to:
+  /// **'ok'**
+  String get logsTaskStatusOk;
+
+  /// About release history entry subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Recent announcements and changelogs'**
+  String get releaseHistoryDescription;
+
+  /// No cached changelog available after a failed fetch
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load release history. Check your connection and try again.'**
+  String get releaseHistoryLoadError;
+
+  /// Cached release notes remain readable after a failed refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Showing a saved copy. Refresh failed; newer notes may be missing.'**
+  String get releaseHistoryStale;
+
+  /// Permanent release history entry and page title
+  ///
+  /// In en, this message translates to:
+  /// **'Release history'**
+  String get releaseHistoryTitle;
+
+  /// CodeWalk UI string — settingsGroupHelp
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsGroupHelp;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Load host catalog'**
+  String get diagnosticsHostCatalog;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Check host'**
+  String get diagnosticsHostProbe;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get diagnosticsProfileSave;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Remove profile'**
+  String get diagnosticsProfileRemove;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Load preferences'**
+  String get diagnosticsPreferencesLoad;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Save preferences'**
+  String get diagnosticsPreferencesSave;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Load release history'**
+  String get diagnosticsArchiveLoad;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Save release history'**
+  String get diagnosticsArchiveSave;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get diagnosticsInfo;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get diagnosticsWarning;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get diagnosticsError;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to copy logs.'**
+  String get diagnosticsCopyFailed;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Logs copied; the copy was limited to 64 KiB.'**
+  String get diagnosticsCopyTruncated;
+
+  /// V2 finite diagnostics and archive UI
+  ///
+  /// In en, this message translates to:
+  /// **'Memory only: operation, outcome, severity, UTC time and bounded duration. No content, credentials or addresses are collected.'**
+  String get diagnosticsPrivacy;
+
+  /// CodeWalk UI string — logsPerformanceDuration
+  ///
+  /// In en, this message translates to:
+  /// **'{elapsedMs} ms'**
+  String logsPerformanceDuration(int elapsedMs);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -5,15 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/settings/release_history_controller.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
+import '../platform/releases/release_source_factory.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/preferences_backend.dart';
+import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/releases/release_source.dart';
 import 'app_dependencies.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
@@ -27,12 +31,26 @@ AppDependencies createAppDependencies({
   EndpointProber? endpointProber,
   EndpointPairing? endpointPairing,
   QrInput? qrInput,
+  DiagnosticsController? diagnostics,
+  ReleaseSource? releaseSource,
+  DateTime Function()? releaseClock,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
   final navigator = GlobalKey<NavigatorState>();
   final metadata =
       metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend());
+  locator.registerSingleton<DiagnosticsController>(
+    diagnostics ?? DiagnosticsController(),
+  );
+  locator.registerSingleton<ReleaseHistoryController>(
+    ReleaseHistoryController(
+      source: releaseSource ?? createReleaseSource(),
+      store: metadata,
+      now: releaseClock,
+      diagnostics: locator<DiagnosticsController>(),
+    ),
+  );
   locator.registerSingleton(
     HostsController(
       repository:
@@ -42,9 +60,15 @@ AppDependencies createAppDependencies({
             credentials: createV2EndpointCredentials(metadata),
           ),
       prober: endpointProber ?? createEndpointProber(),
+      diagnostics: locator<DiagnosticsController>(),
     ),
   );
-  locator.registerSingleton(AppPreferencesController(store: metadataStore));
+  locator.registerSingleton(
+    AppPreferencesController(
+      store: metadataStore,
+      diagnostics: locator<DiagnosticsController>(),
+    ),
+  );
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
   locator.registerSingleton(
@@ -73,6 +97,8 @@ AppDependencies createAppDependencies({
     router: locator<GoRouter>(),
     hosts: locator<HostsController>(),
     pairing: locator<PairingController>(),
+    diagnostics: locator<DiagnosticsController>(),
+    releaseHistory: locator<ReleaseHistoryController>(),
   );
 }
 

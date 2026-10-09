@@ -532,4 +532,124 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get pairingPaired => 'Подключено';
+
+  @override
+  String get chatLoadMore => 'Загрузить еще';
+
+  @override
+  String get chatRefresh => 'Обновить';
+
+  @override
+  String get commonCopiedToClipboard => 'Скопировано в буфер обмена';
+
+  @override
+  String get logsAppLogs => 'Логи приложения';
+
+  @override
+  String get logsClear => 'Очистить логи';
+
+  @override
+  String get logsCopyFiltered => 'Копировать отфильтрованные логи';
+
+  @override
+  String get logsEnableLogging => 'Включить логи приложения';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'Сохраняет диагностические логи в памяти. Оставляйте выключенным, если не устраняете проблему.';
+
+  @override
+  String get logsFilterAll => 'Все';
+
+  @override
+  String get logsLevel => 'Уровень';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk не собирает подробные логи приложения. Включайте логи только когда нужна диагностика.';
+
+  @override
+  String get logsLoggingDisabledTitle => 'Логи отключены';
+
+  @override
+  String get logsNoLogsYet => 'Логи пока не записаны.';
+
+  @override
+  String get logsNoMatchingLogs =>
+      'Нет логов, соответствующих текущим фильтрам.';
+
+  @override
+  String get logsTaskStatusCanceled => 'отменено';
+
+  @override
+  String get logsTaskStatusError => 'ошибка';
+
+  @override
+  String get logsTaskStatusOk => 'ok';
+
+  @override
+  String get releaseHistoryDescription => 'Недавние объявления и изменения';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Не удалось загрузить историю. Проверьте подключение и повторите попытку.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Показана сохранённая копия. Обновить данные не удалось; последние заметки могут отсутствовать.';
+
+  @override
+  String get releaseHistoryTitle => 'История версий';
+
+  @override
+  String get settingsGroupHelp => 'Справка';
+
+  @override
+  String get diagnosticsHostCatalog => 'Загрузка списка серверов';
+
+  @override
+  String get diagnosticsHostProbe => 'Проверка сервера';
+
+  @override
+  String get diagnosticsProfileSave => 'Сохранение профиля';
+
+  @override
+  String get diagnosticsProfileRemove => 'Удаление профиля';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'Загрузка настроек';
+
+  @override
+  String get diagnosticsPreferencesSave => 'Сохранение настроек';
+
+  @override
+  String get diagnosticsArchiveLoad => 'Загрузка истории версий';
+
+  @override
+  String get diagnosticsArchiveSave => 'Сохранение истории версий';
+
+  @override
+  String get diagnosticsInfo => 'Информация';
+
+  @override
+  String get diagnosticsWarning => 'Предупреждение';
+
+  @override
+  String get diagnosticsError => 'Ошибка';
+
+  @override
+  String get diagnosticsCopyFailed => 'Не удалось скопировать журналы.';
+
+  @override
+  String get diagnosticsCopyTruncated =>
+      'Журналы скопированы; копия ограничена 64 KiB.';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'Только в памяти: операция, результат, уровень, время UTC и ограниченная длительность. Содержимое, учётные данные и адреса не собираются.';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs мс';
+  }
 }

@@ -1317,3 +1317,99 @@ tool/release/changelog.py              # Changelog update/extract helper used by
 - **Save pipeline** (`chat_page_file_runtime.dart`): `_saveFileEditorDraft` is the shared manual/autosave path; it coalesces per-path saves, awaits an active save instead of short-circuiting, and allows close to perform a bounded follow-up save when newer edits arrive; only a clean draft short-circuits. It checks DI registration and `_fileMutationsSupported` (snackbars `filesOperationUnavailable` if unsupported); gates UTF-8 content at `_maxEditableFileLength` (64 KiB) and surfaces `_ChatPageFileViewer._draftTooLargeSaveMessage` (`Draft is too large to save from the editor.`) inline and via snackbar; sets `isSaving=true` + clears error; awaits `WorkspaceFileOperationsService.writeFile(serverScopeKey, rootDirectory, path, content)`; on failure sets `saveErrorMessage` via `_fileOperationErrorLabel(result.code)` and surfaces a snackbar; on success calls `markSavedContent`, updates the cached `_FileTabViewState` (preserving mimeType), and snackbars success. Close/lifecycle teardown cancels pending debounce timers and ignores stale completions when a draft is swapped or the page is unmounted.
 - **Dirty-aware reconciliation**: `_reloadFileTab` blocks dirty editor drafts before a reload can swap content — paths with dirty drafts skip the swap and set `saveErrorMessage` to the static string `Unsaved changes; reload skipped.`; diff-aware silent reloads reach that same guard via `_reconcileFileContextWithSessionDiff`, which invokes `_reloadFileTab(silent: true)` per matched tab path. `_reconcileRenamedFileTreePath` remaps `editorDraftsByPath` keys via `_replacePathPrefix`; `_reconcileDeletedFileTreePath` removes and disposes drafts for the deleted path or subtree, and clears `tabSelection.activePath` if the active tab was removed. Close and path mutation guards preserve dirty drafts and coordinate with active saves.
 - **Tests**: `test/unit/presentation/workspace_file_operations_service_test.dart` covers write-path validation, 48 KiB content chunking, negotiated GNU/BSD/Python decoder selection, and server-bound abort/teardown behavior. `test/integration/workspace_file_operations_live_test.dart` is an opt-in local OpenCode probe/create/write/read/delete integration test. `test/support/fakes.dart` adds `writeFileResult`, `writeFileCallCount`, and `onWriteFile` hook to `FakeWorkspaceFileOperationsService`. `test/widget/chat_page_test.dart` covers file-editor autosave timing, per-path draft isolation, active-save coordination, lifecycle/close guards, CRLF round-trip, current-draft Add-to-chat, dirty-state failure/rename guards, and editable empty text files.
+
+## V2-071D diagnostics and release history
+
+This section maps the implemented v2 diagnostics and release-history feature on
+`main`; it is implementation context, not a roadmap or backlog entry.
+
+```text
+lib/shared/diagnostics/diagnostics_controller.dart # Opt-in in-memory diagnostic event ring, finite event vocabulary, byte/event bounds, filters, and bounded clipboard copy
+lib/shared/releases/release_archive.dart           # Pure strict CHANGELOG parser, BigInt stable-version ordering, validated dates, and plain-text notes/announcements
+lib/shared/releases/release_source.dart            # Release-source contract, fixed public archive URL, body bound, and typed results
+lib/platform/releases/release_source_factory.dart  # Conditional release-source factory
+lib/platform/releases/release_source_io.dart       # Native-only unauthenticated IO GET with cancellation, no redirects, bounded body, and timeouts
+lib/platform/releases/release_source_stub.dart     # Non-IO unavailable-source stub; cached history remains usable
+lib/features/settings/release_history_controller.dart # Cache-first archive loading, refresh coalescing, TTL, stale-copy preservation, and shortened-archive rejection
+lib/features/settings/release_history_settings_page.dart # Selectable archive notes/announcements, refresh/retry, and 20-entry paging
+lib/features/settings/diagnostics_settings_page.dart # Opt-in Help > Logs screen with finite filters, clear, and bounded clipboard export
+lib/features/settings/settings_shell_page.dart     # Help group and Logs/Release history settings destinations
+lib/features/hosts/hosts_controller.dart            # Coarse host catalog/probe/profile operation events
+lib/app/app_dependencies.dart                       # Owns/disposes the optional diagnostics and release-history controllers
+lib/app/composition_root.dart                       # Composes diagnostics, release source, and cached history controller
+lib/app/v2_bootstrap.dart                           # Provides composed controllers to the v2 widget tree
+lib/app/app_preferences_controller.dart             # Persists `cw2.settings.loggingEnabled`; default is off
+tool/l10n/diagnostics_catalog.py                    # Scoped diagnostics/archive translations (15 new keys)
+tool/l10n/generate_v2_localizations.py              # `--port-diagnostics` selective v2 catalog port and localization generation/check
+lib/shared/l10n/arb/                                # 14 v2 locale ARBs for diagnostics/archive copy
+lib/shared/l10n/generated/                          # 15 generated v2 localization outputs
+test/v2/diagnostics/diagnostics_controller_test.dart # Event, bounds, filtering, and clipboard controller coverage
+test/v2/diagnostics/diagnostic_preferences_test.dart # Logging preference hydration, persistence, and failure coverage
+test/v2/diagnostics/host_diagnostics_test.dart      # Coarse host-event instrumentation coverage
+test/v2/release_history/release_archive_test.dart   # Strict archive parsing and ordering coverage
+test/v2/release_history/release_history_controller_test.dart # Cache, TTL, coalescing, failure, and stale-copy coverage
+test/v2/release_history/release_source_test.dart    # Native source bounds, timeout/cancellation, and response coverage
+test/v2/settings/diagnostics_history_pages_test.dart # Help settings pages and responsive diagnostics/history UI coverage
+```
+
+Diagnostics are a separate, local v2 event stream—not a global logger hook or a
+persisted event history. Recording is disabled by default and requires the
+`cw2.settings.loggingEnabled` preference. Events contain only finite operation,
+outcome, and severity enums, UTC time, and an optional bounded duration; errors,
+raw text, content, private URLs, and IDs are not captured. The ring is capped at
+1,000 events / 256 KiB serialized, and clipboard output is capped at 64 KiB.
+Instrumented operations are host catalog load/probe/profile save/remove,
+preferences load/save, and release-archive load/save. Turning logging off clears
+the ring.
+
+Release history reads the fixed public `CHANGELOG.md` without authentication,
+only through the native IO source; the non-IO stub does not fetch, but a cached
+copy can still be shown. Fetching has a 256 KiB body limit, 10-second chunk
+inactivity timeout, and 30-second total deadline. The metadata cache is capped
+at 512 KiB with a one-hour TTL; concurrent loads coalesce, failures preserve the
+last good archive, and a refresh that omits an already cached version is
+rejected. Parsing requires unique strict `## vX.Y.Z - YYYY-MM-DD` headings,
+valid calendar dates, and non-empty sections; versions use `BigInt`, and an
+optional leading multiline `> 📣` announcement is separated from selectable
+plain-text notes. The UI displays 20 entries at a time. This surface is read-only:
+it does not acknowledge announcements or run an updater.
+
+`tool/l10n/generate_v2_localizations.py --port-diagnostics` selectively ports
+the diagnostics/archive catalog to the 14 v2 ARBs and regenerates the 15 scoped
+outputs; `--check` verifies generated outputs without writing. From the project
+root, the focused test command is:
+
+```bash
+# Run from the repository root
+if [ -f "$HOME/paths" ]; then source "$HOME/paths"; fi
+export PATH="$HOME/flutter/bin:$PATH"
+flutter test --no-pub \
+  test/v2/diagnostics/diagnostics_controller_test.dart \
+  test/v2/diagnostics/diagnostic_preferences_test.dart \
+  test/v2/diagnostics/host_diagnostics_test.dart \
+  test/v2/release_history/release_archive_test.dart \
+  test/v2/release_history/release_history_controller_test.dart \
+  test/v2/release_history/release_source_test.dart \
+  test/v2/settings/diagnostics_history_pages_test.dart \
+  test/v2/settings/settings_shell_test.dart \
+  test/v2/settings/shortcut_preferences_test.dart \
+  test/v2/hosts/profile_store_test.dart \
+  test/v2/hosts/hosts_controller_test.dart \
+  test/v2/hosts/hosts_page_test.dart
+python3 tool/l10n/generate_v2_localizations.py --check
+flutter test --no-pub test/v2/appearance
+make check
+```
+
+Recorded stage verification: the 53 code/l10n/test files and two desktop PNG
+references were reviewed by eight helpers; the final review approved zero
+findings after three warnings were fixed and focused checks passed. Focused
+settings/host regression checks, mobile layouts, the two desktop references,
+G4, scoped localization checks, and four appearance goldens are recorded as
+passing; the full baseline `make check` is also passing. Follow CodeWalk's
+validation policy: run `make check` from the repository root at the validation
+gate, rather than `make precommit`; do not infer native installation or platform
+acceptance from VM tests/goldens. No installed Android/Linux app, native
+acceptance, or native GA certification is claimed. Parent #302 performance,
+task, Android-process, renderer, and high-water work remains unclaimed; retain
+the legacy cases until V2-084.

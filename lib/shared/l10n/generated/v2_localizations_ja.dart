@@ -509,4 +509,121 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get pairingPaired => 'ペアリング済み';
+
+  @override
+  String get chatLoadMore => 'さらに読み込む';
+
+  @override
+  String get chatRefresh => '更新';
+
+  @override
+  String get commonCopiedToClipboard => 'クリップボードにコピーしました';
+
+  @override
+  String get logsAppLogs => 'アプリログ';
+
+  @override
+  String get logsClear => 'ログをクリア';
+
+  @override
+  String get logsCopyFiltered => 'コピーフィルター済みログ';
+
+  @override
+  String get logsEnableLogging => 'アプリログを有効化';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'メモリ内に診断ログを収集します。トラブルシュート時以外はオフのままにしてください。';
+
+  @override
+  String get logsFilterAll => 'すべて';
+
+  @override
+  String get logsLevel => 'レベル';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk は詳細なアプリログを収集していません。診断が必要な場合のみログを有効にしてください。';
+
+  @override
+  String get logsLoggingDisabledTitle => 'ログは無効です';
+
+  @override
+  String get logsNoLogsYet => 'ログはまだ記録されていません。';
+
+  @override
+  String get logsNoMatchingLogs => '現在のフィルタに一致するログはありません。';
+
+  @override
+  String get logsTaskStatusCanceled => 'キャンセル済み';
+
+  @override
+  String get logsTaskStatusError => 'エラー';
+
+  @override
+  String get logsTaskStatusOk => 'ok';
+
+  @override
+  String get releaseHistoryDescription => '最近のお知らせと変更履歴';
+
+  @override
+  String get releaseHistoryLoadError => '履歴を読み込めませんでした。接続を確認して再試行してください。';
+
+  @override
+  String get releaseHistoryStale =>
+      '保存済みのコピーを表示しています。更新に失敗したため、最新の情報が含まれていない場合があります。';
+
+  @override
+  String get releaseHistoryTitle => 'バージョン履歴';
+
+  @override
+  String get settingsGroupHelp => 'ヘルプ';
+
+  @override
+  String get diagnosticsHostCatalog => 'サーバー一覧を読み込む';
+
+  @override
+  String get diagnosticsHostProbe => 'サーバーを確認';
+
+  @override
+  String get diagnosticsProfileSave => 'プロファイルを保存';
+
+  @override
+  String get diagnosticsProfileRemove => 'プロファイルを削除';
+
+  @override
+  String get diagnosticsPreferencesLoad => '設定を読み込む';
+
+  @override
+  String get diagnosticsPreferencesSave => '設定を保存';
+
+  @override
+  String get diagnosticsArchiveLoad => 'バージョン履歴を読み込む';
+
+  @override
+  String get diagnosticsArchiveSave => 'バージョン履歴を保存';
+
+  @override
+  String get diagnosticsInfo => '情報';
+
+  @override
+  String get diagnosticsWarning => '警告';
+
+  @override
+  String get diagnosticsError => 'エラー';
+
+  @override
+  String get diagnosticsCopyFailed => 'ログをコピーできませんでした。';
+
+  @override
+  String get diagnosticsCopyTruncated => 'ログをコピーしました。コピーは64 KiBに制限されました。';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'メモリのみ：操作、結果、レベル、UTC時刻、制限付き所要時間。内容、認証情報、アドレスは収集しません。';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

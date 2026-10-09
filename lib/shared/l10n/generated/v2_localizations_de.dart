@@ -536,4 +536,126 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get pairingPaired => 'Gekoppelt';
+
+  @override
+  String get chatLoadMore => 'Mehr laden';
+
+  @override
+  String get chatRefresh => 'Aktualisieren';
+
+  @override
+  String get commonCopiedToClipboard => 'In die Zwischenablage kopiert';
+
+  @override
+  String get logsAppLogs => 'App-Protokolle';
+
+  @override
+  String get logsClear => 'Protokolle löschen';
+
+  @override
+  String get logsCopyFiltered => 'Gefilterte Protokolle kopieren';
+
+  @override
+  String get logsEnableLogging => 'App-Logging aktivieren';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'Sammelt Diagnose-Logs im Arbeitsspeicher. Lassen Sie dies außer zur Fehlersuche deaktiviert.';
+
+  @override
+  String get logsFilterAll => 'Alle';
+
+  @override
+  String get logsLevel => 'Ebene';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'CodeWalk sammelt keine detaillierten App-Logs. Aktivieren Sie Logging nur, wenn Sie Diagnosedaten benötigen.';
+
+  @override
+  String get logsLoggingDisabledTitle => 'Logging ist deaktiviert';
+
+  @override
+  String get logsNoLogsYet => 'Noch keine Logs erfasst.';
+
+  @override
+  String get logsNoMatchingLogs =>
+      'Keine Logs entsprechen den aktuellen Filtern.';
+
+  @override
+  String get logsTaskStatusCanceled => 'abgebrochen';
+
+  @override
+  String get logsTaskStatusError => 'Fehler';
+
+  @override
+  String get logsTaskStatusOk => 'ok';
+
+  @override
+  String get releaseHistoryDescription =>
+      'Aktuelle Ankündigungen und Änderungen';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Der Versionsverlauf konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Eine gespeicherte Kopie wird angezeigt. Die Aktualisierung ist fehlgeschlagen; neuere Hinweise können fehlen.';
+
+  @override
+  String get releaseHistoryTitle => 'Versionsverlauf';
+
+  @override
+  String get settingsGroupHelp => 'Hilfe';
+
+  @override
+  String get diagnosticsHostCatalog => 'Serverkatalog laden';
+
+  @override
+  String get diagnosticsHostProbe => 'Server prüfen';
+
+  @override
+  String get diagnosticsProfileSave => 'Profil speichern';
+
+  @override
+  String get diagnosticsProfileRemove => 'Profil entfernen';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'Einstellungen laden';
+
+  @override
+  String get diagnosticsPreferencesSave => 'Einstellungen speichern';
+
+  @override
+  String get diagnosticsArchiveLoad => 'Versionsverlauf laden';
+
+  @override
+  String get diagnosticsArchiveSave => 'Versionsverlauf speichern';
+
+  @override
+  String get diagnosticsInfo => 'Information';
+
+  @override
+  String get diagnosticsWarning => 'Warnung';
+
+  @override
+  String get diagnosticsError => 'Fehler';
+
+  @override
+  String get diagnosticsCopyFailed =>
+      'Protokolle konnten nicht kopiert werden.';
+
+  @override
+  String get diagnosticsCopyTruncated =>
+      'Protokolle kopiert; die Kopie wurde auf 64 KiB begrenzt.';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'Nur im Speicher: Vorgang, Ergebnis, Stufe, UTC-Zeit und begrenzte Dauer. Keine Inhalte, Zugangsdaten oder Adressen werden erfasst.';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

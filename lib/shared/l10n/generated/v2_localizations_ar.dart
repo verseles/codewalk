@@ -527,4 +527,123 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get pairingPaired => 'مقترن';
+
+  @override
+  String get chatLoadMore => 'تحميل المزيد';
+
+  @override
+  String get chatRefresh => 'تحديث';
+
+  @override
+  String get commonCopiedToClipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get logsAppLogs => 'سجلات التطبيق';
+
+  @override
+  String get logsClear => 'مسح السجلات';
+
+  @override
+  String get logsCopyFiltered => 'نسخ السجلات المصفاة';
+
+  @override
+  String get logsEnableLogging => 'تفعيل سجلات التطبيق';
+
+  @override
+  String get logsEnableLoggingDescription =>
+      'يجمع سجلات تشخيصية في الذاكرة. اتركه معطلاً إلا عند استكشاف مشكلة.';
+
+  @override
+  String get logsFilterAll => 'الكل';
+
+  @override
+  String get logsLevel => 'المستوى';
+
+  @override
+  String get logsLoggingDisabledDescription =>
+      'لا يجمع CodeWalk سجلات تفصيلية للتطبيق. فعّل السجلات فقط عند الحاجة إلى التشخيص.';
+
+  @override
+  String get logsLoggingDisabledTitle => 'السجلات معطلة';
+
+  @override
+  String get logsNoLogsYet => 'لم يتم التقاط أي سجلات بعد.';
+
+  @override
+  String get logsNoMatchingLogs => 'لا توجد سجلات تطابق الفلاتر الحالية.';
+
+  @override
+  String get logsTaskStatusCanceled => 'ملغاة';
+
+  @override
+  String get logsTaskStatusError => 'خطأ';
+
+  @override
+  String get logsTaskStatusOk => 'حسنًا';
+
+  @override
+  String get releaseHistoryDescription => 'الإعلانات والتغييرات الأخيرة';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'تعذر تحميل سجل الإصدارات. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get releaseHistoryStale =>
+      'تُعرض نسخة محفوظة. فشل التحديث؛ قد تكون الملاحظات الأحدث غير موجودة.';
+
+  @override
+  String get releaseHistoryTitle => 'سجل الإصدارات';
+
+  @override
+  String get settingsGroupHelp => 'المساعدة';
+
+  @override
+  String get diagnosticsHostCatalog => 'تحميل قائمة الخوادم';
+
+  @override
+  String get diagnosticsHostProbe => 'فحص الخادم';
+
+  @override
+  String get diagnosticsProfileSave => 'حفظ الملف';
+
+  @override
+  String get diagnosticsProfileRemove => 'إزالة الملف';
+
+  @override
+  String get diagnosticsPreferencesLoad => 'تحميل التفضيلات';
+
+  @override
+  String get diagnosticsPreferencesSave => 'حفظ التفضيلات';
+
+  @override
+  String get diagnosticsArchiveLoad => 'تحميل سجل الإصدارات';
+
+  @override
+  String get diagnosticsArchiveSave => 'حفظ سجل الإصدارات';
+
+  @override
+  String get diagnosticsInfo => 'معلومات';
+
+  @override
+  String get diagnosticsWarning => 'تحذير';
+
+  @override
+  String get diagnosticsError => 'خطأ';
+
+  @override
+  String get diagnosticsCopyFailed => 'تعذر نسخ السجلات.';
+
+  @override
+  String get diagnosticsCopyTruncated =>
+      'تم نسخ السجلات؛ اقتصر النسخ على 64 KiB.';
+
+  @override
+  String get diagnosticsPrivacy =>
+      'في الذاكرة فقط: العملية والنتيجة والمستوى ووقت UTC ومدة محدودة. لا يُجمع المحتوى أو بيانات الاعتماد أو العناوين.';
+
+  @override
+  String logsPerformanceDuration(int elapsedMs) {
+    return '$elapsedMs ms';
+  }
 }

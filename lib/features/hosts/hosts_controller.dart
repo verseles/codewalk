@@ -4,14 +4,19 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../shared/diagnostics/diagnostics_controller.dart';
+
 class HostsController extends ChangeNotifier {
   HostsController({
     required this.repository,
     required this.prober,
     String Function()? createId,
     DateTime Function()? now,
+    DiagnosticsController? diagnostics,
   }) : _createId = createId ?? _id,
-       _now = now ?? DateTime.now;
+       _now = now ?? DateTime.now,
+       _diagnostics = diagnostics;
+  final DiagnosticsController? _diagnostics;
   final EndpointProfileRepository repository;
   final EndpointProber prober;
   final String Function() _createId;
@@ -83,9 +88,24 @@ class HostsController extends ChangeNotifier {
         _credentialErrors
           ..clear()
           ..addAll(errors);
+        _diagnostics?.record(
+          DiagnosticOperation.hostCatalogLoad,
+          errors.isEmpty
+              ? DiagnosticOutcome.success
+              : DiagnosticOutcome.failure,
+        );
       }
     } on Object {
-      if (!_disposed) storageError = true;
+      if (!_disposed) {
+        storageError = true;
+        if (revision == _catalogRevision) {
+          _diagnostics?.record(
+            DiagnosticOperation.hostCatalogLoad,
+            DiagnosticOutcome.failure,
+            severity: DiagnosticSeverity.error,
+          );
+        }
+      }
     } finally {
       loading = false;
       _notify();
@@ -121,12 +141,20 @@ class HostsController extends ChangeNotifier {
     try {
       final validated = EndpointProfile.validateEndpoint(endpoint);
       if (secret.isEmpty) {
+        _diagnostics?.record(
+          DiagnosticOperation.hostProbe,
+          DiagnosticOutcome.failure,
+        );
         return const EndpointAssessment(EndpointStatus.authenticationRequired);
       }
       final task = _task = prober.start(validated, secret);
       final result = await task.result;
       if (_disposed || generation != _generation) return null;
       _task = null;
+      _diagnostics?.record(
+        DiagnosticOperation.hostProbe,
+        result.canUse ? DiagnosticOutcome.success : DiagnosticOutcome.failure,
+      );
       if (verifyForSave) {
         _verifiedEndpoint = validated;
         _verifiedSecret = secret;
@@ -134,6 +162,13 @@ class HostsController extends ChangeNotifier {
       }
       return result;
     } on Object {
+      if (!_disposed && generation == _generation) {
+        _diagnostics?.record(
+          DiagnosticOperation.hostProbe,
+          DiagnosticOutcome.failure,
+          severity: DiagnosticSeverity.error,
+        );
+      }
       return _disposed || generation != _generation
           ? null
           : const EndpointAssessment(EndpointStatus.unreachable);
@@ -197,6 +232,12 @@ class HostsController extends ChangeNotifier {
               _assessments[pending.id] = assessment;
             }
             _notify();
+            if (!_disposed && revision == _catalogRevision) {
+              _diagnostics?.record(
+                DiagnosticOperation.profileSave,
+                DiagnosticOutcome.success,
+              );
+            }
             return true;
           }
         } else {
@@ -231,9 +272,22 @@ class HostsController extends ChangeNotifier {
         if (!_disposed && revision == _catalogRevision) storageError = true;
       }
       _notify();
+      if (!_disposed && revision == _catalogRevision) {
+        _diagnostics?.record(
+          DiagnosticOperation.profileSave,
+          DiagnosticOutcome.success,
+        );
+      }
       return true;
     } on Object {
       storageError = true;
+      if (!_disposed && revision == _catalogRevision) {
+        _diagnostics?.record(
+          DiagnosticOperation.profileSave,
+          DiagnosticOutcome.failure,
+          severity: DiagnosticSeverity.error,
+        );
+      }
       _notify();
       return false;
     } finally {
@@ -270,11 +324,22 @@ class HostsController extends ChangeNotifier {
         _credentialErrors.remove(profile.id);
         _assessments[profile.id] = assessment!;
         storageError = false;
+        _diagnostics?.record(
+          DiagnosticOperation.profileSave,
+          DiagnosticOutcome.success,
+        );
         _notify();
       }
       return true;
     } on Object {
       storageError = true;
+      if (!_disposed && revision == _catalogRevision) {
+        _diagnostics?.record(
+          DiagnosticOperation.profileSave,
+          DiagnosticOutcome.failure,
+          severity: DiagnosticSeverity.error,
+        );
+      }
       _notify();
       return false;
     } finally {
@@ -348,19 +413,40 @@ class HostsController extends ChangeNotifier {
   Future<void> remove(EndpointProfile profile) async {
     cancelProbe();
     final revision = ++_catalogRevision;
+    var committed = false;
     try {
       await repository.remove(profile);
+      committed = true;
+      if (!_disposed && revision == _catalogRevision) {
+        _diagnostics?.record(
+          DiagnosticOperation.profileRemove,
+          DiagnosticOutcome.success,
+        );
+      }
       final loaded = await repository.load();
       if (_disposed) return;
       if (revision == _catalogRevision) {
         _profiles = loaded;
         _assessments.remove(profile.id);
         _credentials.remove(profile.id);
+        _diagnostics?.record(
+          DiagnosticOperation.hostCatalogLoad,
+          DiagnosticOutcome.success,
+        );
         _armRetryTimer();
       }
       storageError = false;
     } on Object {
       storageError = true;
+      if (!_disposed && revision == _catalogRevision) {
+        _diagnostics?.record(
+          committed
+              ? DiagnosticOperation.hostCatalogLoad
+              : DiagnosticOperation.profileRemove,
+          DiagnosticOutcome.failure,
+          severity: DiagnosticSeverity.error,
+        );
+      }
     }
     _notify();
   }

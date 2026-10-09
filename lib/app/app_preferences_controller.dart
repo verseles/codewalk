@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../platform/storage/metadata_store.dart';
+import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import '../shared/shortcuts/shortcut_binding_codec.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
@@ -10,9 +11,25 @@ import '../shared/theme/theme_preferences.dart';
 
 /// Appearance uses only the v2 metadata namespace; locale remains transient.
 class AppPreferencesController extends ChangeNotifier {
-  AppPreferencesController({V2MetadataStore? store}) : _store = store;
+  AppPreferencesController({
+    V2MetadataStore? store,
+    DiagnosticsController? diagnostics,
+  }) : _store = store,
+       _diagnostics = diagnostics;
 
   final V2MetadataStore? _store;
+  final DiagnosticsController? _diagnostics;
+  bool _loggingEnabled = false;
+  bool _loggingHydrated = false;
+  bool get loggingEnabled => _loggingEnabled;
+
+  void setLoggingEnabled(bool value) {
+    if (_disposed || _loggingEnabled == value) return;
+    _loggingEnabled = value;
+    _diagnostics?.setEnabled(value);
+    _changed('loggingEnabled');
+  }
+
   ThemeMode _themeMode = ThemeMode.system;
   Locale? _locale;
   AppDensity _density = AppDensity.normal;
@@ -130,6 +147,7 @@ class AppPreferencesController extends ChangeNotifier {
     'contrastLevel': _contrastLevel,
     'useAmoledDark': _useAmoledDark,
     'useDynamicColor': _useDynamicColor,
+    'loggingEnabled': _loggingEnabled,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -192,11 +210,29 @@ class AppPreferencesController extends ChangeNotifier {
       if (amoled is bool) _useAmoledDark = amoled;
       final dynamic = value('useDynamicColor');
       if (dynamic is bool) _useDynamicColor = dynamic;
+      final logging = value('loggingEnabled');
+      if (logging is bool) _loggingEnabled = logging;
+      _loggingHydrated = true;
+      _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;
+      _diagnostics?.record(
+        DiagnosticOperation.preferencesLoad,
+        DiagnosticOutcome.success,
+      );
       notifyListeners();
     } catch (_) {
       if (_disposed) return;
       _loadFailed = true;
+      // Cold failure grants no consent; a failed reload preserves known intent.
+      if (!_loggingHydrated && !_revisions.containsKey('loggingEnabled')) {
+        _loggingEnabled = false;
+        _diagnostics?.setEnabled(false);
+      }
+      _diagnostics?.record(
+        DiagnosticOperation.preferencesLoad,
+        DiagnosticOutcome.failure,
+        severity: DiagnosticSeverity.error,
+      );
       notifyListeners();
     }
   }
@@ -260,10 +296,19 @@ class AppPreferencesController extends ChangeNotifier {
         .then<void>(
           (_) {
             if (_disposed || _revisions[key] != revision) return;
+            _diagnostics?.record(
+              DiagnosticOperation.preferencesSave,
+              DiagnosticOutcome.success,
+            );
             if (_failedKeys.remove(key)) notifyListeners();
           },
           onError: (Object _, StackTrace _) {
             if (_disposed || _revisions[key] != revision) return;
+            _diagnostics?.record(
+              DiagnosticOperation.preferencesSave,
+              DiagnosticOutcome.failure,
+              severity: DiagnosticSeverity.error,
+            );
             if (_failedKeys.add(key)) notifyListeners();
           },
         )

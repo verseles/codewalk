@@ -256,5 +256,84 @@
   "pairingPaired": "জোড়া দেওয়া",
   "@pairingPaired": {
     "description": "V2 pairing and credential lifecycle"
-  }
+  },
+  "chatLoadMore": "আরো লোড",
+  "chatRefresh": "রিফ্রেশ",
+  "commonCopiedToClipboard": "ক্লিপবোর্ডে কপি করা হয়েছে",
+  "logsAppLogs": "অ্যাপ লগ",
+  "logsClear": "সাফ লগ",
+  "logsCopyFiltered": "ফিল্টার করা লগ কপি করুন",
+  "logsEnableLogging": "অ্যাপ লগ চালু করুন",
+  "logsEnableLoggingDescription": "মেমরিতে ডায়াগনস্টিক লগ সংগ্রহ করে। সমস্যা সমাধান না করলে বন্ধ রাখুন।",
+  "logsFilterAll": "সব",
+  "logsLevel": "স্তর",
+  "logsLoggingDisabledDescription": "CodeWalk বিস্তারিত অ্যাপ লগ সংগ্রহ করছে না। ডায়াগনস্টিক প্রয়োজন হলে তবেই লগ চালু করুন।",
+  "logsLoggingDisabledTitle": "লগ বন্ধ আছে",
+  "logsNoLogsYet": "এখনও কোনো লগ ক্যাপচার করা হয়নি।",
+  "logsNoMatchingLogs": "বর্তমান ফিল্টারগুলির সাথে কোনো লগ মিলছে না।",
+  "logsTaskStatusCanceled": "বাতিল",
+  "logsTaskStatusError": "ত্রুটি",
+  "logsTaskStatusOk": "ঠিক আছে",
+  "releaseHistoryDescription": "সাম্প্রতিক ঘোষণা ও পরিবর্তন",
+  "releaseHistoryLoadError": "সংস্করণের ইতিহাস লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "releaseHistoryStale": "সংরক্ষিত অনুলিপি দেখানো হচ্ছে। রিফ্রেশ ব্যর্থ হয়েছে; নতুন তথ্য নাও থাকতে পারে।",
+  "releaseHistoryTitle": "সংস্করণের ইতিহাস",
+  "settingsGroupHelp": "সহায়তা",
+  "diagnosticsHostCatalog": "সার্ভার তালিকা লোড",
+  "@diagnosticsHostCatalog": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsHostProbe": "সার্ভার পরীক্ষা",
+  "@diagnosticsHostProbe": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileSave": "প্রোফাইল সংরক্ষণ",
+  "@diagnosticsProfileSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsProfileRemove": "প্রোফাইল সরান",
+  "@diagnosticsProfileRemove": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesLoad": "পছন্দ লোড",
+  "@diagnosticsPreferencesLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPreferencesSave": "পছন্দ সংরক্ষণ",
+  "@diagnosticsPreferencesSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveLoad": "সংস্করণের ইতিহাস লোড",
+  "@diagnosticsArchiveLoad": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsArchiveSave": "সংস্করণের ইতিহাস সংরক্ষণ",
+  "@diagnosticsArchiveSave": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsInfo": "তথ্য",
+  "@diagnosticsInfo": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsWarning": "সতর্কতা",
+  "@diagnosticsWarning": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsError": "ত্রুটি",
+  "@diagnosticsError": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyFailed": "লগ কপি করা যায়নি।",
+  "@diagnosticsCopyFailed": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsCopyTruncated": "লগ কপি হয়েছে; কপি 64 KiB-তে সীমিত।",
+  "@diagnosticsCopyTruncated": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "diagnosticsPrivacy": "শুধু মেমরিতে: কাজ, ফলাফল, স্তর, UTC সময় ও সীমিত সময়কাল। বিষয়বস্তু, পরিচয়পত্র বা ঠিকানা সংগ্রহ করা হয় না।",
+  "@diagnosticsPrivacy": {
+    "description": "V2 finite diagnostics and archive UI"
+  },
+  "logsPerformanceDuration": "{elapsedMs} ms"
 }
