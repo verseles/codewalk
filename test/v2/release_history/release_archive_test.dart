@@ -15,7 +15,7 @@ void main() {
         greaterThan(0),
       );
     }
-    expect(() => entries.clear(), throwsUnsupportedError);
+    expect(entries.clear, throwsUnsupportedError);
   });
 
   test('BOM CRLF, numeric ordering and original-language announcements', () {

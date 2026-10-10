@@ -93,6 +93,90 @@ jobs:
       - name: Check discovered v2 packages, architecture guards and explicit entry point
         run: make v2-foundations
 
+  v2_native_checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - run: flutter pub get
+      - name: Check all v2 packages and VM/CHP tests without browser prerequisites
+        run: make v2-native-check
+
+  v2_native_builds:
+    needs: v2_native_checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [android, linux]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install project-pinned Android NDK
+        if: matrix.target == 'android'
+        run: sdkmanager "ndk;28.2.13676358"
+      - name: Install Linux development dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
+      - run: flutter pub get
+      - name: Record compiler environment
+        run: |
+          mkdir -p build/native-evidence
+          git rev-parse HEAD > build/native-evidence/source-commit.txt
+          flutter --version --machine > build/native-evidence/flutter.json
+          flutter doctor -v > build/native-evidence/doctor.txt
+          uname -a > build/native-evidence/host.txt
+          df -h > build/native-evidence/disk.txt
+      - name: Compile and inspect explicit v2 debug target
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          make v2-${{ matrix.target }}-debug 2>&1 | tee build/native-evidence/compiler.log
+      - name: Archive Linux bundle with executable permissions
+        if: success() && matrix.target == 'linux'
+        run: tar -czf build/native-evidence/linux-x64-debug.tar.gz -C build/linux/x64/debug/bundle .
+      - name: Retain compiler evidence (not a release or installed-device pass)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-native-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/native-evidence/
+            build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
   test_shards:
     # Keep PR/branch feedback fast; main/tag pushes run the coverage job instead.
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/v'))

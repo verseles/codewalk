@@ -153,7 +153,7 @@ directory.
 ### Make Targets
 
 ```bash
-make check      # deps + codegen + analyze + coverage-tool fixtures + full tests
+make check      # deps + codegen + analyze + coverage/v2-tool fixtures + full tests
 make check-fast # same setup, with the fast test selection
 make test-fast  # excludes slow/integration; includes ChatPage smoke scenarios
 make test-chat  # ChatPage smoke + extended scenarios
@@ -171,6 +171,29 @@ Use focused tests while iterating and `make check` at stable validation gates. T
 Coverage filtering uses Python 3 and does not require system `lcov`. The gate validates fresh Flutter LCOV records, excludes `.g.dart`, localization, and plugin registrant sources, and enforces the global floor plus the reviewed per-file floors in `tool/ci/coverage_baseline.tsv`. Missing protected sources, inconsistent totals, foreign source paths, or coverage below the configured floors fail the gate; an old filtered artifact is never used as a fallback. Floors are changed deliberately, not regenerated or lowered automatically.
 
 When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.
+
+### V2 development targets on `main`
+
+The retained app still defaults to `lib/main.dart`. These separate targets select
+the active v2 implementation explicitly:
+
+```bash
+make v2-native-check  # all workspace packages, architecture/l10n and VM/CHP tests
+make v2-linux-debug   # Linux host architecture: x64 or arm64
+make v2-android-debug # Linux x64 build host; Android arm64, split-per-ABI debug APK
+```
+
+Use a fresh checkout/copy with dependencies resolved for native compilation.
+Existing `build/linux` or `build/app` outputs cause refusal rather than being
+deleted or overwritten. Build receipts under `build/native-evidence/` record the
+source revision, Flutter SDK, explicit `lib/main_v2.dart` target and artifact
+hashes, including ABI/ELF and nonempty debug-kernel checks. CI uses separate native
+check and compiler jobs; no browser is required for this native aggregate.
+
+These debug builds provide compilation evidence, not release AOT, signing,
+installation or MVP acceptance. Android/Linux are the MVP targets; full deferred
+platform evidence remains separate. `make v2-foundations` retains Chrome and Web
+checks; the checker's `--no-build` option omits only the Web build.
 
 ### Web Deploy: Cloudflare Pages or Static Hosting
 

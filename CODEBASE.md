@@ -1413,3 +1413,31 @@ acceptance from VM tests/goldens. No installed Android/Linux app, native
 acceptance, or native GA certification is claimed. Parent #302 performance,
 task, Android-process, renderer, and high-water work remains unclaimed; retain
 the legacy cases until V2-084.
+
+## V2-020CA native tooling
+
+`make v2-native-check` runs the Python v2-tool tests and the shared checker in
+native mode: dynamically discovers all four current workspace packages, applies
+the import-boundary guard, strict Dart analysis and tests per package, checks
+architecture fixtures and v2 localization, then runs strict app analysis and
+VM v2/CHP tests. It needs no browser. The checker defaults to the full profile;
+`--no-build` retains its Chrome test while skipping only the Web build.
+
+```bash
+make v2-native-check
+make v2-linux-debug    # Linux x64/arm64 host; host-architecture debug bundle
+make v2-android-debug  # Linux x64 host only; Android arm64 debug APK, split per ABI
+```
+
+Both debug targets use `lib/main_v2.dart`. The builder refuses existing
+`build/linux` or `build/app` outputs and never cleans them. It validates Linux
+ELF architecture, engine/assets and non-empty Dart kernel, or Android's exact
+`arm64-v8a` ABI, Flutter engine and non-empty kernel, then hashes artifacts into
+`build/native-evidence/{target}.json`. These are compiler/debug checks only—not
+release, AOT, installation, device, or MVP acceptance. CI's independent Ubuntu
+24.04 native-check and Android/Linux build jobs produce compiler evidence,
+retained for 7 days and distinct from installed-device acceptance. The two
+Python suites contain 20 authored test methods; current local `make check` is
+passing and final R2 has
+9 valid approvals. This tooling adds no application behavior or ADR; parent
+#356 native/reference criteria remain pending.

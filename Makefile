@@ -1,4 +1,4 @@
-.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-smoke v2-web web desktop android precommit clean release
+.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-v2-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web web desktop android precommit clean release
 
 APK_DIR = build/app/outputs/flutter-apk
 APK_PATH = $(APK_DIR)/codewalk.apk
@@ -62,6 +62,9 @@ help:
 	@echo "  make check-fast deps + gen + analyze + coverage-tool fixtures + test-fast"
 	@echo "  make v2-architecture Check the governed v2 surface and retained-reference boundary"
 	@echo "  make v2-foundations Discover/check every v2 package, guards, bootstrap and Web build"
+	@echo "  make v2-native-check Discover/check v2 packages and VM/CHP tests without a browser"
+	@echo "  make v2-linux-debug Compile main_v2.dart for this Linux host (fresh native outputs)"
+	@echo "  make v2-android-debug Compile main_v2.dart for Android arm64 on an x64 host"
 	@echo "  make v2-smoke   Exercise the explicit v2 entry point in widget tests"
 	@echo "  make v2-web     Build the explicit v2 entry point into build/v2/web"
 	@echo "  make web        Build Flutter web app into build/web"
@@ -273,6 +276,9 @@ test-web:
 test-coverage-tools:
 	python3 -m unittest discover -s tool/ci -p test_check_coverage.py $(QUIET)
 
+test-v2-tools:
+	python3 -m unittest discover -s tool/ci -p 'test_*v2*.py' $(QUIET)
+
 test-integration:
 	flutter test --no-pub -j 1 --tags integration test/integration $(QUIET)
 
@@ -290,17 +296,27 @@ coverage:
 smoke:
 	bash tool/qa/smoke_test.sh
 
-check: deps gen analyze test-coverage-tools test
+check: deps gen analyze test-coverage-tools test-v2-tools test
 
 check-fast: deps gen analyze test-coverage-tools test-fast
 
 # Coexistence: check/check-fast retain the reference suite. These targets
-# explicitly select the active v2 surface; native platform aggregation is 020C.
+# explicitly select the active v2 surface; 020CA owns the native MVP aggregate,
+# while 020C retains full-platform acceptance.
 v2-architecture:
 	dart run tool/ci/import_rules.dart
 
 v2-foundations:
 	python3 tool/ci/check_v2_foundations.py
+
+v2-native-check: test-v2-tools
+	python3 tool/ci/check_v2_foundations.py --profile native
+
+v2-linux-debug:
+	python3 tool/ci/build_v2_native.py linux
+
+v2-android-debug:
+	python3 tool/ci/build_v2_native.py android
 
 v2-smoke:
 	flutter test --no-pub test/v2

@@ -31,7 +31,7 @@ void main() {
         lessThanOrEqualTo(DiagnosticsController.maxSerializedBytes),
       );
       final snapshot = logs.events;
-      expect(() => snapshot.clear(), throwsUnsupportedError);
+      expect(snapshot.clear, throwsUnsupportedError);
       logs.record(
         DiagnosticOperation.profileSave,
         DiagnosticOutcome.failure,
