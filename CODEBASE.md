@@ -1436,8 +1436,16 @@ ELF architecture, engine/assets and non-empty Dart kernel, or Android's exact
 `build/native-evidence/{target}.json`. These are compiler/debug checks only—not
 release, AOT, installation, device, or MVP acceptance. CI's independent Ubuntu
 24.04 native-check and Android/Linux build jobs produce compiler evidence,
-retained for 7 days and distinct from installed-device acceptance. The two
-Python suites contain 20 authored test methods; current local `make check` is
-passing and final R2 has
-9 valid approvals. This tooling adds no application behavior or ADR; parent
-#356 native/reference criteria remain pending.
+retained for 7 days and distinct from installed-device acceptance. The Android
+CI job invokes `bash tool/ci/install_android_ndk.sh`. It requires an explicit
+SDK root (`ANDROID_HOME` or `ANDROID_SDK_ROOT`; if both are set they must agree),
+uses the root-qualified `cmdline-tools/latest/bin/sdkmanager` path for
+`--version`, then installs pinned `ndk;28.2.13676358`; failures propagate. Its
+six fake-manager tests cover absolute-path invocation without PATH lookup,
+alternate SDK-root variable, missing/inconsistent roots, absent/non-executable
+manager, version-check failure, and install-failure propagation.
+`tool/ci/test_v2_android_ndk.py` contains those tests. The three Python suites
+contain 26 authored test methods. Code checks pass; native compiler evidence for
+the new SHA is pending, and no installed-device acceptance is claimed. This
+tooling adds no application behavior or ADR; parent #356 native/reference
+criteria remain pending.

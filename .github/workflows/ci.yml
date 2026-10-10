@@ -143,7 +143,7 @@ jobs:
           java-version: "17"
       - name: Install project-pinned Android NDK
         if: matrix.target == 'android'
-        run: sdkmanager "ndk;28.2.13676358"
+        run: bash tool/ci/install_android_ndk.sh
       - name: Install Linux development dependencies
         if: matrix.target == 'linux'
         run: |
