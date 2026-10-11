@@ -1485,3 +1485,12 @@ that the native CI pipeline launched the preview or that #363 was delivered or
 accepted; those require successful artifact and handoff evidence. X11/software
 smoke does not establish GPU, Wayland, Android, ARM64, migration, or MVP
 acceptance.
+
+## V2-020CA Linux ARM64 compiler evidence
+
+- Immutable textual evidence: `test/contract/fixtures/native-builds/linux-arm64-74202310/` (`README.md`, `compiler.json`, `audit.json`, `provenance.json`, `SHA256SUMS`); [issue #356](https://github.com/verseles/codewalk/issues/356) remains open.
+- Source `742023108c57da1ee15ab2a9f2f408f614342ee4` compiled on Ubuntu 24.04 ARM64 with Flutter 3.44.0 and Dart 3.12.0; `make v2-native-check` passed four packages and 1,028 Dart tests, with two declared skips.
+- One `make v2-linux-debug` invocation passed; independent audit verified 63 artifact hashes, 15 AArch64 native ELFs, and a non-empty kernel.
+- `compiler.json` is unchanged native-builder output; `audit.json` records independent hash/ELF/kernel checks; provenance, README, and the checksum manifest record the evidence and its scope.
+- The disposable container was stopped and removed; host SDK/packages and production were unchanged, with no permanent app, dependency, or tool-workflow changes.
+- Compiler-only evidence—not GUI launch, installation, G1–G5, #243 retry/quota, or MVP acceptance; release AOT, signing, and migration are untested.

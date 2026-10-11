@@ -1,0 +1,30 @@
+{
+  "status": "pass",
+  "file_hashes_verified": 63,
+  "bundle_bytes": 275376792,
+  "compiler_metadata_sha256": "daefd36e52feee37ddca06c98504ef30242c5067dafe7991fe7b45bcb7eb95cc",
+  "kernel_bytes": 116015696,
+  "kernel_sha256": "846f1b16820d4cc4122d90c4685ef48a94585fc0450426d9c9564ec541219ac3",
+  "source_clean_after_build": true,
+  "elf_class": 64,
+  "elf_endianness": "little",
+  "elf_machine": 183,
+  "elf_machine_name": "AArch64",
+  "native_elf_files": [
+    "codewalk",
+    "lib/libaudioplayers_linux_plugin.so",
+    "lib/libdesktop_drop_plugin.so",
+    "lib/libdynamic_color_plugin.so",
+    "lib/libflutter_linux_gtk.so",
+    "lib/libflutter_secure_storage_linux_plugin.so",
+    "lib/libonnxruntime.so",
+    "lib/libpasteboard_plugin.so",
+    "lib/librecord_linux_plugin.so",
+    "lib/libscreen_retriever_linux_plugin.so",
+    "lib/libsherpa-onnx-c-api.so",
+    "lib/libtailscale.so",
+    "lib/libtray_manager_plugin.so",
+    "lib/liburl_launcher_linux_plugin.so",
+    "lib/libwindow_manager_plugin.so"
+  ]
+}
