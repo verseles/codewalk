@@ -41,23 +41,49 @@ def extract(archive_path, destination):
     return bundle
 
 
-def parse_ocr(text):
+def parse_ocr(text, *, scale=1, pass_id="original"):
     result = []
     for row in csv.DictReader(io.StringIO(text), delimiter="\t"):
         label = row.get("text", "").strip()
         if label and float(row.get("conf", "-1")) >= 25:
-            result.append((label, int(row["left"]) + int(row["width"]) // 2,
-                           int(row["top"]) + int(row["height"]) // 2))
+            line = tuple(row.get(key, "") for key in ("page_num", "block_num", "par_num", "line_num"))
+            result.append((label, round((int(row["left"]) + int(row["width"]) / 2) / scale),
+                           round((int(row["top"]) + int(row["height"]) / 2) / scale), pass_id, line))
     return result
 
 
-def locate(words, label):
+def locate(words, label, *, prefer_exact=False):
     tokens = label.lower().split()
+    candidates = []
     for index in range(len(words) - len(tokens) + 1):
         group = words[index:index + len(tokens)]
+        if any(len(word) > 3 for word in group):
+            if any(len(word) != 5 or word[3:] != group[0][3:] for word in group):
+                continue
+        elif max(word[2] for word in group) - min(word[2] for word in group) > 12:
+            continue
         if [re.sub(r"[^a-z0-9]", "", word[0].lower()) for word in group] == tokens:
-            return group[0][1], group[0][2]
-    return None
+            position = group[0][1], group[0][2]
+            if prefer_exact and [re.sub(r"[^A-Za-z0-9]", "", word[0]) for word in group] == label.split():
+                return position
+            candidates.append(position)
+    return candidates[0] if candidates else None
+
+
+def recognize_screenshot(filename, evidence, command_runner=run):
+    """Three fixed OCR passes; never concatenate phrases across pass/line IDs."""
+    words = parse_ocr(command_runner(["tesseract", str(filename), "stdout", "--psm", "11", "tsv"], timeout=15))
+    for inverted in (False, True):
+        name = "gray-2x-inverted" if inverted else "gray-2x"
+        processed = evidence / f"ocr-{name}.png"
+        command = ["convert", str(filename), "-colorspace", "Gray", "-resize", "200%"]
+        if inverted:
+            command += ["-negate"]
+        command_runner([*command, str(processed)])
+        text = command_runner(["tesseract", str(processed), "stdout", "--psm", "6", "tsv"], timeout=15)
+        (evidence / f"ocr-{name}.tsv").write_text(text)
+        words.extend(parse_ocr(text, scale=2, pass_id=name))
+    return words
 
 
 def sanitized(text):
@@ -126,7 +152,7 @@ def smoke(archive_path, evidence):
 
         def capture(window, filename):
             run(["import", "-silent", "-window", window, str(filename)])
-            return parse_ocr(run(["tesseract", str(filename), "stdout", "--psm", "11", "tsv"], timeout=15))
+            return recognize_screenshot(filename, evidence)
 
         def expect(window, labels, name, *, absent=()):
             deadline = time.monotonic() + 15
@@ -144,14 +170,14 @@ def smoke(archive_path, evidence):
 
         def click(window, label):
             words = capture(window, snapshot)
-            position = locate(words, label)
+            position = locate(words, label, prefer_exact=True)
             if position is None:
                 raise RuntimeError(f"Cannot locate native UI control: {label}")
             run(["xdotool", "mousemove", "--sync", "--window", window, str(position[0]), str(position[1])])
             run(["xdotool", "click", "--clearmodifiers", "1"])
 
         def luminance(window):
-            capture(window, snapshot)
+            run(["import", "-silent", "-window", window, str(snapshot)])
             return float(run(["convert", str(snapshot), "-gravity", "southeast", "-crop", "32x32+24+24",
                               "-colorspace", "Gray", "-format", "%[fx:mean]", "info:"]))
 
@@ -159,7 +185,7 @@ def smoke(archive_path, evidence):
             window = start()
             expect(window, ["CodeWalk", "Settings"], "01-initial")
             click(window, "Servers")
-            expect(window, ["Add server"], "02-hosts")
+            expect(window, ["No servers found", "Pair a server"], "02-hosts")
             click(window, "Pair")
             expect(window, ["Pairing link", "Open QR image"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])

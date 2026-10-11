@@ -269,7 +269,39 @@ class LinuxPreviewTests(unittest.TestCase):
 
     def test_ocr_ignores_low_confidence_noise(self):
         text = "text\tconf\tleft\ttop\twidth\theight\nDark\t80\t20\t30\t40\t20\nNoise\t1\t0\t0\t5\t5\n"
-        self.assertEqual(smoke.parse_ocr(text), [("Dark", 40, 40)])
+        self.assertEqual(smoke.parse_ocr(text), [("Dark", 40, 40, "original", ("", "", "", ""))])
+
+    def test_scaled_colored_button_coordinates_and_line_ids_are_preserved(self):
+        text = ("text\tconf\tleft\ttop\twidth\theight\tpage_num\tblock_num\tpar_num\tline_num\n"
+                "Pair\t93\t2090\t196\t50\t22\t1\t1\t1\t3\n"
+                "a\t93\t2152\t202\t14\t16\t1\t1\t1\t3\n"
+                "server\t93\t2178\t202\t88\t16\t1\t1\t1\t3\n")
+        words = smoke.parse_ocr(text, scale=2, pass_id="gray-2x")
+        self.assertEqual(smoke.locate(words, "Pair a server"), (1058, 104))
+        wrong_line = [words[0], (*words[1][:4], ("1", "1", "1", "4")), words[2]]
+        self.assertIsNone(smoke.locate(wrong_line, "Pair a server"))
+        wrong_pass = [words[0], (*words[1][:3], "other-pass", words[1][4]), words[2]]
+        self.assertIsNone(smoke.locate(wrong_pass, "Pair a server"))
+
+    def test_click_prefers_exact_control_case_over_description_word(self):
+        words = [("dark,", 10, 20), ("Dark", 100, 200)]
+        self.assertEqual(smoke.locate(words, "Dark", prefer_exact=True), (100, 200))
+        self.assertEqual(smoke.locate(words, "Dark"), (10, 20))
+
+    def test_bounded_ocr_fallback_finds_filled_control_without_inventing_text(self):
+        tsv = ("text\tconf\tleft\ttop\twidth\theight\tpage_num\tblock_num\tpar_num\tline_num\n"
+               "Pair\t93\t2090\t196\t50\t22\t1\t1\t1\t3\n")
+        calls = []
+        def runner(command, **options):
+            calls.append(command)
+            if command[0] == "convert":
+                return ""
+            return tsv if "--psm" in command and command[command.index("--psm") + 1] == "6" else tsv.splitlines()[0] + "\n"
+        words = smoke.recognize_screenshot(self.root / "screenshot.png", self.root, runner)
+        self.assertIsNotNone(smoke.locate(words, "Pair"))
+        self.assertIsNone(smoke.locate(words, "Missing control"))
+        self.assertEqual(sum(command[0] == "tesseract" for command in calls), 3)
+        self.assertEqual(sum(command[0] == "convert" for command in calls), 2)
 
 
 if __name__ == "__main__":
