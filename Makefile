@@ -1,6 +1,7 @@
 .PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-v2-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web web desktop android precommit clean release
 
 APK_DIR = build/app/outputs/flutter-apk
+.PHONY: v2-linux-preview-package v2-linux-preview-smoke
 APK_PATH = $(APK_DIR)/codewalk.apk
 APK_METADATA_PATH = $(patsubst %/flutter-apk,%/apk/release,$(APK_DIR))/output-metadata.json
 ANDROID_KEY_PROPERTIES = android/key.properties
@@ -64,6 +65,8 @@ help:
 	@echo "  make v2-foundations Discover/check every v2 package, guards, bootstrap and Web build"
 	@echo "  make v2-native-check Discover/check v2 packages and VM/CHP tests without a browser"
 	@echo "  make v2-linux-debug Compile main_v2.dart for this Linux host (fresh native outputs)"
+	@echo "  make v2-linux-preview-package Package an isolated Linux x64 development preview"
+	@echo "  make v2-linux-preview-smoke Verify the exact packaged preview under Xvfb"
 	@echo "  make v2-android-debug Compile main_v2.dart for Android arm64 on an x64 host"
 	@echo "  make v2-smoke   Exercise the explicit v2 entry point in widget tests"
 	@echo "  make v2-web     Build the explicit v2 entry point into build/v2/web"
@@ -314,6 +317,12 @@ v2-native-check: test-v2-tools
 
 v2-linux-debug:
 	python3 tool/ci/build_v2_native.py linux
+
+v2-linux-preview-package:
+	python3 tool/preview/preview_linux.py package --bundle build/linux/x64/debug/bundle --metadata build/native-evidence/linux.json --output build/native-evidence/codewalk-v2-preview-linux-x64.tar.gz
+
+v2-linux-preview-smoke:
+	python3 tool/ci/smoke_v2_linux_preview.py --archive build/native-evidence/codewalk-v2-preview-linux-x64.tar.gz --evidence build/native-evidence/preview-smoke
 
 v2-android-debug:
 	python3 tool/ci/build_v2_native.py android

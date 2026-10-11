@@ -195,6 +195,32 @@ installation or MVP acceptance. Android/Linux are the MVP targets; full deferred
 platform evidence remains separate. `make v2-foundations` retains Chrome and Web
 checks; the checker's `--no-build` option omits only the Web build.
 
+#### Isolated Linux development preview
+
+The Linux native CI job packages `codewalk-v2-preview-linux-x64.tar.gz` and opens
+those exact archive bytes under Xvfb before offering a verified-preview artifact.
+Screenshots, the completed smoke report and the archive checksum accompany a
+successful result. Compiler success alone is not this visual verification.
+
+On a compatible Ubuntu 24.04 x64 desktop with X11/XWayland, extract the verified
+archive and run `./Open-preview.sh`. No Flutter SDK or compilation is needed.
+The launcher requires the ordinary desktop runtime, Python 3, D-Bus and GNOME
+Keyring; it reports a missing prerequisite without falling back to the host's
+credential session. `PREVIEW.txt` in the package contains opening/removal steps.
+
+The preview uses a separately marked, locked profile, a private D-Bus and a
+supervised encrypted temporary keyring. Nonsecret preferences persist; credentials
+are cleared when the launcher session closes. This is normal-storage isolation,
+not an OS sandbox, GPU/Wayland acceptance, an updater or a public beta. The app
+does not register a new desktop/URI handler or replace the installed v1 app.
+Conversations remain placeholders; the smoke report names the exercised screens
+and untested server/device paths.
+
+```bash
+make v2-linux-preview-package # requires the fresh verified Linux x64 build
+make v2-linux-preview-smoke   # requires an existing Xvfb/X11 visual QA runtime
+```
+
 ### Web Deploy: Cloudflare Pages or Static Hosting
 
 CodeWalk's web build is a static Flutter app. The build does not need Cloudflare secrets or compile-time OpenCode credentials; users add their OpenCode server profile inside the app after opening the deployed site.

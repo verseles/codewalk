@@ -1449,3 +1449,39 @@ contain 26 authored test methods. Code checks pass; native compiler evidence for
 the new SHA is pending, and no installed-device acceptance is claimed. This
 tooling adds no application behavior or ADR; parent #356 native/reference
 criteria remain pending.
+
+## V2-020D isolated Linux preview map
+
+```text
+tool/preview/preview_linux.py             # Verifies compiler inventory and packages/launches the Linux x64 preview
+tool/preview/PREVIEW.txt                   # Extraction, opening, data-isolation, and limitation instructions
+tool/ci/smoke_v2_linux_preview.py           # Safely extracts and visually smokes the exact archive under Xvfb
+tool/ci/test_v2_linux_preview.py            # Packaging, integrity, isolation, and smoke-helper regressions
+Makefile                                   # v2-linux-preview-package and v2-linux-preview-smoke targets
+.github/workflows/ci.yml                   # Packages, smokes, then uploads preview artifact only on success
+```
+
+`make v2-linux-preview-package` verifies the compiler-recorded Linux x64 debug
+bundle and packages the complete bundle, launcher, manifest, and instructions.
+`make v2-linux-preview-smoke` checks that exact archive under Xvfb: UI navigation,
+theme persistence/rendering across restart, compact geometry, private secret-tool
+roundtrip and keyring cleanup, archive integrity, and preservation of a synthetic
+installed-v1 sentinel. CI uploads the preview archive and checksum, alongside
+smoke evidence, only after the compiler, packaging, and full smoke pass. A
+separate always-run diagnostics artifact is retained even on failure and excludes
+the archive and checksum. CI runs on Ubuntu 24.04 with Xvfb/X11 and software
+rendering; the recipient desktop may use X11 or XWayland. The recipient needs the
+desktop runtime and Python, but no Flutter/Dart SDK.
+
+The launcher uses a source-revision-specific private profile, private D-Bus, and
+a supervised encrypted ephemeral keyring with a random secret supplied through
+a pipe. Credentials are cleared at exit; non-secret preferences persist. Owned
+paths use markers, restrictive permissions, and a single-launch lock, and
+existing host/v1 data is not used. This is normal-storage isolation, not an OS
+sandbox against hostile code or same-user access. This development preview adds
+no Dart/application behavior, production identity, SDK/minSdk change, installer,
+updater, service, migration, or release channel. Local tooling/tests do not prove
+that the native CI pipeline launched the preview or that #363 was delivered or
+accepted; those require successful artifact and handoff evidence. X11/software
+smoke does not establish GPU, Wayland, Android, ARM64, migration, or MVP
+acceptance.

@@ -1,0 +1,35 @@
+CODEWALK V2 — LINUX X64 DEVELOPMENT PREVIEW
+
+This package is a preview, not a release or an update to the installed CodeWalk.
+Tested runtime: Ubuntu 24.04 desktop, X11/XWayland, software rendering.
+It needs ordinary desktop runtime libraries, Python 3, dbus-daemon,
+gnome-keyring-daemon and gdbus. It does not need Flutter, Dart or a build toolchain.
+
+OPEN
+1. Extract the archive using your archive manager.
+2. In the extracted folder, run ./Open-preview.sh.
+   The launcher checks the runtime and reports a missing requirement clearly.
+
+WHAT TO LOOK AT
+Hosts, Pairing, Settings, Appearance, supported Shortcuts, App Logs and Release
+history. Conversations and session routes are placeholders; chat is not ready.
+Server-dependent operations require your deliberate input and an authorized
+OpenCode 2 endpoint. The packaged smoke checklist states exactly what was tested.
+
+DATA
+Preferences are kept separately under your original data directory in
+codewalk-v2-preview/<source revision>. A private D-Bus and encrypted temporary
+keyring are created for each run. Credentials do NOT survive closing this preview:
+you must pair or enter them again in a later preview session. This is a declared
+preview limitation; installed CodeWalk credentials and data are not used.
+The launcher does not install a desktop entry, URI handler, update or service.
+This is normal-storage isolation, not a security sandbox for untrusted software.
+
+REMOVE
+Close the preview, then delete its extracted folder. You may also delete its
+specific codewalk-v2-preview/<source revision> data folder after closing it.
+Do not delete the regular CodeWalk application or its data.
+
+The archive checksum, source/SDK provenance, screenshots and completed native
+smoke report are supplied alongside this package. X11/software verification does
+not establish GPU, Wayland, Android, ARM64, migration or full MVP acceptance.

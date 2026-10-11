@@ -149,6 +149,9 @@ jobs:
         run: |
           sudo apt-get -o Acquire::Retries=3 update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
+      - name: Install isolated native visual QA runtime
+        if: matrix.target == 'linux'
+        run: sudo apt-get install -y xvfb xauth xdotool imagemagick tesseract-ocr gnome-keyring libsecret-tools dbus-x11
       - run: flutter pub get
       - name: Record compiler environment
         run: |
@@ -163,16 +166,36 @@ jobs:
         run: |
           set -o pipefail
           make v2-${{ matrix.target }}-debug 2>&1 | tee build/native-evidence/compiler.log
-      - name: Archive Linux bundle with executable permissions
+      - name: Package the isolated Linux development preview
         if: success() && matrix.target == 'linux'
-        run: tar -czf build/native-evidence/linux-x64-debug.tar.gz -C build/linux/x64/debug/bundle .
+        run: make v2-linux-preview-package
+      - name: Launch and visually verify the exact packaged preview
+        if: success() && matrix.target == 'linux'
+        timeout-minutes: 8
+        run: |
+          timeout --signal=TERM --kill-after=10s 420s xvfb-run --auto-servernum --server-args="-screen 0 1600x1000x24 -nolisten tcp" make v2-linux-preview-smoke
+      - name: Deliver only a verified native development preview
+        if: success() && matrix.target == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-v2-preview-linux-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/native-evidence/codewalk-v2-preview-linux-x64.tar.gz
+            build/native-evidence/codewalk-v2-preview-linux-x64.tar.gz.sha256
+            build/native-evidence/preview-smoke/
+            build/native-evidence/linux.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Retain compiler evidence (not a release or installed-device pass)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v2-native-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
-            build/native-evidence/
+            build/native-evidence/*.json
+            build/native-evidence/*.txt
+            build/native-evidence/*.log
+            build/native-evidence/preview-smoke/
             build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
           if-no-files-found: error
           retention-days: 7
