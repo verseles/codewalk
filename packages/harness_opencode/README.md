@@ -75,11 +75,74 @@ endpoint-scoped transport and a canonical `HarnessRef`:
   fork annotations do not establish canonical project identity or turn a native
   message boundary into a timeline item.
 
-The API is not yet wired to the app's Conversations placeholder. Streaming,
-message projection, sending and lifecycle mutations retain their own criteria.
+The catalog is wired to the app's read-only Conversations list by
+[V2-043B / #365](https://github.com/verseles/codewalk/issues/365). The history
+producer below is not yet wired to a message screen. Streaming, sending and
+lifecycle mutations retain their own criteria.
 Tests replay an accepted 2.0.22 B metadata GET over authenticated loopback IO;
 page and failure/race fixtures are explicitly source-shaped test data, not
 additional native G1 recordings. Natural provider retry/quota remains pending.
+
+## Read-only flat history
+
+[V2-044A1 / #366](https://github.com/verseles/codewalk/issues/366) extends the
+same reader with `readHistory(SessionRef, sourceVersion: ..., limit: ..., cursor:
+..., cancellation: ...)`, returning an immutable `Page<TimelineItem>`:
+
+- Supply the version observed for the authenticated endpoint; the reader checks
+  the existing compatibility policy but does not probe or invent a version.
+  One call reads `GET /api/session/{id}/message`. The first page requests ascending
+  order; continuations send the native cursor without `order` or a type filter.
+  Empty or short pages with a continuation remain pageable. History tokens bind
+  the reader, complete session identity, version and limit, separately from the
+  unchanged catalog tokens. Neither operation follows pages or retries itself.
+- The native limit counts messages (50 by default, at most 200), while a message
+  can expand into several timeline items. Server and block order are preserved;
+  text and reasoning have independent ordinals, and tools retain their native
+  call IDs within the full session/message identity. No turn ID, event ID,
+  snapshot boundary or durable replay claim is invented. History generations
+  are adapter bookkeeping, not live-stream generations or hydration barriers.
+- User text, assistant text/reasoning/tools, synthetic/system notices and explicit
+  idle outcomes use canonical types. Delivery stays unknown without evidence.
+  `streamed` or `completed` timestamps can end provider text without ending a
+  running tool or a turn; `finish` and history presence alone cannot. Only the
+  verified `read` tool name is classified; other names remain `ToolKind.other`.
+- Empty assistants, native assistant errors/retry metadata, future types and
+  currently unsupported selection/skill/shell/compaction records remain explicit
+  minimized `UnknownItem` markers. User file/context manifests and tool file
+  outputs do not retain base64, URIs or names and cannot resolve content. Nothing
+  fetches a referenced file or URL.
+- Structured tool arguments redact a finite credential-key set, including
+  `x-api-key`. Streaming argument fragments are omitted with an explicit
+  `inputNotProjected` flag because incomplete JSON cannot safely use that policy.
+  Provider state, arbitrary metadata, snapshots and error response bodies are
+  omitted; only the known tool `truncated` boolean is retained. Conversation text
+  and textual tool output are application content, not diagnostics; this is not
+  a universal secret-removal guarantee.
+- Reads retain the 20-second deadline and 1-MiB body limit. Projection fails
+  atomically rather than truncating: at most 128 assistant blocks per message,
+  2,000 projected items per page (`maxHistoryItems` may lower this), depth 16,
+  16,384 selected node visits, 256 KiB per text, 64 KiB per structured field and
+  1 MiB of selected-content accounting. Values ultimately retained in a canonical
+  manifest are charged there rather than again during string validation. These
+  are application guards, not an absolute process-memory or OS-buffer quota.
+
+The official contract is pinned to OpenCode `05018b8862a8fc198ec9810aafd397c96bb7d86e`
+(`2.0.22`, `packages/protocol/src/groups/message.ts` and
+`packages/schema/src/session-message.ts`). Tests check A's four captured messages
+against six semantic items, replay an actual B HTTP exchange over authenticated
+loopback, and distinguish D/E observed subsets from source-shaped edge cases.
+The A body retains its real continuation; it is not a newly captured HTTP wrapper.
+No fixture/provenance is rewritten and no test establishes new G1, installed
+device or MVP acceptance.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/history_projection_test.dart test/history_reader_test.dart test/session_reader_test.dart
+```
 
 ## Pairing
 

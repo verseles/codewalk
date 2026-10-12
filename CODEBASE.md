@@ -1543,3 +1543,36 @@ check, G4, `make check TEST_TIMEOUT=15m`, and `make v2-native-check`; test count
 were not supplied. Nine current helper reports were validated and approved with
 no findings. This records no new native G1, raw-server page capture,
 installed-device acceptance, MVP acceptance, or full chat/history implementation.
+
+## V2-044A1 Read-only Session History (#366)
+
+```text
+packages/harness_opencode/lib/src/session_reader.dart # Exported OpenCode metadata/history reader borrowing the authenticated transport
+packages/harness_opencode/lib/src/history_projection.dart # Pure bounded projection to canonical timeline items with source provenance
+packages/harness_opencode/test/history_{test_data,projection_test,reader_test}.dart # History fixtures, projection and reader coverage
+packages/harness_opencode/test/support/fixture_replay.dart # Observed A history-body fixture accessor; reader tests cover B HTTP replay
+```
+
+`readHistory` uses native `GET /api/session/{id}/message`, requests ascending order on
+the first page and uses the native cursor alone on continuation. The reader borrows
+the endpoint transport and bounds requests to 20 seconds, 1 MiB, 200 messages per
+page and 2,000 projected items; v2 cursors are scoped to session and source version.
+Projection retains finite content and provenance using the caller's actual source
+version, with separate ordinals and no inferred causal turn or live generation.
+Unresolved attachments and shell content are not fetched or resolved, and this adds
+no history UI. A provides a four-message/six-item golden; B exercises the real HTTP
+wrapper. Source-shaped edge cases are separate synthetic coverage, not additional
+observed native coverage; D/E coverage is a subset, not full G1 evidence.
+
+Focused package command (working directory: `packages/harness_opencode`):
+
+```bash
+export PATH="$HOME/flutter/bin:$PATH"
+dart test test/history_projection_test.dart test/history_reader_test.dart
+```
+
+Strict package analysis/tests and focused/all harness tests passed after three
+judge-approved fixes. `make check TEST_TIMEOUT=15m` and the native aggregate passed
+before those fixes. The owner waived re-review: the nine initial reports do not
+approve the final fixed state, and no R2 is claimed. This records no native
+installation, new capture, or MVP acceptance.

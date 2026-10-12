@@ -5,7 +5,9 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
+import 'history_projection.dart';
 import 'session_projection.dart';
+import 'version_policy.dart';
 
 enum OpenCodeSessionReadFailure {
   closed,
@@ -37,7 +39,7 @@ final class OpenCodeSessionReadException implements Exception {
       '${statusCode == null ? '' : ', status: $statusCode'})';
 }
 
-/// Read-only metadata; borrows an already-authenticated endpoint transport.
+/// Read-only metadata and flat history; borrows an authenticated transport.
 /// Continuation tokens belong to this reader and are not durable credentials.
 final class OpenCodeSessionReader {
   OpenCodeSessionReader(
@@ -46,6 +48,7 @@ final class OpenCodeSessionReader {
     this.deadline = const Duration(seconds: 20),
     this.maxBodyBytes = 1024 * 1024,
     this.maxPageItems = 200,
+    this.maxHistoryItems = 2000,
   }) : _endpoint = transport.endpoint,
        _cursorScope = List.generate(
          4,
@@ -54,6 +57,7 @@ final class OpenCodeSessionReader {
     if (deadline <= Duration.zero ||
         maxBodyBytes <= 0 ||
         maxPageItems <= 0 ||
+        maxHistoryItems <= 0 ||
         harness.host.value.isEmpty ||
         harness.harness.value.isEmpty) {
       throw ArgumentError('Session read limits must be positive.');
@@ -65,6 +69,7 @@ final class OpenCodeSessionReader {
   final Duration deadline;
   final int maxBodyBytes;
   final int maxPageItems;
+  final int maxHistoryItems;
   final Uri _endpoint;
   final String _cursorScope;
   final _active = <_ReadOperation>{};
@@ -147,6 +152,132 @@ final class OpenCodeSessionReader {
       }
       return result;
     }, cancellation);
+  }
+
+  /// Reads one ascending history page without assigning causal read barriers.
+  /// [sourceVersion] must be observed for this endpoint by the caller; native
+  /// message count and projected-item count have independent bounds.
+  Future<Page<TimelineItem>> readHistory(
+    SessionRef ref, {
+    required String sourceVersion,
+    int limit = 50,
+    String? cursor,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (ref.harnessRef != harness) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    try {
+      openCodeSessionId(ref.nativeId);
+      if (limit < 1 ||
+          limit > min(200, maxPageItems) ||
+          OpenCodeCompatibility.parse(sourceVersion) == null ||
+          !OpenCodeCompatibility.assess(sourceVersion).canUse) {
+        throw const FormatException();
+      }
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final native = cursor == null
+        ? null
+        : _decodeHistoryCursor(cursor, ref, limit, sourceVersion);
+    final path = Uri(
+      pathSegments: ['api', 'session', ref.nativeId, 'message'],
+      queryParameters: {
+        'limit': '$limit',
+        if (native == null) 'order': 'asc' else 'cursor': native,
+      },
+    ).toString();
+    return _read(path, (value) {
+      if (value is! Map<String, Object?> ||
+          value['data'] is! List ||
+          value['cursor'] is! Map<String, Object?>) {
+        throw const FormatException('Malformed history page.');
+      }
+      final rows = value['data'] as List;
+      if (rows.length > limit) {
+        throw const FormatException('History row limit.');
+      }
+      final cursors = value['cursor'] as Map<String, Object?>;
+      _nativeCursor(cursors['previous']);
+      final next = _nativeCursor(cursors['next']);
+      if (next != null && next == native) {
+        throw const FormatException('History cursor did not advance.');
+      }
+      final items = projectOpenCodeHistory(
+        rows.cast<Object?>(),
+        ref,
+        sourceVersion: sourceVersion,
+        maxItems: maxHistoryItems,
+      );
+      return Page<TimelineItem>(
+        items: items,
+        nextCursor: next == null
+            ? null
+            : _encodeHistoryCursor(next, ref, limit, sourceVersion),
+      );
+    }, cancellation);
+  }
+
+  String _encodeHistoryCursor(
+    String native,
+    SessionRef ref,
+    int limit,
+    String sourceVersion,
+  ) {
+    if (utf8.decode(utf8.encode(native)) != native) {
+      throw const FormatException('Malformed history continuation.');
+    }
+    final encoded = base64Url.encode(
+      utf8.encode(
+        jsonEncode({
+          'version': 2,
+          'kind': 'history',
+          'scope': _cursorScope,
+          'ref': ref.storageKey,
+          'order': 'asc',
+          'limit': limit,
+          'sourceVersion': sourceVersion,
+          'native': native,
+        }),
+      ),
+    );
+    if (encoded.length > 32 * 1024) {
+      throw const FormatException('History continuation exceeds its limit.');
+    }
+    return encoded;
+  }
+
+  String _decodeHistoryCursor(
+    String value,
+    SessionRef ref,
+    int limit,
+    String sourceVersion,
+  ) {
+    try {
+      if (value.length > 32 * 1024) throw const FormatException();
+      final data = jsonDecode(utf8.decode(base64Url.decode(value)));
+      if (data is! Map<String, Object?> ||
+          data['version'] != 2 ||
+          data['kind'] != 'history' ||
+          data['scope'] != _cursorScope ||
+          data['ref'] != ref.storageKey ||
+          data['order'] != 'asc' ||
+          data['limit'] != limit ||
+          data['sourceVersion'] != sourceVersion) {
+        throw const FormatException();
+      }
+      return _nativeCursor(data['native']) ?? (throw const FormatException());
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidCursor,
+      );
+    }
   }
 
   /// Disposes owned reads, never the borrowed transport or caller signal.

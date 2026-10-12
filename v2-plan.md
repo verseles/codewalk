@@ -1592,6 +1592,12 @@ Before starting, ensure the Issue contains:
 | V2-044B | V2-044A, V2-043, V2-020B | Shared session/timeline screen wired only to the domain/controller; basic mobile/desktop widget tests and stable composer slot for sending. |
 | V2-044C | V2-044B | Scroll/viewport invariants and bounded pagination ported with tests; 2,000 total versus 500 resident performance case. Record the affected legacy test dispositions and old-to-new regression mapping (§8.3); retire obsolete main-side cases/support only after replacement and consumer checks. |
 
+**Independent flat-history producer (2026-10-12).** This child of V2-044A consumes accepted HTTP/fixture and canonical-model evidence while V2-042 remains pending. It does not accept the complete flat/live projection, timeline screens, scroll performance, retry/quota or MVP gates; the original parent criteria and dependencies remain required.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-044A1 ([#366](https://github.com/verseles/codewalk/issues/366)) | V2-005A, V2-005B, V2-022B, V2-023, V2-056A, V2-028D, V2-043A | Read-only native history pages and bounded canonical projection, preserving source order, complete identity, scoped continuations and unknown completion/delivery. Actual A semantic golden and B HTTP replay plus labelled source edge cases; unsupported contexts/types are explicit minimized markers without content resolution. No UI, SSE/hydration, invented causal boundary/turn, new native acceptance or whole-parent waiver. |
+
 #### V2-045 — Sending and outbox
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
 - **Depends on:** V2-044B, V2-005B, V2-027

@@ -58,6 +58,9 @@ final class OpenCodeFixtures {
 
   Map<String, Object?> get info => _object('info.json');
 
+  /// A's captured body has no HTTP exchange wrapper; projection evidence only.
+  Map<String, Object?> get observedAHistory => _object('messages.json');
+
   Map<String, Object?> _object(String path) =>
       jsonDecode(File('${root.path}/$path').readAsStringSync())
           as Map<String, Object?>;
