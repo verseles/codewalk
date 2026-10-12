@@ -625,4 +625,43 @@ class V2LocalizationsKo extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => '저장된 프로필 선택';
+
+  @override
+  String get sessionsEmpty => '불러온 결과에 세션이 없습니다.';
+
+  @override
+  String get sessionsLoading => '세션 불러오는 중…';
+
+  @override
+  String get sessionsPreviousResults => '이전 결과입니다. 새로고침이 아직 성공하지 않았습니다.';
+
+  @override
+  String get sessionsLimit =>
+      '로컬 한도에 도달했습니다(200개 세션 또는 10페이지). 결과가 불완전할 수 있습니다.';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      '읽기 전용 상세 정보입니다. 이 미리보기에서는 대화 기록을 사용할 수 없습니다.';
+
+  @override
+  String get sessionsUnavailable => '이 플랫폼에서는 세션을 읽을 수 없습니다.';
+
+  @override
+  String get sessionsReadFailed =>
+      '세션을 읽지 못했습니다. 새로고침하거나 다음 페이지를 수동으로 다시 불러오세요.';
+
+  @override
+  String get sessionsTimeout => '읽기 시간이 초과되었습니다. 수동으로 다시 시도하세요.';
+
+  @override
+  String get sessionsInvalidCursor => '잘못된 이어보기 정보입니다. 새로고침하여 새 목록을 시작하세요.';
+
+  @override
+  String get sessionsRateLimited => '서버가 요청을 제한했습니다. 기다린 후 수동으로 다시 시도하세요.';
+
+  @override
+  String get sessionExportUntitled => '제목 없는 세션';
 }

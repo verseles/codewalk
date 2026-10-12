@@ -799,5 +799,53 @@
         "type": "int"
       }
     }
+  },
+  "sessionsSelectProfile": "Select a saved profile",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "No sessions in the loaded results.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "Loading sessions…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "Previous results; refresh has not succeeded yet.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "Local limit reached (200 sessions or 10 pages). These results may be incomplete.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "Read-only details. Conversation history is unavailable in this preview.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "Session reading is unavailable on this platform.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "Could not read sessions. Refresh or retry loading the next page manually.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "Session reading timed out. Retry manually.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "Invalid continuation. Refresh to start a new list.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "The server limited requests. Wait before retrying manually.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "Untitled session",
+  "@sessionExportUntitled": {
+    "description": "CodeWalk UI string — sessionExportUntitled"
   }
 }

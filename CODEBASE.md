@@ -1508,3 +1508,38 @@ Adds the exported `OpenCodeSessionReader` in `packages/harness_opencode/lib/src/
 - R2 recorded nine valid approvals; F1 HTTP-status and F2 official `ses`-prefix corrections are verified, with no remaining finding.
 - `make check TEST_TIMEOUT=15m` passed 3,079 root tests with three existing skips; Makefile defaults to 10m and uses `timeout --verbose --foreground`.
 - The Conversations placeholder remains unchanged: no SSE/history, session mutations, acceptance gates or MVP acceptance are included.
+
+## V2-043B Session Catalog (#365)
+
+```text
+lib/shared/sessions/session_catalog_source.dart # Narrow canonical catalog/task port and typed failures
+lib/platform/sessions/session_catalog_factory*.dart # Conditional IO/stub factories; IO source owns endpoint transport and OpenCodeSessionReader
+lib/features/sessions/{sessions_controller,sessions_page}.dart # Explicit saved-profile selection, manual catalog paging, race-safe refresh and metadata-only row inspection
+lib/app/{composition_root,app_dependencies,v2_bootstrap,app_router,app_navigation_controller}.dart # Root-owned controller via Provider.value; `/` and `/sessions` routes; opaque typed session intent survives ordinary routes
+tool/l10n/sessions_catalog.py # Scoped 14-locale catalog; ports 3 legacy keys and adds 11 session keys
+test/v2/sessions/ # Four source, controller, page and fake test files
+test/v2/bootstrap_navigation_test.dart # Bootstrap/navigation extension coverage for opaque session intents
+```
+
+The read-only catalog uses one reader per selected profile, preserves opaque
+continuations, and requests pages manually (50 rows per page; at most 200 rows or
+10 pages). Full `SessionRef` checks, generation/cancellation guards and duplicate
+cursor checks reject stale or incompatible results. Failed refreshes retain stale
+rows but disable paging; a successful explicit refresh replaces them. Rows expose
+only loaded summary metadata; conversation history is unavailable. The typed
+opaque session intent does not activate a session, and `/s/:host/:session` remains
+a placeholder.
+
+Focused test command from the repository root:
+
+```bash
+if [ -f "$HOME/paths" ]; then source "$HOME/paths"; fi
+export PATH="$HOME/flutter/bin:$PATH"
+flutter test --no-pub test/v2/sessions test/v2/bootstrap_navigation_test.dart
+```
+
+Recorded validation passed: focused tests, strict analysis, localization generator
+check, G4, `make check TEST_TIMEOUT=15m`, and `make v2-native-check`; test counts
+were not supplied. Nine current helper reports were validated and approved with
+no findings. This records no new native G1, raw-server page capture,
+installed-device acceptance, MVP acceptance, or full chat/history implementation.

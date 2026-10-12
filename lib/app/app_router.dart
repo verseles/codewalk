@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_page.dart';
 import '../features/pairing/pairing_page.dart';
+import '../features/sessions/sessions_page.dart';
 import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
@@ -68,25 +69,14 @@ GoRouter createAppRouter({
   );
 }
 
-Widget _sessions(BuildContext context, GoRouterState state) => _Placeholder(
-  title: context.v2L10n.chatConversations,
-  message: context.v2L10n.chatAddServerToStart,
-  actionLabel: context.v2L10n.onboardingConnectRunningServer,
-  onAction: () => context.go('/hosts'),
-);
+Widget _sessions(BuildContext context, GoRouterState state) =>
+    const SessionsPage();
 
 class _Placeholder extends StatelessWidget {
-  const _Placeholder({
-    required this.title,
-    this.message,
-    this.actionLabel,
-    this.onAction,
-  });
+  const _Placeholder({required this.title, this.message});
 
   final String title;
   final String? message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -99,10 +89,6 @@ class _Placeholder extends StatelessWidget {
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(message!, textAlign: TextAlign.center),
-          ],
-          if (actionLabel != null && onAction != null) ...[
-            const SizedBox(height: 24),
-            FilledButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
       ),

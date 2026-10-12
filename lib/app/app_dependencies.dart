@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
@@ -20,6 +21,7 @@ class AppDependencies {
     this.pairing,
     this.diagnostics,
     this.releaseHistory,
+    this.sessions,
   });
 
   final AppPreferencesController preferences;
@@ -27,6 +29,7 @@ class AppDependencies {
   final L10nBridge localizations;
   final GoRouter router;
   final HostsController hosts;
+  final SessionsController? sessions;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -44,6 +47,7 @@ class AppDependencies {
     router.dispose();
     pairing?.dispose();
     navigation.dispose();
+    sessions?.dispose();
     hosts.dispose();
     preferences.dispose();
     releaseHistory?.dispose();

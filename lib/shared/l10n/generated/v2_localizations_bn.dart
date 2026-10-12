@@ -646,4 +646,46 @@ class V2LocalizationsBn extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => 'সংরক্ষিত প্রোফাইল নির্বাচন করুন';
+
+  @override
+  String get sessionsEmpty => 'লোড করা ফলাফলে কোনো সেশন নেই।';
+
+  @override
+  String get sessionsLoading => 'সেশন লোড হচ্ছে…';
+
+  @override
+  String get sessionsPreviousResults => 'আগের ফলাফল; রিফ্রেশ এখনও সফল হয়নি।';
+
+  @override
+  String get sessionsLimit =>
+      'স্থানীয় সীমা পূর্ণ (২০০ সেশন বা ১০ পৃষ্ঠা)। ফলাফল অসম্পূর্ণ হতে পারে।';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'শুধু পড়ার বিবরণ। এই পূর্বরূপে কথোপকথনের ইতিহাস উপলব্ধ নয়।';
+
+  @override
+  String get sessionsUnavailable => 'এই প্ল্যাটফর্মে সেশন পড়া উপলব্ধ নয়।';
+
+  @override
+  String get sessionsReadFailed =>
+      'সেশন পড়া যায়নি। রিফ্রেশ করুন বা পরের পৃষ্ঠা ম্যানুয়ালি আবার লোড করুন।';
+
+  @override
+  String get sessionsTimeout =>
+      'সেশন পড়ার সময় শেষ। ম্যানুয়ালি আবার চেষ্টা করুন।';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'অবৈধ ধারাবাহিকতা। নতুন তালিকা শুরু করতে রিফ্রেশ করুন।';
+
+  @override
+  String get sessionsRateLimited =>
+      'সার্ভার অনুরোধ সীমিত করেছে। ম্যানুয়ালি আবার চেষ্টা করার আগে অপেক্ষা করুন।';
+
+  @override
+  String get sessionExportUntitled => 'শিরোনামহীন সেশন';
 }

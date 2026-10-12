@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "Selecciona un perfil guardado",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "No hay sesiones en los resultados cargados.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "Cargando sesiones…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "Resultados anteriores; la actualización aún no ha tenido éxito.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "Límite local alcanzado (200 sesiones o 10 páginas). Los resultados pueden estar incompletos.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "Detalles de solo lectura. El historial no está disponible en esta vista previa.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "La lectura de sesiones no está disponible en esta plataforma.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "No se pudieron leer las sesiones. Actualiza o reintenta la siguiente página manualmente.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "Se agotó el tiempo de lectura. Reintenta manualmente.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "Continuación no válida. Actualiza para iniciar una nueva lista.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "El servidor limitó las solicitudes. Espera antes de reintentar manualmente.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "Sesión sin título"
 }

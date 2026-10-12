@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "저장된 프로필 선택",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "불러온 결과에 세션이 없습니다.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "세션 불러오는 중…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "이전 결과입니다. 새로고침이 아직 성공하지 않았습니다.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "로컬 한도에 도달했습니다(200개 세션 또는 10페이지). 결과가 불완전할 수 있습니다.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "읽기 전용 상세 정보입니다. 이 미리보기에서는 대화 기록을 사용할 수 없습니다.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "이 플랫폼에서는 세션을 읽을 수 없습니다.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "세션을 읽지 못했습니다. 새로고침하거나 다음 페이지를 수동으로 다시 불러오세요.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "읽기 시간이 초과되었습니다. 수동으로 다시 시도하세요.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "잘못된 이어보기 정보입니다. 새로고침하여 새 목록을 시작하세요.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "서버가 요청을 제한했습니다. 기다린 후 수동으로 다시 시도하세요.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "제목 없는 세션"
 }

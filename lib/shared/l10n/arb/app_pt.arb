@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "Selecione um perfil salvo",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "Nenhuma sessão nos resultados carregados.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "Carregando sessões…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "Resultados anteriores; a atualização ainda não foi concluída com sucesso.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "Limite local atingido (200 sessões ou 10 páginas). Os resultados podem estar incompletos.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "Detalhes somente para leitura. O histórico da conversa está indisponível nesta prévia.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "A leitura de sessões está indisponível nesta plataforma.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "Não foi possível ler as sessões. Atualize ou tente carregar a próxima página manualmente.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "A leitura de sessões excedeu o tempo limite. Tente novamente manualmente.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "Continuação inválida. Atualize para iniciar uma nova lista.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "O servidor limitou as solicitações. Aguarde antes de tentar novamente manualmente.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "Sessão sem título"
 }

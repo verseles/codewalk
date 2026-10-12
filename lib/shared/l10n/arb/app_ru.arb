@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} мс"
+  "logsPerformanceDuration": "{elapsedMs} мс",
+  "sessionsSelectProfile": "Выберите сохранённый профиль",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "В загруженных результатах нет сеансов.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "Загрузка сеансов…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "Предыдущие результаты; обновление ещё не завершилось успешно.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "Достигнут локальный предел (200 сеансов или 10 страниц). Результаты могут быть неполными.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "Сведения только для чтения. История беседы недоступна в этом предпросмотре.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "Чтение сеансов недоступно на этой платформе.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "Не удалось прочитать сеансы. Обновите или повторите загрузку следующей страницы вручную.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "Время чтения истекло. Повторите вручную.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "Недопустимое продолжение. Обновите, чтобы начать новый список.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "Сервер ограничил запросы. Подождите перед повторной попыткой вручную.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "Сессия без названия"
 }

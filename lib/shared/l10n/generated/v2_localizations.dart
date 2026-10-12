@@ -1292,6 +1292,78 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'{elapsedMs} ms'**
   String logsPerformanceDuration(int elapsedMs);
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Select a saved profile'**
+  String get sessionsSelectProfile;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions in the loaded results.'**
+  String get sessionsEmpty;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Loading sessions…'**
+  String get sessionsLoading;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Previous results; refresh has not succeeded yet.'**
+  String get sessionsPreviousResults;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Local limit reached (200 sessions or 10 pages). These results may be incomplete.'**
+  String get sessionsLimit;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only details. Conversation history is unavailable in this preview.'**
+  String get sessionsHistoryUnavailable;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Session reading is unavailable on this platform.'**
+  String get sessionsUnavailable;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read sessions. Refresh or retry loading the next page manually.'**
+  String get sessionsReadFailed;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Session reading timed out. Retry manually.'**
+  String get sessionsTimeout;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid continuation. Refresh to start a new list.'**
+  String get sessionsInvalidCursor;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The server limited requests. Wait before retrying manually.'**
+  String get sessionsRateLimited;
+
+  /// CodeWalk UI string — sessionExportUntitled
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled session'**
+  String get sessionExportUntitled;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

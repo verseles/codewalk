@@ -646,4 +646,47 @@ class V2LocalizationsUr extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => 'محفوظ پروفائل منتخب کریں';
+
+  @override
+  String get sessionsEmpty => 'لوڈ شدہ نتائج میں کوئی سیشن نہیں۔';
+
+  @override
+  String get sessionsLoading => 'سیشن لوڈ ہو رہے ہیں…';
+
+  @override
+  String get sessionsPreviousResults =>
+      'پچھلے نتائج؛ تازہ کاری ابھی کامیاب نہیں ہوئی۔';
+
+  @override
+  String get sessionsLimit =>
+      'مقامی حد پوری ہو گئی (200 سیشن یا 10 صفحات)۔ نتائج نامکمل ہو سکتے ہیں۔';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'صرف پڑھنے کی تفصیلات۔ اس پیش منظر میں گفتگو کی تاریخ دستیاب نہیں۔';
+
+  @override
+  String get sessionsUnavailable => 'اس پلیٹ فارم پر سیشن پڑھنا دستیاب نہیں۔';
+
+  @override
+  String get sessionsReadFailed =>
+      'سیشن پڑھے نہیں جا سکے۔ تازہ کریں یا اگلا صفحہ دستی طور پر دوبارہ لوڈ کریں۔';
+
+  @override
+  String get sessionsTimeout =>
+      'سیشن پڑھنے کا وقت ختم ہو گیا۔ دستی طور پر دوبارہ کوشش کریں۔';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'تسلسل درست نہیں۔ نئی فہرست شروع کرنے کے لیے تازہ کریں۔';
+
+  @override
+  String get sessionsRateLimited =>
+      'سرور نے درخواستیں محدود کر دی ہیں۔ دستی طور پر دوبارہ کوشش کرنے سے پہلے انتظار کریں۔';
+
+  @override
+  String get sessionExportUntitled => 'بغیر عنوان والا سیشن';
 }

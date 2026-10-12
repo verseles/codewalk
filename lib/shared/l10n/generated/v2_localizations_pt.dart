@@ -653,4 +653,48 @@ class V2LocalizationsPt extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => 'Selecione um perfil salvo';
+
+  @override
+  String get sessionsEmpty => 'Nenhuma sessão nos resultados carregados.';
+
+  @override
+  String get sessionsLoading => 'Carregando sessões…';
+
+  @override
+  String get sessionsPreviousResults =>
+      'Resultados anteriores; a atualização ainda não foi concluída com sucesso.';
+
+  @override
+  String get sessionsLimit =>
+      'Limite local atingido (200 sessões ou 10 páginas). Os resultados podem estar incompletos.';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'Detalhes somente para leitura. O histórico da conversa está indisponível nesta prévia.';
+
+  @override
+  String get sessionsUnavailable =>
+      'A leitura de sessões está indisponível nesta plataforma.';
+
+  @override
+  String get sessionsReadFailed =>
+      'Não foi possível ler as sessões. Atualize ou tente carregar a próxima página manualmente.';
+
+  @override
+  String get sessionsTimeout =>
+      'A leitura de sessões excedeu o tempo limite. Tente novamente manualmente.';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'Continuação inválida. Atualize para iniciar uma nova lista.';
+
+  @override
+  String get sessionsRateLimited =>
+      'O servidor limitou as solicitações. Aguarde antes de tentar novamente manualmente.';
+
+  @override
+  String get sessionExportUntitled => 'Sessão sem título';
 }

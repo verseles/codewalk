@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
@@ -50,6 +51,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         ChangeNotifierProvider.value(value: dependencies.preferences),
         ChangeNotifierProvider.value(value: dependencies.navigation),
         ChangeNotifierProvider.value(value: dependencies.hosts),
+        if (dependencies.sessions case final sessions?)
+          ChangeNotifierProvider<SessionsController>.value(value: sessions),
         if (dependencies.diagnostics case final diagnostics?)
           ChangeNotifierProvider<DiagnosticsController>.value(
             value: diagnostics,

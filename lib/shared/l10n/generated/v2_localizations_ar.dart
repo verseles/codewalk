@@ -646,4 +646,46 @@ class V2LocalizationsAr extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => 'اختر ملفًا محفوظًا';
+
+  @override
+  String get sessionsEmpty => 'لا توجد جلسات في النتائج المحمّلة.';
+
+  @override
+  String get sessionsLoading => 'جارٍ تحميل الجلسات…';
+
+  @override
+  String get sessionsPreviousResults => 'نتائج سابقة؛ لم ينجح التحديث بعد.';
+
+  @override
+  String get sessionsLimit =>
+      'تم بلوغ الحد المحلي (200 جلسة أو 10 صفحات). قد تكون النتائج غير مكتملة.';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'تفاصيل للقراءة فقط. سجل المحادثة غير متاح في هذه المعاينة.';
+
+  @override
+  String get sessionsUnavailable => 'قراءة الجلسات غير متاحة على هذه المنصة.';
+
+  @override
+  String get sessionsReadFailed =>
+      'تعذرت قراءة الجلسات. حدّث أو أعد محاولة تحميل الصفحة التالية يدويًا.';
+
+  @override
+  String get sessionsTimeout =>
+      'انتهت مهلة قراءة الجلسات. أعد المحاولة يدويًا.';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'متابعة غير صالحة. حدّث لبدء قائمة جديدة.';
+
+  @override
+  String get sessionsRateLimited =>
+      'حدّ الخادم من الطلبات. انتظر قبل إعادة المحاولة يدويًا.';
+
+  @override
+  String get sessionExportUntitled => 'جلسة بدون عنوان';
 }

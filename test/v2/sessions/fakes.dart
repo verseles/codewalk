@@ -1,0 +1,96 @@
+import 'dart:async';
+
+import 'package:codewalk/features/hosts/hosts_controller.dart';
+import 'package:codewalk/features/sessions/sessions_controller.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
+import 'package:codewalk_core/codewalk_core.dart';
+
+import '../hosts/fakes.dart';
+
+EndpointProfile profile(String id) => EndpointProfile(
+  id: 'profile_$id',
+  label: 'Server $id',
+  endpoint: Uri.parse('http://127.0.0.1:4096/proxy/'),
+);
+
+class GatedProfiles extends MemoryProfiles {
+  Completer<EndpointCredential?>? credentialGate;
+  String? unreadable;
+  @override
+  Future<EndpointCredential?> readCredential(EndpointProfile profile) async {
+    if (profile.id == unreadable) throw StateError('private credential error');
+    return credentialGate == null
+        ? super.readCredential(profile)
+        : credentialGate!.future;
+  }
+}
+
+// Cancellation deliberately does not settle the future: controllers must reject
+// late success/error independently of what the transport manages to abort.
+class CatalogTask implements SessionCatalogTask {
+  final completion = Completer<Page<SessionSummary>>();
+  bool cancelled = false;
+  @override
+  Future<Page<SessionSummary>> get result => completion.future;
+  @override
+  void cancel() => cancelled = true;
+}
+
+class CatalogSource implements SessionCatalogSource {
+  CatalogSource(EndpointProfile profile)
+    : harness = HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id));
+  @override
+  final HarnessRef harness;
+  final tasks = <CatalogTask>[];
+  final queries = <SessionQuery>[];
+  int closes = 0;
+  @override
+  CatalogTask list(SessionQuery query) {
+    queries.add(query);
+    final task = CatalogTask();
+    tasks.add(task);
+    return task;
+  }
+
+  SessionSummary row(String id, {String? title}) => SessionSummary(
+    info: SessionInfo(
+      ref: SessionRef(harness.host, harness.harness, 'ses_$id'),
+      title: title ?? id,
+      ownership: const OwnershipInfo.unknown(reason: 'not observed'),
+    ),
+    updatedAt: DateTime.utc(2026, 10, 12),
+  );
+
+  void respond(List<SessionSummary> rows, {String? next}) =>
+      tasks.last.completion.complete(Page(items: rows, nextCursor: next));
+  void fail(SessionCatalogFailure failure) =>
+      tasks.last.completion.completeError(SessionCatalogException(failure));
+  @override
+  void close() => closes++;
+}
+
+class CatalogRig {
+  CatalogRig({DateTime Function()? now}) {
+    hosts = HostsController(repository: repository, prober: FakeProber());
+    sessions = SessionsController(
+      hosts: hosts,
+      sourceFactory: create,
+      now: now,
+    );
+  }
+  final repository = GatedProfiles();
+  late final HostsController hosts;
+  late final SessionsController sessions;
+  final sources = <CatalogSource>[];
+  CatalogSource create(EndpointProfile profile, EndpointCredential credential) {
+    final source = CatalogSource(profile);
+    sources.add(source);
+    return source;
+  }
+
+  Future<void> save(String id) => repository.save(profile(id), 'fake-$id');
+  void dispose() {
+    sessions.dispose();
+    hosts.dispose();
+  }
+}

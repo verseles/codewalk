@@ -647,4 +647,48 @@ class V2LocalizationsHi extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => 'सहेजी गई प्रोफ़ाइल चुनें';
+
+  @override
+  String get sessionsEmpty => 'लोड किए गए परिणामों में कोई सत्र नहीं है।';
+
+  @override
+  String get sessionsLoading => 'सत्र लोड हो रहे हैं…';
+
+  @override
+  String get sessionsPreviousResults =>
+      'पिछले परिणाम; रिफ्रेश अभी सफल नहीं हुआ।';
+
+  @override
+  String get sessionsLimit =>
+      'स्थानीय सीमा पूरी हुई (200 सत्र या 10 पृष्ठ)। परिणाम अधूरे हो सकते हैं।';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'केवल पढ़ने योग्य विवरण। इस पूर्वावलोकन में बातचीत का इतिहास उपलब्ध नहीं है।';
+
+  @override
+  String get sessionsUnavailable =>
+      'इस प्लेटफ़ॉर्म पर सत्र पढ़ना उपलब्ध नहीं है।';
+
+  @override
+  String get sessionsReadFailed =>
+      'सत्र पढ़े नहीं जा सके। रिफ्रेश करें या अगला पृष्ठ मैन्युअल रूप से फिर लोड करें।';
+
+  @override
+  String get sessionsTimeout =>
+      'सत्र पढ़ने का समय समाप्त। मैन्युअल रूप से फिर कोशिश करें।';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'अमान्य निरंतरता। नई सूची शुरू करने के लिए रिफ्रेश करें।';
+
+  @override
+  String get sessionsRateLimited =>
+      'सर्वर ने अनुरोध सीमित किए हैं। मैन्युअल रूप से फिर कोशिश करने से पहले प्रतीक्षा करें।';
+
+  @override
+  String get sessionExportUntitled => 'बिना शीर्षक वाला सत्र';
 }

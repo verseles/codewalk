@@ -610,4 +610,40 @@ class V2LocalizationsZh extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs 毫秒';
   }
+
+  @override
+  String get sessionsSelectProfile => '选择已保存的配置';
+
+  @override
+  String get sessionsEmpty => '已加载的结果中没有会话。';
+
+  @override
+  String get sessionsLoading => '正在加载会话…';
+
+  @override
+  String get sessionsPreviousResults => '此前的结果；刷新尚未成功。';
+
+  @override
+  String get sessionsLimit => '已达到本地上限（200 个会话或 10 页）。结果可能不完整。';
+
+  @override
+  String get sessionsHistoryUnavailable => '只读详情。此预览不提供对话历史。';
+
+  @override
+  String get sessionsUnavailable => '此平台不支持读取会话。';
+
+  @override
+  String get sessionsReadFailed => '无法读取会话。请刷新或手动重试加载下一页。';
+
+  @override
+  String get sessionsTimeout => '读取会话超时。请手动重试。';
+
+  @override
+  String get sessionsInvalidCursor => '续页信息无效。请刷新以开始新列表。';
+
+  @override
+  String get sessionsRateLimited => '服务器限制了请求。请等待后手动重试。';
+
+  @override
+  String get sessionExportUntitled => '无标题会话';
 }

@@ -1578,6 +1578,7 @@ Before starting, ensure the Issue contains:
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
 | V2-043A ([#364](https://github.com/verseles/codewalk/issues/364)) | V2-005B, V2-022B, V2-040, V2-041, V2-056A, V2-028D | Read-only `GET /api/session` and known-session metadata through the existing authenticated transport; canonical scoped summaries, opaque reader-bound pagination, bounded reads, typed safe failures and cancellation/disposal tests. No active overlay, project canonicalization, lifecycle mutation, timeline projection, SSE or invented snapshot boundary. Whole parents and unobserved retry/quota remain pending. |
+| V2-043B ([#365](https://github.com/verseles/codewalk/issues/365)) | V2-043A, V2-020B, V2-027 | Visible canonical Conversations catalog for an explicitly selected saved profile; manual ordered pagination/refresh, safe authentication and storage states, scoped cancellation, and loaded-metadata expansion in compact/wide layouts and 14 locales. Limit resident rows/pages without claiming completeness. Preserve opaque pending session intents; no history, live discovery, lifecycle mutation, project/active overlay or full-parent acceptance. |
 
 #### V2-044 — Timeline projection
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`

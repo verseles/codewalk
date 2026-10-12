@@ -16,13 +16,20 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** the user opens conversations in this v2 app
 - **When** the corresponding route is displayed
-- **Then** localized placeholders are shown
-- **Then** the conversation placeholder offers an action that opens the hosts page
+- **Then** a localized, read-only session catalog offers explicit selection of a saved server and an action that opens the hosts page
+- **Then** loading server profiles, storage failure, missing credentials and a successful empty session read have distinct states; no session request starts before credentials finish loading
+- **When** a server is selected or manually refreshed
+- **Then** native Android/Linux reads use its current password or paired credential and preserve the authored endpoint, port and proxy prefix
+- **Then** sessions retain server order, use complete host/harness/session identity and show a localized fallback for an empty title; tapping a row expands only its loaded update time and a notice that conversation history is unavailable
+- **Then** manual pagination requests 50 items per page, retaining at most 200 rows or ten accepted pages; empty or short pages with a continuation remain pageable and a local limit is explicitly identified
+- **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
+- **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
 - **When** the host and session identifiers are valid
 - **Then** navigation retains a pending session intent and displays the conversation placeholder
 - **Then** identifiers remain opaque, including valid percent-encoded characters
+- **Then** ordinary navigation to conversations, hosts or settings preserves the pending intent without guessing a profile or starting a session read; a new pairing or unsupported link replaces it
 
 - **Given** a `codewalk://pair` link or `/pair` route is opened
 - **When** its pairing intent is captured
@@ -163,8 +170,9 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** opening or refreshing this page neither acknowledges update announcements nor installs an update
 - **Then** disposed or superseded loads cannot publish stale results; unsupported fetch platforms can still display a previously saved copy
 
-Conversations and session routes retain their navigation
-placeholders. Locale changes exposed by the v2 controller remain transient;
+Session-detail routes retain their navigation placeholders; the conversation
+catalog does not fetch history, attach live execution, send prompts or mutate sessions.
+Locale changes exposed by the v2 controller remain transient;
 other feature-specific settings controls and full rendering parity remain
 in their owning Issues. Hosts, settings and appearance widget/golden tests cover mobile and desktop viewports on
 the Flutter VM; they do not certify installed native targets.

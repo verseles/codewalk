@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "Gespeichertes Profil auswählen",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "Keine Sitzungen in den geladenen Ergebnissen.",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "Sitzungen werden geladen…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "Vorherige Ergebnisse; Aktualisierung noch nicht erfolgreich.",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "Lokales Limit erreicht (200 Sitzungen oder 10 Seiten). Ergebnisse können unvollständig sein.",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "Schreibgeschützte Details. Der Verlauf ist in dieser Vorschau nicht verfügbar.",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "Sitzungen können auf dieser Plattform nicht gelesen werden.",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "Sitzungen konnten nicht gelesen werden. Aktualisieren oder nächste Seite manuell erneut laden.",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "Zeitüberschreitung beim Lesen. Manuell erneut versuchen.",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "Ungültige Fortsetzung. Für eine neue Liste aktualisieren.",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "Der Server begrenzt Anfragen. Vor einem manuellen Neuversuch warten.",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "Unbenannte Sitzung"
 }

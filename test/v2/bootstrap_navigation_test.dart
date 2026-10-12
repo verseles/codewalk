@@ -107,6 +107,12 @@ void main() {
       expect(find.text('Conversation'), findsWidgets);
       expect(tester.takeException(), isNull);
 
+      for (final route in ['/hosts', '/sessions', '/settings', '/']) {
+        dependencies.router.go(route);
+        await tester.pumpAndSettle();
+        expect(dependencies.navigation.pendingIntent, same(intent));
+      }
+
       dependencies.openDeepLink(Uri.parse('codewalk://unknown?token=hidden'));
       await tester.pumpAndSettle();
       expect(

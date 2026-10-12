@@ -626,4 +626,40 @@ class V2LocalizationsJa extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs ms';
   }
+
+  @override
+  String get sessionsSelectProfile => '保存済みプロファイルを選択';
+
+  @override
+  String get sessionsEmpty => '読み込んだ結果にセッションはありません。';
+
+  @override
+  String get sessionsLoading => 'セッションを読み込み中…';
+
+  @override
+  String get sessionsPreviousResults => '前回の結果です。更新はまだ成功していません。';
+
+  @override
+  String get sessionsLimit => 'ローカル上限（200セッションまたは10ページ）に達しました。結果は不完全な場合があります。';
+
+  @override
+  String get sessionsHistoryUnavailable => '読み取り専用の詳細です。このプレビューでは会話履歴を利用できません。';
+
+  @override
+  String get sessionsUnavailable => 'このプラットフォームではセッションを読み込めません。';
+
+  @override
+  String get sessionsReadFailed => 'セッションを読み込めませんでした。更新するか、次のページを手動で再試行してください。';
+
+  @override
+  String get sessionsTimeout => '読み込みがタイムアウトしました。手動で再試行してください。';
+
+  @override
+  String get sessionsInvalidCursor => '継続情報が無効です。更新して新しい一覧を開始してください。';
+
+  @override
+  String get sessionsRateLimited => 'サーバーがリクエストを制限しました。しばらく待ってから手動で再試行してください。';
+
+  @override
+  String get sessionExportUntitled => '無題のセッション';
 }

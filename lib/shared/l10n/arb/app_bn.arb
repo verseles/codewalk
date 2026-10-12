@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "সংরক্ষিত প্রোফাইল নির্বাচন করুন",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "লোড করা ফলাফলে কোনো সেশন নেই।",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "সেশন লোড হচ্ছে…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "আগের ফলাফল; রিফ্রেশ এখনও সফল হয়নি।",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "স্থানীয় সীমা পূর্ণ (২০০ সেশন বা ১০ পৃষ্ঠা)। ফলাফল অসম্পূর্ণ হতে পারে।",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "শুধু পড়ার বিবরণ। এই পূর্বরূপে কথোপকথনের ইতিহাস উপলব্ধ নয়।",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "এই প্ল্যাটফর্মে সেশন পড়া উপলব্ধ নয়।",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "সেশন পড়া যায়নি। রিফ্রেশ করুন বা পরের পৃষ্ঠা ম্যানুয়ালি আবার লোড করুন।",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "সেশন পড়ার সময় শেষ। ম্যানুয়ালি আবার চেষ্টা করুন।",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "অবৈধ ধারাবাহিকতা। নতুন তালিকা শুরু করতে রিফ্রেশ করুন।",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "সার্ভার অনুরোধ সীমিত করেছে। ম্যানুয়ালি আবার চেষ্টা করার আগে অপেক্ষা করুন।",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "শিরোনামহীন সেশন"
 }

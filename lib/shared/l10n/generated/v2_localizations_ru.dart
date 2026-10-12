@@ -652,4 +652,47 @@ class V2LocalizationsRu extends V2Localizations {
   String logsPerformanceDuration(int elapsedMs) {
     return '$elapsedMs мс';
   }
+
+  @override
+  String get sessionsSelectProfile => 'Выберите сохранённый профиль';
+
+  @override
+  String get sessionsEmpty => 'В загруженных результатах нет сеансов.';
+
+  @override
+  String get sessionsLoading => 'Загрузка сеансов…';
+
+  @override
+  String get sessionsPreviousResults =>
+      'Предыдущие результаты; обновление ещё не завершилось успешно.';
+
+  @override
+  String get sessionsLimit =>
+      'Достигнут локальный предел (200 сеансов или 10 страниц). Результаты могут быть неполными.';
+
+  @override
+  String get sessionsHistoryUnavailable =>
+      'Сведения только для чтения. История беседы недоступна в этом предпросмотре.';
+
+  @override
+  String get sessionsUnavailable =>
+      'Чтение сеансов недоступно на этой платформе.';
+
+  @override
+  String get sessionsReadFailed =>
+      'Не удалось прочитать сеансы. Обновите или повторите загрузку следующей страницы вручную.';
+
+  @override
+  String get sessionsTimeout => 'Время чтения истекло. Повторите вручную.';
+
+  @override
+  String get sessionsInvalidCursor =>
+      'Недопустимое продолжение. Обновите, чтобы начать новый список.';
+
+  @override
+  String get sessionsRateLimited =>
+      'Сервер ограничил запросы. Подождите перед повторной попыткой вручную.';
+
+  @override
+  String get sessionExportUntitled => 'Сессия без названия';
 }

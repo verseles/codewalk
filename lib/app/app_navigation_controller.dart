@@ -89,7 +89,7 @@ class AppNavigationController extends ChangeNotifier {
         const ['/', '/hosts', '/sessions', '/settings'].contains(link.path) &&
         !link.hasQuery &&
         !link.hasFragment) {
-      _pending = null;
+      if (_pending is! SessionNavigationIntent) _pending = null;
       notifyListeners();
       return link.path;
     }

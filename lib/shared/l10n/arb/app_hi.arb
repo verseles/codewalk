@@ -335,5 +335,50 @@
   "@diagnosticsPrivacy": {
     "description": "V2 finite diagnostics and archive UI"
   },
-  "logsPerformanceDuration": "{elapsedMs} ms"
+  "logsPerformanceDuration": "{elapsedMs} ms",
+  "sessionsSelectProfile": "सहेजी गई प्रोफ़ाइल चुनें",
+  "@sessionsSelectProfile": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsEmpty": "लोड किए गए परिणामों में कोई सत्र नहीं है।",
+  "@sessionsEmpty": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLoading": "सत्र लोड हो रहे हैं…",
+  "@sessionsLoading": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsPreviousResults": "पिछले परिणाम; रिफ्रेश अभी सफल नहीं हुआ।",
+  "@sessionsPreviousResults": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsLimit": "स्थानीय सीमा पूरी हुई (200 सत्र या 10 पृष्ठ)। परिणाम अधूरे हो सकते हैं।",
+  "@sessionsLimit": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsHistoryUnavailable": "केवल पढ़ने योग्य विवरण। इस पूर्वावलोकन में बातचीत का इतिहास उपलब्ध नहीं है।",
+  "@sessionsHistoryUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsUnavailable": "इस प्लेटफ़ॉर्म पर सत्र पढ़ना उपलब्ध नहीं है।",
+  "@sessionsUnavailable": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsReadFailed": "सत्र पढ़े नहीं जा सके। रिफ्रेश करें या अगला पृष्ठ मैन्युअल रूप से फिर लोड करें।",
+  "@sessionsReadFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsTimeout": "सत्र पढ़ने का समय समाप्त। मैन्युअल रूप से फिर कोशिश करें।",
+  "@sessionsTimeout": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsInvalidCursor": "अमान्य निरंतरता। नई सूची शुरू करने के लिए रिफ्रेश करें।",
+  "@sessionsInvalidCursor": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsRateLimited": "सर्वर ने अनुरोध सीमित किए हैं। मैन्युअल रूप से फिर कोशिश करने से पहले प्रतीक्षा करें।",
+  "@sessionsRateLimited": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionExportUntitled": "बिना शीर्षक वाला सत्र"
 }
