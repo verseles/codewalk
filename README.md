@@ -200,6 +200,13 @@ installation or MVP acceptance. Android/Linux are the MVP targets; full deferred
 platform evidence remains separate. `make v2-foundations` retains Chrome and Web
 checks; the checker's `--no-build` option omits only the Web build.
 
+Automatic push/PR CI runs `make v2-native-check` in both `v2_foundations` and
+`v2_native_checks`, preserving the existing status contexts with strict native
+gates. The **V2 deferred Web checkpoint** (`v2-deferred-web.yml`) is manual-only
+and runs the full `make v2-foundations` profile. Its failures remain failures;
+deferred Chrome/Web checks are not native MVP or full-GA acceptance. The retained
+legacy browser checks in `quality` and the legacy Web deployment remain separate.
+
 #### Isolated Linux development preview
 
 The Linux native CI job packages `codewalk-v2-preview-linux-x64.tar.gz` and opens

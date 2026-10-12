@@ -1576,3 +1576,10 @@ judge-approved fixes. `make check TEST_TIMEOUT=15m` and the native aggregate pas
 before those fixes. The owner waived re-review: the nine initial reports do not
 approve the final fixed state, and no R2 is claimed. This records no native
 installation, new capture, or MVP acceptance.
+
+## Native MVP CI and deferred Web checkpoint
+
+- Automatic CI retains the `v2_foundations` and `v2_native_checks` status IDs; both run strict `make v2-native-check`. Android/Linux native builds depend only on `v2_native_checks`.
+- Legacy `test/web` browser coverage and the Windows build remain in CI.
+- `.github/workflows/v2-deferred-web.yml` is manual-only (`workflow_dispatch`) and runs strict `make v2-foundations`, including Chrome `test/v2` and the explicit local `lib/main_v2.dart` Web build; it does not deploy.
+- `tool/ci/test_v2_ci_alignment.py` is included in `test-v2-tools`; `README.md` documents the split.

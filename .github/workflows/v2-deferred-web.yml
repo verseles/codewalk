@@ -1,0 +1,44 @@
+name: V2 deferred Web checkpoint
+
+# Web/Chrome acceptance is post-MVP. This explicit check fails normally and
+# does not publish or participate in the Android/Linux push/PR gate.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.44.0"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v2_full_foundations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Check full v2 foundations, Chrome tests and local Web build
+        run: make v2-foundations
