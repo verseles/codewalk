@@ -7,6 +7,7 @@ APK_METADATA_PATH = $(patsubst %/flutter-apk,%/apk/release,$(APK_DIR))/output-me
 ANDROID_KEY_PROPERTIES = android/key.properties
 ANALYZE_LOG = /tmp/flutter_analyze.log
 TEST_JOBS ?= 4
+TEST_TIMEOUT ?= 10m
 FAST_EXCLUDE_TAGS ?= slow,integration
 ANDROID_BUILD_CODE_OFFSET ?= 2001
 WEB_BASE_HREF ?= /
@@ -256,7 +257,7 @@ analyze:
 	bash tool/ci/check_analyze_budget.sh $(ANALYZE_LOG) 337
 
 test:
-	timeout --foreground 10m flutter test --no-pub -j $(TEST_JOBS) --fail-fast $(QUIET)
+	timeout --verbose --foreground $(TEST_TIMEOUT) flutter test --no-pub -j $(TEST_JOBS) --fail-fast $(QUIET)
 
 test-parallel:
 	flutter test --no-pub -j $(TEST_JOBS) $(QUIET)

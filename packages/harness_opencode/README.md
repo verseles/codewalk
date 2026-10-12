@@ -8,8 +8,8 @@ wire DTOs remain at the adapter edge.
 
 [V2-041 / #273](https://github.com/verseles/codewalk/issues/273) adds
 `OpenCodePairing`: validated pairing inputs, single-use JSON redemption and
-explicit, version-gated successor renewal. Session APIs and realtime hydration
-remain separate work items.
+explicit, version-gated successor renewal. The bounded session reader below is
+delivered separately; realtime hydration and full lifecycle remain work items.
 
 The fixture-backed fake below is **VM-only test support**, delivered by
 [V2-056A / #296](https://github.com/verseles/codewalk/issues/296). It is not
@@ -45,8 +45,41 @@ versions at or above the minimum are explicitly untested. Complete SemVer syntax
 is validated before build metadata is ignored for compatibility precedence.
 Retry hints inform manual checks only: there is no automatic HTTP replay, and
 delays beyond the one-day presentation budget stay deferred rather than clamped.
-Cancellation fences stale results. Session APIs and stream hydration remain with
-their owning work items.
+Cancellation fences stale results. Stream hydration remains with its owning
+work item.
+
+## Read-only session catalog and metadata
+
+[V2-043A / #364](https://github.com/verseles/codewalk/issues/364) adds
+`OpenCodeSessionReader`, which borrows an already-authenticated,
+endpoint-scoped transport and a canonical `HarnessRef`:
+
+- `listSessions(SessionQuery)` reads `GET /api/session`, preserving server order
+  and returning immutable canonical `Page<SessionSummary>` results. The initial
+  page uses descending order; continuations forward the server cursor without
+  interpreting it. Returned continuation tokens belong to that reader instance.
+- `readSession(SessionRef)` reads one matching session. Host, harness and native
+  identity remain distinct; supplied native IDs follow the official `ses`
+  prefix rather than assuming every ID has the generated `ses_` form.
+- Reads default to 20 seconds, a 1-MiB collected-body cap and at most 200 items.
+  These bound application-level work, not OS buffers or arbitrary asynchronous
+  transport cleanup. Disposing the reader cancels its operations while leaving
+  the borrowed transport and caller cancellation signal intact.
+- Errors contain finite categories and HTTP status codes, not raw server
+  messages, URLs, headers, bodies or stacks. Gateway failures are unavailable;
+  HTTP 408 and total deadline expiry are timeouts. Reads are never retried
+  automatically and do not mark a session viewed or resume execution.
+- Project and active-only queries are explicitly unsupported in this producer.
+  Ownership stays unknown, project/execution state stays absent, and the page
+  has no invented snapshot boundary. Whitelisted native directory/project and
+  fork annotations do not establish canonical project identity or turn a native
+  message boundary into a timeline item.
+
+The API is not yet wired to the app's Conversations placeholder. Streaming,
+message projection, sending and lifecycle mutations retain their own criteria.
+Tests replay an accepted 2.0.22 B metadata GET over authenticated loopback IO;
+page and failure/race fixtures are explicitly source-shaped test data, not
+additional native G1 recordings. Natural provider retry/quota remains pending.
 
 ## Pairing
 

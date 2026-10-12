@@ -1494,3 +1494,17 @@ acceptance.
 - `compiler.json` is unchanged native-builder output; `audit.json` records independent hash/ELF/kernel checks; provenance, README, and the checksum manifest record the evidence and its scope.
 - The disposable container was stopped and removed; host SDK/packages and production were unchanged, with no permanent app, dependency, or tool-workflow changes.
 - Compiler-only evidence—not GUI launch, installation, G1–G5, #243 retry/quota, or MVP acceptance; release AOT, signing, and migration are untested.
+
+### V2-043A read-only session reader (#364)
+
+Adds the exported `OpenCodeSessionReader` in `packages/harness_opencode/lib/src/session_reader.dart`.
+- It borrows an authenticated endpoint transport and performs metadata GETs only; defaults are 20 seconds, a 1-MiB body cap and 200 items per page.
+- `listSessions` reads `GET /api/session`, preserving server order and projecting canonical summaries.
+- Continuations are opaque, scoped to this reader instance and do not expose native cursors.
+- `readSession` reads and identity-checks one matching record; native IDs accept the official `ses` prefix, not only `ses_`.
+- `session_projection.dart` maps metadata to canonical summaries; ownership remains unknown, project/execution state absent, and only whitelisted directory/project/fork annotations are kept (no invented timeline item).
+- Typed errors are sanitized; HTTP 408 is a timeout, 502/504 are unavailable, and reads are not automatically retried.
+- `test/session_reader_test.dart` covers 28 cases: accepted B metadata GET over authenticated IO, synthetic pages, cancellation/races and privacy; all 88 harness tests and strict analysis passed.
+- R2 recorded nine valid approvals; F1 HTTP-status and F2 official `ses`-prefix corrections are verified, with no remaining finding.
+- `make check TEST_TIMEOUT=15m` passed 3,079 root tests with three existing skips; Makefile defaults to 10m and uses `timeout --verbose --foreground`.
+- The Conversations placeholder remains unchanged: no SSE/history, session mutations, acceptance gates or MVP acceptance are included.

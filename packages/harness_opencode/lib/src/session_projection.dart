@@ -1,0 +1,92 @@
+import 'dart:convert';
+
+import 'package:codewalk_core/codewalk_core.dart';
+
+/// The HTTP metadata subset is not an execution or hydration snapshot.
+SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
+  final data = _object(value);
+  final id = openCodeSessionId(data['id']);
+  final title = data['title'];
+  if (title != null && title is! String) _malformed();
+  final time = _object(data['time']);
+  final updated = _instant(time['updated']);
+  final parent = data['parentID'];
+  final metadata = <String, Object?>{};
+  final project = data['projectID'];
+  if (project != null) {
+    metadata['nativeProjectId'] = _text(project);
+  }
+  final location = data['location'];
+  if (location != null) {
+    metadata['nativeDirectory'] = _text(_object(location)['directory']);
+  }
+
+  ForkLineage? fork;
+  if (data['fork'] != null) {
+    final native = _object(data['fork']);
+    final source = openCodeSessionId(native['sessionID']);
+    final boundary = _object(native['boundary']);
+    final kind = _text(boundary['type']);
+    final message = _text(boundary['messageID']);
+    if (!message.startsWith('msg_')) _malformed();
+    fork = ForkLineage(SessionRef(harness.host, harness.harness, source));
+    // Native boundaries address a whole message, not a canonical timeline item.
+    metadata['nativeForkBoundary'] = {'type': kind, 'messageId': message};
+  }
+
+  return SessionSummary(
+    info: SessionInfo(
+      ref: SessionRef(harness.host, harness.harness, id),
+      title: title as String? ?? '',
+      ownership: const OwnershipInfo.unknown(
+        reason: 'nativeSessionMetadataHasNoOwnershipProof',
+      ),
+      lineage: SessionLineage(
+        parent: parent == null
+            ? null
+            : SessionRef(
+                harness.host,
+                harness.harness,
+                openCodeSessionId(parent),
+              ),
+        fork: fork,
+      ),
+      metadata: metadata.isEmpty ? null : CanonicalValue(metadata),
+    ),
+    updatedAt: updated,
+  );
+}
+
+String openCodeSessionId(Object? value) {
+  final id = _text(value);
+  if (!id.startsWith('ses')) _malformed();
+  return id;
+}
+
+String _text(Object? value) {
+  if (value is! String ||
+      value.isEmpty ||
+      utf8.encode(value).length > 4096 ||
+      utf8.decode(utf8.encode(value)) != value) {
+    _malformed();
+  }
+  return value;
+}
+
+Map<String, Object?> _object(Object? value) {
+  if (value is! Map<String, Object?>) _malformed();
+  return value;
+}
+
+DateTime _instant(Object? value) {
+  if (value is! num || !value.isFinite || value.abs() > 8640000000000000) {
+    _malformed();
+  }
+  return DateTime.fromMicrosecondsSinceEpoch(
+    (value * 1000).round(),
+    isUtc: true,
+  );
+}
+
+Never _malformed() =>
+    throw const FormatException('Malformed OpenCode session metadata.');

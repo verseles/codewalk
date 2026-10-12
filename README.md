@@ -168,6 +168,11 @@ make release V=patch # bump pubspec, update CHANGELOG.md, commit, tag, push
 
 Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host. `make test-fast` retains the five ChatPage smoke scenarios while the extended suite remains required in full checks. Browser tests run separately via `make test-web` and in CI; set `CHROME_EXECUTABLE` if the browser is not discovered automatically.
 
+The full `make test` suite has a 10-minute execution guard by default. For a
+slower host, `make check TEST_TIMEOUT=15m` retains all tests and individual test
+timeouts while allowing a larger finite suite budget. Guard expiry includes a
+signal diagnostic; it is a failed or incomplete check, not a passing result.
+
 Coverage filtering uses Python 3 and does not require system `lcov`. The gate validates fresh Flutter LCOV records, excludes `.g.dart`, localization, and plugin registrant sources, and enforces the global floor plus the reviewed per-file floors in `tool/ci/coverage_baseline.tsv`. Missing protected sources, inconsistent totals, foreign source paths, or coverage below the configured floors fail the gate; an old filtered artifact is never used as a fallback. Floors are changed deliberately, not regenerated or lowered automatically.
 
 When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.

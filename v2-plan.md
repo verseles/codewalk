@@ -1573,6 +1573,12 @@ Before starting, ensure the Issue contains:
 - **Scope:** cursor-paged list across projects; children under parents; create with `location.directory`; rename; delete (children cascade warning); fork; unread via `POST …/view`; local hide (archive); ownership labels; sessions created in the TUI appear live.
 - **Done when:** [ ] a session started in the TUI appears without manual refresh; [ ] widget tests for grouping and labels.
 
+**Bounded read producer (owner delegation, 2026-10-12).** Start the independent HTTP reader below from accepted facts while native retry/quota recordings remain pending in V2-005D (#243). This is implementation sequencing, not a waiver or an accepted capability tier. The full V2-042/V2-043 dependencies and criteria remain mandatory; lifecycle, live discovery, stream/hydration, timeline/UI, sending and MVP acceptance are not delivered by this reader.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-043A ([#364](https://github.com/verseles/codewalk/issues/364)) | V2-005B, V2-022B, V2-040, V2-041, V2-056A, V2-028D | Read-only `GET /api/session` and known-session metadata through the existing authenticated transport; canonical scoped summaries, opaque reader-bound pagination, bounded reads, typed safe failures and cancellation/disposal tests. No active overlay, project canonicalization, lifecycle mutation, timeline projection, SSE or invented snapshot boundary. Whole parents and unobserved retry/quota remain pending. |
+
 #### V2-044 — Timeline projection
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-044A, V2-044B, V2-044C
