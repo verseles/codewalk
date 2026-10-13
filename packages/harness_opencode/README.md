@@ -239,6 +239,52 @@ dart analyze --fatal-infos
 dart test test/tool_projection_test.dart test/tool_replay_test.dart
 ```
 
+## Native execution lifecycle projection
+
+[V2-044A4 / #370](https://github.com/verseles/codewalk/issues/370) exports
+`projectOpenCodeExecutionEvent(value, current, sourceVersion: ..., position:
+..., receivedAt: ...)`. It is synchronous and pure like its siblings, but returns
+an unmodifiable `List<SessionEvent>` because one terminal frame updates both the
+execution state and the timeline. Reduce the events in order against the latest
+`SessionState`.
+
+| Native event | Canonical result |
+|---|---|
+| `session.execution.started` | `ExecutionChanged(running)`, previous `lastOutcome` kept |
+| `succeeded`, `failed`, `interrupted` (`user`, `superseded`, `inactivity`) | `ExecutionChanged(idle, lastOutcome)`, then `ItemUpserted(TurnOutcome)` |
+| `interrupted` (`shutdown`) | `ExecutionChanged(interruptedPendingResume)` only, previous `lastOutcome` kept |
+
+- The outcome item uses the official `evt_` → `msg_` message ID, so its ID,
+  completed status and outcome kind equal the history `idle` row. Its generation
+  is live and stream-scoped. The error and interrupt reason stay on the execution
+  outcome, not on the item, so live and history items remain identical.
+- A shutdown records no idle marker because the server keeps the execution claim
+  and resumes the same turn; no outcome is invented.
+- Failures keep only `error.type` as `rawType`, with kind `unknown`, an empty raw
+  message and no retry inference. `message`, `status` and `response` are never
+  read. An empty type is unsupported because Core requires a nonempty `rawType`.
+- Unrelated types and foreign sessions return an empty list. Malformed frames,
+  unsupported versions, unknown interrupt reasons, IDs or error types over 4 KiB
+  UTF-8, and a resident non-outcome item under the outcome ID raise finite
+  `OpenCodeExecutionProjectionException` categories, atomically.
+- The reference client's refetch triggers (tool parts still open at a terminal,
+  session info not yet loaded) are not projected; the stream owner handles them.
+  `session.retry.scheduled` is not projected.
+
+Replays cover offline A with the text and tool producers, and every execution
+frame in the B–E captures: 36 terminal outcomes match their recorded `idle` rows,
+3 shutdowns have none, and 4 failures expose no message or body. Fixtures and the
+schema pin are unchanged; no new native, installed-device or MVP acceptance is
+established.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/execution_projection_test.dart test/execution_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

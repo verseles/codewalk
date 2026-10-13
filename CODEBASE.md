@@ -1658,3 +1658,22 @@ Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
 all 13 helpers reviewed round 1 and the accepted W1/S1 corrections were verified
 locally without a second round. This adds no runtime chat wiring or native/MVP
 acceptance; dependent transport, hydration and app parents remain pending.
+
+## V2-044A4 native execution lifecycle projection (#370)
+
+```text
+packages/harness_opencode/lib/src/execution_projection.dart # Pure execution event-to-SessionEvent list projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/execution_projection_test.dart # Mappings, shutdown, privacy, bounds and reducer composition
+packages/harness_opencode/test/execution_replay_test.dart # Offline immutable A–E replays with history idle parity
+packages/harness_opencode/test/execution_test_data.dart # Synthetic source-shaped execution frames and manifests
+```
+
+`projectOpenCodeExecutionEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` returns an ordered list: `ExecutionChanged` for every
+execution frame, plus a history-identical `TurnOutcome` for non-shutdown
+terminals. Shutdown maps to `interruptedPendingResume` without an outcome.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
+nine helpers approved round 1 and the one accepted test-scope suggestion was
+verified locally. No runtime chat wiring or native/MVP acceptance is added.
