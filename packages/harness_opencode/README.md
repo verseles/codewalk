@@ -285,6 +285,59 @@ dart analyze --fatal-infos
 dart test test/execution_projection_test.dart test/execution_replay_test.dart
 ```
 
+## Native inbox projection
+
+[V2-044A5 / #371](https://github.com/verseles/codewalk/issues/371) exports
+`projectOpenCodeInboxEvent(value, current, sourceVersion: ..., position: ...,
+receivedAt: ...)`. Like the execution producer, it is synchronous and pure and
+returns an unmodifiable `List<SessionEvent>`: item upserts first, then a
+level-set `PendingInputChanged` only when the pending collection changes.
+Reduce the events in order against the latest `SessionState`.
+
+| Native event | Canonical result |
+|---|---|
+| `enqueued`, user, `steer` | `UserInput` (pending status, `accepted`), the history context marker when files/agents/skills are attached, and a pending entry |
+| `enqueued`, user `queue` or any synthetic | Pending entry only (a composer chip) |
+| `enqueued`, compaction or move | Validated, not projected |
+| `delivery.changed` | Pending delivery updated; a resident open `UserInput` follows it, and a queued user switched to `steer` is materialized |
+| `delivered` | Resident open `UserInput` becomes `delivered`/completed; otherwise the pending entry is materialized as a delivered `UserInput` or a continuation `Notice` |
+| `cancelled` | Pending entry removed; a resident open `UserInput` is marked `cancelled` in place |
+
+- Native history orders user rows by delivery and never contains cancelled
+  input, while Core keeps first-observed order and has no single-item removal.
+  Keeping queued input pending until delivery therefore keeps live order and
+  contents equal to history without moving or deleting rows. History records the
+  delivered event's `created` time, kept in provenance as `nativeCreated`.
+- Item IDs equal the history projection's (`user`, `notice` and the
+  `user-context-manifest` marker). Live generations include the native event ID,
+  so a cancelled-then-re-enqueued ID replaces its old row; updates keep the
+  resident generation.
+- Only `accepted`/`queued` rows are open. History rows (delivery unknown) and
+  delivered rows never regress, and frames for inbox IDs unknown to `current`
+  return an empty list; nothing is invented from an ID-only frame.
+- Attachment data, names, URIs, mention text, metadata, synthetic descriptions,
+  move targets and the frame `location` are never read or copied. Text is capped
+  at 256 KiB, IDs at 4 KiB, each context list at 1,024 entries and the context
+  marker at 64 KiB, with finite `OpenCodeInboxProjectionException` categories.
+- Known Core follow-up for V2-042 (#274): delivered live rows stay in Core's
+  admission set, because native history rows never carry a known `delivered`
+  state, so a later hydration whose window omits them re-arms
+  `admissionMissingFromHistory`. The stream owner must settle that rule.
+
+Replays cover offline A and every inbox frame in the B–E captures (48 enqueued,
+40 delivered, 8 cancelled, 2 delivery changes): 38 delivered prompts match their
+history rows and six recorded history lists match live order, including a queued
+prompt delivered after later steer input. Fixtures and the schema pin are
+unchanged; no new native, installed-device or MVP acceptance is established.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/inbox_projection_test.dart test/inbox_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

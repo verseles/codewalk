@@ -1677,3 +1677,25 @@ terminals. Shutdown maps to `interruptedPendingResume` without an outcome.
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
 nine helpers approved round 1 and the one accepted test-scope suggestion was
 verified locally. No runtime chat wiring or native/MVP acceptance is added.
+
+## V2-044A5 native inbox projection (#371)
+
+```text
+packages/harness_opencode/lib/src/inbox_projection.dart # Pure inbox event-to-SessionEvent list projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/inbox_projection_test.dart # Phase/kind mappings, settled rows, privacy, bounds and failures
+packages/harness_opencode/test/inbox_replay_test.dart # Offline immutable A–E replays with history user parity and order
+packages/harness_opencode/test/inbox_test_data.dart # Synthetic source-shaped inbox frames and manifests
+```
+
+`projectOpenCodeInboxEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` returns item upserts followed by a level-set
+`PendingInputChanged`. Steer prompts are admitted to the timeline at once;
+queued prompts and synthetic continuations stay pending until delivery, so live
+order and contents match native history without Core reorder or removal.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
+helper review fixes (settled history rows, cancelled re-admission, context
+budget) were verified locally. Delivered rows remaining in Core admissions is a
+recorded V2-042 follow-up. No runtime chat wiring or native/MVP acceptance is
+added.
