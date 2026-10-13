@@ -193,6 +193,52 @@ dart test test/text_reasoning_projection_test.dart test/text_reasoning_replay_te
   test/history_projection_test.dart test/fake_opencode_stream_test.dart test/public_surface_test.dart
 ```
 
+## Native tool event projection
+
+[V2-044A3 / #369](https://github.com/verseles/codewalk/issues/369) exports
+`projectOpenCodeToolEvent(value, current, sourceVersion: ..., position: ...,
+receivedAt: ...)`. Like the text/reasoning projector, it is synchronous and pure,
+returns a canonical `SessionEvent?`, and must be applied project-then-reduce
+against the latest `SessionState`.
+
+- It covers the seven pinned `session.tool.*` phases. `input.started` creates a
+  streaming `ToolCall` with the observed name and never erases a compatible
+  resident prefix. `called` carries structured input; `success` and `failed`
+  carry only their current terminal content. An aborted failure becomes
+  interrupted, with an empty raw message and no retry inference.
+- `input.delta`, `input.ended` and `progress` are validated and return null: raw
+  argument fragments are never JSON-parsed or retained, and arbitrary progress
+  metadata is omitted. Structured `called.input` and output use the same
+  normalized 14-key credential redaction as history.
+- Item IDs match history identity and live generations use the caller's stream
+  epoch. A missing start, a mismatched observed name, or a resident item whose
+  aggregate owner differs from the session or lacks a durable sequence returns a
+  fixed `ResyncRequired`; history and prior-epoch rows are never adopted and no
+  tool name is invented.
+- Provider state, location, error message/status/response/body and file URI/name
+  are never read. Files keep only MIME and an unavailable marker; terminal
+  metadata keeps only the `truncated` flag. An empty error type is unsupported.
+  Failures are finite `OpenCodeToolProjectionException` categories.
+- Selected IDs, name, MIME and error type are limited to 4 KiB; raw argument
+  strings to 64 KiB. Structured input and output each have a 64 KiB JSON-escaped
+  budget (including redaction expansion), depth 16, 16384 shared node visits and
+  at most 128 output parts; text's 256 KiB cap is subordinate. Rejection is atomic,
+  without truncation. These guards do not bound upstream decoding or process memory.
+
+Offline A replay projects the 27 actual frames and yields four history-matching
+content items. B captures verify that progress supplies no terminal content, that
+aborted failures stay interrupted, and that reconnect keeps the completed tool and
+incomplete text without replay. Fixtures and the schema pin are unchanged; no new
+native, installed-device or MVP acceptance is established.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/tool_projection_test.dart test/tool_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

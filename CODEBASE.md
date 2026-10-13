@@ -1636,3 +1636,25 @@ Strict analysis and focused tests, `make v2-native-check`, and `make check` pass
 R2 approved all 13 reports with no pending findings. This adds no runtime chat
 wiring or native/MVP acceptance; dependent app, transport, and native acceptance
 parents remain pending.
+
+## V2-044A3 native tool event projection (#369)
+
+```text
+packages/harness_opencode/lib/src/tool_projection.dart # Pure tool event-to-SessionEvent projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/tool_projection_test.dart # Phase mappings, bounds, redaction, provenance and resident guards
+packages/harness_opencode/test/tool_replay_test.dart # Offline immutable A/B stream and history replays
+packages/harness_opencode/test/tool_test_data.dart # Synthetic source-shaped tool event builders
+```
+
+`projectOpenCodeToolEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` maps the seven verified OpenCode 2.0.22 tool phases.
+Input delta/ended and progress are validated and return null; missing starts,
+name mismatches and incompatible resident owner/sequence return a fixed
+`ResyncRequired`. Selected identity strings are limited to 4 KiB, raw arguments
+to 64 KiB, and structured input/output to 64 KiB each with depth/node/part bounds.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
+all 13 helpers reviewed round 1 and the accepted W1/S1 corrections were verified
+locally without a second round. This adds no runtime chat wiring or native/MVP
+acceptance; dependent transport, hydration and app parents remain pending.

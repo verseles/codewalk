@@ -1,0 +1,1 @@
+o texto está bom mas deve ser em inglês, breve, direto mas claro. o arwuivo é/home/ubuntu/MEGA/CONFIG/opencode/AGENTS.md caso ainda não tenha, deixe claro que os paralelismo deve preferir (não proibir) famílias diferentes (Codex/Claude/Gemini/Grok/etc) permitindo assim balanceamento de servicos quando possivel
