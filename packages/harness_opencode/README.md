@@ -144,6 +144,55 @@ dart analyze --fatal-infos
 dart test test/history_projection_test.dart test/history_reader_test.dart test/session_reader_test.dart
 ```
 
+## Native text and reasoning event projection
+
+[V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports
+`projectOpenCodeTextReasoningEvent(value, current, sourceVersion: ..., position:
+..., receivedAt: ...)`. This synchronous, pure function returns a canonical
+`SessionEvent?`; the caller must project and reduce each observation against the
+latest `SessionState`, rather than project a batch against an old state.
+
+- The six `session.text.*` and `session.reasoning.*` started/delta/ended variants
+  map to streaming items, field-specific deltas and completed full-value upserts.
+  An authoritative end replaces the prefix and completes only that block.
+  Missing-start deltas retain the Core's refetch behavior; starts for a resident
+  item are skipped to preserve its prefix or history content.
+- Item IDs match the history producer's full session/message/kind/ordinal
+  identity. Live generations include the caller's stream ID and epoch and differ
+  from history generations. Native event ID, creation scalar and durable aggregate
+  sequence remain provenance, separate from caller order and receipt time; no
+  turn, execution outcome, snapshot boundary or replay cursor is inferred.
+- This producer verifies the `2.0.22` schema, including valid build metadata but
+  excluding prereleases. It does not change endpoint compatibility policy.
+  Unrelated types and valid foreign sessions return null. Malformed selected
+  fields, unsupported versions, limits and resident item-kind collisions produce
+  finite `OpenCodeTextProjectionException` categories without native error text.
+  Opaque provider state, location and arbitrary metadata are never read or copied.
+- IDs and caller identity strings are limited to 4 KiB UTF-8; selected text and
+  each applicable open block are limited to 256 KiB, with Unicode scalar checks
+  and atomic rejection rather than truncation. Project-then-reduce is essential
+  to the cumulative bound. It runs before the Core's finite deduplication, so an
+  otherwise over-limit duplicate may be rejected while preserving the prefix.
+  These limits do not bound upstream decoding, OS buffers or total process memory.
+
+The official schema pin remains OpenCode `05018b8862a8fc198ec9810aafd397c96bb7d86e`.
+Offline A replay decodes its 27 actual frames, maps ten updates and compares three
+completed content blocks with history. B retains its incomplete text after the
+two recorded reconnect events; it supplies no replayed end. Caller positions and
+receipt clocks are synthetic test inputs, while source-shaped edge cases are
+labelled separately from observed captures. Fixtures and provenance are unchanged.
+No new native observation, installed-device or MVP acceptance is established.
+Live stream/hydration and chat wiring remain separate work items.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/text_reasoning_projection_test.dart test/text_reasoning_replay_test.dart \
+  test/history_projection_test.dart test/fake_opencode_stream_test.dart test/public_surface_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

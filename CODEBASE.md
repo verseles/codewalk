@@ -1605,3 +1605,34 @@ Each history page read probes `/api/info` for the source version before `readHis
 Widget coverage spans all 14 locales at compact 390×844 and wide 1280×800 sizes; the root shell navigation chrome is hidden, and Back preserves the selected catalog session and pending opaque typed navigation intent. The generated base `lib/shared/l10n/generated/v2_localizations.dart` retains its Flutter `gen-l10n` header and is reproducible through `tool/l10n/generate_v2_localizations.py --port-history`. Its exact path is the generated-base size exception (>1,500 lines); there is no locale-file, authored-file, or import-boundary exemption, and other architecture guards remain active.
 
 Focused Flutter analysis/tests and native/full checks passed; four R1 fixes were incorporated and R2 returned eight approvals, including Sol. Final v1 visual parity, installed-device acceptance, and MVP acceptance remain unaccepted; no push was made.
+
+## V2-044A2 native text and reasoning event projection (#368)
+
+```text
+packages/harness_opencode/lib/src/text_reasoning_projection.dart # Pure event-to-SessionEvent projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/text_reasoning_projection_test.dart # Source-shaped mappings, bounds, provenance and sanitized failures
+packages/harness_opencode/test/text_reasoning_replay_test.dart # Offline immutable A/B stream and history replays
+packages/harness_opencode/test/text_reasoning_test_data.dart # Synthetic source-shaped event builders
+```
+
+`projectOpenCodeTextReasoningEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` maps only the six verified OpenCode 2.0.22 text and
+reasoning started/delta/ended variants. The caller projects each frame and
+reduces it against the latest state; the projector owns no stream, UI, core,
+history, or transport behavior. Selected IDs are limited to 4 KiB and text to
+256 KiB per field/open block, with a cumulative live-block bound. Unknown native
+fields are omitted, and native provenance remains separate from caller position.
+
+Focused package command (working directory: `packages/harness_opencode`):
+
+```bash
+export PATH="$HOME/flutter/bin:$PATH"
+dart test test/text_reasoning_projection_test.dart \
+  test/text_reasoning_replay_test.dart test/history_projection_test.dart
+```
+
+Strict analysis and focused tests, `make v2-native-check`, and `make check` passed;
+R2 approved all 13 reports with no pending findings. This adds no runtime chat
+wiring or native/MVP acceptance; dependent app, transport, and native acceptance
+parents remain pending.
