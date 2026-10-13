@@ -7,6 +7,7 @@ import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/sessions/session_history_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 
@@ -22,6 +23,7 @@ class AppDependencies {
     this.diagnostics,
     this.releaseHistory,
     this.sessions,
+    this.historyFactory,
   });
 
   final AppPreferencesController preferences;
@@ -30,6 +32,7 @@ class AppDependencies {
   final GoRouter router;
   final HostsController hosts;
   final SessionsController? sessions;
+  final SessionHistoryFactory? historyFactory;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;

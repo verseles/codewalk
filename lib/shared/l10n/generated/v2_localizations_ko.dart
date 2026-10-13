@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -664,4 +664,43 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionExportUntitled => '제목 없는 세션';
+
+  @override
+  String get chatMessageMessagePartUnavailable => '메시지 일부를 사용할 수 없습니다';
+
+  @override
+  String get chatMessageThinkingProcess => '생각 과정';
+
+  @override
+  String get chatMessageYou => '나';
+
+  @override
+  String get historyOpen => '기록 보기';
+
+  @override
+  String get historyReadOnly => '읽기 전용 기록';
+
+  @override
+  String get historyUnverified => '실시간 상태와 전달은 확인되지 않았습니다.';
+
+  @override
+  String get historyEmpty => '이 페이지에 기록 항목이 없습니다.';
+
+  @override
+  String get historyLimit => '로컬 기록 제한에 도달했습니다. 다른 항목이 있을 수 있습니다.';
+
+  @override
+  String get historySourceChanged => '서버 버전이 변경되었습니다. 새로고침하여 다시 시작하세요.';
+
+  @override
+  String get historyUnavailable => '기록을 읽을 수 없습니다. 서버를 확인하고 다시 시도하세요.';
+
+  @override
+  String get historySendUnavailable => '이 읽기 전용 미리보기에서는 전송할 수 없습니다.';
+
+  @override
+  String get historyAssistant => '어시스턴트';
+
+  @override
+  String get historyDetails => '세부 정보';
 }

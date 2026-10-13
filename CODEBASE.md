@@ -1583,3 +1583,25 @@ installation, new capture, or MVP acceptance.
 - Legacy `test/web` browser coverage and the Windows build remain in CI.
 - `.github/workflows/v2-deferred-web.yml` is manual-only (`workflow_dispatch`) and runs strict `make v2-foundations`, including Chrome `test/v2` and the explicit local `lib/main_v2.dart` Web build; it does not deploy.
 - `tool/ci/test_v2_ci_alignment.py` is included in `test-v2-tools`; `README.md` documents the split.
+
+## V2-044B1 auxiliary read-only history
+
+```text
+lib/shared/sessions/session_history_source.dart # Typed history source/task/page/failure/factory contract
+lib/platform/sessions/session_history_factory.dart # Conditional native IO and unsupported-platform factories
+lib/platform/sessions/session_history_factory_io.dart # Fresh `/api/info` version probe per page; authenticated read-only `OpenCodeSessionReader` (`limit: 50`)
+lib/features/sessions/{session_history_controller,session_history_page}.dart # Fenced auxiliary history controller and plain-text read-only page
+lib/features/sessions/sessions_page.dart # Selected catalog-row history entry pushed on the root navigator
+lib/app/{composition_root,app_dependencies,v2_bootstrap}.dart # Typed history-factory composition and Provider injection
+packages/harness_opencode/lib/src/{session_reader,history_projection}.dart # Native-message to canonical timeline projection, up to 500 projected items per page
+test/v2/sessions/session_history_{source,controller,page}_test.dart # Native source, fences/paging, responsive history, and Back/intent regressions
+tool/l10n/session_history_catalog.py # Scoped read-only history strings
+tool/l10n/generate_v2_localizations.py # Reproducible selective `--port-history` catalog port and Flutter generation
+tool/ci/v2_architecture_manifest.json # Exact generated-base size exception; import boundaries remain enforced
+```
+
+Each history page read probes `/api/info` for the source version before `readHistory`; the native request is capped at 50 messages and projection at 500 canonical items per page. The controller caps resident history at 500 items and ten pages. Catalog-row/profile identity, unreadable or expired credentials, credential changes/expiry, source version and cursor validation, and generation/cancellation/disposal fences reject stale or incompatible work. The page starts an initial read and offers explicit refresh and load-more controls. It remains separate from live chat: text is rendered plainly, unknown/structured content is reduced to markers, and no raw attachment/content resolver, live state, or active composer/send path is exposed.
+
+Widget coverage spans all 14 locales at compact 390×844 and wide 1280×800 sizes; the root shell navigation chrome is hidden, and Back preserves the selected catalog session and pending opaque typed navigation intent. The generated base `lib/shared/l10n/generated/v2_localizations.dart` retains its Flutter `gen-l10n` header and is reproducible through `tool/l10n/generate_v2_localizations.py --port-history`. Its exact path is the generated-base size exception (>1,500 lines); there is no locale-file, authored-file, or import-boundary exemption, and other architecture guards remain active.
+
+Focused Flutter analysis/tests and native/full checks passed; four R1 fixes were incorporated and R2 returned eight approvals, including Sol. Final v1 visual parity, installed-device acceptance, and MVP acceptance remain unaccepted; no push was made.

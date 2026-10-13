@@ -847,5 +847,57 @@
   "sessionExportUntitled": "Untitled session",
   "@sessionExportUntitled": {
     "description": "CodeWalk UI string — sessionExportUntitled"
+  },
+  "chatMessageMessagePartUnavailable": "Message part unavailable",
+  "@chatMessageMessagePartUnavailable": {
+    "description": "CodeWalk UI string — chatMessageMessagePartUnavailable"
+  },
+  "chatMessageThinkingProcess": "Thinking Process",
+  "@chatMessageThinkingProcess": {
+    "description": "CodeWalk UI string — chatMessageThinkingProcess"
+  },
+  "chatMessageYou": "You",
+  "@chatMessageYou": {
+    "description": "CodeWalk UI string — chatMessageYou"
+  },
+  "historyOpen": "View history",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "Read-only history",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "Live state and delivery are not verified.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "No history items in this page.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "Local history limit reached; more items may exist.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "The server version changed. Refresh to start again.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "History could not be read. Check the server and try again.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "Sending is unavailable in this read-only preview.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "Assistant",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "Details",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
   }
 }

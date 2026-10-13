@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -662,4 +662,43 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionExportUntitled => '無題のセッション';
+
+  @override
+  String get chatMessageMessagePartUnavailable => 'メッセージパーツが利用できません';
+
+  @override
+  String get chatMessageThinkingProcess => '思考プロセス';
+
+  @override
+  String get chatMessageYou => 'あなた';
+
+  @override
+  String get historyOpen => '履歴を表示';
+
+  @override
+  String get historyReadOnly => '読み取り専用の履歴';
+
+  @override
+  String get historyUnverified => 'リアルタイムの状態と配信は未確認です。';
+
+  @override
+  String get historyEmpty => 'このページに履歴項目はありません。';
+
+  @override
+  String get historyLimit => 'ローカルの上限に達しました。他の項目がある可能性があります。';
+
+  @override
+  String get historySourceChanged => 'サーバーのバージョンが変わりました。更新して最初から読み込んでください。';
+
+  @override
+  String get historyUnavailable => '履歴を読み込めません。サーバーを確認して再試行してください。';
+
+  @override
+  String get historySendUnavailable => 'この読み取り専用プレビューでは送信できません。';
+
+  @override
+  String get historyAssistant => 'アシスタント';
+
+  @override
+  String get historyDetails => '詳細';
 }

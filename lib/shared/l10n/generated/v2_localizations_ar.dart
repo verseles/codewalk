@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -688,4 +688,45 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'جلسة بدون عنوان';
+
+  @override
+  String get chatMessageMessagePartUnavailable => 'جزء الرسالة غير متوفر';
+
+  @override
+  String get chatMessageThinkingProcess => 'عملية التفكير';
+
+  @override
+  String get chatMessageYou => 'أنت';
+
+  @override
+  String get historyOpen => 'عرض السجل';
+
+  @override
+  String get historyReadOnly => 'سجل للقراءة فقط';
+
+  @override
+  String get historyUnverified => 'لم يتم التحقق من الحالة المباشرة والتسليم.';
+
+  @override
+  String get historyEmpty => 'لا توجد عناصر سجل في هذه الصفحة.';
+
+  @override
+  String get historyLimit => 'تم بلوغ الحد المحلي للسجل؛ قد توجد عناصر أخرى.';
+
+  @override
+  String get historySourceChanged => 'تغير إصدار الخادم. حدّث للبدء من جديد.';
+
+  @override
+  String get historyUnavailable =>
+      'تعذرت قراءة السجل. تحقق من الخادم وحاول مجددًا.';
+
+  @override
+  String get historySendUnavailable =>
+      'الإرسال غير متاح في هذه المعاينة للقراءة فقط.';
+
+  @override
+  String get historyAssistant => 'المساعد';
+
+  @override
+  String get historyDetails => 'التفاصيل';
 }

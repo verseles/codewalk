@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -702,4 +702,49 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'Unbenannte Sitzung';
+
+  @override
+  String get chatMessageMessagePartUnavailable =>
+      'Nachrichtenteil nicht verfügbar';
+
+  @override
+  String get chatMessageThinkingProcess => 'Denkprozess';
+
+  @override
+  String get chatMessageYou => 'Sie';
+
+  @override
+  String get historyOpen => 'Verlauf anzeigen';
+
+  @override
+  String get historyReadOnly => 'Schreibgeschützter Verlauf';
+
+  @override
+  String get historyUnverified =>
+      'Live-Status und Zustellung sind nicht überprüft.';
+
+  @override
+  String get historyEmpty => 'Keine Verlaufseinträge auf dieser Seite.';
+
+  @override
+  String get historyLimit =>
+      'Lokales Limit erreicht; weitere Einträge können vorhanden sein.';
+
+  @override
+  String get historySourceChanged =>
+      'Die Serverversion hat sich geändert. Zum Neustart aktualisieren.';
+
+  @override
+  String get historyUnavailable =>
+      'Verlauf konnte nicht gelesen werden. Server prüfen und erneut versuchen.';
+
+  @override
+  String get historySendUnavailable =>
+      'Senden ist in dieser schreibgeschützten Vorschau nicht verfügbar.';
+
+  @override
+  String get historyAssistant => 'Assistent';
+
+  @override
+  String get historyDetails => 'Details';
 }

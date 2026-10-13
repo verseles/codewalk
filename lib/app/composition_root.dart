@@ -14,6 +14,7 @@ import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/session_catalog_factory.dart';
+import '../platform/sessions/session_history_factory.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/preferences_backend.dart';
@@ -21,6 +22,7 @@ import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/releases/release_source.dart';
 import '../shared/sessions/session_catalog_source.dart';
+import '../shared/sessions/session_history_source.dart';
 import 'app_dependencies.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
@@ -38,6 +40,7 @@ AppDependencies createAppDependencies({
   ReleaseSource? releaseSource,
   DateTime Function()? releaseClock,
   SessionCatalogFactory? sessionCatalogFactory,
+  SessionHistoryFactory? sessionHistoryFactory,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -107,6 +110,7 @@ AppDependencies createAppDependencies({
     router: locator<GoRouter>(),
     hosts: locator<HostsController>(),
     sessions: locator<SessionsController>(),
+    historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),

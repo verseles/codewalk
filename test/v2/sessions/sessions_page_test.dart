@@ -47,7 +47,7 @@ void main() {
           final row = find.byKey(ValueKey(source.row('first').info.ref));
           await tester.tap(row);
           await tester.pumpAndSettle();
-          expect(find.text(l10n.sessionsHistoryUnavailable), findsOneWidget);
+          expect(find.text(l10n.historyReadOnly), findsOneWidget);
           expect(
             dependencies.router.routeInformationProvider.value.uri.path,
             '/sessions',

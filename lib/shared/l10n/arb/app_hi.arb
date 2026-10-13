@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "बिना शीर्षक वाला सत्र"
+  "sessionExportUntitled": "बिना शीर्षक वाला सत्र",
+  "chatMessageMessagePartUnavailable": "संदेश का भाग अनुपलब्ध है",
+  "chatMessageThinkingProcess": "सोचने की प्रक्रिया (Thinking Process)",
+  "chatMessageYou": "आप",
+  "historyOpen": "इतिहास देखें",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "केवल पढ़ने का इतिहास",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "लाइव स्थिति और डिलीवरी सत्यापित नहीं हैं।",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "इस पृष्ठ पर कोई इतिहास आइटम नहीं है।",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "स्थानीय इतिहास सीमा पूरी हुई; और आइटम हो सकते हैं।",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "सर्वर संस्करण बदल गया। फिर शुरू करने के लिए रीफ़्रेश करें।",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "इतिहास पढ़ा नहीं जा सका। सर्वर जाँचें और फिर प्रयास करें।",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "इस केवल पढ़ने वाले पूर्वावलोकन में भेजना उपलब्ध नहीं है।",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "सहायक",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "विवरण",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

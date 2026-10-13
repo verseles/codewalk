@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "بغیر عنوان والا سیشن"
+  "sessionExportUntitled": "بغیر عنوان والا سیشن",
+  "chatMessageMessagePartUnavailable": "پیغام کا حصہ دستیاب نہیں ہے۔",
+  "chatMessageThinkingProcess": "سوچنے کا عمل",
+  "chatMessageYou": "آپ",
+  "historyOpen": "تاریخ دیکھیں",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "صرف پڑھنے کی تاریخ",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "براہ راست حالت اور ترسیل کی تصدیق نہیں ہوئی۔",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "اس صفحے پر تاریخ کا کوئی اندراج نہیں۔",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "مقامی حد پوری ہو گئی؛ مزید اندراجات ہو سکتے ہیں۔",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "سرور کا ورژن بدل گیا۔ دوبارہ شروع کرنے کے لیے تازہ کریں۔",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "تاریخ پڑھی نہیں جا سکی۔ سرور دیکھیں اور دوبارہ کوشش کریں۔",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "اس صرف پڑھنے والے پیش منظر میں بھیجنا دستیاب نہیں۔",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "معاون",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "تفصیلات",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

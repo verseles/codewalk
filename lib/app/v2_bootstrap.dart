@@ -7,6 +7,7 @@ import '../platform/appearance/dynamic_color_adapter.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/sessions/session_history_source.dart';
 import '../shared/theme/app_theme.dart';
 import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
@@ -51,6 +52,9 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         ChangeNotifierProvider.value(value: dependencies.preferences),
         ChangeNotifierProvider.value(value: dependencies.navigation),
         ChangeNotifierProvider.value(value: dependencies.hosts),
+        Provider<SessionHistoryFactory?>.value(
+          value: dependencies.historyFactory,
+        ),
         if (dependencies.sessions case final sessions?)
           ChangeNotifierProvider<SessionsController>.value(value: sessions),
         if (dependencies.diagnostics case final diagnostics?)

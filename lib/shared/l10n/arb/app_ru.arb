@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "Сессия без названия"
+  "sessionExportUntitled": "Сессия без названия",
+  "chatMessageMessagePartUnavailable": "Часть сообщения недоступна",
+  "chatMessageThinkingProcess": "Процесс мышления",
+  "chatMessageYou": "Вы",
+  "historyOpen": "Просмотреть историю",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "История только для чтения",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "Текущее состояние и доставка не проверены.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "На этой странице нет элементов истории.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "Достигнут локальный лимит; могут быть другие элементы.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "Версия сервера изменилась. Обновите, чтобы начать заново.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "Не удалось прочитать историю. Проверьте сервер и повторите попытку.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "Отправка недоступна в этом режиме только для чтения.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "Ассистент",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "Подробности",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

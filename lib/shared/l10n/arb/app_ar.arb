@@ -379,5 +379,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "جلسة بدون عنوان"
+  "sessionExportUntitled": "جلسة بدون عنوان",
+  "chatMessageMessagePartUnavailable": "جزء الرسالة غير متوفر",
+  "chatMessageThinkingProcess": "عملية التفكير",
+  "chatMessageYou": "أنت",
+  "historyOpen": "عرض السجل",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "سجل للقراءة فقط",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "لم يتم التحقق من الحالة المباشرة والتسليم.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "لا توجد عناصر سجل في هذه الصفحة.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "تم بلوغ الحد المحلي للسجل؛ قد توجد عناصر أخرى.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "تغير إصدار الخادم. حدّث للبدء من جديد.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "تعذرت قراءة السجل. تحقق من الخادم وحاول مجددًا.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "الإرسال غير متاح في هذه المعاينة للقراءة فقط.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "المساعد",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "التفاصيل",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

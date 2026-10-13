@@ -1598,6 +1598,12 @@ Before starting, ensure the Issue contains:
 |---|---|---|
 | V2-044A1 ([#366](https://github.com/verseles/codewalk/issues/366)) | V2-005A, V2-005B, V2-022B, V2-023, V2-056A, V2-028D, V2-043A | Read-only native history pages and bounded canonical projection, preserving source order, complete identity, scoped continuations and unknown completion/delivery. Actual A semantic golden and B HTTP replay plus labelled source edge cases; unsupported contexts/types are explicit minimized markers without content resolution. No UI, SSE/hydration, invented causal boundary/turn, new native acceptance or whole-parent waiver. |
 
+**Independent read-only UI consumer (2026-10-13).** Under §11.5, consume the accepted catalog and history children through a bounded child of V2-044B. The original V2-044B dependencies and full-parent criteria remain required; this auxiliary reader neither accepts the bootstrap navigation as a v1 replacement nor supplies live chat, sending or final visual parity.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-044B1 ([#367](https://github.com/verseles/codewalk/issues/367)) | V2-020B, V2-043B, V2-044A1 | Explicit auxiliary native history screen from a loaded catalog row; canonical port/controller, actual endpoint version before each page, credential/scope/cancellation fences, manual ordered pagination and explicit 500-item/ten-page limits. Compact/wide/RTL and 14-localization tests; inactive composer and minimized unsupported markers. No external-link auto-read, rich resolver, SSE/hydration, lifecycle/send/approval, scroll-performance or whole-parent/MVP acceptance. Preserve final v1 appearance and interaction requirements. |
+
 #### V2-045 — Sending and outbox
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
 - **Depends on:** V2-044B, V2-005B, V2-027

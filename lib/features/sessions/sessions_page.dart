@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_catalog_source.dart';
+import '../../shared/sessions/session_history_source.dart';
+import 'session_history_controller.dart';
+import 'session_history_page.dart';
 import 'sessions_controller.dart';
 
 class SessionsPage extends StatefulWidget {
@@ -15,6 +18,7 @@ class SessionsPage extends StatefulWidget {
 
 class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
+  bool _openingHistory = false;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -194,7 +198,28 @@ class _SessionsPageState extends State<SessionsPage> {
                             child: Text(_date(context, date)),
                           ),
                         const SizedBox(height: 8),
-                        Text(l10n.sessionsHistoryUnavailable),
+                        Text(
+                          context.watch<SessionHistoryFactory?>() == null
+                              ? l10n.sessionsHistoryUnavailable
+                              : l10n.historyReadOnly,
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton(
+                            key: ValueKey(
+                              'history-open-${row.info.ref.storageKey}',
+                            ),
+                            onPressed:
+                                _openingHistory ||
+                                    controller.loading ||
+                                    !available ||
+                                    context.watch<SessionHistoryFactory?>() ==
+                                        null
+                                ? null
+                                : () => _openHistory(context, controller, row),
+                            child: Text(l10n.historyOpen),
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -211,6 +236,38 @@ class _SessionsPageState extends State<SessionsPage> {
     final local = date.toLocal();
     final material = MaterialLocalizations.of(context);
     return '${material.formatMediumDate(local)} ${material.formatTimeOfDay(TimeOfDay.fromDateTime(local), alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context))}';
+  }
+
+  Future<void> _openHistory(
+    BuildContext context,
+    SessionsController catalog,
+    SessionSummary row,
+  ) async {
+    final profile = catalog.selectedProfile;
+    final factory = context.read<SessionHistoryFactory?>();
+    if (_openingHistory ||
+        profile == null ||
+        factory == null ||
+        !catalog.sessions.any((s) => s.info.ref == row.info.ref)) {
+      return;
+    }
+    setState(() => _openingHistory = true);
+    final history = SessionHistoryController(
+      hosts: catalog.hosts,
+      profile: profile,
+      summary: row,
+      sourceFactory: factory,
+    );
+    try {
+      await Navigator.of(context, rootNavigator: true).push<void>(
+        MaterialPageRoute(
+          builder: (_) => SessionHistoryPage(controller: history),
+        ),
+      );
+    } finally {
+      history.dispose();
+      if (mounted) setState(() => _openingHistory = false);
+    }
   }
 
   String _failure(V2Localizations l10n, SessionCatalogFailure failure) =>

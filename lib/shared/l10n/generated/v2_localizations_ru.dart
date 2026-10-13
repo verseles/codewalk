@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -695,4 +695,47 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'Сессия без названия';
+
+  @override
+  String get chatMessageMessagePartUnavailable => 'Часть сообщения недоступна';
+
+  @override
+  String get chatMessageThinkingProcess => 'Процесс мышления';
+
+  @override
+  String get chatMessageYou => 'Вы';
+
+  @override
+  String get historyOpen => 'Просмотреть историю';
+
+  @override
+  String get historyReadOnly => 'История только для чтения';
+
+  @override
+  String get historyUnverified => 'Текущее состояние и доставка не проверены.';
+
+  @override
+  String get historyEmpty => 'На этой странице нет элементов истории.';
+
+  @override
+  String get historyLimit =>
+      'Достигнут локальный лимит; могут быть другие элементы.';
+
+  @override
+  String get historySourceChanged =>
+      'Версия сервера изменилась. Обновите, чтобы начать заново.';
+
+  @override
+  String get historyUnavailable =>
+      'Не удалось прочитать историю. Проверьте сервер и повторите попытку.';
+
+  @override
+  String get historySendUnavailable =>
+      'Отправка недоступна в этом режиме только для чтения.';
+
+  @override
+  String get historyAssistant => 'Ассистент';
+
+  @override
+  String get historyDetails => 'Подробности';
 }

@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -701,4 +701,49 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'Session sans titre';
+
+  @override
+  String get chatMessageMessagePartUnavailable =>
+      'Partie du message non disponible';
+
+  @override
+  String get chatMessageThinkingProcess => 'Processus de réflexion';
+
+  @override
+  String get chatMessageYou => 'Vous';
+
+  @override
+  String get historyOpen => 'Voir l’historique';
+
+  @override
+  String get historyReadOnly => 'Historique en lecture seule';
+
+  @override
+  String get historyUnverified =>
+      'L’état en direct et la livraison ne sont pas vérifiés.';
+
+  @override
+  String get historyEmpty => 'Aucun élément d’historique sur cette page.';
+
+  @override
+  String get historyLimit =>
+      'Limite locale atteinte ; d’autres éléments peuvent exister.';
+
+  @override
+  String get historySourceChanged =>
+      'La version du serveur a changé. Actualisez pour recommencer.';
+
+  @override
+  String get historyUnavailable =>
+      'Impossible de lire l’historique. Vérifiez le serveur et réessayez.';
+
+  @override
+  String get historySendUnavailable =>
+      'L’envoi est indisponible dans cet aperçu en lecture seule.';
+
+  @override
+  String get historyAssistant => 'Assistant';
+
+  @override
+  String get historyDetails => 'Détails';
 }

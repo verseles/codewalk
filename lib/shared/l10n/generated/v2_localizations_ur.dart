@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -689,4 +689,48 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'بغیر عنوان والا سیشن';
+
+  @override
+  String get chatMessageMessagePartUnavailable =>
+      'پیغام کا حصہ دستیاب نہیں ہے۔';
+
+  @override
+  String get chatMessageThinkingProcess => 'سوچنے کا عمل';
+
+  @override
+  String get chatMessageYou => 'آپ';
+
+  @override
+  String get historyOpen => 'تاریخ دیکھیں';
+
+  @override
+  String get historyReadOnly => 'صرف پڑھنے کی تاریخ';
+
+  @override
+  String get historyUnverified =>
+      'براہ راست حالت اور ترسیل کی تصدیق نہیں ہوئی۔';
+
+  @override
+  String get historyEmpty => 'اس صفحے پر تاریخ کا کوئی اندراج نہیں۔';
+
+  @override
+  String get historyLimit => 'مقامی حد پوری ہو گئی؛ مزید اندراجات ہو سکتے ہیں۔';
+
+  @override
+  String get historySourceChanged =>
+      'سرور کا ورژن بدل گیا۔ دوبارہ شروع کرنے کے لیے تازہ کریں۔';
+
+  @override
+  String get historyUnavailable =>
+      'تاریخ پڑھی نہیں جا سکی۔ سرور دیکھیں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get historySendUnavailable =>
+      'اس صرف پڑھنے والے پیش منظر میں بھیجنا دستیاب نہیں۔';
+
+  @override
+  String get historyAssistant => 'معاون';
+
+  @override
+  String get historyDetails => 'تفصیلات';
 }

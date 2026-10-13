@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -1364,6 +1364,84 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Untitled session'**
   String get sessionExportUntitled;
+
+  /// CodeWalk UI string — chatMessageMessagePartUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Message part unavailable'**
+  String get chatMessageMessagePartUnavailable;
+
+  /// CodeWalk UI string — chatMessageThinkingProcess
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking Process'**
+  String get chatMessageThinkingProcess;
+
+  /// CodeWalk UI string — chatMessageYou
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get chatMessageYou;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'View history'**
+  String get historyOpen;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only history'**
+  String get historyReadOnly;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Live state and delivery are not verified.'**
+  String get historyUnverified;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'No history items in this page.'**
+  String get historyEmpty;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Local history limit reached; more items may exist.'**
+  String get historyLimit;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'The server version changed. Refresh to start again.'**
+  String get historySourceChanged;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'History could not be read. Check the server and try again.'**
+  String get historyUnavailable;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Sending is unavailable in this read-only preview.'**
+  String get historySendUnavailable;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get historyAssistant;
+
+  /// V2 auxiliary read-only history preview
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get historyDetails;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

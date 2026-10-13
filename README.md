@@ -207,6 +207,12 @@ and runs the full `make v2-foundations` profile. Its failures remain failures;
 deferred Chrome/Web checks are not native MVP or full-GA acceptance. The retained
 legacy browser checks in `quality` and the legacy Web deployment remain separate.
 
+In the explicit native v2 app, expand a loaded catalog row and choose **View
+history** to open its auxiliary read-only reader. Back preserves the catalog.
+Refresh/pagination are manual and bounded; sending and live updates are not
+available. This incremental reader is not the final v1-parity chat interface or
+an installed-device/MVP acceptance result.
+
 #### Isolated Linux development preview
 
 The Linux native CI job packages `codewalk-v2-preview-linux-x64.tar.gz` and opens

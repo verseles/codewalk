@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -646,4 +646,43 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionExportUntitled => '无标题会话';
+
+  @override
+  String get chatMessageMessagePartUnavailable => '消息部分不可用';
+
+  @override
+  String get chatMessageThinkingProcess => '思考过程';
+
+  @override
+  String get chatMessageYou => '您';
+
+  @override
+  String get historyOpen => '查看历史';
+
+  @override
+  String get historyReadOnly => '只读历史';
+
+  @override
+  String get historyUnverified => '实时状态和送达情况未经验证。';
+
+  @override
+  String get historyEmpty => '此页没有历史项目。';
+
+  @override
+  String get historyLimit => '已达到本地历史限制；可能还有更多项目。';
+
+  @override
+  String get historySourceChanged => '服务器版本已更改。请刷新以重新开始。';
+
+  @override
+  String get historyUnavailable => '无法读取历史。请检查服务器并重试。';
+
+  @override
+  String get historySendUnavailable => '此只读预览不支持发送。';
+
+  @override
+  String get historyAssistant => '助手';
+
+  @override
+  String get historyDetails => '详情';
 }

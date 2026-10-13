@@ -23,7 +23,7 @@
     {"path":"lib/shared/theme/opencode_theme_presets.dart","reason":"Selective theme resolver/token port reproduced offline from the retained consolidated snapshot."},
     {"path":"lib/shared/theme/opencode_theme_preferences.dart","reason":"Stable preset identity codecs selectively ported from the retained snapshot."},
     {"path":"lib/shared/theme/brand_colors.dart","reason":"Consolidated brand seeds selectively ported from the retained snapshot."},
-    {"path": "lib/shared/l10n/generated/v2_localizations.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
+    {"path": "lib/shared/l10n/generated/v2_localizations.dart","reason": "Flutter gen-l10n base class from the governed v2 ARB subset; reproduced by tool/l10n/generate_v2_localizations.py. Only this generated base class has the exact size exception below; import boundaries remain governed."},
     {"path": "lib/shared/l10n/generated/v2_localizations_ar.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_bn.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_de.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
@@ -40,7 +40,8 @@
     {"path": "lib/shared/l10n/generated/v2_localizations_zh.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."}
   ],
   "sizeExceptions": [
-    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","category":"generated","reason":"The consolidated 37-preset data snapshot exceeds 1500 lines; no import-boundary exemption."}
+    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","category":"generated","reason":"The consolidated 37-preset data snapshot exceeds 1500 lines; no import-boundary exemption."},
+    {"path":"lib/shared/l10n/generated/v2_localizations.dart","category":"generated","reason":"Flutter gen-l10n emits the complete scoped catalog declarations, documentation and delegates in one base class, exceeding 1500 lines after the read-only history keys. Reproduced by tool/l10n/generate_v2_localizations.py; no locale-file, authored-file or import-boundary exemption."}
   ],
   "compositionRoots": ["lib/app/composition_root.dart"],
   "packageDependencies": {

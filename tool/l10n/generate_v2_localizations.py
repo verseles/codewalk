@@ -21,6 +21,7 @@ from hosts_catalog import PORT_KEYS as HOST_KEYS, NEW_KEYS as HOST_NEW_KEYS, COP
 from pairing_catalog import KEYS as PAIRING_KEYS, COPY as PAIRING_COPY
 from diagnostics_catalog import PORT_KEYS as DIAGNOSTICS_KEYS, NEW_KEYS as DIAGNOSTICS_NEW_KEYS, COPY as DIAGNOSTICS_COPY
 from sessions_catalog import PORT_KEYS as SESSION_KEYS, NEW_KEYS as SESSION_NEW_KEYS, COPY as SESSION_COPY
+from session_history_catalog import PORT_KEYS as HISTORY_KEYS, NEW_KEYS as HISTORY_NEW_KEYS, COPY as HISTORY_COPY
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -111,6 +112,7 @@ KEYS |= HOST_KEYS | set(HOST_NEW_KEYS)
 KEYS |= set(PAIRING_KEYS)
 KEYS |= DIAGNOSTICS_KEYS | set(DIAGNOSTICS_NEW_KEYS)
 KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
+KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -233,6 +235,24 @@ def port_pairing_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_history_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        legacy = json.loads((ROOT / "lib/l10n" / f"app_{locale}.arb").read_text(encoding="utf-8"))
+        for key in sorted(HISTORY_KEYS):
+            arb[key] = legacy[key]
+            if "@" + key in legacy:
+                arb["@" + key] = legacy["@" + key]
+        for key, value in zip(HISTORY_NEW_KEYS, HISTORY_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 auxiliary read-only history preview"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -305,6 +325,7 @@ def main() -> int:
     parser.add_argument("--port-pairing", action="store_true", help="Add scoped pairing copy only.")
     parser.add_argument("--port-diagnostics", action="store_true", help="Add scoped diagnostics and archive copy only.")
     parser.add_argument("--port-sessions", action="store_true", help="Add scoped read-only session catalog copy only.")
+    parser.add_argument("--port-history", action="store_true", help="Add scoped read-only history copy only.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -331,6 +352,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-sessions cannot be combined with --check")
             port_sessions_copy()
+        if args.port_history:
+            if args.check:
+                raise ValueError("--port-history cannot be combined with --check")
+            port_history_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "Sessione senza titolo"
+  "sessionExportUntitled": "Sessione senza titolo",
+  "chatMessageMessagePartUnavailable": "Parte del messaggio non disponibile",
+  "chatMessageThinkingProcess": "Processo di pensiero",
+  "chatMessageYou": "Tu",
+  "historyOpen": "Visualizza cronologia",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "Cronologia di sola lettura",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "Stato in tempo reale e consegna non verificati.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "Nessun elemento di cronologia in questa pagina.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "Limite locale raggiunto; potrebbero esserci altri elementi.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "La versione del server è cambiata. Aggiorna per ricominciare.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "Impossibile leggere la cronologia. Controlla il server e riprova.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "Invio non disponibile in questa anteprima di sola lettura.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "Assistente",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "Dettagli",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

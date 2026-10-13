@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "Sesión sin título"
+  "sessionExportUntitled": "Sesión sin título",
+  "chatMessageMessagePartUnavailable": "Parte del mensaje no disponible",
+  "chatMessageThinkingProcess": "Proceso de pensamiento",
+  "chatMessageYou": "Tú",
+  "historyOpen": "Ver historial",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "Historial de solo lectura",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "El estado en vivo y la entrega no están verificados.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "No hay elementos de historial en esta página.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "Se alcanzó el límite local; puede haber más elementos.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "La versión del servidor cambió. Actualiza para empezar de nuevo.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "No se pudo leer el historial. Comprueba el servidor y reintenta.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "El envío no está disponible en esta vista de solo lectura.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "Asistente",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "Detalles",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

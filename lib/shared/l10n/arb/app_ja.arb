@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "無題のセッション"
+  "sessionExportUntitled": "無題のセッション",
+  "chatMessageMessagePartUnavailable": "メッセージパーツが利用できません",
+  "chatMessageThinkingProcess": "思考プロセス",
+  "chatMessageYou": "あなた",
+  "historyOpen": "履歴を表示",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "読み取り専用の履歴",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "リアルタイムの状態と配信は未確認です。",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "このページに履歴項目はありません。",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "ローカルの上限に達しました。他の項目がある可能性があります。",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "サーバーのバージョンが変わりました。更新して最初から読み込んでください。",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "履歴を読み込めません。サーバーを確認して再試行してください。",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "この読み取り専用プレビューでは送信できません。",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "アシスタント",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "詳細",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

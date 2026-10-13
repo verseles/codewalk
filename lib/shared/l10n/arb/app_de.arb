@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "Unbenannte Sitzung"
+  "sessionExportUntitled": "Unbenannte Sitzung",
+  "chatMessageMessagePartUnavailable": "Nachrichtenteil nicht verfügbar",
+  "chatMessageThinkingProcess": "Denkprozess",
+  "chatMessageYou": "Sie",
+  "historyOpen": "Verlauf anzeigen",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "Schreibgeschützter Verlauf",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "Live-Status und Zustellung sind nicht überprüft.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "Keine Verlaufseinträge auf dieser Seite.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "Lokales Limit erreicht; weitere Einträge können vorhanden sein.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "Die Serverversion hat sich geändert. Zum Neustart aktualisieren.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "Verlauf konnte nicht gelesen werden. Server prüfen und erneut versuchen.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "Senden ist in dieser schreibgeschützten Vorschau nicht verfügbar.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "Assistent",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "Details",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

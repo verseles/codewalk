@@ -380,5 +380,48 @@
   "@sessionsRateLimited": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionExportUntitled": "제목 없는 세션"
+  "sessionExportUntitled": "제목 없는 세션",
+  "chatMessageMessagePartUnavailable": "메시지 일부를 사용할 수 없습니다",
+  "chatMessageThinkingProcess": "생각 과정",
+  "chatMessageYou": "나",
+  "historyOpen": "기록 보기",
+  "@historyOpen": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyReadOnly": "읽기 전용 기록",
+  "@historyReadOnly": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnverified": "실시간 상태와 전달은 확인되지 않았습니다.",
+  "@historyUnverified": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyEmpty": "이 페이지에 기록 항목이 없습니다.",
+  "@historyEmpty": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyLimit": "로컬 기록 제한에 도달했습니다. 다른 항목이 있을 수 있습니다.",
+  "@historyLimit": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySourceChanged": "서버 버전이 변경되었습니다. 새로고침하여 다시 시작하세요.",
+  "@historySourceChanged": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyUnavailable": "기록을 읽을 수 없습니다. 서버를 확인하고 다시 시도하세요.",
+  "@historyUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historySendUnavailable": "이 읽기 전용 미리보기에서는 전송할 수 없습니다.",
+  "@historySendUnavailable": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyAssistant": "어시스턴트",
+  "@historyAssistant": {
+    "description": "V2 auxiliary read-only history preview"
+  },
+  "historyDetails": "세부 정보",
+  "@historyDetails": {
+    "description": "V2 auxiliary read-only history preview"
+  }
 }

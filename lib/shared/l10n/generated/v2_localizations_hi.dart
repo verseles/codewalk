@@ -1,4 +1,4 @@
-// Generated with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
+// GENERATED CODE with Flutter gen-l10n from lib/shared/l10n/arb. Do not edit.
 
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
@@ -691,4 +691,48 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionExportUntitled => 'बिना शीर्षक वाला सत्र';
+
+  @override
+  String get chatMessageMessagePartUnavailable => 'संदेश का भाग अनुपलब्ध है';
+
+  @override
+  String get chatMessageThinkingProcess =>
+      'सोचने की प्रक्रिया (Thinking Process)';
+
+  @override
+  String get chatMessageYou => 'आप';
+
+  @override
+  String get historyOpen => 'इतिहास देखें';
+
+  @override
+  String get historyReadOnly => 'केवल पढ़ने का इतिहास';
+
+  @override
+  String get historyUnverified => 'लाइव स्थिति और डिलीवरी सत्यापित नहीं हैं।';
+
+  @override
+  String get historyEmpty => 'इस पृष्ठ पर कोई इतिहास आइटम नहीं है।';
+
+  @override
+  String get historyLimit =>
+      'स्थानीय इतिहास सीमा पूरी हुई; और आइटम हो सकते हैं।';
+
+  @override
+  String get historySourceChanged =>
+      'सर्वर संस्करण बदल गया। फिर शुरू करने के लिए रीफ़्रेश करें।';
+
+  @override
+  String get historyUnavailable =>
+      'इतिहास पढ़ा नहीं जा सका। सर्वर जाँचें और फिर प्रयास करें।';
+
+  @override
+  String get historySendUnavailable =>
+      'इस केवल पढ़ने वाले पूर्वावलोकन में भेजना उपलब्ध नहीं है।';
+
+  @override
+  String get historyAssistant => 'सहायक';
+
+  @override
+  String get historyDetails => 'विवरण';
 }

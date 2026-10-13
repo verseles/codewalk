@@ -20,10 +20,24 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** loading server profiles, storage failure, missing credentials and a successful empty session read have distinct states; no session request starts before credentials finish loading
 - **When** a server is selected or manually refreshed
 - **Then** native Android/Linux reads use its current password or paired credential and preserve the authored endpoint, port and proxy prefix
-- **Then** sessions retain server order, use complete host/harness/session identity and show a localized fallback for an empty title; tapping a row expands only its loaded update time and a notice that conversation history is unavailable
+- **Then** sessions retain server order, use complete host/harness/session identity and show a localized fallback for an empty title; tapping a row expands its loaded update time and an explicit read-only history action when a history factory is available
 - **Then** manual pagination requests 50 items per page, retaining at most 200 rows or ten accepted pages; empty or short pages with a continuation remain pageable and a local limit is explicitly identified
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
+
+### V2 auxiliary read-only history
+
+- **Given** a loaded session row is expanded in the v2 catalog
+- **When** the user explicitly opens its history
+- **Then** an auxiliary screen covers the shell navigation; Back returns to the existing catalog, selected profile and expanded row without changing the router location or pending opaque session intent
+- **Then** native reads use the current profile-bound credential and preserve the endpoint port and proxy prefix; an authenticated info probe observes the actual server version before every history page, and version drift invalidates the continuation until manual refresh
+- **Then** server order and complete session/item identity are retained; each request reads at most 50 native messages, permits at most 500 projected items and retains at most 500 items or ten accepted pages, with an explicit local-limit notice beside pagination
+- **Then** refresh and pagination remain manual; cancelled, superseded, expired-credential, reloaded-profile or disposed work cannot publish late history, and authentication rejection clears previous content
+- **Then** plain text previews are limited to 2,000 Unicode code points and 16 lines; tool names and unsupported shell/outcome/unknown entries are minimized markers, without rendering raw metadata, fetching content references or executing actions
+- **Then** live state and delivery remain explicitly unverified and the composer slot is inactive; this reader does not enable live events, sending, lifecycle mutations or approval responses
+- **Then** compact/wide and localized layouts are technical coverage only; the final appearance/navigation parity with v1, full timeline and installed/MVP acceptance remain separate requirements
+
+### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
 - **When** the host and session identifiers are valid
