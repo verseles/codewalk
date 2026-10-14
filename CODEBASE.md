@@ -1791,3 +1791,19 @@ row, or nothing for text-free instruction updates.
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No stream wiring, UI or native/MVP acceptance is added.
+
+## V2-044A11 native event projection entry point (#378)
+
+```text
+packages/harness_opencode/lib/src/event_projection.dart # Single routed entry point for 2.0.22 frames with explicit unknowns
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/event_projection_test.dart # Disjoint routing, no-ops, private unknowns, diagnostics bound and capture golden
+```
+
+`projectOpenCodeEvent(Object?, SessionState current, {sourceVersion, position,
+receivedAt})` routes each owned type to its producer and turns the remaining
+in-session types into bounded `UnknownEvent` observations; it is the seam the
+stream owner (V2-042 #274) calls.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No stream wiring, UI or native/MVP acceptance is added.

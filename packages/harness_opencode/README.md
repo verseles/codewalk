@@ -565,6 +565,42 @@ dart analyze --fatal-infos
 dart test test/notice_projection_test.dart
 ```
 
+## Native event projection entry point
+
+[V2-044A11 / #378](https://github.com/verseles/codewalk/issues/378) exports
+`projectOpenCodeEvent(value, current, sourceVersion: ..., position: ...,
+receivedAt: ...)`, the single seam the stream owner (#274) calls for every
+2.0.22 frame. It is synchronous and pure and returns an unmodifiable list.
+
+- An exact type table routes 39 native types to the nine producers above; the
+  producer's result and its finite exception pass through unchanged.
+- Any other frame is a no-op unless its `data.sessionID` names this session:
+  session-free frames such as `server.connected`, other sessions, plugin
+  `rpc.*` and UI `tui.*` commands, and unprojected `*.delta` content streams
+  (which would flood the 32-entry diagnostics) return nothing.
+- The remaining frames become one `UnknownEvent` whose raw value is only
+  `{disposition: unprojected | unrecognized}`; provenance keeps the native type
+  and a valid `evt_` ID. Known types without a producer yet — agent/model
+  selection, retry scheduling, compaction, shell, skill, move, fork, metadata,
+  permissions, views, durable-log-only records — stay `unprojected` instead of
+  being half-mapped.
+- Own failures are `OpenCodeEventProjectionException` (`malformed`,
+  `unsupportedVersion` for an in-session unknown, `limitExceeded` for a type
+  over 4,096 code units).
+
+The capture replay routes all 917 frames the shared walker reaches: 716 yield
+events, 175 are producer no-ops (validated phases, text-free instruction
+updates, other sessions) and 26 are `server.connected`; none becomes a
+diagnostic, and each routed result equals calling its producer directly.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/event_projection_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

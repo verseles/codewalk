@@ -1,0 +1,339 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:codewalk_core/codewalk_core.dart';
+import 'package:harness_opencode/harness_opencode.dart';
+import 'package:test/test.dart';
+
+import 'execution_replay_test.dart' show eventLists, refOf;
+import 'history_test_data.dart';
+import 'support/fixture_replay.dart';
+import 'text_reasoning_test_data.dart' show observedPosition;
+
+typedef Producer =
+    Object? Function(
+      Object? value,
+      SessionState current, {
+      required String sourceVersion,
+      required StreamPosition position,
+      required DateTime receivedAt,
+    });
+
+const producers = <String, Producer>{
+  'text': projectOpenCodeTextReasoningEvent,
+  'tool': projectOpenCodeToolEvent,
+  'execution': projectOpenCodeExecutionEvent,
+  'inbox': projectOpenCodeInboxEvent,
+  'step': projectOpenCodeStepUsageEvent,
+  'interaction': projectOpenCodeInteractionEvent,
+  'revert': projectOpenCodeRevertEvent,
+  'lifecycle': projectOpenCodeSessionLifecycleEvent,
+  'notice': projectOpenCodeNoticeEvent,
+};
+
+const owned = {
+  'session.text.started': 'text',
+  'session.text.delta': 'text',
+  'session.text.ended': 'text',
+  'session.reasoning.started': 'text',
+  'session.reasoning.delta': 'text',
+  'session.reasoning.ended': 'text',
+  'session.tool.input.started': 'tool',
+  'session.tool.input.delta': 'tool',
+  'session.tool.input.ended': 'tool',
+  'session.tool.called': 'tool',
+  'session.tool.progress': 'tool',
+  'session.tool.success': 'tool',
+  'session.tool.failed': 'tool',
+  'session.execution.started': 'execution',
+  'session.execution.succeeded': 'execution',
+  'session.execution.failed': 'execution',
+  'session.execution.interrupted': 'execution',
+  'session.inbox.enqueued': 'inbox',
+  'session.inbox.delivered': 'inbox',
+  'session.inbox.cancelled': 'inbox',
+  'session.inbox.delivery.changed': 'inbox',
+  'session.step.started': 'step',
+  'session.step.streamed': 'step',
+  'session.step.ended': 'step',
+  'session.step.failed': 'step',
+  'session.usage.updated': 'step',
+  'permission.asked': 'interaction',
+  'permission.replied': 'interaction',
+  'form.created': 'interaction',
+  'form.replied': 'interaction',
+  'form.cancelled': 'interaction',
+  'session.revert.staged': 'revert',
+  'session.revert.cleared': 'revert',
+  'session.revert.committed': 'revert',
+  'session.created': 'lifecycle',
+  'session.renamed': 'lifecycle',
+  'session.deleted': 'lifecycle',
+  'session.instructions.updated': 'notice',
+  'session.synthetic': 'notice',
+};
+
+List<SessionEvent> project(
+  Object? frame, {
+  SessionState? current,
+  int seq = 1,
+  String version = '2.0.22',
+}) => projectOpenCodeEvent(
+  frame,
+  current ?? SessionState(historyRef),
+  sourceVersion: version,
+  position: observedPosition(seq),
+  receivedAt: DateTime.utc(2026, 10, 14),
+);
+
+Map<String, Object?> frame(
+  String type, {
+  String session = 'ses_a',
+  Map<String, Object?> data = const {},
+}) => {
+  'id': 'evt_unknown',
+  'created': 1000,
+  'type': type,
+  'location': {'directory': '/fake-private-location'},
+  'data': {'sessionID': session, ...data},
+  'durable': {'aggregateID': session, 'seq': 1, 'version': 1},
+};
+
+Matcher failsWith(OpenCodeEventProjectionFailure failure) => throwsA(
+  isA<OpenCodeEventProjectionException>()
+      .having((e) => e.failure, 'failure', failure)
+      .having(
+        (e) => e.toString(),
+        'toString',
+        'OpenCodeEventProjectionException(${failure.name})',
+      ),
+);
+
+void main() {
+  test('every owned type is routed to exactly its producer', () {
+    final state = SessionState(historyRef);
+    for (final MapEntry(key: type, value: owner) in owned.entries) {
+      // A frame without data makes only the owning producer fail.
+      final probe = {'id': 'evt_x', 'type': type};
+      final failing = [
+        for (final MapEntry(:key, value: producer) in producers.entries)
+          if (_throws(
+            () => producer(
+              probe,
+              state,
+              sourceVersion: '2.0.22',
+              position: observedPosition(1),
+              receivedAt: DateTime.utc(2026, 10, 14),
+            ),
+          ))
+            key,
+      ];
+      expect(failing, [owner], reason: type);
+      expect(
+        () => project(probe),
+        throwsA(isNot(isA<OpenCodeEventProjectionException>())),
+        reason: type,
+      );
+    }
+  });
+
+  test('unowned frames of other sessions or without one are no-ops', () {
+    for (final input in [
+      {'id': 'evt_c', 'type': 'server.connected', 'data': <String, Object?>{}},
+      {
+        'id': 'evt_p',
+        'type': 'project.updated',
+        'data': {'id': 'prj'},
+      },
+      frame('session.retry.scheduled', session: 'ses_b'),
+      frame('session.future.fact', session: 'ses_b'),
+      {'type': 'session.agent.selected'},
+    ]) {
+      expect(project(input, version: 'x'), isEmpty, reason: '$input');
+    }
+  });
+
+  test('plugin, UI and content-delta frames never become diagnostics', () {
+    for (final type in [
+      'rpc.plugin.call',
+      'tui.prompt.append',
+      'tui.session.select',
+      'session.compaction.delta',
+      'session.future.delta',
+    ]) {
+      expect(
+        project(frame(type, data: {'text': 'fake-private-text'})),
+        isEmpty,
+        reason: type,
+      );
+    }
+  });
+
+  test('unprojected and unrecognized session frames are explicit unknowns', () {
+    for (final (type, disposition) in [
+      ('session.retry.scheduled', 'unprojected'),
+      ('session.agent.selected', 'unprojected'),
+      ('session.compaction.started', 'unprojected'),
+      ('session.future.fact', 'unrecognized'),
+    ]) {
+      final events = project(
+        frame(
+          type,
+          data: {
+            'agent': 'fake-private-agent',
+            'error': {'message': 'fake-private-error'},
+            'path': '/fake-private-path',
+          },
+        ),
+      );
+      final event = events.single as UnknownEvent;
+      expect(event.rawType, type);
+      expect(event.raw.value, {'disposition': disposition});
+      expect(event.meta.owner, isA<SessionOwner>());
+      expect(event.meta.source.nativeType, type);
+      expect(event.meta.source.nativeEventId, 'evt_unknown');
+      expect(
+        jsonEncode({
+          'raw': event.raw.value,
+          'extra': event.meta.source.extra?.value,
+        }),
+        isNot(contains('fake-private')),
+      );
+      final reduced = reduce(SessionState(historyRef), event);
+      expect(reduced.effects.every((e) => e is Notify), isTrue);
+      expect(reduced.state.diagnostics.single.rawType, type);
+    }
+    final noId = project({...frame('session.future.fact'), 'id': 7});
+    expect(noId.single.meta.source.nativeEventId, isNull);
+  });
+
+  test('diagnostics stay bounded under a burst of unknowns', () {
+    var state = SessionState(historyRef);
+    for (var i = 0; i < 33; i++) {
+      final event = project(
+        {...frame('session.future.fact'), 'id': 'evt_$i'},
+        current: state,
+        seq: i + 1,
+      ).single;
+      state = reduce(state, event).state;
+    }
+    expect(state.diagnostics, hasLength(32));
+    expect(state.diagnostics.first.meta.source.nativeEventId, 'evt_1');
+  });
+
+  test('envelope failures are finite', () {
+    const m = OpenCodeEventProjectionFailure.malformed;
+    for (final input in [
+      null,
+      'x',
+      <String, Object?>{},
+      {'type': 7},
+      {'type': ''},
+    ]) {
+      expect(() => project(input), failsWith(m), reason: '$input');
+    }
+    expect(
+      () => project(frame('s' * 4097)),
+      failsWith(OpenCodeEventProjectionFailure.limitExceeded),
+    );
+    expect(
+      () => project(frame('session.future.fact'), version: '2.0.21'),
+      failsWith(OpenCodeEventProjectionFailure.unsupportedVersion),
+    );
+    expect(
+      project(frame('session.future.fact'), version: '2.0.22+build.1'),
+      hasLength(1),
+    );
+  });
+
+  test('observed captures: every frame is routed or a documented no-op', () {
+    final fixtures = OpenCodeFixtures();
+    final files =
+        fixtures.root
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where(
+              (f) =>
+                  f.path.endsWith('.json') &&
+                  !f.path.contains('/web-configured-origin/'),
+            )
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
+    final categories = <String, int>{};
+    for (final file in files) {
+      for (final events in eventLists(jsonDecode(file.readAsStringSync()))) {
+        final states = <String, SessionState>{};
+        for (var i = 0; i < events.length; i++) {
+          final input = events[i];
+          final type = input['type']! as String;
+          final data = input['data'];
+          final sessionField = data is Map<String, Object?>
+              ? (data['sessionID'] ??
+                    (data['form'] as Map<String, Object?>?)?['sessionID'])
+              : null;
+          final session = sessionField is String && sessionField != 'global'
+              ? sessionField
+              : 'ses_unscoped';
+          final state = states[session] ?? SessionState(refOf(session));
+          final position = observedPosition(i + 1);
+          final routed = projectOpenCodeEvent(
+            input,
+            state,
+            sourceVersion: '2.0.22',
+            position: position,
+            receivedAt: DateTime.utc(2026, 10, 14),
+          );
+          final owner = owned[type];
+          final String category;
+          if (owner == null) {
+            expect(routed, isEmpty, reason: type);
+            category = 'noop:$type';
+          } else {
+            final direct = producers[owner]!(
+              input,
+              state,
+              sourceVersion: '2.0.22',
+              position: position,
+              receivedAt: DateTime.utc(2026, 10, 14),
+            );
+            final expected = switch (direct) {
+              null => const <SessionEvent>[],
+              final SessionEvent event => [event],
+              final List<SessionEvent> list => list,
+              _ => fail('Unexpected producer result.'),
+            };
+            expect(
+              routed.map((e) => e.runtimeType),
+              expected.map((e) => e.runtimeType),
+              reason: type,
+            );
+            category = routed.isEmpty ? 'routed-empty' : 'routed-events';
+          }
+          categories[category] = (categories[category] ?? 0) + 1;
+          var next = state;
+          for (final event in routed) {
+            next = reduce(next, event).state;
+          }
+          states[session] = next;
+        }
+      }
+    }
+    // 917 frames reach the shared walker: every session type is owned, the
+    // only unowned type is the session-free `server.connected`, and no
+    // tracked frame becomes a diagnostic.
+    expect(categories, {
+      'routed-events': 716,
+      'routed-empty': 175,
+      'noop:server.connected': 26,
+    });
+  });
+}
+
+bool _throws(Object? Function() call) {
+  try {
+    call();
+    return false;
+  } on Exception {
+    return true;
+  }
+}
