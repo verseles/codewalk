@@ -100,27 +100,11 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   var text = '';
   Map<String, Object?>? context;
   if (type == _enqueued) {
-    final item = _object(data['item']);
-    itemType = _text(item['type'], cap: _idLimit);
-    if (!_itemTypes.contains(itemType)) {
-      _fail(OpenCodeInboxProjectionFailure.unsupportedValue);
-    }
-    delivery = _delivery(item['delivery']);
-    final payload = _object(item['payload']);
-    switch (itemType) {
-      case 'user':
-        text = _text(payload['text'], cap: _textLimit);
-        context = _contextManifest(payload);
-      case 'synthetic':
-        text = _text(payload['text'], cap: _textLimit);
-      case 'move':
-        // Validated as declared, then discarded: the target is not projected.
-        _object(payload['location']);
-        _text(payload['projectID'], cap: _idLimit);
-        if (payload.containsKey('subpath')) {
-          _text(payload['subpath'], cap: _idLimit);
-        }
-    }
+    final item = _inboxItem(_object(data['item']));
+    itemType = item.type;
+    delivery = item.delivery;
+    text = item.text;
+    context = item.context;
   } else if (type == _deliveryChanged) {
     delivery = _delivery(data['delivery']);
   }
@@ -323,6 +307,108 @@ List<SessionEvent> projectOpenCodeInboxEvent(
       PendingInputChanged(meta: eventMeta, items: pending),
   ];
   return List.unmodifiable(events);
+}
+
+/// One validated inbox item; shared by the live enqueue and the inbox read.
+({String type, String delivery, String text, Map<String, Object?>? context})
+_inboxItem(Map<String, Object?> item) {
+  final type = _text(item['type'], cap: _idLimit);
+  if (!_itemTypes.contains(type)) {
+    _fail(OpenCodeInboxProjectionFailure.unsupportedValue);
+  }
+  final delivery = _delivery(item['delivery']);
+  final payload = _object(item['payload']);
+  var text = '';
+  Map<String, Object?>? context;
+  switch (type) {
+    case 'user':
+      text = _text(payload['text'], cap: _textLimit);
+      context = _contextManifest(payload);
+    case 'synthetic':
+      text = _text(payload['text'], cap: _textLimit);
+    case 'move':
+      // Validated as declared, then discarded: the target is not projected.
+      _object(payload['location']);
+      _text(payload['projectID'], cap: _idLimit);
+      if (payload.containsKey('subpath')) {
+        _text(payload['subpath'], cap: _idLimit);
+      }
+  }
+  return (type: type, delivery: delivery, text: text, context: context);
+}
+
+/// One row of `GET /api/session/{id}/inbox` for hydration, with the live
+/// producer's identities and admission rules: a steer user prompt is an
+/// admitted [UserInput] (plus its context marker) and pending; queued prompts
+/// and synthetic continuations are pending only; compaction and move rows are
+/// validated and yield nothing. Whether a row was already promoted into
+/// history is the caller's decision.
+({PendingInput? pending, List<TimelineItem> items}) openCodeInboxRow(
+  Object? value,
+  SessionRef ref, {
+  required String sourceVersion,
+  required String generation,
+}) {
+  final row = _object(value);
+  final inboxId = _id(row['id'], 'msg_');
+  if (_id(row['sessionID'], 'ses') != ref.nativeId) {
+    _fail(OpenCodeInboxProjectionFailure.malformed);
+  }
+  final created = _object(row['time'])['created'];
+  if (created is! num || !created.isFinite) {
+    _fail(OpenCodeInboxProjectionFailure.malformed);
+  }
+  final item = _inboxItem(row);
+  if (item.type == 'compaction' || item.type == 'move') {
+    return (pending: null, items: const []);
+  }
+  ItemId itemId(String kind, Object discriminator) =>
+      ItemId(jsonEncode([ref.storageKey, inboxId, kind, discriminator]));
+  final source = SourceProvenance(
+    harness: ref.harnessRef,
+    version: sourceVersion,
+    nativeType: 'session.inbox.list',
+    extra: CanonicalValue({
+      'nativeInboxId': inboxId,
+      'inboxItemType': item.type,
+      'nativeDelivery': item.delivery,
+      if (item.context != null) 'contextNotProjected': true,
+    }),
+  );
+  final steer = item.delivery == 'steer';
+  final id = itemId(item.type == 'user' ? 'user' : 'notice', 0);
+  final pending = PendingInput(
+    id: id,
+    text: item.text,
+    delivery: OpenValue.known(steer ? Delivery.steer : Delivery.queue),
+  );
+  if (item.type != 'user' || !steer) return (pending: pending, items: const []);
+  return (
+    pending: pending,
+    items: [
+      UserInput(
+        meta: ItemMeta(
+          id: id,
+          generation: generation,
+          status: const OpenValue.known(ItemStatus.pending),
+          source: source,
+        ),
+        text: item.text,
+        delivery: const OpenValue.known(DeliveryState.accepted),
+      ),
+      if (item.context != null)
+        UnknownItem(
+          meta: ItemMeta(
+            id: itemId('unknown', ['context', 'user-context-manifest', 0]),
+            generation: generation,
+            status: OpenValue<ItemStatus>.unknown('completionUnverified'),
+            source: source,
+          ),
+          rawType: 'user-context-manifest',
+          raw: CanonicalValue(item.context!),
+        ),
+    ],
+  );
 }
 
 bool _samePending(List<PendingInput> a, List<PendingInput> b) {

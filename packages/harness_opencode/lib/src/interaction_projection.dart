@@ -108,92 +108,11 @@ SessionEvent? projectOpenCodeInteractionEvent(
   final SessionEvent Function(EventMeta meta) build;
   switch (type) {
     case _asked:
-      final id = InteractionId(_id(data['id'], 'per'));
-      final action = _text(data['action']);
-      final resources = _strings(data['resources']);
-      final save = data.containsKey('save') ? _strings(data['save']) : null;
-      Map<String, Object?>? source;
-      if (data.containsKey('source')) {
-        final raw = _object(data['source']);
-        if (_text(raw['type']) != 'tool') {
-          _fail(OpenCodeInteractionProjectionFailure.unsupportedValue);
-        }
-        source = {
-          'type': 'tool',
-          'messageID': _text(raw['messageID']),
-          'id': _text(raw['id']),
-        };
-      }
-      if (data.containsKey('metadata')) {
-        _object(data['metadata']);
-        notProjected['metadataNotProjected'] = true;
-      }
-      if (data.containsKey('message')) {
-        _text(data['message']);
-        notProjected['messageNotProjected'] = true;
-      }
-      final subject = _manifest({
-        'action': action,
-        'resources': resources,
-        'source': ?source,
-      });
-      final patterns = save == null || save.isEmpty
-          ? null
-          : _manifest({'patterns': save});
-      final request = InteractionRequest(
-        id: id,
-        owner: owner,
-        kind: const OpenValue.known(InteractionKind.permission),
-        title: action,
-        subject: subject,
-        choices: [
-          ApprovalChoice(
-            id: 'once',
-            label: 'once',
-            allows: true,
-            scope: const OpenValue.known(ApprovalScope.once),
-            resolutionScope: const OpenValue.known(ResolutionScope.request),
-          ),
-          // Without save patterns the server treats `always` like `once`.
-          if (patterns != null)
-            ApprovalChoice(
-              id: 'always',
-              label: 'always',
-              allows: true,
-              scope: const OpenValue.known(ApprovalScope.persistentProject),
-              resolutionScope: const OpenValue.known(ResolutionScope.project),
-              scopePreview: patterns,
-            ),
-          // One rejection settles every pending request of the session.
-          ApprovalChoice(
-            id: 'reject',
-            label: 'reject',
-            allows: false,
-            scope: const OpenValue.known(ApprovalScope.once),
-            resolutionScope: const OpenValue.known(ResolutionScope.session),
-            acceptsNote: true,
-          ),
-        ],
-        // Eligibility only; the reply policy belongs to the reply flow.
-        autoApprovable: true,
-      );
+      final request = _permissionRequest(data, owner, notProjected);
       if (_resident(current, request)) return null;
       build = (meta) => InteractionOpened(meta: meta, request: request);
     case _formCreated:
-      final id = InteractionId(_id(form!['id'], 'frm_'));
-      final title = _text(form['title']);
-      if (form.containsKey('metadata')) {
-        _object(form['metadata']);
-        notProjected['metadataNotProjected'] = true;
-      }
-      final request = InteractionRequest(
-        id: id,
-        owner: owner,
-        kind: const OpenValue.known(InteractionKind.form),
-        title: title,
-        form: _formSpec(form['fields']),
-        requiresInput: true,
-      );
+      final request = _formRequest(form!, owner, notProjected);
       if (_resident(current, request)) return null;
       build = (meta) => InteractionOpened(meta: meta, request: request);
     case _replied:
@@ -253,6 +172,126 @@ SessionEvent? projectOpenCodeInteractionEvent(
       ),
     ),
   );
+}
+
+/// The request a native `Permission.Request` opens, shared by the live ask
+/// and the session's pending-permission read.
+InteractionRequest _permissionRequest(
+  Map<String, Object?> data,
+  DomainOwner owner,
+  Map<String, Object?> notProjected,
+) {
+  final id = InteractionId(_id(data['id'], 'per'));
+  final action = _text(data['action']);
+  final resources = _strings(data['resources']);
+  final save = data.containsKey('save') ? _strings(data['save']) : null;
+  Map<String, Object?>? source;
+  if (data.containsKey('source')) {
+    final raw = _object(data['source']);
+    if (_text(raw['type']) != 'tool') {
+      _fail(OpenCodeInteractionProjectionFailure.unsupportedValue);
+    }
+    source = {
+      'type': 'tool',
+      'messageID': _text(raw['messageID']),
+      'id': _text(raw['id']),
+    };
+  }
+  if (data.containsKey('metadata')) {
+    _object(data['metadata']);
+    notProjected['metadataNotProjected'] = true;
+  }
+  if (data.containsKey('message')) {
+    _text(data['message']);
+    notProjected['messageNotProjected'] = true;
+  }
+  final subject = _manifest({
+    'action': action,
+    'resources': resources,
+    'source': ?source,
+  });
+  final patterns = save == null || save.isEmpty
+      ? null
+      : _manifest({'patterns': save});
+  return InteractionRequest(
+    id: id,
+    owner: owner,
+    kind: const OpenValue.known(InteractionKind.permission),
+    title: action,
+    subject: subject,
+    choices: [
+      ApprovalChoice(
+        id: 'once',
+        label: 'once',
+        allows: true,
+        scope: const OpenValue.known(ApprovalScope.once),
+        resolutionScope: const OpenValue.known(ResolutionScope.request),
+      ),
+      // Without save patterns the server treats `always` like `once`.
+      if (patterns != null)
+        ApprovalChoice(
+          id: 'always',
+          label: 'always',
+          allows: true,
+          scope: const OpenValue.known(ApprovalScope.persistentProject),
+          resolutionScope: const OpenValue.known(ResolutionScope.project),
+          scopePreview: patterns,
+        ),
+      // One rejection settles every pending request of the session.
+      ApprovalChoice(
+        id: 'reject',
+        label: 'reject',
+        allows: false,
+        scope: const OpenValue.known(ApprovalScope.once),
+        resolutionScope: const OpenValue.known(ResolutionScope.session),
+        acceptsNote: true,
+      ),
+    ],
+    // Eligibility only; the reply policy belongs to the reply flow.
+    autoApprovable: true,
+  );
+}
+
+/// The request a native `Form.Info` opens, shared by the live creation and
+/// the session's pending-form read.
+InteractionRequest _formRequest(
+  Map<String, Object?> form,
+  DomainOwner owner,
+  Map<String, Object?> notProjected,
+) {
+  final id = InteractionId(_id(form['id'], 'frm_'));
+  final title = _text(form['title']);
+  if (form.containsKey('metadata')) {
+    _object(form['metadata']);
+    notProjected['metadataNotProjected'] = true;
+  }
+  return InteractionRequest(
+    id: id,
+    owner: owner,
+    kind: const OpenValue.known(InteractionKind.form),
+    title: title,
+    form: _formSpec(form['fields']),
+    requiresInput: true,
+  );
+}
+
+/// The pending request of one row from `GET /api/session/{id}/permission`.
+/// Session-scoped reads never carry another session or a global owner.
+InteractionRequest openCodePendingPermission(Object? row, SessionRef ref) {
+  final data = _object(row);
+  if (_text(data['sessionID'], nonempty: true) != ref.nativeId) {
+    _fail(OpenCodeInteractionProjectionFailure.malformed);
+  }
+  return _permissionRequest(data, SessionOwner(ref), {});
+}
+
+/// The pending request of one row from `GET /api/session/{id}/form`.
+InteractionRequest openCodePendingForm(Object? row, SessionRef ref) {
+  final form = _object(row);
+  if (_text(form['sessionID'], nonempty: true) != ref.nativeId) {
+    _fail(OpenCodeInteractionProjectionFailure.malformed);
+  }
+  return _formRequest(form, SessionOwner(ref), {});
 }
 
 /// True for a duplicate ask; a different resident kind is a conflict.

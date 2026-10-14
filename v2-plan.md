@@ -1567,6 +1567,13 @@ Before starting, ensure the Issue contains:
 - **Scope:** algorithm of §6.10 (buffer, hydrate, apply, incomplete prefix, isolate batching, watchdog, backoff). Optional durable log stays unavailable until V2-005E verifies its semantics; select a bounded implementation child with that prerequisite before enabling the flag.
 - **Done when:** [ ] fixtures: drop mid-text, mid-tool, during a pending approval, during revert; overflow disconnect; server restart with `shutdown`; [ ] no duplicates and no stuck "running" after any of them.
 
+**Bounded stream children (2026-10-14).** Split V2-042 into a hydration read and the stream owner. V2-005D (#243) stays open only for its inconclusive retry/quota supplement; these children use its delivered D captures. The parent dependencies, done-when fixtures and MVP gates remain mandatory.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-042A ([#379](https://github.com/verseles/codewalk/issues/379)) | V2-023, V2-040, V2-041, V2-056A, V2-028D, V2-043A, V2-044A1, V2-044A5, V2-044A7, V2-044A11 | Pure-read hydration of one session into a `SessionSnapshot`: sequential active → session → inbox → newest history (`order=desc`, reversed by native row, direction-carrying continuation) → permissions → forms; per-read boundaries on the caller's `readStart` (one combined interactions slot); whole-snapshot failure; running/idle plus last page outcome; inbox, permission and form rows through builders shared with A5/A7; history-promoted inbox entries settled. Capture B replay: recorded reads then 38 stream frames, no duplicate identities or leftover pending. No stream owner, buffering, reconnect, global lists, children discovery, UI or parent/MVP acceptance. |
+| V2-042B | V2-042A, V2-044A11 | Stream owner: `server.connected` gating, bounded buffering, hydration cycle, ordered apply through `projectOpenCodeEvent`, resync/eviction effects and the parent done-when fixtures. |
+
 #### V2-043 — Session index and lifecycle
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-042, V2-027, V2-005B

@@ -1807,3 +1807,20 @@ stream owner (V2-042 #274) calls.
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No stream wiring, UI or native/MVP acceptance is added.
+
+## V2-042A session hydration snapshot (#379)
+
+```text
+packages/harness_opencode/lib/src/session_reader.dart # hydrateSession: ordered reads into one SessionSnapshot; desc history continuation
+packages/harness_opencode/lib/src/inbox_projection.dart # Shared inbox item parser and hydration row builder (hidden from the barrel)
+packages/harness_opencode/lib/src/interaction_projection.dart # Shared permission/form request builders (hidden from the barrel)
+packages/harness_opencode/test/session_hydration_test.dart # Read order, mapping, boundaries, promotion, failures and capture B replay
+```
+
+`OpenCodeSessionReader.hydrateSession(SessionRef, {hydrationGeneration,
+readStart, sourceVersion, historyLimit, now, cancellation})` returns an
+unapplied snapshot for the stream owner (V2-042B) to hydrate before replaying
+buffered events.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No stream owner, reconnect, UI or native/MVP acceptance is added.

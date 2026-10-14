@@ -11,8 +11,9 @@ export 'src/pairing_client.dart';
 export 'src/session_reader.dart';
 export 'src/event_projection.dart';
 export 'src/execution_projection.dart';
-export 'src/inbox_projection.dart';
-export 'src/interaction_projection.dart';
+export 'src/inbox_projection.dart' hide openCodeInboxRow;
+export 'src/interaction_projection.dart'
+    hide openCodePendingForm, openCodePendingPermission;
 export 'src/notice_projection.dart';
 export 'src/revert_projection.dart';
 export 'src/session_lifecycle_projection.dart';

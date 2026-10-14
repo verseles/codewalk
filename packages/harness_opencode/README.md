@@ -144,6 +144,42 @@ dart analyze --fatal-infos
 dart test test/history_projection_test.dart test/history_reader_test.dart test/session_reader_test.dart
 ```
 
+## Session hydration snapshot
+
+[V2-042A / #379](https://github.com/verseles/codewalk/issues/379) adds
+`hydrateSession(SessionRef, hydrationGeneration: ..., readStart: ...,
+sourceVersion: ..., historyLimit: 50, now: ..., cancellation: ...)` to the
+reader. It reads one session's authoritative state and returns a Core
+`SessionSnapshot` without applying it; the stream owner (V2-042B) starts the
+hydration, applies the snapshot and then the buffered events.
+
+- Reads run in order: `GET /api/session/active`, the session, its inbox, the
+  newest history page (`order=desc`), pending permissions and pending forms.
+  Reading the inbox before history means an input promoted between the two is
+  found in history. Each collection keeps its own boundary with the caller's
+  `readStart` and its read times; permissions and forms share Core's single
+  interactions slot (earliest start, latest end).
+- Any failed or rejected read fails the whole snapshot; empty lists are
+  authoritative empty collections. Execution is `running` when the session is
+  in the active map, otherwise `idle`, with the last outcome of the page.
+- The descending page is reversed by native message before projection, so the
+  timeline is chronological and identical to `readHistory`; it is complete only
+  without an older continuation. The continuation token records the direction,
+  and `readHistory` follows asc or desc tokens (the cursor is sent without
+  `order`, as the native API requires).
+- Inbox rows, permissions and forms use the same builders as the live inbox
+  and interaction producers. An inbox entry whose message is already in the
+  history page is settled there and is neither pending nor admitted again — Core
+  cannot tell, because history user delivery is unknown. A steer prompt not yet
+  in history is admitted like the live `enqueued` event.
+
+Tests cover the read order, mapping, boundaries, promotion, failures, and
+hydration followed by live events without duplicate identities. A replay serves
+capture B's recorded active, session, inbox and history reads (the ascending
+body reversed, since no capture used `order=desc`), then its 38 stream frames
+through `projectOpenCodeEvent`: four snapshot items grow to eight, with no
+duplicates and no leftover pending input.
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports
