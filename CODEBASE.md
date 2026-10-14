@@ -1738,3 +1738,22 @@ unknown reply origin (cancelled for form cancellations), keyed by the native
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed
 before review. No reply flow (V2-047A), UI or native/MVP acceptance is added.
+
+## V2-044A8 native revert projection (#374)
+
+```text
+packages/harness_opencode/lib/src/revert_projection.dart # Pure revert event-to-SessionEvent projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/revert_projection_test.dart # Kinds, boundary, commit cut/pending proof, privacy, bounds and failures
+packages/harness_opencode/test/revert_replay_test.dart # Offline immutable D replay through all producers and recorded post-commit reads
+packages/harness_opencode/test/revert_test_data.dart # Synthetic source-shaped revert frames, seeded state and manifests
+```
+
+`projectOpenCodeRevertEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` emits `RevertChanged` for each transition and, on a
+proven commit, `ItemsRemoved` and `PendingInputChanged`; an unproven cut yields
+one `ResyncRequired` instead.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
+review corrections were validated with focused tests. No revert commands
+(V2-050), UI or native/MVP acceptance is added.

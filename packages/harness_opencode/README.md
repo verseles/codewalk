@@ -441,6 +441,56 @@ dart analyze --fatal-infos
 dart test test/interaction_projection_test.dart test/interaction_replay_test.dart
 ```
 
+## Native revert projection
+
+[V2-044A8 / #374](https://github.com/verseles/codewalk/issues/374) exports
+`projectOpenCodeRevertEvent(value, current, sourceVersion: ..., position: ...,
+receivedAt: ...)`. It is synchronous and pure and returns an unmodifiable list
+to reduce in order against the latest state, empty for unrelated types and
+foreign sessions.
+
+| Native event (durable) | Canonical result |
+|---|---|
+| `session.revert.staged` | `RevertChanged(staged)` with the boundary item and a file summary |
+| `session.revert.cleared` | `RevertChanged(cleared)` |
+| `session.revert.committed` | `RevertChanged(committed)`, then `ItemsRemoved` and/or `PendingInputChanged` when proven, else one `ResyncRequired` |
+
+- The server nulls its revert on both `cleared` and `committed`; the canonical
+  state keeps the terminal kind, so only `staged` means a pending revert. `none`
+  is left to a future hydration of an absent revert.
+- The boundary is the first resident timeline item of the native message,
+  recovered from the `[storageKey, messageId, kind, …]` item IDs every sibling
+  producer shares; it is null when that message is not resident.
+- A commit deletes the boundary message and everything after it, plus inbox
+  entries enqueued from it on. The producer removes from the boundary item only
+  when every resident item decodes, the first item ordering at or after the
+  boundary is the boundary itself and no later item orders before it; pending
+  entries keep native IDs ordering before the boundary, like the reference
+  client. Otherwise one `ResyncRequired` (`revertMembershipUnproven`,
+  `revertBoundaryMissing`, `revertOrderMismatch` or `revertPendingUnproven`,
+  timeline first) replaces the unproven mutation. Unlike the reference client,
+  a boundary that is not resident never removes from a later message.
+- File diffs keep path, status and counts; patches carry workspace contents
+  and are type-checked only (`patchNotProjected`). Snapshot and legacy part IDs
+  are validated and not copied, and the frame location is never read. IDs and
+  paths are capped at 4 KiB, files at 4,096 entries and details at 64 KiB, with
+  finite `OpenCodeRevertProjectionException` categories.
+
+The capture D replay feeds every frame of `d/revert-file-effects.json` through
+all producers: three stages (one file, none, one file), two clears and a commit
+on the admitted steer prompt, ending with an empty timeline and pending set that
+match the recorded post-commit history and inbox reads. A boundary message with
+several resident items and pending input ordered across the boundary are
+source-shaped only.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/revert_projection_test.dart test/revert_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`
