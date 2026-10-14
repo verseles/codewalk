@@ -11,6 +11,7 @@ export 'src/pairing_client.dart';
 export 'src/session_reader.dart';
 export 'src/execution_projection.dart';
 export 'src/inbox_projection.dart';
+export 'src/interaction_projection.dart';
 export 'src/step_usage_projection.dart';
 export 'src/text_reasoning_projection.dart';
 export 'src/tool_projection.dart';

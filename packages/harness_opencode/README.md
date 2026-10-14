@@ -390,6 +390,57 @@ dart analyze --fatal-infos
 dart test test/step_usage_projection_test.dart test/step_usage_replay_test.dart
 ```
 
+## Native permission and form interaction projection
+
+[V2-044A7 / #373](https://github.com/verseles/codewalk/issues/373) exports
+`projectOpenCodeInteractionEvent(value, current, sourceVersion: ..., position:
+..., receivedAt: ...)`. It is synchronous and pure and returns one
+`SessionEvent` or `null` (unrelated types, foreign sessions and an ask already
+resident under the same identity).
+
+| Native event (ephemeral) | Canonical result |
+|---|---|
+| `permission.asked` | `InteractionOpened` permission request with native choices |
+| `permission.replied` | `InteractionResolved` with an unknown origin and `ApprovalResponse(reply)` |
+| `form.created` | `InteractionOpened` form request with a `FormSpec` |
+| `form.replied` | `InteractionResolved` with an unknown origin and no answers |
+| `form.cancelled` | `InteractionResolved` as `cancelled` |
+
+- Interaction IDs are the native `per…`/`frm_` IDs. Choices use the native reply
+  literals as ID and label: `once` (request scope); `always` only when the ask
+  carries `save` patterns, persisted per project and shown as the scope preview
+  (without patterns the server treats it like `once`); and `reject`, which
+  settles every pending request of the session and accepts a note through the
+  reply route. `autoApprovable` is eligibility only; policy belongs to the reply
+  flow (V2-047A). The subject carries the action, resources and tool source.
+- The event never says who replied, so replies resolve with
+  `unknown('replyOriginUnobserved')`. Resolutions are not gated on residency, so
+  Core tombstones the identity even when the ask preceded the stream.
+- Forms owned by the `"global"` sentinel get a `GlobalOwner` for this harness;
+  the event carrier stays the session. Native string fields with options remain
+  `string` fields because native answers are plain strings; `when` conditions map
+  to `EqualsCondition`/`NotEqualsCondition` (all must hold), with multiselect
+  membership from Core. A future field type stays an unknown, unanswerable kind
+  without copied content.
+- Request messages, native metadata, form answers and the frame location are
+  never copied (flags in provenance). A `durable` block on these ephemeral events
+  is malformed; strings are capped at 4 KiB, lists at 4,096 entries and copied
+  manifests at 64 KiB, with finite `OpenCodeInteractionProjectionException`
+  categories.
+
+Replays cover every interaction frame in captures C and D (35 asks, 31 replies,
+6 forms, 3 form replies, 4 cancellations): 41 opens, 37 settled in the log, 4
+still pending when the log ends, and one resolution settling an ask from before
+the log. No `"global"` form is captured, so that path is source-shaped only.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/interaction_projection_test.dart test/interaction_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

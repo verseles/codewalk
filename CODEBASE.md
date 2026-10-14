@@ -1719,3 +1719,22 @@ Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
 helper review fixes (late-reading test, fractional `created`, stronger replay
 privacy check, documented restart limit) were verified locally. No context
 meter, cost UI, runtime wiring or native/MVP acceptance is added.
+
+## V2-044A7 native permission and form interaction projection (#373)
+
+```text
+packages/harness_opencode/lib/src/interaction_projection.dart # Pure permission/form event-to-SessionEvent projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/interaction_projection_test.dart # Choices, forms, global owner, privacy, bounds and failures
+packages/harness_opencode/test/interaction_replay_test.dart # Offline immutable C/D replays: open/settle pairing and reducer state
+packages/harness_opencode/test/interaction_test_data.dart # Synthetic source-shaped permission/form frames and manifests
+```
+
+`projectOpenCodeInteractionEvent(Object?, SessionState current,
+{sourceVersion, position, receivedAt})` emits `InteractionOpened` with native
+once/always/reject choices or a `FormSpec`, and `InteractionResolved` with an
+unknown reply origin (cancelled for form cancellations), keyed by the native
+`per…`/`frm_` IDs.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed
+before review. No reply flow (V2-047A), UI or native/MVP acceptance is added.
