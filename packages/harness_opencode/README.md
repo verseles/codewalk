@@ -533,6 +533,38 @@ dart analyze --fatal-infos
 dart test test/session_lifecycle_projection_test.dart test/session_lifecycle_replay_test.dart
 ```
 
+## Native instruction and synthetic notices
+
+[V2-044A10 / #377](https://github.com/verseles/codewalk/issues/377) exports
+`projectOpenCodeNoticeEvent(value, current, sourceVersion: ..., position: ...,
+receivedAt: ...)`. It is synchronous and pure and returns an unmodifiable list
+with at most one `ItemUpserted`.
+
+| Native event (durable) | Canonical result |
+|---|---|
+| `session.instructions.updated` (v2) with `text` | `Notice` (`system`) |
+| `session.instructions.updated` without `text` | nothing (baseline or empty rendering) |
+| `session.synthetic` (v1) | `Notice` (`continuation`) |
+
+- The server derives the transcript message ID from the event ID (`evt_` →
+  `msg_`), so the notice ID equals the history `system`/`synthetic` row's ID.
+  A resident item of another kind under that ID fails with `itemKindMismatch`.
+- Instruction sources and hashes, synthetic descriptions, native metadata and
+  the frame location are validated and never copied; text is capped at 256 KiB
+  and source lists at 4,096 entries, with finite
+  `OpenCodeNoticeProjectionException` categories.
+
+All 32 captured instruction updates are text-free baselines and project
+nothing; no synthetic event is captured, so the notice paths are source-shaped.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/notice_projection_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`

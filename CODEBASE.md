@@ -1776,3 +1776,18 @@ rename or a deletion.
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No catalog/child discovery, lifecycle commands, UI or native/MVP acceptance is
 added.
+
+## V2-044A10 native instruction and synthetic notices (#377)
+
+```text
+packages/harness_opencode/lib/src/notice_projection.dart # Pure instruction-update/synthetic event-to-Notice projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/notice_projection_test.dart # History-row parity, privacy, bounds, failures and capture baselines
+```
+
+`projectOpenCodeNoticeEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` emits one `ItemUpserted(Notice)` keyed like the history
+row, or nothing for text-free instruction updates.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No stream wiring, UI or native/MVP acceptance is added.

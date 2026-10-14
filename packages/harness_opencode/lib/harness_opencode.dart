@@ -12,6 +12,7 @@ export 'src/session_reader.dart';
 export 'src/execution_projection.dart';
 export 'src/inbox_projection.dart';
 export 'src/interaction_projection.dart';
+export 'src/notice_projection.dart';
 export 'src/revert_projection.dart';
 export 'src/session_lifecycle_projection.dart';
 export 'src/step_usage_projection.dart';
