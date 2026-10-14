@@ -1699,3 +1699,23 @@ helper review fixes (settled history rows, cancelled re-admission, context
 budget) were verified locally. Delivered rows remaining in Core admissions is a
 recorded V2-042 follow-up. No runtime chat wiring or native/MVP acceptance is
 added.
+
+## V2-044A6 native step lifecycle and usage projection (#372)
+
+```text
+packages/harness_opencode/lib/src/step_usage_projection.dart # Pure step/usage event-to-SessionEvent list projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/step_usage_projection_test.dart # Phase mappings, usage identities, zeros, privacy, bounds and failures
+packages/harness_opencode/test/step_usage_replay_test.dart # Offline immutable A–E replays: history error markers and cumulative totals
+packages/harness_opencode/test/step_usage_test_data.dart # Synthetic source-shaped step/usage frames and manifests
+```
+
+`projectOpenCodeStepUsageEvent(Object?, SessionState current, {sourceVersion,
+position, receivedAt})` emits turn-scope partial step `UsageObserved` readings
+keyed `step:<assistantMessageID>`, the history-identical failure marker, and the
+ephemeral cumulative `session-total` series that replaces earlier readings.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
+helper review fixes (late-reading test, fractional `created`, stronger replay
+privacy check, documented restart limit) were verified locally. No context
+meter, cost UI, runtime wiring or native/MVP acceptance is added.

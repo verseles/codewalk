@@ -338,6 +338,58 @@ dart analyze --fatal-infos
 dart test test/inbox_projection_test.dart test/inbox_replay_test.dart
 ```
 
+## Native step and usage projection
+
+[V2-044A6 / #372](https://github.com/verseles/codewalk/issues/372) exports
+`projectOpenCodeStepUsageEvent(value, current, sourceVersion: ..., position:
+..., receivedAt: ...)`. Like its siblings it is synchronous and pure and returns
+an unmodifiable `List<SessionEvent>` to reduce in order against the latest
+`SessionState`.
+
+| Native event | Canonical result |
+|---|---|
+| `session.step.started`, `session.step.streamed` | Validated, nothing emitted |
+| `session.step.ended` | One step `UsageObserved` |
+| `session.step.failed` | History-identical `assistantErrorNotProjected` marker, plus step usage only when both cost and tokens are present |
+| `session.usage.updated` (ephemeral) | One cumulative session `UsageObserved` |
+
+- Step usage follows Core's A convention: scope `turn`, partial, aggregation key
+  `step:<assistantMessageID>`. Its ID is also `step:<assistantMessageID>`, so a
+  restarted step's new reading replaces the old one and a late older reading
+  never overwrites a newer one.
+- `usage.updated` is the session's cumulative total: scope `session`,
+  cumulative, aggregation key `session-total`, so each reading replaces the
+  previous one. It must never be added to step readings; the session total can
+  legitimately exceed the sum of resident steps (earlier or non-client steps).
+- Costs carry currency `USD` from the pinned `Money.USD` brand. Observed zeros
+  stay zeros, absent values stay absent; negative amounts are unsupported.
+  `observedAt` is the native `created` time.
+- The ephemeral event must not carry a `durable` block; step events require
+  durable version 1. `started` emits no selection: a step model is not a session
+  selection, and execution lifecycle belongs to the execution producer.
+- Error `message`, `status` and `response` and the frame location are never
+  read; provider state, snapshots, file paths, `rawFinish`, model and agent are
+  validated but never copied. No live `empty` marker is projected, because step frames
+  carry no content evidence.
+- Known limit: Core has no single-item removal, so if a failed step restarts
+  under the same message ID its error marker stays until the next history read.
+  No capture shows a restart after a failure.
+
+Replays cover root A and units B–E (56 started, 51 streamed, 44 ended, 11
+failed, 51 usage updates): all 11 failures match their history error markers,
+and 47 cumulative readings equal the sum of the projected step usage; the other
+four belong to restart captures whose earlier steps precede the recorded log.
+Fixtures and the schema pin are unchanged; no new native or MVP acceptance is
+established.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/step_usage_projection_test.dart test/step_usage_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`
