@@ -1757,3 +1757,22 @@ one `ResyncRequired` instead.
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed;
 review corrections were validated with focused tests. No revert commands
 (V2-050), UI or native/MVP acceptance is added.
+
+## V2-044A9 native session lifecycle projection (#376)
+
+```text
+packages/harness_opencode/lib/src/session_lifecycle_projection.dart # Pure created/renamed/deleted event-to-SessionEvent projection
+packages/harness_opencode/lib/harness_opencode.dart # Public barrel export
+packages/harness_opencode/test/session_lifecycle_projection_test.dart # HTTP-record parity, rename, deletion, privacy, bounds and failures
+packages/harness_opencode/test/session_lifecycle_replay_test.dart # Offline replays over tracked captures and recorded session reads
+packages/harness_opencode/test/session_lifecycle_test_data.dart # Synthetic source-shaped lifecycle frames and manifests
+```
+
+`projectOpenCodeSessionLifecycleEvent(Object?, SessionState current,
+{sourceVersion, position, receivedAt})` emits `SessionInfoChanged` for a
+creation or a rename over resident info, and `ResyncRequired` for an unproven
+rename or a deletion.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No catalog/child discovery, lifecycle commands, UI or native/MVP acceptance is
+added.

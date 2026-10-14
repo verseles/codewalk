@@ -491,6 +491,48 @@ dart analyze --fatal-infos
 dart test test/revert_projection_test.dart test/revert_replay_test.dart
 ```
 
+## Native session lifecycle projection
+
+[V2-044A9 / #376](https://github.com/verseles/codewalk/issues/376) exports
+`projectOpenCodeSessionLifecycleEvent(value, current, sourceVersion: ...,
+position: ..., receivedAt: ...)`. It is synchronous and pure and returns an
+unmodifiable list to reduce in order, empty for unrelated types and other
+sessions — including a child created under the current session, whose
+discovery belongs to the stream owner (#274).
+
+| Native event (durable) | Canonical result |
+|---|---|
+| `session.created` (v1) | `SessionInfoChanged` equal to the HTTP session record's info |
+| `session.renamed` (v1) | `SessionInfoChanged` with only the title replaced, or `ResyncRequired('sessionInfoUnproven')` without resident info |
+| `session.deleted` (v2) | `ResyncRequired('sessionDeleted')` |
+
+- `created` copies the title (`''` when absent), parent lineage, native project
+  and directory, with unknown ownership — the same subset as
+  `projectOpenCodeSession`. Slug, server version, subpath, agent, model, host
+  metadata, permissions and workspace are type-checked and never copied, and the
+  frame location is never read.
+- Core has no session-removal event. A deletion requests a fresh read, which
+  observes the deleted session authoritatively; evicting it is the stream
+  owner's job. A rename never invents info it cannot see.
+- Explicit JSON `null` in optional fields is malformed (the schema omits absent
+  keys). IDs and paths are capped at 4 KiB and titles at 256 KiB, with finite
+  `OpenCodeSessionLifecycleProjectionException` categories.
+
+Replays over the tracked 2.0.22 captures project 38 creations, 10 renames
+without resident info and 5 deletions; every one of the 24 recorded
+`GET /api/session/{id}` reads of a created session equals the event-built info,
+and capture E's two renames over the created record match each later read.
+Eleven renames wrapped in `web-managed-restart` operations are outside the
+shared event-list walker.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/session_lifecycle_projection_test.dart test/session_lifecycle_replay_test.dart
+```
+
 ## Pairing
 
 `OpenCodePairing` receives an endpoint-specific transport factory. A `null`
