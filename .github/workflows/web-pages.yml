@@ -15,6 +15,9 @@ env:
 
 jobs:
   deploy-web:
+    # Pushes to main skip the preview deploy; run the workflow manually to
+    # publish a specific main revision to main.codewalk.pages.dev.
+    if: github.ref != 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
