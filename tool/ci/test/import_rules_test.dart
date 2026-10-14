@@ -527,6 +527,33 @@ dependencies:
     }),
   );
 
+  test('a locator behind an export cycle is detected from every entry', () async {
+    // Each facade reaches the locator; whichever is traversed first sees the
+    // other only through the cycle, so a closure cut there must not be
+    // reused for the importer of the second facade.
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; final locator = GetIt.instance;\n",
+        'lib/app/cycle_a.dart':
+            "export 'cycle_b.dart';\nexport 'composition_root.dart' show locator;\n",
+        'lib/app/cycle_b.dart': "export 'cycle_a.dart';\n",
+        for (final facade in ['a', 'b'])
+          'lib/app/page_$facade.dart':
+              "$widgetImports import 'cycle_$facade.dart'; class Page extends StatelessWidget { Object build() => locator<Object>(); }\n",
+      },
+    );
+    expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+    for (final facade in ['a', 'b']) {
+      expect(
+        result.stderr.toString(),
+        contains(
+          RegExp('lib/app/page_$facade\\.dart(:\\d+)? \\[widget-locator\\]'),
+        ),
+      );
+    }
+  });
+
   test(
     'ordinary functions outside composition cannot use imported locator',
     () => reject('get-it-boundary', {
@@ -614,6 +641,34 @@ dependencies:
       }),
     );
   }
+
+  test(
+    'a harness constant behind an export cycle is detected from every entry',
+    () async {
+      final result = await run(
+        files: {
+          'lib/shared/names.dart': "const openCodeName = 'opencode';\n",
+          'lib/shared/cycle_a.dart':
+              "export 'cycle_b.dart';\nexport 'names.dart' show openCodeName;\n",
+          'lib/shared/cycle_b.dart': "export 'cycle_a.dart';\n",
+          for (final facade in ['a', 'b'])
+            'lib/features/chat/page_$facade.dart':
+                "import '../../shared/cycle_$facade.dart'; bool show(dynamic kind) => kind == openCodeName;\n",
+        },
+      );
+      expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+      for (final facade in ['a', 'b']) {
+        expect(
+          result.stderr.toString(),
+          contains(
+            RegExp(
+              'lib/features/chat/page_$facade\\.dart(:\\d+)? \\[harness-branch\\]',
+            ),
+          ),
+        );
+      }
+    },
+  );
 
   test('imported harness labels used only for display remain valid', () async {
     final result = await run(

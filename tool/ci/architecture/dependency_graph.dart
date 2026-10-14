@@ -73,6 +73,13 @@ final class DependencyGraph {
   final Map<String, WorkspacePackage> workspace = {};
   final Map<String, String> packageLibraries = {};
   final Map<String, DartSource> _sources = {};
+  // Export closures that never reached the current import/export chain. The
+  // visited sets hold only that chain, so such a closure is the same under any
+  // chain that does not already contain its path; one that was cut short by a
+  // cycle depends on the chain and is recomputed.
+  final Map<(String, bool), Set<String>> _locatorClosures = {};
+  final Map<String, Set<String>> _harnessClosures = {};
+  var _cycleCuts = 0;
   late final WidgetTypes _widgetTypes = WidgetTypes(
     unit: (path) => source(path).unit,
     resolve: resolve,
@@ -129,7 +136,13 @@ final class DependencyGraph {
     Set<String> visited, {
     bool lookups = false,
   }) {
-    if (!visited.add(path)) return {};
+    if (!visited.add(path)) {
+      _cycleCuts++;
+      return {};
+    }
+    final cached = _locatorClosures[(path, lookups)];
+    if (cached != null) return cached;
+    final cuts = _cycleCuts;
     final unit = source(path).unit;
     final names = <String>{};
     final imported = _importedLocators(path, visited, lookups: lookups);
@@ -178,7 +191,11 @@ final class DependencyGraph {
         );
       }
     }
-    return names.where((name) => !name.startsWith('_')).toSet();
+    final result = Set<String>.unmodifiable(
+      names.where((name) => !name.startsWith('_')),
+    );
+    if (_cycleCuts == cuts) _locatorClosures[(path, lookups)] = result;
+    return result;
   }
 
   bool _referencesLocator(AstNode node, Set<String> names) {
@@ -242,7 +259,13 @@ final class DependencyGraph {
   }
 
   Set<String> _harnessExports(String path, Set<String> visited) {
-    if (!visited.add(path)) return {};
+    if (!visited.add(path)) {
+      _cycleCuts++;
+      return {};
+    }
+    final cached = _harnessClosures[path];
+    if (cached != null) return cached;
+    final cuts = _cycleCuts;
     final unit = source(path).unit;
     final names = <String>{};
     final imported = _importedHarnessNames(path, visited);
@@ -281,7 +304,11 @@ final class DependencyGraph {
         }
       }
     }
-    return names.where((name) => !name.startsWith('_')).toSet();
+    final result = Set<String>.unmodifiable(
+      names.where((name) => !name.startsWith('_')),
+    );
+    if (_cycleCuts == cuts) _harnessClosures[path] = result;
+    return result;
   }
 
   bool _referencesHarness(AstNode node, Set<String> names) {
