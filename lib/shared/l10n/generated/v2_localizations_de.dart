@@ -747,4 +747,77 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get historyDetails => 'Details';
+
+  @override
+  String get liveOpen => 'Live öffnen';
+
+  @override
+  String get liveReadOnly => 'Live-Sitzung (schreibgeschützt)';
+
+  @override
+  String get liveConnecting => 'Verbinden…';
+
+  @override
+  String get liveHydrating => 'Neuester Stand wird geladen…';
+
+  @override
+  String get liveLive => 'Live';
+
+  @override
+  String get liveReconnecting => 'Erneut verbinden…';
+
+  @override
+  String get liveStale =>
+      'Nicht aktuell; letzter synchronisierter Stand wird angezeigt.';
+
+  @override
+  String get liveLastSynced => 'Zuletzt synchronisiert';
+
+  @override
+  String get liveDegraded =>
+      'Diese Sitzung konnte nicht aktuell gehalten werden.';
+
+  @override
+  String get liveEvicted =>
+      'Diese Sitzung existiert auf dem Server nicht mehr.';
+
+  @override
+  String get liveIncompatible =>
+      'Diese Serverversion wird für die Live-Ansicht nicht unterstützt.';
+
+  @override
+  String get liveResuming => 'Server neu gestartet, wird fortgesetzt';
+
+  @override
+  String get liveRunning => 'Läuft';
+
+  @override
+  String get liveIdle => 'Inaktiv';
+
+  @override
+  String get liveOutcomeSucceeded => 'Letzter Durchlauf erfolgreich';
+
+  @override
+  String get liveOutcomeFailed => 'Letzter Durchlauf fehlgeschlagen';
+
+  @override
+  String get liveOutcomeInterrupted => 'Letzter Durchlauf unterbrochen';
+
+  @override
+  String get liveNeedsYou => 'Wartet auf deine Antwort';
+
+  @override
+  String get liveCapacity =>
+      'Für diesen Server sind zu viele Live-Sitzungen geöffnet.';
+
+  @override
+  String get liveUnavailable =>
+      'Die Live-Ansicht konnte nicht geöffnet werden. Server prüfen und erneut versuchen.';
+
+  @override
+  String get liveSendUnavailable =>
+      'Senden ist in dieser schreibgeschützten Live-Ansicht nicht verfügbar.';
+
+  @override
+  String get liveRetry => 'Neu verbinden';
 }

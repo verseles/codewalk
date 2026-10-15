@@ -1442,6 +1442,138 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Details'**
   String get historyDetails;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Open live'**
+  String get liveOpen;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Live session (read-only)'**
+  String get liveReadOnly;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get liveConnecting;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the latest state…'**
+  String get liveHydrating;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get liveLive;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get liveReconnecting;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Not up to date; showing the last synced state.'**
+  String get liveStale;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced'**
+  String get liveLastSynced;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'This session could not be kept up to date.'**
+  String get liveDegraded;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'This session no longer exists on the server.'**
+  String get liveEvicted;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'This server version is not supported for the live view.'**
+  String get liveIncompatible;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Server restarted, resuming'**
+  String get liveResuming;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get liveRunning;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get liveIdle;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Last turn succeeded'**
+  String get liveOutcomeSucceeded;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Last turn failed'**
+  String get liveOutcomeFailed;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Last turn interrupted'**
+  String get liveOutcomeInterrupted;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your answer'**
+  String get liveNeedsYou;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Too many live sessions are open for this server.'**
+  String get liveCapacity;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'The live view could not be opened. Check the server and try again.'**
+  String get liveUnavailable;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Sending is unavailable in this read-only live view.'**
+  String get liveSendUnavailable;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get liveRetry;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

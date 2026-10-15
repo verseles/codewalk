@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
@@ -8,6 +10,7 @@ import '../platform/pairing/native_pairing_links.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/sessions/session_history_source.dart';
+import '../shared/sessions/session_live_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 
@@ -24,6 +27,7 @@ class AppDependencies {
     this.releaseHistory,
     this.sessions,
     this.historyFactory,
+    this.liveDirectory,
   });
 
   final AppPreferencesController preferences;
@@ -33,6 +37,7 @@ class AppDependencies {
   final HostsController hosts;
   final SessionsController? sessions;
   final SessionHistoryFactory? historyFactory;
+  final SessionLiveDirectory? liveDirectory;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -51,6 +56,7 @@ class AppDependencies {
     pairing?.dispose();
     navigation.dispose();
     sessions?.dispose();
+    unawaited(liveDirectory?.close());
     hosts.dispose();
     preferences.dispose();
     releaseHistory?.dispose();

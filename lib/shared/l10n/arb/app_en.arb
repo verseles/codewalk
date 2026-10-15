@@ -899,5 +899,93 @@
   "historyDetails": "Details",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "Open live",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "Live session (read-only)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "Connecting…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "Loading the latest state…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "Live",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "Reconnecting…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "Not up to date; showing the last synced state.",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "Last synced",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "This session could not be kept up to date.",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "This session no longer exists on the server.",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "This server version is not supported for the live view.",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "Server restarted, resuming",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "Running",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "Idle",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "Last turn succeeded",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "Last turn failed",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "Last turn interrupted",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "Waiting for your answer",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "Too many live sessions are open for this server.",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "The live view could not be opened. Check the server and try again.",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "Sending is unavailable in this read-only live view.",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "Reconnect",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

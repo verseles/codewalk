@@ -22,6 +22,7 @@ from pairing_catalog import KEYS as PAIRING_KEYS, COPY as PAIRING_COPY
 from diagnostics_catalog import PORT_KEYS as DIAGNOSTICS_KEYS, NEW_KEYS as DIAGNOSTICS_NEW_KEYS, COPY as DIAGNOSTICS_COPY
 from sessions_catalog import PORT_KEYS as SESSION_KEYS, NEW_KEYS as SESSION_NEW_KEYS, COPY as SESSION_COPY
 from session_history_catalog import PORT_KEYS as HISTORY_KEYS, NEW_KEYS as HISTORY_NEW_KEYS, COPY as HISTORY_COPY
+from session_live_catalog import NEW_KEYS as LIVE_NEW_KEYS, COPY as LIVE_COPY
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -113,6 +114,7 @@ KEYS |= set(PAIRING_KEYS)
 KEYS |= DIAGNOSTICS_KEYS | set(DIAGNOSTICS_NEW_KEYS)
 KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
 KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
+KEYS |= set(LIVE_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -253,6 +255,19 @@ def port_history_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_live_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in zip(LIVE_NEW_KEYS, LIVE_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 live read-only session view"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -326,6 +341,7 @@ def main() -> int:
     parser.add_argument("--port-diagnostics", action="store_true", help="Add scoped diagnostics and archive copy only.")
     parser.add_argument("--port-sessions", action="store_true", help="Add scoped read-only session catalog copy only.")
     parser.add_argument("--port-history", action="store_true", help="Add scoped read-only history copy only.")
+    parser.add_argument("--port-live", action="store_true", help="Add scoped live read-only session copy only.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -356,6 +372,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-history cannot be combined with --check")
             port_history_copy()
+        if args.port_live:
+            if args.check:
+                raise ValueError("--port-live cannot be combined with --check")
+            port_live_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

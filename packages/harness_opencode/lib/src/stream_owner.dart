@@ -187,7 +187,11 @@ final class OpenCodeStreamOwner {
           _onFrame(frame);
         }
       case SseDisconnected(:final generation, :final failure, :final terminal):
-        if (generation != _generation) return;
+        // An attempt that failed before connecting never had a generation
+        // here; its terminal end still stops the stream.
+        if (generation != _generation && !(terminal && _generation == null)) {
+          return;
+        }
         _onDisconnected(failure, terminal);
     }
   }

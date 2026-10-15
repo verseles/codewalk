@@ -733,4 +733,74 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get historyDetails => 'تفصیلات';
+
+  @override
+  String get liveOpen => 'براہ راست کھولیں';
+
+  @override
+  String get liveReadOnly => 'براہ راست سیشن (صرف پڑھنے کے لیے)';
+
+  @override
+  String get liveConnecting => 'جڑ رہا ہے…';
+
+  @override
+  String get liveHydrating => 'تازہ ترین حالت لوڈ ہو رہی ہے…';
+
+  @override
+  String get liveLive => 'براہ راست';
+
+  @override
+  String get liveReconnecting => 'دوبارہ جڑ رہا ہے…';
+
+  @override
+  String get liveStale => 'تازہ نہیں؛ آخری ہم آہنگ حالت دکھائی جا رہی ہے۔';
+
+  @override
+  String get liveLastSynced => 'آخری ہم آہنگی';
+
+  @override
+  String get liveDegraded => 'اس سیشن کو تازہ نہیں رکھا جا سکا۔';
+
+  @override
+  String get liveEvicted => 'یہ سیشن اب سرور پر موجود نہیں۔';
+
+  @override
+  String get liveIncompatible =>
+      'سرور کا یہ ورژن براہ راست منظر کے لیے معاون نہیں۔';
+
+  @override
+  String get liveResuming => 'سرور دوبارہ شروع ہوا، بحال ہو رہا ہے';
+
+  @override
+  String get liveRunning => 'چل رہا ہے';
+
+  @override
+  String get liveIdle => 'غیر فعال';
+
+  @override
+  String get liveOutcomeSucceeded => 'آخری باری کامیاب رہی';
+
+  @override
+  String get liveOutcomeFailed => 'آخری باری ناکام رہی';
+
+  @override
+  String get liveOutcomeInterrupted => 'آخری باری روک دی گئی';
+
+  @override
+  String get liveNeedsYou => 'آپ کے جواب کا انتظار ہے';
+
+  @override
+  String get liveCapacity =>
+      'اس سرور کے لیے بہت زیادہ براہ راست سیشن کھلے ہیں۔';
+
+  @override
+  String get liveUnavailable =>
+      'براہ راست منظر نہیں کھولا جا سکا۔ سرور دیکھیں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get liveSendUnavailable =>
+      'اس صرف پڑھنے والے براہ راست منظر میں بھیجنا دستیاب نہیں۔';
+
+  @override
+  String get liveRetry => 'دوبارہ جوڑیں';
 }

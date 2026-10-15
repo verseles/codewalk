@@ -423,5 +423,93 @@
   "historyDetails": "Detalhes",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "Abrir ao vivo",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "Sessão ao vivo (somente leitura)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "Conectando…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "Carregando o estado mais recente…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "Ao vivo",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "Reconectando…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "Desatualizado; mostrando o último estado sincronizado.",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "Última sincronização",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "Não foi possível manter esta sessão atualizada.",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "Esta sessão não existe mais no servidor.",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "Esta versão do servidor não é compatível com a visão ao vivo.",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "Servidor reiniciado, retomando",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "Em execução",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "Ociosa",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "Último turno concluído",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "Último turno falhou",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "Último turno interrompido",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "Aguardando sua resposta",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "Há sessões ao vivo demais abertas para este servidor.",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "Não foi possível abrir a visão ao vivo. Confira o servidor e tente novamente.",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "Envio indisponível nesta visão ao vivo somente leitura.",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "Reconectar",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

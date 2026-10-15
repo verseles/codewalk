@@ -735,4 +735,74 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get historyDetails => 'विवरण';
+
+  @override
+  String get liveOpen => 'लाइव खोलें';
+
+  @override
+  String get liveReadOnly => 'लाइव सत्र (केवल पढ़ने के लिए)';
+
+  @override
+  String get liveConnecting => 'कनेक्ट हो रहा है…';
+
+  @override
+  String get liveHydrating => 'नवीनतम स्थिति लोड हो रही है…';
+
+  @override
+  String get liveLive => 'लाइव';
+
+  @override
+  String get liveReconnecting => 'फिर से कनेक्ट हो रहा है…';
+
+  @override
+  String get liveStale =>
+      'अद्यतन नहीं; पिछली सिंक की गई स्थिति दिखाई जा रही है।';
+
+  @override
+  String get liveLastSynced => 'पिछली सिंक';
+
+  @override
+  String get liveDegraded => 'इस सत्र को अद्यतन नहीं रखा जा सका।';
+
+  @override
+  String get liveEvicted => 'यह सत्र अब सर्वर पर मौजूद नहीं है।';
+
+  @override
+  String get liveIncompatible =>
+      'यह सर्वर संस्करण लाइव दृश्य के लिए समर्थित नहीं है।';
+
+  @override
+  String get liveResuming => 'सर्वर फिर से शुरू हुआ, जारी किया जा रहा है';
+
+  @override
+  String get liveRunning => 'चल रहा है';
+
+  @override
+  String get liveIdle => 'निष्क्रिय';
+
+  @override
+  String get liveOutcomeSucceeded => 'पिछला चरण सफल रहा';
+
+  @override
+  String get liveOutcomeFailed => 'पिछला चरण विफल रहा';
+
+  @override
+  String get liveOutcomeInterrupted => 'पिछला चरण बाधित हुआ';
+
+  @override
+  String get liveNeedsYou => 'आपके उत्तर की प्रतीक्षा है';
+
+  @override
+  String get liveCapacity => 'इस सर्वर के लिए बहुत अधिक लाइव सत्र खुले हैं।';
+
+  @override
+  String get liveUnavailable =>
+      'लाइव दृश्य नहीं खुल सका। सर्वर जाँचें और फिर प्रयास करें।';
+
+  @override
+  String get liveSendUnavailable =>
+      'इस केवल पढ़ने वाले लाइव दृश्य में भेजना उपलब्ध नहीं है।';
+
+  @override
+  String get liveRetry => 'फिर से कनेक्ट करें';
 }

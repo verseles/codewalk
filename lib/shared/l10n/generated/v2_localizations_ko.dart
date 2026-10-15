@@ -703,4 +703,70 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get historyDetails => '세부 정보';
+
+  @override
+  String get liveOpen => '실시간으로 열기';
+
+  @override
+  String get liveReadOnly => '실시간 세션(읽기 전용)';
+
+  @override
+  String get liveConnecting => '연결 중…';
+
+  @override
+  String get liveHydrating => '최신 상태를 불러오는 중…';
+
+  @override
+  String get liveLive => '실시간';
+
+  @override
+  String get liveReconnecting => '다시 연결 중…';
+
+  @override
+  String get liveStale => '최신 상태가 아닙니다. 마지막으로 동기화된 상태를 표시합니다.';
+
+  @override
+  String get liveLastSynced => '마지막 동기화';
+
+  @override
+  String get liveDegraded => '이 세션을 최신 상태로 유지할 수 없습니다.';
+
+  @override
+  String get liveEvicted => '이 세션은 서버에 더 이상 없습니다.';
+
+  @override
+  String get liveIncompatible => '이 서버 버전은 실시간 보기를 지원하지 않습니다.';
+
+  @override
+  String get liveResuming => '서버가 다시 시작되어 재개하는 중';
+
+  @override
+  String get liveRunning => '실행 중';
+
+  @override
+  String get liveIdle => '유휴';
+
+  @override
+  String get liveOutcomeSucceeded => '마지막 턴 성공';
+
+  @override
+  String get liveOutcomeFailed => '마지막 턴 실패';
+
+  @override
+  String get liveOutcomeInterrupted => '마지막 턴 중단됨';
+
+  @override
+  String get liveNeedsYou => '응답을 기다리는 중';
+
+  @override
+  String get liveCapacity => '이 서버에 열린 실시간 세션이 너무 많습니다.';
+
+  @override
+  String get liveUnavailable => '실시간 보기를 열 수 없습니다. 서버를 확인하고 다시 시도하세요.';
+
+  @override
+  String get liveSendUnavailable => '이 읽기 전용 실시간 보기에서는 전송할 수 없습니다.';
+
+  @override
+  String get liveRetry => '다시 연결';
 }

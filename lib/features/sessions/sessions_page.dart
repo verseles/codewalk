@@ -6,8 +6,11 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
+import '../../shared/sessions/session_live_source.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
+import 'session_live_controller.dart';
+import 'session_live_page.dart';
 import 'sessions_controller.dart';
 
 class SessionsPage extends StatefulWidget {
@@ -19,6 +22,7 @@ class SessionsPage extends StatefulWidget {
 class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
   bool _openingHistory = false;
+  bool _openingLive = false;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -220,6 +224,22 @@ class _SessionsPageState extends State<SessionsPage> {
                             child: Text(l10n.historyOpen),
                           ),
                         ),
+                        if (context.watch<SessionLiveDirectory?>() != null)
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: TextButton(
+                              key: ValueKey(
+                                'live-open-${row.info.ref.storageKey}',
+                              ),
+                              onPressed:
+                                  _openingLive ||
+                                      controller.loading ||
+                                      !available
+                                  ? null
+                                  : () => _openLive(context, controller, row),
+                              child: Text(l10n.liveOpen),
+                            ),
+                          ),
                       ],
                     ],
                   ),
@@ -267,6 +287,36 @@ class _SessionsPageState extends State<SessionsPage> {
     } finally {
       history.dispose();
       if (mounted) setState(() => _openingHistory = false);
+    }
+  }
+
+  Future<void> _openLive(
+    BuildContext context,
+    SessionsController catalog,
+    SessionSummary row,
+  ) async {
+    final profile = catalog.selectedProfile;
+    final directory = context.read<SessionLiveDirectory?>();
+    if (_openingLive ||
+        profile == null ||
+        directory == null ||
+        !catalog.sessions.any((s) => s.info.ref == row.info.ref)) {
+      return;
+    }
+    setState(() => _openingLive = true);
+    final live = SessionLiveController(
+      hosts: catalog.hosts,
+      profile: profile,
+      summary: row,
+      directory: directory,
+    );
+    try {
+      await Navigator.of(context, rootNavigator: true).push<void>(
+        MaterialPageRoute(builder: (_) => SessionLivePage(controller: live)),
+      );
+    } finally {
+      live.dispose();
+      if (mounted) setState(() => _openingLive = false);
     }
   }
 

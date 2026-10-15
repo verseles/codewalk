@@ -685,4 +685,70 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get historyDetails => '详情';
+
+  @override
+  String get liveOpen => '实时打开';
+
+  @override
+  String get liveReadOnly => '实时会话（只读）';
+
+  @override
+  String get liveConnecting => '正在连接…';
+
+  @override
+  String get liveHydrating => '正在加载最新状态…';
+
+  @override
+  String get liveLive => '实时';
+
+  @override
+  String get liveReconnecting => '正在重新连接…';
+
+  @override
+  String get liveStale => '未更新；显示上次同步的状态。';
+
+  @override
+  String get liveLastSynced => '上次同步';
+
+  @override
+  String get liveDegraded => '无法保持此会话为最新状态。';
+
+  @override
+  String get liveEvicted => '此会话已不在服务器上。';
+
+  @override
+  String get liveIncompatible => '此服务器版本不支持实时视图。';
+
+  @override
+  String get liveResuming => '服务器已重启，正在恢复';
+
+  @override
+  String get liveRunning => '运行中';
+
+  @override
+  String get liveIdle => '空闲';
+
+  @override
+  String get liveOutcomeSucceeded => '上一轮已成功';
+
+  @override
+  String get liveOutcomeFailed => '上一轮失败';
+
+  @override
+  String get liveOutcomeInterrupted => '上一轮已中断';
+
+  @override
+  String get liveNeedsYou => '正在等待你的回答';
+
+  @override
+  String get liveCapacity => '此服务器打开的实时会话过多。';
+
+  @override
+  String get liveUnavailable => '无法打开实时视图。请检查服务器并重试。';
+
+  @override
+  String get liveSendUnavailable => '此只读实时视图不支持发送。';
+
+  @override
+  String get liveRetry => '重新连接';
 }

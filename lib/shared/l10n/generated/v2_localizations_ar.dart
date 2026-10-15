@@ -729,4 +729,73 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get historyDetails => 'التفاصيل';
+
+  @override
+  String get liveOpen => 'فتح مباشر';
+
+  @override
+  String get liveReadOnly => 'جلسة مباشرة (للقراءة فقط)';
+
+  @override
+  String get liveConnecting => 'جارٍ الاتصال…';
+
+  @override
+  String get liveHydrating => 'جارٍ تحميل أحدث حالة…';
+
+  @override
+  String get liveLive => 'مباشر';
+
+  @override
+  String get liveReconnecting => 'جارٍ إعادة الاتصال…';
+
+  @override
+  String get liveStale => 'غير محدث؛ يتم عرض آخر حالة متزامنة.';
+
+  @override
+  String get liveLastSynced => 'آخر مزامنة';
+
+  @override
+  String get liveDegraded => 'تعذر إبقاء هذه الجلسة محدثة.';
+
+  @override
+  String get liveEvicted => 'لم تعد هذه الجلسة موجودة على الخادم.';
+
+  @override
+  String get liveIncompatible => 'إصدار الخادم هذا غير مدعوم للعرض المباشر.';
+
+  @override
+  String get liveResuming => 'أُعيد تشغيل الخادم، جارٍ الاستئناف';
+
+  @override
+  String get liveRunning => 'قيد التشغيل';
+
+  @override
+  String get liveIdle => 'خاملة';
+
+  @override
+  String get liveOutcomeSucceeded => 'نجح الدور الأخير';
+
+  @override
+  String get liveOutcomeFailed => 'فشل الدور الأخير';
+
+  @override
+  String get liveOutcomeInterrupted => 'تمت مقاطعة الدور الأخير';
+
+  @override
+  String get liveNeedsYou => 'بانتظار إجابتك';
+
+  @override
+  String get liveCapacity =>
+      'هناك عدد كبير جدًا من الجلسات المباشرة المفتوحة لهذا الخادم.';
+
+  @override
+  String get liveUnavailable =>
+      'تعذر فتح العرض المباشر. تحقق من الخادم وحاول مجددًا.';
+
+  @override
+  String get liveSendUnavailable =>
+      'الإرسال غير متاح في هذا العرض المباشر للقراءة فقط.';
+
+  @override
+  String get liveRetry => 'إعادة الاتصال';
 }

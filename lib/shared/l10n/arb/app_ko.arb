@@ -423,5 +423,93 @@
   "historyDetails": "세부 정보",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "실시간으로 열기",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "실시간 세션(읽기 전용)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "연결 중…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "최신 상태를 불러오는 중…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "실시간",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "다시 연결 중…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "최신 상태가 아닙니다. 마지막으로 동기화된 상태를 표시합니다.",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "마지막 동기화",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "이 세션을 최신 상태로 유지할 수 없습니다.",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "이 세션은 서버에 더 이상 없습니다.",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "이 서버 버전은 실시간 보기를 지원하지 않습니다.",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "서버가 다시 시작되어 재개하는 중",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "실행 중",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "유휴",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "마지막 턴 성공",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "마지막 턴 실패",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "마지막 턴 중단됨",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "응답을 기다리는 중",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "이 서버에 열린 실시간 세션이 너무 많습니다.",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "실시간 보기를 열 수 없습니다. 서버를 확인하고 다시 시도하세요.",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "이 읽기 전용 실시간 보기에서는 전송할 수 없습니다.",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "다시 연결",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

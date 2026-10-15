@@ -423,5 +423,93 @@
   "historyDetails": "বিস্তারিত",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "লাইভ খুলুন",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "লাইভ সেশন (শুধু পড়ার জন্য)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "সংযোগ হচ্ছে…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "সর্বশেষ অবস্থা লোড হচ্ছে…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "লাইভ",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "আবার সংযোগ হচ্ছে…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "হালনাগাদ নয়; সর্বশেষ সিঙ্ক করা অবস্থা দেখানো হচ্ছে।",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "সর্বশেষ সিঙ্ক",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "এই সেশনটি হালনাগাদ রাখা যায়নি।",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "এই সেশনটি সার্ভারে আর নেই।",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "এই সার্ভার সংস্করণ লাইভ ভিউ সমর্থন করে না।",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "সার্ভার পুনরায় চালু হয়েছে, আবার শুরু হচ্ছে",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "চলছে",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "নিষ্ক্রিয়",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "শেষ পালা সফল হয়েছে",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "শেষ পালা ব্যর্থ হয়েছে",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "শেষ পালা বাধাগ্রস্ত হয়েছে",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "আপনার উত্তরের অপেক্ষায়",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "এই সার্ভারের জন্য অনেক বেশি লাইভ সেশন খোলা আছে।",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "লাইভ ভিউ খোলা যায়নি। সার্ভার পরীক্ষা করে আবার চেষ্টা করুন।",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "এই শুধু পড়ার লাইভ ভিউতে পাঠানো যায় না।",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "আবার সংযোগ করুন",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

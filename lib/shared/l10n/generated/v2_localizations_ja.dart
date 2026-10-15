@@ -701,4 +701,70 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get historyDetails => '詳細';
+
+  @override
+  String get liveOpen => 'ライブで開く';
+
+  @override
+  String get liveReadOnly => 'ライブセッション（読み取り専用）';
+
+  @override
+  String get liveConnecting => '接続中…';
+
+  @override
+  String get liveHydrating => '最新の状態を読み込み中…';
+
+  @override
+  String get liveLive => 'ライブ';
+
+  @override
+  String get liveReconnecting => '再接続中…';
+
+  @override
+  String get liveStale => '最新ではありません。最後に同期した状態を表示しています。';
+
+  @override
+  String get liveLastSynced => '最終同期';
+
+  @override
+  String get liveDegraded => 'このセッションを最新に保てませんでした。';
+
+  @override
+  String get liveEvicted => 'このセッションはサーバー上にもうありません。';
+
+  @override
+  String get liveIncompatible => 'このサーバーのバージョンはライブ表示に対応していません。';
+
+  @override
+  String get liveResuming => 'サーバーが再起動しました。再開しています';
+
+  @override
+  String get liveRunning => '実行中';
+
+  @override
+  String get liveIdle => '待機中';
+
+  @override
+  String get liveOutcomeSucceeded => '前回のターンは成功しました';
+
+  @override
+  String get liveOutcomeFailed => '前回のターンは失敗しました';
+
+  @override
+  String get liveOutcomeInterrupted => '前回のターンは中断されました';
+
+  @override
+  String get liveNeedsYou => 'あなたの回答を待っています';
+
+  @override
+  String get liveCapacity => 'このサーバーで開いているライブセッションが多すぎます。';
+
+  @override
+  String get liveUnavailable => 'ライブ表示を開けません。サーバーを確認して再試行してください。';
+
+  @override
+  String get liveSendUnavailable => 'この読み取り専用のライブ表示では送信できません。';
+
+  @override
+  String get liveRetry => '再接続';
 }

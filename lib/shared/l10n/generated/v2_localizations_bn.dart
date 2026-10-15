@@ -731,4 +731,72 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get historyDetails => 'বিস্তারিত';
+
+  @override
+  String get liveOpen => 'লাইভ খুলুন';
+
+  @override
+  String get liveReadOnly => 'লাইভ সেশন (শুধু পড়ার জন্য)';
+
+  @override
+  String get liveConnecting => 'সংযোগ হচ্ছে…';
+
+  @override
+  String get liveHydrating => 'সর্বশেষ অবস্থা লোড হচ্ছে…';
+
+  @override
+  String get liveLive => 'লাইভ';
+
+  @override
+  String get liveReconnecting => 'আবার সংযোগ হচ্ছে…';
+
+  @override
+  String get liveStale =>
+      'হালনাগাদ নয়; সর্বশেষ সিঙ্ক করা অবস্থা দেখানো হচ্ছে।';
+
+  @override
+  String get liveLastSynced => 'সর্বশেষ সিঙ্ক';
+
+  @override
+  String get liveDegraded => 'এই সেশনটি হালনাগাদ রাখা যায়নি।';
+
+  @override
+  String get liveEvicted => 'এই সেশনটি সার্ভারে আর নেই।';
+
+  @override
+  String get liveIncompatible => 'এই সার্ভার সংস্করণ লাইভ ভিউ সমর্থন করে না।';
+
+  @override
+  String get liveResuming => 'সার্ভার পুনরায় চালু হয়েছে, আবার শুরু হচ্ছে';
+
+  @override
+  String get liveRunning => 'চলছে';
+
+  @override
+  String get liveIdle => 'নিষ্ক্রিয়';
+
+  @override
+  String get liveOutcomeSucceeded => 'শেষ পালা সফল হয়েছে';
+
+  @override
+  String get liveOutcomeFailed => 'শেষ পালা ব্যর্থ হয়েছে';
+
+  @override
+  String get liveOutcomeInterrupted => 'শেষ পালা বাধাগ্রস্ত হয়েছে';
+
+  @override
+  String get liveNeedsYou => 'আপনার উত্তরের অপেক্ষায়';
+
+  @override
+  String get liveCapacity => 'এই সার্ভারের জন্য অনেক বেশি লাইভ সেশন খোলা আছে।';
+
+  @override
+  String get liveUnavailable =>
+      'লাইভ ভিউ খোলা যায়নি। সার্ভার পরীক্ষা করে আবার চেষ্টা করুন।';
+
+  @override
+  String get liveSendUnavailable => 'এই শুধু পড়ার লাইভ ভিউতে পাঠানো যায় না।';
+
+  @override
+  String get liveRetry => 'আবার সংযোগ করুন';
 }

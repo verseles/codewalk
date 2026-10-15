@@ -1842,3 +1842,24 @@ packages/harness_opencode/test/stream_owner_test.dart # Done-when drop fixtures,
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No durable log, children discovery, sending, UI or native/MVP acceptance is
 added.
+
+## V2-044B2 live read-only session view (#381)
+
+```text
+lib/shared/sessions/session_live_source.dart # Live port: directory, per-screen handle, view (phase, failure, stale, last synced, state)
+lib/platform/sessions/session_live_factory.dart # Conditional export; the Web stub returns null and hides the action
+lib/platform/sessions/session_live_factory_io.dart # One event stream per endpoint profile: probe, OpenCodeStreamOwner, SessionStore, refcounted handles
+lib/features/sessions/session_live_controller.dart # One screen's lease with credential, expiry and generation fences; retry for terminal states
+lib/features/sessions/session_live_page.dart # Read-only live screen: status live region, execution/outcome chips, timeline, inactive composer
+lib/features/sessions/session_timeline_tile.dart # Timeline item tile shared by the history and live screens
+tool/l10n/session_live_catalog.py # live* copy for 14 locales (generator --port-live)
+test/v2/sessions/session_live_directory_test.dart # Loopback 2.0.22 server: shared stream, fail closed, one secret, capacity, release
+packages/harness_opencode/lib/src/stream_owner.dart # A terminal refusal of an attempt that never connected now stops the stream
+```
+
+The catalog shows "Open live" next to history when a `SessionLiveDirectory`
+is provided; `AppDependencies` closes it on dispose.
+
+Analysis, focused tests, `make v2-native-check` and `make check` passed. No
+sending, answering, interruption, background suspension or native/MVP
+acceptance is added.

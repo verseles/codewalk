@@ -44,6 +44,16 @@ final class ScriptedConnection implements RecoveringSseConnection {
     ]),
   );
 
+  /// A connection attempt refused before it connected, as the transport
+  /// reports it: a generation the owner never saw.
+  void refuse(int attempt, int status) => _controller.add(
+    SseDisconnected(
+      attempt,
+      TransportException(TransportFailure.unexpectedStatus, statusCode: status),
+      terminal: true,
+    ),
+  );
+
   void drop({TransportFailure failure = TransportFailure.connection}) =>
       _controller.add(
         SseDisconnected(
@@ -476,6 +486,40 @@ void main() {
       h.expectConsistent();
       expect(h.state.timeline.whereType<ToolCall>(), hasLength(1));
     });
+
+    test(
+      'a reconnection or first attempt refused terminally stops the stream',
+      () async {
+        final h = Harness('ses_a');
+        h.owner.watch(h.ref);
+        await h.connect(1);
+        h.connection.drop();
+        await h.settle();
+        h.connection.refuse(2, 401);
+        await h.settle();
+        final kinds = [
+          for (final u in h.updates.whereType<OpenCodeConnectionUpdated>())
+            u.kind,
+        ];
+        expect(kinds.last, ConnectionKind.authRequired);
+        final fresh = Harness('ses_a');
+        fresh.owner.watch(fresh.ref);
+        fresh.connection.refuse(1, 404);
+        await fresh.settle();
+        expect(
+          fresh.updates.whereType<OpenCodeConnectionUpdated>().single.kind,
+          ConnectionKind.incompatible,
+        );
+        // A stale non-terminal end of an unseen attempt is still ignored.
+        h.connection.generation = 7;
+        h.connection.drop();
+        await h.settle();
+        expect(
+          h.updates.whereType<OpenCodeConnectionUpdated>().last.kind,
+          ConnectionKind.authRequired,
+        );
+      },
+    );
 
     test('drop during a pending approval keeps or settles it once', () async {
       final c = capture('c/native-interactions.json');

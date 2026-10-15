@@ -423,5 +423,93 @@
   "historyDetails": "تفصیلات",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "براہ راست کھولیں",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "براہ راست سیشن (صرف پڑھنے کے لیے)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "جڑ رہا ہے…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "تازہ ترین حالت لوڈ ہو رہی ہے…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "براہ راست",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "دوبارہ جڑ رہا ہے…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "تازہ نہیں؛ آخری ہم آہنگ حالت دکھائی جا رہی ہے۔",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "آخری ہم آہنگی",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "اس سیشن کو تازہ نہیں رکھا جا سکا۔",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "یہ سیشن اب سرور پر موجود نہیں۔",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "سرور کا یہ ورژن براہ راست منظر کے لیے معاون نہیں۔",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "سرور دوبارہ شروع ہوا، بحال ہو رہا ہے",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "چل رہا ہے",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "غیر فعال",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "آخری باری کامیاب رہی",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "آخری باری ناکام رہی",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "آخری باری روک دی گئی",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "آپ کے جواب کا انتظار ہے",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "اس سرور کے لیے بہت زیادہ براہ راست سیشن کھلے ہیں۔",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "براہ راست منظر نہیں کھولا جا سکا۔ سرور دیکھیں اور دوبارہ کوشش کریں۔",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "اس صرف پڑھنے والے براہ راست منظر میں بھیجنا دستیاب نہیں۔",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "دوبارہ جوڑیں",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

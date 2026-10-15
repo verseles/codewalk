@@ -738,4 +738,76 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get historyDetails => 'Подробности';
+
+  @override
+  String get liveOpen => 'Открыть в реальном времени';
+
+  @override
+  String get liveReadOnly => 'Сессия в реальном времени (только чтение)';
+
+  @override
+  String get liveConnecting => 'Подключение…';
+
+  @override
+  String get liveHydrating => 'Загрузка последнего состояния…';
+
+  @override
+  String get liveLive => 'В реальном времени';
+
+  @override
+  String get liveReconnecting => 'Переподключение…';
+
+  @override
+  String get liveStale =>
+      'Данные устарели; показано последнее синхронизированное состояние.';
+
+  @override
+  String get liveLastSynced => 'Последняя синхронизация';
+
+  @override
+  String get liveDegraded =>
+      'Не удалось поддерживать эту сессию в актуальном состоянии.';
+
+  @override
+  String get liveEvicted => 'Этой сессии больше нет на сервере.';
+
+  @override
+  String get liveIncompatible =>
+      'Эта версия сервера не поддерживается в режиме реального времени.';
+
+  @override
+  String get liveResuming => 'Сервер перезапущен, возобновление';
+
+  @override
+  String get liveRunning => 'Выполняется';
+
+  @override
+  String get liveIdle => 'Простаивает';
+
+  @override
+  String get liveOutcomeSucceeded => 'Последний ход завершён успешно';
+
+  @override
+  String get liveOutcomeFailed => 'Последний ход завершился ошибкой';
+
+  @override
+  String get liveOutcomeInterrupted => 'Последний ход прерван';
+
+  @override
+  String get liveNeedsYou => 'Ожидает вашего ответа';
+
+  @override
+  String get liveCapacity =>
+      'Для этого сервера открыто слишком много сессий в реальном времени.';
+
+  @override
+  String get liveUnavailable =>
+      'Не удалось открыть режим реального времени. Проверьте сервер и повторите попытку.';
+
+  @override
+  String get liveSendUnavailable =>
+      'Отправка недоступна в этом режиме только для чтения.';
+
+  @override
+  String get liveRetry => 'Переподключить';
 }

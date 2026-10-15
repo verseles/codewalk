@@ -742,4 +742,75 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get historyDetails => 'Detalhes';
+
+  @override
+  String get liveOpen => 'Abrir ao vivo';
+
+  @override
+  String get liveReadOnly => 'Sessão ao vivo (somente leitura)';
+
+  @override
+  String get liveConnecting => 'Conectando…';
+
+  @override
+  String get liveHydrating => 'Carregando o estado mais recente…';
+
+  @override
+  String get liveLive => 'Ao vivo';
+
+  @override
+  String get liveReconnecting => 'Reconectando…';
+
+  @override
+  String get liveStale =>
+      'Desatualizado; mostrando o último estado sincronizado.';
+
+  @override
+  String get liveLastSynced => 'Última sincronização';
+
+  @override
+  String get liveDegraded => 'Não foi possível manter esta sessão atualizada.';
+
+  @override
+  String get liveEvicted => 'Esta sessão não existe mais no servidor.';
+
+  @override
+  String get liveIncompatible =>
+      'Esta versão do servidor não é compatível com a visão ao vivo.';
+
+  @override
+  String get liveResuming => 'Servidor reiniciado, retomando';
+
+  @override
+  String get liveRunning => 'Em execução';
+
+  @override
+  String get liveIdle => 'Ociosa';
+
+  @override
+  String get liveOutcomeSucceeded => 'Último turno concluído';
+
+  @override
+  String get liveOutcomeFailed => 'Último turno falhou';
+
+  @override
+  String get liveOutcomeInterrupted => 'Último turno interrompido';
+
+  @override
+  String get liveNeedsYou => 'Aguardando sua resposta';
+
+  @override
+  String get liveCapacity =>
+      'Há sessões ao vivo demais abertas para este servidor.';
+
+  @override
+  String get liveUnavailable =>
+      'Não foi possível abrir a visão ao vivo. Confira o servidor e tente novamente.';
+
+  @override
+  String get liveSendUnavailable =>
+      'Envio indisponível nesta visão ao vivo somente leitura.';
+
+  @override
+  String get liveRetry => 'Reconectar';
 }

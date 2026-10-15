@@ -733,4 +733,73 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get historyDetails => 'Details';
+
+  @override
+  String get liveOpen => 'Open live';
+
+  @override
+  String get liveReadOnly => 'Live session (read-only)';
+
+  @override
+  String get liveConnecting => 'Connecting…';
+
+  @override
+  String get liveHydrating => 'Loading the latest state…';
+
+  @override
+  String get liveLive => 'Live';
+
+  @override
+  String get liveReconnecting => 'Reconnecting…';
+
+  @override
+  String get liveStale => 'Not up to date; showing the last synced state.';
+
+  @override
+  String get liveLastSynced => 'Last synced';
+
+  @override
+  String get liveDegraded => 'This session could not be kept up to date.';
+
+  @override
+  String get liveEvicted => 'This session no longer exists on the server.';
+
+  @override
+  String get liveIncompatible =>
+      'This server version is not supported for the live view.';
+
+  @override
+  String get liveResuming => 'Server restarted, resuming';
+
+  @override
+  String get liveRunning => 'Running';
+
+  @override
+  String get liveIdle => 'Idle';
+
+  @override
+  String get liveOutcomeSucceeded => 'Last turn succeeded';
+
+  @override
+  String get liveOutcomeFailed => 'Last turn failed';
+
+  @override
+  String get liveOutcomeInterrupted => 'Last turn interrupted';
+
+  @override
+  String get liveNeedsYou => 'Waiting for your answer';
+
+  @override
+  String get liveCapacity => 'Too many live sessions are open for this server.';
+
+  @override
+  String get liveUnavailable =>
+      'The live view could not be opened. Check the server and try again.';
+
+  @override
+  String get liveSendUnavailable =>
+      'Sending is unavailable in this read-only live view.';
+
+  @override
+  String get liveRetry => 'Reconnect';
 }

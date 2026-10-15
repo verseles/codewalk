@@ -423,5 +423,93 @@
   "historyDetails": "विवरण",
   "@historyDetails": {
     "description": "V2 auxiliary read-only history preview"
+  },
+  "liveOpen": "लाइव खोलें",
+  "@liveOpen": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReadOnly": "लाइव सत्र (केवल पढ़ने के लिए)",
+  "@liveReadOnly": {
+    "description": "V2 live read-only session view"
+  },
+  "liveConnecting": "कनेक्ट हो रहा है…",
+  "@liveConnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveHydrating": "नवीनतम स्थिति लोड हो रही है…",
+  "@liveHydrating": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLive": "लाइव",
+  "@liveLive": {
+    "description": "V2 live read-only session view"
+  },
+  "liveReconnecting": "फिर से कनेक्ट हो रहा है…",
+  "@liveReconnecting": {
+    "description": "V2 live read-only session view"
+  },
+  "liveStale": "अद्यतन नहीं; पिछली सिंक की गई स्थिति दिखाई जा रही है।",
+  "@liveStale": {
+    "description": "V2 live read-only session view"
+  },
+  "liveLastSynced": "पिछली सिंक",
+  "@liveLastSynced": {
+    "description": "V2 live read-only session view"
+  },
+  "liveDegraded": "इस सत्र को अद्यतन नहीं रखा जा सका।",
+  "@liveDegraded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveEvicted": "यह सत्र अब सर्वर पर मौजूद नहीं है।",
+  "@liveEvicted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIncompatible": "यह सर्वर संस्करण लाइव दृश्य के लिए समर्थित नहीं है।",
+  "@liveIncompatible": {
+    "description": "V2 live read-only session view"
+  },
+  "liveResuming": "सर्वर फिर से शुरू हुआ, जारी किया जा रहा है",
+  "@liveResuming": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRunning": "चल रहा है",
+  "@liveRunning": {
+    "description": "V2 live read-only session view"
+  },
+  "liveIdle": "निष्क्रिय",
+  "@liveIdle": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeSucceeded": "पिछला चरण सफल रहा",
+  "@liveOutcomeSucceeded": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeFailed": "पिछला चरण विफल रहा",
+  "@liveOutcomeFailed": {
+    "description": "V2 live read-only session view"
+  },
+  "liveOutcomeInterrupted": "पिछला चरण बाधित हुआ",
+  "@liveOutcomeInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveNeedsYou": "आपके उत्तर की प्रतीक्षा है",
+  "@liveNeedsYou": {
+    "description": "V2 live read-only session view"
+  },
+  "liveCapacity": "इस सर्वर के लिए बहुत अधिक लाइव सत्र खुले हैं।",
+  "@liveCapacity": {
+    "description": "V2 live read-only session view"
+  },
+  "liveUnavailable": "लाइव दृश्य नहीं खुल सका। सर्वर जाँचें और फिर प्रयास करें।",
+  "@liveUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveSendUnavailable": "इस केवल पढ़ने वाले लाइव दृश्य में भेजना उपलब्ध नहीं है।",
+  "@liveSendUnavailable": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetry": "फिर से कनेक्ट करें",
+  "@liveRetry": {
+    "description": "V2 live read-only session view"
   }
 }

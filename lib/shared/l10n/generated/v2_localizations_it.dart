@@ -742,4 +742,76 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get historyDetails => 'Dettagli';
+
+  @override
+  String get liveOpen => 'Apri in diretta';
+
+  @override
+  String get liveReadOnly => 'Sessione in diretta (sola lettura)';
+
+  @override
+  String get liveConnecting => 'Connessione…';
+
+  @override
+  String get liveHydrating => 'Caricamento dello stato più recente…';
+
+  @override
+  String get liveLive => 'In diretta';
+
+  @override
+  String get liveReconnecting => 'Riconnessione…';
+
+  @override
+  String get liveStale =>
+      'Non aggiornato; viene mostrato l’ultimo stato sincronizzato.';
+
+  @override
+  String get liveLastSynced => 'Ultima sincronizzazione';
+
+  @override
+  String get liveDegraded =>
+      'Impossibile mantenere aggiornata questa sessione.';
+
+  @override
+  String get liveEvicted => 'Questa sessione non esiste più sul server.';
+
+  @override
+  String get liveIncompatible =>
+      'Questa versione del server non è supportata per la vista in diretta.';
+
+  @override
+  String get liveResuming => 'Server riavviato, ripresa in corso';
+
+  @override
+  String get liveRunning => 'In esecuzione';
+
+  @override
+  String get liveIdle => 'Inattiva';
+
+  @override
+  String get liveOutcomeSucceeded => 'Ultimo turno riuscito';
+
+  @override
+  String get liveOutcomeFailed => 'Ultimo turno non riuscito';
+
+  @override
+  String get liveOutcomeInterrupted => 'Ultimo turno interrotto';
+
+  @override
+  String get liveNeedsYou => 'In attesa della tua risposta';
+
+  @override
+  String get liveCapacity =>
+      'Ci sono troppe sessioni in diretta aperte per questo server.';
+
+  @override
+  String get liveUnavailable =>
+      'Impossibile aprire la vista in diretta. Controlla il server e riprova.';
+
+  @override
+  String get liveSendUnavailable =>
+      'Invio non disponibile in questa vista in diretta di sola lettura.';
+
+  @override
+  String get liveRetry => 'Riconnetti';
 }

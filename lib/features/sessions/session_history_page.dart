@@ -1,8 +1,8 @@
-import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import 'session_history_controller.dart';
+import 'session_timeline_tile.dart';
 
 class SessionHistoryPage extends StatefulWidget {
   const SessionHistoryPage({super.key, required this.controller});
@@ -112,68 +112,9 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         );
                       }
                       final item = c.items[index - 1];
-                      final (label, text, icon) = switch (item) {
-                        UserInput() => (
-                          l10n.chatMessageYou,
-                          item.text,
-                          Icons.person_outline,
-                        ),
-                        AssistantText() => (
-                          l10n.historyAssistant,
-                          item.text,
-                          Icons.chat_bubble_outline,
-                        ),
-                        Reasoning() => (
-                          l10n.chatMessageThinkingProcess,
-                          item.text,
-                          Icons.psychology_outlined,
-                        ),
-                        Notice() => (
-                          l10n.historyDetails,
-                          item.text,
-                          Icons.info_outline,
-                        ),
-                        ToolCall() => (
-                          l10n.historyDetails,
-                          item.rawName,
-                          Icons.build_outlined,
-                        ),
-                        _ => (
-                          l10n.historyDetails,
-                          l10n.chatMessageMessagePartUnavailable,
-                          Icons.info_outline,
-                        ),
-                      };
-                      return Card(
+                      return SessionTimelineTile(
                         key: ValueKey(item.id),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(icon),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      label,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleSmall,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                String.fromCharCodes(text.runes.take(2000)),
-                                maxLines: 16,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
+                        item: item,
                       );
                     },
                   ),
