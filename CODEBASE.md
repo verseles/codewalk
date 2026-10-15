@@ -1863,3 +1863,19 @@ is provided; `AppDependencies` closes it on dispose.
 Analysis, focused tests, `make v2-native-check` and `make check` passed. No
 sending, answering, interruption, background suspension or native/MVP
 acceptance is added.
+
+## V2-045A message ids and one prompt (#382)
+
+```text
+packages/harness_opencode/lib/src/message_id.dart # OpenCodeMessageIds: official msg_ minter with server offset and order floor; openCodeIdOrdinal
+packages/harness_opencode/lib/src/prompt_client.dart # OpenCodePromptClient: one POST /prompt mapped to receipt, submission and admitted inbox row
+packages/harness_opencode/test/message_id_test.dart # Captured event-id decoding, ascending mints, slow-clock ordering, sample filtering
+packages/harness_opencode/test/prompt_client_test.dart # Recorded prompt-matrix replay, error map, uncertainty and preflight refusals
+```
+
+The minted id is passed to `send`, so the outbox (V2-045B) can persist it and
+the exact payload before the POST.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No persistence, retry, cancel/switch, composer or native/MVP acceptance is
+added.

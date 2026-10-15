@@ -216,6 +216,33 @@ pending approval (C), during a revert (D), an overflow disconnect and a restart
 with `shutdown` (C) — asserting unique identities and no stuck running, plus the
 gate, eviction, repair bounds, held frames, capacity and disconnect races.
 
+## Message ids and one prompt
+
+[V2-045A / #382](https://github.com/verseles/codewalk/issues/382) exports
+`OpenCodeMessageIds`, `openCodeIdOrdinal` and `OpenCodePromptClient`, the first
+child of sending (V2-045 / #280).
+
+- `OpenCodeMessageIds.mint()` returns `msg_` ids in the official 2.0.22 shape
+  (12 hex characters of `time * 0x1000 + counter`, 14 base62 characters).
+  Revert compares ids as strings, so time is the local clock plus the largest
+  observed server offset, and an id always sorts after every server id passed to
+  `observe(id, created:, receivedAt:)` and after the previous mint. Only a
+  sample whose id carries its `created` time adjusts the offset. Keep one
+  instance per server.
+- `OpenCodePromptClient.send(session:, commandId:, messageId:, draft:,
+  delivery:)` posts one text prompt to `/api/session/{id}/prompt` with the
+  caller's id and maps the single response: a 200 for this intent is admitted
+  (never delivered or settled) with the inbox row hydration builds; a same-id
+  replay whose text or delivery differs is `PromptIdentityOccupied`; 400, 401,
+  403, 404, 409 and 429 are rejected from the status alone; a timeout, closed or
+  lost connection, other status or unprovable 200 is uncertain and keeps the id
+  and exact payload. Unverified versions and drafts with attachments, mentions,
+  selection or metadata send nothing. It never mints, persists, retries or
+  reads the inbox.
+
+Tests replay every recorded `prompt-matrix.json` request byte-for-byte and
+decode captured event ids (`created mod 2^36`).
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports

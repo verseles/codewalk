@@ -1628,6 +1628,17 @@ Before starting, ensure the Issue contains:
 - **Scope:** `msg_` id minting with server-clock offset; persist before POST; states (§6.9); bounded same-id retry; 409 handling; steer/queue split control; inbox chips with cancel and switch; fallback path if SP-01 rejects client ids.
 - **Done when:** [ ] timeout-after-admission fixture yields one message; [ ] identical prompts sent twice yield two messages; [ ] queue cancel racing delivery shows the real outcome.
 
+**Bounded sending children (2026-10-15).** Under §11.5, planned with all eligible helpers. The parent criteria remain on the children named below and are accepted only by the whole set.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-045A ([#382](https://github.com/verseles/codewalk/issues/382)) | V2-005B, V2-027, V2-042B, V2-044B2 | Harness-only official 2.0.22 `msg_` minter (local clock + largest observed server offset, always after observed server ids and the previous mint) and a single-attempt `POST /prompt` client: exact recorded request encoding, admitted (not delivered) on a 200 for this intent, `PromptIdentityOccupied` for a changed same-id replay, rejected 400/401/403/404/409/429 from the status, uncertain with the id kept for timeouts, closed/lost connections, other statuses and unprovable 200s; unverified versions and non-text drafts send nothing. No persistence, retry, cancel/switch or UI. |
+| V2-045B | V2-045A, V2-027 | Persist the original command and exact payload before the POST (outbox under `cw2.`); a failed write keeps the draft and sends nothing; submission states per §6.9 without automatic retry. |
+| V2-045C | V2-045A, V2-045B | Reconcile inbox/history by native id, then bounded same-id replay (3 attempts) only under the verified 2.0.22 contract; cancellation fences; owns "timeout-after-admission yields one message". |
+| V2-045D | V2-045A, V2-045C | Queue cancel (`DELETE`) and delivery switch (`PATCH`) with the race outcome taken from inbox/history; owns the adapter half of "queue cancel racing delivery". |
+| V2-045E | V2-044B2, V2-045B–D | Composer on the live screen: steer default, explicit queue, inbox chips with cancel/switch, submission states and conflict copy; compact/wide/RTL/14 locales; owns the user-visible parent criteria. |
+| V2-045F | V2-045A, V2-045C, SP-01 | Omit-`id` correlation only if a capture shows client ids misbehave; V2-005B shows 2.0.22 accepts them, so it stays unimplemented until then. |
+
 #### V2-046 — Execution state, stop, retries
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode`
 - **Depends on:** V2-042, V2-005D
