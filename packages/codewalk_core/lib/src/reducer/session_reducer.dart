@@ -669,8 +669,12 @@ final class _Draft {
     }
     itemPositions[item.id] = position;
     if (item is UserInput) {
+      // Only input not yet in history needs protection from a racing read;
+      // delivered input is ordered against snapshots by its position, so a
+      // later complete history without it means the server removed it.
       if (item.delivery.known == DeliveryState.cancelled ||
-          item.delivery.known == DeliveryState.rejected) {
+          item.delivery.known == DeliveryState.rejected ||
+          item.delivery.known == DeliveryState.delivered) {
         admissions.remove(item.id);
       } else {
         admissions.add(item.id);

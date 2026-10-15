@@ -102,53 +102,10 @@ List<SessionEvent> projectOpenCodeRevertEvent(
   var patchOmitted = false;
   switch (type) {
     case _staged:
-      final revert = _object(data['revert']);
-      messageId = _id(revert['messageID'], 'msg_');
-      if (revert.containsKey('partID')) _text(revert['partID']);
-      final hasSnapshot = revert.containsKey('snapshot');
-      if (hasSnapshot) _text(revert['snapshot'], nonempty: true);
-      List<Map<String, Object?>>? files;
-      if (revert.containsKey('files')) {
-        final raw = revert['files'];
-        if (raw is! List<Object?>) {
-          _fail(OpenCodeRevertProjectionFailure.malformed);
-        }
-        if (raw.length > _listLimit) {
-          _fail(OpenCodeRevertProjectionFailure.limitExceeded);
-        }
-        files = [
-          for (final entry in raw)
-            () {
-              final file = _object(entry);
-              final path = _text(file['file'], nonempty: true);
-              final status = _text(file['status']);
-              if (!_statuses.contains(status)) {
-                _fail(OpenCodeRevertProjectionFailure.unsupportedValue);
-              }
-              // Required by FileDiff.Info; carries file contents, so it is
-              // type-checked and never measured or copied.
-              if (file['patch'] is! String) {
-                _fail(OpenCodeRevertProjectionFailure.malformed);
-              }
-              return {
-                'file': path,
-                'status': status,
-                'additions': _integer(file['additions']),
-                'deletions': _integer(file['deletions']),
-              };
-            }(),
-        ];
-        patchOmitted = files.isNotEmpty;
-      }
-      details = {
-        'messageId': messageId,
-        'hasSnapshot': hasSnapshot,
-        'files': ?files,
-        if (patchOmitted) 'patchNotProjected': true,
-      };
-      if (utf8.encode(jsonEncode(details)).length > _manifestLimit) {
-        _fail(OpenCodeRevertProjectionFailure.limitExceeded);
-      }
+      final staged = _stagedDetails(_object(data['revert']));
+      messageId = staged.messageId;
+      details = staged.details;
+      patchOmitted = staged.patchOmitted;
     case _cleared:
       break;
     case _committed:
@@ -239,6 +196,82 @@ List<SessionEvent> projectOpenCodeRevertEvent(
     events.add(ResyncRequired(meta: eventMeta, reason: resync));
   }
   return List.unmodifiable(events);
+}
+
+/// The validated, patch-free details of a native `Session.Revert`, shared by
+/// the live `staged` event and the session record read during hydration.
+({String messageId, Map<String, Object?> details, bool patchOmitted})
+_stagedDetails(Map<String, Object?> revert) {
+  var patchOmitted = false;
+  final messageId = _id(revert['messageID'], 'msg_');
+  if (revert.containsKey('partID')) _text(revert['partID']);
+  final hasSnapshot = revert.containsKey('snapshot');
+  if (hasSnapshot) _text(revert['snapshot'], nonempty: true);
+  List<Map<String, Object?>>? files;
+  if (revert.containsKey('files')) {
+    final raw = revert['files'];
+    if (raw is! List<Object?>) {
+      _fail(OpenCodeRevertProjectionFailure.malformed);
+    }
+    if (raw.length > _listLimit) {
+      _fail(OpenCodeRevertProjectionFailure.limitExceeded);
+    }
+    files = [
+      for (final entry in raw)
+        () {
+          final file = _object(entry);
+          final path = _text(file['file'], nonempty: true);
+          final status = _text(file['status']);
+          if (!_statuses.contains(status)) {
+            _fail(OpenCodeRevertProjectionFailure.unsupportedValue);
+          }
+          // Required by FileDiff.Info; carries file contents, so it is
+          // type-checked and never measured or copied.
+          if (file['patch'] is! String) {
+            _fail(OpenCodeRevertProjectionFailure.malformed);
+          }
+          return {
+            'file': path,
+            'status': status,
+            'additions': _integer(file['additions']),
+            'deletions': _integer(file['deletions']),
+          };
+        }(),
+    ];
+    patchOmitted = files.isNotEmpty;
+  }
+  final details = {
+    'messageId': messageId,
+    'hasSnapshot': hasSnapshot,
+    'files': ?files,
+    if (patchOmitted) 'patchNotProjected': true,
+  };
+  if (utf8.encode(jsonEncode(details)).length > _manifestLimit) {
+    _fail(OpenCodeRevertProjectionFailure.limitExceeded);
+  }
+  return (messageId: messageId, details: details, patchOmitted: patchOmitted);
+}
+
+/// The staged revert a hydrated session record carries, with its boundary
+/// resolved against the hydrated [timeline] like the live `staged` event.
+RevertState openCodeStagedRevert(
+  Object? value,
+  SessionRef ref,
+  List<TimelineItem> timeline,
+) {
+  final staged = _stagedDetails(_object(value));
+  ItemId? boundary;
+  for (final item in timeline) {
+    if (_messageOf(item.id, ref) == staged.messageId) {
+      boundary = item.id;
+      break;
+    }
+  }
+  return RevertState(
+    kind: const OpenValue.known(RevertKind.staged),
+    boundary: boundary,
+    details: CanonicalValue(staged.details),
+  );
 }
 
 /// The native message of a canonical `[storageKey, messageId, kind, …]` ID, or

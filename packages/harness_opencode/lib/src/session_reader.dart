@@ -8,6 +8,7 @@ import 'package:codewalk_net/codewalk_net.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
 import 'interaction_projection.dart';
+import 'revert_projection.dart';
 import 'session_projection.dart';
 import 'version_policy.dart';
 
@@ -311,7 +312,7 @@ final class OpenCodeSessionReader {
         return active.containsKey(ref.nativeId);
       },
     );
-    final (summary, infoStart, infoEnd) = await timed(
+    final (record, infoStart, infoEnd) = await timed(
       Uri(pathSegments: ['api', 'session', ref.nativeId]).toString(),
       (value) {
         if (value is! Map<String, Object?>) {
@@ -321,9 +322,11 @@ final class OpenCodeSessionReader {
         if (result.info.ref != ref) {
           throw const FormatException('Session response has another identity.');
         }
-        return result;
+        // The staged revert is projected once the history page is known.
+        return (result, (value['data']! as Map)['revert']);
       },
     );
+    final (summary, revert) = record;
     final generation = jsonEncode([
       'hydration',
       ref.storageKey,
@@ -410,6 +413,16 @@ final class OpenCodeSessionReader {
         break;
       }
     }
+    final RevertState revertState;
+    try {
+      revertState = revert == null
+          ? const RevertState(kind: OpenValue.known(RevertKind.none))
+          : openCodeStagedRevert(revert, ref, page.items);
+    } on OpenCodeRevertProjectionException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.incompatibleResponse,
+      );
+    }
     final more = page.nextCursor;
     return SessionSnapshot(
       ref: ref,
@@ -444,6 +457,11 @@ final class OpenCodeSessionReader {
           formStart.isBefore(permissionStart) ? formStart : permissionStart,
           formEnd.isAfter(permissionEnd) ? formEnd : permissionEnd,
         ),
+      ),
+      // The session record carries the staged revert; absent means none.
+      revert: SnapshotValue(
+        value: revertState,
+        boundary: boundary('session.get', infoStart, infoEnd),
       ),
       nextHistoryCursor: more == null ? null : HistoryCursor(more),
       hasMoreHistory: more != null,

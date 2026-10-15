@@ -7,6 +7,46 @@ import 'synthetic_reducer_test.dart' as synthetic;
 // A client read-start position belongs to one observer stream. Each event uses
 // a distinct synthetic native ID so dedup cannot conceal a stale-clock defect.
 void main() {
+  group('admission protection', () {
+    test(
+      'accepted input survives a racing history read; delivered does not',
+      () {
+        var state = synthetic.upsert(
+          synthetic.initial(),
+          synthetic.user('accepted'),
+          5,
+        );
+        state = synthetic.upsert(
+          state,
+          synthetic.user('sent', delivery: DeliveryState.delivered),
+          6,
+        );
+        // A complete history read after both, containing neither: the accepted
+        // input may still be promoted later, the delivered one was removed.
+        final result = hydrate(
+          synthetic.hydrating(state, seq: 10),
+          synthetic.history(const [], 10),
+        );
+        expect(
+          [for (final item in result.state.timeline) item.id.value],
+          ['accepted'],
+        );
+        expect(result.effects.whereType<Refetch>().map((e) => e.reason), [
+          'admissionMissingFromHistory',
+        ]);
+        // A history read that started before the delivery keeps it.
+        final early = hydrate(
+          synthetic.hydrating(state, seq: 3),
+          synthetic.history(const [], 3),
+        );
+        expect(
+          [for (final item in early.state.timeline) item.id.value],
+          ['accepted', 'sent'],
+        );
+      },
+    );
+  });
+
   group('synthetic hydration read-start barriers', () {
     test('authoritative idle at 20 rejects buffered running through 20', () {
       var state = _hydrateAt20(

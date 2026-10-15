@@ -77,6 +77,7 @@ final class Server {
     List<Object?>? permissions,
     List<Object?>? forms,
     this.failPath,
+    this.revert,
   }) : inbox =
            inbox ??
            [
@@ -111,6 +112,7 @@ final class Server {
   final List<Object?> permissions;
   final List<Object?> forms;
   final String? failPath;
+  final Object? revert;
   final paths = <String>[];
 
   late final transport = TestTransport((request, _) {
@@ -139,6 +141,7 @@ final class Server {
           'projectID': 'prj_a',
           'location': {'directory': '/workspace'},
           'time': {'created': 1, 'updated': 2},
+          'revert': ?revert,
         },
       },
     });
@@ -266,6 +269,40 @@ void main() {
     ]);
     expect(encoded, isNot(contains('fake-private')));
   });
+
+  test(
+    'the session record carries the staged revert; absent is none',
+    () async {
+      final none = await hydrate(Server());
+      expect(none.revert!.value.kind.known, RevertKind.none);
+      expect(none.revert!.boundary.source!.nativeType, 'session.get');
+      final staged = await hydrate(
+        Server(
+          revert: {
+            'messageID': 'msg_h2',
+            'snapshot': 'fake-private-snapshot',
+            'files': [
+              {
+                'file': 'a.txt',
+                'patch': 'fake-private-patch',
+                'additions': 1,
+                'deletions': 0,
+                'status': 'modified',
+              },
+            ],
+          },
+        ),
+      );
+      final state = staged.revert!.value;
+      expect(state.kind.known, RevertKind.staged);
+      expect(messageOf(state.boundary!), 'msg_h2');
+      expect(jsonEncode(state.details!.value), isNot(contains('fake-private')));
+      await expectLater(
+        hydrate(Server(revert: {'messageID': 'x'})),
+        throwsA(failure(OpenCodeSessionReadFailure.incompatibleResponse)),
+      );
+    },
+  );
 
   test('the continuation reads older descending pages', () async {
     final server = Server(next: 'native-older');

@@ -1824,3 +1824,21 @@ buffered events.
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No stream owner, reconnect, UI or native/MVP acceptance is added.
+
+## V2-042B native event stream owner (#380)
+
+```text
+packages/harness_opencode/lib/src/stream_owner.dart # OpenCodeStreamOwner: generation gate, hydration, ordered apply, repairs, eviction, disconnects
+packages/harness_opencode/lib/src/session_reader.dart # hydrateSession also maps the staged revert of the session record
+packages/harness_opencode/lib/src/revert_projection.dart # Shared staged-revert builder (hidden from the barrel)
+packages/codewalk_core/lib/src/reducer/session_reducer.dart # Delivered input no longer keeps admission protection
+packages/harness_opencode/test/stream_owner_test.dart # Done-when drop fixtures, gate mechanics and races with a scripted connection
+```
+
+`OpenCodeStreamOwner` consumes a `RecoveringSseConnection` built with
+`connectedWhen: openCodeServerConnected` and keeps watched sessions of a Core
+`SessionStore` current; the app controller and UI consume its updates later.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No durable log, children discovery, sending, UI or native/MVP acceptance is
+added.

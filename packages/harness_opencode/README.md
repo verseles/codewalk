@@ -180,6 +180,42 @@ body reversed, since no capture used `order=desc`), then its 38 stream frames
 through `projectOpenCodeEvent`: four snapshot items grow to eight, with no
 duplicates and no leftover pending input.
 
+## Native event stream owner
+
+[V2-042B / #380](https://github.com/verseles/codewalk/issues/380) exports
+`OpenCodeStreamOwner(connection: ..., reader: ..., store: ..., harness: ...,
+sourceVersion: ...)`, the single consumer of `GET /api/event` for one harness,
+and `openCodeServerConnected`, the readiness predicate the injected
+`RecoveringSseConnection` must use as `connectedWhen`.
+
+- `watch(ref)` opens a session in the Core `SessionStore` and keeps it hydrated
+  (refused beyond the store's capacity, whose LRU would evict a watched
+  session); `unwatch` forgets it locally and never interrupts remote work.
+- On each connection generation the owner hydrates every watched session from
+  one shared read start (`hydrateSession`), then releases the generation and
+  reduces later frames, in order, through `projectOpenCodeEvent`. Positions use
+  the generation as epoch and count every frame. A session watched after the
+  release keeps its own frames until its first snapshot.
+- Reducer repair requests and rejected frames coalesce into one bounded
+  re-hydration per session; a session whose hydration keeps failing is set aside
+  (`degraded`, `hydrationExhausted`) without holding the others back; a missing
+  session is evicted (`OpenCodeSessionEvicted`). A disconnect abandons the
+  generation, marks every watched session and reports `reconnecting`, or
+  `authRequired`/`incompatible` when terminal; reconnecting is the transport's.
+- Updates are `OpenCodeSessionUpdated` (state and reducer effects),
+  `OpenCodeSessionEvicted` and `OpenCodeConnectionUpdated` with finite
+  `OpenCodeStreamFailure` categories.
+
+Hydration now also reads the session record's staged revert (absent is
+`none`), and Core no longer keeps admission protection for input already
+delivered live, so a complete history without it (a committed revert) drops it.
+
+Tests drive the owner with a scripted connection and path-keyed reads through
+the parent's done-when cases — drop mid-text and mid-tool (capture B), during a
+pending approval (C), during a revert (D), an overflow disconnect and a restart
+with `shutdown` (C) — asserting unique identities and no stuck running, plus the
+gate, eviction, repair bounds, held frames, capacity and disconnect races.
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports
