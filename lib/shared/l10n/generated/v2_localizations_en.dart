@@ -802,4 +802,113 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get liveRetry => 'Reconnect';
+
+  @override
+  String get composerLiveSession => 'Live session';
+
+  @override
+  String get composerHint => 'Message';
+
+  @override
+  String get composerSend => 'Send';
+
+  @override
+  String get composerSteer => 'Steer';
+
+  @override
+  String get composerQueue => 'Queue';
+
+  @override
+  String get composerSteering => 'Steering';
+
+  @override
+  String get composerQueued => 'Queued';
+
+  @override
+  String get composerCancel => 'Cancel';
+
+  @override
+  String get composerMoveToSteer => 'Steer now';
+
+  @override
+  String get composerMoveToQueue => 'Move to queue';
+
+  @override
+  String get composerCheckAgain => 'Check again';
+
+  @override
+  String get composerSendAgain => 'Send again (may duplicate)';
+
+  @override
+  String get composerDiscard => 'Discard';
+
+  @override
+  String get composerSending => 'Sending…';
+
+  @override
+  String get composerNotConfirmed => 'Delivery not confirmed';
+
+  @override
+  String get composerCancelling => 'Cancellation not confirmed yet';
+
+  @override
+  String get composerNotSent => 'Not sent';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'This message could not be saved on this device, so it was not sent.';
+
+  @override
+  String get composerNoticeFull =>
+      'Too many unsent messages are kept on this device. Discard one to send more.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'The saved messages could not be read; sending is unavailable.';
+
+  @override
+  String get composerNoticeUnavailable => 'This message cannot be sent here.';
+
+  @override
+  String get composerNoticeConflict =>
+      'The server refused this message because the session changed. Your text was kept.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'Another message already uses this message’s identity; it was not sent again.';
+
+  @override
+  String get composerNoticeRejected =>
+      'The server did not accept this message. Your text was kept.';
+
+  @override
+  String get composerNoticeCancelled => 'Message cancelled.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'The message was delivered before it could be cancelled.';
+
+  @override
+  String get composerNoticeSwitched => 'Delivery changed.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'Delivery could not be changed; the message was already delivered.';
+
+  @override
+  String get composerNoticeChangeFailed => 'The change could not be confirmed.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'The server version changed; this message cannot be changed here.';
+
+  @override
+  String get composerOffline =>
+      'Sending resumes when the live view is up to date.';
+
+  @override
+  String get composerOtherClient => 'From another client';
+
+  @override
+  String get composerInbox => 'Waiting messages';
 }

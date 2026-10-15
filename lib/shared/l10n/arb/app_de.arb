@@ -511,5 +511,137 @@
   "liveRetry": "Neu verbinden",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "Live-Sitzung",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "Nachricht",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "Senden",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "Steuern",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "Einreihen",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "Steuert",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "In Warteschlange",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "Abbrechen",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "Jetzt steuern",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "In die Warteschlange",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "Erneut prüfen",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "Erneut senden (evtl. doppelt)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "Verwerfen",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "Wird gesendet…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "Zustellung nicht bestätigt",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "Abbruch noch nicht bestätigt",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "Nicht gesendet",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "Diese Nachricht konnte nicht auf dem Gerät gespeichert werden und wurde daher nicht gesendet.",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "Auf diesem Gerät liegen zu viele ungesendete Nachrichten. Verwirf eine, um mehr zu senden.",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "Die gespeicherten Nachrichten konnten nicht gelesen werden; Senden ist nicht verfügbar.",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "Diese Nachricht kann hier nicht gesendet werden.",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "Der Server hat diese Nachricht abgelehnt, weil sich die Sitzung geändert hat. Dein Text wurde behalten.",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "Eine andere Nachricht nutzt bereits die Kennung dieser Nachricht; sie wurde nicht erneut gesendet.",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "Der Server hat diese Nachricht nicht angenommen. Dein Text wurde behalten.",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "Nachricht abgebrochen.",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "Die Nachricht wurde zugestellt, bevor sie abgebrochen werden konnte.",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "Zustellung geändert.",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "Zustellung konnte nicht geändert werden; die Nachricht wurde bereits zugestellt.",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "Die Änderung konnte nicht bestätigt werden.",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "Die Serverversion hat sich geändert; diese Nachricht kann hier nicht geändert werden.",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "Senden geht weiter, sobald die Live-Ansicht aktuell ist.",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "Von einem anderen Client",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "Wartende Nachrichten",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

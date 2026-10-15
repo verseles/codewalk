@@ -511,5 +511,137 @@
   "liveRetry": "다시 연결",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "라이브 세션",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "메시지",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "보내기",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "조정",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "대기열",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "조정 중",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "대기 중",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "취소",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "지금 조정",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "대기열로 이동",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "다시 확인",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "다시 보내기(중복될 수 있음)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "삭제",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "보내는 중…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "전달이 확인되지 않음",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "취소가 아직 확인되지 않음",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "보내지 않음",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "이 메시지를 기기에 저장할 수 없어 보내지 않았습니다.",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "이 기기에 보내지 않은 메시지가 너무 많습니다. 더 보내려면 하나를 삭제하세요.",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "저장된 메시지를 읽을 수 없어 보낼 수 없습니다.",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "이 메시지는 여기서 보낼 수 없습니다.",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "세션이 바뀌어 서버가 이 메시지를 거부했습니다. 입력한 텍스트는 유지됩니다.",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "다른 메시지가 이미 이 메시지의 식별자를 사용합니다. 다시 보내지 않았습니다.",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "서버가 이 메시지를 받지 않았습니다. 입력한 텍스트는 유지됩니다.",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "메시지를 취소했습니다.",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "취소하기 전에 메시지가 전달되었습니다.",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "전달 방식을 변경했습니다.",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "전달 방식을 변경할 수 없습니다. 메시지가 이미 전달되었습니다.",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "변경을 확인할 수 없습니다.",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "서버 버전이 바뀌어 여기서 이 메시지를 변경할 수 없습니다.",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "라이브 보기가 최신이 되면 다시 보낼 수 있습니다.",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "다른 클라이언트에서",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "대기 중인 메시지",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

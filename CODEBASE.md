@@ -1935,3 +1935,25 @@ changes.
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No composer, chips or wiring (V2-045E) and no native/MVP acceptance is added.
+
+## V2-045E live composer (#386)
+
+```text
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle.outbox (null when the lease cannot send) and nativeMessageOf
+lib/platform/sessions/session_live_factory_io.dart # One OpenCodePromptOutbox per profile slot after the 2.0.22 probe; shared executor and id minter per profile; id-only minter floor from pending and newest items
+lib/platform/sessions/prompt_outbox_store.dart # Optional shared KeySerialExecutor
+lib/app/composition_root.dart # Passes createV2PayloadStore(metadata) to the live directory
+packages/harness_opencode/lib/src/item_ids.dart # openCodeMessageIdOf: native msg_ id behind a projected ItemId
+lib/features/sessions/session_composer_controller.dart # Steer default, explicit queue, one command per send, single automatic check, cancel/switch/check/send again/discard, finite notices
+lib/features/sessions/session_composer.dart # Inbox chips, attention rows, steer/queue choice, field and send; scrolls inside the page's height cap
+lib/features/sessions/session_live_page.dart # Owns the draft; LayoutBuilder height cap; read-only line when no outbox
+tool/l10n/session_composer_catalog.py # 33 composer keys in 14 locales (--port-composer)
+test/v2/sessions/session_composer_test.dart # Controller cases and the three V2-045 parent criteria over the real outbox
+test/v2/sessions/outbox_fakes.dart # Outbox store/transport/server rig shared with prompt_outbox_test
+test/v2/sessions/composer_fakes.dart # Scriptable PromptOutbox fake
+```
+
+The composer sends only through the lease's outbox on the slot's existing
+transport and event stream; features reach it through `SessionLiveController`
+getters and never import harness code. Without storage, a verified version or
+on Web the page keeps the read-only line. Sending needs a live, current view.

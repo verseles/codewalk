@@ -803,4 +803,114 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveRetry => 'دوبارہ جوڑیں';
+
+  @override
+  String get composerLiveSession => 'لائیو سیشن';
+
+  @override
+  String get composerHint => 'پیغام';
+
+  @override
+  String get composerSend => 'بھیجیں';
+
+  @override
+  String get composerSteer => 'رہنمائی';
+
+  @override
+  String get composerQueue => 'قطار میں ڈالیں';
+
+  @override
+  String get composerSteering => 'رہنمائی جاری';
+
+  @override
+  String get composerQueued => 'قطار میں';
+
+  @override
+  String get composerCancel => 'منسوخ کریں';
+
+  @override
+  String get composerMoveToSteer => 'ابھی رہنمائی کریں';
+
+  @override
+  String get composerMoveToQueue => 'قطار میں منتقل کریں';
+
+  @override
+  String get composerCheckAgain => 'دوبارہ جانچیں';
+
+  @override
+  String get composerSendAgain => 'دوبارہ بھیجیں (دہرا ہو سکتا ہے)';
+
+  @override
+  String get composerDiscard => 'رد کریں';
+
+  @override
+  String get composerSending => 'بھیجا جا رہا ہے…';
+
+  @override
+  String get composerNotConfirmed => 'ترسیل کی تصدیق نہیں ہوئی';
+
+  @override
+  String get composerCancelling => 'منسوخی کی ابھی تصدیق نہیں ہوئی';
+
+  @override
+  String get composerNotSent => 'نہیں بھیجا گیا';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'یہ پیغام اس آلے پر محفوظ نہیں ہو سکا، اس لیے نہیں بھیجا گیا۔';
+
+  @override
+  String get composerNoticeFull =>
+      'اس آلے پر بہت زیادہ نہ بھیجے گئے پیغامات محفوظ ہیں۔ مزید بھیجنے کے لیے ایک رد کریں۔';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'محفوظ پیغامات پڑھے نہیں جا سکے؛ بھیجنا دستیاب نہیں۔';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'یہ پیغام یہاں سے نہیں بھیجا جا سکتا۔';
+
+  @override
+  String get composerNoticeConflict =>
+      'سیشن بدلنے کی وجہ سے سرور نے یہ پیغام مسترد کر دیا۔ آپ کا متن محفوظ رکھا گیا۔';
+
+  @override
+  String get composerNoticeIdentity =>
+      'کوئی دوسرا پیغام پہلے ہی اس پیغام کی شناخت استعمال کر رہا ہے؛ اسے دوبارہ نہیں بھیجا گیا۔';
+
+  @override
+  String get composerNoticeRejected =>
+      'سرور نے یہ پیغام قبول نہیں کیا۔ آپ کا متن محفوظ رکھا گیا۔';
+
+  @override
+  String get composerNoticeCancelled => 'پیغام منسوخ ہو گیا۔';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'منسوخ ہونے سے پہلے پیغام پہنچ گیا۔';
+
+  @override
+  String get composerNoticeSwitched => 'ترسیل کا طریقہ بدل دیا گیا۔';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'ترسیل کا طریقہ نہیں بدلا جا سکا؛ پیغام پہلے ہی پہنچ چکا ہے۔';
+
+  @override
+  String get composerNoticeChangeFailed => 'تبدیلی کی تصدیق نہیں ہو سکی۔';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'سرور کا ورژن بدل گیا؛ یہ پیغام یہاں نہیں بدلا جا سکتا۔';
+
+  @override
+  String get composerOffline =>
+      'لائیو منظر تازہ ہونے پر بھیجنا دوبارہ شروع ہوگا۔';
+
+  @override
+  String get composerOtherClient => 'کسی دوسرے کلائنٹ سے';
+
+  @override
+  String get composerInbox => 'منتظر پیغامات';
 }

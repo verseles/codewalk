@@ -799,4 +799,113 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveRetry => 'আবার সংযোগ করুন';
+
+  @override
+  String get composerLiveSession => 'লাইভ সেশন';
+
+  @override
+  String get composerHint => 'বার্তা';
+
+  @override
+  String get composerSend => 'পাঠান';
+
+  @override
+  String get composerSteer => 'পরিচালনা';
+
+  @override
+  String get composerQueue => 'সারিতে রাখুন';
+
+  @override
+  String get composerSteering => 'পরিচালনা হচ্ছে';
+
+  @override
+  String get composerQueued => 'সারিতে';
+
+  @override
+  String get composerCancel => 'বাতিল';
+
+  @override
+  String get composerMoveToSteer => 'এখনই পরিচালনা';
+
+  @override
+  String get composerMoveToQueue => 'সারিতে সরান';
+
+  @override
+  String get composerCheckAgain => 'আবার যাচাই';
+
+  @override
+  String get composerSendAgain => 'আবার পাঠান (দ্বিগুণ হতে পারে)';
+
+  @override
+  String get composerDiscard => 'বাদ দিন';
+
+  @override
+  String get composerSending => 'পাঠানো হচ্ছে…';
+
+  @override
+  String get composerNotConfirmed => 'পৌঁছানো নিশ্চিত হয়নি';
+
+  @override
+  String get composerCancelling => 'বাতিল এখনও নিশ্চিত হয়নি';
+
+  @override
+  String get composerNotSent => 'পাঠানো হয়নি';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'বার্তাটি এই ডিভাইসে সংরক্ষণ করা যায়নি, তাই পাঠানো হয়নি।';
+
+  @override
+  String get composerNoticeFull =>
+      'এই ডিভাইসে অনেক বেশি না-পাঠানো বার্তা রাখা আছে। আরও পাঠাতে একটি বাদ দিন।';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'সংরক্ষিত বার্তা পড়া যায়নি; পাঠানো যাচ্ছে না।';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'এই বার্তাটি এখান থেকে পাঠানো যায় না।';
+
+  @override
+  String get composerNoticeConflict =>
+      'সেশন বদলে যাওয়ায় সার্ভার বার্তাটি প্রত্যাখ্যান করেছে। আপনার লেখা রাখা হয়েছে।';
+
+  @override
+  String get composerNoticeIdentity =>
+      'অন্য একটি বার্তা ইতিমধ্যে এই বার্তার পরিচয় ব্যবহার করছে; আবার পাঠানো হয়নি।';
+
+  @override
+  String get composerNoticeRejected =>
+      'সার্ভার বার্তাটি গ্রহণ করেনি। আপনার লেখা রাখা হয়েছে।';
+
+  @override
+  String get composerNoticeCancelled => 'বার্তা বাতিল হয়েছে।';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'বাতিল করার আগেই বার্তাটি পৌঁছে গেছে।';
+
+  @override
+  String get composerNoticeSwitched => 'পৌঁছানোর ধরন বদলানো হয়েছে।';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'পৌঁছানোর ধরন বদলানো যায়নি; বার্তাটি ইতিমধ্যে পৌঁছেছে।';
+
+  @override
+  String get composerNoticeChangeFailed => 'পরিবর্তন নিশ্চিত করা যায়নি।';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'সার্ভারের সংস্করণ বদলেছে; এখানে এই বার্তা বদলানো যাবে না।';
+
+  @override
+  String get composerOffline => 'লাইভ দৃশ্য হালনাগাদ হলে আবার পাঠানো যাবে।';
+
+  @override
+  String get composerOtherClient => 'অন্য ক্লায়েন্ট থেকে';
+
+  @override
+  String get composerInbox => 'অপেক্ষমাণ বার্তা';
 }

@@ -1574,6 +1574,204 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Reconnect'**
   String get liveRetry;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Live session'**
+  String get composerLiveSession;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get composerHint;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get composerSend;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Steer'**
+  String get composerSteer;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get composerQueue;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Steering'**
+  String get composerSteering;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get composerQueued;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get composerCancel;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Steer now'**
+  String get composerMoveToSteer;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Move to queue'**
+  String get composerMoveToQueue;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get composerCheckAgain;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Send again (may duplicate)'**
+  String get composerSendAgain;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get composerDiscard;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get composerSending;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery not confirmed'**
+  String get composerNotConfirmed;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation not confirmed yet'**
+  String get composerCancelling;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent'**
+  String get composerNotSent;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'This message could not be saved on this device, so it was not sent.'**
+  String get composerNoticeNotSaved;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Too many unsent messages are kept on this device. Discard one to send more.'**
+  String get composerNoticeFull;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The saved messages could not be read; sending is unavailable.'**
+  String get composerNoticeUnreadable;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'This message cannot be sent here.'**
+  String get composerNoticeUnavailable;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this message because the session changed. Your text was kept.'**
+  String get composerNoticeConflict;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Another message already uses this message’s identity; it was not sent again.'**
+  String get composerNoticeIdentity;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not accept this message. Your text was kept.'**
+  String get composerNoticeRejected;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Message cancelled.'**
+  String get composerNoticeCancelled;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The message was delivered before it could be cancelled.'**
+  String get composerNoticeDeliveredFirst;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery changed.'**
+  String get composerNoticeSwitched;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery could not be changed; the message was already delivered.'**
+  String get composerNoticeSwitchNotApplied;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The change could not be confirmed.'**
+  String get composerNoticeChangeFailed;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The server version changed; this message cannot be changed here.'**
+  String get composerNoticeVersionChanged;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Sending resumes when the live view is up to date.'**
+  String get composerOffline;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'From another client'**
+  String get composerOtherClient;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting messages'**
+  String get composerInbox;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

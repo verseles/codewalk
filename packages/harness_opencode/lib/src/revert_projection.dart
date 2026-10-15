@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeRevertProjectionFailure {
@@ -276,23 +277,7 @@ RevertState openCodeStagedRevert(
 
 /// The native message of a canonical `[storageKey, messageId, kind, …]` ID, or
 /// null when the ID has another shape or belongs to another session.
-String? _messageOf(ItemId id, SessionRef ref) {
-  if (id.value.length > _manifestLimit) return null;
-  final Object? decoded;
-  try {
-    decoded = jsonDecode(id.value);
-  } on FormatException {
-    return null;
-  }
-  if (decoded is! List<Object?> ||
-      decoded.length != 4 ||
-      decoded[0] != ref.storageKey ||
-      decoded[2] is! String) {
-    return null;
-  }
-  final message = decoded[1];
-  return message is String && message.startsWith('msg_') ? message : null;
-}
+String? _messageOf(ItemId id, SessionRef ref) => openCodeMessageIdOf(id, ref);
 
 Map<String, Object?> _object(Object? value) {
   if (value is! Map<String, Object?>) {

@@ -510,5 +510,137 @@
   "liveRetry": "إعادة الاتصال",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "جلسة مباشرة",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "رسالة",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "إرسال",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "توجيه",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "وضع في الطابور",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "قيد التوجيه",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "في الطابور",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "إلغاء",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "وجّه الآن",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "انقل إلى الطابور",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "تحقق مرة أخرى",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "أرسل مرة أخرى (قد تتكرر)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "تجاهل",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "جارٍ الإرسال…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "لم يتأكد التسليم",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "لم يتأكد الإلغاء بعد",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "لم تُرسل",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "تعذّر حفظ هذه الرسالة على الجهاز، لذلك لم تُرسل.",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "توجد رسائل غير مرسلة كثيرة جدًا على هذا الجهاز. تجاهل واحدة لإرسال المزيد.",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "تعذّرت قراءة الرسائل المحفوظة؛ الإرسال غير متاح.",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "لا يمكن إرسال هذه الرسالة من هنا.",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "رفض الخادم هذه الرسالة لأن الجلسة تغيّرت. تم الاحتفاظ بنصك.",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "رسالة أخرى تستخدم بالفعل معرّف هذه الرسالة؛ لم تُرسل مرة أخرى.",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "لم يقبل الخادم هذه الرسالة. تم الاحتفاظ بنصك.",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "أُلغيت الرسالة.",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "سُلّمت الرسالة قبل أن يمكن إلغاؤها.",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "تم تغيير طريقة التسليم.",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "تعذّر تغيير طريقة التسليم؛ سُلّمت الرسالة بالفعل.",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "تعذّر تأكيد التغيير.",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "تغيّر إصدار الخادم؛ لا يمكن تغيير هذه الرسالة هنا.",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "يُستأنف الإرسال عندما يصبح العرض المباشر محدّثًا.",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "من عميل آخر",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "رسائل في الانتظار",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

@@ -751,4 +751,103 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveRetry => '重新连接';
+
+  @override
+  String get composerLiveSession => '实时会话';
+
+  @override
+  String get composerHint => '消息';
+
+  @override
+  String get composerSend => '发送';
+
+  @override
+  String get composerSteer => '引导';
+
+  @override
+  String get composerQueue => '排队';
+
+  @override
+  String get composerSteering => '引导中';
+
+  @override
+  String get composerQueued => '排队中';
+
+  @override
+  String get composerCancel => '取消';
+
+  @override
+  String get composerMoveToSteer => '立即引导';
+
+  @override
+  String get composerMoveToQueue => '移到队列';
+
+  @override
+  String get composerCheckAgain => '重新检查';
+
+  @override
+  String get composerSendAgain => '再次发送（可能重复）';
+
+  @override
+  String get composerDiscard => '丢弃';
+
+  @override
+  String get composerSending => '正在发送…';
+
+  @override
+  String get composerNotConfirmed => '未确认送达';
+
+  @override
+  String get composerCancelling => '取消尚未确认';
+
+  @override
+  String get composerNotSent => '未发送';
+
+  @override
+  String get composerNoticeNotSaved => '无法在此设备上保存这条消息，因此未发送。';
+
+  @override
+  String get composerNoticeFull => '此设备上保存的未发送消息过多。请丢弃一条后再发送。';
+
+  @override
+  String get composerNoticeUnreadable => '无法读取已保存的消息；无法发送。';
+
+  @override
+  String get composerNoticeUnavailable => '此处无法发送这条消息。';
+
+  @override
+  String get composerNoticeConflict => '会话已变更，服务器拒绝了这条消息。你的文本已保留。';
+
+  @override
+  String get composerNoticeIdentity => '另一条消息已使用此消息的标识；未再次发送。';
+
+  @override
+  String get composerNoticeRejected => '服务器未接受这条消息。你的文本已保留。';
+
+  @override
+  String get composerNoticeCancelled => '消息已取消。';
+
+  @override
+  String get composerNoticeDeliveredFirst => '消息在取消之前已送达。';
+
+  @override
+  String get composerNoticeSwitched => '送达方式已更改。';
+
+  @override
+  String get composerNoticeSwitchNotApplied => '无法更改送达方式；消息已送达。';
+
+  @override
+  String get composerNoticeChangeFailed => '无法确认此更改。';
+
+  @override
+  String get composerNoticeVersionChanged => '服务器版本已变更；无法在此更改这条消息。';
+
+  @override
+  String get composerOffline => '实时视图更新后即可继续发送。';
+
+  @override
+  String get composerOtherClient => '来自其他客户端';
+
+  @override
+  String get composerInbox => '等待中的消息';
 }

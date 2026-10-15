@@ -1,19 +1,31 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
+import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../storage/payload_store.dart';
+import '../storage/storage_support.dart';
+import 'prompt_outbox_store.dart';
 
-SessionLiveDirectory? createSessionLiveDirectory({DateTime Function()? now}) =>
-    _NativeLiveDirectory(now ?? DateTime.now);
+SessionLiveDirectory? createSessionLiveDirectory({
+  DateTime Function()? now,
+  PayloadStore? payloads,
+}) => _NativeLiveDirectory(now ?? DateTime.now, payloads);
 
 /// One event stream per endpoint profile, shared by every open handle; the
 /// last handle of a session unwatches it and the last of a profile closes the
-/// stream. Nothing here mutates the server.
+/// stream. The stream never mutates the server; only a handle's outbox sends.
 final class _NativeLiveDirectory implements SessionLiveDirectory {
-  _NativeLiveDirectory(this._now);
+  _NativeLiveDirectory(this._now, this._payloads);
   final DateTime Function() _now;
+  final PayloadStore? _payloads;
+  // Outlive slot generations: a replaced slot's outbox and its successor
+  // write the same ledgers in turn, and minted ids keep rising per server.
+  final _queue = KeySerialExecutor();
+  final _ids = <String, OpenCodeMessageIds>{};
   final _slots = <String, _ProfileSlot>{};
   // Includes terminal slots detached from [_slots] while screens still hold
   // them, so closing the directory reaches every open stream.
@@ -64,9 +76,18 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     SessionRef session,
   ) {
     late final _ProfileSlot slot;
-    slot = _ProfileSlot(profile, credential, session.harnessRef, _now, () {
-      if (identical(_slots[key], slot)) _slots.remove(key);
-    });
+    slot = _ProfileSlot(
+      profile,
+      credential,
+      session.harnessRef,
+      _now,
+      () {
+        if (identical(_slots[key], slot)) _slots.remove(key);
+      },
+      payloads: _payloads,
+      queue: _queue,
+      ids: _ids.putIfAbsent(key, OpenCodeMessageIds.new),
+    );
     _owned
       ..removeWhere((owned) => owned.isClosed)
       ..add(slot);
@@ -90,15 +111,18 @@ final class _ProfileSlot {
     this.credential,
     this.harness,
     this._now,
-    this._release,
-  ) : _transport = IoEndpointHttpTransport(
-        endpoint: profile.endpoint,
-        headers: basicEndpointHeaders(
-          endpoint: profile.endpoint,
-          username: 'opencode',
-          secret: () => credential.secret,
-        ),
-      ) {
+    this._release, {
+    required this.payloads,
+    required this.queue,
+    required this.ids,
+  }) : _transport = IoEndpointHttpTransport(
+         endpoint: profile.endpoint,
+         headers: basicEndpointHeaders(
+           endpoint: profile.endpoint,
+           username: 'opencode',
+           secret: () => credential.secret,
+         ),
+       ) {
     _reader = OpenCodeSessionReader(
       _transport,
       harness: harness,
@@ -110,6 +134,10 @@ final class _ProfileSlot {
   final HarnessRef harness;
   final DateTime Function() _now;
   final void Function() _release;
+  final PayloadStore? payloads;
+  final KeySerialExecutor queue;
+  final OpenCodeMessageIds ids;
+  PromptOutbox? outbox;
   final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
   final _store = SessionStore(maxSessions: 8);
@@ -152,6 +180,20 @@ final class _ProfileSlot {
       throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
     }
     version = observed;
+    if (payloads case final store?) {
+      outbox = OpenCodePromptOutbox(
+        store: store,
+        client: OpenCodePromptClient(
+          _transport,
+          harness: harness,
+          connectedVersion: observed,
+        ),
+        reader: _reader,
+        ids: ids,
+        now: _now,
+        queue: queue,
+      );
+    }
     final connection = IoSseRecovery(
       _transport,
       'api/event',
@@ -224,6 +266,7 @@ final class _ProfileSlot {
       case OpenCodeSessionUpdated(:final ref, :final state):
         final previous = _views[ref];
         if (previous == null) return;
+        _observe(ref, state);
         // A disconnect snapshot arrives before the reconnecting update.
         final live = _phase == SessionLivePhase.live && _isLive(state);
         _publish(
@@ -309,6 +352,20 @@ final class _ProfileSlot {
     }
   }
 
+  /// Minted ids must sort after the server's: ids rise, so the pending rows
+  /// and the newest items carry the floor.
+  void _observe(SessionRef ref, SessionState state) {
+    final timeline = state.timeline;
+    for (final id in [
+      for (final entry in state.pending) entry.id,
+      for (final item in timeline.skip(max(0, timeline.length - 16))) item.id,
+    ]) {
+      if (openCodeMessageIdOf(id, ref) case final message?) {
+        ids.observe(message);
+      }
+    }
+  }
+
   void release(_LiveHandle handle) {
     if (!handles.remove(handle)) return;
     if (!handles.any((h) => h.session == handle.session)) {
@@ -361,6 +418,12 @@ final class _LiveHandle implements SessionLiveHandle {
     );
     listener.onCancel = subscription.cancel;
   });
+
+  @override
+  PromptOutbox? get outbox => _closed ? null : _slot.outbox;
+
+  @override
+  String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
 
   void emit(SessionLiveView view) {
     if (!_closed) _controller.add(view);

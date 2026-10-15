@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:harness_opencode/harness_opencode.dart';
 
 class LiveHandle implements SessionLiveHandle {
-  LiveHandle(this.session);
+  LiveHandle(this.session, {this.outbox});
   @override
   final SessionRef session;
+  @override
+  PromptOutbox? outbox;
+  @override
+  String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
   final _controller = StreamController<SessionLiveView>.broadcast();
   late SessionLiveView _current = SessionLiveView(
     session: session,
@@ -46,8 +52,8 @@ class LiveDirectory implements SessionLiveDirectory {
     return completer.future;
   }
 
-  LiveHandle grant(SessionRef session) {
-    final handle = LiveHandle(session);
+  LiveHandle grant(SessionRef session, {PromptOutbox? outbox}) {
+    final handle = LiveHandle(session, outbox: outbox);
     handles.add(handle);
     opens.last.complete(handle);
     return handle;
@@ -87,6 +93,7 @@ SessionState liveState(
   List<TimelineItem> items = const [],
   ExecutionState? execution,
   List<InteractionRequest> interactions = const [],
+  List<PendingInput> pending = const [],
   bool hasMore = false,
 }) {
   final start = beginHydration(
@@ -110,6 +117,7 @@ SessionState liveState(
           ? null
           : SnapshotValue(value: execution, boundary: _boundary(ref)),
       timeline: SnapshotCollection(values: items, boundary: _boundary(ref)),
+      pending: SnapshotCollection(values: pending, boundary: _boundary(ref)),
       interactions: SnapshotCollection(
         values: interactions,
         boundary: _boundary(ref),

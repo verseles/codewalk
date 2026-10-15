@@ -805,4 +805,113 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveRetry => 'फिर से कनेक्ट करें';
+
+  @override
+  String get composerLiveSession => 'लाइव सत्र';
+
+  @override
+  String get composerHint => 'संदेश';
+
+  @override
+  String get composerSend => 'भेजें';
+
+  @override
+  String get composerSteer => 'दिशा दें';
+
+  @override
+  String get composerQueue => 'कतार में डालें';
+
+  @override
+  String get composerSteering => 'दिशा दी जा रही है';
+
+  @override
+  String get composerQueued => 'कतार में';
+
+  @override
+  String get composerCancel => 'रद्द करें';
+
+  @override
+  String get composerMoveToSteer => 'अभी दिशा दें';
+
+  @override
+  String get composerMoveToQueue => 'कतार में ले जाएँ';
+
+  @override
+  String get composerCheckAgain => 'फिर जाँचें';
+
+  @override
+  String get composerSendAgain => 'फिर भेजें (दोहराव संभव)';
+
+  @override
+  String get composerDiscard => 'हटाएँ';
+
+  @override
+  String get composerSending => 'भेजा जा रहा है…';
+
+  @override
+  String get composerNotConfirmed => 'डिलीवरी की पुष्टि नहीं हुई';
+
+  @override
+  String get composerCancelling => 'रद्द करने की पुष्टि अभी नहीं हुई';
+
+  @override
+  String get composerNotSent => 'नहीं भेजा गया';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'यह संदेश इस डिवाइस पर सहेजा नहीं जा सका, इसलिए नहीं भेजा गया।';
+
+  @override
+  String get composerNoticeFull =>
+      'इस डिवाइस पर बहुत अधिक बिना भेजे संदेश रखे हैं। और भेजने के लिए एक हटाएँ।';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'सहेजे गए संदेश पढ़े नहीं जा सके; भेजना उपलब्ध नहीं है।';
+
+  @override
+  String get composerNoticeUnavailable => 'यह संदेश यहाँ से नहीं भेजा जा सकता।';
+
+  @override
+  String get composerNoticeConflict =>
+      'सत्र बदल जाने से सर्वर ने यह संदेश अस्वीकार किया। आपका पाठ रखा गया है।';
+
+  @override
+  String get composerNoticeIdentity =>
+      'कोई दूसरा संदेश पहले से इस संदेश की पहचान उपयोग करता है; इसे फिर नहीं भेजा गया।';
+
+  @override
+  String get composerNoticeRejected =>
+      'सर्वर ने यह संदेश स्वीकार नहीं किया। आपका पाठ रखा गया है।';
+
+  @override
+  String get composerNoticeCancelled => 'संदेश रद्द किया गया।';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'रद्द होने से पहले संदेश डिलीवर हो गया।';
+
+  @override
+  String get composerNoticeSwitched => 'डिलीवरी बदली गई।';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'डिलीवरी नहीं बदली जा सकी; संदेश पहले ही डिलीवर हो चुका है।';
+
+  @override
+  String get composerNoticeChangeFailed => 'बदलाव की पुष्टि नहीं हो सकी।';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'सर्वर का संस्करण बदल गया; यह संदेश यहाँ नहीं बदला जा सकता।';
+
+  @override
+  String get composerOffline =>
+      'लाइव दृश्य अद्यतन होने पर भेजना फिर शुरू होगा।';
+
+  @override
+  String get composerOtherClient => 'किसी दूसरे क्लाइंट से';
+
+  @override
+  String get composerInbox => 'प्रतीक्षारत संदेश';
 }

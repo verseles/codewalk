@@ -1,13 +1,17 @@
+import 'dart:math';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
+import 'session_composer.dart';
+import 'session_composer_controller.dart';
 import 'session_live_controller.dart';
 import 'session_timeline_tile.dart';
 
-/// Live, read-only view of one session: it observes the server and never
-/// sends, answers, stops or reverts anything.
+/// Live view of one session: it observes the server and sends prompts only
+/// through the composer's outbox; it never answers, stops or reverts.
 class SessionLivePage extends StatefulWidget {
   const SessionLivePage({super.key, required this.controller});
   final SessionLiveController controller;
@@ -16,9 +20,13 @@ class SessionLivePage extends StatefulWidget {
 }
 
 class _SessionLivePageState extends State<SessionLivePage> {
+  late final SessionComposerController _composer;
+  final _draft = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _composer = SessionComposerController(live: widget.controller);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) widget.controller.start();
     });
@@ -26,6 +34,8 @@ class _SessionLivePageState extends State<SessionLivePage> {
 
   @override
   void dispose() {
+    _composer.dispose();
+    _draft.dispose();
     widget.controller.dispose();
     super.dispose();
   }
@@ -105,106 +115,137 @@ class _SessionLivePageState extends State<SessionLivePage> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
-            child: Column(
-              children: [
-                if (c.loading)
-                  LinearProgressIndicator(semanticsLabel: l10n.liveConnecting),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index > 0) {
-                        final item = items[index - 1];
-                        return SessionTimelineTile(
-                          key: ValueKey(item.id),
-                          item: item,
-                        );
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(l10n.liveReadOnly, style: textTheme.titleMedium),
-                          Text(
-                            c.profile.label,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Semantics(
-                            liveRegion: true,
-                            container: true,
-                            child: Column(
-                              key: const ValueKey('live-status'),
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                if (failure != null)
-                                  Text(failure)
-                                else
-                                  Text(_phase(l10n, c.phase)),
-                                if (view?.stale ?? false) Text(l10n.liveStale),
-                              ],
-                            ),
-                          ),
-                          // Outside the live region: it changes on every event.
-                          if (view?.lastSyncedAt case final synced?)
-                            Text(
-                              '${l10n.liveLastSynced}: ${_time(context, synced)}',
-                            ),
-                          if (execution != null || outcome != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  if (execution != null)
-                                    Chip(
-                                      key: const ValueKey('live-execution'),
-                                      label: Text(execution),
-                                    ),
-                                  if (outcome != null)
-                                    Chip(label: Text(outcome)),
-                                ],
+        body: LayoutBuilder(
+          builder: (context, body) {
+            final tight = body.maxHeight < 200;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: Column(
+                  children: [
+                    if (c.loading)
+                      LinearProgressIndicator(
+                        semanticsLabel: l10n.liveConnecting,
+                      ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: items.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index > 0) {
+                            final item = items[index - 1];
+                            return SessionTimelineTile(
+                              key: ValueKey(item.id),
+                              item: item,
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                c.outbox == null
+                                    ? l10n.liveReadOnly
+                                    : l10n.composerLiveSession,
+                                style: textTheme.titleMedium,
                               ),
-                            ),
-                          if (needsYou && execution != l10n.liveNeedsYou)
-                            Text(
-                              l10n.liveNeedsYou,
-                              key: const ValueKey('live-needs-you'),
-                            ),
-                          if (state?.hasMoreHistory ?? false)
-                            Text(l10n.historyLimit),
-                          if (c.canRetry)
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton(
-                                key: const ValueKey('live-retry'),
-                                onPressed: c.retry,
-                                child: Text(l10n.liveRetry),
+                              Text(
+                                c.profile.label,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          const SizedBox(height: 8),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      l10n.liveSendUnavailable,
-                      key: const ValueKey('live-composer'),
+                              Semantics(
+                                liveRegion: true,
+                                container: true,
+                                child: Column(
+                                  key: const ValueKey('live-status'),
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    if (failure != null)
+                                      Text(failure)
+                                    else
+                                      Text(_phase(l10n, c.phase)),
+                                    if (view?.stale ?? false)
+                                      Text(l10n.liveStale),
+                                  ],
+                                ),
+                              ),
+                              // Outside the live region: it changes on every event.
+                              if (view?.lastSyncedAt case final synced?)
+                                Text(
+                                  '${l10n.liveLastSynced}: ${_time(context, synced)}',
+                                ),
+                              if (execution != null || outcome != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (execution != null)
+                                        Chip(
+                                          key: const ValueKey('live-execution'),
+                                          label: Text(execution),
+                                        ),
+                                      if (outcome != null)
+                                        Chip(label: Text(outcome)),
+                                    ],
+                                  ),
+                                ),
+                              if (needsYou && execution != l10n.liveNeedsYou)
+                                Text(
+                                  l10n.liveNeedsYou,
+                                  key: const ValueKey('live-needs-you'),
+                                ),
+                              if (state?.hasMoreHistory ?? false)
+                                Text(l10n.historyLimit),
+                              if (c.canRetry)
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton(
+                                    key: const ValueKey('live-retry'),
+                                    onPressed: c.retry,
+                                    child: Text(l10n.liveRetry),
+                                  ),
+                                ),
+                              const SizedBox(height: 8),
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: tight ? 4 : 16,
+                        ),
+                        child: c.outbox == null
+                            ? Text(
+                                l10n.liveSendUnavailable,
+                                key: const ValueKey('live-composer'),
+                              )
+                            : SessionComposer(
+                                controller: _composer,
+                                text: _draft,
+                                // Most of the body stays the timeline's; with
+                                // the keyboard over a short body the field
+                                // wins instead (the 4 is the progress bar).
+                                maxHeight:
+                                    max(
+                                      body.maxHeight * 0.4,
+                                      min(body.maxHeight - 4, 136),
+                                    ) -
+                                    (tight ? 8 : 32),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       );
     },

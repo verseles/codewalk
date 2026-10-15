@@ -511,5 +511,137 @@
   "liveRetry": "আবার সংযোগ করুন",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "লাইভ সেশন",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "বার্তা",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "পাঠান",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "পরিচালনা",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "সারিতে রাখুন",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "পরিচালনা হচ্ছে",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "সারিতে",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "বাতিল",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "এখনই পরিচালনা",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "সারিতে সরান",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "আবার যাচাই",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "আবার পাঠান (দ্বিগুণ হতে পারে)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "বাদ দিন",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "পাঠানো হচ্ছে…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "পৌঁছানো নিশ্চিত হয়নি",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "বাতিল এখনও নিশ্চিত হয়নি",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "পাঠানো হয়নি",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "বার্তাটি এই ডিভাইসে সংরক্ষণ করা যায়নি, তাই পাঠানো হয়নি।",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "এই ডিভাইসে অনেক বেশি না-পাঠানো বার্তা রাখা আছে। আরও পাঠাতে একটি বাদ দিন।",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "সংরক্ষিত বার্তা পড়া যায়নি; পাঠানো যাচ্ছে না।",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "এই বার্তাটি এখান থেকে পাঠানো যায় না।",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "সেশন বদলে যাওয়ায় সার্ভার বার্তাটি প্রত্যাখ্যান করেছে। আপনার লেখা রাখা হয়েছে।",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "অন্য একটি বার্তা ইতিমধ্যে এই বার্তার পরিচয় ব্যবহার করছে; আবার পাঠানো হয়নি।",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "সার্ভার বার্তাটি গ্রহণ করেনি। আপনার লেখা রাখা হয়েছে।",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "বার্তা বাতিল হয়েছে।",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "বাতিল করার আগেই বার্তাটি পৌঁছে গেছে।",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "পৌঁছানোর ধরন বদলানো হয়েছে।",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "পৌঁছানোর ধরন বদলানো যায়নি; বার্তাটি ইতিমধ্যে পৌঁছেছে।",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "পরিবর্তন নিশ্চিত করা যায়নি।",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "সার্ভারের সংস্করণ বদলেছে; এখানে এই বার্তা বদলানো যাবে না।",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "লাইভ দৃশ্য হালনাগাদ হলে আবার পাঠানো যাবে।",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "অন্য ক্লায়েন্ট থেকে",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "অপেক্ষমাণ বার্তা",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

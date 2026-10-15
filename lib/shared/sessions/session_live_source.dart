@@ -1,5 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'prompt_outbox.dart';
+
 enum SessionLiveFailure {
   authenticationRequired,
   unavailable,
@@ -63,6 +65,14 @@ abstract interface class SessionLiveHandle {
 
   /// Emits the current view on listen, then every change.
   Stream<SessionLiveView> get updates;
+
+  /// The only way this lease sends: null when it cannot (no ledger storage,
+  /// closed lease). The lease itself never sends on its own.
+  PromptOutbox? get outbox;
+
+  /// The native message id [id] was projected from, so a pending row can be
+  /// matched to an outbox entry; null for any other item.
+  String? nativeMessageOf(ItemId id);
   void close();
 }
 

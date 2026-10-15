@@ -511,5 +511,137 @@
   "liveRetry": "دوبارہ جوڑیں",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "لائیو سیشن",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "پیغام",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "بھیجیں",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "رہنمائی",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "قطار میں ڈالیں",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "رہنمائی جاری",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "قطار میں",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "منسوخ کریں",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "ابھی رہنمائی کریں",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "قطار میں منتقل کریں",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "دوبارہ جانچیں",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "دوبارہ بھیجیں (دہرا ہو سکتا ہے)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "رد کریں",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "بھیجا جا رہا ہے…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "ترسیل کی تصدیق نہیں ہوئی",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "منسوخی کی ابھی تصدیق نہیں ہوئی",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "نہیں بھیجا گیا",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "یہ پیغام اس آلے پر محفوظ نہیں ہو سکا، اس لیے نہیں بھیجا گیا۔",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "اس آلے پر بہت زیادہ نہ بھیجے گئے پیغامات محفوظ ہیں۔ مزید بھیجنے کے لیے ایک رد کریں۔",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "محفوظ پیغامات پڑھے نہیں جا سکے؛ بھیجنا دستیاب نہیں۔",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "یہ پیغام یہاں سے نہیں بھیجا جا سکتا۔",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "سیشن بدلنے کی وجہ سے سرور نے یہ پیغام مسترد کر دیا۔ آپ کا متن محفوظ رکھا گیا۔",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "کوئی دوسرا پیغام پہلے ہی اس پیغام کی شناخت استعمال کر رہا ہے؛ اسے دوبارہ نہیں بھیجا گیا۔",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "سرور نے یہ پیغام قبول نہیں کیا۔ آپ کا متن محفوظ رکھا گیا۔",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "پیغام منسوخ ہو گیا۔",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "منسوخ ہونے سے پہلے پیغام پہنچ گیا۔",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "ترسیل کا طریقہ بدل دیا گیا۔",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "ترسیل کا طریقہ نہیں بدلا جا سکا؛ پیغام پہلے ہی پہنچ چکا ہے۔",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "تبدیلی کی تصدیق نہیں ہو سکی۔",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "سرور کا ورژن بدل گیا؛ یہ پیغام یہاں نہیں بدلا جا سکتا۔",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "لائیو منظر تازہ ہونے پر بھیجنا دوبارہ شروع ہوگا۔",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "کسی دوسرے کلائنٹ سے",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "منتظر پیغامات",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

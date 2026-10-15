@@ -511,5 +511,137 @@
   "liveRetry": "重新连接",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "实时会话",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "消息",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "发送",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "引导",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "排队",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "引导中",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "排队中",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "取消",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "立即引导",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "移到队列",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "重新检查",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "再次发送（可能重复）",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "丢弃",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "正在发送…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "未确认送达",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "取消尚未确认",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "未发送",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "无法在此设备上保存这条消息，因此未发送。",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "此设备上保存的未发送消息过多。请丢弃一条后再发送。",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "无法读取已保存的消息；无法发送。",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "此处无法发送这条消息。",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "会话已变更，服务器拒绝了这条消息。你的文本已保留。",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "另一条消息已使用此消息的标识；未再次发送。",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "服务器未接受这条消息。你的文本已保留。",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "消息已取消。",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "消息在取消之前已送达。",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "送达方式已更改。",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "无法更改送达方式；消息已送达。",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "无法确认此更改。",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "服务器版本已变更；无法在此更改这条消息。",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "实时视图更新后即可继续发送。",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "来自其他客户端",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "等待中的消息",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }

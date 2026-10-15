@@ -810,4 +810,114 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveRetry => 'Переподключить';
+
+  @override
+  String get composerLiveSession => 'Живая сессия';
+
+  @override
+  String get composerHint => 'Сообщение';
+
+  @override
+  String get composerSend => 'Отправить';
+
+  @override
+  String get composerSteer => 'Направить';
+
+  @override
+  String get composerQueue => 'В очередь';
+
+  @override
+  String get composerSteering => 'Направляется';
+
+  @override
+  String get composerQueued => 'В очереди';
+
+  @override
+  String get composerCancel => 'Отменить';
+
+  @override
+  String get composerMoveToSteer => 'Направить сейчас';
+
+  @override
+  String get composerMoveToQueue => 'Переместить в очередь';
+
+  @override
+  String get composerCheckAgain => 'Проверить снова';
+
+  @override
+  String get composerSendAgain => 'Отправить снова (возможен дубль)';
+
+  @override
+  String get composerDiscard => 'Удалить';
+
+  @override
+  String get composerSending => 'Отправка…';
+
+  @override
+  String get composerNotConfirmed => 'Доставка не подтверждена';
+
+  @override
+  String get composerCancelling => 'Отмена ещё не подтверждена';
+
+  @override
+  String get composerNotSent => 'Не отправлено';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'Не удалось сохранить сообщение на устройстве, поэтому оно не отправлено.';
+
+  @override
+  String get composerNoticeFull =>
+      'На устройстве хранится слишком много неотправленных сообщений. Удалите одно, чтобы отправить ещё.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'Не удалось прочитать сохранённые сообщения; отправка недоступна.';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'Это сообщение нельзя отправить здесь.';
+
+  @override
+  String get composerNoticeConflict =>
+      'Сервер отклонил сообщение, потому что сессия изменилась. Ваш текст сохранён.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'Другое сообщение уже использует идентификатор этого; оно не отправлено повторно.';
+
+  @override
+  String get composerNoticeRejected =>
+      'Сервер не принял это сообщение. Ваш текст сохранён.';
+
+  @override
+  String get composerNoticeCancelled => 'Сообщение отменено.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'Сообщение было доставлено до того, как его удалось отменить.';
+
+  @override
+  String get composerNoticeSwitched => 'Способ доставки изменён.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'Не удалось изменить доставку; сообщение уже доставлено.';
+
+  @override
+  String get composerNoticeChangeFailed => 'Не удалось подтвердить изменение.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'Версия сервера изменилась; здесь это сообщение изменить нельзя.';
+
+  @override
+  String get composerOffline =>
+      'Отправка возобновится, когда живой вид обновится.';
+
+  @override
+  String get composerOtherClient => 'С другого клиента';
+
+  @override
+  String get composerInbox => 'Ожидающие сообщения';
 }

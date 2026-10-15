@@ -767,4 +767,107 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveRetry => '再接続';
+
+  @override
+  String get composerLiveSession => 'ライブセッション';
+
+  @override
+  String get composerHint => 'メッセージ';
+
+  @override
+  String get composerSend => '送信';
+
+  @override
+  String get composerSteer => 'ステア';
+
+  @override
+  String get composerQueue => 'キュー';
+
+  @override
+  String get composerSteering => 'ステア中';
+
+  @override
+  String get composerQueued => 'キュー待ち';
+
+  @override
+  String get composerCancel => 'キャンセル';
+
+  @override
+  String get composerMoveToSteer => '今すぐステア';
+
+  @override
+  String get composerMoveToQueue => 'キューへ移動';
+
+  @override
+  String get composerCheckAgain => '再確認';
+
+  @override
+  String get composerSendAgain => '再送信（重複の可能性あり）';
+
+  @override
+  String get composerDiscard => '破棄';
+
+  @override
+  String get composerSending => '送信中…';
+
+  @override
+  String get composerNotConfirmed => '配信が確認されていません';
+
+  @override
+  String get composerCancelling => 'キャンセルはまだ確認されていません';
+
+  @override
+  String get composerNotSent => '未送信';
+
+  @override
+  String get composerNoticeNotSaved => 'このメッセージを端末に保存できなかったため、送信されませんでした。';
+
+  @override
+  String get composerNoticeFull => 'この端末に未送信のメッセージが多すぎます。送信するには1件破棄してください。';
+
+  @override
+  String get composerNoticeUnreadable => '保存されたメッセージを読み込めません。送信できません。';
+
+  @override
+  String get composerNoticeUnavailable => 'このメッセージはここでは送信できません。';
+
+  @override
+  String get composerNoticeConflict =>
+      'セッションが変更されたため、サーバーがこのメッセージを拒否しました。テキストは保持されています。';
+
+  @override
+  String get composerNoticeIdentity =>
+      '別のメッセージがすでにこのメッセージの識別子を使用しています。再送信はされていません。';
+
+  @override
+  String get composerNoticeRejected => 'サーバーがこのメッセージを受け付けませんでした。テキストは保持されています。';
+
+  @override
+  String get composerNoticeCancelled => 'メッセージをキャンセルしました。';
+
+  @override
+  String get composerNoticeDeliveredFirst => 'キャンセルする前にメッセージが配信されました。';
+
+  @override
+  String get composerNoticeSwitched => '配信方法を変更しました。';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      '配信方法を変更できませんでした。メッセージはすでに配信されています。';
+
+  @override
+  String get composerNoticeChangeFailed => '変更を確認できませんでした。';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'サーバーのバージョンが変わったため、ここではこのメッセージを変更できません。';
+
+  @override
+  String get composerOffline => 'ライブ表示が最新になると送信を再開します。';
+
+  @override
+  String get composerOtherClient => '別のクライアントから';
+
+  @override
+  String get composerInbox => '待機中のメッセージ';
 }

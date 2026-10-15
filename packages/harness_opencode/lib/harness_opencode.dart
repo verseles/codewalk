@@ -8,6 +8,7 @@ export 'src/server_info.dart';
 export 'src/version_policy.dart';
 export 'src/retry_after.dart';
 export 'src/pairing_client.dart';
+export 'src/item_ids.dart';
 export 'src/message_id.dart';
 export 'src/prompt_client.dart';
 export 'src/session_reader.dart';

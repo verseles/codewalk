@@ -769,4 +769,108 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveRetry => '다시 연결';
+
+  @override
+  String get composerLiveSession => '라이브 세션';
+
+  @override
+  String get composerHint => '메시지';
+
+  @override
+  String get composerSend => '보내기';
+
+  @override
+  String get composerSteer => '조정';
+
+  @override
+  String get composerQueue => '대기열';
+
+  @override
+  String get composerSteering => '조정 중';
+
+  @override
+  String get composerQueued => '대기 중';
+
+  @override
+  String get composerCancel => '취소';
+
+  @override
+  String get composerMoveToSteer => '지금 조정';
+
+  @override
+  String get composerMoveToQueue => '대기열로 이동';
+
+  @override
+  String get composerCheckAgain => '다시 확인';
+
+  @override
+  String get composerSendAgain => '다시 보내기(중복될 수 있음)';
+
+  @override
+  String get composerDiscard => '삭제';
+
+  @override
+  String get composerSending => '보내는 중…';
+
+  @override
+  String get composerNotConfirmed => '전달이 확인되지 않음';
+
+  @override
+  String get composerCancelling => '취소가 아직 확인되지 않음';
+
+  @override
+  String get composerNotSent => '보내지 않음';
+
+  @override
+  String get composerNoticeNotSaved => '이 메시지를 기기에 저장할 수 없어 보내지 않았습니다.';
+
+  @override
+  String get composerNoticeFull =>
+      '이 기기에 보내지 않은 메시지가 너무 많습니다. 더 보내려면 하나를 삭제하세요.';
+
+  @override
+  String get composerNoticeUnreadable => '저장된 메시지를 읽을 수 없어 보낼 수 없습니다.';
+
+  @override
+  String get composerNoticeUnavailable => '이 메시지는 여기서 보낼 수 없습니다.';
+
+  @override
+  String get composerNoticeConflict =>
+      '세션이 바뀌어 서버가 이 메시지를 거부했습니다. 입력한 텍스트는 유지됩니다.';
+
+  @override
+  String get composerNoticeIdentity =>
+      '다른 메시지가 이미 이 메시지의 식별자를 사용합니다. 다시 보내지 않았습니다.';
+
+  @override
+  String get composerNoticeRejected => '서버가 이 메시지를 받지 않았습니다. 입력한 텍스트는 유지됩니다.';
+
+  @override
+  String get composerNoticeCancelled => '메시지를 취소했습니다.';
+
+  @override
+  String get composerNoticeDeliveredFirst => '취소하기 전에 메시지가 전달되었습니다.';
+
+  @override
+  String get composerNoticeSwitched => '전달 방식을 변경했습니다.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      '전달 방식을 변경할 수 없습니다. 메시지가 이미 전달되었습니다.';
+
+  @override
+  String get composerNoticeChangeFailed => '변경을 확인할 수 없습니다.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      '서버 버전이 바뀌어 여기서 이 메시지를 변경할 수 없습니다.';
+
+  @override
+  String get composerOffline => '라이브 보기가 최신이 되면 다시 보낼 수 있습니다.';
+
+  @override
+  String get composerOtherClient => '다른 클라이언트에서';
+
+  @override
+  String get composerInbox => '대기 중인 메시지';
 }

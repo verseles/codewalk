@@ -814,4 +814,115 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get liveRetry => 'Riconnetti';
+
+  @override
+  String get composerLiveSession => 'Sessione dal vivo';
+
+  @override
+  String get composerHint => 'Messaggio';
+
+  @override
+  String get composerSend => 'Invia';
+
+  @override
+  String get composerSteer => 'Indirizza';
+
+  @override
+  String get composerQueue => 'Accoda';
+
+  @override
+  String get composerSteering => 'In indirizzamento';
+
+  @override
+  String get composerQueued => 'In coda';
+
+  @override
+  String get composerCancel => 'Annulla';
+
+  @override
+  String get composerMoveToSteer => 'Indirizza ora';
+
+  @override
+  String get composerMoveToQueue => 'Sposta in coda';
+
+  @override
+  String get composerCheckAgain => 'Verifica di nuovo';
+
+  @override
+  String get composerSendAgain => 'Invia di nuovo (possibile duplicato)';
+
+  @override
+  String get composerDiscard => 'Scarta';
+
+  @override
+  String get composerSending => 'Invio…';
+
+  @override
+  String get composerNotConfirmed => 'Consegna non confermata';
+
+  @override
+  String get composerCancelling => 'Annullamento non ancora confermato';
+
+  @override
+  String get composerNotSent => 'Non inviato';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'Impossibile salvare questo messaggio sul dispositivo, quindi non è stato inviato.';
+
+  @override
+  String get composerNoticeFull =>
+      'Troppi messaggi non inviati sono conservati su questo dispositivo. Scartane uno per inviarne altri.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'Impossibile leggere i messaggi salvati; l’invio non è disponibile.';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'Questo messaggio non può essere inviato qui.';
+
+  @override
+  String get composerNoticeConflict =>
+      'Il server ha rifiutato questo messaggio perché la sessione è cambiata. Il testo è stato mantenuto.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'Un altro messaggio usa già l’identità di questo; non è stato inviato di nuovo.';
+
+  @override
+  String get composerNoticeRejected =>
+      'Il server non ha accettato questo messaggio. Il testo è stato mantenuto.';
+
+  @override
+  String get composerNoticeCancelled => 'Messaggio annullato.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'Il messaggio è stato consegnato prima di poter essere annullato.';
+
+  @override
+  String get composerNoticeSwitched => 'Consegna modificata.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'Impossibile modificare la consegna; il messaggio è già stato consegnato.';
+
+  @override
+  String get composerNoticeChangeFailed =>
+      'Impossibile confermare la modifica.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'La versione del server è cambiata; questo messaggio non può essere modificato qui.';
+
+  @override
+  String get composerOffline =>
+      'L’invio riprende quando la vista dal vivo è aggiornata.';
+
+  @override
+  String get composerOtherClient => 'Da un altro client';
+
+  @override
+  String get composerInbox => 'Messaggi in attesa';
 }

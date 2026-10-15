@@ -820,4 +820,115 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get liveRetry => 'Neu verbinden';
+
+  @override
+  String get composerLiveSession => 'Live-Sitzung';
+
+  @override
+  String get composerHint => 'Nachricht';
+
+  @override
+  String get composerSend => 'Senden';
+
+  @override
+  String get composerSteer => 'Steuern';
+
+  @override
+  String get composerQueue => 'Einreihen';
+
+  @override
+  String get composerSteering => 'Steuert';
+
+  @override
+  String get composerQueued => 'In Warteschlange';
+
+  @override
+  String get composerCancel => 'Abbrechen';
+
+  @override
+  String get composerMoveToSteer => 'Jetzt steuern';
+
+  @override
+  String get composerMoveToQueue => 'In die Warteschlange';
+
+  @override
+  String get composerCheckAgain => 'Erneut prüfen';
+
+  @override
+  String get composerSendAgain => 'Erneut senden (evtl. doppelt)';
+
+  @override
+  String get composerDiscard => 'Verwerfen';
+
+  @override
+  String get composerSending => 'Wird gesendet…';
+
+  @override
+  String get composerNotConfirmed => 'Zustellung nicht bestätigt';
+
+  @override
+  String get composerCancelling => 'Abbruch noch nicht bestätigt';
+
+  @override
+  String get composerNotSent => 'Nicht gesendet';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'Diese Nachricht konnte nicht auf dem Gerät gespeichert werden und wurde daher nicht gesendet.';
+
+  @override
+  String get composerNoticeFull =>
+      'Auf diesem Gerät liegen zu viele ungesendete Nachrichten. Verwirf eine, um mehr zu senden.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'Die gespeicherten Nachrichten konnten nicht gelesen werden; Senden ist nicht verfügbar.';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'Diese Nachricht kann hier nicht gesendet werden.';
+
+  @override
+  String get composerNoticeConflict =>
+      'Der Server hat diese Nachricht abgelehnt, weil sich die Sitzung geändert hat. Dein Text wurde behalten.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'Eine andere Nachricht nutzt bereits die Kennung dieser Nachricht; sie wurde nicht erneut gesendet.';
+
+  @override
+  String get composerNoticeRejected =>
+      'Der Server hat diese Nachricht nicht angenommen. Dein Text wurde behalten.';
+
+  @override
+  String get composerNoticeCancelled => 'Nachricht abgebrochen.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'Die Nachricht wurde zugestellt, bevor sie abgebrochen werden konnte.';
+
+  @override
+  String get composerNoticeSwitched => 'Zustellung geändert.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'Zustellung konnte nicht geändert werden; die Nachricht wurde bereits zugestellt.';
+
+  @override
+  String get composerNoticeChangeFailed =>
+      'Die Änderung konnte nicht bestätigt werden.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'Die Serverversion hat sich geändert; diese Nachricht kann hier nicht geändert werden.';
+
+  @override
+  String get composerOffline =>
+      'Senden geht weiter, sobald die Live-Ansicht aktuell ist.';
+
+  @override
+  String get composerOtherClient => 'Von einem anderen Client';
+
+  @override
+  String get composerInbox => 'Wartende Nachrichten';
 }

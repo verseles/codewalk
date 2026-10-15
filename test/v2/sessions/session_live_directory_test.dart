@@ -9,6 +9,8 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'outbox_fakes.dart';
+
 /// A loopback OpenCode 2.0.22 stand-in: probe, one event stream per
 /// connection and the hydration reads. It records every request path.
 final class _Server {
@@ -23,6 +25,7 @@ final class _Server {
   final paths = <String>[];
   final streams = <HttpResponse>[];
   final methods = <String>{};
+  final prompts = <String>[];
   int get port => _server.port;
   int get events => paths.where((p) => p == '/proxy/api/event').length;
 
@@ -53,6 +56,24 @@ final class _Server {
     }
     r.response.headers.contentType = ContentType.json;
     final tail = segments.last;
+    if (r.method == 'POST' && tail == 'prompt') {
+      prompts.add(await utf8.decoder.bind(r).join());
+      final body = jsonDecode(prompts.last) as Map<String, Object?>;
+      r.response.write(
+        jsonEncode({
+          'data': {
+            'id': body['id'],
+            'sessionID': segments[3],
+            'time': {'created': 1},
+            'type': 'user',
+            'payload': {'text': body['text']},
+            'delivery': body['delivery'],
+          },
+        }),
+      );
+      await r.response.close();
+      return;
+    }
     final session = segments.length > 3 ? segments[3] : 'ses_one';
     r.response.write(
       jsonEncode(switch (tail) {
@@ -360,4 +381,44 @@ void main() {
       );
     },
   );
+
+  test('a lease sends only through its outbox, on the same stream', () async {
+    final readOnly = createSessionLiveDirectory()!;
+    addTearDown(readOnly.close);
+    final plain = await readOnly.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    expect(plain.outbox, isNull);
+    plain.close();
+
+    final directory = createSessionLiveDirectory(payloads: OutboxStore())!;
+    addTearDown(directory.close);
+    final handle = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    await until(handle, (v) => v.phase == SessionLivePhase.live);
+    expect(server.methods, {'GET'});
+    final outbox = handle.outbox!;
+    final result = await outbox.submit(
+      session: ref('ses_one'),
+      commandId: const CommandId('cmd_1'),
+      draft: PromptDraft(text: 'Hi'),
+      delivery: Delivery.steer,
+    );
+    expect(result.entry?.state, SubmissionKind.admitted);
+    final body = jsonDecode(server.prompts.single) as Map<String, Object?>;
+    expect(body.keys, ['id', 'text', 'delivery', 'resume']);
+    expect(body['id'], matches(RegExp(r'^msg_[0-9a-f]{12}[0-9A-Za-z]{14}$')));
+    expect(body, containsPair('text', 'Hi'));
+    expect(body, containsPair('delivery', 'steer'));
+    expect(body, containsPair('resume', true));
+    expect(server.paths, contains('/proxy/api/session/ses_one/prompt'));
+    expect(server.events, 1);
+    handle.close();
+    expect(handle.outbox, isNull);
+  });
 }

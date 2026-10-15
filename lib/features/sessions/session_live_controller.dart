@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../hosts/hosts_controller.dart';
 
-/// Owns one screen's live, read-only lease; it never starts, stops or answers
-/// anything on the server.
+/// Owns one screen's live lease; it never starts, stops or answers anything
+/// on the server. The composer sends through the lease's [outbox].
 class SessionLiveController extends ChangeNotifier {
   SessionLiveController({
     required this.hosts,
@@ -34,6 +35,8 @@ class SessionLiveController extends ChangeNotifier {
   bool opening = false;
 
   SessionState? get state => view?.state;
+  PromptOutbox? get outbox => _handle?.outbox;
+  String? nativeMessageOf(ItemId id) => _handle?.nativeMessageOf(id);
   SessionLivePhase get phase => view?.phase ?? SessionLivePhase.probing;
   bool get loading =>
       opening ||

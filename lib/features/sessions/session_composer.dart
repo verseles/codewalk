@@ -1,0 +1,381 @@
+import 'dart:math';
+
+import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/material.dart';
+
+import '../../shared/l10n/generated/v2_localizations.dart';
+import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/prompt_outbox.dart';
+import 'session_composer_controller.dart';
+
+/// The live screen's composer: pending inbox chips, entries that still need
+/// the user, the steer/queue choice and the text field. It edits the page's
+/// draft, so typing never rebuilds the timeline and a reopened lease keeps
+/// the text.
+class SessionComposer extends StatefulWidget {
+  const SessionComposer({
+    super.key,
+    required this.controller,
+    required this.text,
+    required this.maxHeight,
+  });
+  final SessionComposerController controller;
+
+  /// Owned by the page, so a draft outlives a reopened lease.
+  final TextEditingController text;
+
+  /// The most the composer may take of the page body, which already
+  /// excludes the keyboard; past it the composer scrolls.
+  final double maxHeight;
+  @override
+  State<SessionComposer> createState() => _SessionComposerState();
+}
+
+class _SessionComposerState extends State<SessionComposer> {
+  TextEditingController get _text => widget.text;
+
+  @override
+  void initState() {
+    super.initState();
+    _text.addListener(_textChanged);
+  }
+
+  @override
+  void dispose() {
+    _text.removeListener(_textChanged);
+    super.dispose();
+  }
+
+  // The draft belongs to the page and outlives this widget across a
+  // reopened lease, so a finished send still updates it after an unmount.
+  Future<void> _sendAgain(CommandId id) async {
+    final draft = _text;
+    final text = await widget.controller.sendAgain(id);
+    if (text != null && draft.text.isEmpty) draft.text = text;
+  }
+
+  void _textChanged() => setState(() {});
+
+  Future<void> _send() async {
+    final draft = _text;
+    final sent = draft.text;
+    final clear = await widget.controller.send(sent);
+    // Text typed while the send was pending is the user's, never cleared.
+    if (clear && draft.text == sent) draft.clear();
+  }
+
+  String? _notice(V2Localizations l10n, ComposerNotice notice) =>
+      switch (notice) {
+        ComposerNotice.none => null,
+        ComposerNotice.unconfirmed => l10n.composerNotConfirmed,
+        ComposerNotice.notSaved => l10n.composerNoticeNotSaved,
+        ComposerNotice.full => l10n.composerNoticeFull,
+        ComposerNotice.unreadable => l10n.composerNoticeUnreadable,
+        ComposerNotice.unavailable => l10n.composerNoticeUnavailable,
+        ComposerNotice.conflict => l10n.composerNoticeConflict,
+        ComposerNotice.identityOccupied => l10n.composerNoticeIdentity,
+        ComposerNotice.authRequired => l10n.hostsAuthRequired,
+        ComposerNotice.rateLimited => l10n.sessionsRateLimited,
+        ComposerNotice.sessionGone => l10n.liveEvicted,
+        ComposerNotice.rejected => l10n.composerNoticeRejected,
+        ComposerNotice.cancelled => l10n.composerNoticeCancelled,
+        ComposerNotice.deliveredFirst => l10n.composerNoticeDeliveredFirst,
+        ComposerNotice.cancelPending => l10n.composerCancelling,
+        ComposerNotice.switched => l10n.composerNoticeSwitched,
+        ComposerNotice.switchNotApplied => l10n.composerNoticeSwitchNotApplied,
+        ComposerNotice.changeFailed => l10n.composerNoticeChangeFailed,
+        ComposerNotice.versionChanged => l10n.composerNoticeVersionChanged,
+      };
+
+  static String _preview(String text) =>
+      String.fromCharCodes(text.runes.take(200));
+
+  Widget _action(
+    String key,
+    IconData icon,
+    String tooltip,
+    VoidCallback? onPressed,
+  ) => IconButton(
+    key: ValueKey(key),
+    icon: Icon(icon),
+    tooltip: tooltip,
+    visualDensity: VisualDensity.compact,
+    onPressed: onPressed,
+  );
+
+  Widget _chip(BuildContext context, ComposerChip chip, bool wide) {
+    final l10n = context.v2L10n;
+    final c = widget.controller;
+    final entry = chip.entry;
+    final queued =
+        (entry?.delivery ?? chip.pending.delivery.known) == Delivery.queue;
+    final fenced = entry != null && openFence(entry.fence);
+    final idle = entry == null || !c.busy.contains(entry.commandId);
+    final status = fenced
+        ? l10n.composerCancelling
+        : entry?.state == SubmissionKind.uncertain
+        ? l10n.composerNotConfirmed
+        : queued
+        ? l10n.composerQueued
+        : l10n.composerSteering;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: ValueKey('live-chip-${chip.pending.id.value}'),
+      constraints: BoxConstraints(maxWidth: wide ? 320 : 240),
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 4, 6),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _preview(chip.pending.text),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  entry == null
+                      ? '$status · ${l10n.composerOtherClient}'
+                      : status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+          if (entry != null && idle && canSwitch(entry))
+            _action(
+              'live-chip-switch-${entry.commandId.value}',
+              queued ? Icons.bolt : Icons.schedule,
+              queued ? l10n.composerMoveToSteer : l10n.composerMoveToQueue,
+              () => c.switchDelivery(
+                entry.commandId,
+                queued ? Delivery.steer : Delivery.queue,
+              ),
+            ),
+          if (entry != null && idle && canCancel(entry))
+            _action(
+              'live-chip-cancel-${entry.commandId.value}',
+              Icons.close,
+              l10n.composerCancel,
+              () => c.cancel(entry.commandId),
+            ),
+          if (entry != null &&
+              idle &&
+              (fenced || entry.state == SubmissionKind.uncertain))
+            _action(
+              'live-chip-check-${entry.commandId.value}',
+              Icons.refresh,
+              l10n.composerCheckAgain,
+              () => c.checkAgain(entry.commandId),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, OutboxEntry entry) {
+    final l10n = context.v2L10n;
+    final c = widget.controller;
+    final id = entry.commandId.value;
+    final idle = !c.busy.contains(entry.commandId);
+    final fenced = openFence(entry.fence);
+    final status = switch (entry.state) {
+      _ when fenced => l10n.composerCancelling,
+      SubmissionKind.sending => l10n.composerSending,
+      SubmissionKind.rejected => l10n.composerNotSent,
+      _ => l10n.composerNotConfirmed,
+    };
+    final uncertain = entry.state == SubmissionKind.uncertain;
+    return Padding(
+      key: ValueKey('live-row-$id'),
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: Text(
+              '${_preview(entry.text)} · $status',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (idle && (uncertain || fenced))
+            TextButton(
+              key: ValueKey('live-row-check-$id'),
+              onPressed: () => c.checkAgain(entry.commandId),
+              child: Text(l10n.composerCheckAgain),
+            ),
+          if (idle && uncertain && !fenced)
+            TextButton(
+              key: ValueKey('live-row-again-$id'),
+              // Enabled only with an empty field, which gets the text back
+              // if the new send does not take it.
+              onPressed: c.canSend && _text.text.isEmpty
+                  ? () => _sendAgain(entry.commandId)
+                  : null,
+              child: Text(l10n.composerSendAgain),
+            ),
+          if (idle && entry.state != SubmissionKind.sending)
+            TextButton(
+              key: ValueKey('live-row-discard-$id'),
+              onPressed: () => c.discard(entry.commandId),
+              child: Text(l10n.composerDiscard),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: widget.controller,
+    builder: (context, _) {
+      final c = widget.controller;
+      final l10n = context.v2L10n;
+      final state = c.live.state;
+      final chips = c.chips(state);
+      final rows = c.rows(state, chips);
+      final notice = _notice(l10n, c.notice);
+      final wide = MediaQuery.sizeOf(context).width >= 840;
+      final canSend = c.canSend && _text.text.trim().isNotEmpty;
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: max(0, widget.maxHeight)),
+        child: SingleChildScrollView(
+          reverse: true,
+          child: Column(
+            key: const ValueKey('live-composer'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                // Leaves room for the field with the keyboard open.
+                constraints: BoxConstraints(
+                  maxHeight: min(200, MediaQuery.sizeOf(context).height * 0.2),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (chips.isNotEmpty) ...[
+                        Text(
+                          l10n.composerInbox,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final chip in chips)
+                              _chip(context, chip, wide),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      for (final entry in rows) _row(context, entry),
+                    ],
+                  ),
+                ),
+              ),
+              Semantics(
+                liveRegion: true,
+                container: true,
+                child: Column(
+                  key: const ValueKey('live-composer-notice'),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (notice != null) Text(notice),
+                    if (c.unreadable)
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: TextButton(
+                          key: const ValueKey('live-composer-reload'),
+                          onPressed: c.reload,
+                          child: Text(l10n.composerCheckAgain),
+                        ),
+                      ),
+                    if (!c.canSend && !c.sending && !c.unreadable)
+                      Text(l10n.composerOffline),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    key: const ValueKey('live-delivery-steer'),
+                    label: Text(l10n.composerSteer),
+                    selected: c.delivery == Delivery.steer,
+                    onSelected: (_) => c.setDelivery(Delivery.steer),
+                  ),
+                  ChoiceChip(
+                    key: const ValueKey('live-delivery-queue'),
+                    label: Text(l10n.composerQueue),
+                    selected: c.delivery == Delivery.queue,
+                    onSelected: (_) => c.setDelivery(Delivery.queue),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      key: const ValueKey('live-composer-input'),
+                      controller: _text,
+                      // A text that a failed resend hands back needs the field
+                      // untouched until the send ends.
+                      readOnly: c.sending,
+                      minLines: 1,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: l10n.composerHint,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (c.sending)
+                    SizedBox.square(
+                      dimension: 48,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          semanticsLabel: l10n.composerSending,
+                        ),
+                      ),
+                    )
+                  else if (wide)
+                    FilledButton.icon(
+                      key: const ValueKey('live-composer-send'),
+                      onPressed: canSend ? _send : null,
+                      icon: const Icon(Icons.send),
+                      label: Text(l10n.composerSend),
+                    )
+                  else
+                    IconButton.filled(
+                      key: const ValueKey('live-composer-send'),
+                      onPressed: canSend ? _send : null,
+                      icon: const Icon(Icons.send),
+                      tooltip: l10n.composerSend,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}

@@ -21,8 +21,10 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     required this.ids,
     DateTime Function()? now,
     Future<void> Function(Duration)? wait,
+    KeySerialExecutor? queue,
   }) : _now = now ?? DateTime.now,
-       _wait = wait ?? Future<void>.delayed {
+       _wait = wait ?? Future<void>.delayed,
+       _queue = queue ?? KeySerialExecutor() {
     if (reader.harness != client.harness ||
         reader.transport.endpoint != client.transport.endpoint) {
       throw ArgumentError('The reader and the client serve another server.');
@@ -46,7 +48,10 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   final OpenCodeMessageIds ids;
   final DateTime Function() _now;
   final Future<void> Function(Duration) _wait;
-  final _queue = KeySerialExecutor();
+
+  /// Shared by every outbox of one server, so two instances writing the same
+  /// session ledger still take turns.
+  final KeySerialExecutor _queue;
 
   static String keyFor(SessionRef session) =>
       'cw2.outbox.v1.${sha256.convert(utf8.encode(session.storageKey))}';

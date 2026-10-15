@@ -18,6 +18,7 @@ import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
+import '../platform/storage/payload_factory.dart';
 import '../platform/storage/preferences_backend.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
@@ -114,7 +115,11 @@ AppDependencies createAppDependencies({
     hosts: locator<HostsController>(),
     sessions: locator<SessionsController>(),
     historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
-    liveDirectory: (sessionLiveDirectory ?? createSessionLiveDirectory)(),
+    liveDirectory:
+        (sessionLiveDirectory ??
+        () => createSessionLiveDirectory(
+          payloads: createV2PayloadStore(metadata),
+        ))(),
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),

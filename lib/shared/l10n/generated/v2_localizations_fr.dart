@@ -816,4 +816,115 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get liveRetry => 'Reconnecter';
+
+  @override
+  String get composerLiveSession => 'Session en direct';
+
+  @override
+  String get composerHint => 'Message';
+
+  @override
+  String get composerSend => 'Envoyer';
+
+  @override
+  String get composerSteer => 'Orienter';
+
+  @override
+  String get composerQueue => 'Mettre en file';
+
+  @override
+  String get composerSteering => 'Orientation';
+
+  @override
+  String get composerQueued => 'En file';
+
+  @override
+  String get composerCancel => 'Annuler';
+
+  @override
+  String get composerMoveToSteer => 'Orienter maintenant';
+
+  @override
+  String get composerMoveToQueue => 'Mettre en file d’attente';
+
+  @override
+  String get composerCheckAgain => 'Vérifier à nouveau';
+
+  @override
+  String get composerSendAgain => 'Renvoyer (doublon possible)';
+
+  @override
+  String get composerDiscard => 'Supprimer';
+
+  @override
+  String get composerSending => 'Envoi…';
+
+  @override
+  String get composerNotConfirmed => 'Livraison non confirmée';
+
+  @override
+  String get composerCancelling => 'Annulation pas encore confirmée';
+
+  @override
+  String get composerNotSent => 'Non envoyé';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'Ce message n’a pas pu être enregistré sur cet appareil ; il n’a donc pas été envoyé.';
+
+  @override
+  String get composerNoticeFull =>
+      'Trop de messages non envoyés sont conservés sur cet appareil. Supprimez-en un pour en envoyer d’autres.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'Les messages enregistrés sont illisibles ; l’envoi est indisponible.';
+
+  @override
+  String get composerNoticeUnavailable =>
+      'Ce message ne peut pas être envoyé ici.';
+
+  @override
+  String get composerNoticeConflict =>
+      'Le serveur a refusé ce message car la session a changé. Votre texte a été conservé.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'Un autre message utilise déjà l’identité de celui-ci ; il n’a pas été renvoyé.';
+
+  @override
+  String get composerNoticeRejected =>
+      'Le serveur n’a pas accepté ce message. Votre texte a été conservé.';
+
+  @override
+  String get composerNoticeCancelled => 'Message annulé.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'Le message a été livré avant de pouvoir être annulé.';
+
+  @override
+  String get composerNoticeSwitched => 'Livraison modifiée.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'Impossible de modifier la livraison ; le message a déjà été livré.';
+
+  @override
+  String get composerNoticeChangeFailed =>
+      'La modification n’a pas pu être confirmée.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'La version du serveur a changé ; ce message ne peut pas être modifié ici.';
+
+  @override
+  String get composerOffline =>
+      'L’envoi reprend quand la vue en direct est à jour.';
+
+  @override
+  String get composerOtherClient => 'D’un autre client';
+
+  @override
+  String get composerInbox => 'Messages en attente';
 }

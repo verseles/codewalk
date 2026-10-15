@@ -798,4 +798,113 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveRetry => 'إعادة الاتصال';
+
+  @override
+  String get composerLiveSession => 'جلسة مباشرة';
+
+  @override
+  String get composerHint => 'رسالة';
+
+  @override
+  String get composerSend => 'إرسال';
+
+  @override
+  String get composerSteer => 'توجيه';
+
+  @override
+  String get composerQueue => 'وضع في الطابور';
+
+  @override
+  String get composerSteering => 'قيد التوجيه';
+
+  @override
+  String get composerQueued => 'في الطابور';
+
+  @override
+  String get composerCancel => 'إلغاء';
+
+  @override
+  String get composerMoveToSteer => 'وجّه الآن';
+
+  @override
+  String get composerMoveToQueue => 'انقل إلى الطابور';
+
+  @override
+  String get composerCheckAgain => 'تحقق مرة أخرى';
+
+  @override
+  String get composerSendAgain => 'أرسل مرة أخرى (قد تتكرر)';
+
+  @override
+  String get composerDiscard => 'تجاهل';
+
+  @override
+  String get composerSending => 'جارٍ الإرسال…';
+
+  @override
+  String get composerNotConfirmed => 'لم يتأكد التسليم';
+
+  @override
+  String get composerCancelling => 'لم يتأكد الإلغاء بعد';
+
+  @override
+  String get composerNotSent => 'لم تُرسل';
+
+  @override
+  String get composerNoticeNotSaved =>
+      'تعذّر حفظ هذه الرسالة على الجهاز، لذلك لم تُرسل.';
+
+  @override
+  String get composerNoticeFull =>
+      'توجد رسائل غير مرسلة كثيرة جدًا على هذا الجهاز. تجاهل واحدة لإرسال المزيد.';
+
+  @override
+  String get composerNoticeUnreadable =>
+      'تعذّرت قراءة الرسائل المحفوظة؛ الإرسال غير متاح.';
+
+  @override
+  String get composerNoticeUnavailable => 'لا يمكن إرسال هذه الرسالة من هنا.';
+
+  @override
+  String get composerNoticeConflict =>
+      'رفض الخادم هذه الرسالة لأن الجلسة تغيّرت. تم الاحتفاظ بنصك.';
+
+  @override
+  String get composerNoticeIdentity =>
+      'رسالة أخرى تستخدم بالفعل معرّف هذه الرسالة؛ لم تُرسل مرة أخرى.';
+
+  @override
+  String get composerNoticeRejected =>
+      'لم يقبل الخادم هذه الرسالة. تم الاحتفاظ بنصك.';
+
+  @override
+  String get composerNoticeCancelled => 'أُلغيت الرسالة.';
+
+  @override
+  String get composerNoticeDeliveredFirst =>
+      'سُلّمت الرسالة قبل أن يمكن إلغاؤها.';
+
+  @override
+  String get composerNoticeSwitched => 'تم تغيير طريقة التسليم.';
+
+  @override
+  String get composerNoticeSwitchNotApplied =>
+      'تعذّر تغيير طريقة التسليم؛ سُلّمت الرسالة بالفعل.';
+
+  @override
+  String get composerNoticeChangeFailed => 'تعذّر تأكيد التغيير.';
+
+  @override
+  String get composerNoticeVersionChanged =>
+      'تغيّر إصدار الخادم؛ لا يمكن تغيير هذه الرسالة هنا.';
+
+  @override
+  String get composerOffline =>
+      'يُستأنف الإرسال عندما يصبح العرض المباشر محدّثًا.';
+
+  @override
+  String get composerOtherClient => 'من عميل آخر';
+
+  @override
+  String get composerInbox => 'رسائل في الانتظار';
 }

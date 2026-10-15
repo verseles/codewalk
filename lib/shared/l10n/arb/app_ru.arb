@@ -511,5 +511,137 @@
   "liveRetry": "Переподключить",
   "@liveRetry": {
     "description": "V2 live read-only session view"
+  },
+  "composerLiveSession": "Живая сессия",
+  "@composerLiveSession": {
+    "description": "V2 live session composer"
+  },
+  "composerHint": "Сообщение",
+  "@composerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerSend": "Отправить",
+  "@composerSend": {
+    "description": "V2 live session composer"
+  },
+  "composerSteer": "Направить",
+  "@composerSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerQueue": "В очередь",
+  "@composerQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerSteering": "Направляется",
+  "@composerSteering": {
+    "description": "V2 live session composer"
+  },
+  "composerQueued": "В очереди",
+  "@composerQueued": {
+    "description": "V2 live session composer"
+  },
+  "composerCancel": "Отменить",
+  "@composerCancel": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToSteer": "Направить сейчас",
+  "@composerMoveToSteer": {
+    "description": "V2 live session composer"
+  },
+  "composerMoveToQueue": "Переместить в очередь",
+  "@composerMoveToQueue": {
+    "description": "V2 live session composer"
+  },
+  "composerCheckAgain": "Проверить снова",
+  "@composerCheckAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerSendAgain": "Отправить снова (возможен дубль)",
+  "@composerSendAgain": {
+    "description": "V2 live session composer"
+  },
+  "composerDiscard": "Удалить",
+  "@composerDiscard": {
+    "description": "V2 live session composer"
+  },
+  "composerSending": "Отправка…",
+  "@composerSending": {
+    "description": "V2 live session composer"
+  },
+  "composerNotConfirmed": "Доставка не подтверждена",
+  "@composerNotConfirmed": {
+    "description": "V2 live session composer"
+  },
+  "composerCancelling": "Отмена ещё не подтверждена",
+  "@composerCancelling": {
+    "description": "V2 live session composer"
+  },
+  "composerNotSent": "Не отправлено",
+  "@composerNotSent": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeNotSaved": "Не удалось сохранить сообщение на устройстве, поэтому оно не отправлено.",
+  "@composerNoticeNotSaved": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeFull": "На устройстве хранится слишком много неотправленных сообщений. Удалите одно, чтобы отправить ещё.",
+  "@composerNoticeFull": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnreadable": "Не удалось прочитать сохранённые сообщения; отправка недоступна.",
+  "@composerNoticeUnreadable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeUnavailable": "Это сообщение нельзя отправить здесь.",
+  "@composerNoticeUnavailable": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeConflict": "Сервер отклонил сообщение, потому что сессия изменилась. Ваш текст сохранён.",
+  "@composerNoticeConflict": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeIdentity": "Другое сообщение уже использует идентификатор этого; оно не отправлено повторно.",
+  "@composerNoticeIdentity": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeRejected": "Сервер не принял это сообщение. Ваш текст сохранён.",
+  "@composerNoticeRejected": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeCancelled": "Сообщение отменено.",
+  "@composerNoticeCancelled": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeDeliveredFirst": "Сообщение было доставлено до того, как его удалось отменить.",
+  "@composerNoticeDeliveredFirst": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitched": "Способ доставки изменён.",
+  "@composerNoticeSwitched": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeSwitchNotApplied": "Не удалось изменить доставку; сообщение уже доставлено.",
+  "@composerNoticeSwitchNotApplied": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeChangeFailed": "Не удалось подтвердить изменение.",
+  "@composerNoticeChangeFailed": {
+    "description": "V2 live session composer"
+  },
+  "composerNoticeVersionChanged": "Версия сервера изменилась; здесь это сообщение изменить нельзя.",
+  "@composerNoticeVersionChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerOffline": "Отправка возобновится, когда живой вид обновится.",
+  "@composerOffline": {
+    "description": "V2 live session composer"
+  },
+  "composerOtherClient": "С другого клиента",
+  "@composerOtherClient": {
+    "description": "V2 live session composer"
+  },
+  "composerInbox": "Ожидающие сообщения",
+  "@composerInbox": {
+    "description": "V2 live session composer"
   }
 }
