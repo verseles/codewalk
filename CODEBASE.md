@@ -1895,3 +1895,23 @@ wires it per endpoint profile with the live connection.
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No reconciliation, retry, cancel/switch, composer or native/MVP acceptance is
 added.
+
+## V2-045C prompt reconciliation (#384)
+
+```text
+packages/harness_opencode/lib/src/session_reader.dart # locatePrompt: inbox, then history newest first; pending/promoted/occupied/absent/incomplete
+lib/shared/sessions/prompt_outbox.dart # PromptOutbox.reconcile, OutboxReconciliation; OutboxEntry.replays/fence
+lib/platform/sessions/prompt_outbox_store.dart # reconcile steps under the session lock, same-id replay via OperationContract, setCancellationFence
+packages/harness_opencode/test/prompt_lookup_test.dart # Lookup over the V2-005B inbox/history captures
+test/v2/sessions/prompt_outbox_test.dart # Reconcile group: one message after a lost response, replay bound and backoff, fences, crash, old ledgers
+```
+
+An uncertain entry is checked by its native id; pending becomes admitted,
+promoted becomes delivered. Only an id absent from the inbox and the complete
+history is posted again, with the exact recorded payload, at most three times
+with backoff, and never under a cancellation fence. Ledgers stay schema 1 with
+optional `replays`, `fence` and `notBefore`. Nothing calls `reconcile` yet; the
+composer child (V2-045E) does.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No queue cancel/switch, composer or native/MVP acceptance is added.

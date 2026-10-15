@@ -14,6 +14,8 @@ final class OutboxEntry {
     required this.createdAt,
     required this.updatedAt,
     this.reason,
+    this.replays = 0,
+    this.fence = CancellationFence.none,
   });
   final SessionRef session;
   final CommandId commandId;
@@ -27,6 +29,12 @@ final class OutboxEntry {
   /// A finite category such as `ConflictError` or `timeout`; never server
   /// text.
   final String? reason;
+
+  /// Same-id replays posted after the original send.
+  final int replays;
+
+  /// Anything but `none` stops every replay of this entry.
+  final CancellationFence fence;
 }
 
 /// [entry] is null when nothing was recorded or sent, so the caller keeps the
@@ -42,8 +50,21 @@ final class OutboxSubmission {
   final bool sent;
 }
 
-/// Records each prompt before sending it and keeps the outcome; it never
-/// resends on its own.
+/// [entry] is null when the outbox is unreadable or does not hold the
+/// command ([refusal] says which); otherwise it is the entry after the call
+/// and [posts] counts the replays this call sent.
+final class OutboxReconciliation {
+  const OutboxReconciliation._({this.entry, this.refusal, this.posts = 0});
+  const OutboxReconciliation.refused(String reason) : this._(refusal: reason);
+  const OutboxReconciliation.recorded(OutboxEntry entry, {required int posts})
+    : this._(entry: entry, posts: posts);
+  final OutboxEntry? entry;
+  final String? refusal;
+  final int posts;
+}
+
+/// Records each prompt before sending it and keeps the outcome. Only
+/// [reconcile] ever sends a prompt again, under its original id.
 abstract interface class PromptOutbox {
   Future<OutboxSubmission> submit({
     required SessionRef session,
@@ -59,4 +80,14 @@ abstract interface class PromptOutbox {
   /// after reconciling, or when the user gives it up); refuses `sending`. A
   /// forgotten command is never posted again.
   Future<bool> dismiss(SessionRef session, CommandId commandId);
+
+  /// Resolves an uncertain entry from the server's inbox and history by its
+  /// native id. Only when that proves the prompt absent, and the verified
+  /// contract allows it, the exact recorded payload is posted again under
+  /// the same id, a bounded number of times with backoff. Any other entry is
+  /// returned unchanged, without network access.
+  Future<OutboxReconciliation> reconcile(
+    SessionRef session,
+    CommandId commandId,
+  );
 }

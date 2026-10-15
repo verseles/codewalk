@@ -52,10 +52,14 @@ final class _ThrowingStore extends _Store {
   Future<String?> read(String key) async => throw StateError('io');
 }
 
+/// Posts go to [respond]; reads go to [read], which fails unless set.
 final class _Transport implements EndpointHttpTransport {
-  _Transport(this.respond);
+  _Transport(this.respond, {this.read});
   FutureOr<TransportResponse> Function(Map<String, Object?> body) respond;
+  FutureOr<TransportResponse> Function(Uri uri)? read;
   final bodies = <Map<String, Object?>>[];
+  final reads = <Uri>[];
+  final raw = <String>[];
   void Function()? onSend;
   @override
   Uri endpoint = Uri.parse('http://127.0.0.1/');
@@ -66,8 +70,14 @@ final class _Transport implements EndpointHttpTransport {
     TransportRequest request, {
     RequestCancellation? cancellation,
   }) async {
+    if (request.method == 'GET') {
+      final uri = Uri.parse(request.path);
+      reads.add(uri);
+      return (read ?? (_) => fail('no read expected'))(uri);
+    }
     onSend?.call();
-    final body = jsonDecode(utf8.decode(request.body!)) as Map<String, Object?>;
+    raw.add(utf8.decode(request.body!));
+    final body = jsonDecode(raw.last) as Map<String, Object?>;
     bodies.add(body);
     return respond(body);
   }
@@ -97,21 +107,28 @@ TransportResponse _admit(Map<String, Object?> body) => _json({
   },
 });
 
-OpenCodePromptOutbox _outbox(PayloadStore store, _Transport transport) =>
-    OpenCodePromptOutbox(
-      store: store,
-      client: OpenCodePromptClient(
-        transport,
-        harness: _harness,
-        connectedVersion: '2.0.22',
-        deadline: const Duration(milliseconds: 200),
-      ),
-      ids: OpenCodeMessageIds(
-        now: () => DateTime.utc(2026, 10, 15),
-        random: Random(1),
-      ),
-      now: () => DateTime.utc(2026, 10, 15, 12),
-    );
+OpenCodePromptOutbox _outbox(
+  PayloadStore store,
+  _Transport transport, {
+  String version = '2.0.22',
+  DateTime Function()? now,
+  Future<void> Function(Duration)? wait,
+}) => OpenCodePromptOutbox(
+  store: store,
+  client: OpenCodePromptClient(
+    transport,
+    harness: _harness,
+    connectedVersion: version,
+    deadline: const Duration(milliseconds: 200),
+  ),
+  reader: OpenCodeSessionReader(transport, harness: _harness),
+  ids: OpenCodeMessageIds(
+    now: () => DateTime.utc(2026, 10, 15),
+    random: Random(1),
+  ),
+  now: now ?? () => DateTime.utc(2026, 10, 15, 12),
+  wait: wait ?? (_) async {},
+);
 
 Future<OutboxSubmission> _submit(
   PromptOutbox outbox, {
@@ -421,4 +438,410 @@ void main() {
     expect(entries.single.messageId, sent.entry!.messageId);
     expect(entries.single.text, 'Hello');
   });
+
+  group('reconcile', () {
+    test(
+      'timeout after admission yields one message, without a repost',
+      () async {
+        final server = _Server()..loseResponse = true;
+        final store = _Store();
+        final outbox = _outbox(store, server.transport);
+        final lost = await _submit(outbox);
+        expect(lost.entry!.state, SubmissionKind.uncertain);
+        server.loseResponse = false;
+        final result = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(result.posts, 0);
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.replays, 0);
+        expect(server.transport.bodies, hasLength(1));
+        expect(server.inbox, hasLength(1));
+        expect(server.inbox.single['id'], lost.entry!.messageId);
+        // A resolved entry is never checked again.
+        server.transport.reads.clear();
+        final again = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(again.entry!.state, SubmissionKind.admitted);
+        expect(server.transport.reads, isEmpty);
+      },
+    );
+
+    test(
+      'a lost request is replayed once with the exact payload and id',
+      () async {
+        final server = _Server()..reachServer = false;
+        final store = _Store();
+        final outbox = _outbox(store, server.transport);
+        await _submit(outbox);
+        server.reachServer = true;
+        final result = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(result.posts, 1);
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.replays, 1);
+        expect(server.transport.bodies, hasLength(2));
+        expect(server.transport.bodies.last, server.transport.bodies.first);
+        final saved = (_ledger(store)['entries']! as List).single as Map;
+        expect(server.transport.raw.last, saved['payload']);
+        expect(server.inbox, hasLength(1));
+        // The inbox is read before the history page, newest first.
+        expect(
+          [for (final u in server.transport.reads) u.pathSegments.last],
+          ['inbox', 'message'],
+        );
+      },
+    );
+
+    test('a promoted id is delivered and never posted again', () async {
+      final server = _Server()..loseResponse = true;
+      final outbox = _outbox(_Store(), server.transport);
+      final lost = await _submit(outbox);
+      server.promote(lost.entry!.messageId);
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.posts, 0);
+      expect(result.entry!.state, SubmissionKind.delivered);
+      expect(server.transport.bodies, hasLength(1));
+      expect(server.history, hasLength(1));
+    });
+
+    test(
+      'any cancellation fence blocks the replay but not the check',
+      () async {
+        for (final fence in CancellationFence.values) {
+          if (fence == CancellationFence.none) continue;
+          final server = _Server()..reachServer = false;
+          final outbox = _outbox(_Store(), server.transport);
+          await _submit(outbox);
+          expect(
+            await outbox.setCancellationFence(
+              _session,
+              const CommandId('cmd_1'),
+              fence,
+            ),
+            isTrue,
+          );
+          server.reachServer = true;
+          final result = await outbox.reconcile(
+            _session,
+            const CommandId('cmd_1'),
+          );
+          expect(result.posts, 0, reason: fence.name);
+          expect(result.entry!.state, SubmissionKind.uncertain);
+          expect(result.entry!.reason, 'cancellationFence');
+          expect(result.entry!.fence, fence);
+          expect(server.transport.bodies, hasLength(1));
+          expect(server.transport.reads, isNotEmpty);
+        }
+      },
+    );
+
+    test('at most three replays, with backoff between them', () async {
+      final server = _Server()..reachServer = false;
+      var clock = DateTime.utc(2026, 10, 15, 12);
+      final waits = <Duration>[];
+      final store = _Store();
+      final outbox = _outbox(
+        store,
+        server.transport,
+        now: () => clock,
+        wait: (d) async {
+          waits.add(d);
+          clock = clock.add(d);
+        },
+      );
+      await _submit(outbox);
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.posts, 3);
+      expect(waits, [const Duration(seconds: 1), const Duration(seconds: 2)]);
+      expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(result.entry!.replays, OpenCodePromptOutbox.maxReplays);
+      expect(server.transport.bodies, hasLength(4));
+      expect(server.transport.raw.toSet(), hasLength(1));
+      // Exhausted: still checked, never posted again.
+      final later = await _outbox(
+        store,
+        server.transport,
+        now: () => clock.add(const Duration(minutes: 1)),
+      ).reconcile(_session, const CommandId('cmd_1'));
+      expect(later.posts, 0);
+      expect(later.entry!.reason, 'replayExhausted');
+      expect(server.transport.bodies, hasLength(4));
+      // A late admission still resolves it.
+      server.inbox.add(server.row(server.transport.bodies.first));
+      final resolved = await outbox.reconcile(
+        _session,
+        const CommandId('cmd_1'),
+      );
+      expect(resolved.entry!.state, SubmissionKind.admitted);
+    });
+
+    test('a clock set back never parks the caller', () async {
+      final server = _Server()..reachServer = false;
+      var clock = DateTime.utc(2026, 10, 15, 12);
+      final waits = <Duration>[];
+      final store = _Store();
+      await _submit(_outbox(store, server.transport));
+      final outbox = _outbox(
+        store,
+        server.transport,
+        now: () => clock,
+        wait: (d) async {
+          waits.add(d);
+          // The device clock jumps back an hour during the first wait.
+          clock = clock.subtract(const Duration(hours: 1));
+        },
+      );
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(waits, [const Duration(seconds: 1)]);
+      expect(result.posts, 1);
+      expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(result.entry!.replays, 1);
+    });
+
+    test('a failed or incomplete read keeps the entry uncertain', () async {
+      final server = _Server()..reachServer = false;
+      final outbox = _outbox(_Store(), server.transport);
+      await _submit(outbox);
+      server.reachServer = true;
+      for (final (status, reason) in [
+        (401, 'authenticationRequired'),
+        (404, 'notFound'),
+        (500, 'unavailable'),
+      ]) {
+        server.failReads = status;
+        final result = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(result.posts, 0);
+        expect(result.entry!.state, SubmissionKind.uncertain);
+        expect(result.entry!.reason, reason);
+        expect(result.entry!.replays, 0);
+      }
+      server.failReads = null;
+      server.history.addAll([
+        for (var i = 0; i < 200; i++)
+          {
+            'id': 'msg_${i.toString().padLeft(26, '0')}',
+            'time': {'created': 1},
+            'type': 'assistant',
+          },
+      ]);
+      server.next = 'older';
+      final incomplete = await outbox.reconcile(
+        _session,
+        const CommandId('cmd_1'),
+      );
+      expect(incomplete.posts, 0);
+      expect(incomplete.entry!.reason, 'historyIncomplete');
+      expect(server.transport.bodies, hasLength(1));
+    });
+
+    test('identical text under two commands stays two messages', () async {
+      final server = _Server()..reachServer = false;
+      final outbox = _outbox(_Store(), server.transport);
+      await _submit(outbox, command: 'a');
+      await _submit(outbox, command: 'b');
+      server.reachServer = true;
+      await outbox.reconcile(_session, const CommandId('a'));
+      await outbox.reconcile(_session, const CommandId('b'));
+      expect(server.inbox, hasLength(2));
+      expect({for (final r in server.inbox) r['id']}, hasLength(2));
+      expect(
+        {for (final r in server.inbox) (r['payload']! as Map)['text']},
+        {'Hello'},
+      );
+    });
+
+    test('a pending id holding another text is occupied, not ours', () async {
+      final server = _Server()..loseResponse = true;
+      final outbox = _outbox(_Store(), server.transport);
+      final lost = await _submit(outbox);
+      (server.inbox.single['payload']! as Map)['text'] = 'Other';
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(result.entry!.reason, 'identityOccupied');
+      expect(result.posts, 0);
+      expect(lost.entry!.messageId, server.inbox.single['id']);
+    });
+
+    test('a pending id switched to another delivery is still ours', () async {
+      final server = _Server()..loseResponse = true;
+      final outbox = _outbox(_Store(), server.transport);
+      await _submit(outbox);
+      server.inbox.single['delivery'] = 'queue';
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.entry!.state, SubmissionKind.admitted);
+      expect(result.posts, 0);
+    });
+
+    test('another connected version neither reads nor posts', () async {
+      final server = _Server()..reachServer = false;
+      final store = _Store();
+      await _submit(_outbox(store, server.transport));
+      final reads = server.transport.reads.length;
+      final result = await _outbox(
+        store,
+        server.transport,
+        version: '2.0.23',
+      ).reconcile(_session, const CommandId('cmd_1'));
+      expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(server.transport.reads, hasLength(reads));
+      expect(server.transport.bodies, hasLength(1));
+    });
+
+    test('a crash during a replay keeps the counted attempt', () async {
+      final server = _Server()..reachServer = false;
+      final store = _Store();
+      final outbox = _outbox(store, server.transport);
+      await _submit(outbox);
+      // The replay is recorded, then the result can no longer be written.
+      server.onPost = () => store.failWrite = true;
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.posts, 1);
+      final saved = (_ledger(store)['entries']! as List).single as Map;
+      expect(saved['state'], 'sending');
+      expect(saved['replays'], 1);
+      store.failWrite = false;
+      server.onPost = null;
+      final entries = await _outbox(store, server.transport).entries(_session);
+      expect(entries.single.state, SubmissionKind.uncertain);
+      expect(entries.single.reason, 'interrupted');
+      expect(entries.single.replays, 1);
+    });
+
+    test('a ledger written before replays existed still loads', () async {
+      final server = _Server()..reachServer = false;
+      final store = _Store();
+      await _submit(_outbox(store, server.transport));
+      final ledger = _ledger(store);
+      for (final entry in (ledger['entries']! as List).cast<Map>()) {
+        entry
+          ..remove('replays')
+          ..remove('fence')
+          ..remove('notBefore');
+      }
+      store.values[OpenCodePromptOutbox.keyFor(_session)] = jsonEncode(ledger);
+      server.reachServer = true;
+      final result = await _outbox(
+        store,
+        server.transport,
+      ).reconcile(_session, const CommandId('cmd_1'));
+      expect(result.posts, 1);
+      expect(result.entry!.state, SubmissionKind.admitted);
+      // An out-of-range count makes the ledger unreadable, never rewritten.
+      final bad = _ledger(store);
+      ((bad['entries']! as List).single as Map)['replays'] = 9;
+      final raw = jsonEncode(bad);
+      store.values[OpenCodePromptOutbox.keyFor(_session)] = raw;
+      final refused = await _outbox(
+        store,
+        server.transport,
+      ).reconcile(_session, const CommandId('cmd_1'));
+      expect(refused.refusal, 'unreadable');
+      expect(store.values[OpenCodePromptOutbox.keyFor(_session)], raw);
+    });
+
+    test('an unknown command is refused without network', () async {
+      final server = _Server();
+      final result = await _outbox(
+        _Store(),
+        server.transport,
+      ).reconcile(_session, const CommandId('nope'));
+      expect(result.refusal, 'unknownCommand');
+      expect(server.transport.reads, isEmpty);
+    });
+
+    test('delivered entries make room in a full ledger', () async {
+      final server = _Server()..loseResponse = true;
+      final outbox = _outbox(_Store(), server.transport);
+      for (var i = 0; i < OpenCodePromptOutbox.maxEntries; i++) {
+        await _submit(outbox, command: 'u_$i');
+      }
+      expect((await _submit(outbox, command: 'extra')).refusal, 'full');
+      server.promote(server.inbox.first['id']! as String);
+      final delivered = await outbox.reconcile(
+        _session,
+        const CommandId('u_0'),
+      );
+      expect(delivered.entry!.state, SubmissionKind.delivered);
+      server.loseResponse = false;
+      expect((await _submit(outbox, command: 'extra')).sent, isTrue);
+    });
+  });
+}
+
+/// A native 2.0.22 session reduced to what reconciliation reads: a same-id
+/// POST returns the original admission, the inbox lists pending input and
+/// promotion moves it to history.
+final class _Server {
+  _Server() {
+    transport = _Transport(_post, read: _read);
+  }
+  late final _Transport transport;
+  final inbox = <Map<String, Object?>>[];
+  final history = <Map<String, Object?>>[];
+
+  /// False: the request is lost before the server; true otherwise.
+  bool reachServer = true;
+
+  /// The server admits, but its response is lost.
+  bool loseResponse = false;
+  int? failReads;
+  String? next;
+  void Function()? onPost;
+
+  Map<String, Object?> row(Map<String, Object?> body) => {
+    'id': body['id'],
+    'sessionID': 'ses_one',
+    'time': {'created': 1},
+    'type': 'user',
+    'payload': {'text': body['text']},
+    'delivery': body['delivery'],
+  };
+
+  void promote(String id) {
+    final row = inbox.singleWhere((r) => r['id'] == id);
+    inbox.remove(row);
+    history.add({
+      'id': id,
+      'time': row['time'],
+      'text': (row['payload']! as Map)['text'],
+      'type': 'user',
+    });
+  }
+
+  FutureOr<TransportResponse> _post(Map<String, Object?> body) {
+    onPost?.call();
+    if (!reachServer) {
+      throw const TransportException(TransportFailure.timeout);
+    }
+    var admitted = inbox.where((r) => r['id'] == body['id']).firstOrNull;
+    if (admitted == null && !history.any((r) => r['id'] == body['id'])) {
+      inbox.add(admitted = row(body));
+    }
+    if (loseResponse) {
+      throw const TransportException(TransportFailure.timeout);
+    }
+    return _json({'data': admitted ?? row(body)});
+  }
+
+  TransportResponse _read(Uri uri) {
+    if (failReads case final status?) return _json({}, status: status);
+    if (uri.pathSegments.last == 'inbox') return _json({'data': inbox});
+    return _json({
+      'data': history.reversed.take(200).toList(),
+      // Each page points further back.
+      'cursor': {
+        'previous': null,
+        'next': next == null ? null : '$next${transport.reads.length}',
+      },
+    });
+  }
 }

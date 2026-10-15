@@ -42,6 +42,40 @@ final class OpenCodeSessionReadException implements Exception {
       '${statusCode == null ? '' : ', status: $statusCode'})';
 }
 
+/// Where [OpenCodeSessionReader.locatePrompt] found one native prompt id.
+sealed class OpenCodePromptLocation {
+  const OpenCodePromptLocation();
+}
+
+/// Still in the inbox: admitted, not yet delivered.
+final class OpenCodePromptPending extends OpenCodePromptLocation {
+  const OpenCodePromptPending({required this.text, required this.delivery});
+  final String text;
+
+  /// The native delivery (`steer` or `queue`).
+  final String delivery;
+}
+
+/// Promoted to history: delivered.
+final class OpenCodePromptPromoted extends OpenCodePromptLocation {
+  const OpenCodePromptPromoted();
+}
+
+/// The id belongs to another kind of record.
+final class OpenCodePromptOccupied extends OpenCodePromptLocation {
+  const OpenCodePromptOccupied();
+}
+
+/// Neither in the inbox nor anywhere in the complete history.
+final class OpenCodePromptAbsent extends OpenCodePromptLocation {
+  const OpenCodePromptAbsent();
+}
+
+/// Not in the inbox nor in the history pages read, but history goes on.
+final class OpenCodePromptIncomplete extends OpenCodePromptLocation {
+  const OpenCodePromptIncomplete();
+}
+
 /// Read-only metadata and flat history; borrows an authenticated transport.
 /// Continuation tokens belong to this reader and are not durable credentials.
 const _hydrationListLimit = 4096;
@@ -203,6 +237,108 @@ final class OpenCodeSessionReader {
       ),
       cancellation,
     );
+  }
+
+  /// Finds one prompt by its native id: the inbox first, then history newest
+  /// first, the order hydration uses, so an input promoted between the two
+  /// reads is found in history. Only a complete scan proves absence; a scan
+  /// that reaches [maxHistoryPages] full pages is [OpenCodePromptIncomplete].
+  ///
+  /// History is in promotion order, not id order, so no id or time cutoff
+  /// stops the scan early. A 2.0.22 page keeps a `next` cursor even at the
+  /// end, so the end is a page shorter than its limit. Any failed read throws
+  /// [OpenCodeSessionReadException]; it never reads as absence.
+  Future<OpenCodePromptLocation> locatePrompt(
+    SessionRef ref,
+    String messageId, {
+    required String sourceVersion,
+    int maxHistoryPages = 5,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (ref.harnessRef != harness) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    final limit = min(200, maxPageItems);
+    try {
+      openCodeSessionId(ref.nativeId);
+      if (!messageId.startsWith('msg_') ||
+          maxHistoryPages < 1 ||
+          OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+        throw const FormatException();
+      }
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    List<Map<String, Object?>> rows(Object? value, int max) {
+      if (value is! Map<String, Object?> || value['data'] is! List) {
+        throw const FormatException('Malformed list response.');
+      }
+      final data = value['data']! as List;
+      if (data.length > max) throw const FormatException('List limit.');
+      final ids = <String>{};
+      return [
+        for (final row in data)
+          if (row is Map<String, Object?> &&
+              row['id'] is String &&
+              ids.add(row['id']! as String))
+            row
+          else
+            throw const FormatException('Malformed or duplicate row.'),
+      ];
+    }
+
+    // Identity only: a row of another type under this id is not ours.
+    final inbox = await _read(
+      Uri(pathSegments: ['api', 'session', ref.nativeId, 'inbox']).toString(),
+      (value) => rows(value, _hydrationListLimit),
+      cancellation,
+    );
+    for (final row in inbox) {
+      if (row['id'] != messageId) continue;
+      final payload = row['payload'];
+      final text = payload is Map<String, Object?> ? payload['text'] : null;
+      final delivery = row['delivery'];
+      if (row['type'] != 'user' ||
+          row['sessionID'] != ref.nativeId ||
+          text is! String ||
+          delivery is! String) {
+        return const OpenCodePromptOccupied();
+      }
+      return OpenCodePromptPending(text: text, delivery: delivery);
+    }
+    String? native;
+    for (var page = 0; page < maxHistoryPages; page++) {
+      final (
+        found,
+        next,
+        length,
+      ) = await _read(_historyPath(ref, limit, 'desc', native), (value) {
+        final data = rows(value, limit);
+        final cursors = value is Map<String, Object?> ? value['cursor'] : null;
+        if (cursors is! Map<String, Object?>) {
+          throw const FormatException('Malformed history page.');
+        }
+        final next = _nativeCursor(cursors['next']);
+        if (next != null && next == native) {
+          throw const FormatException('History cursor did not advance.');
+        }
+        final match = data.where((row) => row['id'] == messageId);
+        return (match.firstOrNull, next, data.length);
+      }, cancellation);
+      if (found != null) {
+        return found['type'] == 'user'
+            ? const OpenCodePromptPromoted()
+            : const OpenCodePromptOccupied();
+      }
+      if (next == null || length < limit) return const OpenCodePromptAbsent();
+      native = next;
+    }
+    return const OpenCodePromptIncomplete();
   }
 
   /// Reads the authoritative state of one open session for a hydration cycle

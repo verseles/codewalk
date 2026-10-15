@@ -249,6 +249,19 @@ decode captured event ids (`created mod 2^36`).
 attempt) and `post(ready)`, which sends exactly `ready.payload` once, so the
 app's outbox can persist the body before anything reaches the wire.
 
+[V2-045C / #384](https://github.com/verseles/codewalk/issues/384) adds
+`OpenCodeSessionReader.locatePrompt(ref, messageId, sourceVersion:)`, the
+reconciliation read for one native prompt id on 2.0.22: the inbox first, then
+history newest first (`limit=200`, following the native cursor up to
+`maxHistoryPages`), the order hydration uses, so an input promoted between the
+reads is found in history. It returns `OpenCodePromptPending` (text and native
+delivery), `OpenCodePromptPromoted`, `OpenCodePromptOccupied` (the id holds
+another kind of record), `OpenCodePromptAbsent` or `OpenCodePromptIncomplete`.
+History is in promotion order, so no id or time cutoff ends the scan, and a
+2.0.22 page keeps a `next` cursor even at the end: a page shorter than its
+limit ends history. Failed reads throw and never read as absence. The
+uncaptured `GET .../message/{id}` route is not used.
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports
