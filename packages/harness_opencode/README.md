@@ -243,6 +243,12 @@ child of sending (V2-045 / #280).
 Tests replay every recorded `prompt-matrix.json` request byte-for-byte and
 decode captured event ids (`created mod 2^36`).
 
+[V2-045B / #383](https://github.com/verseles/codewalk/issues/383) splits
+`send` into `prepare` (checks and the exact body, no network; an
+`OpenCodePromptReady` or an `OpenCodePromptRefused` carrying the unavailable
+attempt) and `post(ready)`, which sends exactly `ready.payload` once, so the
+app's outbox can persist the body before anything reaches the wire.
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports

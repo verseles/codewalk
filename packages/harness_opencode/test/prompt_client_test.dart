@@ -111,6 +111,40 @@ void main() {
     }
   });
 
+  test('prepare touches no network; post sends exactly its payload', () async {
+    final call = matrix['promptOriginal']!;
+    final request = call['request']! as Map<String, Object?>;
+    final transport = _Transport(
+      (_, _) => _response(call['response'], status: 200),
+    );
+    final client = OpenCodePromptClient(
+      transport,
+      harness: _harness,
+      connectedVersion: '2.0.22',
+    );
+    final ready =
+        client.prepare(
+              session: _session(call['path']! as String),
+              commandId: const CommandId('cmd'),
+              messageId: request['id']! as String,
+              draft: PromptDraft(text: request['text']! as String),
+              delivery: Delivery.queue,
+              resume: false,
+            )
+            as OpenCodePromptReady;
+    expect(transport.requests, isEmpty);
+    expect(jsonDecode(ready.payload), request);
+    final attempt = await client.post(ready);
+    expect(utf8.decode(transport.requests.single.body!), ready.payload);
+    expect(attempt.payload, ready.payload);
+    final other = OpenCodePromptClient(
+      transport,
+      harness: _harness,
+      connectedVersion: '2.0.21',
+    );
+    await expectLater(other.post(ready), throwsArgumentError);
+  });
+
   test('a 200 for this intent is admitted, not delivered', () async {
     final (attempt, _) = await _replay(matrix['promptOriginal']!);
     expect(attempt.receipt.state.known, ReceiptState.accepted);

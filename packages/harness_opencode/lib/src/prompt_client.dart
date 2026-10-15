@@ -68,6 +68,7 @@ final class OpenCodePromptClient {
   final Duration deadline;
   final int maxBodyBytes;
 
+  /// Prepares and posts in one call; see [prepare] and [post].
   Future<OpenCodePromptAttempt> send({
     required SessionRef session,
     required CommandId commandId,
@@ -76,7 +77,31 @@ final class OpenCodePromptClient {
     required Delivery delivery,
     bool resume = true,
     RequestCancellation? cancellation,
-  }) async {
+  }) async => switch (prepare(
+    session: session,
+    commandId: commandId,
+    messageId: messageId,
+    draft: draft,
+    delivery: delivery,
+    resume: resume,
+  )) {
+    OpenCodePromptRefused(:final attempt) => attempt,
+    final OpenCodePromptReady ready => await post(
+      ready,
+      cancellation: cancellation,
+    ),
+  };
+
+  /// Checks a draft and builds the exact body without any network access, so
+  /// a caller can persist it before [post]. A refusal sends nothing.
+  OpenCodePromptPreparation prepare({
+    required SessionRef session,
+    required CommandId commandId,
+    required String messageId,
+    required PromptDraft draft,
+    required Delivery delivery,
+    bool resume = true,
+  }) {
     if (session.harnessRef != harness) {
       throw ArgumentError.value(
         session,
@@ -98,15 +123,8 @@ final class OpenCodePromptClient {
         'resume': resume,
       }),
     );
-    OpenCodePromptAttempt unavailable(String reason) => OpenCodePromptAttempt._(
-      command: command,
-      messageId: messageId,
-      receipt: CommandReceipt.unavailable(
-        id: commandId,
-        owner: owner,
-        unavailable: CapabilityUnavailable('prompt', reason: reason),
-      ),
-    );
+    OpenCodePromptRefused unavailable(String reason) =>
+        OpenCodePromptRefused._(_unavailable(command, messageId, reason));
     // Only the observed 2.0.22 admission semantics are relied on.
     if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
       return unavailable('unverifiedVersion');
@@ -133,16 +151,41 @@ final class OpenCodePromptClient {
     if (delivery != Delivery.steer && delivery != Delivery.queue) {
       return unavailable('unsupportedDelivery');
     }
-    if (cancellation?.isCancelled ?? false) {
-      return unavailable('cancelledBeforeSend');
+    return OpenCodePromptReady._(
+      session: session,
+      command: command,
+      messageId: messageId,
+      text: draft.text,
+      delivery: delivery,
+      resume: resume,
+      payload: jsonEncode({
+        'id': messageId,
+        'text': draft.text,
+        'delivery': delivery.name,
+        'resume': resume,
+      }),
+    );
+  }
+
+  /// Posts exactly [OpenCodePromptReady.payload] once and maps the response.
+  Future<OpenCodePromptAttempt> post(
+    OpenCodePromptReady ready, {
+    RequestCancellation? cancellation,
+  }) async {
+    final OpenCodePromptReady(:session, :command, :messageId, :payload) = ready;
+    final delivery = ready.delivery;
+    final commandId = command.id;
+    final owner = command.owner;
+    if (session.harnessRef != harness ||
+        command.connectedVersion != connectedVersion) {
+      throw ArgumentError.value(ready, 'ready', 'Prepared by another client');
     }
-    if (transport.isClosed) return unavailable('closed');
-    final payload = jsonEncode({
-      'id': messageId,
-      'text': draft.text,
-      'delivery': delivery.name,
-      'resume': resume,
-    });
+    if (cancellation?.isCancelled ?? false) {
+      return _unavailable(command, messageId, 'cancelledBeforeSend');
+    }
+    if (transport.isClosed) {
+      return _unavailable(command, messageId, 'closed');
+    }
     OpenCodePromptAttempt finish(
       CommandReceipt receipt,
       SubmissionKind kind, {
@@ -267,7 +310,7 @@ final class OpenCodePromptClient {
       if (pending == null) return uncertain('malformedAdmission');
       // A pending same-id replay returns the original admission, even for
       // changed text or delivery: this intent was not admitted.
-      if (pending.text != draft.text || pending.delivery.known != delivery) {
+      if (pending.text != ready.text || pending.delivery.known != delivery) {
         return rejected(
           _error(
             ErrorKind.protocol,
@@ -297,7 +340,7 @@ final class OpenCodePromptClient {
         // sending may follow the body, so it stays uncertain.
         TransportFailure.invalidTarget || TransportFailure.invalidRequest
             when response == null =>
-          unavailable(error.failure.name),
+          _unavailable(command, messageId, error.failure.name),
         _ => uncertain(error.failure.name),
       };
     } on Object {
@@ -325,3 +368,48 @@ ErrorInfo _error(
   retryable: retryable,
   action: action == null ? null : OpenValue.known(action),
 );
+
+OpenCodePromptAttempt _unavailable(
+  OriginalCommand command,
+  String messageId,
+  String reason,
+) => OpenCodePromptAttempt._(
+  command: command,
+  messageId: messageId,
+  receipt: CommandReceipt.unavailable(
+    id: command.id,
+    owner: command.owner,
+    unavailable: CapabilityUnavailable('prompt', reason: reason),
+  ),
+);
+
+/// The result of [OpenCodePromptClient.prepare].
+sealed class OpenCodePromptPreparation {
+  const OpenCodePromptPreparation();
+}
+
+/// A checked draft and the exact body [OpenCodePromptClient.post] will send.
+final class OpenCodePromptReady extends OpenCodePromptPreparation {
+  const OpenCodePromptReady._({
+    required this.session,
+    required this.command,
+    required this.messageId,
+    required this.text,
+    required this.delivery,
+    required this.resume,
+    required this.payload,
+  });
+  final SessionRef session;
+  final OriginalCommand command;
+  final String messageId;
+  final String text;
+  final Delivery delivery;
+  final bool resume;
+  final String payload;
+}
+
+/// Nothing is sent; [attempt] carries the unavailable receipt.
+final class OpenCodePromptRefused extends OpenCodePromptPreparation {
+  const OpenCodePromptRefused._(this.attempt);
+  final OpenCodePromptAttempt attempt;
+}

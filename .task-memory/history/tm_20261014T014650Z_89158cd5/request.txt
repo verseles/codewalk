@@ -1,1 +1,0 @@
-Acho que colocar uma condição no GitHub Actions seria mais adequada para o momento. O que você acha? | Mas não basta colocar uma condição no GitHub Action dentro do arquivo? Na parte de condições | Faz como você julgar melhor.

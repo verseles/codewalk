@@ -1879,3 +1879,19 @@ the exact payload before the POST.
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No persistence, retry, cancel/switch, composer or native/MVP acceptance is
 added.
+
+## V2-045B prompt outbox (#383)
+
+```text
+lib/shared/sessions/prompt_outbox.dart # PromptOutbox port: OutboxEntry, OutboxSubmission (refused keeps the draft), submit/entries/dismiss
+lib/platform/sessions/prompt_outbox_store.dart # OpenCodePromptOutbox: per-session atomic ledger, persist before the single POST, restart sending -> uncertain
+packages/harness_opencode/lib/src/prompt_client.dart # prepare (no network, exact body) and post (sends exactly that body)
+test/v2/sessions/prompt_outbox_test.dart # Persist-before-POST, write failures, restart, outcomes, serialization, bounds, unreadable ledger
+```
+
+The outbox is not yet composed into the app; the composer child (V2-045E)
+wires it per endpoint profile with the live connection.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No reconciliation, retry, cancel/switch, composer or native/MVP acceptance is
+added.
