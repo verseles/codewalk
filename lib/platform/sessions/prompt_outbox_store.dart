@@ -91,16 +91,19 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         case final OpenCodePromptReady prepared:
           ready = prepared;
       }
-      // Only an admitted or delivered entry makes room: the server already
-      // holds its text. Rejected entries keep the user's text and uncertain
+      // Only an admitted, delivered or cancelled entry makes room: the server
+      // already holds its text or no longer needs it. Rejected entries keep the user's text and uncertain
       // ones may need a replay, so without such an entry a full ledger
       // refuses.
       var base = ledger;
       if (base.records.length >= maxEntries) {
         final evicted = base.records.where(
           (r) =>
-              r.state == SubmissionKind.admitted ||
-              r.state == SubmissionKind.delivered,
+              (r.state == SubmissionKind.admitted ||
+                  r.state == SubmissionKind.delivered ||
+                  r.state == SubmissionKind.cancelled) &&
+              // An unfinished cancel stays until it is settled.
+              !_open(r.fence),
         );
         if (evicted.isEmpty) return const OutboxSubmission.refused('full');
         base = base.without(evicted.first);
@@ -197,7 +200,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     }
   }
 
-  /// Fences replays of one entry; V2-045D sets it around a queue cancel.
+  /// Fences replays of one entry. A fence is never cleared, and a settled one
+  /// (`cancelled`, `settled`) never changes; [cancel] is the production
+  /// writer.
   Future<bool> setCancellationFence(
     SessionRef session,
     CommandId commandId,
@@ -209,7 +214,11 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       if (read == null) return false;
       final ledger = await _recover(key, session, read);
       final record = ledger.find(commandId);
-      if (record == null) return false;
+      if (record == null ||
+          (record.fence != CancellationFence.none &&
+              (fence == CancellationFence.none || !_open(record.fence)))) {
+        return false;
+      }
       return _persist(
         key,
         session,
@@ -226,6 +235,230 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     });
   }
 
+  @override
+  Future<OutboxMutation> cancel(SessionRef session, CommandId commandId) {
+    final key = keyFor(session);
+    return _queue.run(key, () async {
+      final read = await _read(key, session);
+      if (read == null) return const OutboxMutation.refused('unreadable');
+      var ledger = await _recover(key, session, read);
+      var record = ledger.find(commandId);
+      if (record == null) return const OutboxMutation.refused('unknownCommand');
+      if (record.connectedVersion != client.connectedVersion) {
+        return const OutboxMutation.refused('versionChanged');
+      }
+      // Only input the server may still hold can be cancelled; a settled
+      // cancel is not repeated.
+      if ((record.state != SubmissionKind.admitted &&
+              record.state != SubmissionKind.uncertain) ||
+          (record.fence != CancellationFence.none && !_open(record.fence))) {
+        return OutboxMutation.recorded(record.entry);
+      }
+      // The server holds another record under this id: deleting it would
+      // remove input that is not this prompt.
+      if (record.reason == 'identityOccupied') {
+        return const OutboxMutation.refused('identityOccupied');
+      }
+      Future<bool> write(_Record next) async {
+        if (!await _persist(key, session, ledger.replacing(record!, next))) {
+          return false;
+        }
+        ledger = ledger.replacing(record!, next);
+        record = next;
+        return true;
+      }
+
+      _Record fenced(CancellationFence fence, [String? reason]) =>
+          record!.copyWith(
+            state: record!.state,
+            reason: reason ?? record!.reason,
+            fence: fence,
+            updatedAt: _now().toUtc(),
+          );
+      // The fence is durable before anything reaches the wire.
+      if (record!.fence == CancellationFence.none &&
+          !await write(fenced(CancellationFence.requested))) {
+        return const OutboxMutation.refused('notPersisted');
+      }
+      if (!await write(fenced(CancellationFence.submitting))) {
+        return const OutboxMutation.refused('notPersisted');
+      }
+      final result = await client.cancelInbox(
+        session: session,
+        messageId: record!.messageId,
+      );
+      if (result case OpenCodeInboxNotSent(:final reason)) {
+        await write(fenced(CancellationFence.requested, reason));
+        return OutboxMutation.recorded(record!.entry);
+      }
+      // Whatever the status, a crash from here must not look settled.
+      await write(fenced(CancellationFence.uncertain));
+      await write(await _afterCancel(session, record!));
+      return OutboxMutation.recorded(record!.entry);
+    });
+  }
+
+  @override
+  Future<OutboxMutation> switchDelivery(
+    SessionRef session,
+    CommandId commandId,
+    Delivery delivery,
+  ) {
+    if (delivery != Delivery.steer && delivery != Delivery.queue) {
+      return Future.value(const OutboxMutation.refused('unsupportedDelivery'));
+    }
+    final key = keyFor(session);
+    return _queue.run(key, () async {
+      final read = await _read(key, session);
+      if (read == null) return const OutboxMutation.refused('unreadable');
+      final ledger = await _recover(key, session, read);
+      final record = ledger.find(commandId);
+      if (record == null) return const OutboxMutation.refused('unknownCommand');
+      if (record.connectedVersion != client.connectedVersion) {
+        return const OutboxMutation.refused('versionChanged');
+      }
+      if (record.state != SubmissionKind.admitted) {
+        return const OutboxMutation.refused('notPending');
+      }
+      if (record.fence != CancellationFence.none) {
+        return const OutboxMutation.refused('cancellationFence');
+      }
+      if (record.delivery == delivery) {
+        return OutboxMutation.recorded(record.entry);
+      }
+      final result = await client.switchInboxDelivery(
+        session: session,
+        messageId: record.messageId,
+        delivery: delivery,
+      );
+      if (result case OpenCodeInboxNotSent(:final reason)) {
+        return OutboxMutation.refused(reason);
+      }
+      _Record next(
+        String? reason, {
+        SubmissionKind state = SubmissionKind.admitted,
+        Delivery? delivery,
+        CancellationFence? fence,
+      }) => record.copyWith(
+        state: state,
+        reason: reason,
+        delivery: delivery,
+        fence: fence,
+        updatedAt: _now().toUtc(),
+      );
+      // The server decides; an admitted entry never becomes uncertain here,
+      // where it could be replayed.
+      final _Record after;
+      try {
+        after = switch (await reader.locatePrompt(
+          session,
+          record.messageId,
+          sourceVersion: client.connectedVersion,
+        )) {
+          OpenCodePromptPending(:final text, delivery: final shown)
+              when text == record.text =>
+            next(
+              shown == delivery.name
+                  ? null
+                  : switch (result) {
+                      OpenCodeInboxRefused(:final error) => error.rawType,
+                      _ => 'switchNotApplied',
+                    },
+              delivery: _delivery(shown) ?? record.delivery,
+            ),
+          OpenCodePromptPromoted() => next(
+            null,
+            state: SubmissionKind.delivered,
+          ),
+          // Admitted and now gone: another client cancelled it.
+          OpenCodePromptAbsent() => next(
+            null,
+            state: SubmissionKind.cancelled,
+            fence: CancellationFence.cancelled,
+          ),
+          OpenCodePromptIncomplete() => next('historyIncomplete'),
+          OpenCodePromptPending() ||
+          OpenCodePromptOccupied() => next('identityOccupied'),
+        };
+      } on OpenCodeSessionReadException catch (error) {
+        final failed = next(error.failure.name);
+        return OutboxMutation.recorded(
+          await _persist(key, session, ledger.replacing(record, failed))
+              ? failed.entry
+              : record.entry,
+        );
+      }
+      return OutboxMutation.recorded(
+        await _persist(key, session, ledger.replacing(record, after))
+            ? after.entry
+            : record.entry,
+      );
+    });
+  }
+
+  /// A cancel was asked but its outcome is not known yet.
+  static bool _open(CancellationFence fence) =>
+      fence != CancellationFence.none &&
+      fence != CancellationFence.cancelled &&
+      fence != CancellationFence.settled;
+
+  static Delivery? _delivery(String native) => switch (native) {
+    'steer' => Delivery.steer,
+    'queue' => Delivery.queue,
+    _ => null,
+  };
+
+  /// What the server shows for a prompt whose cancel was asked; it is never
+  /// sent again. Absence proves cancellation only for an admitted prompt:
+  /// an unconfirmed one may still arrive, and a cancelled id would be
+  /// re-enqueued by a repost.
+  Future<_Record> _afterCancel(SessionRef session, _Record record) async {
+    _Record next(
+      String? reason, {
+      SubmissionKind? state,
+      Delivery? delivery,
+      CancellationFence? fence,
+    }) => record.copyWith(
+      state: state ?? record.state,
+      reason: reason,
+      delivery: delivery,
+      fence: fence,
+      updatedAt: _now().toUtc(),
+    );
+    try {
+      return switch (await reader.locatePrompt(
+        session,
+        record.messageId,
+        sourceVersion: client.connectedVersion,
+      )) {
+        OpenCodePromptPending(:final text, :final delivery)
+            when text == record.text =>
+          next(
+            'cancelPending',
+            state: SubmissionKind.admitted,
+            delivery: _delivery(delivery),
+          ),
+        OpenCodePromptPromoted() => next(
+          null,
+          state: SubmissionKind.delivered,
+          fence: CancellationFence.settled,
+        ),
+        OpenCodePromptAbsent() when record.state == SubmissionKind.admitted =>
+          next(
+            null,
+            state: SubmissionKind.cancelled,
+            fence: CancellationFence.cancelled,
+          ),
+        OpenCodePromptAbsent() => next('cancellationFence'),
+        OpenCodePromptIncomplete() => next('historyIncomplete'),
+        OpenCodePromptPending() ||
+        OpenCodePromptOccupied() => next('identityOccupied'),
+      };
+    } on OpenCodeSessionReadException catch (error) {
+      return next(error.failure.name);
+    }
+  }
+
   Future<_Step> _reconcileStep(
     String key,
     SessionRef session,
@@ -236,11 +469,24 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     final ledger = await _recover(key, session, read);
     final record = ledger.find(commandId);
     if (record == null) return const _Step.refused('unknownCommand');
-    // Only an unknown admission is checked; a known outcome never regresses,
-    // and an entry recorded under another version is left to the user.
-    if (record.state != SubmissionKind.uncertain ||
+    // Only an unknown admission or an unsettled cancel is checked; a known
+    // outcome never regresses, and an entry recorded under another version
+    // is left to the user.
+    final cancelling =
+        _open(record.fence) &&
+        (record.state == SubmissionKind.uncertain ||
+            record.state == SubmissionKind.admitted);
+    if ((record.state != SubmissionKind.uncertain && !cancelling) ||
         record.connectedVersion != client.connectedVersion) {
       return _Step(record);
+    }
+    if (cancelling) {
+      final next = await _afterCancel(session, record);
+      return _Step(
+        await _persist(key, session, ledger.replacing(record, next))
+            ? next
+            : record,
+      );
     }
     Future<_Step> settle(SubmissionKind state, String? reason) async {
       final next = record.copyWith(
@@ -579,8 +825,8 @@ final class _Record {
     fence: fence,
   );
 
-  /// [reason] is replaced, even by null; the replay fields are kept unless
-  /// given.
+  /// [reason] is replaced, even by null; the replay fields and the delivery
+  /// are kept unless given. The recorded payload never changes.
   _Record copyWith({
     required SubmissionKind state,
     required DateTime updatedAt,
@@ -588,12 +834,13 @@ final class _Record {
     int? replays,
     CancellationFence? fence,
     DateTime? notBefore,
+    Delivery? delivery,
   }) => _Record(
     session: session,
     commandId: commandId,
     messageId: messageId,
     text: text,
-    delivery: delivery,
+    delivery: delivery ?? this.delivery,
     connectedVersion: connectedVersion,
     resume: resume,
     payload: payload,

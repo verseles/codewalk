@@ -1915,3 +1915,23 @@ composer child (V2-045E) does.
 
 Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
 No queue cancel/switch, composer or native/MVP acceptance is added.
+
+## V2-045D queue cancel and delivery switch (#385)
+
+```text
+packages/harness_opencode/lib/src/prompt_client.dart # cancelInbox (DELETE) / switchInboxDelivery (PATCH): status only, 204 is not proof
+packages/harness_opencode/test/inbox_control_test.dart # Captured DELETE/PATCH requests and status mapping
+lib/shared/sessions/prompt_outbox.dart # PromptOutbox.cancel/switchDelivery, OutboxMutation
+lib/platform/sessions/prompt_outbox_store.dart # Fence before the DELETE, outcome from locatePrompt, fenced reconcile, switch confirmed from the inbox
+test/v2/sessions/prompt_outbox_test.dart # Cancel-and-switch group: race with delivery, lost responses, unconfirmed prompts, eviction
+```
+
+A cancel persists a cancellation fence before the DELETE and never clears it;
+the entry ends `cancelled` only when an admitted prompt is gone from inbox and
+history, `delivered` when it was delivered first, and otherwise keeps its state
+with the fence until a later check. A switch changes only an admitted, unfenced
+prompt and records the delivery the inbox shows; the exact payload never
+changes.
+
+Strict analysis, focused tests, `make v2-native-check` and `make check` passed.
+No composer, chips or wiring (V2-045E) and no native/MVP acceptance is added.

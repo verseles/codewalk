@@ -353,6 +353,157 @@ final class OpenCodePromptClient {
       response?.cancel();
     }
   }
+
+  /// `DELETE /api/session/{id}/inbox/{messageId}` once. A 204 is not proof of
+  /// cancellation: 2.0.22 also answers 204 for a delivered or unknown id, so
+  /// the caller decides the outcome from the inbox and history.
+  Future<OpenCodeInboxResult> cancelInbox({
+    required SessionRef session,
+    required String messageId,
+    RequestCancellation? cancellation,
+  }) => _inbox('DELETE', session, messageId, null, cancellation);
+
+  /// `PATCH /api/session/{id}/inbox/{messageId}` with `{delivery}` once.
+  /// Steering wakes execution. A 409 (observed for a delivered id) and a 204
+  /// are both confirmed from the inbox and history by the caller.
+  Future<OpenCodeInboxResult> switchInboxDelivery({
+    required SessionRef session,
+    required String messageId,
+    required Delivery delivery,
+    RequestCancellation? cancellation,
+  }) {
+    if (delivery != Delivery.steer && delivery != Delivery.queue) {
+      return Future.value(const OpenCodeInboxNotSent('unsupportedDelivery'));
+    }
+    return _inbox(
+      'PATCH',
+      session,
+      messageId,
+      jsonEncode({'delivery': delivery.name}),
+      cancellation,
+    );
+  }
+
+  Future<OpenCodeInboxResult> _inbox(
+    String method,
+    SessionRef session,
+    String messageId,
+    String? body,
+    RequestCancellation? cancellation,
+  ) async {
+    if (session.harnessRef != harness) {
+      throw ArgumentError.value(
+        session,
+        'session',
+        'Belongs to another harness',
+      );
+    }
+    if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
+      return const OpenCodeInboxNotSent('unverifiedVersion');
+    }
+    try {
+      openCodeSessionId(session.nativeId);
+    } on FormatException {
+      return const OpenCodeInboxNotSent('invalidSession');
+    }
+    if (!messageId.startsWith('msg_') ||
+        messageId.length > 4096 ||
+        messageId.contains(RegExp(r'\s'))) {
+      return const OpenCodeInboxNotSent('invalidMessageId');
+    }
+    if (cancellation?.isCancelled ?? false) {
+      return const OpenCodeInboxNotSent('cancelledBeforeSend');
+    }
+    if (transport.isClosed) return const OpenCodeInboxNotSent('closed');
+    final token = RequestCancellation();
+    var timedOut = false;
+    // The deadline bounds the headers even if a transport ignores
+    // cancellation; no body is ever read.
+    final expired = Completer<Never>();
+    expired.future.ignore();
+    final timer = Timer(deadline, () {
+      timedOut = true;
+      token.cancel();
+      expired.completeError(const TransportException(TransportFailure.timeout));
+    });
+    final parent = cancellation?.onCancel.listen((_) => token.cancel());
+    TransportResponse? response;
+    try {
+      final sending = transport.send(
+        TransportRequest(
+          method: method,
+          path: Uri(
+            pathSegments: [
+              'api',
+              'session',
+              session.nativeId,
+              'inbox',
+              messageId,
+            ],
+          ).toString(),
+          headers: {
+            'Accept': 'application/json',
+            if (body != null) 'Content-Type': 'application/json',
+          },
+          body: body == null ? null : utf8.encode(body),
+        ),
+        cancellation: token,
+      );
+      unawaited(
+        sending.then((late) {
+          if (timedOut) late.cancel();
+        }, onError: (Object _) {}),
+      );
+      final current = await Future.any<TransportResponse>([
+        sending,
+        expired.future,
+      ]);
+      response = current;
+      // The status alone decides; error bodies can echo ids.
+      return switch (current.statusCode) {
+        204 => const OpenCodeInboxCompleted(),
+        400 => OpenCodeInboxRefused(
+          _error(ErrorKind.protocol, 'InvalidRequestError'),
+        ),
+        401 || 403 => OpenCodeInboxRefused(
+          _error(
+            ErrorKind.auth,
+            'UnauthorizedError',
+            action: ErrorAction.authenticate,
+          ),
+        ),
+        404 => OpenCodeInboxRefused(
+          _error(ErrorKind.protocol, 'SessionNotFoundError'),
+        ),
+        409 => OpenCodeInboxRefused(
+          _error(
+            ErrorKind.protocol,
+            'ConflictError',
+            action: ErrorAction.refresh,
+          ),
+        ),
+        429 => OpenCodeInboxRefused(
+          _error(ErrorKind.rateLimit, 'RateLimited', retryable: true),
+        ),
+        final status => OpenCodeInboxUncertain('status$status'),
+      };
+    } on TransportException catch (error) {
+      if (timedOut) return const OpenCodeInboxUncertain('timeout');
+      return switch (error.failure) {
+        TransportFailure.invalidTarget || TransportFailure.invalidRequest
+            when response == null =>
+          OpenCodeInboxNotSent(error.failure.name),
+        _ => OpenCodeInboxUncertain(error.failure.name),
+      };
+    } on Object {
+      if (timedOut) return const OpenCodeInboxUncertain('timeout');
+      return const OpenCodeInboxUncertain('unexpectedTransportFailure');
+    } finally {
+      timer.cancel();
+      unawaited(parent?.cancel());
+      response?.cancel();
+    }
+  }
 }
 
 ErrorInfo _error(
@@ -412,4 +563,32 @@ final class OpenCodePromptReady extends OpenCodePromptPreparation {
 final class OpenCodePromptRefused extends OpenCodePromptPreparation {
   const OpenCodePromptRefused._(this.attempt);
   final OpenCodePromptAttempt attempt;
+}
+
+/// The single response to an inbox cancel or delivery switch.
+sealed class OpenCodeInboxResult {
+  const OpenCodeInboxResult();
+}
+
+/// 204: the handler succeeded or the request was a no-op.
+final class OpenCodeInboxCompleted extends OpenCodeInboxResult {
+  const OpenCodeInboxCompleted();
+}
+
+/// A definite refusal known from the status alone; the body is not read.
+final class OpenCodeInboxRefused extends OpenCodeInboxResult {
+  const OpenCodeInboxRefused(this.error);
+  final ErrorInfo error;
+}
+
+/// It may or may not have been applied.
+final class OpenCodeInboxUncertain extends OpenCodeInboxResult {
+  const OpenCodeInboxUncertain(this.reason);
+  final String reason;
+}
+
+/// Nothing reached the wire.
+final class OpenCodeInboxNotSent extends OpenCodeInboxResult {
+  const OpenCodeInboxNotSent(this.reason);
+  final String reason;
 }

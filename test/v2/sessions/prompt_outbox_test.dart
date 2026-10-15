@@ -52,11 +52,14 @@ final class _ThrowingStore extends _Store {
   Future<String?> read(String key) async => throw StateError('io');
 }
 
-/// Posts go to [respond]; reads go to [read], which fails unless set.
+/// Posts go to [respond]; reads go to [read] and inbox changes to [change],
+/// which fail unless set.
 final class _Transport implements EndpointHttpTransport {
-  _Transport(this.respond, {this.read});
+  _Transport(this.respond, {this.read, this.change});
   FutureOr<TransportResponse> Function(Map<String, Object?> body) respond;
   FutureOr<TransportResponse> Function(Uri uri)? read;
+  FutureOr<TransportResponse> Function(TransportRequest request)? change;
+  final changes = <TransportRequest>[];
   final bodies = <Map<String, Object?>>[];
   final reads = <Uri>[];
   final raw = <String>[];
@@ -74,6 +77,10 @@ final class _Transport implements EndpointHttpTransport {
       final uri = Uri.parse(request.path);
       reads.add(uri);
       return (read ?? (_) => fail('no read expected'))(uri);
+    }
+    if (request.method != 'POST') {
+      changes.add(request);
+      return (change ?? (_) => fail('no change expected'))(request);
     }
     onSend?.call();
     raw.add(utf8.decode(request.body!));
@@ -671,6 +678,18 @@ void main() {
       expect(lost.entry!.messageId, server.inbox.single['id']);
     });
 
+    test('an id held by another record is never cancelled', () async {
+      final server = _Server()..loseResponse = true;
+      final outbox = _outbox(_Store(), server.transport);
+      await _submit(outbox);
+      (server.inbox.single['payload']! as Map)['text'] = 'Other';
+      await outbox.reconcile(_session, const CommandId('cmd_1'));
+      final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(result.refusal, 'identityOccupied');
+      expect(server.transport.changes, isEmpty);
+      expect(server.inbox, hasLength(1));
+    });
+
     test('a pending id switched to another delivery is still ours', () async {
       final server = _Server()..loseResponse = true;
       final outbox = _outbox(_Store(), server.transport);
@@ -775,6 +794,292 @@ void main() {
       expect((await _submit(outbox, command: 'extra')).sent, isTrue);
     });
   });
+
+  group('cancel and switch', () {
+    Future<(_Server, OpenCodePromptOutbox, _Store)> queued({
+      Delivery delivery = Delivery.queue,
+    }) async {
+      final server = _Server();
+      final store = _Store();
+      final outbox = _outbox(store, server.transport);
+      final sent = await _submit(outbox, delivery: delivery);
+      expect(sent.entry!.state, SubmissionKind.admitted);
+      return (server, outbox, store);
+    }
+
+    Map<dynamic, dynamic> saved(_Store store) =>
+        (_ledger(store)['entries']! as List).single as Map;
+
+    test('cancel of a pending prompt: fenced first, cancelled after', () async {
+      final (server, outbox, store) = await queued();
+      server.beforeChange = () =>
+          expect(saved(store)['fence'], CancellationFence.submitting.name);
+      final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(server.transport.changes.single.method, 'DELETE');
+      expect(server.inbox, isEmpty);
+      expect(result.entry!.state, SubmissionKind.cancelled);
+      expect(result.entry!.fence, CancellationFence.cancelled);
+      // Never sent again, and a repeated cancel sends nothing.
+      final again = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(again.entry!.state, SubmissionKind.cancelled);
+      expect(server.transport.changes, hasLength(1));
+      final checked = await outbox.reconcile(
+        _session,
+        const CommandId('cmd_1'),
+      );
+      expect(checked.posts, 0);
+      expect(server.transport.bodies, hasLength(1));
+    });
+
+    test('cancel racing delivery shows the delivery', () async {
+      final (server, outbox, _) = await queued();
+      // Delivered just before the DELETE arrives: 2.0.22 still answers 204.
+      server.beforeChange = () =>
+          server.promote(server.inbox.single['id']! as String);
+      final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(result.entry!.state, SubmissionKind.delivered);
+      expect(result.entry!.fence, CancellationFence.settled);
+      expect(server.history, hasLength(1));
+    });
+
+    test(
+      'a lost cancel response keeps the fence until a check decides',
+      () async {
+        final (server, outbox, store) = await queued();
+        server.changeAnswer = (request) {
+          server.inbox.clear();
+          throw const TransportException(TransportFailure.timeout);
+        };
+        server.failReads = 500;
+        final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.fence, CancellationFence.uncertain);
+        expect(result.entry!.reason, 'unavailable');
+        // A later check finds it gone; nothing is ever posted again.
+        server.failReads = null;
+        final checked = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(checked.posts, 0);
+        expect(checked.entry!.state, SubmissionKind.cancelled);
+        expect(checked.entry!.fence, CancellationFence.cancelled);
+        expect(saved(store)['fence'], 'cancelled');
+        expect(server.transport.bodies, hasLength(1));
+      },
+    );
+
+    test(
+      'cancel of an unconfirmed prompt is never claimed nor replayed',
+      () async {
+        final server = _Server()..reachServer = false;
+        final outbox = _outbox(_Store(), server.transport);
+        await _submit(outbox);
+        // The id is unknown to the server: its DELETE is a 204 no-op.
+        final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(result.entry!.state, SubmissionKind.uncertain);
+        expect(result.entry!.fence, CancellationFence.uncertain);
+        expect(result.entry!.reason, 'cancellationFence');
+        // The lost request arrives late; the check records it, still fenced.
+        server.inbox.add(server.row(server.transport.bodies.single));
+        final checked = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(checked.posts, 0);
+        expect(checked.entry!.state, SubmissionKind.admitted);
+        expect(checked.entry!.fence, CancellationFence.uncertain);
+        // A second cancel removes it.
+        final cancelled = await outbox.cancel(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(cancelled.entry!.state, SubmissionKind.cancelled);
+        expect(server.inbox, isEmpty);
+        expect(server.transport.bodies, hasLength(1));
+      },
+    );
+
+    test(
+      'a cancel that never left keeps the fence and sends nothing',
+      () async {
+        final (server, outbox, _) = await queued();
+        server.transport.isClosed = true;
+        final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(server.transport.changes, isEmpty);
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.fence, CancellationFence.requested);
+        expect(result.entry!.reason, 'closed');
+      },
+    );
+
+    test('a fence that cannot be written sends nothing', () async {
+      final (server, outbox, store) = await queued();
+      store.failWrite = true;
+      final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(result.refusal, 'notPersisted');
+      expect(server.transport.changes, isEmpty);
+    });
+
+    test('a fence is never cleared or reopened', () async {
+      final (_, outbox, _) = await queued();
+      await outbox.cancel(_session, const CommandId('cmd_1'));
+      for (final fence in CancellationFence.values) {
+        expect(
+          await outbox.setCancellationFence(
+            _session,
+            const CommandId('cmd_1'),
+            fence,
+          ),
+          isFalse,
+          reason: fence.name,
+        );
+      }
+    });
+
+    test('switch queue to steer follows the inbox, payload kept', () async {
+      final (server, outbox, store) = await queued();
+      final payload = saved(store)['payload'];
+      final result = await outbox.switchDelivery(
+        _session,
+        const CommandId('cmd_1'),
+        Delivery.steer,
+      );
+      final patch = server.transport.changes.single;
+      expect(patch.method, 'PATCH');
+      expect(jsonDecode(utf8.decode(patch.body!)), {'delivery': 'steer'});
+      expect(result.entry!.delivery, Delivery.steer);
+      expect(result.entry!.state, SubmissionKind.admitted);
+      expect(saved(store)['payload'], payload);
+      expect(saved(store)['delivery'], 'steer');
+      // Already steered: nothing is sent.
+      await outbox.switchDelivery(
+        _session,
+        const CommandId('cmd_1'),
+        Delivery.steer,
+      );
+      expect(server.transport.changes, hasLength(1));
+    });
+
+    test(
+      'switch of a delivered prompt shows the delivery, not a 409',
+      () async {
+        final (server, outbox, _) = await queued();
+        server.promote(server.inbox.single['id']! as String);
+        final result = await outbox.switchDelivery(
+          _session,
+          const CommandId('cmd_1'),
+          Delivery.steer,
+        );
+        expect(server.transport.changes.single.method, 'PATCH');
+        expect(result.entry!.state, SubmissionKind.delivered);
+        expect(result.entry!.delivery, Delivery.queue);
+      },
+    );
+
+    test('a 409 still pending keeps the delivery and says why', () async {
+      final (server, outbox, _) = await queued();
+      server.changeAnswer = (_) =>
+          _json({'_tag': 'ConflictError'}, status: 409);
+      final result = await outbox.switchDelivery(
+        _session,
+        const CommandId('cmd_1'),
+        Delivery.steer,
+      );
+      expect(result.entry!.state, SubmissionKind.admitted);
+      expect(result.entry!.delivery, Delivery.queue);
+      expect(result.entry!.reason, 'ConflictError');
+      // A failed check never makes an admitted prompt replayable.
+      server.failReads = 500;
+      final unchecked = await outbox.switchDelivery(
+        _session,
+        const CommandId('cmd_1'),
+        Delivery.steer,
+      );
+      expect(unchecked.entry!.state, SubmissionKind.admitted);
+      expect(unchecked.entry!.reason, 'unavailable');
+    });
+
+    test(
+      'switch is refused for fenced, unconfirmed or unknown entries',
+      () async {
+        final (server, outbox, _) = await queued();
+        expect(
+          (await outbox.switchDelivery(
+            _session,
+            const CommandId('cmd_1'),
+            Delivery.immediate,
+          )).refusal,
+          'unsupportedDelivery',
+        );
+        expect(
+          (await outbox.switchDelivery(
+            _session,
+            const CommandId('nope'),
+            Delivery.steer,
+          )).refusal,
+          'unknownCommand',
+        );
+        server.failReads = 500;
+        await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(
+          (await outbox.switchDelivery(
+            _session,
+            const CommandId('cmd_1'),
+            Delivery.steer,
+          )).refusal,
+          'cancellationFence',
+        );
+        final lost = _Server()..reachServer = false;
+        final unconfirmed = _outbox(_Store(), lost.transport);
+        await _submit(unconfirmed);
+        expect(
+          (await unconfirmed.switchDelivery(
+            _session,
+            const CommandId('cmd_1'),
+            Delivery.steer,
+          )).refusal,
+          'notPending',
+        );
+        expect(lost.transport.changes, isEmpty);
+      },
+    );
+
+    test('an unsettled cancel is never evicted', () async {
+      final server = _Server();
+      final outbox = _outbox(_Store(), server.transport);
+      for (var i = 0; i < OpenCodePromptOutbox.maxEntries; i++) {
+        await _submit(outbox, command: 'q_$i', delivery: Delivery.queue);
+      }
+      // The oldest prompt's cancel cannot be confirmed.
+      server.failReads = 500;
+      final open = await outbox.cancel(_session, const CommandId('q_0'));
+      expect(open.entry!.fence, CancellationFence.uncertain);
+      server.failReads = null;
+      expect((await _submit(outbox, command: 'extra')).sent, isTrue);
+      final kept = [
+        for (final e in await outbox.entries(_session)) e.commandId.value,
+      ];
+      expect(kept, contains('q_0'));
+      expect(kept, isNot(contains('q_1')));
+    });
+
+    test('cancelled entries make room in a full ledger', () async {
+      final server = _Server();
+      final outbox = _outbox(_Store(), server.transport);
+      server.changeAnswer = null;
+      for (var i = 0; i < OpenCodePromptOutbox.maxEntries; i++) {
+        await _submit(outbox, command: 'c_$i', delivery: Delivery.queue);
+        await outbox.cancel(_session, CommandId('c_$i'));
+      }
+      expect((await _submit(outbox, command: 'extra')).sent, isTrue);
+      // The evicted command is forgotten, never sent again.
+      expect(
+        (await _submit(outbox, command: 'c_0')).refusal,
+        'alreadySubmitted',
+      );
+    });
+  });
 }
 
 /// A native 2.0.22 session reduced to what reconciliation reads: a same-id
@@ -782,8 +1087,14 @@ void main() {
 /// promotion moves it to history.
 final class _Server {
   _Server() {
-    transport = _Transport(_post, read: _read);
+    transport = _Transport(_post, read: _read, change: _change);
   }
+
+  /// Answers a DELETE or PATCH; null applies it like 2.0.22.
+  FutureOr<TransportResponse> Function(TransportRequest request)? changeAnswer;
+
+  /// Runs when a DELETE or PATCH reaches the server, before it applies.
+  void Function()? beforeChange;
   late final _Transport transport;
   final inbox = <Map<String, Object?>>[];
   final history = <Map<String, Object?>>[];
@@ -832,6 +1143,23 @@ final class _Server {
     return _json({'data': admitted ?? row(body)});
   }
 
+  /// 2.0.22: a DELETE of a delivered or unknown id is a 204 no-op; a PATCH
+  /// of a delivered id is a 409.
+  FutureOr<TransportResponse> _change(TransportRequest request) {
+    beforeChange?.call();
+    if (changeAnswer case final answer?) return answer(request);
+    final id = Uri.parse(request.path).pathSegments.last;
+    final row = inbox.where((r) => r['id'] == id).firstOrNull;
+    if (request.method == 'DELETE') {
+      if (row != null) inbox.remove(row);
+      return _empty(204);
+    }
+    if (row == null) return _json({'_tag': 'ConflictError'}, status: 409);
+    row['delivery'] =
+        (jsonDecode(utf8.decode(request.body!)) as Map)['delivery'];
+    return _empty(204);
+  }
+
   TransportResponse _read(Uri uri) {
     if (failReads case final status?) return _json({}, status: status);
     if (uri.pathSegments.last == 'inbox') return _json({'data': inbox});
@@ -845,3 +1173,10 @@ final class _Server {
     });
   }
 }
+
+TransportResponse _empty(int status) => TransportResponse(
+  statusCode: status,
+  headers: const {},
+  body: const Stream.empty(),
+  cancel: () {},
+);

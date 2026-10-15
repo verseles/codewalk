@@ -63,6 +63,18 @@ final class OutboxReconciliation {
   final int posts;
 }
 
+/// The result of a queue cancel or delivery switch. [entry] is null when
+/// nothing was attempted ([refusal] says why); otherwise it is the entry
+/// after the call, whose state, delivery and fence tell what the server
+/// shows, never the request's status alone.
+final class OutboxMutation {
+  const OutboxMutation._({this.entry, this.refusal});
+  const OutboxMutation.refused(String reason) : this._(refusal: reason);
+  const OutboxMutation.recorded(OutboxEntry entry) : this._(entry: entry);
+  final OutboxEntry? entry;
+  final String? refusal;
+}
+
 /// Records each prompt before sending it and keeps the outcome. Only
 /// [reconcile] ever sends a prompt again, under its original id.
 abstract interface class PromptOutbox {
@@ -84,10 +96,28 @@ abstract interface class PromptOutbox {
   /// Resolves an uncertain entry from the server's inbox and history by its
   /// native id. Only when that proves the prompt absent, and the verified
   /// contract allows it, the exact recorded payload is posted again under
-  /// the same id, a bounded number of times with backoff. Any other entry is
-  /// returned unchanged, without network access.
+  /// the same id, a bounded number of times with backoff. An entry whose
+  /// cancel is still unsettled is checked the same way, never sent again
+  /// (neither its prompt nor its cancel). Any other entry is returned
+  /// unchanged, without network access.
   Future<OutboxReconciliation> reconcile(
     SessionRef session,
     CommandId commandId,
+  );
+
+  /// Cancels a queued or steered prompt not yet delivered. A cancellation
+  /// fence is durable before the request and never cleared, so the prompt is
+  /// never sent again; the entry ends `cancelled` only when the server no
+  /// longer holds it, `delivered` when it was delivered first, and otherwise
+  /// keeps its state with the fence until a later check decides.
+  Future<OutboxMutation> cancel(SessionRef session, CommandId commandId);
+
+  /// Changes the delivery of an admitted, still pending prompt (steering
+  /// wakes execution). The recorded delivery follows what the server shows
+  /// afterwards; the original payload is kept.
+  Future<OutboxMutation> switchDelivery(
+    SessionRef session,
+    CommandId commandId,
+    Delivery delivery,
   );
 }

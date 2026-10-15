@@ -262,6 +262,17 @@ History is in promotion order, so no id or time cutoff ends the scan, and a
 limit ends history. Failed reads throw and never read as absence. The
 uncaptured `GET .../message/{id}` route is not used.
 
+[V2-045D / #385](https://github.com/verseles/codewalk/issues/385) adds
+`OpenCodePromptClient.cancelInbox(session:, messageId:)` (`DELETE
+/api/session/{id}/inbox/{msg}`) and `switchInboxDelivery(session:, messageId:,
+delivery:)` (`PATCH` with `{delivery}`), each sent once on 2.0.22 and mapped from
+the status alone, without reading a body: 204 is `OpenCodeInboxCompleted`,
+400/401/403/404/409/429 are `OpenCodeInboxRefused` with a finite `ErrorInfo`,
+other statuses and transport failures are `OpenCodeInboxUncertain`, and nothing
+sent is `OpenCodeInboxNotSent`. A 204 is not proof: 2.0.22 also answers 204 for
+a delivered or unknown id, and a 409 was observed for a delivered one, so the
+caller decides the outcome with `locatePrompt`.
+
 ## Native text and reasoning event projection
 
 [V2-044A2 / #368](https://github.com/verseles/codewalk/issues/368) exports
