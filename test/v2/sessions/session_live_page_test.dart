@@ -3,8 +3,10 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'composer_fakes.dart';
@@ -124,6 +126,34 @@ void main() {
             ),
             findsNothing,
           );
+
+          // Stop does not depend on a prompt ledger, and shutdown-resuming
+          // above never offered it. Keep the projected partial output.
+          expect(find.byKey(const ValueKey('live-stop')), findsNothing);
+          handle.stopAvailable = true;
+          handle.stopAction = (_) async =>
+              const SessionStopState(phase: SessionStopPhase.idle);
+          handle.emit(
+            SessionLiveView(
+              session: ref,
+              phase: SessionLivePhase.live,
+              state: liveState(
+                ref,
+                items: handle.current.state!.timeline,
+                execution: const ExecutionState(
+                  kind: OpenValue.known(ExecutionKind.running),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final stop = find.byKey(const ValueKey('live-stop'));
+          expect(stop, findsOneWidget);
+          await tester.tap(stop);
+          await tester.pumpAndSettle();
+          expect(handle.stops, hasLength(1));
+          expect(find.text(l10n.liveStopIdle), findsOneWidget);
+          expect(find.text('…<b>Plain body</b>'), findsOneWidget);
 
           // A set-aside session keeps its resident state visible, marked stale.
           handle.emit(
@@ -324,7 +354,58 @@ void main() {
         await tester.pumpAndSettle();
         expect(outbox.calls, contains('cancel mine'));
         expect(tester.takeException(), isNull);
+
+        // All 14 locales and three layouts exercise the v1-style Send/Stop
+        // slot swap, without changing draft text or canonical execution.
+        handle.stopAvailable = true;
+        handle.stopAction = (_) async =>
+            const SessionStopState(phase: SessionStopPhase.idle);
+        handle.emit(
+          SessionLiveView(
+            session: ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              ref,
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('live-stop')), findsOneWidget);
+        expect(find.byKey(const ValueKey('live-composer-send')), findsNothing);
+        await tester.enterText(find.byType(TextField), 'Keep');
+        await tester.pump();
+        expect(find.byKey(const ValueKey('live-stop')), findsNothing);
+        expect(
+          find.byKey(const ValueKey('live-composer-send')),
+          findsOneWidget,
+        );
+        await tester.enterText(find.byType(TextField), '');
+        // Focus scrolls the field into view asynchronously. Let that scroll
+        // settle before hit-testing the replacement trailing action.
+        await tester.pumpAndSettle();
+        final stopRect = tester.getRect(
+          find.byKey(const ValueKey('live-stop')),
+        );
+        expect((Offset.zero & size).contains(stopRect.center), isTrue);
+        await tester.tap(find.byKey(const ValueKey('live-stop')));
+        await tester.pumpAndSettle();
+        expect(handle.stops, hasLength(1));
+        expect(find.text(l10n.liveStopIdle), findsOneWidget);
+        expect(find.text(l10n.liveRunning), findsOneWidget);
+        expect(tester.takeException(), isNull);
         if (locale.languageCode != 'en') return;
+        await tester.enterText(find.byType(TextField), 'Keep');
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pump();
+        expect(find.text(l10n.liveStopEscapeHint), findsOneWidget);
+        expect(handle.stops, hasLength(1));
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(handle.stops, hasLength(2));
+        expect(find.text('Keep'), findsOneWidget);
         // A draft survives a reopened lease.
         await tester.enterText(find.byType(TextField), 'Draft');
         handle.emit(

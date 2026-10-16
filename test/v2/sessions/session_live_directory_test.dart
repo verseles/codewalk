@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,6 +27,14 @@ final class _Server {
   final streams = <HttpResponse>[];
   final methods = <String>{};
   final prompts = <String>[];
+  final running = <String>{};
+  bool includePreviousOutcome = false;
+  final interrupts = <Uri>[];
+  final firstInterrupt = Completer<void>();
+  Completer<void>? holdInterrupt;
+  Object? interruptBody = const {'interrupted': true};
+  int interruptStatus = 200;
+  int _seq = 0;
   int get port => _server.port;
   int get events => paths.where((p) => p == '/proxy/api/event').length;
 
@@ -56,6 +65,17 @@ final class _Server {
     }
     r.response.headers.contentType = ContentType.json;
     final tail = segments.last;
+    if (r.method == 'POST' && tail == 'interrupt') {
+      interrupts.add(r.uri);
+      if (!firstInterrupt.isCompleted) firstInterrupt.complete();
+      expect(await utf8.decoder.bind(r).join(), isEmpty);
+      expect(r.uri.hasQuery, isFalse);
+      await holdInterrupt?.future;
+      r.response.statusCode = interruptStatus;
+      r.response.write(jsonEncode(interruptBody));
+      await r.response.close();
+      return;
+    }
     if (r.method == 'POST' && tail == 'prompt') {
       prompts.add(await utf8.decoder.bind(r).join());
       final body = jsonDecode(prompts.last) as Map<String, Object?>;
@@ -83,7 +103,11 @@ final class _Server {
           'urls': [],
           'paths': {'tmp': '/tmp'},
         },
-        'active' => {'data': <String, Object?>{}},
+        'active' => {
+          'data': {
+            for (final id in running) id: {'type': 'running'},
+          },
+        },
         'inbox' || 'permission' || 'form' => {'data': <Object?>[]},
         'message' => {
           'data': [
@@ -93,6 +117,13 @@ final class _Server {
               'time': {'created': 1000},
               'text': 'hello from $session',
             },
+            if (includePreviousOutcome)
+              {
+                'id': 'msg_0',
+                'type': 'idle',
+                'time': {'created': 500},
+                'outcome': 'succeeded',
+              },
           ],
           'cursor': {'previous': null, 'next': null},
         },
@@ -108,6 +139,26 @@ final class _Server {
       }),
     );
     await r.response.close();
+  }
+
+  Future<void> execution(String session, String type, {String? reason}) async {
+    final seq = ++_seq;
+    if (type == 'started') {
+      running.add(session);
+    } else {
+      running.remove(session);
+    }
+    final frame = {
+      'id': 'evt_$seq',
+      'type': 'session.execution.$type',
+      'created': 1000 + seq,
+      'durable': {'aggregateID': session, 'version': 1, 'seq': seq},
+      'data': {'sessionID': session, 'reason': ?reason},
+    };
+    for (final stream in streams) {
+      stream.write('data: ${jsonEncode(frame)}\n\n');
+      await stream.flush();
+    }
   }
 
   Future<void> close() async {
@@ -141,6 +192,243 @@ void main() {
     );
   });
   tearDown(() => server.close());
+
+  test(
+    'Stop shares a fence across leases, same credential/prefix, no ledger',
+    () async {
+      server.running.add('ses_one');
+      server.holdInterrupt = Completer();
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final b = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(a, (_) => a.canStop);
+      expect(a.outbox, isNull);
+      final pending = a.stop(id: const CommandId('first'));
+      await b.stop(id: const CommandId('second'));
+      expect(b.stopState.busy, isTrue);
+      await server.firstInterrupt.future.timeout(const Duration(seconds: 10));
+      expect(
+        server.interrupts.single.path,
+        '/proxy/api/session/ses_one/interrupt',
+      );
+      server.holdInterrupt!.complete();
+      await pending;
+      expect(b.stopState.phase, SessionStopPhase.requested);
+      expect(a.current.state?.execution?.kind.known, ExecutionKind.running);
+      await b.stop(id: const CommandId('third'));
+      expect(server.interrupts, hasLength(1));
+      await server.execution('ses_one', 'interrupted', reason: 'user');
+      await until(
+        a,
+        (v) => v.state?.execution?.kind.known == ExecutionKind.idle,
+      );
+      expect(b.stopState.busy, isFalse);
+      expect(
+        a.current.state!.timeline.whereType<TurnOutcome>().single.kind.known,
+        OutcomeKind.interrupted,
+      );
+      expect(server.events, 1);
+      a.close();
+      b.close();
+      await b.stop(id: const CommandId('closed'));
+      expect(server.interrupts, hasLength(1));
+    },
+  );
+
+  test(
+    'terminal and successor before HTTP answer do not restore a stop wait',
+    () async {
+      server.running.add('ses_one');
+      server.holdInterrupt = Completer();
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(a, (_) => a.canStop);
+      final pending = a.stop(id: const CommandId('first'));
+      await server.firstInterrupt.future.timeout(const Duration(seconds: 10));
+      await server.execution('ses_one', 'interrupted', reason: 'user');
+      await until(
+        a,
+        (v) => v.state?.execution?.kind.known == ExecutionKind.idle,
+      );
+      await server.execution('ses_one', 'started');
+      await until(
+        a,
+        (v) => v.state?.execution?.kind.known == ExecutionKind.running,
+      );
+      expect(a.canStop, isFalse, reason: 'HTTP attempt is still in flight');
+      server.holdInterrupt!.complete();
+      await pending;
+      expect(a.stopState.busy, isFalse);
+      expect(a.canStop, isTrue);
+      expect(server.interrupts, hasLength(1));
+    },
+  );
+
+  test('reconnect hydration cannot settle a still-running Stop', () async {
+    server.running.add('ses_one');
+    server.includePreviousOutcome = true;
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final a = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    await until(a, (_) => a.canStop);
+    final previous = a.current.state!.execution!.lastOutcome;
+    expect(previous, isNotNull);
+    await a.stop(id: const CommandId('first'));
+    expect(a.stopState.phase, SessionStopPhase.requested);
+    final reconnect = a.updates.firstWhere(
+      (v) => v.phase == SessionLivePhase.live && server.events >= 2,
+    );
+    final oldStream = server.streams.removeLast();
+    await oldStream.close();
+    await reconnect.timeout(const Duration(seconds: 10));
+    expect(
+      identical(previous, a.current.state!.execution!.lastOutcome),
+      isFalse,
+      reason: 'the same historical outcome was reconstructed by hydration',
+    );
+    expect(a.current.state!.execution!.kind.known, ExecutionKind.running);
+    expect(a.stopState.phase, SessionStopPhase.requested);
+    expect(a.canStop, isFalse);
+    await a.stop(id: const CommandId('must-not-send'));
+    expect(server.interrupts, hasLength(1));
+    await server.execution('ses_one', 'interrupted', reason: 'user');
+    await until(a, (_) => !a.stopState.busy);
+    expect(a.stopState.phase, SessionStopPhase.ready);
+  });
+
+  test(
+    'an uncertain HTTP receipt clears only after authoritative settlement',
+    () async {
+      server.running.add('ses_one');
+      server.interruptBody = {
+        'data': {'interrupted': true},
+      };
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(a, (_) => a.canStop);
+      await a.stop(id: const CommandId('first'));
+      expect(a.stopState.phase, SessionStopPhase.unconfirmed);
+      await server.execution('ses_one', 'interrupted', reason: 'user');
+      await until(
+        a,
+        (v) => v.state?.execution?.kind.known == ExecutionKind.idle,
+      );
+      expect(a.stopState.phase, SessionStopPhase.ready);
+      expect(server.interrupts, hasLength(1));
+    },
+  );
+
+  test('false, malformed, refusal: no optimistic idle or retry', () async {
+    for (final body in [
+      {'interrupted': false},
+      {
+        'data': {'interrupted': true},
+      },
+      {'secret': 'not displayed'},
+    ]) {
+      server.running.add('ses_one');
+      server.interruptBody = body;
+      server.interruptStatus = body.containsKey('secret') ? 401 : 200;
+      final directory = createSessionLiveDirectory()!;
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(a, (_) => a.canStop);
+      final count = server.interrupts.length;
+      await a.stop(id: const CommandId('first'));
+      expect(
+        a.stopState.phase,
+        body.containsKey('secret')
+            ? SessionStopPhase.refused
+            : body.containsKey('data')
+            ? SessionStopPhase.unconfirmed
+            : SessionStopPhase.idle,
+      );
+      expect(a.current.state?.execution?.kind.known, ExecutionKind.running);
+      expect(server.interrupts.length, count + 1);
+      await directory.close();
+    }
+  });
+
+  test('an idle parent cannot Stop its running child', () async {
+    server.running.add('ses_child');
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final parent = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    final child = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_child'),
+    );
+    await until(
+      parent,
+      (v) => v.phase == SessionLivePhase.live && v.state != null,
+    );
+    await until(child, (_) => child.canStop);
+    await parent.stop(id: const CommandId('parent'));
+    expect(server.interrupts, isEmpty);
+    expect(child.canStop, isTrue);
+    await child.stop(id: const CommandId('child'));
+    expect(server.interrupts.single.path, endsWith('/ses_child/interrupt'));
+  });
+
+  test(
+    'accepted request waiting state is bounded; never sends another POST',
+    () async {
+      server.running.add('ses_one');
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(a, (_) => a.canStop);
+      await a.stop(id: const CommandId('first'));
+      expect(a.stopState.busy, isTrue);
+      await a.updates
+          .firstWhere((_) => a.stopState.phase == SessionStopPhase.unconfirmed)
+          .timeout(const Duration(seconds: 35));
+      expect(a.canStop, isTrue);
+      expect(server.interrupts, hasLength(1));
+      await server.execution('ses_one', 'interrupted', reason: 'user');
+      await until(
+        a,
+        (v) => v.state?.execution?.kind.known == ExecutionKind.idle,
+      );
+      expect(a.stopState.phase, SessionStopPhase.ready);
+    },
+    timeout: const Timeout(Duration(seconds: 45)),
+  );
 
   test(
     'handles share one event stream, hydrate read-only and release it',

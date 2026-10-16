@@ -913,4 +913,23 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get composerInbox => 'منتظر پیغامات';
+
+  @override
+  String get liveStop => 'روکیں';
+
+  @override
+  String get liveStopping => 'روکنے کی درخواست کی گئی…';
+
+  @override
+  String get liveStopIdle => 'کوئی فعال عمل نہیں روکا گیا۔';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'روکنے کی تصدیق نہیں ہوئی۔ لائیو عمل کی حالت دیکھیں۔';
+
+  @override
+  String get liveStopFailed => 'روکنے کی درخواست مسترد کر دی گئی۔';
+
+  @override
+  String get liveStopEscapeHint => 'روکنے کے لیے Escape دوبارہ دبائیں۔';
 }

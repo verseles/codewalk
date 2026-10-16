@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
@@ -10,6 +11,33 @@ class LiveHandle implements SessionLiveHandle {
   final SessionRef session;
   @override
   PromptOutbox? outbox;
+  bool stopAvailable = false;
+  Future<SessionStopState> Function(CommandId)? stopAction;
+  final stops = <CommandId>[];
+  @override
+  SessionStopState stopState = const SessionStopState();
+  @override
+  bool get canStop =>
+      stopAvailable &&
+      closes == 0 &&
+      !stopState.busy &&
+      current.phase == SessionLivePhase.live &&
+      !current.stale &&
+      current.state?.execution?.kind.known == ExecutionKind.running;
+  @override
+  Future<void> stop({required CommandId id}) async {
+    if (!canStop) return;
+    stops.add(id);
+    stopState = const SessionStopState(phase: SessionStopPhase.requesting);
+    emit(current);
+    stopState =
+        await (stopAction?.call(id) ??
+            Future.value(
+              const SessionStopState(phase: SessionStopPhase.requested),
+            ));
+    if (closes == 0) emit(current);
+  }
+
   @override
   String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
   final _controller = StreamController<SessionLiveView>.broadcast();

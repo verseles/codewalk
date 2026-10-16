@@ -49,6 +49,22 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an unsent draft survives a reopened lease; an unreadable ledger disables sending with a re-read action; without storage, a verified version or on Web the screen keeps the read-only "sending unavailable" line
 - **Then** compact, landscape and wide layouts in all 14 locales (RTL for Arabic/Urdu) are technical widget coverage; installed native acceptance remains separate
 
+### V2 live session Stop
+
+- **Given** an open native v2 session on verified OpenCode 2.0.22 with a live, current, known-running execution
+- **When** the composer draft is empty
+- **Then** its trailing Send action becomes Stop; typing keeps Send with steer/queue, and Stop never clears the draft or partial output
+- **Then** two unmodified Escape presses within 500 milliseconds while the input is focused also request Stop; the first shows a hint, and composing text, repeated keys and modifiers do not trigger it
+- **When** Stop is deliberately requested
+- **Then** exactly one session-scoped interrupt request is sent, without a body or resume query; it neither resumes parked input nor cancels inbox entries or other sessions
+- **Then** the shared session lease fences duplicate requests across screens and temporarily disables competing composer mutations; Stop remains available without prompt-ledger storage
+- **Then** an accepted `interrupted:true` means only that interruption was requested, while `false` is a confirmed idle no-op; neither response changes canonical execution state
+- **Then** missing, malformed or lost responses show finite unconfirmed copy and never replay automatically; a later deliberate Stop is a new action against whatever execution is current
+- **Then** the HTTP attempt is bounded to 20 seconds and the post-accept wait to 30 seconds; only an authoritative live, non-stale non-running observation settles the wait, including after an unconfirmed result
+- **Then** reconnect hydration that merely reconstructs an earlier outcome does not settle a still-running request; a missed terminal followed by a running successor keeps the conservative bounded wait
+- **Then** idle/refused notices describe that request, and stream/hydration remain the only source of execution and turn outcomes; closing, credential changes and lease release never initiate a remote Stop
+- **Then** technical coverage includes compact/landscape/wide composers in 14 locales and storage-less compact/wide Stop; installed native/MVP acceptance, child controls and retry countdown remain separate
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened

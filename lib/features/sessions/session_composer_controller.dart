@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import 'session_live_controller.dart';
@@ -59,7 +59,7 @@ class SessionComposerController extends ChangeNotifier {
   SessionComposerController({
     required this.live,
     CommandId Function()? commandIds,
-  }) : _commandIds = commandIds ?? _randomCommandId {
+  }) : _commandIds = commandIds ?? mintCommandId {
     live.addListener(_liveChanged);
     _liveChanged();
   }
@@ -83,17 +83,9 @@ class SessionComposerController extends ChangeNotifier {
       _outbox != null &&
       !unreadable &&
       !sending &&
+      !live.stopping &&
       live.view?.phase == SessionLivePhase.live &&
       !(live.view?.stale ?? true);
-
-  static CommandId _randomCommandId() {
-    final random = Random.secure();
-    final hex = [
-      for (var i = 0; i < 16; i++)
-        random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-    ].join();
-    return CommandId('cmd_$hex');
-  }
 
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -259,7 +251,7 @@ class SessionComposerController extends ChangeNotifier {
     Future<void> Function(PromptOutbox) op,
   ) async {
     final outbox = _outbox;
-    if (outbox == null || !busy.add(id)) return;
+    if (outbox == null || live.stopping || !busy.add(id)) return;
     _notify();
     try {
       await op(outbox);

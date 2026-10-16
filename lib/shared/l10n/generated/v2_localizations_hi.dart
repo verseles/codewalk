@@ -914,4 +914,23 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get composerInbox => 'प्रतीक्षारत संदेश';
+
+  @override
+  String get liveStop => 'रोकें';
+
+  @override
+  String get liveStopping => 'रोकने का अनुरोध किया गया…';
+
+  @override
+  String get liveStopIdle => 'कोई सक्रिय निष्पादन बाधित नहीं हुआ।';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'रोकने की पुष्टि नहीं हुई। लाइव निष्पादन की स्थिति देखें।';
+
+  @override
+  String get liveStopFailed => 'रोकने का अनुरोध अस्वीकार किया गया।';
+
+  @override
+  String get liveStopEscapeHint => 'रोकने के लिए Escape फिर दबाएँ।';
 }

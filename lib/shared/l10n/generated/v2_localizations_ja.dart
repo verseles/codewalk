@@ -870,4 +870,22 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get composerInbox => '待機中のメッセージ';
+
+  @override
+  String get liveStop => '停止';
+
+  @override
+  String get liveStopping => '停止を要求しました…';
+
+  @override
+  String get liveStopIdle => '実行中の処理は中断されませんでした。';
+
+  @override
+  String get liveStopUnconfirmed => '停止を確認できません。ライブの実行状態を確認してください。';
+
+  @override
+  String get liveStopFailed => '停止要求が拒否されました。';
+
+  @override
+  String get liveStopEscapeHint => '停止するにはもう一度 Esc を押してください。';
 }

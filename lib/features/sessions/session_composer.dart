@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import 'session_composer_controller.dart';
+import 'session_stop_button.dart';
 
 /// The live screen's composer: pending inbox chips, entries that still need
 /// the user, the steer/queue choice and the text field. It edits the page's
@@ -33,6 +35,39 @@ class SessionComposer extends StatefulWidget {
 
 class _SessionComposerState extends State<SessionComposer> {
   TextEditingController get _text => widget.text;
+  DateTime? _escapeAt;
+
+  KeyEventResult _key(FocusNode node, KeyEvent event) {
+    final keyboard = HardwareKeyboard.instance;
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.escape ||
+        keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isShiftPressed ||
+        !_text.value.composing.isCollapsed ||
+        widget.controller.sending ||
+        !widget.controller.live.canStop) {
+      return KeyEventResult.ignored;
+    }
+    final now = DateTime.now();
+    final previous = _escapeAt;
+    _escapeAt = now;
+    if (previous != null &&
+        now.difference(previous) <= const Duration(milliseconds: 500)) {
+      _escapeAt = null;
+      ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
+      widget.controller.live.stopCurrentTurn();
+    } else {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(context.v2L10n.liveStopEscapeHint),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+    return KeyEventResult.handled;
+  }
 
   @override
   void initState() {
@@ -110,7 +145,9 @@ class _SessionComposerState extends State<SessionComposer> {
     final queued =
         (entry?.delivery ?? chip.pending.delivery.known) == Delivery.queue;
     final fenced = entry != null && openFence(entry.fence);
-    final idle = entry == null || !c.busy.contains(entry.commandId);
+    final idle =
+        !c.live.stopping &&
+        (entry == null || !c.busy.contains(entry.commandId));
     final status = fenced
         ? l10n.composerCancelling
         : entry?.state == SubmissionKind.uncertain
@@ -186,7 +223,7 @@ class _SessionComposerState extends State<SessionComposer> {
     final l10n = context.v2L10n;
     final c = widget.controller;
     final id = entry.commandId.value;
-    final idle = !c.busy.contains(entry.commandId);
+    final idle = !c.live.stopping && !c.busy.contains(entry.commandId);
     final fenced = openFence(entry.fence);
     final status = switch (entry.state) {
       _ when fenced => l10n.composerCancelling,
@@ -296,6 +333,7 @@ class _SessionComposerState extends State<SessionComposer> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (notice != null) Text(notice),
+                    SessionStopNotice(live: c.live),
                     if (c.unreadable)
                       Align(
                         alignment: AlignmentDirectional.centerStart,
@@ -305,7 +343,10 @@ class _SessionComposerState extends State<SessionComposer> {
                           child: Text(l10n.composerCheckAgain),
                         ),
                       ),
-                    if (!c.canSend && !c.sending && !c.unreadable)
+                    if (!c.canSend &&
+                        !c.sending &&
+                        !c.unreadable &&
+                        !c.live.stopping)
                       Text(l10n.composerOffline),
                   ],
                 ),
@@ -332,17 +373,21 @@ class _SessionComposerState extends State<SessionComposer> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      key: const ValueKey('live-composer-input'),
-                      controller: _text,
-                      // A text that a failed resend hands back needs the field
-                      // untouched until the send ends.
-                      readOnly: c.sending,
-                      minLines: 1,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: l10n.composerHint,
-                        border: const OutlineInputBorder(),
+                    child: Focus(
+                      onKeyEvent: _key,
+                      onFocusChange: (_) => _escapeAt = null,
+                      child: TextField(
+                        key: const ValueKey('live-composer-input'),
+                        controller: _text,
+                        // A text that a failed resend hands back needs the field
+                        // untouched until the send ends.
+                        readOnly: c.sending,
+                        minLines: 1,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          hintText: l10n.composerHint,
+                          border: const OutlineInputBorder(),
+                        ),
                       ),
                     ),
                   ),
@@ -356,6 +401,9 @@ class _SessionComposerState extends State<SessionComposer> {
                         ),
                       ),
                     )
+                  else if (c.live.stopping ||
+                      (c.live.canStop && _text.text.trim().isEmpty))
+                    SessionStopButton(live: c.live)
                   else if (wide)
                     FilledButton.icon(
                       key: const ValueKey('live-composer-send'),

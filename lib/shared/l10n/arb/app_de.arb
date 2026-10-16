@@ -643,5 +643,29 @@
   "composerInbox": "Wartende Nachrichten",
   "@composerInbox": {
     "description": "V2 live session composer"
+  },
+  "liveStop": "Stoppen",
+  "@liveStop": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopping": "Stopp angefordert…",
+  "@liveStopping": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopIdle": "Keine aktive Ausführung wurde unterbrochen.",
+  "@liveStopIdle": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopUnconfirmed": "Stopp nicht bestätigt. Verfolge den Live-Ausführungsstatus.",
+  "@liveStopUnconfirmed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopFailed": "Die Stoppanfrage wurde abgelehnt.",
+  "@liveStopFailed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopEscapeHint": "Drücke Escape erneut zum Stoppen.",
+  "@liveStopEscapeHint": {
+    "description": "V2 explicit execution stop control"
   }
 }

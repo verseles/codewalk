@@ -908,4 +908,23 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get composerInbox => 'অপেক্ষমাণ বার্তা';
+
+  @override
+  String get liveStop => 'থামান';
+
+  @override
+  String get liveStopping => 'থামানোর অনুরোধ করা হয়েছে…';
+
+  @override
+  String get liveStopIdle => 'কোনো সক্রিয় কাজ বাধাগ্রস্ত হয়নি।';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'থামানো নিশ্চিত হয়নি। সরাসরি কাজের অবস্থা দেখুন।';
+
+  @override
+  String get liveStopFailed => 'থামানোর অনুরোধ প্রত্যাখ্যাত হয়েছে।';
+
+  @override
+  String get liveStopEscapeHint => 'থামাতে আবার Escape চাপুন।';
 }

@@ -1645,6 +1645,12 @@ Before starting, ensure the Issue contains:
 - **Scope:** execution events + active list; stop the turn; retry countdown; `interrupted{shutdown}` as "resuming"; parent idle while children run.
 - **Done when:** [ ] no state derived from `session.status`; [ ] fixtures for each outcome.
 
+**Bounded Stop producer (2026-10-16).** Deliver the command/control side from accepted producers and the already delivered interruption subset of V2-005D. This child does not accept the whole V2-046, V2-042 or V2-005D; native transport, retry/quota and remaining parent criteria stay pending.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-046A ([#387](https://github.com/verseles/codewalk/issues/387)) | V2-044A4, V2-042A, V2-042B, V2-044B2, V2-045E; delivered V2-005D interrupt recordings as evidence | Native live/current/running session Stop: one bare version-gated 2.0.22 POST, no resume/replay/ledger requirement, shared per-session lease fence, bounded HTTP/settlement and authoritative stream state. Empty-draft Send/Stop swap and focused double-Escape preserve v1 behavior; 14 locales, compact/landscape/wide composer, loopback reconnect/same-history outcome and late-terminal regressions. HTTP acceptance is not settlement, and the session endpoint has no turn CAS. No retry countdown, child/all-background control, new capture, installed/MVP acceptance or parent closure. |
+
 #### V2-047 — Permissions and modes
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-047A, V2-047B

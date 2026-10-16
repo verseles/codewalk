@@ -850,4 +850,22 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get composerInbox => '等待中的消息';
+
+  @override
+  String get liveStop => '停止';
+
+  @override
+  String get liveStopping => '已请求停止…';
+
+  @override
+  String get liveStopIdle => '没有活动执行被中断。';
+
+  @override
+  String get liveStopUnconfirmed => '未确认停止。请关注实时执行状态。';
+
+  @override
+  String get liveStopFailed => '停止请求被拒绝。';
+
+  @override
+  String get liveStopEscapeHint => '再次按 Escape 停止。';
 }

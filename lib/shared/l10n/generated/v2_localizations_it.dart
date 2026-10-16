@@ -925,4 +925,24 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get composerInbox => 'Messaggi in attesa';
+
+  @override
+  String get liveStop => 'Interrompi';
+
+  @override
+  String get liveStopping => 'Interruzione richiesta…';
+
+  @override
+  String get liveStopIdle => 'Nessuna esecuzione attiva è stata interrotta.';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'Interruzione non confermata. Segui lo stato di esecuzione dal vivo.';
+
+  @override
+  String get liveStopFailed =>
+      'La richiesta di interruzione è stata rifiutata.';
+
+  @override
+  String get liveStopEscapeHint => 'Premi di nuovo Esc per interrompere.';
 }

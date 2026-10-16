@@ -920,4 +920,23 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get composerInbox => 'Ожидающие сообщения';
+
+  @override
+  String get liveStop => 'Остановить';
+
+  @override
+  String get liveStopping => 'Остановка запрошена…';
+
+  @override
+  String get liveStopIdle => 'Ни одно активное выполнение не было прервано.';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'Остановка не подтверждена. Следите за состоянием выполнения в реальном времени.';
+
+  @override
+  String get liveStopFailed => 'Запрос остановки отклонён.';
+
+  @override
+  String get liveStopEscapeHint => 'Нажмите Escape ещё раз для остановки.';
 }

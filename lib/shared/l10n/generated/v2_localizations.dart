@@ -1772,6 +1772,42 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Waiting messages'**
   String get composerInbox;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get liveStop;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'Stop requested…'**
+  String get liveStopping;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'No active execution was interrupted.'**
+  String get liveStopIdle;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'Stop not confirmed. Follow the live execution state.'**
+  String get liveStopUnconfirmed;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'The stop request was refused.'**
+  String get liveStopFailed;
+
+  /// V2 explicit execution stop control
+  ///
+  /// In en, this message translates to:
+  /// **'Press Escape again to stop.'**
+  String get liveStopEscapeHint;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

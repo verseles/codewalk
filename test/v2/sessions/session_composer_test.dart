@@ -6,6 +6,7 @@ import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/platform/sessions/prompt_outbox_store.dart';
 import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:harness_opencode/harness_opencode.dart';
@@ -85,6 +86,33 @@ void main() {
   });
 
   group('sending', () {
+    test(
+      'Stop fences new sends without writing or clearing the prompt ledger',
+      () async {
+        final outbox = FakeOutbox();
+        await open(
+          outbox,
+          state: liveState(
+            ref,
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        );
+        handle.stopAvailable = true;
+        final pending = Completer<SessionStopState>();
+        handle.stopAction = (_) => pending.future;
+        final stop = live.stopCurrentTurn();
+        expect(composer.canSend, isFalse);
+        expect(await composer.send('keep this draft'), isFalse);
+        expect(outbox.calls, isEmpty);
+        pending.complete(
+          const SessionStopState(phase: SessionStopPhase.unconfirmed),
+        );
+        await stop;
+        expect(composer.canSend, isTrue);
+      },
+    );
     test('no outbox keeps the screen read-only', () async {
       await open(null);
       expect(composer.available, isFalse);

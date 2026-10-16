@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_stop.dart';
 import '../hosts/hosts_controller.dart';
 
-/// Owns one screen's live lease; it never starts, stops or answers anything
-/// on the server. The composer sends through the lease's [outbox].
+/// Owns one screen's live lease. Prompts and Stop require explicit user actions;
+/// observing, reconnecting and closing never mutate the server.
 class SessionLiveController extends ChangeNotifier {
   SessionLiveController({
     required this.hosts,
@@ -14,7 +16,9 @@ class SessionLiveController extends ChangeNotifier {
     required this.summary,
     required this.directory,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now {
+    CommandId Function()? commandIds,
+  }) : _now = now ?? DateTime.now,
+       _commandIds = commandIds ?? mintCommandId {
     hosts.addListener(_hostsChanged);
   }
   final HostsController hosts;
@@ -22,6 +26,7 @@ class SessionLiveController extends ChangeNotifier {
   final SessionSummary summary;
   final SessionLiveDirectory directory;
   final DateTime Function() _now;
+  final CommandId Function() _commandIds;
   SessionRef get session => summary.info.ref;
   EndpointCredential? _credential;
   SessionLiveHandle? _handle;
@@ -36,6 +41,31 @@ class SessionLiveController extends ChangeNotifier {
 
   SessionState? get state => view?.state;
   PromptOutbox? get outbox => _handle?.outbox;
+  SessionStopState get stopState =>
+      _handle?.stopState ?? const SessionStopState();
+  bool get stopping => stopState.busy;
+  bool get canStop =>
+      !_disposed &&
+      !opening &&
+      _credential?.matches(_currentCredential()) == true &&
+      phase == SessionLivePhase.live &&
+      !(view?.stale ?? true) &&
+      state?.execution?.kind.known == ExecutionKind.running &&
+      (_handle?.canStop ?? false);
+
+  Future<void> stopCurrentTurn() async {
+    final handle = _handle;
+    if (!canStop || handle == null) return;
+    final generation = _generation;
+    final stopping = handle.stop(id: _commandIds());
+    _notify();
+    await stopping;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
   String? nativeMessageOf(ItemId id) => _handle?.nativeMessageOf(id);
   SessionLivePhase get phase => view?.phase ?? SessionLivePhase.probing;
   bool get loading =>

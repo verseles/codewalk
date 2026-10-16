@@ -924,4 +924,23 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get composerInbox => 'Mensagens aguardando';
+
+  @override
+  String get liveStop => 'Parar';
+
+  @override
+  String get liveStopping => 'Interrupção solicitada…';
+
+  @override
+  String get liveStopIdle => 'Nenhuma execução ativa foi interrompida.';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'Interrupção não confirmada. Acompanhe o estado da execução ao vivo.';
+
+  @override
+  String get liveStopFailed => 'O pedido de interrupção foi recusado.';
+
+  @override
+  String get liveStopEscapeHint => 'Pressione Escape de novo para parar.';
 }

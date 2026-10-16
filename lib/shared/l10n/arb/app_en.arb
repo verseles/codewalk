@@ -1119,5 +1119,29 @@
   "composerInbox": "Waiting messages",
   "@composerInbox": {
     "description": "V2 live session composer"
+  },
+  "liveStop": "Stop",
+  "@liveStop": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopping": "Stop requested…",
+  "@liveStopping": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopIdle": "No active execution was interrupted.",
+  "@liveStopIdle": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopUnconfirmed": "Stop not confirmed. Follow the live execution state.",
+  "@liveStopUnconfirmed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopFailed": "The stop request was refused.",
+  "@liveStopFailed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopEscapeHint": "Press Escape again to stop.",
+  "@liveStopEscapeHint": {
+    "description": "V2 explicit execution stop control"
   }
 }

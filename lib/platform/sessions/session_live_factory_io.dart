@@ -6,6 +6,7 @@ import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_stop.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
 import 'prompt_outbox_store.dart';
@@ -17,7 +18,7 @@ SessionLiveDirectory? createSessionLiveDirectory({
 
 /// One event stream per endpoint profile, shared by every open handle; the
 /// last handle of a session unwatches it and the last of a profile closes the
-/// stream. The stream never mutates the server; only a handle's outbox sends.
+/// stream. Mutations require an explicit outbox action or Stop on a handle.
 final class _NativeLiveDirectory implements SessionLiveDirectory {
   _NativeLiveDirectory(this._now, this._payloads);
   final DateTime Function() _now;
@@ -138,6 +139,8 @@ final class _ProfileSlot {
   final KeySerialExecutor queue;
   final OpenCodeMessageIds ids;
   PromptOutbox? outbox;
+  OpenCodeInterruptClient? _interrupt;
+  final _stops = <SessionRef, _StopRequest>{};
   final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
   final _store = SessionStore(maxSessions: 8);
@@ -180,6 +183,11 @@ final class _ProfileSlot {
       throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
     }
     version = observed;
+    _interrupt = OpenCodeInterruptClient(
+      _transport,
+      harness: harness,
+      connectedVersion: observed,
+    );
     if (payloads case final store?) {
       outbox = OpenCodePromptOutbox(
         store: store,
@@ -255,10 +263,85 @@ final class _ProfileSlot {
       SessionLiveView(session: session, phase: SessionLivePhase.closed);
 
   void _publish(SessionRef session, SessionLiveView view) {
+    final stop = _stops[session];
+    final execution = view.state?.execution;
+    if (stop != null &&
+        execution != null &&
+        view.phase == SessionLivePhase.live &&
+        !view.stale) {
+      if (execution.kind.known != ExecutionKind.running) {
+        stop.settled = true;
+      }
+    }
+    // Hydration reconstructs lastOutcome objects even for the same running
+    // execution. Only an observed non-running state proves settlement. Latch
+    // it if it beats HTTP, and clear an uncertain wait too when it arrives late.
+    if (stop != null &&
+        stop.settled &&
+        !stop.inFlight &&
+        (stop.state.phase == SessionStopPhase.requested ||
+            stop.state.phase == SessionStopPhase.unconfirmed)) {
+      stop.timer?.cancel();
+      stop.state = const SessionStopState();
+    }
     _views[session] = view;
     for (final handle in handles.toList()) {
       if (handle.session == session) handle.emit(view);
     }
+  }
+
+  SessionStopState stopState(SessionRef ref) =>
+      _stops[ref]?.state ?? const SessionStopState();
+
+  bool canStop(SessionRef ref) {
+    final current = view(ref);
+    return !isClosed &&
+        _interrupt != null &&
+        !stopState(ref).busy &&
+        _stops[ref]?.inFlight != true &&
+        current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        current.state?.execution?.kind.known == ExecutionKind.running;
+  }
+
+  Future<void> stop(SessionRef ref, CommandId id) async {
+    final client = _interrupt;
+    if (client == null || !canStop(ref)) return;
+    _stops[ref]?.dispose();
+    final request = _StopRequest();
+    _stops[ref] = request;
+    _publish(ref, view(ref));
+    final attempt = await client.interrupt(
+      session: ref,
+      id: id,
+      cancellation: request.cancellation,
+    );
+    if (isClosed || !identical(_stops[ref], request)) return;
+    request.inFlight = false;
+    final receipt = attempt.receipt;
+    final phase = switch (receipt.state.known) {
+      ReceiptState.accepted when attempt.interrupted == false =>
+        SessionStopPhase.idle,
+      ReceiptState.accepted when request.settled => SessionStopPhase.ready,
+      ReceiptState.accepted => SessionStopPhase.requested,
+      ReceiptState.rejected ||
+      ReceiptState.unavailable => SessionStopPhase.refused,
+      _ => SessionStopPhase.unconfirmed,
+    };
+    request.state = SessionStopState(phase: phase, receipt: receipt);
+    if (phase == SessionStopPhase.requested) {
+      // The request was accepted, not settled. Bound the local waiting state
+      // without inferring success or automatically repeating the mutation.
+      request.timer = Timer(const Duration(seconds: 30), () {
+        if (isClosed || !identical(_stops[ref], request)) return;
+        request.state = SessionStopState(
+          phase: SessionStopPhase.unconfirmed,
+          receipt: receipt,
+        );
+        _publish(ref, view(ref));
+      });
+    }
+    _publish(ref, view(ref));
   }
 
   void _onUpdate(OpenCodeStreamUpdate update) {
@@ -371,6 +454,7 @@ final class _ProfileSlot {
     if (!handles.any((h) => h.session == handle.session)) {
       _owner?.unwatch(handle.session);
       _views.remove(handle.session);
+      _stops.remove(handle.session)?.dispose();
     }
     if (handles.isEmpty) {
       _release();
@@ -383,6 +467,10 @@ final class _ProfileSlot {
   Future<void> close() => _closing ??= _shutdown();
 
   Future<void> _shutdown() async {
+    for (final stop in _stops.values) {
+      stop.dispose();
+    }
+    _stops.clear();
     for (final handle in handles.toList()) {
       handle.detach();
     }
@@ -393,6 +481,20 @@ final class _ProfileSlot {
     _reader.dispose();
     _transport.close();
     _store.clear();
+  }
+}
+
+final class _StopRequest {
+  final cancellation = RequestCancellation();
+  bool inFlight = true;
+  bool settled = false;
+  Timer? timer;
+  SessionStopState state = const SessionStopState(
+    phase: SessionStopPhase.requesting,
+  );
+  void dispose() {
+    timer?.cancel();
+    cancellation.cancel();
   }
 }
 
@@ -421,6 +523,18 @@ final class _LiveHandle implements SessionLiveHandle {
 
   @override
   PromptOutbox? get outbox => _closed ? null : _slot.outbox;
+
+  @override
+  SessionStopState get stopState =>
+      _closed ? const SessionStopState() : _slot.stopState(session);
+
+  @override
+  bool get canStop => !_closed && _slot.canStop(session);
+
+  @override
+  Future<void> stop({required CommandId id}) async {
+    if (!_closed) await _slot.stop(session, id);
+  }
 
   @override
   String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);

@@ -927,4 +927,23 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get composerInbox => 'Messages en attente';
+
+  @override
+  String get liveStop => 'Arrêter';
+
+  @override
+  String get liveStopping => 'Arrêt demandé…';
+
+  @override
+  String get liveStopIdle => 'Aucune exécution active n’a été interrompue.';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'Arrêt non confirmé. Suivez l’état d’exécution en direct.';
+
+  @override
+  String get liveStopFailed => 'La demande d’arrêt a été refusée.';
+
+  @override
+  String get liveStopEscapeHint => 'Appuyez à nouveau sur Échap pour arrêter.';
 }

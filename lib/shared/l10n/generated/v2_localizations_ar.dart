@@ -907,4 +907,23 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get composerInbox => 'رسائل في الانتظار';
+
+  @override
+  String get liveStop => 'إيقاف';
+
+  @override
+  String get liveStopping => 'طُلب الإيقاف…';
+
+  @override
+  String get liveStopIdle => 'لم تتم مقاطعة أي تنفيذ نشط.';
+
+  @override
+  String get liveStopUnconfirmed =>
+      'لم يتأكد الإيقاف. تابع حالة التنفيذ المباشرة.';
+
+  @override
+  String get liveStopFailed => 'رُفض طلب الإيقاف.';
+
+  @override
+  String get liveStopEscapeHint => 'اضغط Escape مرة أخرى للإيقاف.';
 }

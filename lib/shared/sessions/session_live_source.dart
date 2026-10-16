@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'prompt_outbox.dart';
+import 'session_stop.dart';
 
 enum SessionLiveFailure {
   authenticationRequired,
@@ -69,6 +70,12 @@ abstract interface class SessionLiveHandle {
   /// The only way this lease sends: null when it cannot (no ledger storage,
   /// closed lease). The lease itself never sends on its own.
   PromptOutbox? get outbox;
+
+  /// Explicit control of this session, independent of prompt-ledger storage.
+  /// The state and single-flight fence are shared by its open leases.
+  SessionStopState get stopState;
+  bool get canStop;
+  Future<void> stop({required CommandId id});
 
   /// The native message id [id] was projected from, so a pending row can be
   /// matched to an outbox entry; null for any other item.

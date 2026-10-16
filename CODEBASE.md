@@ -1957,3 +1957,48 @@ The composer sends only through the lease's outbox on the slot's existing
 transport and event stream; features reach it through `SessionLiveController`
 getters and never import harness code. Without storage, a verified version or
 on Web the page keeps the read-only line. Sending needs a live, current view.
+
+## V2-046A native session Stop (#387)
+
+```text
+packages/harness_opencode/lib/src/interrupt_client.dart # OpenCodeInterruptClient sends one OpenCode 2.0.22 interrupt POST; OpenCodeInterruptAttempt keeps the receipt distinct from the bare `interrupted` result
+packages/harness_opencode/lib/harness_opencode.dart # Public export of the interrupt client
+lib/shared/sessions/session_stop.dart # SessionStopPhase and SessionStopState; local action status, separate from canonical execution
+lib/shared/sessions/command_ids.dart # Reused secure CommandId minter
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle stopState/canStop/stop contract
+lib/platform/sessions/session_live_factory.dart # Conditional live factory barrel
+lib/platform/sessions/session_live_factory_io.dart # Per-session Stop fence shared across leases on the existing transport, independent of prompt-ledger storage
+lib/platform/sessions/session_live_factory_stub.dart # Unsupported-platform live-directory stub
+lib/features/sessions/session_live_controller.dart # Fresh live-running eligibility and explicit Stop command coordination
+lib/features/sessions/session_stop_button.dart # Responsive Stop action and localized status notice
+lib/features/sessions/session_composer.dart # Empty-draft Send/Stop slot swap and double-Escape Stop within 500 ms
+lib/features/sessions/session_live_page.dart # Stop action also available without a prompt outbox
+tool/l10n/session_stop_catalog.py # Six Stop strings for the 14-locale scoped catalog
+tool/l10n/generate_v2_localizations.py # Selective Stop catalog import via `--port-stop`
+packages/harness_opencode/test/interrupt_client_test.dart # Wire contract, response bounds, no-replay, deadline and preflight cases
+test/v2/sessions/session_live_directory_test.dart # Loopback Stop lifecycle, shared leases, reconnect hydration, timeout and uncertain-terminal cases
+test/v2/sessions/session_live_controller_test.dart # Controller eligibility and single-command cases
+test/v2/sessions/session_composer_test.dart # Composer send/Stop fencing cases
+test/v2/sessions/session_live_page_test.dart # Widget coverage at three sizes across 14 locales
+```
+
+Stop sends one `POST /api/session/{id}/interrupt` without resume or replay, only
+for the current fresh live execution known to be running. Settlement is inferred
+only from an observed non-running execution, not from outcome identity; an
+accepted request remains pending for at most 30 seconds before becoming
+unconfirmed. Late authoritative settlement clears the local wait without
+changing canonical execution optimistically. The composer preserves a non-empty
+draft by showing Send instead of Stop; double Escape is the alternate explicit
+Stop gesture.
+
+```text
+# From packages/harness_opencode/
+dart test test/interrupt_client_test.dart
+
+# From the repository root
+flutter test --no-pub test/v2/sessions
+```
+
+Reported gates `make v2-native-check && make check` passed with exit 0
+(`/tmp/opencode/run_final_e0Q1j2/test.log`). These checks are not installed/native
+MVP evidence; parent issues #281, #274 and #243 remain open.

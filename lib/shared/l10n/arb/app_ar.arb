@@ -642,5 +642,29 @@
   "composerInbox": "رسائل في الانتظار",
   "@composerInbox": {
     "description": "V2 live session composer"
+  },
+  "liveStop": "إيقاف",
+  "@liveStop": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopping": "طُلب الإيقاف…",
+  "@liveStopping": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopIdle": "لم تتم مقاطعة أي تنفيذ نشط.",
+  "@liveStopIdle": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopUnconfirmed": "لم يتأكد الإيقاف. تابع حالة التنفيذ المباشرة.",
+  "@liveStopUnconfirmed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopFailed": "رُفض طلب الإيقاف.",
+  "@liveStopFailed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopEscapeHint": "اضغط Escape مرة أخرى للإيقاف.",
+  "@liveStopEscapeHint": {
+    "description": "V2 explicit execution stop control"
   }
 }

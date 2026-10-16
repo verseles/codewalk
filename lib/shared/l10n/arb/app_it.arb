@@ -643,5 +643,29 @@
   "composerInbox": "Messaggi in attesa",
   "@composerInbox": {
     "description": "V2 live session composer"
+  },
+  "liveStop": "Interrompi",
+  "@liveStop": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopping": "Interruzione richiesta…",
+  "@liveStopping": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopIdle": "Nessuna esecuzione attiva è stata interrotta.",
+  "@liveStopIdle": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopUnconfirmed": "Interruzione non confermata. Segui lo stato di esecuzione dal vivo.",
+  "@liveStopUnconfirmed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopFailed": "La richiesta di interruzione è stata rifiutata.",
+  "@liveStopFailed": {
+    "description": "V2 explicit execution stop control"
+  },
+  "liveStopEscapeHint": "Premi di nuovo Esc per interrompere.",
+  "@liveStopEscapeHint": {
+    "description": "V2 explicit execution stop control"
   }
 }

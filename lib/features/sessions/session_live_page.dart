@@ -8,10 +8,11 @@ import '../../shared/sessions/session_live_source.dart';
 import 'session_composer.dart';
 import 'session_composer_controller.dart';
 import 'session_live_controller.dart';
+import 'session_stop_button.dart';
 import 'session_timeline_tile.dart';
 
 /// Live view of one session: it observes the server and sends prompts only
-/// through the composer's outbox; it never answers, stops or reverts.
+/// through the composer's outbox. Stop is explicit; it never answers or reverts.
 class SessionLivePage extends StatefulWidget {
   const SessionLivePage({super.key, required this.controller});
   final SessionLiveController controller;
@@ -143,7 +144,7 @@ class _SessionLivePageState extends State<SessionLivePage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                c.outbox == null
+                                c.outbox == null && !c.canStop && !c.stopping
                                     ? l10n.liveReadOnly
                                     : l10n.composerLiveSession,
                                 style: textTheme.titleMedium,
@@ -222,9 +223,17 @@ class _SessionLivePageState extends State<SessionLivePage> {
                           vertical: tight ? 4 : 16,
                         ),
                         child: c.outbox == null
-                            ? Text(
-                                l10n.liveSendUnavailable,
-                                key: const ValueKey('live-composer'),
+                            ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n.liveSendUnavailable,
+                                    key: const ValueKey('live-composer'),
+                                  ),
+                                  if (c.canStop || c.stopping)
+                                    SessionStopButton(live: c),
+                                  SessionStopNotice(live: c),
+                                ],
                               )
                             : SessionComposer(
                                 controller: _composer,

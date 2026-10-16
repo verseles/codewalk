@@ -873,4 +873,22 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get composerInbox => '대기 중인 메시지';
+
+  @override
+  String get liveStop => '중지';
+
+  @override
+  String get liveStopping => '중지 요청됨…';
+
+  @override
+  String get liveStopIdle => '활성 실행이 중단되지 않았습니다.';
+
+  @override
+  String get liveStopUnconfirmed => '중지가 확인되지 않았습니다. 실시간 실행 상태를 확인하세요.';
+
+  @override
+  String get liveStopFailed => '중지 요청이 거부되었습니다.';
+
+  @override
+  String get liveStopEscapeHint => '중지하려면 Escape를 다시 누르세요.';
 }
