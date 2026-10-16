@@ -858,6 +858,30 @@ Malformed JSON, body-limit and request-limit failures are labelled synthetic
 `400`, `413` and `429` responses. Observations store only outcome kind and
 exchange index, excluding paths, headers, credentials and request bodies.
 
+## Permission replies
+
+[V2-047A1 / #388](https://github.com/verseles/codewalk/issues/388) adds
+`OpenCodePermissionReplyClient`, a caller-invoked harness-only producer with no
+responder loop, mode state, UI or persistence. `reply` validates a canonical
+`InteractionRequest` plus `ApprovalResponse` with existing Core
+`validateResponse` and sends at most one version-gated 2.0.22 `POST`
+`/api/session/{id}/permission/{requestId}/reply` with `{decision, message?}`;
+`approveOnce` derives only the eligible native `once` with no note. A null note
+omits `message`; empty, whitespace and Unicode notes are preserved verbatim per
+native truthiness (empty declines, spaces carry feedback) under a local 64 KiB
+UTF-8 bound. A 204 is a receipt, never settlement; 404 is this attempt's
+generic rejection without origin inference; other statuses, loss and timeout
+stay uncertain and are never replayed. Error bodies are never read and note
+text never enters diagnostics.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/permission_reply_client_test.dart test/interaction_projection_test.dart test/interaction_replay_test.dart
+```
+
 ## Provenance and limits
 
 Fixtures remain under

@@ -12,6 +12,7 @@ export 'src/item_ids.dart';
 export 'src/message_id.dart';
 export 'src/prompt_client.dart';
 export 'src/interrupt_client.dart';
+export 'src/permission_reply_client.dart';
 export 'src/session_reader.dart';
 export 'src/stream_owner.dart';
 export 'src/event_projection.dart';

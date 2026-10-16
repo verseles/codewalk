@@ -1662,6 +1662,12 @@ Before starting, ensure the Issue contains:
 | V2-047A | V2-044B, V2-003, V2-005C | Policy/reply mapping with automatic once, never-automatic requests and first-reply-wins; tests include batch rejection with/without note and an unaffected different session. |
 | V2-047B | V2-047A | Mode chip/cards, child-origin display and Unrestricted add/remove with conflict warning; effective-mode UI and multi-client widget/contract tests. |
 
+**Bounded permission-reply producer (2026-10-16).** Deliver the validation plus single-attempt adapter from accepted producers and the already delivered C interaction subset of V2-005C. This child adds no app caller, responder loop, mode state or UI, and does not accept the whole V2-047A, V2-047B, V2-044B or V2-005C; policy activation, batch reconciliation and remaining parent criteria stay pending.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-047A1 ([#388](https://github.com/verseles/codewalk/issues/388)) | V2-003 (ADR-059 documentary), V2-005C, V2-044A7; inherited V2-028D transport and Core contracts | Harness-only caller-invoked 2.0.22 permission reply: canonical validation plus eligible once-only entry, one bounded POST with exact decision/message encoding, status-only receipts and no replay. 204 is receipt only; 404 stays this attempt's generic rejection; notes kept verbatim under a local bound. No Core/app/UI/schema/fixture changes. No responder activation, D05 change, batch reconciliation, new capture, installed/MVP acceptance or parent closure. |
+
 #### V2-048 — Forms
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-044B, V2-005C

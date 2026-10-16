@@ -2002,3 +2002,30 @@ flutter test --no-pub test/v2/sessions
 Reported gates `make v2-native-check && make check` passed with exit 0
 (`/tmp/opencode/run_final_e0Q1j2/test.log`). These checks are not installed/native
 MVP evidence; parent issues #281, #274 and #243 remain open.
+
+## V2-047A1 native permission reply (#388)
+
+```text
+packages/harness_opencode/lib/src/permission_reply_client.dart # OpenCodePermissionReplyClient sends one OpenCode 2.0.22 permission reply; OpenCodePermissionReplyAttempt keeps the receipt distinct from the encoded payload
+packages/harness_opencode/lib/harness_opencode.dart # Public export of the permission reply client
+packages/harness_opencode/test/permission_reply_client_test.dart # Recorded C replay, guards, transport-loss/pre-wire table, default note bound, build versions, no-replay cases
+```
+
+Caller-invoked harness-only producer: canonical validation plus the eligible
+once-only entry, one bounded POST with exact decision/message encoding,
+status-only receipts and no replay. A 204 is a receipt, never settlement; 404
+stays this attempt's generic rejection; notes are kept verbatim under a local
+64 KiB bound. No Core, app, UI, l10n, schema or fixture changes, and no
+responder activation, mode state or batch reconciliation.
+
+```text
+# From packages/harness_opencode/
+dart test test/permission_reply_client_test.dart
+```
+
+Reported `dart analyze --fatal-infos` plus the full `harness_opencode` suite
+(including `public_surface_test` and the reply tests) passed; `make
+v2-native-check` and `make check-fast` passed with exit 0. A full `make check`
+could not complete on this shared host (three runs killed by the Makefile
+timeout with zero test failures; one unrelated integration test hangs and
+`/tmp` filled mid-run); parent issues #283/#278 and MVP remain open.
