@@ -933,4 +933,42 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'रोकने के लिए Escape फिर दबाएँ।';
+
+  @override
+  String get livePermissionAllowOnce => 'एक बार अनुमति दें';
+
+  @override
+  String get livePermissionAlwaysProject => 'इस प्रोजेक्ट के लिए हमेशा';
+
+  @override
+  String get livePermissionProjectHint => 'इस प्रोजेक्ट में बना रहेगा';
+
+  @override
+  String get livePermissionRejectNote => 'नोट के साथ अस्वीकार करें';
+
+  @override
+  String get livePermissionRejectStop => 'अस्वीकार करें और रोकें';
+
+  @override
+  String get livePermissionNoteHint => 'नोट (यह अस्वीकृति भेजने के लिए आवश्यक)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'अस्वीकार करने से इस सत्र के अन्य लंबित अनुरोध भी सुलझ जाते हैं।';
+
+  @override
+  String get livePermissionSending => 'उत्तर भेजा जा रहा है…';
+
+  @override
+  String get livePermissionSent => 'उत्तर भेजा गया। लाइव स्थिति देखें।';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'उत्तर की पुष्टि नहीं हुई। लाइव स्थिति देखें।';
+
+  @override
+  String get livePermissionRefused => 'उत्तर अस्वीकार किया गया।';
+
+  @override
+  String get livePermissionRejectSend => 'नोट के साथ अस्वीकृति भेजें';
 }

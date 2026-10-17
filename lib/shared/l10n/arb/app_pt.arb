@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "Pressione Escape de novo para parar.",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "Permitir uma vez",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "Sempre para este projeto",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "Persiste neste projeto",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "Rejeitar com nota",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "Rejeitar e parar",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "Nota (obrigatória para enviar esta rejeição)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "Rejeitar também encerra os outros pedidos pendentes desta sessão.",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "Enviando resposta…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "Resposta enviada. Acompanhe o estado ao vivo.",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "Resposta não confirmada. Acompanhe o estado ao vivo.",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "A resposta foi recusada.",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "Enviar rejeição com nota",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

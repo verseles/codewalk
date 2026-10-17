@@ -939,4 +939,43 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'Нажмите Escape ещё раз для остановки.';
+
+  @override
+  String get livePermissionAllowOnce => 'Разрешить один раз';
+
+  @override
+  String get livePermissionAlwaysProject => 'Всегда для этого проекта';
+
+  @override
+  String get livePermissionProjectHint => 'Сохраняется для этого проекта';
+
+  @override
+  String get livePermissionRejectNote => 'Отклонить с заметкой';
+
+  @override
+  String get livePermissionRejectStop => 'Отклонить и остановить';
+
+  @override
+  String get livePermissionNoteHint =>
+      'Заметка (обязательна для отправки отказа)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'Отклонение также завершает остальные ожидающие запросы этого сеанса.';
+
+  @override
+  String get livePermissionSending => 'Отправка ответа…';
+
+  @override
+  String get livePermissionSent => 'Ответ отправлен. Следите за состоянием.';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'Ответ не подтверждён. Следите за состоянием.';
+
+  @override
+  String get livePermissionRefused => 'Ответ отклонён.';
+
+  @override
+  String get livePermissionRejectSend => 'Отправить отказ с заметкой';
 }

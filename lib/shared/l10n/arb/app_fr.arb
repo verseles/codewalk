@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "Appuyez à nouveau sur Échap pour arrêter.",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "Autoriser une fois",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "Toujours pour ce projet",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "Persiste pour ce projet",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "Rejeter avec note",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "Rejeter et arrêter",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "Note (obligatoire pour envoyer ce refus)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "Rejeter règle aussi les autres demandes en attente de cette session.",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "Envoi de la réponse…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "Réponse envoyée. Suivez l’état en direct.",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "Réponse non confirmée. Suivez l’état en direct.",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "La réponse a été refusée.",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "Envoyer le refus avec note",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

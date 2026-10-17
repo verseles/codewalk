@@ -666,5 +666,53 @@
   "liveStopEscapeHint": "اضغط Escape مرة أخرى للإيقاف.",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "السماح مرة واحدة",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "دائمًا لهذا المشروع",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "يبقى لهذا المشروع",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "رفض مع ملاحظة",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "رفض وإيقاف",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "ملاحظة (مطلوبة لإرسال هذا الرفض)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "الرفض يسوّي أيضًا الطلبات المعلقة الأخرى في هذه الجلسة.",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "جارٍ إرسال الرد…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "تم إرسال الرد. تابع الحالة المباشرة.",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "لم يتأكد الرد. تابع الحالة المباشرة.",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "رُفض الرد.",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "إرسال الرفض مع ملاحظة",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

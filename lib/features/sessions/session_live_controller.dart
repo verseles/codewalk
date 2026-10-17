@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../hosts/hosts_controller.dart';
 
@@ -34,6 +35,7 @@ class SessionLiveController extends ChangeNotifier {
   Timer? _expiry;
   bool _disposed = false;
   int _generation = 0;
+  final _notes = <String, String>{};
 
   SessionLiveView? view;
   SessionLiveFailure? failure;
@@ -64,6 +66,70 @@ class SessionLiveController extends ChangeNotifier {
       return;
     }
     _notify();
+  }
+
+  SessionPermissionReplyState replyState(InteractionId id) =>
+      _handle?.replyState(id) ?? const SessionPermissionReplyState();
+
+  bool replying(InteractionId id) => _handle?.replyState(id).busy ?? false;
+
+  /// Whether this screen's lease can send replies at all. A resident card stays
+  /// mounted (disabled) while the lease is not current, so a typed note and the
+  /// pending request survive a reconnect instead of disappearing.
+  bool get supportsReplies => !_disposed && (_handle?.supportsReplies ?? false);
+
+  /// Manual permission replies need a live, current lease like Stop does, but
+  /// never require a running execution: approvals arrive while Turn work runs.
+  /// A busy request disables its actions until the stream settles it.
+  bool canReply(InteractionRequest request) =>
+      !_disposed &&
+      !opening &&
+      _credential?.matches(_currentCredential()) == true &&
+      phase == SessionLivePhase.live &&
+      !(view?.stale ?? true) &&
+      !replying(request.id) &&
+      (_handle?.canReply(request) ?? false);
+
+  Future<void> replyToPermission({
+    required InteractionRequest request,
+    required ApprovalResponse response,
+  }) async {
+    final handle = _handle;
+    if (!canReply(request) || handle == null) return;
+    final generation = _generation;
+    final replying = handle.reply(
+      request: request,
+      response: response,
+      id: _commandIds(),
+    );
+    _notify();
+    await replying;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
+  /// Local draft text for a request's rejection note. The card seeds its field
+  /// from here and writes every edit back, so an explicit retry or a lease
+  /// re-open cannot discard a note the user already typed.
+  String permissionNote(InteractionId id) => _notes[id.value] ?? '';
+
+  void setPermissionNote(InteractionId id, String value) {
+    if (_disposed) return;
+    if (value.isEmpty) {
+      _notes.remove(id.value);
+    } else {
+      _notes[id.value] = value;
+    }
+  }
+
+  /// Drops drafts whose request left canonical state. A null state means the
+  /// lease is being re-opened, so the drafts must survive it.
+  void _pruneNotes(SessionState? state) {
+    if (_notes.isEmpty || state == null) return;
+    final resident = {for (final r in state.interactions) r.id.value};
+    _notes.removeWhere((key, _) => !resident.contains(key));
   }
 
   String? nativeMessageOf(ItemId id) => _handle?.nativeMessageOf(id);
@@ -172,6 +238,7 @@ class SessionLiveController extends ChangeNotifier {
       }
       _subscription = handle.updates.listen((next) {
         if (_disposed || generation != _generation) return;
+        _pruneNotes(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
         _notify();

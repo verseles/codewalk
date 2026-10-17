@@ -927,4 +927,42 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'থামাতে আবার Escape চাপুন।';
+
+  @override
+  String get livePermissionAllowOnce => 'একবার অনুমতি দিন';
+
+  @override
+  String get livePermissionAlwaysProject => 'এই প্রকল্পের জন্য সর্বদা';
+
+  @override
+  String get livePermissionProjectHint => 'এই প্রকল্পে বজায় থাকবে';
+
+  @override
+  String get livePermissionRejectNote => 'নোটসহ প্রত্যাখ্যান';
+
+  @override
+  String get livePermissionRejectStop => 'প্রত্যাখ্যান করে থামান';
+
+  @override
+  String get livePermissionNoteHint => 'নোট (এই প্রত্যাখ্যান পাঠাতে আবশ্যক)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'প্রত্যাখ্যান করলে এই সেশনের অন্যান্য বিচারাধীন অনুরোধও মিটে যাবে।';
+
+  @override
+  String get livePermissionSending => 'উত্তর পাঠানো হচ্ছে…';
+
+  @override
+  String get livePermissionSent => 'উত্তর পাঠানো হয়েছে। সরাসরি অবস্থা দেখুন।';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'উত্তর নিশ্চিত হয়নি। সরাসরি অবস্থা দেখুন।';
+
+  @override
+  String get livePermissionRefused => 'উত্তর প্রত্যাখ্যাত হয়েছে।';
+
+  @override
+  String get livePermissionRejectSend => 'নোটসহ প্রত্যাখ্যান পাঠান';
 }

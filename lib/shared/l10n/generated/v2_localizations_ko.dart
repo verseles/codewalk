@@ -891,4 +891,40 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => '중지하려면 Escape를 다시 누르세요.';
+
+  @override
+  String get livePermissionAllowOnce => '한 번 허용';
+
+  @override
+  String get livePermissionAlwaysProject => '이 프로젝트에 항상 허용';
+
+  @override
+  String get livePermissionProjectHint => '이 프로젝트에 유지됨';
+
+  @override
+  String get livePermissionRejectNote => '메모와 함께 거부';
+
+  @override
+  String get livePermissionRejectStop => '거부하고 중지';
+
+  @override
+  String get livePermissionNoteHint => '메모(이 거부를 보내려면 필수)';
+
+  @override
+  String get livePermissionBatchScope => '거부하면 이 세션의 다른 보류 중인 요청도 해결됩니다.';
+
+  @override
+  String get livePermissionSending => '응답 보내는 중…';
+
+  @override
+  String get livePermissionSent => '응답을 보냈습니다. 실시간 상태를 확인하세요.';
+
+  @override
+  String get livePermissionUnconfirmed => '응답이 확인되지 않았습니다. 실시간 상태를 확인하세요.';
+
+  @override
+  String get livePermissionRefused => '응답이 거부되었습니다.';
+
+  @override
+  String get livePermissionRejectSend => '메모와 함께 거부 보내기';
 }

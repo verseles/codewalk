@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +28,9 @@ final class _Server {
   final streams = <HttpResponse>[];
   final methods = <String>{};
   final prompts = <String>[];
+  final replies = <String>[];
+  final permissions = <Object?>[];
+  int replyStatus = 204;
   final running = <String>{};
   bool includePreviousOutcome = false;
   final interrupts = <Uri>[];
@@ -76,6 +80,12 @@ final class _Server {
       await r.response.close();
       return;
     }
+    if (r.method == 'POST' && tail == 'reply') {
+      replies.add(await utf8.decoder.bind(r).join());
+      r.response.statusCode = replyStatus;
+      await r.response.close();
+      return;
+    }
     if (r.method == 'POST' && tail == 'prompt') {
       prompts.add(await utf8.decoder.bind(r).join());
       final body = jsonDecode(prompts.last) as Map<String, Object?>;
@@ -108,7 +118,13 @@ final class _Server {
             for (final id in running) id: {'type': 'running'},
           },
         },
-        'inbox' || 'permission' || 'form' => {'data': <Object?>[]},
+        'inbox' || 'form' => {'data': <Object?>[]},
+        'permission' => {
+          'data': [
+            for (final permission in permissions)
+              if ((permission! as Map)['sessionID'] == session) permission,
+          ],
+        },
         'message' => {
           'data': [
             {
@@ -708,5 +724,197 @@ void main() {
     expect(server.events, 1);
     handle.close();
     expect(handle.outbox, isNull);
+  });
+
+  test(
+    'permission replies share one fence, exact JSON, no replay, no ledger',
+    () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final b = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      final req = view.state!.interactions.single;
+      expect(a.outbox, isNull);
+      expect(a.canReply(req), isTrue);
+      await a.reply(
+        request: req,
+        response: ApprovalResponse('once'),
+        id: const CommandId('r1'),
+      );
+      expect(server.replies.single, '{"decision":"once"}');
+      expect(
+        server.paths,
+        contains('/proxy/api/session/ses_one/permission/per_1/reply'),
+      );
+      expect(a.replyState(req.id).phase, SessionPermissionReplyPhase.requested);
+      await b.reply(
+        request: req,
+        response: ApprovalResponse('once'),
+        id: const CommandId('r2'),
+      );
+      expect(server.replies, hasLength(1));
+      a.close();
+      b.close();
+      await b.reply(
+        request: req,
+        response: ApprovalResponse('once'),
+        id: const CommandId('r3'),
+      );
+      expect(server.replies, hasLength(1));
+    },
+  );
+
+  test(
+    'refused replies keep the card actionable and change nothing else',
+    () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      server.replyStatus = 401;
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      final req = view.state!.interactions.single;
+      await a.reply(
+        request: req,
+        response: ApprovalResponse('once'),
+        id: const CommandId('r1'),
+      );
+      expect(a.replyState(req.id).phase, SessionPermissionReplyPhase.refused);
+      expect(
+        a.current.state?.execution?.kind.known,
+        isNot(ExecutionKind.running),
+      );
+      expect(a.canReply(req), isTrue);
+      a.close();
+    },
+  );
+
+  for (final (status, phase) in [
+    (404, SessionPermissionReplyPhase.refused),
+    (500, SessionPermissionReplyPhase.unconfirmed),
+  ]) {
+    test('reply status $status maps to ${phase.name} with one POST', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      server.replyStatus = status;
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      final req = view.state!.interactions.single;
+      await a.reply(
+        request: req,
+        response: ApprovalResponse('once'),
+        id: const CommandId('r1'),
+      );
+      expect(a.replyState(req.id).phase, phase);
+      expect(server.replies, hasLength(1));
+      expect(
+        a.current.state?.execution?.kind.known,
+        isNot(ExecutionKind.running),
+      );
+      a.close();
+    });
+  }
+
+  test('the same request id in two sessions keeps two fences', () async {
+    for (final session in ['ses_one', 'ses_two']) {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': session,
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+    }
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final a = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    final b = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_two'),
+    );
+    InteractionRequest askFor(SessionRef session, SessionLiveView view) =>
+        view.state!.interactions.singleWhere(
+          (r) => r.owner is SessionOwner && (r.owner as SessionOwner).session == session,
+        );
+    final askA = askFor(
+      ref('ses_one'),
+      await until(a, (v) => v.phase == SessionLivePhase.live && v.state != null),
+    );
+    final askB = askFor(
+      ref('ses_two'),
+      await until(b, (v) => v.phase == SessionLivePhase.live && v.state != null),
+    );
+
+    expect(a.canReply(askB), isFalse);
+    await a.reply(
+      request: askA,
+      response: ApprovalResponse('once'),
+      id: const CommandId('r1'),
+    );
+    expect(a.replyState(askA.id).phase, SessionPermissionReplyPhase.requested);
+    expect(b.replyState(askB.id).phase, SessionPermissionReplyPhase.ready);
+    expect(b.canReply(askB), isTrue);
+    await b.reply(
+      request: askB,
+      response: ApprovalResponse('once'),
+      id: const CommandId('r2'),
+    );
+    expect(server.replies, hasLength(2));
+    expect(
+      server.paths,
+      containsAll([
+        '/proxy/api/session/ses_one/permission/per_1/reply',
+        '/proxy/api/session/ses_two/permission/per_1/reply',
+      ]),
+    );
+    a.close();
+    b.close();
   });
 }

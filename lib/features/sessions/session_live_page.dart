@@ -5,11 +5,16 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_stop.dart';
 import 'session_composer.dart';
 import 'session_composer_controller.dart';
 import 'session_live_controller.dart';
+import 'session_permission_card.dart';
 import 'session_stop_button.dart';
 import 'session_timeline_tile.dart';
+
+/// Minimum height the prompt composer keeps beside a resident permission card.
+const double _composerFloor = 56;
 
 /// Live view of one session: it observes the server and sends prompts only
 /// through the composer's outbox. Stop is explicit; it never answers or reverts.
@@ -119,6 +124,49 @@ class _SessionLivePageState extends State<SessionLivePage> {
         body: LayoutBuilder(
           builder: (context, body) {
             final tight = body.maxHeight < 200;
+            final pad = tight ? 8.0 : 32.0;
+            final hasCards =
+                c.supportsReplies &&
+                (state?.interactions.any(
+                      (r) => r.kind.known == InteractionKind.permission,
+                    ) ??
+                    false);
+            final canAct =
+                c.outbox != null || c.canStop || c.stopping || hasCards;
+            // Cards and composer partition the footer instead of competing for
+            // it: cards take a bounded slice, the composer keeps at least a
+            // usable field, and their sum never exceeds the body, so a short
+            // viewport (keyboard open, landscape) cannot overrun the footer and
+            // a pending card can never starve the composer. The other fixed
+            // children of this column (the loading bar, the safe-area inset and
+            // a rendered Stop button) are reserved up front, or the partition
+            // would saturate the body and those would overflow it.
+            final stopButton = c.outbox == null && (c.canStop || c.stopping);
+            // The prompt-less footer also renders the Stop button and, while a
+            // Stop waits or failed, its notice: both live outside the partition.
+            final stopNotice =
+                c.outbox == null &&
+                c.stopState.phase != SessionStopPhase.ready;
+            final chrome =
+                (c.loading ? 4.0 : 0.0) +
+                MediaQuery.paddingOf(context).bottom +
+                (stopButton ? 56.0 : 0.0) +
+                (stopNotice ? 24.0 : 0.0);
+            final space = max(0.0, body.maxHeight - pad - chrome);
+            final composerBase = max(
+              0.0,
+              max(body.maxHeight * 0.4, min(body.maxHeight - 4, 136)) - pad,
+            );
+            final cardBudget = hasCards
+                ? min(
+                    min(300.0, max(0.0, body.maxHeight * 0.45)),
+                    max(0.0, space - min(composerBase, _composerFloor)),
+                  )
+                : 0.0;
+            final composerBudget = min(
+              composerBase,
+              max(0.0, space - cardBudget),
+            );
             return Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 960),
@@ -144,9 +192,9 @@ class _SessionLivePageState extends State<SessionLivePage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                c.outbox == null && !c.canStop && !c.stopping
-                                    ? l10n.liveReadOnly
-                                    : l10n.composerLiveSession,
+                                canAct
+                                    ? l10n.composerLiveSession
+                                    : l10n.liveReadOnly,
                                 style: textTheme.titleMedium,
                               ),
                               Text(
@@ -222,32 +270,37 @@ class _SessionLivePageState extends State<SessionLivePage> {
                           horizontal: 16,
                           vertical: tight ? 4 : 16,
                         ),
-                        child: c.outbox == null
-                            ? Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    l10n.liveSendUnavailable,
-                                    key: const ValueKey('live-composer'),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SessionPermissionCards(live: c, maxHeight: cardBudget),
+                            c.outbox == null
+                                ? Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // With actionable cards above it, the
+                                      // prompt-less footer is not "read-only":
+                                      // the cards do answer the server.
+                                      if (!hasCards)
+                                        Text(
+                                          l10n.liveSendUnavailable,
+                                          key: const ValueKey('live-composer'),
+                                        ),
+                                      if (c.canStop || c.stopping)
+                                        SessionStopButton(live: c),
+                                      SessionStopNotice(live: c),
+                                    ],
+                                  )
+                                : SessionComposer(
+                                    controller: _composer,
+                                    text: _draft,
+                                    // Most of the body stays the timeline's; with
+                                    // the keyboard over a short body the field
+                                    // wins instead (the 4 is the progress bar).
+                                    maxHeight: composerBudget,
                                   ),
-                                  if (c.canStop || c.stopping)
-                                    SessionStopButton(live: c),
-                                  SessionStopNotice(live: c),
-                                ],
-                              )
-                            : SessionComposer(
-                                controller: _composer,
-                                text: _draft,
-                                // Most of the body stays the timeline's; with
-                                // the keyboard over a short body the field
-                                // wins instead (the 4 is the progress bar).
-                                maxHeight:
-                                    max(
-                                      body.maxHeight * 0.4,
-                                      min(body.maxHeight - 4, 136),
-                                    ) -
-                                    (tight ? 8 : 32),
-                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "روکنے کے لیے Escape دوبارہ دبائیں۔",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "ایک بار اجازت دیں",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "اس پروجیکٹ کے لیے ہمیشہ",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "اس پروجیکٹ کے لیے برقرار رہے گا",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "نوٹ کے ساتھ مسترد کریں",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "مسترد کر کے روکیں",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "نوٹ (یہ مسترد بھیجنے کے لیے لازمی)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "مسترد کرنے سے اس سیشن کی دیگر زیر التواء درخواستیں بھی حل ہو جاتی ہیں۔",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "جواب بھیجا جا رہا ہے…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "جواب بھیج دیا گیا۔ لائیو حالت دیکھیں۔",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "جواب کی تصدیق نہیں ہوئی۔ لائیو حالت دیکھیں۔",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "جواب مسترد کر دیا گیا۔",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "نوٹ کے ساتھ مسترد بھیجیں",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

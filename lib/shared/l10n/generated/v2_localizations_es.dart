@@ -942,4 +942,44 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'Pulsa Escape de nuevo para detener.';
+
+  @override
+  String get livePermissionAllowOnce => 'Permitir una vez';
+
+  @override
+  String get livePermissionAlwaysProject => 'Siempre para este proyecto';
+
+  @override
+  String get livePermissionProjectHint => 'Persiste en este proyecto';
+
+  @override
+  String get livePermissionRejectNote => 'Rechazar con nota';
+
+  @override
+  String get livePermissionRejectStop => 'Rechazar y detener';
+
+  @override
+  String get livePermissionNoteHint =>
+      'Nota (obligatoria para enviar este rechazo)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'Rechazar también resuelve las demás solicitudes pendientes de esta sesión.';
+
+  @override
+  String get livePermissionSending => 'Enviando respuesta…';
+
+  @override
+  String get livePermissionSent =>
+      'Respuesta enviada. Observa el estado en vivo.';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'Respuesta no confirmada. Observa el estado en vivo.';
+
+  @override
+  String get livePermissionRefused => 'La respuesta fue rechazada.';
+
+  @override
+  String get livePermissionRejectSend => 'Enviar rechazo con nota';
 }

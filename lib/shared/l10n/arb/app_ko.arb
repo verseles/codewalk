@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "중지하려면 Escape를 다시 누르세요.",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "한 번 허용",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "이 프로젝트에 항상 허용",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "이 프로젝트에 유지됨",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "메모와 함께 거부",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "거부하고 중지",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "메모(이 거부를 보내려면 필수)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "거부하면 이 세션의 다른 보류 중인 요청도 해결됩니다.",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "응답 보내는 중…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "응답을 보냈습니다. 실시간 상태를 확인하세요.",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "응답이 확인되지 않았습니다. 실시간 상태를 확인하세요.",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "응답이 거부되었습니다.",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "메모와 함께 거부 보내기",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

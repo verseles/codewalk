@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
@@ -61,6 +62,61 @@ class LiveHandle implements SessionLiveHandle {
 
   @override
   void close() => closes++;
+
+  bool replyAvailable = false;
+  @override
+  bool get supportsReplies => replyAvailable && closes == 0;
+  Future<SessionPermissionReplyState> Function(
+    InteractionRequest,
+    ApprovalResponse,
+  )?
+  replyAction;
+  final replies = <(InteractionId, String, String?, CommandId)>[];
+  final _replyStates = <String, SessionPermissionReplyState>{};
+
+  @override
+  SessionPermissionReplyState replyState(InteractionId id) =>
+      _replyStates[id.value] ?? const SessionPermissionReplyState();
+
+  @override
+  bool canReply(InteractionRequest request) =>
+      replyAvailable &&
+      closes == 0 &&
+      request.kind.known == InteractionKind.permission &&
+      request.owner is SessionOwner &&
+      (request.owner as SessionOwner).session == session &&
+      current.phase == SessionLivePhase.live &&
+      !current.stale &&
+      (current.state?.interactions.any(
+            (r) => r.id.value == request.id.value,
+          ) ??
+          false) &&
+      !replyState(request.id).busy;
+
+  @override
+  Future<void> reply({
+    required InteractionRequest request,
+    required ApprovalResponse response,
+    required CommandId id,
+  }) async {
+    if (!canReply(request)) return;
+    replies.add((request.id, response.choiceId, response.note, id));
+    _replyStates[request.id.value] = const SessionPermissionReplyState(
+      phase: SessionPermissionReplyPhase.requesting,
+    );
+    emit(current);
+    final result =
+        await (replyAction?.call(request, response) ??
+            Future.value(
+              const SessionPermissionReplyState(
+                phase: SessionPermissionReplyPhase.requested,
+              ),
+            ));
+    if (closes == 0) {
+      _replyStates[request.id.value] = result;
+      emit(current);
+    }
+  }
 }
 
 class LiveDirectory implements SessionLiveDirectory {

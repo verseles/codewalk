@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "থামাতে আবার Escape চাপুন।",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "একবার অনুমতি দিন",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "এই প্রকল্পের জন্য সর্বদা",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "এই প্রকল্পে বজায় থাকবে",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "নোটসহ প্রত্যাখ্যান",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "প্রত্যাখ্যান করে থামান",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "নোট (এই প্রত্যাখ্যান পাঠাতে আবশ্যক)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "প্রত্যাখ্যান করলে এই সেশনের অন্যান্য বিচারাধীন অনুরোধও মিটে যাবে।",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "উত্তর পাঠানো হচ্ছে…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "উত্তর পাঠানো হয়েছে। সরাসরি অবস্থা দেখুন।",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "উত্তর নিশ্চিত হয়নি। সরাসরি অবস্থা দেখুন।",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "উত্তর প্রত্যাখ্যাত হয়েছে।",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "নোটসহ প্রত্যাখ্যান পাঠান",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

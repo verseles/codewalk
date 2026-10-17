@@ -65,6 +65,21 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** idle/refused notices describe that request, and stream/hydration remain the only source of execution and turn outcomes; closing, credential changes and lease release never initiate a remote Stop
 - **Then** technical coverage includes compact/landscape/wide composers in 14 locales and storage-less compact/wide Stop; installed native/MVP acceptance, child controls and retry countdown remain separate
 
+### V2 manual permission replies
+
+- **Given** an open native v2 session on verified OpenCode 2.0.22 whose lease holds a reply port
+- **When** the session has a resident permission request
+- **Then** the live footer shows one card per request with its native title and resources, and offers an action only for a choice OpenCode itself accepts: `once`; `always` only with a non-empty, in-bounds pattern preview; `reject` with or without a verbatim note
+- **Then** a request whose native choices include anything else is shown without actions, because one non-native choice makes every reply for that request unsupported
+- **Then** one deliberate tap is one `POST /api/session/<session>/permission/<request>/reply` on the same verified stream, carrying the native decision and, for a noted rejection, the text exactly as typed; an empty note disables its own send
+- **Then** the per-request fence is shared by every screen of that session and keyed by session plus request id, so a second tap or another screen's tap sends nothing while one reply is in flight, while equal ids in different sessions stay independent
+- **Then** a `204` is only an admission: no card is removed by it, only the stream or a hydration settles the request, and a lost, malformed or unlisted result stays unconfirmed with finite localized copy and is never replayed automatically
+- **Then** a `404` reads as a generic refusal without inferring who answered, and reject-and-stop sends a note-less rejection without requesting an execution Stop
+- **Then** a card stays mounted with its actions disabled while the lease is not live or current, so a typed note survives a reconnect or an explicit retry and is dropped only when the request leaves canonical state
+- **Then** the patterns a persistent `always` would grant are shown in full, the footer partitions cards and composer with a usable composer floor (never overrunning a short body, the loading bar, the safe-area inset or a Stop control), and the read-only prompt line is not shown while only replies are available
+- **Then** no automatic approval happens on this surface; ADR-059 modes, child/owner cards and consent wording beyond the native choices remain separate work
+- **Then** technical coverage includes the card surface in 14 locales at compact and wide sizes, fence isolation across sessions, poisoned choices, note drafts, footer budget at short and hydrating bodies, and the slot-level `204`/`404`/`5xx` mappings; installed native acceptance remains separate
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened

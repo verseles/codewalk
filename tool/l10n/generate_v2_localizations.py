@@ -24,6 +24,7 @@ from sessions_catalog import PORT_KEYS as SESSION_KEYS, NEW_KEYS as SESSION_NEW_
 from session_history_catalog import PORT_KEYS as HISTORY_KEYS, NEW_KEYS as HISTORY_NEW_KEYS, COPY as HISTORY_COPY
 from session_live_catalog import NEW_KEYS as LIVE_NEW_KEYS, COPY as LIVE_COPY
 from session_composer_catalog import NEW_KEYS as COMPOSER_NEW_KEYS, COPY as COMPOSER_COPY
+from session_permission_catalog import NEW_KEYS as PERMISSION_NEW_KEYS, COPY as PERMISSION_COPY
 from session_stop_catalog import NEW_KEYS as STOP_NEW_KEYS, COPY as STOP_COPY
 
 
@@ -118,6 +119,7 @@ KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
 KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
 KEYS |= set(LIVE_NEW_KEYS)
 KEYS |= set(COMPOSER_NEW_KEYS)
+KEYS |= set(PERMISSION_NEW_KEYS)
 KEYS |= set(STOP_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
@@ -285,6 +287,19 @@ def port_composer_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_permission_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in zip(PERMISSION_NEW_KEYS, PERMISSION_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 manual permission cards"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def port_stop_copy() -> None:
     ports = []
     for locale in LOCALES:
@@ -373,6 +388,7 @@ def main() -> int:
     parser.add_argument("--port-history", action="store_true", help="Add scoped read-only history copy only.")
     parser.add_argument("--port-live", action="store_true", help="Add scoped live read-only session copy only.")
     parser.add_argument("--port-composer", action="store_true", help="Add scoped live composer copy only.")
+    parser.add_argument("--port-permission", action="store_true", help="Add scoped manual permission card copy only.")
     parser.add_argument("--port-stop", action="store_true", help="Add scoped execution stop copy only.")
     args = parser.parse_args()
     try:
@@ -412,6 +428,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-composer cannot be combined with --check")
             port_composer_copy()
+        if args.port_permission:
+            if args.check:
+                raise ValueError("--port-permission cannot be combined with --check")
+            port_permission_copy()
         if args.port_stop:
             if args.check:
                 raise ValueError("--port-stop cannot be combined with --check")

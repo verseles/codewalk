@@ -932,4 +932,42 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'روکنے کے لیے Escape دوبارہ دبائیں۔';
+
+  @override
+  String get livePermissionAllowOnce => 'ایک بار اجازت دیں';
+
+  @override
+  String get livePermissionAlwaysProject => 'اس پروجیکٹ کے لیے ہمیشہ';
+
+  @override
+  String get livePermissionProjectHint => 'اس پروجیکٹ کے لیے برقرار رہے گا';
+
+  @override
+  String get livePermissionRejectNote => 'نوٹ کے ساتھ مسترد کریں';
+
+  @override
+  String get livePermissionRejectStop => 'مسترد کر کے روکیں';
+
+  @override
+  String get livePermissionNoteHint => 'نوٹ (یہ مسترد بھیجنے کے لیے لازمی)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'مسترد کرنے سے اس سیشن کی دیگر زیر التواء درخواستیں بھی حل ہو جاتی ہیں۔';
+
+  @override
+  String get livePermissionSending => 'جواب بھیجا جا رہا ہے…';
+
+  @override
+  String get livePermissionSent => 'جواب بھیج دیا گیا۔ لائیو حالت دیکھیں۔';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'جواب کی تصدیق نہیں ہوئی۔ لائیو حالت دیکھیں۔';
+
+  @override
+  String get livePermissionRefused => 'جواب مسترد کر دیا گیا۔';
+
+  @override
+  String get livePermissionRejectSend => 'نوٹ کے ساتھ مسترد بھیجیں';
 }

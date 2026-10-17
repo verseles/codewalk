@@ -6,6 +6,7 @@ import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
@@ -18,7 +19,8 @@ SessionLiveDirectory? createSessionLiveDirectory({
 
 /// One event stream per endpoint profile, shared by every open handle; the
 /// last handle of a session unwatches it and the last of a profile closes the
-/// stream. Mutations require an explicit outbox action or Stop on a handle.
+/// stream. Mutations require an explicit outbox action, Stop or permission
+/// reply on a handle.
 final class _NativeLiveDirectory implements SessionLiveDirectory {
   _NativeLiveDirectory(this._now, this._payloads);
   final DateTime Function() _now;
@@ -140,7 +142,11 @@ final class _ProfileSlot {
   final OpenCodeMessageIds ids;
   PromptOutbox? outbox;
   OpenCodeInterruptClient? _interrupt;
+  OpenCodePermissionReplyClient? _replies;
   final _stops = <SessionRef, _StopRequest>{};
+  // Keyed by session and native id: one slot multiplexes several sessions, and
+  // ids are only unique inside their own session.
+  final _replyStates = <String, _ReplyRequest>{};
   final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
   final _store = SessionStore(maxSessions: 8);
@@ -184,6 +190,11 @@ final class _ProfileSlot {
     }
     version = observed;
     _interrupt = OpenCodeInterruptClient(
+      _transport,
+      harness: harness,
+      connectedVersion: observed,
+    );
+    _replies = OpenCodePermissionReplyClient(
       _transport,
       harness: harness,
       connectedVersion: observed,
@@ -263,6 +274,7 @@ final class _ProfileSlot {
       SessionLiveView(session: session, phase: SessionLivePhase.closed);
 
   void _publish(SessionRef session, SessionLiveView view) {
+    _pruneReplies(session, view.state);
     final stop = _stops[session];
     final execution = view.state?.execution;
     if (stop != null &&
@@ -342,6 +354,97 @@ final class _ProfileSlot {
       });
     }
     _publish(ref, view(ref));
+  }
+
+  static String _replyKey(SessionRef ref, String id) =>
+      '${ref.storageKey}|$id';
+
+  SessionPermissionReplyState replyState(SessionRef ref, InteractionId id) =>
+      _replyStates[_replyKey(ref, id.value)]?.state ??
+      const SessionPermissionReplyState();
+
+  bool get supportsReplies => _replies != null && !isClosed;
+
+  bool canReply(SessionRef ref, InteractionRequest request) {
+    final owner = request.owner;
+    if (isClosed ||
+        _replies == null ||
+        owner is! SessionOwner ||
+        owner.session != ref) {
+      return false;
+    }
+    final key = _replyKey(ref, request.id.value);
+    if ((_replyStates[key]?.inFlight ?? false) ||
+        replyState(ref, request.id).busy) {
+      return false;
+    }
+    final current = view(ref);
+    return current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        (current.state?.interactions.any(
+              (r) => r.id.value == request.id.value,
+            ) ??
+            false);
+  }
+
+  Future<void> reply({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required ApprovalResponse response,
+    required CommandId id,
+  }) async {
+    final client = _replies;
+    if (client == null || !canReply(ref, request)) return;
+    final key = _replyKey(ref, request.id.value);
+    _replyStates[key]?.dispose();
+    final reply = _ReplyRequest(ref);
+    _replyStates[key] = reply;
+    _publish(ref, view(ref));
+    final attempt = await client.reply(
+      request: request,
+      response: response,
+      id: id,
+      cancellation: reply.cancellation,
+    );
+    if (isClosed || !identical(_replyStates[key], reply)) return;
+    reply.inFlight = false;
+    final receipt = attempt.receipt;
+    final phase = switch (receipt.state.known) {
+      ReceiptState.accepted => SessionPermissionReplyPhase.requested,
+      ReceiptState.rejected ||
+      ReceiptState.unavailable => SessionPermissionReplyPhase.refused,
+      _ => SessionPermissionReplyPhase.unconfirmed,
+    };
+    reply.state = SessionPermissionReplyState(phase: phase, receipt: receipt);
+    if (phase == SessionPermissionReplyPhase.requested) {
+      // The reply was accepted, not settled. Bound the local waiting state
+      // without inferring settlement or automatically repeating the mutation.
+      reply.timer = Timer(const Duration(seconds: 30), () {
+        if (isClosed || !identical(_replyStates[key], reply)) return;
+        reply.state = SessionPermissionReplyState(
+          phase: SessionPermissionReplyPhase.unconfirmed,
+          receipt: receipt,
+        );
+        _publish(ref, view(ref));
+      });
+    }
+    _publish(ref, view(ref));
+  }
+
+  /// Drops local reply state whose request left canonical state. Cards only
+  /// disappear through the stream/hydration; this just frees their fences.
+  void _pruneReplies(SessionRef ref, SessionState? state) {
+    if (_replyStates.isEmpty) return;
+    final resident = {
+      for (final r in state?.interactions ?? const <InteractionRequest>[])
+        _replyKey(ref, r.id.value),
+    };
+    _replyStates.removeWhere((key, reply) {
+      if (reply.session != ref) return false;
+      final drop = !resident.contains(key) && !reply.inFlight;
+      if (drop) reply.dispose();
+      return drop;
+    });
   }
 
   void _onUpdate(OpenCodeStreamUpdate update) {
@@ -455,6 +558,11 @@ final class _ProfileSlot {
       _owner?.unwatch(handle.session);
       _views.remove(handle.session);
       _stops.remove(handle.session)?.dispose();
+      _replyStates.removeWhere((_, reply) {
+        if (reply.session != handle.session) return false;
+        reply.dispose();
+        return true;
+      });
     }
     if (handles.isEmpty) {
       _release();
@@ -471,6 +579,10 @@ final class _ProfileSlot {
       stop.dispose();
     }
     _stops.clear();
+    for (final reply in _replyStates.values) {
+      reply.dispose();
+    }
+    _replyStates.clear();
     for (final handle in handles.toList()) {
       handle.detach();
     }
@@ -491,6 +603,21 @@ final class _StopRequest {
   Timer? timer;
   SessionStopState state = const SessionStopState(
     phase: SessionStopPhase.requesting,
+  );
+  void dispose() {
+    timer?.cancel();
+    cancellation.cancel();
+  }
+}
+
+final class _ReplyRequest {
+  _ReplyRequest(this.session);
+  final SessionRef session;
+  final cancellation = RequestCancellation();
+  bool inFlight = true;
+  Timer? timer;
+  SessionPermissionReplyState state = const SessionPermissionReplyState(
+    phase: SessionPermissionReplyPhase.requesting,
   );
   void dispose() {
     timer?.cancel();
@@ -534,6 +661,34 @@ final class _LiveHandle implements SessionLiveHandle {
   @override
   Future<void> stop({required CommandId id}) async {
     if (!_closed) await _slot.stop(session, id);
+  }
+
+  @override
+  bool get supportsReplies => !_closed && _slot.supportsReplies;
+
+  @override
+  SessionPermissionReplyState replyState(InteractionId id) => _closed
+      ? const SessionPermissionReplyState()
+      : _slot.replyState(session, id);
+
+  @override
+  bool canReply(InteractionRequest request) =>
+      !_closed && _slot.canReply(session, request);
+
+  @override
+  Future<void> reply({
+    required InteractionRequest request,
+    required ApprovalResponse response,
+    required CommandId id,
+  }) async {
+    if (!_closed) {
+      await _slot.reply(
+        ref: session,
+        request: request,
+        response: response,
+        id: id,
+      );
+    }
   }
 
   @override

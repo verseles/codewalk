@@ -1808,6 +1808,78 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Press Escape again to stop.'**
   String get liveStopEscapeHint;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Allow once'**
+  String get livePermissionAllowOnce;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Always for this project'**
+  String get livePermissionAlwaysProject;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Persists for this project'**
+  String get livePermissionProjectHint;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Reject with note'**
+  String get livePermissionRejectNote;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Reject and stop'**
+  String get livePermissionRejectStop;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Note (required to send this rejection)'**
+  String get livePermissionNoteHint;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Rejecting also settles the other pending requests in this session.'**
+  String get livePermissionBatchScope;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Sending reply…'**
+  String get livePermissionSending;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Reply sent. Follow the live state.'**
+  String get livePermissionSent;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Reply not confirmed. Follow the live state.'**
+  String get livePermissionUnconfirmed;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'The reply was refused.'**
+  String get livePermissionRefused;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Send rejection with note'**
+  String get livePermissionRejectSend;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

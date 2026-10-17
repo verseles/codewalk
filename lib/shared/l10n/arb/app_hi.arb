@@ -667,5 +667,53 @@
   "liveStopEscapeHint": "रोकने के लिए Escape फिर दबाएँ।",
   "@liveStopEscapeHint": {
     "description": "V2 explicit execution stop control"
+  },
+  "livePermissionAllowOnce": "एक बार अनुमति दें",
+  "@livePermissionAllowOnce": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAlwaysProject": "इस प्रोजेक्ट के लिए हमेशा",
+  "@livePermissionAlwaysProject": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionProjectHint": "इस प्रोजेक्ट में बना रहेगा",
+  "@livePermissionProjectHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectNote": "नोट के साथ अस्वीकार करें",
+  "@livePermissionRejectNote": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectStop": "अस्वीकार करें और रोकें",
+  "@livePermissionRejectStop": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionNoteHint": "नोट (यह अस्वीकृति भेजने के लिए आवश्यक)",
+  "@livePermissionNoteHint": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionBatchScope": "अस्वीकार करने से इस सत्र के अन्य लंबित अनुरोध भी सुलझ जाते हैं।",
+  "@livePermissionBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSending": "उत्तर भेजा जा रहा है…",
+  "@livePermissionSending": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionSent": "उत्तर भेजा गया। लाइव स्थिति देखें।",
+  "@livePermissionSent": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionUnconfirmed": "उत्तर की पुष्टि नहीं हुई। लाइव स्थिति देखें।",
+  "@livePermissionUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRefused": "उत्तर अस्वीकार किया गया।",
+  "@livePermissionRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionRejectSend": "नोट के साथ अस्वीकृति भेजें",
+  "@livePermissionRejectSend": {
+    "description": "V2 manual permission cards"
   }
 }

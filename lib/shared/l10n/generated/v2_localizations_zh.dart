@@ -868,4 +868,40 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => '再次按 Escape 停止。';
+
+  @override
+  String get livePermissionAllowOnce => '允许一次';
+
+  @override
+  String get livePermissionAlwaysProject => '对此项目始终允许';
+
+  @override
+  String get livePermissionProjectHint => '在此项目中保留';
+
+  @override
+  String get livePermissionRejectNote => '附注拒绝';
+
+  @override
+  String get livePermissionRejectStop => '拒绝并停止';
+
+  @override
+  String get livePermissionNoteHint => '备注（发送此拒绝时必填）';
+
+  @override
+  String get livePermissionBatchScope => '拒绝也会解决此会话的其他待处理请求。';
+
+  @override
+  String get livePermissionSending => '正在发送回复…';
+
+  @override
+  String get livePermissionSent => '已发送回复。请关注实时状态。';
+
+  @override
+  String get livePermissionUnconfirmed => '未确认回复。请关注实时状态。';
+
+  @override
+  String get livePermissionRefused => '回复被拒绝。';
+
+  @override
+  String get livePermissionRejectSend => '发送附注拒绝';
 }

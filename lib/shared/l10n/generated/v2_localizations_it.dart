@@ -945,4 +945,43 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'Premi di nuovo Esc per interrompere.';
+
+  @override
+  String get livePermissionAllowOnce => 'Consenti una volta';
+
+  @override
+  String get livePermissionAlwaysProject => 'Sempre per questo progetto';
+
+  @override
+  String get livePermissionProjectHint => 'Persiste per questo progetto';
+
+  @override
+  String get livePermissionRejectNote => 'Rifiuta con nota';
+
+  @override
+  String get livePermissionRejectStop => 'Rifiuta e interrompi';
+
+  @override
+  String get livePermissionNoteHint =>
+      'Nota (obbligatoria per inviare questo rifiuto)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'Rifiutare risolve anche le altre richieste in attesa di questa sessione.';
+
+  @override
+  String get livePermissionSending => 'Invio della risposta…';
+
+  @override
+  String get livePermissionSent => 'Risposta inviata. Segui lo stato dal vivo.';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'Risposta non confermata. Segui lo stato dal vivo.';
+
+  @override
+  String get livePermissionRefused => 'La risposta è stata rifiutata.';
+
+  @override
+  String get livePermissionRejectSend => 'Invia rifiuto con nota';
 }

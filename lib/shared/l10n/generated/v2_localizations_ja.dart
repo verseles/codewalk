@@ -888,4 +888,40 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => '停止するにはもう一度 Esc を押してください。';
+
+  @override
+  String get livePermissionAllowOnce => '1回許可';
+
+  @override
+  String get livePermissionAlwaysProject => 'このプロジェクトでは常に許可';
+
+  @override
+  String get livePermissionProjectHint => 'このプロジェクトに保持される';
+
+  @override
+  String get livePermissionRejectNote => 'メモ付きで拒否';
+
+  @override
+  String get livePermissionRejectStop => '拒否して停止';
+
+  @override
+  String get livePermissionNoteHint => 'メモ（この拒否を送信するには必須）';
+
+  @override
+  String get livePermissionBatchScope => '拒否すると、このセッションの他の保留中の要求も解決されます。';
+
+  @override
+  String get livePermissionSending => '応答を送信中…';
+
+  @override
+  String get livePermissionSent => '応答を送信しました。ライブの状態を確認してください。';
+
+  @override
+  String get livePermissionUnconfirmed => '応答を確認できません。ライブの状態を確認してください。';
+
+  @override
+  String get livePermissionRefused => '応答が拒否されました。';
+
+  @override
+  String get livePermissionRejectSend => 'メモ付きで拒否を送信';
 }

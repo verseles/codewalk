@@ -926,4 +926,42 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveStopEscapeHint => 'اضغط Escape مرة أخرى للإيقاف.';
+
+  @override
+  String get livePermissionAllowOnce => 'السماح مرة واحدة';
+
+  @override
+  String get livePermissionAlwaysProject => 'دائمًا لهذا المشروع';
+
+  @override
+  String get livePermissionProjectHint => 'يبقى لهذا المشروع';
+
+  @override
+  String get livePermissionRejectNote => 'رفض مع ملاحظة';
+
+  @override
+  String get livePermissionRejectStop => 'رفض وإيقاف';
+
+  @override
+  String get livePermissionNoteHint => 'ملاحظة (مطلوبة لإرسال هذا الرفض)';
+
+  @override
+  String get livePermissionBatchScope =>
+      'الرفض يسوّي أيضًا الطلبات المعلقة الأخرى في هذه الجلسة.';
+
+  @override
+  String get livePermissionSending => 'جارٍ إرسال الرد…';
+
+  @override
+  String get livePermissionSent => 'تم إرسال الرد. تابع الحالة المباشرة.';
+
+  @override
+  String get livePermissionUnconfirmed =>
+      'لم يتأكد الرد. تابع الحالة المباشرة.';
+
+  @override
+  String get livePermissionRefused => 'رُفض الرد.';
+
+  @override
+  String get livePermissionRejectSend => 'إرسال الرفض مع ملاحظة';
 }

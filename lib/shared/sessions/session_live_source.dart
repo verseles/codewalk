@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'prompt_outbox.dart';
+import 'session_permission_reply.dart';
 import 'session_stop.dart';
 
 enum SessionLiveFailure {
@@ -76,6 +77,22 @@ abstract interface class SessionLiveHandle {
   SessionStopState get stopState;
   bool get canStop;
   Future<void> stop({required CommandId id});
+
+  /// Whether this lease can send permission replies at all, independent of the
+  /// current phase: a card for a resident request stays mounted (disabled)
+  /// while the lease is not current, so no typed note is lost.
+  bool get supportsReplies;
+
+  /// Explicit permission replies for this session's interactions, independent
+  /// of prompt-ledger storage. The per-request state and single-flight fence
+  /// are shared by its open leases; closing never replies.
+  SessionPermissionReplyState replyState(InteractionId id);
+  bool canReply(InteractionRequest request);
+  Future<void> reply({
+    required InteractionRequest request,
+    required ApprovalResponse response,
+    required CommandId id,
+  });
 
   /// The native message id [id] was projected from, so a pending row can be
   /// matched to an outbox entry; null for any other item.
