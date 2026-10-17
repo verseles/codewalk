@@ -1,6 +1,6 @@
 # OpenCode v2 — Server Contract Anchor
 
-> **Scope:** new CodeWalk v2 consumers on `main`. The retained legacy implementation and `v1` maintenance use [the v1 server anchor](opencode_server.md). This is a curated, source-pinned upstream contract reference, not a claim that CodeWalk v2 or its live acceptance checks are implemented.
+> **Scope:** new CodeWalk v2 consumers on `main`. The retained legacy implementation and `v1` maintenance use [the v1 server anchor](../ai-docs/opencode_server.md). This is a curated, source-pinned upstream contract reference, not a claim that CodeWalk v2 or its live acceptance checks are implemented.
 
 ## Provenance and authority
 
@@ -111,4 +111,4 @@ it must not be described as an upstream inability to forward PDF.
 - [Browser/Web contract anchor](opencode_v2_web.md).
 - [Model/agent contract anchor](opencode_v2_models.md).
 - [ADR registry](../ADR.md), ADR-023 contract-first principle and ADR-058 implementation-line architecture.
-- [Legacy server contract](opencode_server.md), retained for v1 and the reference implementation only.
+- [Legacy server contract](../ai-docs/opencode_server.md), retained for v1 and the reference implementation only.

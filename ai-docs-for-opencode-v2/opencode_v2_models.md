@@ -1,6 +1,6 @@
 # OpenCode v2 — Model and Agent Contract Anchor
 
-> **Scope:** model/agent/catalog consumers authored for CodeWalk v2. The v1/retained reference implementation uses [the legacy model anchor](opencode_models.md). This is pinned upstream evidence, not an implemented v2 selector or a live compatibility result.
+> **Scope:** model/agent/catalog consumers authored for CodeWalk v2. The v1/retained reference implementation uses [the legacy model anchor](../ai-docs/opencode_models.md). This is pinned upstream evidence, not an implemented v2 selector or a live compatibility result.
 
 ## Provenance
 

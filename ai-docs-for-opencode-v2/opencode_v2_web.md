@@ -1,6 +1,6 @@
 # OpenCode v2 — Web Contract Anchor
 
-> **Scope:** new CodeWalk v2 browser/connection consumers. Retained legacy implementation and `v1` maintenance use [the v1 Web anchor](opencode_web.md). This is a curated pinned reference; it does not claim a CodeWalk v2 browser build or a passing platform experiment.
+> **Scope:** new CodeWalk v2 browser/connection consumers. Retained legacy implementation and `v1` maintenance use [the v1 Web anchor](../ai-docs/opencode_web.md). This is a curated pinned reference; it does not claim a CodeWalk v2 browser build or a passing platform experiment.
 
 ## Provenance
 
@@ -61,6 +61,22 @@ accept Safari, trusted HTTPS-to-actual-HTTP-LAN mixed content, configured-origin
 service restart, foreground/background recovery or the terminal-on-Web product
 decision. V2-008 remains partial. Browser origin, scheme and TLS checks were
 preserved; the Chromium process sandbox was disabled for the disposable container.
+
+## Observed configured-origin native HTTP subset
+
+[The 2026-10-05 native diagnostic](https://github.com/verseles/codewalk/issues/247#issuecomment-5992914771)
+records Linux ARM64 OpenCode 2.0.22 on an isolated loopback service. Setting the
+exact origin `https://main.codewalk.pages.dev` stopped the owned initial process;
+the next start and an additional stop/start retained the exact allow-origin header
+on OPTIONS and authenticated `/api/info`. A lookalike origin received no
+allow-origin header, unauthenticated GET returned 401, and a rejected trailing-slash
+configuration left the running service and configuration metadata unchanged.
+The issue preserves package hashes and separate immutable 2.0.22 source provenance.
+
+Origin headers were supplied by a Python HTTP client. This observes native CORS
+configuration/restart/persistence, not browser readability or configured-origin
+Flutter streaming. Those browser checks and the other SP-04 gates remain pending;
+the disposable service and private runtime roots were cleaned up.
 
 ## Reference client and policy separation
 

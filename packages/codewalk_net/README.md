@@ -114,4 +114,4 @@ already-allocated source chunks or kernel/socket memory.
 
 Primary implementation references: [Dart public upgrade API](https://api.dart.dev/stable/3.12.1/dart-io/HttpClientResponse/detachSocket.html),
 [RFC6455](https://www.rfc-editor.org/rfc/rfc6455), and the versioned
-[OpenCode v2 contract anchor](../../ai-docs/opencode_v2_server.md) for adapter consumers.
+[OpenCode v2 contract anchor](../../ai-docs-for-opencode-v2/opencode_v2_server.md) for adapter consumers.

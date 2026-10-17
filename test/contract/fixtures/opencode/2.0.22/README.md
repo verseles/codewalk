@@ -74,7 +74,7 @@ The committed `validate.py` reproduces these checks without changing fixtures;
 | Shared TUI | API-driven turn appears live in the native TUI opened on the same session | Managed service plus captured native terminal |
 
 References are preserved under `plan/opencode-v2-src/`; the scoped official
-anchor is `ai-docs/opencode_v2_server.md`. Its primary source pin is
+anchor is `ai-docs-for-opencode-v2/opencode_v2_server.md`. Its primary source pin is
 `anomalyco/opencode@v2.0.21`, commit
 `8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72`; the later research pin for 2.0.22 is
 `05018b8862a8fc198ec9810aafd397c96bb7d86e`. This capture ran **2.0.22 only**.
