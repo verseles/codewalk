@@ -1493,6 +1493,7 @@ acceptance.
 - `compiler.json` is unchanged native-builder output; `audit.json` records independent hash/ELF/kernel checks; provenance, README, and the checksum manifest record the evidence and its scope.
 - The disposable container was stopped and removed; host SDK/packages and production were unchanged, with no permanent app, dependency, or tool-workflow changes.
 - Compiler-only evidence—not GUI launch, installation, G1–G5, #243 retry/quota, or MVP acceptance; release AOT, signing, and migration are untested.
+- `test/contract/fixtures/native-builds/mvp-targets-2026-10-17/` (`README.md`, `targets.json`): V2-020CA record of the agreed Android/Linux MVP targets, explicit v2 entry-point commands/CI targets, aggregate-check evidence at revision `846b9e5d` and the recorded pending prerequisites.
 
 ### V2-043A read-only session reader (#364)
 

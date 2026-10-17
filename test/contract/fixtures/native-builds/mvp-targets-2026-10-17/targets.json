@@ -1,0 +1,51 @@
+{
+  "unit": "V2-020CA",
+  "issue": 356,
+  "recorded_at": "2026-10-17",
+  "revision": "846b9e5d",
+  "entry_point": "lib/main_v2.dart",
+  "governed_packages": [
+    "packages/codewalk_core",
+    "packages/codewalk_net",
+    "packages/harness_opencode",
+    "packages/harness_host"
+  ],
+  "targets": [
+    {"scope": "native-mvp", "platform": "android", "target": "12/API 31", "status": "compiler-ci-observed", "pending": "device install/launch, signing, layout and permission flows"},
+    {"scope": "native-mvp", "platform": "linux", "target": "x64", "status": "debug-build-local-observed", "pending": "packaging, extraction, GUI smoke"},
+    {"scope": "native-mvp", "platform": "linux", "target": "arm64", "status": "debug-compiler-observed", "pending": "GUI/install", "evidence": "test/contract/fixtures/native-builds/linux-arm64-74202310"},
+    {"scope": "deferred-post-mvp", "platform": "web-chrome", "target": "manual-checkpoint", "status": "not-accepted", "evidence": ".github/workflows/v2-deferred-web.yml"},
+    {"scope": "deferred-post-mvp", "platform": "ios", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"},
+    {"scope": "deferred-post-mvp", "platform": "macos", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"},
+    {"scope": "deferred-post-mvp", "platform": "windows", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"}
+  ],
+  "commands": [
+    {"make": "v2-architecture", "command": "dart run tool/ci/import_rules.dart", "ci_job": "quality"},
+    {"make": "v2-foundations", "command": "python3 tool/ci/check_v2_foundations.py", "ci_job": "v2_foundations"},
+    {"make": "v2-native-check", "command": "python3 tool/ci/check_v2_foundations.py --profile native", "ci_job": "v2_native_checks"},
+    {"make": "v2-android-debug", "command": "python3 tool/ci/build_v2_native.py android", "ci_job": "v2_native_builds"},
+    {"make": "v2-linux-debug", "command": "python3 tool/ci/build_v2_native.py linux", "ci_job": "v2_native_builds"},
+    {"make": "v2-linux-preview-package", "command": "tool/preview/preview_linux.py package", "ci_job": null},
+    {"make": "v2-linux-preview-smoke", "command": "tool/ci/smoke_v2_linux_preview.py", "ci_job": null},
+    {"make": "v2-smoke", "command": "flutter test --no-pub test/v2", "ci_job": "v2_native_checks"}
+  ],
+  "aggregate_evidence": {
+    "v2_native_check": {"result": "exit 0", "packages": 4, "explicit_entry_point": true, "tests_passed": 790, "skips": 2, "skip_reasons": ["authorized isolated OpenCode 2.0.22 runtime check", "browser-only guard"]},
+    "ci_jobs": {"quality": "success", "v2_foundations": "success", "v2_native_checks": "success", "v2_native_builds": ["android: success", "linux: success"], "coverage": "success", "windows_build": "success", "test_shards": "skipped"}
+  },
+  "lifecycle": {
+    "path_manifest": "tool/ci/v2_architecture_manifest.json",
+    "enforcer": "tool/ci/import_rules.dart",
+    "removals_or_suppressions": "none",
+    "v2_discovery": "governed packages plus the explicit entry point only",
+    "cutover_retirement_owner": "V2-084"
+  },
+  "not_claimed": [
+    "android/linux device acceptance",
+    "packaging or distribution",
+    "MVP acceptance (V2-086) and G1-G5",
+    "publication authority (V2-077A)",
+    "installed cohort migration (V1-02A, V2-076A)",
+    "full-parent V2-020C/V2-020 closure for deferred platforms"
+  ]
+}
