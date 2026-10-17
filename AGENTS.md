@@ -26,16 +26,24 @@
 - **MVP platform boundary (owner amendment, 2026-10-08):** MVP targets only Android and Linux. Web/Chrome, Safari, native iOS, Windows and macOS are deferred until after MVP, superseding the 2026-10-06 Chrome-in-MVP decision. Use `V2-028D`, `V2-020CA`, `V1-02A`, `V2-076A`, `V2-077A` and `V2-078A` as bounded native producers; `V2-008A` remains a post-MVP Chrome checkpoint. Require actual installed v1.266 cohort migration, native evidence, G1–G5 and owner acceptance. Full six-platform GA obligations remain; deferral is neither a passing check nor an approved capability tier. Declare Android reference devices and Linux architectures before acceptance.
 - **Native references and first visual delivery (2026-10-10):** Android 12/API 31 is the OS reference, without changing minSdk; Linux MVP covers x64 and ARM64. The orchestrator owns setup, implementation, technical QA, packaging and launch verification. Deliver a usable isolated native development preview through `V2-020D` (#363) before requesting product feedback; do not require the owner to code, diagnose builds or select SDKs. One verified first-preview target is sufficient for that unit, not for the full MVP matrix. Preserve installed v1 and production identity/data policy; public-beta gates, publication authority and Web prerequisites remain unchanged. Record real device gaps before later installed/MVP acceptance rather than blocking safe preview preparation on a phone-model question.
 
+## Web Origins and Published State
+
+- **Stable / v1 Web:** `https://codewalk.pages.dev`.
+- **`main` development preview:** `https://main.codewalk.pages.dev`, reflecting the latest successfully deployed `origin/main` revision. Use this origin for Web validation of the active development line; the preview URL alone does not establish that the v2 transport is implemented.
+- Local changes appear on Pages only after their commit is pushed and its Web deployment succeeds. Before validating a published change, compare the deployment commit with `origin/main` and local `HEAD`; an app version or HTML 200 is not commit-level evidence.
+- These are the current mappings, not immutable endpoints. Revalidate and update this section whenever Pages origins, branch routing, or deployment behavior changes.
+
 ## Required Context
 
 - Read `BEHAVIOR.md` before substantial planning.
-- For behavior changes, identify the implementation line and verify ADR-023's contract-first principle using `ADR.md`. New v2-authored behavior uses ADR-058 and the versioned official OpenCode anchors `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, and `ai-docs/opencode_v2_models.md`. v1 maintenance and retained legacy reference paths (including legacy code still on `main`) use the original anchors `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md`, plus their applicable v1-specific invariants. Legacy details such as `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE behavior do not constrain authored v2.
+- For behavior changes, identify the implementation line and verify ADR-023's contract-first principle using `ADR.md`. New v2-authored behavior uses ADR-058 and the versioned official OpenCode anchors `ai-docs-for-opencode-v2/opencode_v2_server.md`, `ai-docs-for-opencode-v2/opencode_v2_web.md`, and `ai-docs-for-opencode-v2/opencode_v2_models.md`. v1 maintenance and retained legacy reference paths (including legacy code still on `main`) use the original anchors `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md`, which live on the `v1` branch, plus their applicable v1-specific invariants. Legacy details such as `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE behavior do not constrain authored v2.
 - For new features or bug fixes, also inspect `https://github.com/openchamber/openchamber` as a secondary community reference. It must never override official OpenCode docs/source.
 - For OpenCode or OpenChamber source-code investigation, do not use the `researcher` subagent. Inspect GitHub URLs, raw files, commits, pull requests, and code directly with GitHub/URL tools.
 - If a behavior change cannot align with the applicable official contract under ADR-023, it is blocked unless an explicit ADR exception documents rationale, risk, rollback/feature flag, and regression tests.
 
 ## Documentation
 
+- `ai-docs-for-opencode-v2/` is the only OpenCode documentation namespace on `main`; the OpenCode v1 documentation (`ai-docs/opencode_*.md`) lives on the `v1` branch. Keep the two namespaces separate. Immutable historical captures may record pre-move paths; the Required Context paths above are the current canonical anchors.
 - `BEHAVIOR.md` documents current implemented behavior only.
 - `ADR.md` stores architecture decisions. Use `adrkeeper`/ADR flow for ADR updates.
 - `CODEBASE.md` stores structure, entry points, core modules, and command map. Use `codemapper`/CODEBASE flow for structural updates.

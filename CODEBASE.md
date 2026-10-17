@@ -286,11 +286,10 @@ transitively by authored v2 source.
 
 ```text
 codewalk/
-├── ai-docs/                            # AI docs and engineering artifacts
-│   ├── opencode_server.md              # Server contract local anchor (used by ADR-023)
-│   ├── opencode_web.md                 # Web contract local anchor (used by ADR-023)
-│   ├── opencode_config.md              # Config schema local anchor (used by ADR-023)
-│   └── opencode_models.md              # Model/provider compatibility notes (used by ADR-023)
+├── ai-docs-for-opencode-v2/            # Pinned OpenCode v2 contract anchors; only OpenCode documentation namespace on main (v1 documentation lives on the v1 branch)
+│   ├── opencode_v2_server.md           # Versioned v2 server contract reference
+│   ├── opencode_v2_web.md              # Versioned v2 Web contract reference
+│   └── opencode_v2_models.md           # Versioned v2 model/agent contract reference
 ├── assets/
 │   ├── images/                           # Source and generated launcher/tray icon assets used by `make icons`
 │   ├── moonshine_models.json             # Moonshine STT model catalog
