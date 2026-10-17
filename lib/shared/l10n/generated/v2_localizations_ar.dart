@@ -793,8 +793,7 @@ class V2LocalizationsAr extends V2Localizations {
       'تعذر فتح العرض المباشر. تحقق من الخادم وحاول مجددًا.';
 
   @override
-  String get liveSendUnavailable =>
-      'الإرسال غير متاح في هذا العرض المباشر للقراءة فقط.';
+  String get liveSendUnavailable => 'إرسال الطلب غير متاح في هذا العرض.';
 
   @override
   String get liveRetry => 'إعادة الاتصال';

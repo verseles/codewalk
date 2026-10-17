@@ -763,7 +763,7 @@ class V2LocalizationsJa extends V2Localizations {
   String get liveUnavailable => 'ライブ表示を開けません。サーバーを確認して再試行してください。';
 
   @override
-  String get liveSendUnavailable => 'この読み取り専用のライブ表示では送信できません。';
+  String get liveSendUnavailable => 'この表示ではプロンプトを送信できません。';
 
   @override
   String get liveRetry => '再接続';

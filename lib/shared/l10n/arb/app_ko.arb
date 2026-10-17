@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "이 읽기 전용 실시간 보기에서는 전송할 수 없습니다.",
+  "liveSendUnavailable": "이 보기에서는 프롬프트를 보낼 수 없습니다.",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

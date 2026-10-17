@@ -806,7 +806,7 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'Отправка недоступна в этом режиме только для чтения.';
+      'Отправка запроса недоступна в этом представлении.';
 
   @override
   String get liveRetry => 'Переподключить';

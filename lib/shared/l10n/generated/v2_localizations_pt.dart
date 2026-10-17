@@ -808,8 +808,7 @@ class V2LocalizationsPt extends V2Localizations {
       'Não foi possível abrir a visão ao vivo. Confira o servidor e tente novamente.';
 
   @override
-  String get liveSendUnavailable =>
-      'Envio indisponível nesta visão ao vivo somente leitura.';
+  String get liveSendUnavailable => 'Envio de prompt indisponível nesta visão.';
 
   @override
   String get liveRetry => 'Reconectar';

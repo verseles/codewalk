@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "Отправка недоступна в этом режиме только для чтения.",
+  "liveSendUnavailable": "Отправка запроса недоступна в этом представлении.",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

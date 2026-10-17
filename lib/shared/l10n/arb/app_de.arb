@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "Senden ist in dieser schreibgeschützten Live-Ansicht nicht verfügbar.",
+  "liveSendUnavailable": "Das Senden von Prompts ist in dieser Ansicht nicht verfügbar.",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

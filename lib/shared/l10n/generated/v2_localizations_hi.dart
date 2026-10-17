@@ -801,7 +801,7 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'इस केवल पढ़ने वाले लाइव दृश्य में भेजना उपलब्ध नहीं है।';
+      'इस दृश्य में प्रॉम्प्ट भेजना उपलब्ध नहीं है।';
 
   @override
   String get liveRetry => 'फिर से कनेक्ट करें';

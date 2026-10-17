@@ -795,7 +795,7 @@ class V2LocalizationsBn extends V2Localizations {
       'লাইভ ভিউ খোলা যায়নি। সার্ভার পরীক্ষা করে আবার চেষ্টা করুন।';
 
   @override
-  String get liveSendUnavailable => 'এই শুধু পড়ার লাইভ ভিউতে পাঠানো যায় না।';
+  String get liveSendUnavailable => 'এই ভিউতে প্রম্পট পাঠানো অনুপলব্ধ।';
 
   @override
   String get liveRetry => 'আবার সংযোগ করুন';

@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "اس صرف پڑھنے والے براہ راست منظر میں بھیجنا دستیاب نہیں۔",
+  "liveSendUnavailable": "اس ویو میں پرامپٹ بھیجنا دستیاب نہیں۔",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

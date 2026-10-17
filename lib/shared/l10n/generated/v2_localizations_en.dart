@@ -798,7 +798,7 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'Sending is unavailable in this read-only live view.';
+      'Prompt sending is unavailable in this view.';
 
   @override
   String get liveRetry => 'Reconnect';

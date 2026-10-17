@@ -46,7 +46,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the field clears only once the prompt is recorded as admitted or not confirmed; refusals and rejections keep the text with finite localized copy and never show raw server reasons
 - **Then** a send whose response was lost is checked once automatically under the same id; entries restored from an earlier run are checked only by the user (Check again); "Send again (may duplicate)" forgets the old command first and hands the text back if the new send does not go
 - **Then** pending inbox rows appear as chips: this device's admitted prompts offer cancel and a steer/queue switch, other clients' rows are read-only, and a cancel that lost to delivery says so instead of claiming cancellation
-- **Then** an unsent draft survives a reopened lease; an unreadable ledger disables sending with a re-read action; without storage, a verified version or on Web the screen keeps the read-only "sending unavailable" line
+- **Then** an unsent draft survives a reopened lease; an unreadable ledger disables sending with a re-read action; without storage, a verified version or on Web the screen explains that prompt sending is unavailable, without claiming the view is read-only while permission cards can still reply
 - **Then** compact, landscape and wide layouts in all 14 locales (RTL for Arabic/Urdu) are technical widget coverage; installed native acceptance remains separate
 
 ### V2 live session Stop

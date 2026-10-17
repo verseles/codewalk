@@ -812,7 +812,7 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'L’envoi est indisponible dans cette vue en direct en lecture seule.';
+      'L’envoi de prompt est indisponible dans cette vue.';
 
   @override
   String get liveRetry => 'Reconnecter';

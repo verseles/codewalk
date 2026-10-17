@@ -798,8 +798,7 @@ class V2LocalizationsUr extends V2Localizations {
       'براہ راست منظر نہیں کھولا جا سکا۔ سرور دیکھیں اور دوبارہ کوشش کریں۔';
 
   @override
-  String get liveSendUnavailable =>
-      'اس صرف پڑھنے والے براہ راست منظر میں بھیجنا دستیاب نہیں۔';
+  String get liveSendUnavailable => 'اس ویو میں پرامپٹ بھیجنا دستیاب نہیں۔';
 
   @override
   String get liveRetry => 'دوبارہ جوڑیں';

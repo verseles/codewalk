@@ -1566,7 +1566,7 @@ abstract class V2Localizations {
   /// V2 live read-only session view
   ///
   /// In en, this message translates to:
-  /// **'Sending is unavailable in this read-only live view.'**
+  /// **'Prompt sending is unavailable in this view.'**
   String get liveSendUnavailable;
 
   /// V2 live read-only session view

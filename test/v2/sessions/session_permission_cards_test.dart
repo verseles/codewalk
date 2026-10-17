@@ -530,6 +530,15 @@ void main() {
       ]) {
         expect(find.byKey(ValueKey(key)), findsOneWidget, reason: key);
       }
+      // No outbox: the footer still explains that prompt sending is out,
+      // and its wording no longer claims the view is read-only while the
+      // cards above it can reply.
+      expect(find.text(V2LocalizationsEn().liveSendUnavailable), findsOneWidget);
+      expect(
+        find.textContaining('read-only'),
+        findsNothing,
+        reason: 'no read-only claim beside actionable cards',
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -649,8 +658,12 @@ void main() {
     ) async {
       tester.view.physicalSize = const Size(390, 240);
       tester.view.devicePixelRatio = 1;
+      // The production footer carries a composer and a bottom inset, so this
+      // case must exercise both with the loading bar.
+      tester.view.padding = const FakeViewPadding(bottom: 24);
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('en'),
@@ -660,7 +673,7 @@ void main() {
         ),
       );
       await tester.pump();
-      handle = directory.grant(ref);
+      handle = directory.grant(ref, outbox: FakeOutbox());
       handle.replyAvailable = true;
       await tester.pump();
       handle.emit(

@@ -980,7 +980,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "Sending is unavailable in this read-only live view.",
+  "liveSendUnavailable": "Prompt sending is unavailable in this view.",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

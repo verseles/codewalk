@@ -809,7 +809,7 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'El envío no está disponible en esta vista en vivo de solo lectura.';
+      'No se pueden enviar prompts en esta vista.';
 
   @override
   String get liveRetry => 'Reconectar';

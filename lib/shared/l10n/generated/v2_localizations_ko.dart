@@ -765,7 +765,7 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveUnavailable => '실시간 보기를 열 수 없습니다. 서버를 확인하고 다시 시도하세요.';
 
   @override
-  String get liveSendUnavailable => '이 읽기 전용 실시간 보기에서는 전송할 수 없습니다.';
+  String get liveSendUnavailable => '이 보기에서는 프롬프트를 보낼 수 없습니다.';
 
   @override
   String get liveRetry => '다시 연결';

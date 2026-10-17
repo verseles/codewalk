@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "この読み取り専用のライブ表示では送信できません。",
+  "liveSendUnavailable": "この表示ではプロンプトを送信できません。",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

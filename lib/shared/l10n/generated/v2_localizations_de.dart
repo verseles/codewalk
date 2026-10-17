@@ -816,7 +816,7 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get liveSendUnavailable =>
-      'Senden ist in dieser schreibgeschützten Live-Ansicht nicht verfügbar.';
+      'Das Senden von Prompts ist in dieser Ansicht nicht verfügbar.';
 
   @override
   String get liveRetry => 'Neu verbinden';

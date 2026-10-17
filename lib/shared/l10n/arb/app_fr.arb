@@ -504,7 +504,7 @@
   "@liveUnavailable": {
     "description": "V2 live read-only session view"
   },
-  "liveSendUnavailable": "L’envoi est indisponible dans cette vue en direct en lecture seule.",
+  "liveSendUnavailable": "L’envoi de prompt est indisponible dans cette vue.",
   "@liveSendUnavailable": {
     "description": "V2 live read-only session view"
   },

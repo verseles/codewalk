@@ -278,14 +278,14 @@ class _SessionLivePageState extends State<SessionLivePage> {
                                 ? Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // With actionable cards above it, the
-                                      // prompt-less footer is not "read-only":
-                                      // the cards do answer the server.
-                                      if (!hasCards)
-                                        Text(
-                                          l10n.liveSendUnavailable,
-                                          key: const ValueKey('live-composer'),
-                                        ),
+                                      // Prompt storage is missing, so the
+                                      // footer explains that only prompt
+                                      // sending is out, whether or not the
+                                      // cards above it can still reply.
+                                      Text(
+                                        l10n.liveSendUnavailable,
+                                        key: const ValueKey('live-composer'),
+                                      ),
                                       if (c.canStop || c.stopping)
                                         SessionStopButton(live: c),
                                       SessionStopNotice(live: c),

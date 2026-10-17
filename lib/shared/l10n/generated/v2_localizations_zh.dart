@@ -747,7 +747,7 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveUnavailable => '无法打开实时视图。请检查服务器并重试。';
 
   @override
-  String get liveSendUnavailable => '此只读实时视图不支持发送。';
+  String get liveSendUnavailable => '在此视图中无法发送提示。';
 
   @override
   String get liveRetry => '重新连接';
