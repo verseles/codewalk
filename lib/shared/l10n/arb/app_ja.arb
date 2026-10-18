@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "メモ付きで拒否を送信",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "権限モード",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "確認する",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "すべて許可",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "このセッションに設定",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "アプリの既定",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "アプリの既定を使用",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "権限モードを利用できません",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "権限モードを保存できませんでした。",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

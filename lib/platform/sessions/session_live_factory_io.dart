@@ -36,7 +36,9 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     this._payloads,
     this._permissionModes,
     this._commandIds,
-  );
+  ) {
+    _permissionModes?.addListener(_policyChanged);
+  }
   final DateTime Function() _now;
   final PayloadStore? _payloads;
   final PermissionModePolicy? _permissionModes;
@@ -119,10 +121,21 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     return _slots[key] = slot;
   }
 
+  /// A policy change is the user's decision: re-evaluate resident requests
+  /// now, so switching to Allow all does not wait for another frame. Every
+  /// gate in [_ProfileSlot._canAutoApprove] still applies.
+  void _policyChanged() {
+    if (_closed) return;
+    for (final slot in _owned.toList()) {
+      slot.considerAutoApproval();
+    }
+  }
+
   @override
   Future<void> close() async {
     if (_closed) return;
     _closed = true;
+    _permissionModes?.removeListener(_policyChanged);
     final slots = _owned.toList();
     _slots.clear();
     _owned.clear();
@@ -535,6 +548,14 @@ final class _ProfileSlot {
     if (request.automaticChoice?.id != 'once') return false;
     if (answered.contains(_replyKey(ref, request.id.value))) return false;
     return canReply(ref, request);
+  }
+
+  /// Re-runs automatic eligibility for watched sessions after a policy change.
+  void considerAutoApproval() {
+    if (isClosed) return;
+    for (final ref in _views.keys.toList()) {
+      if (handles.any((handle) => handle.session == ref)) _autoApprove(ref);
+    }
   }
 
   /// Answers every eligible resident request of a watched session once. Only

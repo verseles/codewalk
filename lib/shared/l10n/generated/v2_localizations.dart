@@ -1880,6 +1880,54 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Send rejection with note'**
   String get livePermissionRejectSend;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Permission mode'**
+  String get livePermissionMode;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get livePermissionModeAsk;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Allow all'**
+  String get livePermissionModeAllowAll;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Set for this session'**
+  String get livePermissionModeSession;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'App default'**
+  String get livePermissionModeDefault;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Use app default'**
+  String get livePermissionModeUseDefault;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Permission mode unavailable'**
+  String get livePermissionModeUnavailable;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the permission mode.'**
+  String get livePermissionModeFailed;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

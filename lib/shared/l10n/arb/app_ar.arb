@@ -714,5 +714,37 @@
   "livePermissionRejectSend": "إرسال الرفض مع ملاحظة",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "وضع الأذونات",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "اسأل",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "السماح بالكل",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "مُعيّن لهذه الجلسة",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "الافتراضي في التطبيق",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "استخدام الافتراضي",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "وضع الأذونات غير متاح",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "تعذّر حفظ وضع الأذونات.",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

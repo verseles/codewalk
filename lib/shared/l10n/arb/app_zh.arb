@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "发送附注拒绝",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "权限模式",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "询问",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "全部允许",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "已为此会话设置",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "应用默认",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "使用应用默认",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "权限模式不可用",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "无法保存权限模式。",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

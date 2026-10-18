@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "Отправить отказ с заметкой",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "Режим разрешений",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "Спрашивать",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "Разрешить всё",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "Задано для этого сеанса",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "По умолчанию в приложении",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "Использовать значение по умолчанию",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "Режим разрешений недоступен",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "Не удалось сохранить режим разрешений.",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

@@ -1191,5 +1191,37 @@
   "livePermissionRejectSend": "Send rejection with note",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "Permission mode",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "Ask",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "Allow all",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "Set for this session",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "App default",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "Use app default",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "Permission mode unavailable",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "Could not save the permission mode.",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

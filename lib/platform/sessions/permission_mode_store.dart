@@ -11,7 +11,7 @@ import '../storage/storage_support.dart';
 /// failed read never becomes Allow all, because an unreadable preference must
 /// not grant standing approval authority.
 final class PermissionModeStore extends ChangeNotifier
-    implements PermissionModePolicy {
+    implements EditablePermissionModePolicy {
   PermissionModeStore({required V2MetadataStore store}) : _store = store;
 
   /// Global default: `ask` | `allowAll`. Absent means the new-install default
@@ -48,7 +48,11 @@ final class PermissionModeStore extends ChangeNotifier
   /// True when the policy could not be applied: a write failed and was
   /// reverted, or it was refused because persisting would drop unreadable
   /// overrides or exceed the bound.
+  @override
   bool get hasPersistenceError => _persistenceError;
+
+  @override
+  bool get overridesUnreadable => _overridesUnreadable;
 
   Future<void> initialize() async {
     if (_loaded) return;
@@ -194,9 +198,13 @@ final class PermissionModeStore extends ChangeNotifier
         return true;
       });
 
+  @override
   Future<bool> setSessionMode(SessionRef session, PermissionMode mode) =>
       _executor.run(overridesKey, () async {
         final key = session.storageKey;
+        // Before the first read the in-memory map is empty, and writing it
+        // back would drop every stored override.
+        if (!_loaded) return false;
         if (_overridesUnreadable) {
           // Rewriting would drop overrides that cannot be read, so the
           // corrupted blob stays intact until an explicit repair exists.
@@ -232,9 +240,13 @@ final class PermissionModeStore extends ChangeNotifier
         return true;
       });
 
+  @override
   Future<bool> clearSessionMode(SessionRef session) =>
       _executor.run(overridesKey, () async {
         final key = session.storageKey;
+        // Before the first read the in-memory map is empty, and writing it
+        // back would drop every stored override.
+        if (!_loaded) return false;
         if (_overridesUnreadable) {
           _persistenceError = true;
           notifyListeners();
@@ -262,6 +274,7 @@ final class PermissionModeStore extends ChangeNotifier
 
   /// Dismisses the "could not be applied" indicator; nothing is retried, so
   /// the settings surface asks the user again instead.
+  @override
   Future<void> clearPersistenceError() async {
     _persistenceError = false;
     notifyListeners();

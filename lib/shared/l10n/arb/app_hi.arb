@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "नोट के साथ अस्वीकृति भेजें",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "अनुमति मोड",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "पूछें",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "सभी अनुमति दें",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "इस सत्र के लिए सेट",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "ऐप डिफ़ॉल्ट",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "ऐप डिफ़ॉल्ट उपयोग करें",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "अनुमति मोड उपलब्ध नहीं",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "अनुमति मोड सहेजा नहीं जा सका।",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

@@ -188,4 +188,22 @@ void main() {
     expect(store.hasPersistenceError, isFalse);
     expect(store.effectiveFor(ref('ses_one')).mode, PermissionMode.ask);
   });
+
+  test('writes before the first read are refused and keep the blob', () async {
+    final backend = FakeMetadataBackend();
+    final first = PermissionModeStore(store: storeWith(backend));
+    await first.initialize();
+    expect(
+      await first.setSessionMode(ref('ses_two'), PermissionMode.ask),
+      isTrue,
+    );
+    final stored = backend.values[PermissionModeStore.overridesKey];
+    final cold = PermissionModeStore(store: storeWith(backend));
+    expect(
+      await cold.setSessionMode(ref('ses_one'), PermissionMode.allowAll),
+      isFalse,
+    );
+    expect(await cold.clearSessionMode(ref('ses_two')), isFalse);
+    expect(backend.values[PermissionModeStore.overridesKey], stored);
+  });
 }

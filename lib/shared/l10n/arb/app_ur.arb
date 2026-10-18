@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "نوٹ کے ساتھ مسترد بھیجیں",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "اجازت موڈ",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "پوچھیں",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "سب کی اجازت دیں",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "اس سیشن کے لیے مقرر",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "ایپ ڈیفالٹ",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "ایپ ڈیفالٹ استعمال کریں",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "اجازت موڈ دستیاب نہیں",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "اجازت موڈ محفوظ نہیں ہو سکا۔",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

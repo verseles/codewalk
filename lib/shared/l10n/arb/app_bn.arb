@@ -715,5 +715,37 @@
   "livePermissionRejectSend": "নোটসহ প্রত্যাখ্যান পাঠান",
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionMode": "অনুমতি মোড",
+  "@livePermissionMode": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAsk": "জিজ্ঞাসা করুন",
+  "@livePermissionModeAsk": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeAllowAll": "সব অনুমতি দিন",
+  "@livePermissionModeAllowAll": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeSession": "এই সেশনের জন্য সেট",
+  "@livePermissionModeSession": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeDefault": "অ্যাপ ডিফল্ট",
+  "@livePermissionModeDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUseDefault": "অ্যাপ ডিফল্ট ব্যবহার করুন",
+  "@livePermissionModeUseDefault": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnavailable": "অনুমতি মোড উপলব্ধ নয়",
+  "@livePermissionModeUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeFailed": "অনুমতি মোড সংরক্ষণ করা যায়নি।",
+  "@livePermissionModeFailed": {
+    "description": "V2 manual permission cards"
   }
 }

@@ -965,4 +965,28 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'নোটসহ প্রত্যাখ্যান পাঠান';
+
+  @override
+  String get livePermissionMode => 'অনুমতি মোড';
+
+  @override
+  String get livePermissionModeAsk => 'জিজ্ঞাসা করুন';
+
+  @override
+  String get livePermissionModeAllowAll => 'সব অনুমতি দিন';
+
+  @override
+  String get livePermissionModeSession => 'এই সেশনের জন্য সেট';
+
+  @override
+  String get livePermissionModeDefault => 'অ্যাপ ডিফল্ট';
+
+  @override
+  String get livePermissionModeUseDefault => 'অ্যাপ ডিফল্ট ব্যবহার করুন';
+
+  @override
+  String get livePermissionModeUnavailable => 'অনুমতি মোড উপলব্ধ নয়';
+
+  @override
+  String get livePermissionModeFailed => 'অনুমতি মোড সংরক্ষণ করা যায়নি।';
 }

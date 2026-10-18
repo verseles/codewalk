@@ -924,4 +924,28 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'メモ付きで拒否を送信';
+
+  @override
+  String get livePermissionMode => '権限モード';
+
+  @override
+  String get livePermissionModeAsk => '確認する';
+
+  @override
+  String get livePermissionModeAllowAll => 'すべて許可';
+
+  @override
+  String get livePermissionModeSession => 'このセッションに設定';
+
+  @override
+  String get livePermissionModeDefault => 'アプリの既定';
+
+  @override
+  String get livePermissionModeUseDefault => 'アプリの既定を使用';
+
+  @override
+  String get livePermissionModeUnavailable => '権限モードを利用できません';
+
+  @override
+  String get livePermissionModeFailed => '権限モードを保存できませんでした。';
 }

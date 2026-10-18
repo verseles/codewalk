@@ -904,4 +904,28 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => '发送附注拒绝';
+
+  @override
+  String get livePermissionMode => '权限模式';
+
+  @override
+  String get livePermissionModeAsk => '询问';
+
+  @override
+  String get livePermissionModeAllowAll => '全部允许';
+
+  @override
+  String get livePermissionModeSession => '已为此会话设置';
+
+  @override
+  String get livePermissionModeDefault => '应用默认';
+
+  @override
+  String get livePermissionModeUseDefault => '使用应用默认';
+
+  @override
+  String get livePermissionModeUnavailable => '权限模式不可用';
+
+  @override
+  String get livePermissionModeFailed => '无法保存权限模式。';
 }

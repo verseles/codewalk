@@ -971,4 +971,28 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'नोट के साथ अस्वीकृति भेजें';
+
+  @override
+  String get livePermissionMode => 'अनुमति मोड';
+
+  @override
+  String get livePermissionModeAsk => 'पूछें';
+
+  @override
+  String get livePermissionModeAllowAll => 'सभी अनुमति दें';
+
+  @override
+  String get livePermissionModeSession => 'इस सत्र के लिए सेट';
+
+  @override
+  String get livePermissionModeDefault => 'ऐप डिफ़ॉल्ट';
+
+  @override
+  String get livePermissionModeUseDefault => 'ऐप डिफ़ॉल्ट उपयोग करें';
+
+  @override
+  String get livePermissionModeUnavailable => 'अनुमति मोड उपलब्ध नहीं';
+
+  @override
+  String get livePermissionModeFailed => 'अनुमति मोड सहेजा नहीं जा सका।';
 }

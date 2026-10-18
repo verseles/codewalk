@@ -969,4 +969,28 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'نوٹ کے ساتھ مسترد بھیجیں';
+
+  @override
+  String get livePermissionMode => 'اجازت موڈ';
+
+  @override
+  String get livePermissionModeAsk => 'پوچھیں';
+
+  @override
+  String get livePermissionModeAllowAll => 'سب کی اجازت دیں';
+
+  @override
+  String get livePermissionModeSession => 'اس سیشن کے لیے مقرر';
+
+  @override
+  String get livePermissionModeDefault => 'ایپ ڈیفالٹ';
+
+  @override
+  String get livePermissionModeUseDefault => 'ایپ ڈیفالٹ استعمال کریں';
+
+  @override
+  String get livePermissionModeUnavailable => 'اجازت موڈ دستیاب نہیں';
+
+  @override
+  String get livePermissionModeFailed => 'اجازت موڈ محفوظ نہیں ہو سکا۔';
 }

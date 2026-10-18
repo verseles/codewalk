@@ -978,4 +978,30 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'Отправить отказ с заметкой';
+
+  @override
+  String get livePermissionMode => 'Режим разрешений';
+
+  @override
+  String get livePermissionModeAsk => 'Спрашивать';
+
+  @override
+  String get livePermissionModeAllowAll => 'Разрешить всё';
+
+  @override
+  String get livePermissionModeSession => 'Задано для этого сеанса';
+
+  @override
+  String get livePermissionModeDefault => 'По умолчанию в приложении';
+
+  @override
+  String get livePermissionModeUseDefault =>
+      'Использовать значение по умолчанию';
+
+  @override
+  String get livePermissionModeUnavailable => 'Режим разрешений недоступен';
+
+  @override
+  String get livePermissionModeFailed =>
+      'Не удалось сохранить режим разрешений.';
 }

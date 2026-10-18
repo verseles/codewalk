@@ -10,6 +10,7 @@ import 'session_composer.dart';
 import 'session_composer_controller.dart';
 import 'session_live_controller.dart';
 import 'session_permission_card.dart';
+import 'session_permission_mode_chip.dart';
 import 'session_stop_button.dart';
 import 'session_timeline_tile.dart';
 
@@ -113,6 +114,13 @@ class _SessionLivePageState extends State<SessionLivePage> {
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
         appBar: AppBar(
+          actions: [
+            if (c.permissionModes != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                child: SessionPermissionModeChip(live: c),
+              ),
+          ],
           title: Text(
             c.summary.info.title.trim().isEmpty
                 ? l10n.sessionExportUntitled

@@ -1310,6 +1310,81 @@ void main() {
       },
     );
 
+    test(
+      'switching to Allow all answers a resident request without a frame',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        expect(view.state!.interactions.single.id.value, 'per_1');
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        expect(
+          await policy.setSessionMode(ref('ses_one'), PermissionMode.allowAll),
+          isTrue,
+        );
+        await waitForReplies(1);
+        expect(server.replies, hasLength(1));
+        expect(server.replies.single, '{"decision":"once"}');
+        // Back to Ask: a later policy notification never sends another reply.
+        expect(
+          await policy.setSessionMode(ref('ses_one'), PermissionMode.ask),
+          isTrue,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, hasLength(1));
+        a.close();
+      },
+    );
+
+    test(
+      'a policy change never answers a session whose lease was released',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        a.close();
+        expect(
+          await policy.setSessionMode(ref('ses_one'), PermissionMode.allowAll),
+          isTrue,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+      },
+    );
+
     test('two sessions stay isolated, one auto each', () async {
       for (final session in ['ses_one', 'ses_two']) {
         server.permissions.add({

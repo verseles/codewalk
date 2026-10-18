@@ -963,4 +963,28 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'إرسال الرفض مع ملاحظة';
+
+  @override
+  String get livePermissionMode => 'وضع الأذونات';
+
+  @override
+  String get livePermissionModeAsk => 'اسأل';
+
+  @override
+  String get livePermissionModeAllowAll => 'السماح بالكل';
+
+  @override
+  String get livePermissionModeSession => 'مُعيّن لهذه الجلسة';
+
+  @override
+  String get livePermissionModeDefault => 'الافتراضي في التطبيق';
+
+  @override
+  String get livePermissionModeUseDefault => 'استخدام الافتراضي';
+
+  @override
+  String get livePermissionModeUnavailable => 'وضع الأذونات غير متاح';
+
+  @override
+  String get livePermissionModeFailed => 'تعذّر حفظ وضع الأذونات.';
 }

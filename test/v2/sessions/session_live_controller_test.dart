@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
+import 'package:codewalk/platform/sessions/permission_mode_store.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../storage/storage_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
 
@@ -262,5 +266,51 @@ void main() {
     await controller.start();
     expect(directory.opens, isEmpty);
     expect(controller.failure, SessionLiveFailure.authenticationRequired);
+  });
+
+  group('permission mode', () {
+    test('reports unavailable and ignores edits without a policy', () async {
+      expect(controller.permissionModes, isNull);
+      expect(controller.permissionModeState.mode, isNull);
+      expect(controller.canChangePermissionMode, isFalse);
+      expect(await controller.setPermissionMode(PermissionMode.ask), isFalse);
+      expect(await controller.useDefaultPermissionMode(), isFalse);
+    });
+
+    test('delegates the owning session and survives dispose', () async {
+      final policy = PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      );
+      await policy.initialize();
+      addTearDown(policy.dispose);
+      final summary = CatalogSource(profile('a')).row('one');
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+        permissionModes: policy,
+      );
+      expect(live.permissionModeState.source, PermissionModeSource.defaultOn);
+      expect(await live.setPermissionMode(PermissionMode.ask), isTrue);
+      expect(live.permissionModeState.mode, PermissionMode.ask);
+      expect(live.permissionModeState.source, PermissionModeSource.session);
+      expect(await live.useDefaultPermissionMode(), isTrue);
+      expect(live.permissionModeState.source, PermissionModeSource.defaultOn);
+      // Picking Allow all while the default applies it never pins an override.
+      expect(await live.setPermissionMode(PermissionMode.allowAll), isTrue);
+      expect(live.permissionModeState.source, PermissionModeSource.defaultOn);
+      // An explicit Ask under an Ask default is still stored for the session.
+      expect(await policy.setDefaultMode(PermissionMode.ask), isTrue);
+      expect(await live.setPermissionMode(PermissionMode.ask), isTrue);
+      expect(live.permissionModeState.source, PermissionModeSource.session);
+      expect(await policy.setDefaultMode(PermissionMode.allowAll), isTrue);
+      expect(live.permissionModeState.mode, PermissionMode.ask);
+      expect(await live.useDefaultPermissionMode(), isTrue);
+      live.dispose();
+      expect(await live.setPermissionMode(PermissionMode.allowAll), isFalse);
+      // The disposed controller no longer listens; the store keeps working.
+      expect(await policy.setSessionMode(ref, PermissionMode.ask), isTrue);
+    });
   });
 }

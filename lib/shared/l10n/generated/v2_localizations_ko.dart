@@ -927,4 +927,28 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => '메모와 함께 거부 보내기';
+
+  @override
+  String get livePermissionMode => '권한 모드';
+
+  @override
+  String get livePermissionModeAsk => '묻기';
+
+  @override
+  String get livePermissionModeAllowAll => '모두 허용';
+
+  @override
+  String get livePermissionModeSession => '이 세션에 설정됨';
+
+  @override
+  String get livePermissionModeDefault => '앱 기본값';
+
+  @override
+  String get livePermissionModeUseDefault => '앱 기본값 사용';
+
+  @override
+  String get livePermissionModeUnavailable => '권한 모드를 사용할 수 없음';
+
+  @override
+  String get livePermissionModeFailed => '권한 모드를 저장하지 못했습니다.';
 }

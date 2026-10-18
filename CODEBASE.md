@@ -2055,3 +2055,26 @@ corrupted metadata. The mode chip, child cards and Unrestricted remain V2-047B.
 # From the repository root
 flutter test --no-pub test/v2/sessions/permission_mode_store_test.dart test/v2/sessions/session_live_directory_test.dart
 ```
+
+## V2-047B1 permission-mode chip (#284)
+
+```text
+lib/shared/sessions/permission_mode.dart # Adds the EditablePermissionModePolicy write port (session set/clear, persistence and unreadable-overrides flags) beside the read-only policy
+lib/platform/sessions/permission_mode_store.dart # Implements the write port; exposes overridesUnreadable
+lib/platform/sessions/session_live_factory_io.dart # Directory listens to the policy; _ProfileSlot.considerAutoApproval re-runs the gate for watched sessions
+lib/features/sessions/session_live_controller.dart # Optional policy: acknowledged mode state, saving/failed flags, set and use-default writes
+lib/features/sessions/session_permission_mode_chip.dart # AppBar chip and menu (Ask / Allow all / Use app default); icon-only below 600 dp
+lib/features/sessions/session_live_page.dart # Mounts the chip in AppBar.actions when a policy exists
+lib/features/sessions/sessions_page.dart # Passes the provided policy to each live controller
+lib/app/v2_bootstrap.dart # Conditional ChangeNotifierProvider for the policy
+tool/l10n/session_permission_catalog.py # Eight mode strings across the 14 locales
+test/v2/sessions/session_permission_mode_chip_test.dart # Acknowledged label, Use app default, failed write
+```
+
+The chip shows only the mode the store acknowledged; the responder keeps the
+read-only policy. Unrestricted and child cards remain V2-047B2.
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/session_permission_mode_chip_test.dart test/v2/sessions/session_live_controller_test.dart test/v2/sessions/session_live_directory_test.dart
+```

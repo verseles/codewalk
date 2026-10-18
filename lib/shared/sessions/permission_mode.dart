@@ -37,3 +37,17 @@ abstract class PermissionModePolicy extends ChangeNotifier {
   /// default, and unknown or unreadable values stay explicit.
   SessionPermissionModeState effectiveFor(SessionRef session);
 }
+
+/// The acknowledged policy plus the writes the live surface may request.
+/// The automatic responder keeps reading [PermissionModePolicy] only, so a
+/// wider write port never widens what the responder consults.
+abstract class EditablePermissionModePolicy extends PermissionModePolicy {
+  bool get hasPersistenceError;
+
+  /// True when stored overrides cannot be read; writes are refused so the
+  /// unread blob is preserved.
+  bool get overridesUnreadable;
+  Future<bool> setSessionMode(SessionRef session, PermissionMode mode);
+  Future<bool> clearSessionMode(SessionRef session);
+  Future<void> clearPersistenceError();
+}

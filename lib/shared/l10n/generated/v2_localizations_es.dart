@@ -982,4 +982,29 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get livePermissionRejectSend => 'Enviar rechazo con nota';
+
+  @override
+  String get livePermissionMode => 'Modo de permisos';
+
+  @override
+  String get livePermissionModeAsk => 'Preguntar';
+
+  @override
+  String get livePermissionModeAllowAll => 'Permitir todo';
+
+  @override
+  String get livePermissionModeSession => 'Definido para esta sesión';
+
+  @override
+  String get livePermissionModeDefault => 'Predeterminado de la app';
+
+  @override
+  String get livePermissionModeUseDefault => 'Usar el valor predeterminado';
+
+  @override
+  String get livePermissionModeUnavailable => 'Modo de permisos no disponible';
+
+  @override
+  String get livePermissionModeFailed =>
+      'No se pudo guardar el modo de permisos.';
 }

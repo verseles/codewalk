@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import '../../shared/sessions/command_ids.dart';
+import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
@@ -16,16 +17,22 @@ class SessionLiveController extends ChangeNotifier {
     required this.profile,
     required this.summary,
     required this.directory,
+    this.permissionModes,
     DateTime Function()? now,
     CommandId Function()? commandIds,
   }) : _now = now ?? DateTime.now,
        _commandIds = commandIds ?? mintCommandId {
     hosts.addListener(_hostsChanged);
+    permissionModes?.addListener(_policyChanged);
   }
   final HostsController hosts;
   final EndpointProfile profile;
   final SessionSummary summary;
   final SessionLiveDirectory directory;
+
+  /// The acknowledged permission policy for this session, when the app graph
+  /// provides one. The controller never owns or disposes it.
+  final EditablePermissionModePolicy? permissionModes;
   final DateTime Function() _now;
   final CommandId Function() _commandIds;
   SessionRef get session => summary.info.ref;
@@ -40,6 +47,63 @@ class SessionLiveController extends ChangeNotifier {
   SessionLiveView? view;
   SessionLiveFailure? failure;
   bool opening = false;
+  bool _savingPermissionMode = false;
+
+  /// The acknowledged effective mode, never a requested-in-flight value.
+  SessionPermissionModeState get permissionModeState =>
+      permissionModes?.effectiveFor(session) ??
+      const SessionPermissionModeState.unavailable('noPolicy');
+
+  bool get savingPermissionMode => _savingPermissionMode;
+  bool get canChangePermissionMode =>
+      !_disposed &&
+      permissionModes != null &&
+      permissionModes!.loaded &&
+      !permissionModes!.overridesUnreadable &&
+      !_savingPermissionMode;
+
+  /// Persists one session override. The returned value is the store's
+  /// acknowledgement; nothing changes locally before it resolves. Picking
+  /// Allow all while the app default already applies it is a no-op, so the
+  /// session never silently pins standing approval authority; an explicit Ask
+  /// is always stored, so a later default change cannot widen it.
+  Future<bool> setPermissionMode(PermissionMode mode) {
+    if (!canChangePermissionMode) return Future.value(false);
+    final current = permissionModeState;
+    if (mode == PermissionMode.allowAll &&
+        current.source != PermissionModeSource.session &&
+        current.mode == mode) {
+      return Future.value(true);
+    }
+    return _changePermissionMode(
+      () => permissionModes!.setSessionMode(session, mode),
+    );
+  }
+
+  /// Drops this session's override so the global default applies again.
+  Future<bool> useDefaultPermissionMode() =>
+      _changePermissionMode(() => permissionModes!.clearSessionMode(session));
+
+  Future<bool> _changePermissionMode(Future<bool> Function() write) async {
+    if (!canChangePermissionMode) return false;
+    _savingPermissionMode = true;
+    notifyListeners();
+    var applied = false;
+    try {
+      applied = await write();
+    } on Object {
+      applied = false;
+    }
+    if (_disposed) return applied;
+    _savingPermissionMode = false;
+    notifyListeners();
+    return applied;
+  }
+
+  void _policyChanged() {
+    if (_disposed) return;
+    notifyListeners();
+  }
 
   SessionState? get state => view?.state;
   PromptOutbox? get outbox => _handle?.outbox;
@@ -269,6 +333,7 @@ class SessionLiveController extends ChangeNotifier {
     if (_disposed) return;
     _disposed = true;
     hosts.removeListener(_hostsChanged);
+    permissionModes?.removeListener(_policyChanged);
     _detach();
     super.dispose();
   }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
@@ -290,6 +291,14 @@ class _SessionsPageState extends State<SessionsPage> {
     }
   }
 
+  EditablePermissionModePolicy? _permissionPolicy(BuildContext context) {
+    try {
+      return context.read<EditablePermissionModePolicy>();
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
+
   Future<void> _openLive(
     BuildContext context,
     SessionsController catalog,
@@ -309,6 +318,7 @@ class _SessionsPageState extends State<SessionsPage> {
       profile: profile,
       summary: row,
       directory: directory,
+      permissionModes: _permissionPolicy(context),
     );
     try {
       await Navigator.of(context, rootNavigator: true).push<void>(

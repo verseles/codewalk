@@ -7,6 +7,7 @@ import '../platform/appearance/dynamic_color_adapter.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/sessions/permission_mode.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import '../shared/theme/app_theme.dart';
@@ -59,6 +60,10 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         Provider<SessionLiveDirectory?>.value(
           value: dependencies.liveDirectory,
         ),
+        if (dependencies.permissionModes case final modes?)
+          ChangeNotifierProvider<EditablePermissionModePolicy>.value(
+            value: modes,
+          ),
         if (dependencies.sessions case final sessions?)
           ChangeNotifierProvider<SessionsController>.value(value: sessions),
         if (dependencies.diagnostics case final diagnostics?)
