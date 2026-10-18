@@ -2129,3 +2129,25 @@ Child session permission cards are displayed in the parent live card, routed to 
 flutter test --no-pub test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_permission_cards_test.dart
 ```
 
+## V2-047B3b Child auto-responder policy and live rules reconciliation (#284, ADR-059 §§2, 8)
+
+```text
+lib/shared/sessions/permission_mode.dart # ChildPermissionModePolicy extension: effectiveForChild implements Ask-floor veto, child mode override, and parent mode inheritance fail-closed
+lib/platform/sessions/session_live_factory_io.dart # _canAutoApprove resolves child mode via effectiveForChild when owning != ref or when owning has lineage parent; deduplicates via shared (owningSession, id) answered set; OpenCodeSessionRulesUpdated marks busy or needsRead and reconciles _settleUnrestricted live
+packages/harness_opencode/lib/src/event_projection.dart # projectOpenCodeSessionPermissions validates version/session and returns OpenCodeSessionRules
+packages/harness_opencode/lib/src/stream_owner.dart # OpenCodeSessionRulesUpdated stream update emitted when session.permissions frame is received; non-list permissions fail as malformed
+test/v2/sessions/permission_mode_store_test.dart # effectiveForChild precedence tests (Ask floor on parent/child, child override, parent inheritance, fail-closed)
+packages/harness_opencode/test/event_projection_test.dart # session.permissions frame projection and validation tests
+packages/harness_opencode/test/stream_owner_test.dart # session.permissions event dispatch and repair handling tests
+test/v2/sessions/session_live_directory_test.dart # Child auto-responder integration, multi-client deduplication, live rules reconciliation, and direct child watch Ask floor tests
+```
+
+Child session permission auto-responder evaluates canonical precedence with Ask-floor veto, multi-client deduplication on shared owning-session keys, and live `session.permissions` stream event reconciliation.
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/permission_mode_store_test.dart test/v2/sessions/session_live_directory_test.dart
+cd packages/harness_opencode && dart test
+```
+
+

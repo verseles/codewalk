@@ -206,4 +206,91 @@ void main() {
     expect(await cold.clearSessionMode(ref('ses_two')), isFalse);
     expect(backend.values[PermissionModeStore.overridesKey], stored);
   });
+
+  group('effectiveForChild precedence (V2-047B3b)', () {
+    test('inherits parent effective Allow all when child has no override', () async {
+      final backend = FakeMetadataBackend();
+      final store = PermissionModeStore(store: storeWith(backend));
+      await store.initialize();
+      final state = store.effectiveForChild(
+        child: ref('ses_child'),
+        parent: ref('ses_parent'),
+      );
+      expect(state.mode, PermissionMode.allowAll);
+      expect(state.answering, isTrue);
+    });
+
+    test('inherits parent explicit Allow all when child has no override', () async {
+      final backend = FakeMetadataBackend()
+        ..values[PermissionModeStore.globalKey] = 'ask';
+      final store = PermissionModeStore(store: storeWith(backend));
+      await store.initialize();
+      await store.setSessionMode(ref('ses_parent'), PermissionMode.allowAll);
+      final state = store.effectiveForChild(
+        child: ref('ses_child'),
+        parent: ref('ses_parent'),
+      );
+      expect(state.mode, PermissionMode.allowAll);
+      expect(state.source, PermissionModeSource.session);
+      expect(state.answering, isTrue);
+    });
+
+    test('explicit Ask on parent vetoes child explicit Allow all', () async {
+      final backend = FakeMetadataBackend();
+      final store = PermissionModeStore(store: storeWith(backend));
+      await store.initialize();
+      await store.setSessionMode(ref('ses_parent'), PermissionMode.ask);
+      await store.setSessionMode(ref('ses_child'), PermissionMode.allowAll);
+      final state = store.effectiveForChild(
+        child: ref('ses_child'),
+        parent: ref('ses_parent'),
+      );
+      expect(state.mode, PermissionMode.ask);
+      expect(state.source, PermissionModeSource.session);
+      expect(state.answering, isFalse);
+    });
+
+    test('explicit Ask on child vetoes parent Allow all', () async {
+      final backend = FakeMetadataBackend();
+      final store = PermissionModeStore(store: storeWith(backend));
+      await store.initialize();
+      await store.setSessionMode(ref('ses_child'), PermissionMode.ask);
+      final state = store.effectiveForChild(
+        child: ref('ses_child'),
+        parent: ref('ses_parent'),
+      );
+      expect(state.mode, PermissionMode.ask);
+      expect(state.source, PermissionModeSource.session);
+      expect(state.answering, isFalse);
+    });
+
+    test('child explicit Allow all applies when parent has no override', () async {
+      final backend = FakeMetadataBackend()
+        ..values[PermissionModeStore.globalKey] = 'ask';
+      final store = PermissionModeStore(store: storeWith(backend));
+      await store.initialize();
+      await store.setSessionMode(ref('ses_child'), PermissionMode.allowAll);
+      final state = store.effectiveForChild(
+        child: ref('ses_child'),
+        parent: ref('ses_parent'),
+      );
+      expect(state.mode, PermissionMode.allowAll);
+      expect(state.source, PermissionModeSource.session);
+      expect(state.answering, isTrue);
+    });
+
+    test('fails closed when not loaded or either session is unreadable', () async {
+      final backend = FakeMetadataBackend();
+      final store = PermissionModeStore(store: storeWith(backend));
+      expect(
+        store
+            .effectiveForChild(
+              child: ref('ses_child'),
+              parent: ref('ses_parent'),
+            )
+            .reason,
+        'loading',
+      );
+    });
+  });
 }

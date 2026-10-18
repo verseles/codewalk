@@ -209,6 +209,8 @@ final class _Server {
         _ => {
           'data': {
             'id': session,
+            for (final entry in children.entries)
+              if (entry.value.contains(session)) 'parentID': entry.key,
             'title': 'Session',
             'projectID': 'prj_a',
             'location': {'directory': '/workspace'},
@@ -1848,6 +1850,23 @@ void main() {
       expect(server.sessionRules['ses_one'], [ask]);
       expect(store.recordFor(ref('ses_one')), isNull);
     });
+
+    test('live session.permissions frame reconciles unrestricted phase without a manual refresh', () async {
+      server.sessionRules['ses_one'] = [ask];
+      final store = await ledger();
+      final handle = await openLive(store);
+      expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+      expect((await settled(handle)).inEffect, isFalse);
+
+      await server.emit('session.permissions', {
+        'sessionID': 'ses_one',
+        'permissions': [ask, wildcard],
+      });
+
+      await until(handle, (v) => handle.unrestrictedState.inEffect);
+      expect(handle.unrestrictedState.phase, SessionUnrestrictedPhase.elsewhere);
+      expect(handle.unrestrictedState.inEffect, isTrue);
+    });
   });
 
   group('child requests in the parent (V2-047B3a)', () {
@@ -1953,7 +1972,7 @@ void main() {
     });
 
     test(
-      'Allow all answers the parent but leaves child requests manual',
+      'parent in Allow all auto-approves child requests when child has no override',
       () async {
         server.children['ses_one'] = ['ses_child'];
         server.permissions
@@ -1968,19 +1987,164 @@ void main() {
         addTearDown(directory.close);
         final handle = await openParent(directory);
         await eventually(() => childRequest(handle, 'per_c4') != null);
-        await eventually(() => server.replies.isNotEmpty);
-        await Future<void>.delayed(const Duration(milliseconds: 250));
-        expect(server.replies, ['{"decision":"once"}']);
+        await eventually(() => server.replies.length >= 2);
         expect(
           server.paths,
           contains('/proxy/api/session/ses_one/permission/per_own/reply'),
         );
         expect(
+          server.paths,
+          contains('/proxy/api/session/ses_child/permission/per_c4/reply'),
+        );
+        expect(server.replies, ['{"decision":"once"}', '{"decision":"once"}']);
+      },
+    );
+
+    test(
+      'explicit Ask on parent vetoes child explicit Allow all override',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions.add(ask('per_c_veto', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        await policy.setSessionMode(ref('ses_child'), PermissionMode.allowAll);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final handle = await openParent(directory);
+        await eventually(() => childRequest(handle, 'per_c_veto') != null);
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        expect(
           server.paths.where(
-            (path) => path.contains('ses_child/permission/per_c4/reply'),
+            (p) => p.contains('ses_child/permission/per_c_veto/reply'),
           ),
           isEmpty,
         );
+      },
+    );
+
+    test(
+      'explicit Ask on child vetoes parent Allow all mode',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions.add(ask('per_c_child_ask', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        await policy.setSessionMode(ref('ses_child'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final handle = await openParent(directory);
+        await eventually(() => childRequest(handle, 'per_c_child_ask') != null);
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        expect(
+          server.paths.where(
+            (p) => p.contains('ses_child/permission/per_c_child_ask/reply'),
+          ),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'child explicit Allow all applies when parent has no override under global Ask',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions.add(ask('per_c_allow', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(
+            backend: FakeMetadataBackend()
+              ..values[PermissionModeStore.globalKey] = 'ask',
+          ),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        await policy.setSessionMode(ref('ses_child'), PermissionMode.allowAll);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final handle = await openParent(directory);
+        await eventually(() => childRequest(handle, 'per_c_allow') != null);
+        await eventually(() => server.replies.isNotEmpty);
+        expect(
+          server.paths,
+          contains('/proxy/api/session/ses_child/permission/per_c_allow/reply'),
+        );
+        expect(server.replies, ['{"decision":"once"}']);
+      },
+    );
+
+    test(
+      'multi-client deduplication: watching both parent and child sends only one reply',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions.add(ask('per_c_dedupe', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+
+        final parentHandle = await openParent(directory);
+        final childHandle = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_child'),
+        );
+        addTearDown(childHandle.close);
+        await until(childHandle, (v) => v.phase == SessionLivePhase.live);
+
+        await eventually(
+          () => childRequest(parentHandle, 'per_c_dedupe') != null,
+        );
+        await eventually(() => server.replies.isNotEmpty);
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+
+        expect(server.replies, ['{"decision":"once"}']);
+        expect(
+          server.paths.where(
+            (p) => p.contains('ses_child/permission/per_c_dedupe/reply'),
+          ),
+          hasLength(1),
+        );
+      },
+    );
+
+    test(
+      'directly watching a child session honors parent explicit Ask floor',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions.add(ask('per_c_veto', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(
+            backend: FakeMetadataBackend()
+              ..values[PermissionModeStore.globalKey] = 'allowAll',
+          ),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+
+        final childHandle = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_child'),
+        );
+        addTearDown(childHandle.close);
+        await until(childHandle, (v) => v.phase == SessionLivePhase.live);
+
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
       },
     );
 

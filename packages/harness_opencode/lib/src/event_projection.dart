@@ -6,6 +6,8 @@ import 'interaction_projection.dart';
 import 'notice_projection.dart';
 import 'revert_projection.dart';
 import 'session_lifecycle_projection.dart';
+import 'session_projection.dart';
+import 'session_rules.dart';
 import 'step_usage_projection.dart';
 import 'text_reasoning_projection.dart';
 import 'tool_projection.dart';
@@ -186,7 +188,6 @@ const _unprojected = {
   'session.model.selected',
   'session.moved',
   'session.metadata.updated',
-  'session.permissions',
   'session.viewed',
   'session.forked',
   'session.skill.activated',
@@ -282,3 +283,44 @@ List<SessionEvent> projectOpenCodeEvent(
 
 Never _fail(OpenCodeEventProjectionFailure failure) =>
     throw OpenCodeEventProjectionException(failure);
+
+/// Projects one native `session.permissions` stream frame into
+/// [OpenCodeSessionRules]. Throws [OpenCodeEventProjectionException] on malformed
+/// payload, invalid session ID, or unsupported server version.
+OpenCodeSessionRules projectOpenCodeSessionPermissions(
+  Object? value,
+  SessionRef session, {
+  required String sourceVersion,
+}) {
+  if (value is! Map<String, Object?>) {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  final type = value['type'];
+  if (type != 'session.permissions') {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+    _fail(OpenCodeEventProjectionFailure.unsupportedVersion);
+  }
+  final data = value['data'];
+  if (data is! Map<String, Object?>) {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  final sessionId = data['sessionID'];
+  if (sessionId is! String || sessionId.isEmpty) {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  try {
+    openCodeSessionId(sessionId);
+  } on FormatException {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  if (sessionId != session.nativeId) {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  final permissions = data['permissions'];
+  if (permissions != null && permissions is! List) {
+    _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  return OpenCodeSessionRules.parse(permissions);
+}

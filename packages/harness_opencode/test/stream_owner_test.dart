@@ -636,5 +636,68 @@ void main() {
       h.expectConsistent();
       expect(h.state.execution!.kind.known, ExecutionKind.idle);
     });
+
+    test('session.permissions emits OpenCodeSessionRulesUpdated when ready', () async {
+      final h = Harness('ses_a');
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      final frame = {
+        'id': 'evt_perm',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_a',
+          'permissions': [
+            {'action': '*', 'resource': '*', 'effect': 'allow'},
+          ],
+        },
+      };
+      await h.send([frame]);
+      final updates = h.updates.whereType<OpenCodeSessionRulesUpdated>().toList();
+      expect(updates, hasLength(1));
+      expect(updates.first.ref, h.ref);
+      expect(updates.first.rules.endsWithWildcardAllow, isTrue);
+    });
+
+    test('malformed session.permissions triggers repair', () async {
+      final h = Harness('ses_a');
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      final initialPathCount = h.reads.paths.length;
+      final badFrame = {
+        'id': 'evt_bad',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_a',
+          'permissions': 'not_a_list', // structurally malformed
+        },
+      };
+      await h.send([badFrame]);
+      await h.settle();
+      // Repair causes re-hydration
+      expect(h.reads.paths.length, greaterThan(initialPathCount));
+    });
+
+    test('unrecognized session.permissions emits rules updated without repair', () async {
+      final h = Harness('ses_a');
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      final initialPathCount = h.reads.paths.length;
+      final frame = {
+        'id': 'evt_unrec',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_a',
+          'permissions': [
+            {'action': 'read'}, // valid list with unmodeled rule shape
+          ],
+        },
+      };
+      await h.send([frame]);
+      await h.settle();
+      final updates = h.updates.whereType<OpenCodeSessionRulesUpdated>().toList();
+      expect(updates, hasLength(1));
+      expect(updates.first.rules.recognized, isFalse);
+      expect(h.reads.paths.length, equals(initialPathCount));
+    });
   });
 }

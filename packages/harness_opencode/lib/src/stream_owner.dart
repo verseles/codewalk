@@ -8,6 +8,7 @@ import 'event_projection.dart';
 import 'interaction_projection.dart';
 import 'session_projection.dart';
 import 'session_reader.dart';
+import 'session_rules.dart';
 
 /// Readiness predicate for the event stream connection: the transport must be
 /// built with `connectedWhen: openCodeServerConnected`, so it holds every
@@ -41,6 +42,13 @@ final class OpenCodeSessionUpdated extends OpenCodeStreamUpdate {
 final class OpenCodeSessionEvicted extends OpenCodeStreamUpdate {
   const OpenCodeSessionEvicted(this.ref);
   final SessionRef ref;
+}
+
+/// A session's permission rules were updated upstream (via `session.permissions`).
+final class OpenCodeSessionRulesUpdated extends OpenCodeStreamUpdate {
+  const OpenCodeSessionRulesUpdated(this.ref, this.rules);
+  final SessionRef ref;
+  final OpenCodeSessionRules rules;
 }
 
 /// Connection confidence for the whole stream, with a finite failure when one
@@ -565,6 +573,20 @@ final class OpenCodeStreamOwner {
   }
 
   void _apply(SessionRef ref, Map<String, Object?> value, int seq) {
+    final type = value['type'];
+    if (type == 'session.permissions') {
+      try {
+        final rules = projectOpenCodeSessionPermissions(
+          value,
+          ref,
+          sourceVersion: sourceVersion,
+        );
+        _emit(OpenCodeSessionRulesUpdated(ref, rules));
+      } on Exception {
+        _repair(ref);
+      }
+      return;
+    }
     final state = store.read(ref);
     if (state == null) {
       // Lost from a shared store: never drop frames silently, re-read.

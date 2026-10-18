@@ -327,6 +327,106 @@ void main() {
       'noop:server.connected': 26,
     });
   });
+
+  group('projectOpenCodeSessionPermissions (V2-047B3b)', () {
+    final ref = SessionRef(
+      const HostId('h'),
+      const HarnessInstanceId('h'),
+      'ses_target',
+    );
+
+    test('projects valid session.permissions frame into OpenCodeSessionRules', () {
+      final frame = {
+        'id': 'evt_perm',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_target',
+          'permissions': [
+            {'action': 'read', 'resource': 'src/a.txt', 'effect': 'allow'},
+            {'action': '*', 'resource': '*', 'effect': 'allow'},
+          ],
+        },
+      };
+      final rules = projectOpenCodeSessionPermissions(
+        frame,
+        ref,
+        sourceVersion: '2.0.22',
+      );
+      expect(rules.recognized, isTrue);
+      expect(rules.rules, hasLength(2));
+      expect(rules.endsWithWildcardAllow, isTrue);
+    });
+
+    test('projects empty permissions list or null into empty rules', () {
+      final frame = {
+        'id': 'evt_perm',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_target',
+          'permissions': null,
+        },
+      };
+      final rules = projectOpenCodeSessionPermissions(
+        frame,
+        ref,
+        sourceVersion: '2.0.22',
+      );
+      expect(rules.recognized, isTrue);
+      expect(rules.rules, isEmpty);
+    });
+
+    test('throws on malformed or invalid session.permissions frame', () {
+      for (final bad in [
+        'not a map',
+        {'type': 'wrong.type'},
+        {'type': 'session.permissions', 'data': 'not a map'},
+        {
+          'type': 'session.permissions',
+          'data': {'sessionID': 'ses_other', 'permissions': []},
+        },
+        {
+          'type': 'session.permissions',
+          'data': {'sessionID': 'not_valid_id', 'permissions': []},
+        },
+        {
+          'type': 'session.permissions',
+          'data': {
+            'sessionID': 'ses_target',
+            'permissions': 'not a list',
+          },
+        },
+      ]) {
+        expect(
+          () => projectOpenCodeSessionPermissions(
+            bad,
+            ref,
+            sourceVersion: '2.0.22',
+          ),
+          throwsA(isA<OpenCodeEventProjectionException>()),
+        );
+      }
+    });
+
+    test('returns unrecognized rules when list has unmodeled rules', () {
+      final frame = {
+        'id': 'evt_perm',
+        'type': 'session.permissions',
+        'data': {
+          'sessionID': 'ses_target',
+          'permissions': [
+            {'action': 'read'}, // missing resource & effect
+          ],
+        },
+      };
+      final rules = projectOpenCodeSessionPermissions(
+        frame,
+        ref,
+        sourceVersion: '2.0.22',
+      );
+      expect(rules.recognized, isFalse);
+      expect(rules.rules, isEmpty);
+    });
+  });
 }
 
 bool _throws(Object? Function() call) {

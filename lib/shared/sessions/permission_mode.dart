@@ -51,3 +51,49 @@ abstract class EditablePermissionModePolicy extends PermissionModePolicy {
   Future<bool> clearSessionMode(SessionRef session);
   Future<void> clearPersistenceError();
 }
+
+extension ChildPermissionModePolicy on PermissionModePolicy {
+  /// The acknowledged effective policy for a child request shown in [parent].
+  ///
+  /// Precedence (ADR-059 §8):
+  /// 1. Fail-closed: if the policy is not loaded or either session is unavailable,
+  ///    returns unavailable.
+  /// 2. Explicit Ask floor: an explicit per-session Ask on either child or parent
+  ///    always wins.
+  /// 3. Child explicit override: if the child has its own per-session override,
+  ///    that mode applies.
+  /// 4. Parent inherited mode: otherwise, the child inherits the parent's
+  ///    effective mode (whether explicit Allow all, or global default).
+  SessionPermissionModeState effectiveForChild({
+    required SessionRef child,
+    required SessionRef parent,
+  }) {
+    if (!loaded) {
+      return const SessionPermissionModeState.unavailable('loading');
+    }
+    final childState = effectiveFor(child);
+    final parentState = effectiveFor(parent);
+    if (childState.reason != null) return childState;
+    if (parentState.reason != null) return parentState;
+
+    final childExplicitAsk =
+        childState.source == PermissionModeSource.session &&
+        childState.mode == PermissionMode.ask;
+    final parentExplicitAsk =
+        parentState.source == PermissionModeSource.session &&
+        parentState.mode == PermissionMode.ask;
+
+    if (childExplicitAsk || parentExplicitAsk) {
+      return const SessionPermissionModeState(
+        mode: PermissionMode.ask,
+        source: PermissionModeSource.session,
+      );
+    }
+
+    if (childState.source == PermissionModeSource.session) {
+      return childState;
+    }
+
+    return parentState;
+  }
+}

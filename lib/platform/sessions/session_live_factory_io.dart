@@ -973,16 +973,21 @@ final class _ProfileSlot {
   /// manual card, and the request must still be answerable right now.
   bool _canAutoApprove(SessionRef ref, InteractionRequest request) {
     final policy = permissionModes;
-    if (policy == null ||
-        !policy.loaded ||
-        !policy.effectiveFor(ref).answering) {
-      return false;
+    if (policy == null || !policy.loaded) return false;
+    final owning = _owning(request);
+    if (owning == null) return false;
+    final SessionPermissionModeState state;
+    if (owning == ref) {
+      final parentRef = view(ref).state?.info?.lineage.parent;
+      state = parentRef != null
+          ? policy.effectiveForChild(child: ref, parent: parentRef)
+          : policy.effectiveFor(ref);
+    } else {
+      state = policy.effectiveForChild(child: owning, parent: ref);
     }
+    if (!state.answering) return false;
     // The native `once` choice is the only thing this path may send.
     if (request.automaticChoice?.id != 'once') return false;
-    // A child's request shown in its parent stays manual until the child
-    // policy lands (V2-047B3b).
-    if (_owning(request) != ref) return false;
     if (answered.contains(_requestKey(request))) return false;
     return canReply(ref, request);
   }
@@ -1055,6 +1060,15 @@ final class _ProfileSlot {
             version: version,
           ),
         );
+      case OpenCodeSessionRulesUpdated(:final ref, :final rules):
+        final entry = _unrestricted[ref];
+        if (entry == null || !supportsUnrestricted) return;
+        if (entry.state.busy) {
+          entry.needsRead = true;
+          return;
+        }
+        _markUnrestrictedBusy(ref, entry);
+        unawaited(_settleUnrestricted(ref, entry, rules));
       case OpenCodeConnectionUpdated(:final kind, :final session):
         final phase = switch (kind) {
           ConnectionKind.hydrating => SessionLivePhase.hydrating,
