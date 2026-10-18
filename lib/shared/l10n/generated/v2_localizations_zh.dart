@@ -928,4 +928,52 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => '无法保存权限模式。';
+
+  @override
+  String get livePermissionModeUnrestricted => '无限制';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => '在 CodeWalk 之外设置';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => '开启无限制…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => '关闭无限制';
+
+  @override
+  String get livePermissionModeRulesRefresh => '刷新会话规则';
+
+  @override
+  String get liveUnrestrictedTitle => '要为此会话开启无限制吗？';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode 将不经询问执行此会话中的所有操作，覆盖代理的询问和拒绝规则。已在等待的请求仍需答复。';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      '新的子会话会复制此规则。现有子会话保留其规则，之后关闭也不会改变已复制该规则的子会话。';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      '其他客户端可以查看和更改此规则；CodeWalk 只会移除自己添加的规则。关闭不会撤销已执行的操作。';
+
+  @override
+  String get liveUnrestrictedConfirm => '开启无限制';
+
+  @override
+  String get liveUnrestrictedRefused => '会话规则未更改。';
+
+  @override
+  String get liveUnrestrictedUnconfirmed => '规则更改未确认。请刷新以检查。';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere => '会话规则已在其他地方更改。CodeWalk 未覆盖它们。';
+
+  @override
+  String get liveUnrestrictedUnavailable => '会话规则不可用。';
+
+  @override
+  String get liveUnrestrictedTurnedOff => '已关闭无限制。现有子会话保留其已复制的规则。';
 }

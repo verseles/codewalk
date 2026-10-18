@@ -10,19 +10,23 @@ import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/sessions/session_unrestricted.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
 import 'prompt_outbox_store.dart';
+import 'unrestricted_ownership_store.dart';
 
 SessionLiveDirectory? createSessionLiveDirectory({
   DateTime Function()? now,
   PayloadStore? payloads,
   PermissionModePolicy? permissionModes,
+  UnrestrictedOwnershipLedger? unrestrictedOwnership,
   CommandId Function()? commandIds,
 }) => _NativeLiveDirectory(
   now ?? DateTime.now,
   payloads,
   permissionModes,
+  unrestrictedOwnership,
   commandIds ?? mintCommandId,
 );
 
@@ -35,6 +39,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     this._now,
     this._payloads,
     this._permissionModes,
+    this._unrestrictedOwnership,
     this._commandIds,
   ) {
     _permissionModes?.addListener(_policyChanged);
@@ -42,6 +47,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
   final DateTime Function() _now;
   final PayloadStore? _payloads;
   final PermissionModePolicy? _permissionModes;
+  final UnrestrictedOwnershipLedger? _unrestrictedOwnership;
   final CommandId Function() _commandIds;
   // Outlive slot generations: a replaced slot's outbox and its successor
   // write the same ledgers in turn, and minted ids keep rising per server.
@@ -113,6 +119,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
       ids: _ids.putIfAbsent(key, OpenCodeMessageIds.new),
       answered: _answered.putIfAbsent(key, () => <String>{}),
       permissionModes: _permissionModes,
+      unrestrictedOwnership: _unrestrictedOwnership,
       commandIds: _commandIds,
     );
     _owned
@@ -156,6 +163,7 @@ final class _ProfileSlot {
     required this.ids,
     required this.answered,
     required this.permissionModes,
+    required this.unrestrictedOwnership,
     required this.commandIds,
   }) : _transport = IoEndpointHttpTransport(
          endpoint: profile.endpoint,
@@ -180,11 +188,16 @@ final class _ProfileSlot {
   final KeySerialExecutor queue;
   final OpenCodeMessageIds ids;
   final PermissionModePolicy? permissionModes;
+
+  /// CodeWalk's own Unrestricted insertions; without it the action is absent.
+  final UnrestrictedOwnershipLedger? unrestrictedOwnership;
   final CommandId Function() commandIds;
   PromptOutbox? outbox;
   OpenCodeInterruptClient? _interrupt;
   OpenCodePermissionReplyClient? _replies;
+  OpenCodeSessionRulesClient? _rules;
   final _stops = <SessionRef, _StopRequest>{};
+  final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
   // Keyed by session and native id: one slot multiplexes several sessions, and
   // ids are only unique inside their own session.
   final _replyStates = <String, _ReplyRequest>{};
@@ -243,6 +256,11 @@ final class _ProfileSlot {
       connectedVersion: observed,
     );
     _replies = OpenCodePermissionReplyClient(
+      _transport,
+      harness: harness,
+      connectedVersion: observed,
+    );
+    _rules = OpenCodeSessionRulesClient(
       _transport,
       harness: harness,
       connectedVersion: observed,
@@ -309,8 +327,13 @@ final class _ProfileSlot {
         ),
       );
     }
+    if (supportsUnrestricted) {
+      _unrestricted.putIfAbsent(session, _UnrestrictedEntry.new);
+    }
     final handle = _LiveHandle(this, session);
     handles.add(handle);
+    // A session that is already live reads its rules now.
+    _considerUnrestrictedRead(session, view(session));
     return handle;
   }
 
@@ -348,6 +371,7 @@ final class _ProfileSlot {
     for (final handle in handles.toList()) {
       if (handle.session == session) handle.emit(view);
     }
+    _considerUnrestrictedRead(session, view);
   }
 
   SessionStopState stopState(SessionRef ref) =>
@@ -402,6 +426,389 @@ final class _ProfileSlot {
       });
     }
     _publish(ref, view(ref));
+  }
+
+  /// Unrestricted is the session's own server rule (ADR-059 §7), separate
+  /// from the local Ask / Allow all mode. It exists only with an ownership
+  /// ledger, and nothing here runs from the automatic responder.
+  bool get supportsUnrestricted =>
+      !isClosed && _rules != null && unrestrictedOwnership != null;
+
+  SessionUnrestrictedState unrestrictedState(SessionRef ref) =>
+      _unrestricted[ref]?.state ?? const SessionUnrestrictedState();
+
+  bool _unrestrictedReady(SessionRef ref) {
+    final ledger = unrestrictedOwnership;
+    final entry = _unrestricted[ref];
+    final current = view(ref);
+    return supportsUnrestricted &&
+        ledger != null &&
+        ledger.loaded &&
+        !ledger.unreadable &&
+        entry != null &&
+        !entry.state.busy &&
+        current.phase == SessionLivePhase.live &&
+        !current.stale;
+  }
+
+  bool canEnableUnrestricted(SessionRef ref) =>
+      _unrestrictedReady(ref) &&
+      unrestrictedState(ref).phase == SessionUnrestrictedPhase.off;
+
+  bool canDisableUnrestricted(SessionRef ref) =>
+      _unrestrictedReady(ref) &&
+      unrestrictedState(ref).phase == SessionUnrestrictedPhase.on;
+
+  bool canRefreshUnrestricted(SessionRef ref) => _unrestrictedReady(ref);
+
+  /// Reads the rules once per live period: when a lease opens on a live
+  /// session and again after every reconnect.
+  void _considerUnrestrictedRead(SessionRef ref, SessionLiveView current) {
+    final entry = _unrestricted[ref];
+    if (entry == null || !supportsUnrestricted) return;
+    if (current.phase != SessionLivePhase.live || current.stale) {
+      // A read in flight may predate the reconnect, so read again after it.
+      entry
+        ..needsRead = true
+        ..retried = false;
+      return;
+    }
+    if (!entry.needsRead || entry.state.busy) return;
+    entry.needsRead = false;
+    unawaited(_automaticRead(ref, entry));
+  }
+
+  /// The read a live period starts with; a failure is retried once in the
+  /// same period, then waits for a reconnect or an explicit refresh.
+  Future<void> _automaticRead(SessionRef ref, _UnrestrictedEntry entry) async {
+    await refreshUnrestricted(ref);
+    if (!_currentUnrestricted(ref, entry) || entry.retried) return;
+    if (entry.state.phase != SessionUnrestrictedPhase.unavailable) return;
+    // An unreadable ledger stays unavailable however often the rules load.
+    final ledger = unrestrictedOwnership;
+    if (ledger == null || !ledger.loaded || ledger.unreadable) return;
+    entry
+      ..retried = true
+      ..needsRead = true;
+    _considerUnrestrictedRead(ref, view(ref));
+  }
+
+  Future<OpenCodeSessionRules?> _readRules(
+    SessionRef ref,
+    _UnrestrictedEntry entry,
+  ) async {
+    try {
+      return await _reader.readSessionRules(
+        ref,
+        cancellation: entry.cancellation,
+      );
+    } on OpenCodeSessionReadException {
+      return null;
+    }
+  }
+
+  void _setUnrestricted(
+    SessionRef ref,
+    _UnrestrictedEntry entry,
+    SessionUnrestrictedState state,
+  ) {
+    entry.state = state;
+    _publish(ref, view(ref));
+  }
+
+  bool _currentUnrestricted(SessionRef ref, _UnrestrictedEntry entry) =>
+      !isClosed && identical(_unrestricted[ref], entry);
+
+  /// Classifies [rules] against the ledger and stores the record transition.
+  /// A failed or unrecognized read keeps nothing writable, and keeps the last
+  /// known "in effect" so an active rule is never hidden by a failed read.
+  Future<void> _settleUnrestricted(
+    SessionRef ref,
+    _UnrestrictedEntry entry,
+    OpenCodeSessionRules? rules, {
+    SessionUnrestrictedNotice notice = SessionUnrestrictedNotice.none,
+    CommandReceipt? receipt,
+  }) async {
+    final ledger = unrestrictedOwnership;
+    if (rules == null ||
+        !rules.recognized ||
+        ledger == null ||
+        !ledger.loaded ||
+        ledger.unreadable) {
+      _setUnrestricted(
+        ref,
+        entry,
+        SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.unavailable,
+          inEffect: rules != null && rules.recognized
+              ? rules.endsWithWildcardAllow
+              : entry.state.inEffect,
+          notice: notice,
+          receipt: receipt,
+        ),
+      );
+      return;
+    }
+    final previous = ledger.recordFor(ref);
+    final reading = classifyUnrestricted(rules, previous);
+    final next = reading.record;
+    var stored = true;
+    if (!_sameRecord(previous, next)) {
+      // A failed transition leaves the older stage; it is reported, and the
+      // next read classifies that stage again.
+      stored = next == null
+          ? await ledger.remove(ref)
+          : await ledger.put(ref, next);
+    }
+    if (!_currentUnrestricted(ref, entry)) return;
+    // CodeWalk could not record its own state. After an accepted write the
+    // rules did change, so that is unconfirmed rather than refused.
+    if (!stored && notice != SessionUnrestrictedNotice.unconfirmed) {
+      notice = receipt?.state.known == ReceiptState.accepted
+          ? SessionUnrestrictedNotice.unconfirmed
+          : SessionUnrestrictedNotice.refused;
+    }
+    _setUnrestricted(
+      ref,
+      entry,
+      SessionUnrestrictedState(
+        phase: reading.phase,
+        inEffect: rules.endsWithWildcardAllow,
+        notice:
+            reading.phase == SessionUnrestrictedPhase.conflict &&
+                notice == SessionUnrestrictedNotice.none
+            ? SessionUnrestrictedNotice.changedElsewhere
+            : notice,
+        receipt: receipt,
+      ),
+    );
+  }
+
+  static bool _sameRecord(UnrestrictedOwnership? a, UnrestrictedOwnership? b) =>
+      a == null
+      ? b == null
+      : b != null &&
+            a.stage == b.stage &&
+            a.base == b.base &&
+            a.owned == b.owned;
+
+  void _markUnrestrictedBusy(SessionRef ref, _UnrestrictedEntry entry) {
+    final state = entry.state;
+    _setUnrestricted(
+      ref,
+      entry,
+      SessionUnrestrictedState(
+        phase: state.phase,
+        inEffect: state.inEffect,
+        busy: true,
+      ),
+    );
+  }
+
+  /// Re-reads the rules without writing anything.
+  Future<void> refreshUnrestricted(SessionRef ref) async {
+    final entry = _unrestricted[ref];
+    if (entry == null || !supportsUnrestricted || entry.state.busy) return;
+    _markUnrestrictedBusy(ref, entry);
+    final rules = await _readRules(ref, entry);
+    if (!_currentUnrestricted(ref, entry)) return;
+    await _settleUnrestricted(ref, entry, rules);
+  }
+
+  /// Appends CodeWalk's allow-everything rule to a fresh read of the rules,
+  /// after the record of that insertion is stored. One attempt; the result is
+  /// confirmed by reading the rules again, never by the 204 alone.
+  Future<void> enableUnrestricted(SessionRef ref, CommandId id) async {
+    final client = _rules;
+    final ledger = unrestrictedOwnership;
+    final entry = _unrestricted[ref];
+    if (client == null ||
+        ledger == null ||
+        entry == null ||
+        !canEnableUnrestricted(ref)) {
+      return;
+    }
+    _markUnrestrictedBusy(ref, entry);
+    final rules = await _readRules(ref, entry);
+    if (!_currentUnrestricted(ref, entry)) return;
+    final record = ledger.recordFor(ref);
+    final fresh = rules != null && rules.recognized;
+    // Only from a clean state: no wildcard yet, and no record other than an
+    // unapplied insertion over these exact rules.
+    if (!fresh ||
+        rules.endsWithWildcardAllow ||
+        (record != null &&
+            (record.stage != UnrestrictedStage.applying ||
+                unrestrictedFingerprint(rules) != record.base))) {
+      // Nothing is written; a readable change is reported as such.
+      return _settleUnrestricted(
+        ref,
+        entry,
+        rules,
+        notice: fresh
+            ? SessionUnrestrictedNotice.changedElsewhere
+            : SessionUnrestrictedNotice.none,
+      );
+    }
+    // One more rule would no longer be readable, so CodeWalk could neither
+    // show nor remove it.
+    if (rules.rules.length >= OpenCodeSessionRules.maxRules) {
+      return _settleUnrestricted(
+        ref,
+        entry,
+        rules,
+        notice: SessionUnrestrictedNotice.refused,
+      );
+    }
+    final next = rules.withWildcardAllow();
+    final pending = UnrestrictedOwnership(
+      stage: UnrestrictedStage.applying,
+      base: unrestrictedFingerprint(rules),
+      owned: unrestrictedFingerprint(next),
+    );
+    if (!await ledger.put(ref, pending)) {
+      if (!_currentUnrestricted(ref, entry)) return;
+      return _settleUnrestricted(
+        ref,
+        entry,
+        rules,
+        notice: SessionUnrestrictedNotice.refused,
+      );
+    }
+    if (!_currentUnrestricted(ref, entry)) return;
+    final attempt = await client.replace(
+      session: ref,
+      rules: next,
+      change: 'enable',
+      id: id,
+      cancellation: entry.cancellation,
+    );
+    if (!_currentUnrestricted(ref, entry)) return;
+    final receipt = attempt.receipt;
+    switch (receipt.state.known) {
+      case ReceiptState.accepted:
+        final after = await _readRules(ref, entry);
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          after,
+          notice: after != null && after.endsWithWildcardAllow
+              ? SessionUnrestrictedNotice.none
+              : SessionUnrestrictedNotice.unconfirmed,
+          receipt: receipt,
+        );
+      case ReceiptState.rejected || ReceiptState.unavailable:
+        // Definitely not applied: the pending record is dropped.
+        await ledger.remove(ref);
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          rules,
+          notice: SessionUnrestrictedNotice.refused,
+          receipt: receipt,
+        );
+      default:
+        // Unknown outcome: one verification read, never a second write.
+        final after = await _readRules(ref, entry);
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          after,
+          notice: SessionUnrestrictedNotice.unconfirmed,
+          receipt: receipt,
+        );
+    }
+  }
+
+  /// Removes only CodeWalk's own insertion, and only while a fresh read still
+  /// matches what CodeWalk wrote; otherwise it warns and writes nothing.
+  Future<void> disableUnrestricted(SessionRef ref, CommandId id) async {
+    final client = _rules;
+    final ledger = unrestrictedOwnership;
+    final entry = _unrestricted[ref];
+    if (client == null ||
+        ledger == null ||
+        entry == null ||
+        !canDisableUnrestricted(ref)) {
+      return;
+    }
+    _markUnrestrictedBusy(ref, entry);
+    final rules = await _readRules(ref, entry);
+    if (!_currentUnrestricted(ref, entry)) return;
+    final record = ledger.recordFor(ref);
+    final fresh = rules != null && rules.recognized;
+    // Any stage counts once the rules match CodeWalk's insertion exactly: an
+    // earlier stage that failed to persist must not strand the rule.
+    if (!fresh ||
+        !rules.endsWithWildcardAllow ||
+        record == null ||
+        unrestrictedFingerprint(rules) != record.owned) {
+      return _settleUnrestricted(
+        ref,
+        entry,
+        rules,
+        notice: fresh
+            ? SessionUnrestrictedNotice.changedElsewhere
+            : SessionUnrestrictedNotice.none,
+      );
+    }
+    if (!await ledger.put(ref, record.at(UnrestrictedStage.removing))) {
+      if (!_currentUnrestricted(ref, entry)) return;
+      return _settleUnrestricted(
+        ref,
+        entry,
+        rules,
+        notice: SessionUnrestrictedNotice.refused,
+      );
+    }
+    if (!_currentUnrestricted(ref, entry)) return;
+    final attempt = await client.replace(
+      session: ref,
+      rules: rules.withoutTrailingWildcardAllow(),
+      change: 'disable',
+      id: id,
+      cancellation: entry.cancellation,
+    );
+    if (!_currentUnrestricted(ref, entry)) return;
+    final receipt = attempt.receipt;
+    switch (receipt.state.known) {
+      case ReceiptState.accepted:
+        final after = await _readRules(ref, entry);
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          after,
+          notice: after != null && !after.endsWithWildcardAllow
+              ? SessionUnrestrictedNotice.none
+              : SessionUnrestrictedNotice.unconfirmed,
+          receipt: receipt,
+        );
+      case ReceiptState.rejected || ReceiptState.unavailable:
+        // Definitely not applied: the insertion is still CodeWalk's.
+        await ledger.put(ref, record.at(UnrestrictedStage.owned));
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          rules,
+          notice: SessionUnrestrictedNotice.refused,
+          receipt: receipt,
+        );
+      default:
+        final after = await _readRules(ref, entry);
+        if (!_currentUnrestricted(ref, entry)) return;
+        await _settleUnrestricted(
+          ref,
+          entry,
+          after,
+          notice: SessionUnrestrictedNotice.unconfirmed,
+          receipt: receipt,
+        );
+    }
   }
 
   static String _replyKey(SessionRef ref, String id) => '${ref.storageKey}|$id';
@@ -702,6 +1109,7 @@ final class _ProfileSlot {
       _owner?.unwatch(handle.session);
       _views.remove(handle.session);
       _stops.remove(handle.session)?.dispose();
+      _unrestricted.remove(handle.session)?.dispose();
       _replyStates.removeWhere((_, reply) {
         if (reply.session != handle.session) return false;
         reply.dispose();
@@ -723,6 +1131,10 @@ final class _ProfileSlot {
       stop.dispose();
     }
     _stops.clear();
+    for (final entry in _unrestricted.values) {
+      entry.dispose();
+    }
+    _unrestricted.clear();
     for (final reply in _replyStates.values) {
       reply.dispose();
     }
@@ -752,6 +1164,16 @@ final class _StopRequest {
     timer?.cancel();
     cancellation.cancel();
   }
+}
+
+final class _UnrestrictedEntry {
+  final cancellation = RequestCancellation();
+  bool needsRead = true;
+
+  /// The current live period already retried a failed automatic read.
+  bool retried = false;
+  SessionUnrestrictedState state = const SessionUnrestrictedState();
+  void dispose() => cancellation.cancel();
 }
 
 final class _ReplyRequest {
@@ -805,6 +1227,43 @@ final class _LiveHandle implements SessionLiveHandle {
   @override
   Future<void> stop({required CommandId id}) async {
     if (!_closed) await _slot.stop(session, id);
+  }
+
+  @override
+  bool get supportsUnrestricted => !_closed && _slot.supportsUnrestricted;
+
+  @override
+  SessionUnrestrictedState get unrestrictedState => _closed
+      ? const SessionUnrestrictedState()
+      : _slot.unrestrictedState(session);
+
+  @override
+  bool get canEnableUnrestricted =>
+      !_closed && _slot.canEnableUnrestricted(session);
+
+  @override
+  bool get canDisableUnrestricted =>
+      !_closed && _slot.canDisableUnrestricted(session);
+
+  @override
+  bool get canRefreshUnrestricted =>
+      !_closed && _slot.canRefreshUnrestricted(session);
+
+  @override
+  Future<void> enableUnrestricted({required CommandId id}) async {
+    if (!_closed) await _slot.enableUnrestricted(session, id);
+  }
+
+  @override
+  Future<void> disableUnrestricted({required CommandId id}) async {
+    if (!_closed) await _slot.disableUnrestricted(session, id);
+  }
+
+  @override
+  Future<void> refreshUnrestricted() async {
+    if (!_closed && _slot.canRefreshUnrestricted(session)) {
+      await _slot.refreshUnrestricted(session);
+    }
   }
 
   @override

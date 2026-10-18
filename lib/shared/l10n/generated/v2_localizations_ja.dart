@@ -948,4 +948,54 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => '権限モードを保存できませんでした。';
+
+  @override
+  String get livePermissionModeUnrestricted => '制限なし';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'CodeWalk 以外で設定';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => '制限なしをオンにする…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => '制限なしをオフにする';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'セッションのルールを更新';
+
+  @override
+  String get liveUnrestrictedTitle => 'このセッションで制限なしをオンにしますか？';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode はこのセッションのすべての操作を確認なしで実行し、エージェントの確認・拒否ルールを上書きします。すでに待機中の要求には引き続き回答が必要です。';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      '新しい子セッションはこのルールをコピーします。既存の子セッションは自身のルールを保持し、後でオフにしてもすでにコピーした子セッションは変わりません。';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      '他のクライアントもこのルールを表示・変更できます。CodeWalk は自分が追加したルールのみ削除します。オフにしても実行済みの操作は元に戻りません。';
+
+  @override
+  String get liveUnrestrictedConfirm => '制限なしをオンにする';
+
+  @override
+  String get liveUnrestrictedRefused => 'セッションのルールは変更されませんでした。';
+
+  @override
+  String get liveUnrestrictedUnconfirmed => 'ルールの変更を確認できませんでした。更新して確認してください。';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'セッションのルールが別の場所で変更されました。CodeWalk は上書きしていません。';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'セッションのルールを利用できません。';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      '制限なしをオフにしました。既存の子セッションはコピーしたルールを保持します。';
 }

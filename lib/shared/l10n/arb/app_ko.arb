@@ -747,5 +747,65 @@
   "livePermissionModeFailed": "권한 모드를 저장하지 못했습니다.",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "제한 없음",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "CodeWalk 외부에서 설정됨",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "제한 없음 켜기…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "제한 없음 끄기",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "세션 규칙 새로 고침",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "이 세션에서 제한 없음을 켤까요?",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "OpenCode가 이 세션의 모든 작업을 묻지 않고 실행하며 에이전트의 묻기 및 거부 규칙을 무시합니다. 이미 대기 중인 요청에는 여전히 응답이 필요합니다.",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "새 하위 세션은 이 규칙을 복사합니다. 기존 하위 세션은 자신의 규칙을 유지하며, 나중에 끄더라도 이미 복사한 하위 세션은 바뀌지 않습니다.",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "다른 클라이언트도 이 규칙을 보고 변경할 수 있습니다. CodeWalk는 자신이 추가한 규칙만 제거합니다. 꺼도 이미 수행된 작업은 되돌려지지 않습니다.",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "제한 없음 켜기",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "세션 규칙이 변경되지 않았습니다.",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "규칙 변경이 확인되지 않았습니다. 새로 고쳐 확인하세요.",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "세션 규칙이 다른 곳에서 변경되었습니다. CodeWalk는 덮어쓰지 않았습니다.",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "세션 규칙을 사용할 수 없습니다.",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "제한 없음을 껐습니다. 기존 하위 세션은 복사한 규칙을 유지합니다.",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

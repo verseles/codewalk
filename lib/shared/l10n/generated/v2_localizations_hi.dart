@@ -995,4 +995,55 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => 'अनुमति मोड सहेजा नहीं जा सका।';
+
+  @override
+  String get livePermissionModeUnrestricted => 'बिना प्रतिबंध';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'CodeWalk के बाहर सेट';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => 'बिना प्रतिबंध चालू करें…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => 'बिना प्रतिबंध बंद करें';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'सत्र नियम रीफ़्रेश करें';
+
+  @override
+  String get liveUnrestrictedTitle => 'इस सत्र के लिए बिना प्रतिबंध चालू करें?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode इस सत्र की हर कार्रवाई बिना पूछे चलाएगा और एजेंट के पूछने व अस्वीकार करने के नियमों को अनदेखा करेगा। पहले से प्रतीक्षारत अनुरोधों को अब भी उत्तर चाहिए।';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'नए चाइल्ड सत्र यह नियम कॉपी करते हैं। मौजूदा चाइल्ड सत्र अपने नियम रखते हैं, और बाद में बंद करने से उन चाइल्ड सत्रों पर असर नहीं पड़ता जिन्होंने इसे कॉपी कर लिया है।';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'अन्य क्लाइंट यह नियम देख और बदल सकते हैं; CodeWalk केवल अपना जोड़ा हुआ नियम हटाता है। बंद करने से पहले की गई कार्रवाइयाँ पूर्ववत नहीं होतीं।';
+
+  @override
+  String get liveUnrestrictedConfirm => 'बिना प्रतिबंध चालू करें';
+
+  @override
+  String get liveUnrestrictedRefused => 'सत्र नियम नहीं बदले गए।';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'नियम परिवर्तन की पुष्टि नहीं हुई। जाँचने के लिए रीफ़्रेश करें।';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'सत्र नियम कहीं और बदले गए। CodeWalk ने उन्हें अधिलेखित नहीं किया।';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'सत्र नियम उपलब्ध नहीं हैं।';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'बिना प्रतिबंध बंद किया गया। मौजूदा चाइल्ड सत्र कॉपी किया गया नियम रखते हैं।';
 }

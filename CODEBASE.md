@@ -2078,3 +2078,30 @@ read-only policy. Unrestricted and child cards remain V2-047B2.
 # From the repository root
 flutter test --no-pub test/v2/sessions/session_permission_mode_chip_test.dart test/v2/sessions/session_live_controller_test.dart test/v2/sessions/session_live_directory_test.dart
 ```
+
+## V2-047B2 OpenCode Unrestricted (#284)
+
+```text
+packages/harness_opencode/lib/src/session_rules.dart # OpenCodePermissionRule, strict OpenCodeSessionRules parse/canonical form, single-attempt PATCH client
+packages/harness_opencode/lib/src/session_reader.dart # readSessionRules: session rules from the info record with an identity check
+lib/shared/sessions/session_unrestricted.dart # Unrestricted phase/state/notice, ownership record and ledger port
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle Unrestricted support, state and actions
+lib/platform/sessions/unrestricted_ownership_store.dart # Fingerprints, pure classifyUnrestricted and the fail-closed cw2.sessions.unrestrictedRules ledger
+lib/platform/sessions/session_live_factory_io.dart # Slot reads rules when live, enables/disables/refreshes one operation per session
+lib/features/sessions/session_live_controller.dart # Unrestricted delegation with lease and generation guards
+lib/features/sessions/session_permission_mode_chip.dart # Unrestricted label, menu items and outcome snackbars
+lib/features/sessions/session_unrestricted_dialog.dart # Explicit confirmation before the rule is added
+lib/app/composition_root.dart # Creates and initializes the ownership store beside the permission policy
+packages/harness_opencode/test/session_rules_test.dart # Parse, PATCH encoding/status mapping and rules read
+test/v2/sessions/unrestricted_ownership_store_test.dart # Classification and fail-closed ledger
+```
+
+Unrestricted is a server rule separate from the local Ask/Allow all mode; the
+responder never writes rules. Child cards and `session.permissions` events
+remain V2-047B3.
+
+```text
+# From the repository root
+(cd packages/harness_opencode && dart test test/session_rules_test.dart)
+flutter test --no-pub test/v2/sessions/unrestricted_ownership_store_test.dart test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_permission_mode_chip_test.dart
+```

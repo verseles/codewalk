@@ -5,6 +5,7 @@ import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../storage/storage_fakes.dart';
@@ -312,5 +313,43 @@ void main() {
       // The disposed controller no longer listens; the store keeps working.
       expect(await policy.setSessionMode(ref, PermissionMode.ask), isTrue);
     });
+  });
+
+  test('Unrestricted needs a live current lease and forwards once', () async {
+    final opening = controller.start();
+    final handle = directory.grant(ref)
+      ..unrestrictedAvailable = true
+      ..unrestrictedState = const SessionUnrestrictedState(
+        phase: SessionUnrestrictedPhase.off,
+      );
+    await opening;
+    expect(controller.supportsUnrestricted, isTrue);
+    expect(controller.canEnableUnrestricted, isFalse, reason: 'not live yet');
+    await controller.enableUnrestricted();
+    expect(handle.unrestrictedCalls, isEmpty);
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(ref),
+      ),
+    );
+    await pumpEventQueue();
+    expect(controller.canEnableUnrestricted, isTrue);
+    expect(controller.canDisableUnrestricted, isFalse);
+    await controller.enableUnrestricted();
+    expect(handle.unrestrictedCalls, ['enable']);
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        stale: true,
+        state: liveState(ref),
+      ),
+    );
+    await pumpEventQueue();
+    expect(controller.canRefreshUnrestricted, isFalse);
+    await controller.refreshUnrestricted();
+    expect(handle.unrestrictedCalls, ['enable']);
   });
 }

@@ -747,5 +747,65 @@
   "livePermissionModeFailed": "権限モードを保存できませんでした。",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "制限なし",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "CodeWalk 以外で設定",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "制限なしをオンにする…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "制限なしをオフにする",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "セッションのルールを更新",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "このセッションで制限なしをオンにしますか？",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "OpenCode はこのセッションのすべての操作を確認なしで実行し、エージェントの確認・拒否ルールを上書きします。すでに待機中の要求には引き続き回答が必要です。",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "新しい子セッションはこのルールをコピーします。既存の子セッションは自身のルールを保持し、後でオフにしてもすでにコピーした子セッションは変わりません。",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "他のクライアントもこのルールを表示・変更できます。CodeWalk は自分が追加したルールのみ削除します。オフにしても実行済みの操作は元に戻りません。",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "制限なしをオンにする",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "セッションのルールは変更されませんでした。",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "ルールの変更を確認できませんでした。更新して確認してください。",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "セッションのルールが別の場所で変更されました。CodeWalk は上書きしていません。",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "セッションのルールを利用できません。",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "制限なしをオフにしました。既存の子セッションはコピーしたルールを保持します。",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

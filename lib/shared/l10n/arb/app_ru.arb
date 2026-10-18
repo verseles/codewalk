@@ -747,5 +747,65 @@
   "livePermissionModeFailed": "Не удалось сохранить режим разрешений.",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "Без ограничений",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "Задано вне CodeWalk",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "Включить «Без ограничений»…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "Выключить «Без ограничений»",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "Обновить правила сеанса",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "Включить «Без ограничений» для этого сеанса?",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "OpenCode будет выполнять все действия в этом сеансе без вопросов, переопределяя правила агента «спрашивать» и «запрещать». Уже ожидающие запросы всё равно требуют ответа.",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "Новые дочерние сеансы копируют это правило. Существующие дочерние сеансы сохраняют свои правила, и последующее выключение не меняет те, что уже его скопировали.",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "Другие клиенты могут видеть и менять это правило; CodeWalk удаляет только добавленное им правило. Выключение не отменяет уже выполненные действия.",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "Включить «Без ограничений»",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "Правила сеанса не изменены.",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "Изменение правил не подтверждено. Обновите, чтобы проверить.",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "Правила сеанса изменены в другом месте. CodeWalk не перезаписал их.",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "Правила сеанса недоступны.",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "«Без ограничений» выключено. Существующие дочерние сеансы сохраняют скопированное правило.",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

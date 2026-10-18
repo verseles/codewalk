@@ -17,6 +17,7 @@ import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
+import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/payload_factory.dart';
@@ -57,6 +58,8 @@ AppDependencies createAppDependencies({
   // it is loaded before the graph is mounted (see loadAppDependencies).
   final permissionModes =
       permissionModeStore ?? PermissionModeStore(store: metadata);
+  // Records the Unrestricted rules CodeWalk added, so only those are removed.
+  final unrestrictedOwnership = UnrestrictedOwnershipStore(store: metadata);
   locator.registerSingleton<DiagnosticsController>(
     diagnostics ?? DiagnosticsController(),
   );
@@ -126,8 +129,10 @@ AppDependencies createAppDependencies({
         () => createSessionLiveDirectory(
           payloads: createV2PayloadStore(metadata),
           permissionModes: permissionModes,
+          unrestrictedOwnership: unrestrictedOwnership,
         ))(),
     permissionModes: permissionModes,
+    unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),
@@ -150,6 +155,7 @@ Future<AppDependencies> loadAppDependencies({
   // session can be watched, and a failed read stays explicit instead of
   // defaulting to Allow all.
   await dependencies.permissionModes?.initialize();
+  await dependencies.unrestrictedOwnership?.initialize();
   if (listenNativeLinks) {
     final links = dependencies.links = NativePairingLinks((uri) {
       if (dependencies.isDisposed) return;

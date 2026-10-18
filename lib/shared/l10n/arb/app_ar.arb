@@ -746,5 +746,65 @@
   "livePermissionModeFailed": "تعذّر حفظ وضع الأذونات.",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "بلا قيود",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "مُعيّن خارج CodeWalk",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "تشغيل «بلا قيود»…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "إيقاف «بلا قيود»",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "تحديث قواعد الجلسة",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "تشغيل «بلا قيود» لهذه الجلسة؟",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "سينفّذ OpenCode كل إجراء في هذه الجلسة دون سؤال، متجاوزًا قواعد السؤال والرفض الخاصة بالوكيل. الطلبات المنتظرة بالفعل لا تزال تحتاج إلى رد.",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "تنسخ الجلسات الفرعية الجديدة هذه القاعدة. تحتفظ الجلسات الفرعية الحالية بقواعدها، والإيقاف لاحقًا لا يغيّر الجلسات التي نسختها بالفعل.",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "يمكن لعملاء آخرين رؤية هذه القاعدة وتغييرها؛ لا يزيل CodeWalk إلا القاعدة التي أضافها. الإيقاف لا يتراجع عن الإجراءات المنفّذة بالفعل.",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "تشغيل «بلا قيود»",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "لم تتغيّر قواعد الجلسة.",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "لم يتأكد تغيير القواعد. حدّث للتحقق.",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "تغيّرت قواعد الجلسة في مكان آخر. لم يستبدلها CodeWalk.",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "قواعد الجلسة غير متاحة.",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "تم إيقاف «بلا قيود». تحتفظ الجلسات الفرعية الحالية بالقاعدة التي نسختها.",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

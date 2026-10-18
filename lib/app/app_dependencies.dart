@@ -8,6 +8,7 @@ import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/permission_mode_store.dart';
+import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/sessions/session_history_source.dart';
@@ -30,6 +31,7 @@ class AppDependencies {
     this.historyFactory,
     this.liveDirectory,
     this.permissionModes,
+    this.unrestrictedOwnership,
   });
 
   final AppPreferencesController preferences;
@@ -44,6 +46,9 @@ class AppDependencies {
   /// CodeWalk's permission policy (ADR-059). The session chip and its settings
   /// surface belong to V2-047B; the live slot consults it already.
   final PermissionModeStore? permissionModes;
+
+  /// CodeWalk's own Unrestricted insertions, loaded with the policy.
+  final UnrestrictedOwnershipStore? unrestrictedOwnership;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;

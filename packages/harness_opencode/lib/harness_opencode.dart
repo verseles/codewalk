@@ -14,6 +14,7 @@ export 'src/prompt_client.dart';
 export 'src/interrupt_client.dart';
 export 'src/permission_reply_client.dart';
 export 'src/session_reader.dart';
+export 'src/session_rules.dart';
 export 'src/stream_owner.dart';
 export 'src/event_projection.dart';
 export 'src/execution_projection.dart';

@@ -992,4 +992,55 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => 'Could not save the permission mode.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'Unrestricted';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'Set outside CodeWalk';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => 'Turn on Unrestricted…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => 'Turn off Unrestricted';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'Refresh session rules';
+
+  @override
+  String get liveUnrestrictedTitle => 'Turn on Unrestricted for this session?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode will run every action in this session without asking, overriding the agent’s ask and deny rules. Requests already waiting still need an answer.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'New child sessions copy this rule. Existing child sessions keep their rules, and turning it off later does not change children that already copied it.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'Other clients can see and change this rule; CodeWalk only removes the rule it added. Turning it off does not undo actions already taken.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'Turn on Unrestricted';
+
+  @override
+  String get liveUnrestrictedRefused => 'The session rules were not changed.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'The rules change was not confirmed. Refresh to check.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'The session rules changed elsewhere. CodeWalk did not overwrite them.';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'Session rules are unavailable.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'Unrestricted turned off. Existing child sessions keep the rule they copied.';
 }

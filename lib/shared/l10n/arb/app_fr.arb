@@ -747,5 +747,65 @@
   "livePermissionModeFailed": "Impossible d’enregistrer le mode d’autorisation.",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "Sans restriction",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "Défini hors de CodeWalk",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "Activer Sans restriction…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "Désactiver Sans restriction",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "Actualiser les règles de la session",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "Activer Sans restriction pour cette session ?",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "OpenCode exécutera toutes les actions de cette session sans demander, en passant outre les règles de demande et de refus de l’agent. Les demandes déjà en attente nécessitent toujours une réponse.",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "Les nouvelles sessions enfants copient cette règle. Les sessions enfants existantes gardent leurs règles, et la désactiver plus tard ne modifie pas celles qui l’ont déjà copiée.",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "D’autres clients peuvent voir et modifier cette règle ; CodeWalk ne retire que la règle qu’il a ajoutée. La désactiver n’annule pas les actions déjà effectuées.",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "Activer Sans restriction",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "Les règles de la session n’ont pas été modifiées.",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "La modification des règles n’a pas été confirmée. Actualisez pour vérifier.",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "Les règles de la session ont été modifiées ailleurs. CodeWalk ne les a pas écrasées.",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "Les règles de la session sont indisponibles.",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "Sans restriction désactivé. Les sessions enfants existantes gardent la règle copiée.",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

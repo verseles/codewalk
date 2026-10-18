@@ -993,4 +993,55 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => 'اجازت موڈ محفوظ نہیں ہو سکا۔';
+
+  @override
+  String get livePermissionModeUnrestricted => 'بغیر پابندی';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'CodeWalk کے باہر مقرر';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => 'بغیر پابندی آن کریں…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => 'بغیر پابندی آف کریں';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'سیشن کے قواعد ریفریش کریں';
+
+  @override
+  String get liveUnrestrictedTitle => 'اس سیشن کے لیے بغیر پابندی آن کریں؟';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode اس سیشن کی ہر کارروائی بغیر پوچھے چلائے گا اور ایجنٹ کے پوچھنے اور انکار کے قواعد کو نظرانداز کرے گا۔ پہلے سے منتظر درخواستوں کو اب بھی جواب درکار ہے۔';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'نئے چائلڈ سیشن یہ قاعدہ کاپی کرتے ہیں۔ موجودہ چائلڈ سیشن اپنے قواعد رکھتے ہیں، اور بعد میں آف کرنے سے وہ سیشن نہیں بدلتے جنہوں نے اسے کاپی کر لیا ہے۔';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'دوسرے کلائنٹ یہ قاعدہ دیکھ اور بدل سکتے ہیں؛ CodeWalk صرف اپنا شامل کردہ قاعدہ ہٹاتا ہے۔ آف کرنے سے پہلے کی گئی کارروائیاں واپس نہیں ہوتیں۔';
+
+  @override
+  String get liveUnrestrictedConfirm => 'بغیر پابندی آن کریں';
+
+  @override
+  String get liveUnrestrictedRefused => 'سیشن کے قواعد تبدیل نہیں ہوئے۔';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'قواعد کی تبدیلی کی تصدیق نہیں ہوئی۔ جانچنے کے لیے ریفریش کریں۔';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'سیشن کے قواعد کہیں اور تبدیل ہوئے۔ CodeWalk نے انہیں اوور رائٹ نہیں کیا۔';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'سیشن کے قواعد دستیاب نہیں ہیں۔';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'بغیر پابندی آف ہو گیا۔ موجودہ چائلڈ سیشن کاپی کیا گیا قاعدہ رکھتے ہیں۔';
 }

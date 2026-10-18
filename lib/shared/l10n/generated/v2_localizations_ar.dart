@@ -987,4 +987,55 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => 'تعذّر حفظ وضع الأذونات.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'بلا قيود';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'مُعيّن خارج CodeWalk';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => 'تشغيل «بلا قيود»…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => 'إيقاف «بلا قيود»';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'تحديث قواعد الجلسة';
+
+  @override
+  String get liveUnrestrictedTitle => 'تشغيل «بلا قيود» لهذه الجلسة؟';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'سينفّذ OpenCode كل إجراء في هذه الجلسة دون سؤال، متجاوزًا قواعد السؤال والرفض الخاصة بالوكيل. الطلبات المنتظرة بالفعل لا تزال تحتاج إلى رد.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'تنسخ الجلسات الفرعية الجديدة هذه القاعدة. تحتفظ الجلسات الفرعية الحالية بقواعدها، والإيقاف لاحقًا لا يغيّر الجلسات التي نسختها بالفعل.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'يمكن لعملاء آخرين رؤية هذه القاعدة وتغييرها؛ لا يزيل CodeWalk إلا القاعدة التي أضافها. الإيقاف لا يتراجع عن الإجراءات المنفّذة بالفعل.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'تشغيل «بلا قيود»';
+
+  @override
+  String get liveUnrestrictedRefused => 'لم تتغيّر قواعد الجلسة.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'لم يتأكد تغيير القواعد. حدّث للتحقق.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'تغيّرت قواعد الجلسة في مكان آخر. لم يستبدلها CodeWalk.';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'قواعد الجلسة غير متاحة.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'تم إيقاف «بلا قيود». تحتفظ الجلسات الفرعية الحالية بالقاعدة التي نسختها.';
 }

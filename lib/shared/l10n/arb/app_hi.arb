@@ -747,5 +747,65 @@
   "livePermissionModeFailed": "अनुमति मोड सहेजा नहीं जा सका।",
   "@livePermissionModeFailed": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestricted": "बिना प्रतिबंध",
+  "@livePermissionModeUnrestricted": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedExternal": "CodeWalk के बाहर सेट",
+  "@livePermissionModeUnrestrictedExternal": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOn": "बिना प्रतिबंध चालू करें…",
+  "@livePermissionModeUnrestrictedTurnOn": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeUnrestrictedTurnOff": "बिना प्रतिबंध बंद करें",
+  "@livePermissionModeUnrestrictedTurnOff": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionModeRulesRefresh": "सत्र नियम रीफ़्रेश करें",
+  "@livePermissionModeRulesRefresh": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTitle": "इस सत्र के लिए बिना प्रतिबंध चालू करें?",
+  "@liveUnrestrictedTitle": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOverride": "OpenCode इस सत्र की हर कार्रवाई बिना पूछे चलाएगा और एजेंट के पूछने व अस्वीकार करने के नियमों को अनदेखा करेगा। पहले से प्रतीक्षारत अनुरोधों को अब भी उत्तर चाहिए।",
+  "@liveUnrestrictedOverride": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChildren": "नए चाइल्ड सत्र यह नियम कॉपी करते हैं। मौजूदा चाइल्ड सत्र अपने नियम रखते हैं, और बाद में बंद करने से उन चाइल्ड सत्रों पर असर नहीं पड़ता जिन्होंने इसे कॉपी कर लिया है।",
+  "@liveUnrestrictedChildren": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedOthers": "अन्य क्लाइंट यह नियम देख और बदल सकते हैं; CodeWalk केवल अपना जोड़ा हुआ नियम हटाता है। बंद करने से पहले की गई कार्रवाइयाँ पूर्ववत नहीं होतीं।",
+  "@liveUnrestrictedOthers": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedConfirm": "बिना प्रतिबंध चालू करें",
+  "@liveUnrestrictedConfirm": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedRefused": "सत्र नियम नहीं बदले गए।",
+  "@liveUnrestrictedRefused": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnconfirmed": "नियम परिवर्तन की पुष्टि नहीं हुई। जाँचने के लिए रीफ़्रेश करें।",
+  "@liveUnrestrictedUnconfirmed": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedChangedElsewhere": "सत्र नियम कहीं और बदले गए। CodeWalk ने उन्हें अधिलेखित नहीं किया।",
+  "@liveUnrestrictedChangedElsewhere": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedUnavailable": "सत्र नियम उपलब्ध नहीं हैं।",
+  "@liveUnrestrictedUnavailable": {
+    "description": "V2 manual permission cards"
+  },
+  "liveUnrestrictedTurnedOff": "बिना प्रतिबंध बंद किया गया। मौजूदा चाइल्ड सत्र कॉपी किया गया नियम रखते हैं।",
+  "@liveUnrestrictedTurnedOff": {
+    "description": "V2 manual permission cards"
   }
 }

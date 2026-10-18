@@ -6,13 +6,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:codewalk/platform/sessions/permission_mode_store.dart';
 import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
+import 'package:codewalk/platform/sessions/unrestricted_ownership_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:harness_opencode/harness_opencode.dart';
 
 import '../storage/storage_fakes.dart';
 import 'outbox_fakes.dart';
@@ -35,6 +38,18 @@ final class _Server {
   final replies = <String>[];
   final permissions = <Object?>[];
   int replyStatus = 204;
+
+  /// Session rules by session id; absent means never set.
+  final sessionRules = <String, List<Object?>>{};
+  final patches = <String>[];
+  int patchStatus = 204;
+
+  /// Whether a PATCH is stored even when its status says otherwise.
+  bool? patchApplies;
+
+  /// 1-based indices of `GET /api/session/<id>` reads answered with 500.
+  final failSessionReads = <int>{};
+  int sessionReads = 0;
   final running = <String>{};
   bool includePreviousOutcome = false;
   final interrupts = <Uri>[];
@@ -90,6 +105,17 @@ final class _Server {
       await r.response.close();
       return;
     }
+    if (r.method == 'PATCH' && segments.length == 4) {
+      final body = await utf8.decoder.bind(r).join();
+      patches.add(body);
+      if (patchApplies ?? patchStatus == 204) {
+        final decoded = jsonDecode(body) as Map<String, Object?>;
+        sessionRules[segments[3]] = (decoded['permissions']! as List).toList();
+      }
+      r.response.statusCode = patchStatus;
+      await r.response.close();
+      return;
+    }
     if (r.method == 'POST' && tail == 'prompt') {
       prompts.add(await utf8.decoder.bind(r).join());
       final body = jsonDecode(prompts.last) as Map<String, Object?>;
@@ -109,6 +135,13 @@ final class _Server {
       return;
     }
     final session = segments.length > 3 ? segments[3] : 'ses_one';
+    if (r.method == 'GET' && segments.length == 4 && tail == session) {
+      if (failSessionReads.contains(++sessionReads)) {
+        r.response.statusCode = 500;
+        await r.response.close();
+        return;
+      }
+    }
     r.response.write(
       jsonEncode(switch (tail) {
         'info' => {
@@ -154,6 +187,7 @@ final class _Server {
             'projectID': 'prj_a',
             'location': {'directory': '/workspace'},
             'time': {'created': 1, 'updated': 2},
+            'permissions': ?sessionRules[session],
           },
         },
       }),
@@ -1427,6 +1461,351 @@ void main() {
       );
       a.close();
       b.close();
+    });
+  });
+
+  group('Unrestricted session rule (V2-047B2)', () {
+    const wildcard = {'action': '*', 'resource': '*', 'effect': 'allow'};
+    const ask = {'action': 'bash', 'resource': '*', 'effect': 'ask'};
+    late FakeMetadataBackend backend;
+
+    Future<UnrestrictedOwnershipStore> ledger() async {
+      final store = UnrestrictedOwnershipStore(
+        store: V2MetadataStore(backend: backend),
+      );
+      await store.initialize();
+      return store;
+    }
+
+    setUp(() => backend = FakeMetadataBackend());
+
+    Future<(SessionLiveDirectory, SessionLiveHandle)> openLive(
+      UnrestrictedOwnershipStore? store,
+    ) async {
+      final directory = createSessionLiveDirectory(
+        unrestrictedOwnership: store,
+      )!;
+      addTearDown(directory.close);
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      return (directory, handle);
+    }
+
+    Future<SessionUnrestrictedState> settled(SessionLiveHandle handle) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (DateTime.now().isBefore(deadline)) {
+        final state = handle.unrestrictedState;
+        if (!state.busy && state.phase != SessionUnrestrictedPhase.unknown) {
+          return state;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      fail('Unrestricted state never settled');
+    }
+
+    List<Object?> sent(int index) =>
+        (jsonDecode(server.patches[index]) as Map)['permissions'] as List;
+
+    test('is absent without an ownership ledger', () async {
+      final (_, handle) = await openLive(null);
+      expect(handle.supportsUnrestricted, isFalse);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      expect(server.patches, isEmpty);
+    });
+
+    test(
+      'enable appends to fresh rules and shows on only after a read',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final store = await ledger();
+        final (_, handle) = await openLive(store);
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        expect(handle.canEnableUnrestricted, isTrue);
+        await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+        final state = await settled(handle);
+        expect(state.phase, SessionUnrestrictedPhase.on);
+        expect(state.inEffect, isTrue);
+        expect(server.patches, hasLength(1));
+        expect(sent(0), [ask, wildcard]);
+        expect(
+          jsonDecode(server.patches.single) as Map,
+          hasLength(1),
+          reason: 'title and metadata are never sent',
+        );
+        expect(store.recordFor(ref('ses_one'))!.stage, UnrestrictedStage.owned);
+      },
+    );
+
+    test(
+      'a wildcard CodeWalk did not add is never claimed or removed',
+      () async {
+        server.sessionRules['ses_one'] = [ask, wildcard];
+        final (_, handle) = await openLive(await ledger());
+        final state = await settled(handle);
+        expect(state.phase, SessionUnrestrictedPhase.elsewhere);
+        expect(state.inEffect, isTrue);
+        expect(handle.canEnableUnrestricted, isFalse);
+        expect(handle.canDisableUnrestricted, isFalse);
+        await handle.disableUnrestricted(id: const CommandId('cmd_off'));
+        expect(server.patches, isEmpty);
+      },
+    );
+
+    test('a ledger write failure sends nothing', () async {
+      backend.failWrite = UnrestrictedOwnershipStore.key;
+      final (_, handle) = await openLive(await ledger());
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      final state = await settled(handle);
+      expect(state.notice, SessionUnrestrictedNotice.refused);
+      expect(state.phase, SessionUnrestrictedPhase.off);
+      expect(server.patches, isEmpty);
+    });
+
+    test('a refused write drops the pending record', () async {
+      server.patchStatus = 400;
+      final store = await ledger();
+      final (_, handle) = await openLive(store);
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.off);
+      expect(state.notice, SessionUnrestrictedNotice.refused);
+      expect(server.patches, hasLength(1));
+      expect(store.recordFor(ref('ses_one')), isNull);
+    });
+
+    test('an unknown outcome is checked by one read, never resent', () async {
+      server
+        ..patchStatus = 500
+        ..patchApplies = true;
+      final store = await ledger();
+      final (_, handle) = await openLive(store);
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.on);
+      expect(state.notice, SessionUnrestrictedNotice.unconfirmed);
+      expect(server.patches, hasLength(1));
+      expect(store.recordFor(ref('ses_one'))!.stage, UnrestrictedStage.owned);
+    });
+
+    test('disable restores exactly the preceding rules', () async {
+      server.sessionRules['ses_one'] = [ask];
+      final store = await ledger();
+      final (_, handle) = await openLive(store);
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      await settled(handle);
+      expect(handle.canDisableUnrestricted, isTrue);
+      await handle.disableUnrestricted(id: const CommandId('cmd_off'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.off);
+      expect(state.inEffect, isFalse);
+      expect(server.patches, hasLength(2));
+      expect(sent(1), [ask]);
+      expect(server.sessionRules['ses_one'], [ask]);
+      expect(store.recordFor(ref('ses_one')), isNull);
+    });
+
+    test('rules changed by another client are never overwritten', () async {
+      server.sessionRules['ses_one'] = [ask];
+      final store = await ledger();
+      final (_, handle) = await openLive(store);
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      await settled(handle);
+      // Another client inserts a rule before CodeWalk's wildcard.
+      const deny = {'action': 'edit', 'resource': '*', 'effect': 'deny'};
+      server.sessionRules['ses_one'] = [ask, deny, wildcard];
+      await handle.disableUnrestricted(id: const CommandId('cmd_off'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.conflict);
+      expect(state.notice, SessionUnrestrictedNotice.changedElsewhere);
+      expect(state.inEffect, isTrue);
+      expect(server.patches, hasLength(1));
+      expect(server.sessionRules['ses_one'], [ask, deny, wildcard]);
+      expect(store.recordFor(ref('ses_one')), isNotNull);
+      expect(handle.canDisableUnrestricted, isFalse);
+    });
+
+    test('a reopened session recognizes CodeWalk\'s insertion', () async {
+      final store = await ledger();
+      final (directory, handle) = await openLive(store);
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      await settled(handle);
+      handle.close();
+      final again = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(again.close);
+      await until(again, (v) => v.phase == SessionLivePhase.live);
+      expect((await settled(again)).phase, SessionUnrestrictedPhase.on);
+      expect(again.canDisableUnrestricted, isTrue);
+    });
+
+    test('the automatic responder never writes rules', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      final policy = PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      );
+      await policy.initialize();
+      addTearDown(policy.dispose);
+      final directory = createSessionLiveDirectory(
+        permissionModes: policy,
+        unrestrictedOwnership: await ledger(),
+      )!;
+      addTearDown(directory.close);
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      await settled(handle);
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (server.replies.isEmpty && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(server.replies.single, '{"decision":"once"}');
+      expect(server.patches, isEmpty);
+    });
+  });
+
+  group('Unrestricted after review (V2-047B2)', () {
+    const wildcard = {'action': '*', 'resource': '*', 'effect': 'allow'};
+    const ask = {'action': 'bash', 'resource': '*', 'effect': 'ask'};
+    late FakeMetadataBackend backend;
+    setUp(() => backend = FakeMetadataBackend());
+
+    Future<UnrestrictedOwnershipStore> ledger() async {
+      final store = UnrestrictedOwnershipStore(
+        store: V2MetadataStore(backend: backend),
+      );
+      await store.initialize();
+      return store;
+    }
+
+    Future<SessionLiveHandle> openLive(UnrestrictedOwnershipStore store) async {
+      final directory = createSessionLiveDirectory(
+        unrestrictedOwnership: store,
+      )!;
+      addTearDown(directory.close);
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      return handle;
+    }
+
+    Future<SessionUnrestrictedState> settled(
+      SessionLiveHandle handle, {
+      bool Function(SessionUnrestrictedState)? until,
+    }) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (DateTime.now().isBefore(deadline)) {
+        final state = handle.unrestrictedState;
+        if (!state.busy &&
+            state.phase != SessionUnrestrictedPhase.unknown &&
+            (until?.call(state) ?? true)) {
+          return state;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      fail('Unrestricted state never settled');
+    }
+
+    test('a failed read never hides a rule that is in effect', () async {
+      server.sessionRules['ses_one'] = [ask];
+      final handle = await openLive(await ledger());
+      await settled(handle);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      expect((await settled(handle)).phase, SessionUnrestrictedPhase.on);
+      server.failSessionReads.add(server.sessionReads + 1);
+      await handle.disableUnrestricted(id: const CommandId('cmd_off'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.unavailable);
+      expect(state.inEffect, isTrue);
+      expect(state.notice, SessionUnrestrictedNotice.none);
+      expect(server.patches, hasLength(1));
+    });
+
+    test('a failed first read is retried once while live', () async {
+      server.sessionRules['ses_one'] = [ask, wildcard];
+      // Read 1 hydrates the session; read 2 is the first rules read.
+      server.failSessionReads.add(2);
+      final handle = await openLive(await ledger());
+      final state = await settled(
+        handle,
+        until: (s) => s.phase != SessionUnrestrictedPhase.unavailable,
+      );
+      expect(state.phase, SessionUnrestrictedPhase.elsewhere);
+    });
+
+    test('an enable that may not write says why', () async {
+      final handle = await openLive(await ledger());
+      expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+      server.sessionRules['ses_one'] = [ask, wildcard];
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.elsewhere);
+      expect(state.notice, SessionUnrestrictedNotice.changedElsewhere);
+      expect(server.patches, isEmpty);
+    });
+
+    test('a full ruleset is never extended past what can be read', () async {
+      server.sessionRules['ses_one'] = List.filled(1024, ask);
+      final handle = await openLive(await ledger());
+      expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      expect((await settled(handle)).notice, SessionUnrestrictedNotice.refused);
+      expect(server.patches, isEmpty);
+    });
+
+    test('an unpersisted promotion is reported and still removable', () async {
+      server.sessionRules['ses_one'] = [ask, wildcard];
+      final store = await ledger();
+      await store.put(
+        ref('ses_one'),
+        UnrestrictedOwnership(
+          stage: UnrestrictedStage.applying,
+          base: unrestrictedFingerprint(OpenCodeSessionRules.parse([ask])),
+          owned: unrestrictedFingerprint(
+            OpenCodeSessionRules.parse([ask, wildcard]),
+          ),
+        ),
+      );
+      backend.failWrite = UnrestrictedOwnershipStore.key;
+      final handle = await openLive(store);
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.on);
+      expect(state.notice, SessionUnrestrictedNotice.refused);
+      expect(
+        store.recordFor(ref('ses_one'))!.stage,
+        UnrestrictedStage.applying,
+      );
+      backend.failWrite = null;
+      await handle.disableUnrestricted(id: const CommandId('cmd_off'));
+      expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+      expect(server.sessionRules['ses_one'], [ask]);
+      expect(store.recordFor(ref('ses_one')), isNull);
     });
   });
 }

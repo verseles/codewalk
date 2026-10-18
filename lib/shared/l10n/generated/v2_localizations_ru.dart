@@ -1004,4 +1004,58 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get livePermissionModeFailed =>
       'Не удалось сохранить режим разрешений.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'Без ограничений';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'Задано вне CodeWalk';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn =>
+      'Включить «Без ограничений»…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff =>
+      'Выключить «Без ограничений»';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'Обновить правила сеанса';
+
+  @override
+  String get liveUnrestrictedTitle =>
+      'Включить «Без ограничений» для этого сеанса?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode будет выполнять все действия в этом сеансе без вопросов, переопределяя правила агента «спрашивать» и «запрещать». Уже ожидающие запросы всё равно требуют ответа.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'Новые дочерние сеансы копируют это правило. Существующие дочерние сеансы сохраняют свои правила, и последующее выключение не меняет те, что уже его скопировали.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'Другие клиенты могут видеть и менять это правило; CodeWalk удаляет только добавленное им правило. Выключение не отменяет уже выполненные действия.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'Включить «Без ограничений»';
+
+  @override
+  String get liveUnrestrictedRefused => 'Правила сеанса не изменены.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'Изменение правил не подтверждено. Обновите, чтобы проверить.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'Правила сеанса изменены в другом месте. CodeWalk не перезаписал их.';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'Правила сеанса недоступны.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      '«Без ограничений» выключено. Существующие дочерние сеансы сохраняют скопированное правило.';
 }

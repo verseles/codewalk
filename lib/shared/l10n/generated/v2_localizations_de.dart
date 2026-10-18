@@ -1016,4 +1016,61 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get livePermissionModeFailed =>
       'Berechtigungsmodus konnte nicht gespeichert werden.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'Uneingeschränkt';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal =>
+      'Außerhalb von CodeWalk festgelegt';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn =>
+      'Uneingeschränkt aktivieren…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff =>
+      'Uneingeschränkt deaktivieren';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'Sitzungsregeln aktualisieren';
+
+  @override
+  String get liveUnrestrictedTitle =>
+      'Uneingeschränkt für diese Sitzung aktivieren?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode führt jede Aktion in dieser Sitzung ohne Nachfrage aus und setzt die Frage- und Verbotsregeln des Agenten außer Kraft. Bereits wartende Anfragen brauchen weiterhin eine Antwort.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'Neue Untersitzungen übernehmen diese Regel. Bestehende Untersitzungen behalten ihre Regeln, und späteres Deaktivieren ändert keine Untersitzung, die sie schon übernommen hat.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'Andere Clients können diese Regel sehen und ändern; CodeWalk entfernt nur die Regel, die es hinzugefügt hat. Deaktivieren macht bereits ausgeführte Aktionen nicht rückgängig.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'Uneingeschränkt aktivieren';
+
+  @override
+  String get liveUnrestrictedRefused =>
+      'Die Sitzungsregeln wurden nicht geändert.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'Die Regeländerung wurde nicht bestätigt. Zum Prüfen aktualisieren.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'Die Sitzungsregeln wurden anderswo geändert. CodeWalk hat sie nicht überschrieben.';
+
+  @override
+  String get liveUnrestrictedUnavailable =>
+      'Sitzungsregeln sind nicht verfügbar.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'Uneingeschränkt deaktiviert. Bestehende Untersitzungen behalten die übernommene Regel.';
 }

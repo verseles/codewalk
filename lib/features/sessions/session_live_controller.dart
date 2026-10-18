@@ -7,6 +7,7 @@ import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/hosts_controller.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
@@ -126,6 +127,58 @@ class SessionLiveController extends ChangeNotifier {
     final stopping = handle.stop(id: _commandIds());
     _notify();
     await stopping;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
+  /// Unrestricted is the session's own server rule (ADR-059 §7), separate
+  /// from [permissionModeState]; it changes only after explicit confirmation.
+  bool get supportsUnrestricted =>
+      !_disposed && (_handle?.supportsUnrestricted ?? false);
+  SessionUnrestrictedState get unrestrictedState =>
+      _handle?.unrestrictedState ?? const SessionUnrestrictedState();
+
+  bool get _unrestrictedCurrent =>
+      !_disposed &&
+      !opening &&
+      _credential?.matches(_currentCredential()) == true &&
+      phase == SessionLivePhase.live &&
+      !(view?.stale ?? true);
+
+  bool get canEnableUnrestricted =>
+      _unrestrictedCurrent && (_handle?.canEnableUnrestricted ?? false);
+  bool get canDisableUnrestricted =>
+      _unrestrictedCurrent && (_handle?.canDisableUnrestricted ?? false);
+  bool get canRefreshUnrestricted =>
+      _unrestrictedCurrent && (_handle?.canRefreshUnrestricted ?? false);
+
+  Future<void> enableUnrestricted() => _changeUnrestricted(
+    canEnableUnrestricted,
+    (handle) => handle.enableUnrestricted(id: _commandIds()),
+  );
+
+  Future<void> disableUnrestricted() => _changeUnrestricted(
+    canDisableUnrestricted,
+    (handle) => handle.disableUnrestricted(id: _commandIds()),
+  );
+
+  Future<void> refreshUnrestricted() => _changeUnrestricted(
+    canRefreshUnrestricted,
+    (handle) => handle.refreshUnrestricted(),
+  );
+
+  Future<void> _changeUnrestricted(
+    bool allowed,
+    Future<void> Function(SessionLiveHandle) action,
+  ) async {
+    final handle = _handle;
+    if (!allowed || handle == null) return;
+    final generation = _generation;
+    final running = action(handle);
+    _notify();
+    await running;
     if (_disposed || generation != _generation || !identical(handle, _handle)) {
       return;
     }

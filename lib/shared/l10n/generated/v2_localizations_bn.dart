@@ -989,4 +989,55 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get livePermissionModeFailed => 'অনুমতি মোড সংরক্ষণ করা যায়নি।';
+
+  @override
+  String get livePermissionModeUnrestricted => 'সীমাহীন';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal => 'CodeWalk-এর বাইরে সেট';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn => 'সীমাহীন চালু করুন…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff => 'সীমাহীন বন্ধ করুন';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'সেশনের নিয়ম রিফ্রেশ করুন';
+
+  @override
+  String get liveUnrestrictedTitle => 'এই সেশনে সীমাহীন চালু করবেন?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode এই সেশনের প্রতিটি কাজ জিজ্ঞাসা ছাড়াই চালাবে এবং এজেন্টের জিজ্ঞাসা ও প্রত্যাখ্যানের নিয়ম উপেক্ষা করবে। ইতিমধ্যে অপেক্ষমাণ অনুরোধগুলির এখনও উত্তর প্রয়োজন।';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'নতুন চাইল্ড সেশন এই নিয়ম কপি করে। বিদ্যমান চাইল্ড সেশন নিজেদের নিয়ম রাখে, এবং পরে বন্ধ করলে যেগুলি ইতিমধ্যে কপি করেছে সেগুলি বদলায় না।';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'অন্যান্য ক্লায়েন্ট এই নিয়ম দেখতে ও বদলাতে পারে; CodeWalk শুধু নিজের যোগ করা নিয়মটি সরায়। বন্ধ করলে আগে করা কাজ ফেরানো যায় না।';
+
+  @override
+  String get liveUnrestrictedConfirm => 'সীমাহীন চালু করুন';
+
+  @override
+  String get liveUnrestrictedRefused => 'সেশনের নিয়ম বদলানো হয়নি।';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'নিয়ম পরিবর্তন নিশ্চিত হয়নি। যাচাই করতে রিফ্রেশ করুন।';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'সেশনের নিয়ম অন্য কোথাও বদলেছে। CodeWalk সেগুলি ওভাররাইট করেনি।';
+
+  @override
+  String get liveUnrestrictedUnavailable => 'সেশনের নিয়ম উপলব্ধ নয়।';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'সীমাহীন বন্ধ হয়েছে। বিদ্যমান চাইল্ড সেশন কপি করা নিয়মটি রাখে।';
 }

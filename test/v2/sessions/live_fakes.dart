@@ -3,6 +3,7 @@ import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
@@ -87,9 +88,7 @@ class LiveHandle implements SessionLiveHandle {
       (request.owner as SessionOwner).session == session &&
       current.phase == SessionLivePhase.live &&
       !current.stale &&
-      (current.state?.interactions.any(
-            (r) => r.id.value == request.id.value,
-          ) ??
+      (current.state?.interactions.any((r) => r.id.value == request.id.value) ??
           false) &&
       !replyState(request.id).busy;
 
@@ -117,6 +116,50 @@ class LiveHandle implements SessionLiveHandle {
       emit(current);
     }
   }
+
+  bool unrestrictedAvailable = false;
+  @override
+  SessionUnrestrictedState unrestrictedState = const SessionUnrestrictedState();
+  final unrestrictedCalls = <String>[];
+  SessionUnrestrictedState Function(String change)? unrestrictedAction;
+
+  bool get _unrestrictedReady =>
+      unrestrictedAvailable &&
+      closes == 0 &&
+      !unrestrictedState.busy &&
+      current.phase == SessionLivePhase.live &&
+      !current.stale;
+
+  @override
+  bool get supportsUnrestricted => unrestrictedAvailable && closes == 0;
+  @override
+  bool get canEnableUnrestricted =>
+      _unrestrictedReady &&
+      unrestrictedState.phase == SessionUnrestrictedPhase.off;
+  @override
+  bool get canDisableUnrestricted =>
+      _unrestrictedReady &&
+      unrestrictedState.phase == SessionUnrestrictedPhase.on;
+  @override
+  bool get canRefreshUnrestricted => _unrestrictedReady;
+
+  Future<void> _unrestricted(String change, bool allowed) async {
+    if (!allowed) return;
+    unrestrictedCalls.add(change);
+    final action = unrestrictedAction;
+    if (action != null) unrestrictedState = action(change);
+    emit(current);
+  }
+
+  @override
+  Future<void> enableUnrestricted({required CommandId id}) =>
+      _unrestricted('enable', canEnableUnrestricted);
+  @override
+  Future<void> disableUnrestricted({required CommandId id}) =>
+      _unrestricted('disable', canDisableUnrestricted);
+  @override
+  Future<void> refreshUnrestricted() =>
+      _unrestricted('refresh', canRefreshUnrestricted);
 }
 
 class LiveDirectory implements SessionLiveDirectory {

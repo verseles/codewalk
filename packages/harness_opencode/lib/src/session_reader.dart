@@ -10,6 +10,7 @@ import 'inbox_projection.dart';
 import 'interaction_projection.dart';
 import 'revert_projection.dart';
 import 'session_projection.dart';
+import 'session_rules.dart';
 import 'version_policy.dart';
 
 enum OpenCodeSessionReadFailure {
@@ -190,6 +191,40 @@ final class OpenCodeSessionReader {
         throw const FormatException('Session response has another identity.');
       }
       return result;
+    }, cancellation);
+  }
+
+  /// Reads the session's own permission rules from its info record. The
+  /// identity is checked like [readSession]; an unexpected rules shape is
+  /// returned as unrecognized instead of failing the read.
+  Future<OpenCodeSessionRules> readSessionRules(
+    SessionRef ref, {
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (ref.harnessRef != harness) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    try {
+      openCodeSessionId(ref.nativeId);
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final path = Uri(pathSegments: ['api', 'session', ref.nativeId]).toString();
+    return _read(path, (value) {
+      if (value is! Map<String, Object?>) {
+        throw const FormatException('Malformed OpenCode session response.');
+      }
+      final data = value['data'];
+      final result = projectOpenCodeSession(data, harness);
+      if (result.info.ref != ref) {
+        throw const FormatException('Session response has another identity.');
+      }
+      return OpenCodeSessionRules.parse((data as Map)['permissions']);
     }, cancellation);
   }
 

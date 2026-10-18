@@ -1007,4 +1007,61 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get livePermissionModeFailed =>
       'No se pudo guardar el modo de permisos.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'Sin restricciones';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal =>
+      'Definido fuera de CodeWalk';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn =>
+      'Activar Sin restricciones…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff =>
+      'Desactivar Sin restricciones';
+
+  @override
+  String get livePermissionModeRulesRefresh => 'Actualizar reglas de la sesión';
+
+  @override
+  String get liveUnrestrictedTitle =>
+      '¿Activar Sin restricciones en esta sesión?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode ejecutará todas las acciones de esta sesión sin preguntar, anulando las reglas de preguntar y denegar del agente. Las solicitudes que ya esperan siguen necesitando respuesta.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'Las nuevas sesiones hijas copian esta regla. Las sesiones hijas existentes conservan sus reglas, y desactivarla después no cambia las hijas que ya la copiaron.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'Otros clientes pueden ver y cambiar esta regla; CodeWalk solo elimina la regla que añadió. Desactivarla no deshace las acciones ya realizadas.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'Activar Sin restricciones';
+
+  @override
+  String get liveUnrestrictedRefused =>
+      'Las reglas de la sesión no se cambiaron.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'El cambio de reglas no se confirmó. Actualiza para comprobarlo.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'Las reglas de la sesión cambiaron en otro lugar. CodeWalk no las sobrescribió.';
+
+  @override
+  String get liveUnrestrictedUnavailable =>
+      'Las reglas de la sesión no están disponibles.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'Sin restricciones desactivado. Las sesiones hijas existentes conservan la regla que copiaron.';
 }

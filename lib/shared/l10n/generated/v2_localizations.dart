@@ -1928,6 +1928,96 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Could not save the permission mode.'**
   String get livePermissionModeFailed;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Unrestricted'**
+  String get livePermissionModeUnrestricted;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Set outside CodeWalk'**
+  String get livePermissionModeUnrestrictedExternal;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Unrestricted…'**
+  String get livePermissionModeUnrestrictedTurnOn;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off Unrestricted'**
+  String get livePermissionModeUnrestrictedTurnOff;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh session rules'**
+  String get livePermissionModeRulesRefresh;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Unrestricted for this session?'**
+  String get liveUnrestrictedTitle;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'OpenCode will run every action in this session without asking, overriding the agent’s ask and deny rules. Requests already waiting still need an answer.'**
+  String get liveUnrestrictedOverride;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'New child sessions copy this rule. Existing child sessions keep their rules, and turning it off later does not change children that already copied it.'**
+  String get liveUnrestrictedChildren;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Other clients can see and change this rule; CodeWalk only removes the rule it added. Turning it off does not undo actions already taken.'**
+  String get liveUnrestrictedOthers;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Unrestricted'**
+  String get liveUnrestrictedConfirm;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'The session rules were not changed.'**
+  String get liveUnrestrictedRefused;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'The rules change was not confirmed. Refresh to check.'**
+  String get liveUnrestrictedUnconfirmed;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'The session rules changed elsewhere. CodeWalk did not overwrite them.'**
+  String get liveUnrestrictedChangedElsewhere;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Session rules are unavailable.'**
+  String get liveUnrestrictedUnavailable;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Unrestricted turned off. Existing child sessions keep the rule they copied.'**
+  String get liveUnrestrictedTurnedOff;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

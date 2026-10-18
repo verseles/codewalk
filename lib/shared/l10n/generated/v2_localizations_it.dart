@@ -1010,4 +1010,62 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get livePermissionModeFailed =>
       'Impossibile salvare la modalità dei permessi.';
+
+  @override
+  String get livePermissionModeUnrestricted => 'Senza restrizioni';
+
+  @override
+  String get livePermissionModeUnrestrictedExternal =>
+      'Impostato fuori da CodeWalk';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOn =>
+      'Attiva Senza restrizioni…';
+
+  @override
+  String get livePermissionModeUnrestrictedTurnOff =>
+      'Disattiva Senza restrizioni';
+
+  @override
+  String get livePermissionModeRulesRefresh =>
+      'Aggiorna le regole della sessione';
+
+  @override
+  String get liveUnrestrictedTitle =>
+      'Attivare Senza restrizioni per questa sessione?';
+
+  @override
+  String get liveUnrestrictedOverride =>
+      'OpenCode eseguirà ogni azione di questa sessione senza chiedere, ignorando le regole di richiesta e divieto dell’agente. Le richieste già in attesa richiedono comunque una risposta.';
+
+  @override
+  String get liveUnrestrictedChildren =>
+      'Le nuove sessioni figlie copiano questa regola. Le sessioni figlie esistenti mantengono le loro regole e disattivarla in seguito non cambia quelle che l’hanno già copiata.';
+
+  @override
+  String get liveUnrestrictedOthers =>
+      'Altri client possono vedere e modificare questa regola; CodeWalk rimuove solo la regola che ha aggiunto. Disattivarla non annulla le azioni già eseguite.';
+
+  @override
+  String get liveUnrestrictedConfirm => 'Attiva Senza restrizioni';
+
+  @override
+  String get liveUnrestrictedRefused =>
+      'Le regole della sessione non sono state modificate.';
+
+  @override
+  String get liveUnrestrictedUnconfirmed =>
+      'La modifica delle regole non è stata confermata. Aggiorna per verificare.';
+
+  @override
+  String get liveUnrestrictedChangedElsewhere =>
+      'Le regole della sessione sono state modificate altrove. CodeWalk non le ha sovrascritte.';
+
+  @override
+  String get liveUnrestrictedUnavailable =>
+      'Le regole della sessione non sono disponibili.';
+
+  @override
+  String get liveUnrestrictedTurnedOff =>
+      'Senza restrizioni disattivato. Le sessioni figlie esistenti mantengono la regola copiata.';
 }

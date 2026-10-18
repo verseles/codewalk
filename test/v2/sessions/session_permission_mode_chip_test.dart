@@ -4,6 +4,8 @@ import 'package:codewalk/platform/sessions/permission_mode_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
+import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -151,5 +153,164 @@ void main() {
     expect(other.permissionModeState.mode, PermissionMode.allowAll);
     expect(find.text('Allow all'), findsOneWidget);
     expect(find.text('Could not save the permission mode.'), findsOneWidget);
+  });
+
+  group('Unrestricted', () {
+    Future<(SessionLiveController, LiveHandle)> live(
+      WidgetTester tester,
+      SessionUnrestrictedState state,
+    ) async {
+      final controller = await open('a');
+      final opening = controller.start();
+      final handle = directory.grant(controller.session)
+        ..unrestrictedAvailable = true
+        ..unrestrictedState = state;
+      await opening;
+      handle.emit(
+        SessionLiveView(
+          session: controller.session,
+          phase: SessionLivePhase.live,
+          state: liveState(controller.session),
+        ),
+      );
+      await tester.pump();
+      return (controller, handle);
+    }
+
+    testWidgets('turning it on needs explicit confirmation', (tester) async {
+      final (controller, handle) = await live(
+        tester,
+        const SessionUnrestrictedState(phase: SessionUnrestrictedPhase.off),
+      );
+      handle.unrestrictedAction = (_) => const SessionUnrestrictedState(
+        phase: SessionUnrestrictedPhase.on,
+        inEffect: true,
+      );
+      await pumpChip(tester, controller);
+      await tester.tap(find.byKey(const ValueKey('live-permission-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('live-unrestricted-on')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('live-unrestricted-dialog')),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(handle.unrestrictedCalls, isEmpty);
+      expect(find.text('Allow all'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('live-permission-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('live-unrestricted-on')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('live-unrestricted-confirm')));
+      await tester.pumpAndSettle();
+      expect(handle.unrestrictedCalls, ['enable']);
+      expect(find.text('Unrestricted'), findsOneWidget);
+      // The local mode is a separate axis and is untouched.
+      expect(controller.permissionModeState.mode, PermissionMode.allowAll);
+    });
+
+    testWidgets('a rule CodeWalk did not add is shown but never offered', (
+      tester,
+    ) async {
+      final (controller, handle) = await live(
+        tester,
+        const SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.elsewhere,
+          inEffect: true,
+        ),
+      );
+      await pumpChip(tester, controller);
+      expect(find.text('Unrestricted'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('live-permission-mode')));
+      await tester.pumpAndSettle();
+      expect(find.text('Set outside CodeWalk'), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-unrestricted-off')), findsNothing);
+      expect(find.byKey(const ValueKey('live-unrestricted-on')), findsNothing);
+      await tester.tap(find.text('Set outside CodeWalk'));
+      await tester.pumpAndSettle();
+      expect(handle.unrestrictedCalls, isEmpty);
+    });
+
+    testWidgets('turning it off explains that children keep the rule', (
+      tester,
+    ) async {
+      final (controller, handle) = await live(
+        tester,
+        const SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.on,
+          inEffect: true,
+        ),
+      );
+      handle.unrestrictedAction = (_) =>
+          const SessionUnrestrictedState(phase: SessionUnrestrictedPhase.off);
+      await pumpChip(tester, controller);
+      await tester.tap(find.byKey(const ValueKey('live-permission-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('live-unrestricted-off')));
+      await tester.pumpAndSettle();
+      expect(handle.unrestrictedCalls, ['disable']);
+      expect(
+        find.text(
+          'Unrestricted turned off. Existing child sessions keep the rule '
+          'they copied.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Allow all'), findsOneWidget);
+    });
+
+    testWidgets('rules changed elsewhere are reported, not overwritten', (
+      tester,
+    ) async {
+      final (controller, handle) = await live(
+        tester,
+        const SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.on,
+          inEffect: true,
+        ),
+      );
+      handle.unrestrictedAction = (_) => const SessionUnrestrictedState(
+        phase: SessionUnrestrictedPhase.conflict,
+        inEffect: true,
+        notice: SessionUnrestrictedNotice.changedElsewhere,
+      );
+      await pumpChip(tester, controller);
+      await tester.tap(find.byKey(const ValueKey('live-permission-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('live-unrestricted-off')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'The session rules changed elsewhere. CodeWalk did not overwrite '
+          'them.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Unrestricted'), findsOneWidget);
+    });
+
+    testWidgets('compact width keeps the label in semantics', (tester) async {
+      tester.view.physicalSize = const Size(390, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final (controller, _) = await live(
+        tester,
+        const SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.on,
+          inEffect: true,
+        ),
+      );
+      await pumpChip(tester, controller);
+      expect(find.text('Unrestricted'), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          'Permission mode: Unrestricted: Set for this session',
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

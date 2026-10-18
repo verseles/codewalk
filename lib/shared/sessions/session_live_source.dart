@@ -3,6 +3,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'prompt_outbox.dart';
 import 'session_permission_reply.dart';
 import 'session_stop.dart';
+import 'session_unrestricted.dart';
 
 enum SessionLiveFailure {
   authenticationRequired,
@@ -93,6 +94,18 @@ abstract interface class SessionLiveHandle {
     required ApprovalResponse response,
     required CommandId id,
   });
+
+  /// Unrestricted, the session's own server rule (ADR-059 §7): absent when
+  /// the lease has no rules client or ownership ledger. The state and the
+  /// single-flight fence are shared by its open leases; closing never writes.
+  bool get supportsUnrestricted;
+  SessionUnrestrictedState get unrestrictedState;
+  bool get canEnableUnrestricted;
+  bool get canDisableUnrestricted;
+  bool get canRefreshUnrestricted;
+  Future<void> enableUnrestricted({required CommandId id});
+  Future<void> disableUnrestricted({required CommandId id});
+  Future<void> refreshUnrestricted();
 
   /// The native message id [id] was projected from, so a pending row can be
   /// matched to an outbox entry; null for any other item.
