@@ -1051,4 +1051,25 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'カスタム回答';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'アプリ安定性のため大きなメッセージのプレビューを切り詰めました。';
+
+  @override
+  String get chatMessageToolStatusInProgress => '進行中';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count文字を切り詰め] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => '数式';
+
+  @override
+  String get mermaidCopySourceTooltip => 'ソースをコピー';
+
+  @override
+  String get mermaidDiagramLabel => 'Mermaidダイアグラム';
 }

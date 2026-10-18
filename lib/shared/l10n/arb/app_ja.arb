@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "カスタム回答",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "アプリ安定性のため大きなメッセージのプレビューを切り詰めました。",
+  "chatMessageToolStatusInProgress": "進行中",
+  "chatMessageTruncatedChars": "[{count}文字を切り詰め] {reason}",
+  "mathExpressionLabel": "数式",
+  "mermaidCopySourceTooltip": "ソースをコピー",
+  "mermaidDiagramLabel": "Mermaidダイアグラム"
 }

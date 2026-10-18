@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "Свой ответ",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "Предпросмотр большого сообщения обрезан для стабильности приложения.",
+  "chatMessageToolStatusInProgress": "Выполняется",
+  "chatMessageTruncatedChars": "[обрезано {count} символов] {reason}",
+  "mathExpressionLabel": "Математика",
+  "mermaidCopySourceTooltip": "Копировать исходный код",
+  "mermaidDiagramLabel": "Диаграмма Mermaid"
 }

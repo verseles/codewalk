@@ -1054,4 +1054,24 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => '사용자 정의 답변';
+
+  @override
+  String get chatMessageLargeMessageTruncated => '앱 안정성을 위해 큰 메시지 미리보기가 잘렸습니다.';
+
+  @override
+  String get chatMessageToolStatusInProgress => '진행 중';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count자 잘림] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => '수식';
+
+  @override
+  String get mermaidCopySourceTooltip => '소스 복사';
+
+  @override
+  String get mermaidDiagramLabel => 'Mermaid 다이어그램';
 }

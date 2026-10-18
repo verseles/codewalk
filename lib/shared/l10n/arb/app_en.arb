@@ -1351,5 +1351,37 @@
   "liveFormCustomAnswer": "Custom answer",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
+  },
+  "chatMessageLargeMessageTruncated": "Large message preview truncated for app stability.",
+  "@chatMessageLargeMessageTruncated": {
+    "description": "CodeWalk UI string — chatMessageLargeMessageTruncated"
+  },
+  "chatMessageToolStatusInProgress": "In progress",
+  "@chatMessageToolStatusInProgress": {
+    "description": "CodeWalk UI string — chatMessageToolStatusInProgress"
+  },
+  "chatMessageTruncatedChars": "[truncated {count} chars] {reason}",
+  "@chatMessageTruncatedChars": {
+    "description": "CodeWalk UI string — chatMessageTruncatedChars",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "mathExpressionLabel": "Math",
+  "@mathExpressionLabel": {
+    "description": "CodeWalk UI string — mathExpressionLabel"
+  },
+  "mermaidCopySourceTooltip": "Copy source",
+  "@mermaidCopySourceTooltip": {
+    "description": "CodeWalk UI string — mermaidCopySourceTooltip"
+  },
+  "mermaidDiagramLabel": "Mermaid Diagram",
+  "@mermaidDiagramLabel": {
+    "description": "CodeWalk UI string — mermaidDiagramLabel"
   }
 }

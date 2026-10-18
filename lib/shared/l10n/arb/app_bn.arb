@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "কাস্টম উত্তর",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "অ্যাপ স্থিতিশীলতার জন্য বড় বার্তার প্রিভিউ ছাঁটা হয়েছে।",
+  "chatMessageToolStatusInProgress": "চলছে",
+  "chatMessageTruncatedChars": "[{count} অক্ষর ছাঁটা হয়েছে] {reason}",
+  "mathExpressionLabel": "গণিত",
+  "mermaidCopySourceTooltip": "কপি উৎস",
+  "mermaidDiagramLabel": "মারমেইড ডায়াগ্রাম"
 }

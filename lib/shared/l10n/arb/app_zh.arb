@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "自定义回答",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "为保证应用稳定性，大消息预览已被截断。",
+  "chatMessageToolStatusInProgress": "进行中",
+  "chatMessageTruncatedChars": "[已截断 {count} 个字符] {reason}",
+  "mathExpressionLabel": "数学",
+  "mermaidCopySourceTooltip": "复制源码",
+  "mermaidDiagramLabel": "Mermaid 图表"
 }

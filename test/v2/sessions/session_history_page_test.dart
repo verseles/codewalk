@@ -61,7 +61,7 @@ void main() {
           await tester.pump();
           final source = sources.single;
           source.respond([
-            source.item(1, text: '<b>Plain body</b>'),
+            source.item(1, text: '<b>Bold body</b>'),
             UserInput(
               meta: source.meta(2),
               text: 'User text',
@@ -98,7 +98,9 @@ void main() {
           expect(find.byType(SessionHistoryPage), findsOneWidget);
           expect(find.byType(NavigationBar), findsNothing);
           expect(find.byType(NavigationRail), findsNothing);
-          expect(find.text('<b>Plain body</b>'), findsOneWidget);
+          // V2-071A: <b> is rich (bold), not literal; unsafe tags stay literal.
+          expect(find.textContaining('Bold body'), findsWidgets);
+          expect(find.text('<b>Bold body</b>'), findsNothing);
           if (locale.languageCode == 'en' && size.width == 1280) {
             final c = tester
                 .widget<SessionHistoryPage>(find.byType(SessionHistoryPage))
@@ -128,6 +130,7 @@ void main() {
             );
           }
           expect(find.textContaining('do-not-render'), findsNothing);
+          expect(find.textContaining('do-not-execute'), findsNothing);
           expect(find.byType(TextField), findsNothing);
           expect(
             find.byKey(const ValueKey('history-composer')),

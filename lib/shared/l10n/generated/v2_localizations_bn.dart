@@ -1093,4 +1093,25 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'কাস্টম উত্তর';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'অ্যাপ স্থিতিশীলতার জন্য বড় বার্তার প্রিভিউ ছাঁটা হয়েছে।';
+
+  @override
+  String get chatMessageToolStatusInProgress => 'চলছে';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count অক্ষর ছাঁটা হয়েছে] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => 'গণিত';
+
+  @override
+  String get mermaidCopySourceTooltip => 'কপি উৎস';
+
+  @override
+  String get mermaidDiagramLabel => 'মারমেইড ডায়াগ্রাম';
 }

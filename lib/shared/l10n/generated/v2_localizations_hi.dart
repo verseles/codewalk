@@ -1100,4 +1100,25 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'कस्टम उत्तर';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'ऐप स्थिरता के लिए बड़े संदेश का पूर्वावलोकन छोटा किया गया।';
+
+  @override
+  String get chatMessageToolStatusInProgress => 'प्रगति पर है';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count वर्ण छोटे किए गए] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => 'गणित';
+
+  @override
+  String get mermaidCopySourceTooltip => 'स्रोत कॉपी करें';
+
+  @override
+  String get mermaidDiagramLabel => 'मरमेड आरेख (Mermaid Diagram)';
 }

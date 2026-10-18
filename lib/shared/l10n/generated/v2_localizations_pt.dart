@@ -1116,4 +1116,25 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'Resposta personalizada';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'Pré-visualização de mensagem grande truncada para a estabilidade do app.';
+
+  @override
+  String get chatMessageToolStatusInProgress => 'Em progresso';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[truncado $count caracteres] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => 'Matemática';
+
+  @override
+  String get mermaidCopySourceTooltip => 'Copiar código fonte';
+
+  @override
+  String get mermaidDiagramLabel => 'Diagrama Mermaid';
 }

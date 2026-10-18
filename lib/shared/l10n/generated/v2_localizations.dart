@@ -2120,6 +2120,42 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Custom answer'**
   String get liveFormCustomAnswer;
+
+  /// CodeWalk UI string — chatMessageLargeMessageTruncated
+  ///
+  /// In en, this message translates to:
+  /// **'Large message preview truncated for app stability.'**
+  String get chatMessageLargeMessageTruncated;
+
+  /// CodeWalk UI string — chatMessageToolStatusInProgress
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get chatMessageToolStatusInProgress;
+
+  /// CodeWalk UI string — chatMessageTruncatedChars
+  ///
+  /// In en, this message translates to:
+  /// **'[truncated {count} chars] {reason}'**
+  String chatMessageTruncatedChars(int count, String reason);
+
+  /// CodeWalk UI string — mathExpressionLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Math'**
+  String get mathExpressionLabel;
+
+  /// CodeWalk UI string — mermaidCopySourceTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Copy source'**
+  String get mermaidCopySourceTooltip;
+
+  /// CodeWalk UI string — mermaidDiagramLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Mermaid Diagram'**
+  String get mermaidDiagramLabel;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -88,6 +88,17 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** sub-agent permission requests (SessionOwner with origin matching the parent) appear directly in the parent session's resident permission cards alongside the parent's own requests; cards are ordered with the parent's own requests first, followed by child requests grouped by sub-agent in order of first appearance, with child requests badged with a Sub-agent badge and arrow icon; manual replies post directly to the child session's reply endpoint `/api/session/<child>/permission/<request>/reply`; the reply fence, reply states, and note drafts are scoped per owning session; child automatic responder follows canonical precedence (fail-closed, explicit Ask on either parent or child vetoes auto-approval, child explicit mode override wins, otherwise inherits parent's effective mode), evaluated symmetrically when watched in the parent card or directly; watching both parent and child concurrently deduplicates replies via the shared `(owningSession, requestId)` fence so only one reply is sent; late 404 (first-reply-wins) is mapped to answered elsewhere and triggers a single state refresh
 - **Then** technical coverage includes the card surface in 14 locales at compact and wide sizes, fence isolation across sessions, poisoned choices, note drafts, footer budget at short and hydrating bodies, and the slot-level `204`/`404`/`5xx` mappings; installed native acceptance remains separate
 
+### V2 rich timeline rendering
+
+- **Given** a v2 history or live timeline item with canonical text (`UserInput`, `AssistantText`, `Reasoning`, `Notice`)
+- **When** the shared `SessionTimelineTile` builds its body
+- **Then** `AssistantText` renders GFM Markdown with basic HTML (`b`, `i`, `u`, `br`, `sub`, `sup`, `progress`), LaTeX math (`$...$`, `$$...$$`), fenced code with syntax highlighting and a Mermaid diagram card with raw-source fallback; `UserInput`/`Reasoning`/`Notice` render the same Markdown/math/code without raw HTML (unsupported tags stay safe and never execute)
+- **Then** images remain text without network or file I/O; links and file paths emit callbacks without navigation; `ToolCall`, `ShellRun`, `TurnOutcome` and `UnknownItem` stay minimized markers without exposing `input`/`output`/`raw`
+- **Then** sources above 64,000 runes fall back to plain truncated text with a localized notice; code blocks above 8,000 chars render as plain monospace; malformed math/Mermaid degrade to selectable raw source without crashing
+- **Then** streaming re-parses are throttled (120 ms desktop, 48 ms mobile) and settle on completion; the 2,000-item history builds lazily without exception
+- **Then** compact/wide, 14 locales with RTL, SelectionArea, semantics headers, 200% text scaling, reduced-motion static progress and VM goldens (mobile/desktop light/dark + ar RTL) are covered by widget tests; keyboard focus on overflowing code remains pending and is not claimed as passing
+- **Then** `flutter analyze` passes with no new issues and focused v2 rendering/timeline/history/live tests pass; `dart run tool/ci/import_rules.dart` was not run for this stage (known >20 min, issue #375) with manual G4 verification (no legacy imports, no `part of`, new files <500 lines)
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened

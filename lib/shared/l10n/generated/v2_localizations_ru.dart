@@ -1112,4 +1112,25 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'Свой ответ';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'Предпросмотр большого сообщения обрезан для стабильности приложения.';
+
+  @override
+  String get chatMessageToolStatusInProgress => 'Выполняется';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[обрезано $count символов] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => 'Математика';
+
+  @override
+  String get mermaidCopySourceTooltip => 'Копировать исходный код';
+
+  @override
+  String get mermaidDiagramLabel => 'Диаграмма Mermaid';
 }

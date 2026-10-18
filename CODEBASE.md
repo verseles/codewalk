@@ -43,7 +43,7 @@ lib/features/settings/shortcuts_settings_page.dart # Searchable shortcut catalog
 lib/shared/layout/window_size_class.dart # Responsive viewport classes
 lib/shared/l10n/{arb,generated}/         # Scoped route, appearance, settings/shortcut, and 12 pairing strings with generated delegates for 14 locales
 lib/shared/l10n/l10n_bridge.dart         # Per-graph locale resolution and English fallback
-lib/shared/rendering/                   # Minimal GFM bridge and URL/file callbacks, preserving source text
+lib/shared/rendering/                   # Canonical rich rendering: GFM/math/HTML/Mermaid/code budget, throttle, tile body; URL/file callbacks, no navigation/I-O
 lib/platform/storage/storage.dart      # Storage API barrel; appearance uses its metadata-store path
 lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
 lib/platform/storage/preferences_backend.dart # Allow-listed SharedPreferencesAsync metadata adapter; normalizes Linux string lists and preserves malformed values for caller validation

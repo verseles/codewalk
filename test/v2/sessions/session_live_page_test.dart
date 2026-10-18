@@ -84,7 +84,7 @@ void main() {
                 items: [
                   AssistantText(
                     meta: liveMeta(ref, 'a1'),
-                    text: '<b>Plain body</b>',
+                    text: '<b>Bold body</b>',
                     complete: false,
                     prefixMissing: true,
                   ),
@@ -110,7 +110,9 @@ void main() {
           expect(find.byKey(const ValueKey('live-needs-you')), findsOneWidget);
           expect(find.text(l10n.historyLimit), findsOneWidget);
           expect(find.textContaining(l10n.liveLastSynced), findsOneWidget);
-          expect(find.text('…<b>Plain body</b>'), findsOneWidget);
+          // V2-071A: <b> renders rich (bold) with … prefix, not literal tags.
+          expect(find.textContaining('Bold body'), findsWidgets);
+          expect(find.text('…<b>Bold body</b>'), findsNothing);
           expect(find.textContaining('do-not-render'), findsNothing);
           expect(find.textContaining('do-not-answer'), findsNothing);
           expect(find.byType(TextField), findsNothing);
@@ -153,7 +155,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(handle.stops, hasLength(1));
           expect(find.text(l10n.liveStopIdle), findsOneWidget);
-          expect(find.text('…<b>Plain body</b>'), findsOneWidget);
+          expect(find.textContaining('Bold body'), findsWidgets);
 
           // A set-aside session keeps its resident state visible, marked stale.
           handle.emit(
@@ -171,7 +173,7 @@ void main() {
           // A session set aside says so, not that it never opened.
           expect(find.text(l10n.liveDegraded), findsOneWidget);
           expect(find.text(l10n.liveUnavailable), findsNothing);
-          expect(find.text('…<b>Plain body</b>'), findsOneWidget);
+          expect(find.textContaining('Bold body'), findsWidgets);
           final retry = find.byKey(const ValueKey('live-retry'));
           expect(retry, findsOneWidget);
           await tester.tap(retry);

@@ -1098,4 +1098,25 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => 'اپنی مرضی کا جواب';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'بڑے پیغام کا پیش نظارہ ایپ کے استحکام کے لیے مختصر کیا گیا۔';
+
+  @override
+  String get chatMessageToolStatusInProgress => 'جاری ہے۔';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count حروف مختصر] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => 'ریاضی';
+
+  @override
+  String get mermaidCopySourceTooltip => 'ماخذ کاپی کریں۔';
+
+  @override
+  String get mermaidDiagramLabel => 'متسیستری خاکہ';
 }

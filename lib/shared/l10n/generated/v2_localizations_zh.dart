@@ -1027,4 +1027,24 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveFormCustomAnswer => '自定义回答';
+
+  @override
+  String get chatMessageLargeMessageTruncated => '为保证应用稳定性，大消息预览已被截断。';
+
+  @override
+  String get chatMessageToolStatusInProgress => '进行中';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[已截断 $count 个字符] $reason';
+  }
+
+  @override
+  String get mathExpressionLabel => '数学';
+
+  @override
+  String get mermaidCopySourceTooltip => '复制源码';
+
+  @override
+  String get mermaidDiagramLabel => 'Mermaid 图表';
 }

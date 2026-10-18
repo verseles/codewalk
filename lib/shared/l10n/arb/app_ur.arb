@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "اپنی مرضی کا جواب",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "بڑے پیغام کا پیش نظارہ ایپ کے استحکام کے لیے مختصر کیا گیا۔",
+  "chatMessageToolStatusInProgress": "جاری ہے۔",
+  "chatMessageTruncatedChars": "[{count} حروف مختصر] {reason}",
+  "mathExpressionLabel": "ریاضی",
+  "mermaidCopySourceTooltip": "ماخذ کاپی کریں۔",
+  "mermaidDiagramLabel": "متسیستری خاکہ"
 }

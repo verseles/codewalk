@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "कस्टम उत्तर",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "ऐप स्थिरता के लिए बड़े संदेश का पूर्वावलोकन छोटा किया गया।",
+  "chatMessageToolStatusInProgress": "प्रगति पर है",
+  "chatMessageTruncatedChars": "[{count} वर्ण छोटे किए गए] {reason}",
+  "mathExpressionLabel": "गणित",
+  "mermaidCopySourceTooltip": "स्रोत कॉपी करें",
+  "mermaidDiagramLabel": "मरमेड आरेख (Mermaid Diagram)"
 }

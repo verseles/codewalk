@@ -875,5 +875,11 @@
   "liveFormCustomAnswer": "Risposta personalizzata",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "Anteprima del messaggio grande troncata per la stabilità dell''app.",
+  "chatMessageToolStatusInProgress": "In corso",
+  "chatMessageTruncatedChars": "[troncati {count} caratteri] {reason}",
+  "mathExpressionLabel": "Matematica",
+  "mermaidCopySourceTooltip": "Copia sorgente",
+  "mermaidDiagramLabel": "Diagramma Mermaid"
 }

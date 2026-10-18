@@ -874,5 +874,11 @@
   "liveFormCustomAnswer": "إجابة مخصصة",
   "@liveFormCustomAnswer": {
     "description": "V2 interactive form cards"
-  }
+  },
+  "chatMessageLargeMessageTruncated": "تم اقتطاع معاينة الرسالة الكبيرة من أجل استقرار التطبيق.",
+  "chatMessageToolStatusInProgress": "قيد المعالجة",
+  "chatMessageTruncatedChars": "[تم اقتطاع {count} حرفًا] {reason}",
+  "mathExpressionLabel": "رياضيات",
+  "mermaidCopySourceTooltip": "نسخ المصدر",
+  "mermaidDiagramLabel": "مخطط Mermaid"
 }
