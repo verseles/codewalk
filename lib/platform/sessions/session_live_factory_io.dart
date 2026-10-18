@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
+import '../../shared/sessions/command_ids.dart';
+import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
@@ -15,20 +17,37 @@ import 'prompt_outbox_store.dart';
 SessionLiveDirectory? createSessionLiveDirectory({
   DateTime Function()? now,
   PayloadStore? payloads,
-}) => _NativeLiveDirectory(now ?? DateTime.now, payloads);
+  PermissionModePolicy? permissionModes,
+  CommandId Function()? commandIds,
+}) => _NativeLiveDirectory(
+  now ?? DateTime.now,
+  payloads,
+  permissionModes,
+  commandIds ?? mintCommandId,
+);
 
 /// One event stream per endpoint profile, shared by every open handle; the
 /// last handle of a session unwatches it and the last of a profile closes the
 /// stream. Mutations require an explicit outbox action, Stop or permission
 /// reply on a handle.
 final class _NativeLiveDirectory implements SessionLiveDirectory {
-  _NativeLiveDirectory(this._now, this._payloads);
+  _NativeLiveDirectory(
+    this._now,
+    this._payloads,
+    this._permissionModes,
+    this._commandIds,
+  );
   final DateTime Function() _now;
   final PayloadStore? _payloads;
+  final PermissionModePolicy? _permissionModes;
+  final CommandId Function() _commandIds;
   // Outlive slot generations: a replaced slot's outbox and its successor
   // write the same ledgers in turn, and minted ids keep rising per server.
   final _queue = KeySerialExecutor();
   final _ids = <String, OpenCodeMessageIds>{};
+  // Outlive slot generations, like [_ids]: a request answered before the last
+  // screen closed stays answered when the same profile reopens in a new slot.
+  final _answered = <String, Set<String>>{};
   final _slots = <String, _ProfileSlot>{};
   // Includes terminal slots detached from [_slots] while screens still hold
   // them, so closing the directory reaches every open stream.
@@ -90,6 +109,9 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
       payloads: _payloads,
       queue: _queue,
       ids: _ids.putIfAbsent(key, OpenCodeMessageIds.new),
+      answered: _answered.putIfAbsent(key, () => <String>{}),
+      permissionModes: _permissionModes,
+      commandIds: _commandIds,
     );
     _owned
       ..removeWhere((owned) => owned.isClosed)
@@ -105,6 +127,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     _slots.clear();
     _owned.clear();
     await Future.wait([for (final slot in slots) slot.close()]);
+    _answered.clear();
   }
 }
 
@@ -118,6 +141,9 @@ final class _ProfileSlot {
     required this.payloads,
     required this.queue,
     required this.ids,
+    required this.answered,
+    required this.permissionModes,
+    required this.commandIds,
   }) : _transport = IoEndpointHttpTransport(
          endpoint: profile.endpoint,
          headers: basicEndpointHeaders(
@@ -140,6 +166,8 @@ final class _ProfileSlot {
   final PayloadStore? payloads;
   final KeySerialExecutor queue;
   final OpenCodeMessageIds ids;
+  final PermissionModePolicy? permissionModes;
+  final CommandId Function() commandIds;
   PromptOutbox? outbox;
   OpenCodeInterruptClient? _interrupt;
   OpenCodePermissionReplyClient? _replies;
@@ -147,6 +175,13 @@ final class _ProfileSlot {
   // Keyed by session and native id: one slot multiplexes several sessions, and
   // ids are only unique inside their own session.
   final _replyStates = <String, _ReplyRequest>{};
+
+  /// One canonical fence for every reply, manual or automatic: a deliberate
+  /// human decision wins and a repeated frame never answers the same
+  /// session+request twice. The directory owns the set so it survives slot
+  /// generations; only the automatic path consults it, so a manual retry
+  /// stays possible.
+  final Set<String> answered;
   final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
   final _store = SessionStore(maxSessions: 8);
@@ -274,7 +309,7 @@ final class _ProfileSlot {
       SessionLiveView(session: session, phase: SessionLivePhase.closed);
 
   void _publish(SessionRef session, SessionLiveView view) {
-    _pruneReplies(session, view.state);
+    _pruneReplies(session, view);
     final stop = _stops[session];
     final execution = view.state?.execution;
     if (stop != null &&
@@ -356,8 +391,7 @@ final class _ProfileSlot {
     _publish(ref, view(ref));
   }
 
-  static String _replyKey(SessionRef ref, String id) =>
-      '${ref.storageKey}|$id';
+  static String _replyKey(SessionRef ref, String id) => '${ref.storageKey}|$id';
 
   SessionPermissionReplyState replyState(SessionRef ref, InteractionId id) =>
       _replyStates[_replyKey(ref, id.value)]?.state ??
@@ -392,6 +426,23 @@ final class _ProfileSlot {
     required InteractionRequest request,
     required ApprovalResponse response,
     required CommandId id,
+  }) => _send(
+    ref: ref,
+    request: request,
+    response: response,
+    id: id,
+    automatic: false,
+  );
+
+  /// The manual and the automatic path share this fence, timer and receipt
+  /// mapping: both are one caller-invoked reply for one request. [automatic]
+  /// only selects the native `once`-only client call.
+  Future<void> _send({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required ApprovalResponse response,
+    required CommandId id,
+    required bool automatic,
   }) async {
     final client = _replies;
     if (client == null || !canReply(ref, request)) return;
@@ -399,13 +450,23 @@ final class _ProfileSlot {
     _replyStates[key]?.dispose();
     final reply = _ReplyRequest(ref);
     _replyStates[key] = reply;
+    // A deliberate reply wins over any later automatic attempt for the same
+    // session and request: both paths latch under the canonical key here,
+    // synchronously, before the first await.
+    answered.add(key);
     _publish(ref, view(ref));
-    final attempt = await client.reply(
-      request: request,
-      response: response,
-      id: id,
-      cancellation: reply.cancellation,
-    );
+    final attempt = automatic
+        ? await client.approveOnce(
+            request: request,
+            id: id,
+            cancellation: reply.cancellation,
+          )
+        : await client.reply(
+            request: request,
+            response: response,
+            id: id,
+            cancellation: reply.cancellation,
+          );
     if (isClosed || !identical(_replyStates[key], reply)) return;
     reply.inFlight = false;
     final receipt = attempt.receipt;
@@ -433,18 +494,69 @@ final class _ProfileSlot {
 
   /// Drops local reply state whose request left canonical state. Cards only
   /// disappear through the stream/hydration; this just frees their fences.
-  void _pruneReplies(SessionRef ref, SessionState? state) {
-    if (_replyStates.isEmpty) return;
+  void _pruneReplies(SessionRef ref, SessionLiveView view) {
+    final state = view.state;
     final resident = {
       for (final r in state?.interactions ?? const <InteractionRequest>[])
         _replyKey(ref, r.id.value),
     };
+    // The answered fence only shrinks on an authoritative live snapshot that
+    // no longer lists the request. Native ids are unique, so a removed request
+    // never returns and cannot re-open a replay window.
+    if (state != null && view.phase == SessionLivePhase.live && !view.stale) {
+      final prefix = '${ref.storageKey}|';
+      answered.removeWhere(
+        (key) =>
+            key.startsWith(prefix) &&
+            !resident.contains(key) &&
+            !(_replyStates[key]?.inFlight ?? false),
+      );
+    }
+    if (_replyStates.isEmpty) return;
     _replyStates.removeWhere((key, reply) {
       if (reply.session != ref) return false;
       final drop = !resident.contains(key) && !reply.inFlight;
       if (drop) reply.dispose();
       return drop;
     });
+  }
+
+  /// The complete gate for answering [request] without the user. Only the
+  /// policy's acknowledged Allow all opens it; every other value keeps the
+  /// manual card, and the request must still be answerable right now.
+  bool _canAutoApprove(SessionRef ref, InteractionRequest request) {
+    final policy = permissionModes;
+    if (policy == null ||
+        !policy.loaded ||
+        !policy.effectiveFor(ref).answering) {
+      return false;
+    }
+    // The native `once` choice is the only thing this path may send.
+    if (request.automaticChoice?.id != 'once') return false;
+    if (answered.contains(_replyKey(ref, request.id.value))) return false;
+    return canReply(ref, request);
+  }
+
+  /// Answers every eligible resident request of a watched session once. Only
+  /// called for a session with a lease and a current live state, so a session
+  /// nobody is looking at is never answered on the user's behalf.
+  void _autoApprove(SessionRef ref) {
+    if (isClosed) return;
+    final requests = view(ref).state?.interactions;
+    if (requests == null || requests.isEmpty) return;
+    for (final request in requests.toList()) {
+      if (!_canAutoApprove(ref, request)) continue;
+      // _send latches the canonical key before its first await.
+      unawaited(
+        _send(
+          ref: ref,
+          request: request,
+          response: ApprovalResponse('once'),
+          id: commandIds(),
+          automatic: true,
+        ),
+      );
+    }
   }
 
   void _onUpdate(OpenCodeStreamUpdate update) {
@@ -472,6 +584,8 @@ final class _ProfileSlot {
             state: state,
           ),
         );
+        // After publishing: the gate reads the phase this frame established.
+        _autoApprove(ref);
       case OpenCodeSessionEvicted(:final ref):
         if (!_views.containsKey(ref)) return;
         _publish(
@@ -510,6 +624,7 @@ final class _ProfileSlot {
             _release();
           }
         }
+        final autoCandidates = <SessionRef>[];
         for (final MapEntry(key: ref, value: previous)
             in _views.entries.toList()) {
           if (session != null && session != ref) continue;
@@ -534,6 +649,14 @@ final class _ProfileSlot {
               state: previous.state,
             ),
           );
+          // Initial hydration publishes its state before the stream is live,
+          // so its SessionUpdated cannot answer yet. Once live is
+          // established, answer every eligible resident request of the
+          // sessions this update brought live.
+          if (live && previous.state != null) autoCandidates.add(ref);
+        }
+        for (final ref in autoCandidates) {
+          _autoApprove(ref);
         }
     }
   }

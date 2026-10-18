@@ -2029,3 +2029,29 @@ v2-native-check` and `make check-fast` passed with exit 0. A full `make check`
 could not complete on this shared host (three runs killed by the Makefile
 timeout with zero test failures; one unrelated integration test hangs and
 `/tmp` filled mid-run); parent issues #283/#278 and MVP remain open.
+
+## V2-047A3 automatic permission responder (#390)
+
+```text
+lib/shared/sessions/permission_mode.dart # PermissionMode ask|allowAll, SessionPermissionModeState with an explicit unavailable reason, and the PermissionModePolicy port
+lib/platform/sessions/permission_mode_store.dart # cw2.settings.permissionMode plus bounded cw2.sessions.permissionModes overrides; fail-closed reads, persist-before-apply and idempotent writes
+lib/platform/sessions/session_live_factory_io.dart # _NativeLiveDirectory owns the shared reply fence; _ProfileSlot auto-answers eligible once requests on live frames
+lib/platform/sessions/session_live_factory_stub.dart # Signature parity for non-IO platforms
+lib/app/app_dependencies.dart # Optional policy handle on the dependency bundle
+lib/app/composition_root.dart # Builds and initializes the store beside preferences
+test/v2/sessions/permission_mode_store_test.dart # Defaults, imported OFF, fail-closed corruption, idempotent selection, persistence errors
+test/v2/sessions/session_live_directory_test.dart # Automatic once, per-session Ask, refusal mapping, manual precedence, batch and reopen cases
+```
+
+The responder answers only a resident native `once` choice of a watched session
+whose lease view is live and current, keeping the manual fence, receipt mapping,
+30-second wait and no-replay rules. A deliberate reply latches the canonical
+session and request in the directory, so later frames, other screens and a
+reopened session never answer it again while a manual retry stays possible. An
+unreadable policy or override opens no approval and refuses to overwrite the
+corrupted metadata. The mode chip, child cards and Unrestricted remain V2-047B.
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/permission_mode_store_test.dart test/v2/sessions/session_live_directory_test.dart
+```

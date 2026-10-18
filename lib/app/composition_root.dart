@@ -13,6 +13,7 @@ import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
+import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
@@ -45,12 +46,17 @@ AppDependencies createAppDependencies({
   SessionCatalogFactory? sessionCatalogFactory,
   SessionHistoryFactory? sessionHistoryFactory,
   SessionLiveDirectory? Function()? sessionLiveDirectory,
+  PermissionModeStore? permissionModeStore,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
   final navigator = GlobalKey<NavigatorState>();
   final metadata =
       metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend());
+  // The live slot consults this policy before answering anything on its own;
+  // it is loaded before the graph is mounted (see loadAppDependencies).
+  final permissionModes =
+      permissionModeStore ?? PermissionModeStore(store: metadata);
   locator.registerSingleton<DiagnosticsController>(
     diagnostics ?? DiagnosticsController(),
   );
@@ -119,7 +125,9 @@ AppDependencies createAppDependencies({
         (sessionLiveDirectory ??
         () => createSessionLiveDirectory(
           payloads: createV2PayloadStore(metadata),
+          permissionModes: permissionModes,
         ))(),
+    permissionModes: permissionModes,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),
@@ -138,6 +146,10 @@ Future<AppDependencies> loadAppDependencies({
         metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend()),
   );
   await dependencies.preferences.initialize();
+  // A cold read grants no approval authority: the policy is loaded before any
+  // session can be watched, and a failed read stays explicit instead of
+  // defaulting to Allow all.
+  await dependencies.permissionModes?.initialize();
   if (listenNativeLinks) {
     final links = dependencies.links = NativePairingLinks((uri) {
       if (dependencies.isDisposed) return;

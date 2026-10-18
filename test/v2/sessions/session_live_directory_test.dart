@@ -4,13 +4,17 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:codewalk/platform/sessions/permission_mode_store.dart';
 import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../storage/storage_fakes.dart';
 import 'outbox_fakes.dart';
 
 /// A loopback OpenCode 2.0.22 stand-in: probe, one event stream per
@@ -881,15 +885,23 @@ void main() {
     );
     InteractionRequest askFor(SessionRef session, SessionLiveView view) =>
         view.state!.interactions.singleWhere(
-          (r) => r.owner is SessionOwner && (r.owner as SessionOwner).session == session,
+          (r) =>
+              r.owner is SessionOwner &&
+              (r.owner as SessionOwner).session == session,
         );
     final askA = askFor(
       ref('ses_one'),
-      await until(a, (v) => v.phase == SessionLivePhase.live && v.state != null),
+      await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      ),
     );
     final askB = askFor(
       ref('ses_two'),
-      await until(b, (v) => v.phase == SessionLivePhase.live && v.state != null),
+      await until(
+        b,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      ),
     );
 
     expect(a.canReply(askB), isFalse);
@@ -916,5 +928,430 @@ void main() {
     );
     a.close();
     b.close();
+  });
+
+  group('automatic once responder (V2-047A3)', () {
+    Future<PermissionModeStore> defaultOnStore() async {
+      final backend = FakeMetadataBackend();
+      final store = PermissionModeStore(
+        store: V2MetadataStore(backend: backend),
+      );
+      await store.initialize();
+      addTearDown(store.dispose);
+      return store;
+    }
+
+    Future<void> waitForReplies(int count) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 3));
+      while (server.replies.length < count &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    test(
+      'default ON sends one exact once POST and never PATCH/always',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        final req = view.state!.interactions.single;
+        expect(req.automaticChoice?.id, 'once');
+        await waitForReplies(1);
+        expect(server.replies, hasLength(1));
+        expect(server.replies.single, '{"decision":"once"}');
+        expect(
+          server.paths,
+          contains('/proxy/api/session/ses_one/permission/per_1/reply'),
+        );
+        expect(server.methods, isNot(contains('PATCH')));
+        expect(server.prompts, isEmpty);
+        expect(
+          a.replyState(req.id).phase,
+          SessionPermissionReplyPhase.requested,
+        );
+        a.close();
+      },
+    );
+
+    test(
+      'per-session Ask suppresses the automatic reply, manual still works',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        final req = view.state!.interactions.single;
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        expect(a.canReply(req), isTrue);
+        await a.reply(
+          request: req,
+          response: ApprovalResponse('once'),
+          id: const CommandId('manual_1'),
+        );
+        expect(server.replies.single, '{"decision":"once"}');
+        a.close();
+      },
+    );
+
+    test('no policy sends nothing automatically', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      expect(view.state!.interactions.single.id.value, 'per_1');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, isEmpty);
+      expect(a.canReply(view.state!.interactions.single), isTrue);
+      a.close();
+    });
+
+    test('404 auto is refused, latched and stays actionable', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      server.replyStatus = 404;
+      final policy = await defaultOnStore();
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      final req = view.state!.interactions.single;
+      await waitForReplies(1);
+      expect(server.replies, hasLength(1));
+      expect(a.replyState(req.id).phase, SessionPermissionReplyPhase.refused);
+      // The card is not removed by the receipt; only the stream removes it.
+      expect(a.current.state!.interactions.single.id.value, 'per_1');
+      expect(a.canReply(req), isTrue);
+      // Latch: a second concurrent lease on the same slot never replays.
+      final b = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await until(b, (v) => v.phase == SessionLivePhase.live);
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, hasLength(1));
+      a.close();
+      b.close();
+    });
+
+    test('500 auto is unconfirmed, single POST and actionable', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      server.replyStatus = 500;
+      final policy = await defaultOnStore();
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      final req = view.state!.interactions.single;
+      await waitForReplies(1);
+      expect(server.replies, hasLength(1));
+      expect(
+        a.replyState(req.id).phase,
+        SessionPermissionReplyPhase.unconfirmed,
+      );
+      expect(a.canReply(req), isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, hasLength(1));
+      a.close();
+    });
+
+    test(
+      'an unconfirmed manual reply is never upgraded by a later frame',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        final req = view.state!.interactions.single;
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        server.replyStatus = 500;
+        await a.reply(
+          request: req,
+          response: ApprovalResponse('reject'),
+          id: const CommandId('manual_reject'),
+        );
+        expect(
+          a.replyState(req.id).phase,
+          SessionPermissionReplyPhase.unconfirmed,
+        );
+        expect(server.replies.single, '{"decision":"reject"}');
+        // Allow all arrives after the human decision: the latch keeps it.
+        expect(
+          await policy.setSessionMode(ref('ses_one'), PermissionMode.allowAll),
+          isTrue,
+        );
+        await server.execution('ses_one', 'started');
+        await until(
+          a,
+          (v) => v.state?.execution?.kind.known == ExecutionKind.running,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, hasLength(1));
+        expect(server.replies, isNot(contains('{"decision":"once"}')));
+        a.close();
+      },
+    );
+
+    test('two resident permissions in one session each get one POST', () async {
+      for (final id in ['per_1', 'per_2']) {
+        server.permissions.add({
+          'id': id,
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/$id.txt'],
+        });
+      }
+      final policy = await defaultOnStore();
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final view = await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      expect(view.state!.interactions, hasLength(2));
+      await waitForReplies(2);
+      expect(server.replies, hasLength(2));
+      expect(server.replies.every((r) => r == '{"decision":"once"}'), isTrue);
+      expect(
+        server.paths.where((path) => path.endsWith('/reply')),
+        containsAll([
+          '/proxy/api/session/ses_one/permission/per_1/reply',
+          '/proxy/api/session/ses_one/permission/per_2/reply',
+        ]),
+      );
+      await server.execution('ses_one', 'started');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, hasLength(2));
+      a.close();
+    });
+
+    test(
+      'reopening after the last close never replays an uncertain reply',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        server.replyStatus = 500;
+        final policy = await defaultOnStore();
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        expect(view.state!.interactions.single.id.value, 'per_1');
+        await waitForReplies(1);
+        expect(server.replies, hasLength(1));
+        a.close();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        final b = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        await until(
+          b,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, hasLength(1));
+        b.close();
+      },
+    );
+
+    test(
+      'a human rejection survives closing and reopening the session',
+      () async {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = await defaultOnStore();
+        await policy.setSessionMode(ref('ses_one'), PermissionMode.ask);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final a = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        final view = await until(
+          a,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        final req = view.state!.interactions.single;
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, isEmpty);
+        server.replyStatus = 500;
+        await a.reply(
+          request: req,
+          response: ApprovalResponse('reject'),
+          id: const CommandId('manual_reject'),
+        );
+        expect(server.replies.single, '{"decision":"reject"}');
+        expect(
+          await policy.setSessionMode(ref('ses_one'), PermissionMode.allowAll),
+          isTrue,
+        );
+        a.close();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        final b = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        await until(
+          b,
+          (v) => v.phase == SessionLivePhase.live && v.state != null,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, hasLength(1));
+        expect(server.replies, isNot(contains('{"decision":"once"}')));
+        b.close();
+      },
+    );
+
+    test('two sessions stay isolated, one auto each', () async {
+      for (final session in ['ses_one', 'ses_two']) {
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': session,
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+      }
+      final policy = await defaultOnStore();
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final b = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_two'),
+      );
+      await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      await until(
+        b,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      await waitForReplies(2);
+      expect(server.replies, hasLength(2));
+      expect(server.replies.every((r) => r == '{"decision":"once"}'), isTrue);
+      expect(
+        server.paths,
+        containsAll([
+          '/proxy/api/session/ses_one/permission/per_1/reply',
+          '/proxy/api/session/ses_two/permission/per_1/reply',
+        ]),
+      );
+      a.close();
+      b.close();
+    });
   });
 }

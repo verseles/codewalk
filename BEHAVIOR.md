@@ -77,7 +77,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a `404` reads as a generic refusal without inferring who answered, and reject-and-stop sends a note-less rejection without requesting an execution Stop
 - **Then** a card stays mounted with its actions disabled while the lease is not live or current, so a typed note survives a reconnect or an explicit retry and is dropped only when the request leaves canonical state
 - **Then** the patterns a persistent `always` would grant are shown in full, the footer partitions cards and composer with a usable composer floor (never overrunning a short body, the loading bar, the safe-area inset or a Stop control), and the read-only prompt line is not shown while only replies are available
-- **Then** no automatic approval happens on this surface; ADR-059 modes, child/owner cards and consent wording beyond the native choices remain separate work
+- **Then** with the session policy at Allow all (the default for a new install), a resident request whose only native automatic choice is `once` is answered once without a tap on the same stream, only for a session whose lease is open and whose view is live and current; forms, questions, plan approval, installation consent, project trust, `requiresInput` and any unknown or non-`once` choice stay manual
+- **Then** a deliberate reply latches that session and request in the directory, so a later frame, a second screen or a closed and reopened session never answers it again, while the card stays available for a manual retry; the automatic path never sends `always`, a note or a wildcard
+- **Then** a policy that cannot be read or parsed opens no approval at all, an unreadable per-session override blocks writes instead of being overwritten, and a mode only takes effect after it is persisted
+- **Then** the mode chip, per-session Ask/Unrestricted controls and child/owner cards beyond the native choices remain separate work (V2-047B); unreadable overrides have no in-session repair surface yet
 - **Then** technical coverage includes the card surface in 14 locales at compact and wide sizes, fence isolation across sessions, poisoned choices, note drafts, footer budget at short and hydrating bodies, and the slot-level `204`/`404`/`5xx` mappings; installed native acceptance remains separate
 
 ### V2 navigation intents and locale
