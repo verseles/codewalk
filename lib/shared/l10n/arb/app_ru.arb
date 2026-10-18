@@ -819,5 +819,61 @@
   "livePermissionAnsweredElsewhere": "Уже отвечено в другом месте или больше не ожидает. Следите за состоянием.",
   "@livePermissionAnsweredElsewhere": {
     "description": "V2 manual permission cards"
+  },
+  "liveFormSubmit": "Отправить",
+  "@liveFormSubmit": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismiss": "Отклонить",
+  "@liveFormDismiss": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSending": "Отправка формы…",
+  "@liveFormSending": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismissing": "Отклонение формы…",
+  "@liveFormDismissing": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSent": "Форма отправлена. Следите за состоянием.",
+  "@liveFormSent": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormUnconfirmed": "Отправка не подтверждена. Следите за состоянием.",
+  "@liveFormUnconfirmed": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRefused": "Отправка отклонена.",
+  "@liveFormRefused": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRequiredField": "Это поле обязательно для заполнения.",
+  "@liveFormRequiredField": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidNumber": "Введите корректное число.",
+  "@liveFormInvalidNumber": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidInteger": "Введите корректное целое число.",
+  "@liveFormInvalidInteger": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormOpenLink": "Открыть внешнюю ссылку",
+  "@liveFormOpenLink": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSecretToggle": "Показать/скрыть секрет",
+  "@liveFormSecretToggle": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSelectOption": "Выберите вариант",
+  "@liveFormSelectOption": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormCustomAnswer": "Свой ответ",
+  "@liveFormCustomAnswer": {
+    "description": "V2 interactive form cards"
   }
 }

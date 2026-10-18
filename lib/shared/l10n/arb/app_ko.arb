@@ -819,5 +819,61 @@
   "livePermissionAnsweredElsewhere": "이미 다른 곳에서 응답했거나 더 이상 보류 중이 아닙니다. 실시간 상태를 확인하세요.",
   "@livePermissionAnsweredElsewhere": {
     "description": "V2 manual permission cards"
+  },
+  "liveFormSubmit": "제출",
+  "@liveFormSubmit": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismiss": "닫기",
+  "@liveFormDismiss": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSending": "양식 제출 중…",
+  "@liveFormSending": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismissing": "양식 닫는 중…",
+  "@liveFormDismissing": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSent": "양식이 제출되었습니다. 실시간 상태를 확인하세요.",
+  "@liveFormSent": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormUnconfirmed": "제출이 확인되지 않았습니다. 실시간 상태를 확인하세요.",
+  "@liveFormUnconfirmed": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRefused": "제출이 거부되었습니다.",
+  "@liveFormRefused": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRequiredField": "이 필드는 필수입니다.",
+  "@liveFormRequiredField": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidNumber": "올바른 숫자를 입력하세요.",
+  "@liveFormInvalidNumber": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidInteger": "올바른 정수를 입력하세요.",
+  "@liveFormInvalidInteger": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormOpenLink": "외부 링크 열기",
+  "@liveFormOpenLink": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSecretToggle": "비밀 정보 표시 전환",
+  "@liveFormSecretToggle": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSelectOption": "옵션을 선택하세요",
+  "@liveFormSelectOption": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormCustomAnswer": "사용자 정의 답변",
+  "@liveFormCustomAnswer": {
+    "description": "V2 interactive form cards"
   }
 }

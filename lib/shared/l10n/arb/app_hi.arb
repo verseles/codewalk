@@ -819,5 +819,61 @@
   "livePermissionAnsweredElsewhere": "पहले ही कहीं और उत्तर दिया गया या अब लंबित नहीं है। लाइव स्थिति देखें।",
   "@livePermissionAnsweredElsewhere": {
     "description": "V2 manual permission cards"
+  },
+  "liveFormSubmit": "जमा करें",
+  "@liveFormSubmit": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismiss": "खारिज करें",
+  "@liveFormDismiss": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSending": "फ़ॉर्म भेजा जा रहा है…",
+  "@liveFormSending": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismissing": "फ़ॉर्म खारिज किया जा रहा है…",
+  "@liveFormDismissing": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSent": "फ़ॉर्म भेजा गया। लाइव स्थिति देखें।",
+  "@liveFormSent": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormUnconfirmed": "प्रस्तुति की पुष्टि नहीं हुई। लाइव स्थिति देखें।",
+  "@liveFormUnconfirmed": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRefused": "प्रस्तुति अस्वीकार कर दी गई।",
+  "@liveFormRefused": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRequiredField": "यह फ़ील्ड आवश्यक है।",
+  "@liveFormRequiredField": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidNumber": "कृपया एक मान्य संख्या दर्ज करें।",
+  "@liveFormInvalidNumber": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidInteger": "कृपया एक मान्य पूर्णांक दर्ज करें।",
+  "@liveFormInvalidInteger": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormOpenLink": "बाहरी लिंक खोलें",
+  "@liveFormOpenLink": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSecretToggle": "गोपनीय दृश्यता टॉगल करें",
+  "@liveFormSecretToggle": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSelectOption": "एक विकल्प चुनें",
+  "@liveFormSelectOption": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormCustomAnswer": "कस्टम उत्तर",
+  "@liveFormCustomAnswer": {
+    "description": "V2 interactive form cards"
   }
 }

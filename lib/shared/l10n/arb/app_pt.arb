@@ -819,5 +819,61 @@
   "livePermissionAnsweredElsewhere": "Já respondido em outro lugar ou não está mais pendente. Acompanhe o estado ao vivo.",
   "@livePermissionAnsweredElsewhere": {
     "description": "V2 manual permission cards"
+  },
+  "liveFormSubmit": "Enviar",
+  "@liveFormSubmit": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismiss": "Descartar",
+  "@liveFormDismiss": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSending": "Enviando formulário…",
+  "@liveFormSending": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismissing": "Descartando formulário…",
+  "@liveFormDismissing": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSent": "Formulário enviado. Acompanhe o estado ao vivo.",
+  "@liveFormSent": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormUnconfirmed": "Envio não confirmado. Acompanhe o estado ao vivo.",
+  "@liveFormUnconfirmed": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRefused": "O envio foi recusado.",
+  "@liveFormRefused": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRequiredField": "Este campo é obrigatório.",
+  "@liveFormRequiredField": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidNumber": "Insira um número válido.",
+  "@liveFormInvalidNumber": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidInteger": "Insira um número inteiro válido.",
+  "@liveFormInvalidInteger": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormOpenLink": "Abrir link externo",
+  "@liveFormOpenLink": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSecretToggle": "Alternar visibilidade do segredo",
+  "@liveFormSecretToggle": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSelectOption": "Selecione uma opção",
+  "@liveFormSelectOption": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormCustomAnswer": "Resposta personalizada",
+  "@liveFormCustomAnswer": {
+    "description": "V2 interactive form cards"
   }
 }

@@ -44,6 +44,7 @@ class SessionLiveController extends ChangeNotifier {
   bool _disposed = false;
   int _generation = 0;
   final _notes = <String, String>{};
+  final _formDrafts = <String, Map<String, dynamic>>{};
 
   SessionLiveView? view;
   SessionLiveFailure? failure;
@@ -241,6 +242,92 @@ class SessionLiveController extends ChangeNotifier {
     _notify();
   }
 
+  bool canReplyForm(InteractionRequest request) =>
+      !_disposed &&
+      !opening &&
+      _credential?.matches(_currentCredential()) == true &&
+      phase == SessionLivePhase.live &&
+      !(view?.stale ?? true) &&
+      !replying(request.id, owner: _childOwner(request)) &&
+      (_handle?.canReplyForm(request) ?? false);
+
+  Future<void> replyToForm({
+    required InteractionRequest request,
+    required FormAnswers answers,
+  }) async {
+    final handle = _handle;
+    if (!canReplyForm(request) || handle == null) return;
+    final generation = _generation;
+    final replying = handle.replyForm(
+      request: request,
+      response: FormResponse(answers),
+      id: _commandIds(),
+    );
+    _notify();
+    await replying;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
+  Future<void> dismissForm({
+    required InteractionRequest request,
+  }) async {
+    final handle = _handle;
+    if (!canReplyForm(request) || handle == null) return;
+    final generation = _generation;
+    final dismissing = handle.dismissForm(
+      request: request,
+      id: _commandIds(),
+    );
+    _notify();
+    await dismissing;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
+  Map<String, dynamic> formDraft(InteractionId id, {SessionRef? owner}) =>
+      _formDrafts[_noteKey(id, owner)] ?? const <String, dynamic>{};
+
+  void setFormFieldDraft(
+    InteractionId id,
+    String fieldKey,
+    dynamic value, {
+    SessionRef? owner,
+  }) {
+    if (_disposed) return;
+    final key = _noteKey(id, owner);
+    final current = Map<String, dynamic>.from(_formDrafts[key] ?? const {});
+    if (value == null) {
+      current.remove(fieldKey);
+    } else {
+      current[fieldKey] = value;
+    }
+    if (current.isEmpty) {
+      _formDrafts.remove(key);
+    } else {
+      _formDrafts[key] = current;
+    }
+    notifyListeners();
+  }
+
+  void clearFormDraft(InteractionId id, {SessionRef? owner}) {
+    if (_disposed) return;
+    _formDrafts.remove(_noteKey(id, owner));
+    notifyListeners();
+  }
+
+  void _pruneFormDrafts(SessionState? state) {
+    if (_formDrafts.isEmpty || state == null) return;
+    final resident = {
+      for (final r in state.interactions) _noteKey(r.id, _childOwner(r)),
+    };
+    _formDrafts.removeWhere((key, _) => !resident.contains(key));
+  }
+
   String _noteKey(InteractionId id, SessionRef? owner) =>
       owner != null ? '${owner.nativeId}/${id.value}' : id.value;
 
@@ -381,6 +468,7 @@ class SessionLiveController extends ChangeNotifier {
       _subscription = handle.updates.listen((next) {
         if (_disposed || generation != _generation) return;
         _pruneNotes(next.state);
+        _pruneFormDrafts(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
         _notify();

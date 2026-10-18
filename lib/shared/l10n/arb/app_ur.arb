@@ -819,5 +819,61 @@
   "livePermissionAnsweredElsewhere": "پہلے ہی کہیں اور جواب دیا جا چکا یا اب زیر التواء نہیں۔ لائیو حالت دیکھیں۔",
   "@livePermissionAnsweredElsewhere": {
     "description": "V2 manual permission cards"
+  },
+  "liveFormSubmit": "جمع کروائیں",
+  "@liveFormSubmit": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismiss": "رد کریں",
+  "@liveFormDismiss": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSending": "فارم جمع کیا جا رہا ہے…",
+  "@liveFormSending": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormDismissing": "فارم رد کیا جا رہا ہے…",
+  "@liveFormDismissing": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSent": "فارم جمع کر دیا گیا۔ لائیو حالت دیکھیں۔",
+  "@liveFormSent": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormUnconfirmed": "جمع کرنے کی تصدیق نہیں ہوئی۔ لائیو حالت دیکھیں۔",
+  "@liveFormUnconfirmed": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRefused": "جمع کرنا مسترد کر دیا گیا۔",
+  "@liveFormRefused": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormRequiredField": "یہ خانہ لازمی ہے۔",
+  "@liveFormRequiredField": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidNumber": "براہ کرم درست نمبر درج کریں۔",
+  "@liveFormInvalidNumber": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormInvalidInteger": "براہ کرم درست مکمل عدد درج کریں۔",
+  "@liveFormInvalidInteger": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormOpenLink": "بیرونی لنک کھولیں",
+  "@liveFormOpenLink": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSecretToggle": "خفیہ کی نمائش تبدیل کریں",
+  "@liveFormSecretToggle": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormSelectOption": "ایک اختیار منتخب کریں",
+  "@liveFormSelectOption": {
+    "description": "V2 interactive form cards"
+  },
+  "liveFormCustomAnswer": "اپنی مرضی کا جواب",
+  "@liveFormCustomAnswer": {
+    "description": "V2 interactive form cards"
   }
 }

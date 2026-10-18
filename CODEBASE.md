@@ -2150,4 +2150,26 @@ flutter test --no-pub test/v2/sessions/permission_mode_store_test.dart test/v2/s
 cd packages/harness_opencode && dart test
 ```
 
+## V2-048 Forms (#285, ADR-059 §§2, 8)
+
+```text
+packages/harness_opencode/lib/src/form_reply_client.dart # OpenCodeFormReplyClient supporting reply (POST) with answer body and dismiss (DELETE), version 2.0.22 guard, timeout/cancellation, error mapping
+packages/harness_opencode/lib/src/stream_owner.dart # Global owner form frame fanout to active subscriber
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle replyForm and dismissForm methods
+lib/platform/sessions/session_live_factory_io.dart # canReplyForm, replyForm, dismissForm with global owner routing and slot fencing
+lib/features/sessions/session_live_controller.dart # formDrafts, setFormFieldDraft, clearFormDraft, replyToForm, dismissForm with draft persistence on network failure
+lib/features/sessions/session_form_card.dart # SessionFormCards and SessionFormCard rendering all 9 FormFieldKind variants, conditional visibility (when), FormSpec.validate, secret visibility toggle, choice chips for string with options, and custom inputs
+lib/features/sessions/session_live_page.dart # Mounting SessionFormCards in shared constrained card budget
+tool/l10n/session_form_catalog.py # 14 form copy keys across all 14 supported locales
+packages/harness_opencode/test/form_reply_client_test.dart # Form reply and dismiss client test suite
+test/v2/sessions/session_form_cards_test.dart # Form widgets, 9 field types, dynamic visibility, draft persistence, and resolved-elsewhere suite
+```
+
+Interactive forms render all 9 OpenCode 2.0.22 field kinds, evaluate conditional visibility (`when`), validate with `FormSpec.validate`, persist drafts on network failure, and route replies (POST) and dismissals (DELETE) with global owner support.
+
+```text
+# From the repository root
+flutter test --no-pub packages/harness_opencode/test/form_reply_client_test.dart test/v2/sessions/session_form_cards_test.dart
+```
+
 

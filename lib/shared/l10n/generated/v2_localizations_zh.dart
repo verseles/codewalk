@@ -985,4 +985,46 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get livePermissionAnsweredElsewhere => '已在其他地方答复或不再待处理。请关注实时状态。';
+
+  @override
+  String get liveFormSubmit => '提交';
+
+  @override
+  String get liveFormDismiss => '关闭';
+
+  @override
+  String get liveFormSending => '正在提交表单…';
+
+  @override
+  String get liveFormDismissing => '正在关闭表单…';
+
+  @override
+  String get liveFormSent => '表单已提交。请关注实时状态。';
+
+  @override
+  String get liveFormUnconfirmed => '提交未确认。请关注实时状态。';
+
+  @override
+  String get liveFormRefused => '提交被拒绝。';
+
+  @override
+  String get liveFormRequiredField => '此字段为必填项。';
+
+  @override
+  String get liveFormInvalidNumber => '请输入有效的数字。';
+
+  @override
+  String get liveFormInvalidInteger => '请输入有效的整数。';
+
+  @override
+  String get liveFormOpenLink => '打开外部链接';
+
+  @override
+  String get liveFormSecretToggle => '切换密钥可见性';
+
+  @override
+  String get liveFormSelectOption => '请选择一个选项';
+
+  @override
+  String get liveFormCustomAnswer => '自定义回答';
 }

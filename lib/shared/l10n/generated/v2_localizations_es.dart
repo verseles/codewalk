@@ -1075,4 +1075,47 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'Ya se respondió en otro lugar o ya no está pendiente. Observa el estado en vivo.';
+
+  @override
+  String get liveFormSubmit => 'Enviar';
+
+  @override
+  String get liveFormDismiss => 'Descartar';
+
+  @override
+  String get liveFormSending => 'Enviando formulario…';
+
+  @override
+  String get liveFormDismissing => 'Descartando formulario…';
+
+  @override
+  String get liveFormSent => 'Formulario enviado. Observa el estado en vivo.';
+
+  @override
+  String get liveFormUnconfirmed =>
+      'Envío no confirmado. Observa el estado en vivo.';
+
+  @override
+  String get liveFormRefused => 'El envío fue rechazado.';
+
+  @override
+  String get liveFormRequiredField => 'Este campo es obligatorio.';
+
+  @override
+  String get liveFormInvalidNumber => 'Introduce un número válido.';
+
+  @override
+  String get liveFormInvalidInteger => 'Introduce un número entero válido.';
+
+  @override
+  String get liveFormOpenLink => 'Abrir enlace externo';
+
+  @override
+  String get liveFormSecretToggle => 'Alternar visibilidad del secreto';
+
+  @override
+  String get liveFormSelectOption => 'Selecciona una opción';
+
+  @override
+  String get liveFormCustomAnswer => 'Respuesta personalizada';
 }

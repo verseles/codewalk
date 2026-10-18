@@ -26,6 +26,7 @@ from session_live_catalog import NEW_KEYS as LIVE_NEW_KEYS, COPY as LIVE_COPY
 from session_composer_catalog import NEW_KEYS as COMPOSER_NEW_KEYS, COPY as COMPOSER_COPY
 from session_permission_catalog import NEW_KEYS as PERMISSION_NEW_KEYS, COPY as PERMISSION_COPY
 from session_stop_catalog import NEW_KEYS as STOP_NEW_KEYS, COPY as STOP_COPY
+from session_form_catalog import NEW_KEYS as FORM_NEW_KEYS, COPY as FORM_COPY
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -121,6 +122,7 @@ KEYS |= set(LIVE_NEW_KEYS)
 KEYS |= set(COMPOSER_NEW_KEYS)
 KEYS |= set(PERMISSION_NEW_KEYS)
 KEYS |= set(STOP_NEW_KEYS)
+KEYS |= set(FORM_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -313,6 +315,19 @@ def port_stop_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_form_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in zip(FORM_NEW_KEYS, FORM_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 interactive form cards"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -390,6 +405,7 @@ def main() -> int:
     parser.add_argument("--port-composer", action="store_true", help="Add scoped live composer copy only.")
     parser.add_argument("--port-permission", action="store_true", help="Add scoped manual permission card copy only.")
     parser.add_argument("--port-stop", action="store_true", help="Add scoped execution stop copy only.")
+    parser.add_argument("--port-form", action="store_true", help="Add scoped interactive form card copy only.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -436,6 +452,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-stop cannot be combined with --check")
             port_stop_copy()
+        if args.port_form:
+            if args.check:
+                raise ValueError("--port-form cannot be combined with --check")
+            port_form_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

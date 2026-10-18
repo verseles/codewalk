@@ -2,12 +2,14 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import 'session_composer.dart';
 import 'session_composer_controller.dart';
+import 'session_form_card.dart';
 import 'session_live_controller.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
@@ -136,7 +138,9 @@ class _SessionLivePageState extends State<SessionLivePage> {
             final hasCards =
                 c.supportsReplies &&
                 (state?.interactions.any(
-                      (r) => r.kind.known == InteractionKind.permission,
+                      (r) =>
+                          r.kind.known == InteractionKind.permission ||
+                          r.kind.known == InteractionKind.form,
                     ) ??
                     false);
             final canAct =
@@ -281,7 +285,25 @@ class _SessionLivePageState extends State<SessionLivePage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SessionPermissionCards(live: c, maxHeight: cardBudget),
+                            ConstrainedBox(
+                              constraints:
+                                  BoxConstraints(maxHeight: cardBudget),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SessionPermissionCards(
+                                      live: c,
+                                      maxHeight: cardBudget,
+                                    ),
+                                    SessionFormCards(
+                                      live: c,
+                                      maxHeight: cardBudget,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                             c.outbox == null
                                 ? Column(
                                     mainAxisSize: MainAxisSize.min,

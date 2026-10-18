@@ -1012,4 +1012,46 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       '이미 다른 곳에서 응답했거나 더 이상 보류 중이 아닙니다. 실시간 상태를 확인하세요.';
+
+  @override
+  String get liveFormSubmit => '제출';
+
+  @override
+  String get liveFormDismiss => '닫기';
+
+  @override
+  String get liveFormSending => '양식 제출 중…';
+
+  @override
+  String get liveFormDismissing => '양식 닫는 중…';
+
+  @override
+  String get liveFormSent => '양식이 제출되었습니다. 실시간 상태를 확인하세요.';
+
+  @override
+  String get liveFormUnconfirmed => '제출이 확인되지 않았습니다. 실시간 상태를 확인하세요.';
+
+  @override
+  String get liveFormRefused => '제출이 거부되었습니다.';
+
+  @override
+  String get liveFormRequiredField => '이 필드는 필수입니다.';
+
+  @override
+  String get liveFormInvalidNumber => '올바른 숫자를 입력하세요.';
+
+  @override
+  String get liveFormInvalidInteger => '올바른 정수를 입력하세요.';
+
+  @override
+  String get liveFormOpenLink => '외부 링크 열기';
+
+  @override
+  String get liveFormSecretToggle => '비밀 정보 표시 전환';
+
+  @override
+  String get liveFormSelectOption => '옵션을 선택하세요';
+
+  @override
+  String get liveFormCustomAnswer => '사용자 정의 답변';
 }

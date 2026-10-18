@@ -1049,4 +1049,46 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'تمت الإجابة في مكان آخر أو لم يعد معلقًا. تابع الحالة المباشرة.';
+
+  @override
+  String get liveFormSubmit => 'إرسال';
+
+  @override
+  String get liveFormDismiss => 'تجاهل';
+
+  @override
+  String get liveFormSending => 'جارٍ إرسال النموذج…';
+
+  @override
+  String get liveFormDismissing => 'جارٍ إلغاء النموذج…';
+
+  @override
+  String get liveFormSent => 'تم إرسال النموذج. تابع الحالة المباشرة.';
+
+  @override
+  String get liveFormUnconfirmed => 'لم يتأكد الإرسال. تابع الحالة المباشرة.';
+
+  @override
+  String get liveFormRefused => 'رُفض الإرسال.';
+
+  @override
+  String get liveFormRequiredField => 'هذا الحقل مطلوب.';
+
+  @override
+  String get liveFormInvalidNumber => 'يُرجى إدخال رقم صحيح.';
+
+  @override
+  String get liveFormInvalidInteger => 'يُرجى إدخال عدد صحيح صالح.';
+
+  @override
+  String get liveFormOpenLink => 'فتح رابط خارجي';
+
+  @override
+  String get liveFormSecretToggle => 'تبديل رؤية السر';
+
+  @override
+  String get liveFormSelectOption => 'اختر خيارًا';
+
+  @override
+  String get liveFormCustomAnswer => 'إجابة مخصصة';
 }

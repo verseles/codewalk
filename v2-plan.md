@@ -1677,7 +1677,7 @@ Before starting, ensure the Issue contains:
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-044B, V2-005C
 - **Scope:** renderer for all field types, conditional visibility, required/validation, custom answers, external links, secret input, global-owner forms, dismiss semantics; answers preserved on network failure.
-- **Done when:** [ ] fixtures for each field type; [ ] resolved-elsewhere closes the card.
+- **Done when:** [x] fixtures for each field type; [x] resolved-elsewhere closes the card.
 
 #### V2-049 — Subagents and the Background Work tray
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`

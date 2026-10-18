@@ -1055,4 +1055,47 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'پہلے ہی کہیں اور جواب دیا جا چکا یا اب زیر التواء نہیں۔ لائیو حالت دیکھیں۔';
+
+  @override
+  String get liveFormSubmit => 'جمع کروائیں';
+
+  @override
+  String get liveFormDismiss => 'رد کریں';
+
+  @override
+  String get liveFormSending => 'فارم جمع کیا جا رہا ہے…';
+
+  @override
+  String get liveFormDismissing => 'فارم رد کیا جا رہا ہے…';
+
+  @override
+  String get liveFormSent => 'فارم جمع کر دیا گیا۔ لائیو حالت دیکھیں۔';
+
+  @override
+  String get liveFormUnconfirmed =>
+      'جمع کرنے کی تصدیق نہیں ہوئی۔ لائیو حالت دیکھیں۔';
+
+  @override
+  String get liveFormRefused => 'جمع کرنا مسترد کر دیا گیا۔';
+
+  @override
+  String get liveFormRequiredField => 'یہ خانہ لازمی ہے۔';
+
+  @override
+  String get liveFormInvalidNumber => 'براہ کرم درست نمبر درج کریں۔';
+
+  @override
+  String get liveFormInvalidInteger => 'براہ کرم درست مکمل عدد درج کریں۔';
+
+  @override
+  String get liveFormOpenLink => 'بیرونی لنک کھولیں';
+
+  @override
+  String get liveFormSecretToggle => 'خفیہ کی نمائش تبدیل کریں';
+
+  @override
+  String get liveFormSelectOption => 'ایک اختیار منتخب کریں';
+
+  @override
+  String get liveFormCustomAnswer => 'اپنی مرضی کا جواب';
 }

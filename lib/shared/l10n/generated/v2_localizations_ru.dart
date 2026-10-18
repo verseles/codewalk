@@ -1069,4 +1069,47 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'Уже отвечено в другом месте или больше не ожидает. Следите за состоянием.';
+
+  @override
+  String get liveFormSubmit => 'Отправить';
+
+  @override
+  String get liveFormDismiss => 'Отклонить';
+
+  @override
+  String get liveFormSending => 'Отправка формы…';
+
+  @override
+  String get liveFormDismissing => 'Отклонение формы…';
+
+  @override
+  String get liveFormSent => 'Форма отправлена. Следите за состоянием.';
+
+  @override
+  String get liveFormUnconfirmed =>
+      'Отправка не подтверждена. Следите за состоянием.';
+
+  @override
+  String get liveFormRefused => 'Отправка отклонена.';
+
+  @override
+  String get liveFormRequiredField => 'Это поле обязательно для заполнения.';
+
+  @override
+  String get liveFormInvalidNumber => 'Введите корректное число.';
+
+  @override
+  String get liveFormInvalidInteger => 'Введите корректное целое число.';
+
+  @override
+  String get liveFormOpenLink => 'Открыть внешнюю ссылку';
+
+  @override
+  String get liveFormSecretToggle => 'Показать/скрыть секрет';
+
+  @override
+  String get liveFormSelectOption => 'Выберите вариант';
+
+  @override
+  String get liveFormCustomAnswer => 'Свой ответ';
 }

@@ -136,6 +136,94 @@ class LiveHandle implements SessionLiveHandle {
     }
   }
 
+  final formReplies = <(InteractionId, FormResponse, CommandId)>[];
+  final formDismissals = <(InteractionId, CommandId)>[];
+  Future<SessionPermissionReplyState> Function(
+    InteractionRequest,
+    FormResponse?,
+  )?
+  formAction;
+
+  @override
+  bool canReplyForm(InteractionRequest request) {
+    final owner = request.owner;
+    final child = owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+    return replyAvailable &&
+        closes == 0 &&
+        request.kind.known == InteractionKind.form &&
+        (owner is GlobalOwner ||
+            (owner is SessionOwner &&
+                (owner.session == session || owner.origin == session))) &&
+        current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        (current.state?.interactions.any(
+              (r) => r.id.value == request.id.value,
+            ) ??
+            false) &&
+        !replyState(request.id, owner: child).busy;
+  }
+
+  @override
+  Future<void> replyForm({
+    required InteractionRequest request,
+    required FormResponse response,
+    required CommandId id,
+  }) async {
+    if (!canReplyForm(request)) return;
+    final owner = request.owner;
+    final child = owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+    final key = _replyKey(request.id, child);
+    formReplies.add((request.id, response, id));
+    _replyStates[key] = const SessionPermissionReplyState(
+      phase: SessionPermissionReplyPhase.requesting,
+    );
+    emit(current);
+    final result =
+        await (formAction?.call(request, response) ??
+            Future.value(
+              const SessionPermissionReplyState(
+                phase: SessionPermissionReplyPhase.requested,
+              ),
+            ));
+    if (closes == 0) {
+      _replyStates[key] = result;
+      emit(current);
+    }
+  }
+
+  @override
+  Future<void> dismissForm({
+    required InteractionRequest request,
+    required CommandId id,
+  }) async {
+    if (!canReplyForm(request)) return;
+    final owner = request.owner;
+    final child = owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+    final key = _replyKey(request.id, child);
+    formDismissals.add((request.id, id));
+    _replyStates[key] = const SessionPermissionReplyState(
+      phase: SessionPermissionReplyPhase.requesting,
+    );
+    emit(current);
+    final result =
+        await (formAction?.call(request, null) ??
+            Future.value(
+              const SessionPermissionReplyState(
+                phase: SessionPermissionReplyPhase.requested,
+              ),
+            ));
+    if (closes == 0) {
+      _replyStates[key] = result;
+      emit(current);
+    }
+  }
+
   bool unrestrictedAvailable = false;
   @override
   SessionUnrestrictedState unrestrictedState = const SessionUnrestrictedState();

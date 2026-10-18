@@ -2036,6 +2036,90 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Already answered elsewhere or no longer pending. Follow the live state.'**
   String get livePermissionAnsweredElsewhere;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get liveFormSubmit;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get liveFormDismiss;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting form…'**
+  String get liveFormSending;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissing form…'**
+  String get liveFormDismissing;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Form submitted. Follow the live state.'**
+  String get liveFormSent;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Submission not confirmed. Follow the live state.'**
+  String get liveFormUnconfirmed;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'The submission was refused.'**
+  String get liveFormRefused;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get liveFormRequiredField;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number.'**
+  String get liveFormInvalidNumber;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid integer.'**
+  String get liveFormInvalidInteger;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Open external link'**
+  String get liveFormOpenLink;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle secret visibility'**
+  String get liveFormSecretToggle;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Select an option'**
+  String get liveFormSelectOption;
+
+  /// V2 interactive form cards
+  ///
+  /// In en, this message translates to:
+  /// **'Custom answer'**
+  String get liveFormCustomAnswer;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

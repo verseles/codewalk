@@ -97,6 +97,18 @@ abstract interface class SessionLiveHandle {
     required CommandId id,
   });
 
+  /// Explicit form replies and dismissals for this session's interactions.
+  bool canReplyForm(InteractionRequest request);
+  Future<void> replyForm({
+    required InteractionRequest request,
+    required FormResponse response,
+    required CommandId id,
+  });
+  Future<void> dismissForm({
+    required InteractionRequest request,
+    required CommandId id,
+  });
+
   /// Unrestricted, the session's own server rule (ADR-059 §7): absent when
   /// the lease has no rules client or ownership ledger. The state and the
   /// single-flight fence are shared by its open leases; closing never writes.

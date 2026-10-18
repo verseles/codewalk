@@ -1084,4 +1084,47 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'Bereits anderswo beantwortet oder nicht mehr ausstehend. Verfolge den Live-Status.';
+
+  @override
+  String get liveFormSubmit => 'Absenden';
+
+  @override
+  String get liveFormDismiss => 'Verwerfen';
+
+  @override
+  String get liveFormSending => 'Formular wird gesendet…';
+
+  @override
+  String get liveFormDismissing => 'Formular wird verworfen…';
+
+  @override
+  String get liveFormSent => 'Formular gesendet. Verfolge den Live-Status.';
+
+  @override
+  String get liveFormUnconfirmed =>
+      'Übermittlung nicht bestätigt. Verfolge den Live-Status.';
+
+  @override
+  String get liveFormRefused => 'Die Übermittlung wurde abgelehnt.';
+
+  @override
+  String get liveFormRequiredField => 'Dieses Feld ist erforderlich.';
+
+  @override
+  String get liveFormInvalidNumber => 'Bitte eine gültige Zahl eingeben.';
+
+  @override
+  String get liveFormInvalidInteger => 'Bitte eine gültige Ganzzahl eingeben.';
+
+  @override
+  String get liveFormOpenLink => 'Externen Link öffnen';
+
+  @override
+  String get liveFormSecretToggle => 'Geheimnis ein-/ausblenden';
+
+  @override
+  String get liveFormSelectOption => 'Eine Option auswählen';
+
+  @override
+  String get liveFormCustomAnswer => 'Benutzerdefinierte Antwort';
 }

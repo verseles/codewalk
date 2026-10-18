@@ -195,6 +195,7 @@ final class _ProfileSlot {
   PromptOutbox? outbox;
   OpenCodeInterruptClient? _interrupt;
   OpenCodePermissionReplyClient? _replies;
+  OpenCodeFormReplyClient? _forms;
   OpenCodeSessionRulesClient? _rules;
   final _stops = <SessionRef, _StopRequest>{};
   final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
@@ -256,6 +257,11 @@ final class _ProfileSlot {
       connectedVersion: observed,
     );
     _replies = OpenCodePermissionReplyClient(
+      _transport,
+      harness: harness,
+      connectedVersion: observed,
+    );
+    _forms = OpenCodeFormReplyClient(
       _transport,
       harness: harness,
       connectedVersion: observed,
@@ -821,8 +827,13 @@ final class _ProfileSlot {
     return owner is SessionOwner ? owner.session : null;
   }
 
-  static String _requestKey(InteractionRequest request) =>
-      _replyKey(_owning(request)!, request.id.value);
+  static String _requestKey(InteractionRequest request) {
+    final owner = request.owner;
+    if (owner is SessionOwner) {
+      return _replyKey(owner.session, request.id.value);
+    }
+    return 'global|${request.id.value}';
+  }
 
   /// [owner] is the request's owning session when it is not [ref] itself.
   SessionPermissionReplyState replyState(
@@ -831,9 +842,11 @@ final class _ProfileSlot {
     SessionRef? owner,
   }) =>
       _replyStates[_replyKey(owner ?? ref, id.value)]?.state ??
+      _replyStates['global|${id.value}']?.state ??
       const SessionPermissionReplyState();
 
-  bool get supportsReplies => _replies != null && !isClosed;
+  bool get supportsReplies =>
+      (_replies != null || _forms != null) && !isClosed;
 
   bool canReply(SessionRef ref, InteractionRequest request) {
     final owner = request.owner;
@@ -879,33 +892,119 @@ final class _ProfileSlot {
     required ApprovalResponse response,
     required CommandId id,
     required bool automatic,
-  }) async {
+  }) {
     final client = _replies;
-    if (client == null || !canReply(ref, request)) return;
+    if (client == null || !canReply(ref, request)) return Future.value();
+    return _dispatchReply(
+      ref: ref,
+      request: request,
+      send: (cancellation) async => (automatic
+              ? await client.approveOnce(
+                  request: request,
+                  id: id,
+                  cancellation: cancellation,
+                )
+              : await client.reply(
+                  request: request,
+                  response: response,
+                  id: id,
+                  cancellation: cancellation,
+                ))
+          .receipt,
+    );
+  }
+
+  bool canReplyForm(SessionRef ref, InteractionRequest request) {
+    final owner = request.owner;
+    if (isClosed || _forms == null) return false;
+    if (owner is SessionOwner) {
+      if (owner.session != ref && owner.origin != ref) return false;
+    } else if (owner is GlobalOwner) {
+      if (owner.harness != harness) return false;
+    } else {
+      return false;
+    }
+    final key = _requestKey(request);
+    if ((_replyStates[key]?.inFlight ?? false) ||
+        (_replyStates[key]?.state.busy ?? false)) {
+      return false;
+    }
+    final current = view(ref);
+    return current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        (current.state?.interactions.any(
+              (r) => r.identityKey == request.identityKey,
+            ) ??
+            false);
+  }
+
+  Future<void> replyForm({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required FormResponse response,
+    required CommandId id,
+  }) => _sendForm(
+    ref: ref,
+    request: request,
+    response: response,
+    id: id,
+    isDismiss: false,
+  );
+
+  Future<void> dismissForm({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required CommandId id,
+  }) => _sendForm(
+    ref: ref,
+    request: request,
+    response: null,
+    id: id,
+    isDismiss: true,
+  );
+
+  Future<void> _sendForm({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required FormResponse? response,
+    required CommandId id,
+    required bool isDismiss,
+  }) {
+    final client = _forms;
+    if (client == null || !canReplyForm(ref, request)) return Future.value();
+    return _dispatchReply(
+      ref: ref,
+      request: request,
+      send: (cancellation) async => (isDismiss
+              ? await client.dismiss(
+                  request: request,
+                  id: id,
+                  cancellation: cancellation,
+                )
+              : await client.reply(
+                  request: request,
+                  response: response!,
+                  id: id,
+                  cancellation: cancellation,
+                ))
+          .receipt,
+    );
+  }
+
+  Future<void> _dispatchReply({
+    required SessionRef ref,
+    required InteractionRequest request,
+    required Future<CommandReceipt> Function(RequestCancellation) send,
+  }) async {
     final key = _requestKey(request);
     _replyStates[key]?.dispose();
     final reply = _ReplyRequest(ref);
     _replyStates[key] = reply;
-    // A deliberate reply wins over any later automatic attempt for the same
-    // session and request: both paths latch under the canonical key here,
-    // synchronously, before the first await.
     answered.add(key);
     _publish(ref, view(ref));
-    final attempt = automatic
-        ? await client.approveOnce(
-            request: request,
-            id: id,
-            cancellation: reply.cancellation,
-          )
-        : await client.reply(
-            request: request,
-            response: response,
-            id: id,
-            cancellation: reply.cancellation,
-          );
+    final receipt = await send(reply.cancellation);
     if (isClosed || !identical(_replyStates[key], reply)) return;
     reply.inFlight = false;
-    final receipt = attempt.receipt;
     final phase = switch (receipt.state.known) {
       ReceiptState.accepted => SessionPermissionReplyPhase.requested,
       ReceiptState.rejected ||
@@ -913,15 +1012,12 @@ final class _ProfileSlot {
       _ => SessionPermissionReplyPhase.unconfirmed,
     };
     reply.state = SessionPermissionReplyState(phase: phase, receipt: receipt);
-    // Someone else answered first (or the request is gone): never resend,
-    // read the session once so the card follows the native state.
     if (receipt.state.known == ReceiptState.rejected &&
-        receipt.error?.rawType == 'NotFoundError') {
+        (receipt.error?.rawType == 'NotFoundError' ||
+            receipt.error?.rawType == 'FormAlreadySettledError')) {
       _owner?.refresh(ref);
     }
     if (phase == SessionPermissionReplyPhase.requested) {
-      // The reply was accepted, not settled. Bound the local waiting state
-      // without inferring settlement or automatically repeating the mutation.
       reply.timer = Timer(const Duration(seconds: 30), () {
         if (isClosed || !identical(_replyStates[key], reply)) return;
         reply.state = SessionPermissionReplyState(
@@ -940,7 +1036,7 @@ final class _ProfileSlot {
     final state = view.state;
     final resident = {
       for (final r in state?.interactions ?? const <InteractionRequest>[])
-        if (_owning(r) != null) _requestKey(r),
+        _requestKey(r),
     };
     // The answered fence only shrinks on an authoritative live snapshot that
     // no longer lists the request. Native ids are unique, so a removed request
@@ -949,6 +1045,7 @@ final class _ProfileSlot {
     if (state != null && view.phase == SessionLivePhase.live && !view.stale) {
       final prefixes = [
         '${ref.storageKey}|',
+        'global|',
         for (final child in _owner?.childrenOf(ref) ?? const <SessionRef>{})
           if (!_views.containsKey(child)) '${child.storageKey}|',
       ];
@@ -1336,6 +1433,40 @@ final class _LiveHandle implements SessionLiveHandle {
         ref: session,
         request: request,
         response: response,
+        id: id,
+      );
+    }
+  }
+
+  @override
+  bool canReplyForm(InteractionRequest request) =>
+      !_closed && _slot.canReplyForm(session, request);
+
+  @override
+  Future<void> replyForm({
+    required InteractionRequest request,
+    required FormResponse response,
+    required CommandId id,
+  }) async {
+    if (!_closed) {
+      await _slot.replyForm(
+        ref: session,
+        request: request,
+        response: response,
+        id: id,
+      );
+    }
+  }
+
+  @override
+  Future<void> dismissForm({
+    required InteractionRequest request,
+    required CommandId id,
+  }) async {
+    if (!_closed) {
+      await _slot.dismissForm(
+        ref: session,
+        request: request,
         id: id,
       );
     }

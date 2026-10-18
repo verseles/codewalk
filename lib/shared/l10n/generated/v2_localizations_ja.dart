@@ -1009,4 +1009,46 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'すでに別の場所で回答済みか、保留中ではありません。ライブの状態を確認してください。';
+
+  @override
+  String get liveFormSubmit => '送信';
+
+  @override
+  String get liveFormDismiss => '破棄';
+
+  @override
+  String get liveFormSending => 'フォームを送信中…';
+
+  @override
+  String get liveFormDismissing => 'フォームを破棄中…';
+
+  @override
+  String get liveFormSent => 'フォームを送信しました。ライブの状態を確認してください。';
+
+  @override
+  String get liveFormUnconfirmed => '送信を確認できません。ライブの状態を確認してください。';
+
+  @override
+  String get liveFormRefused => '送信が拒否されました。';
+
+  @override
+  String get liveFormRequiredField => 'この項目は必須です。';
+
+  @override
+  String get liveFormInvalidNumber => '有効な数値を入力してください。';
+
+  @override
+  String get liveFormInvalidInteger => '有効な整数を入力してください。';
+
+  @override
+  String get liveFormOpenLink => '外部リンクを開く';
+
+  @override
+  String get liveFormSecretToggle => 'シークレットの表示を切り替え';
+
+  @override
+  String get liveFormSelectOption => '選択してください';
+
+  @override
+  String get liveFormCustomAnswer => 'カスタム回答';
 }

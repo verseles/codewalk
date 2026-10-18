@@ -466,6 +466,17 @@ final class OpenCodeStreamOwner {
           (form is Map<String, Object?> ? form['sessionID'] : null);
     }
     if (session is! String || session.isEmpty) return;
+    if (session == 'global') {
+      final type = value['type'];
+      if (type is String && type.startsWith('form.')) {
+        for (final entry in _watched.entries) {
+          if (!entry.value.stalled) {
+            _hold(entry.key, entry.value, value, seq, null);
+          }
+        }
+      }
+      return;
+    }
     final ref = SessionRef(harness.host, harness.harness, session);
     if (observeChildren && data is Map<String, Object?>) {
       _routeChild(ref, data, value, seq);

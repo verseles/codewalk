@@ -1051,4 +1051,46 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'ইতিমধ্যে অন্য কোথাও উত্তর দেওয়া হয়েছে বা আর বিচারাধীন নেই। সরাসরি অবস্থা দেখুন।';
+
+  @override
+  String get liveFormSubmit => 'জমা দিন';
+
+  @override
+  String get liveFormDismiss => 'বাতিল করুন';
+
+  @override
+  String get liveFormSending => 'ফর্ম জমা দেওয়া হচ্ছে…';
+
+  @override
+  String get liveFormDismissing => 'ফর্ম বাতিল করা হচ্ছে…';
+
+  @override
+  String get liveFormSent => 'ফর্ম জমা দেওয়া হয়েছে। সরাসরি অবস্থা দেখুন।';
+
+  @override
+  String get liveFormUnconfirmed => 'জমা নিশ্চিত হয়নি। সরাসরি অবস্থা দেখুন।';
+
+  @override
+  String get liveFormRefused => 'জমা প্রত্যাখ্যাত হয়েছে।';
+
+  @override
+  String get liveFormRequiredField => 'এই ক্ষেত্রটি আবশ্যক।';
+
+  @override
+  String get liveFormInvalidNumber => 'দয়া করে একটি বৈধ সংখ্যা লিখুন।';
+
+  @override
+  String get liveFormInvalidInteger => 'দয়া করে একটি বৈধ পূর্ণসংখ্যা লিখুন।';
+
+  @override
+  String get liveFormOpenLink => 'বাহ্যিক লিঙ্ক খুলুন';
+
+  @override
+  String get liveFormSecretToggle => 'গোপন তথ্যের দৃশ্যমানতা টগল করুন';
+
+  @override
+  String get liveFormSelectOption => 'একটি বিকল্প নির্বাচন করুন';
+
+  @override
+  String get liveFormCustomAnswer => 'কাস্টম উত্তর';
 }

@@ -2103,6 +2103,29 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Then** the app retries it with a bounded backoff (two retries) instead of leaving questions hidden until the next session action
 - **Then** a question that was answered locally is not resurrected by a stale server list within a short propagation window
 
+### Form prompts (OpenCode 2.0.22)
+
+- **Given** the server or an agent emits an interactive form (`type: "form"`) with a `FormSpec`
+- **When** the form request is received on the active session or global owner stream
+- **Then** an interactive card (`SessionFormCard`) is rendered with Material 3 styling in the footer card column
+- **Then** all 9 `FormFieldKind` types are rendered with appropriate native controls:
+  - `string`: plain text field when options are empty; choice chips when options are present, plus a custom text field if `acceptsCustom` is true
+  - `number`: numeric input with validation; rejects non-numeric input with `liveFormInvalidNumber`
+  - `integer`: integer input with validation; rejects non-integer input with `liveFormInvalidInteger`
+  - `boolean`: switch list tile
+  - `singleSelect`: dropdown selector; displays custom text field if `acceptsCustom` is true
+  - `multiSelect`: wrap of filter chips
+  - `custom`: multi-line custom JSON/text input
+  - `externalLink`: button that safely launches external URL via system browser
+  - `secret`: password-obscured input with visibility toggle, with autocorrect and suggestions disabled
+- **Then** dynamic conditional visibility (`when` / `FormCondition`) is evaluated in real time as values change, mounting or unmounting dependent fields
+- **Then** client-side validation (`FormSpec.validate`) checks required fields and field formats before submission
+- **Then** submitting sends `POST /api/session/{sessionId}/form/{formId}/reply` with `{"answer": answers.toJson()}` (204)
+- **Then** dismissing sends `DELETE /api/session/{sessionId}/form/{formId}` (204)
+- **Then** when a network error or HTTP failure occurs during submit, draft field values are preserved so the user does not lose input and can retry
+- **Then** when the form is resolved or dismissed on another client, the live stream update automatically removes the form card
+- **Then** form cards and permission cards share a bounded viewport budget (`cardBudget`), preventing vertical footer overflow on compact screens
+
 ---
 
 ## File Explorer

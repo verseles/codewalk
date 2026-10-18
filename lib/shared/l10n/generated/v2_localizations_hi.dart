@@ -1057,4 +1057,47 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get livePermissionAnsweredElsewhere =>
       'पहले ही कहीं और उत्तर दिया गया या अब लंबित नहीं है। लाइव स्थिति देखें।';
+
+  @override
+  String get liveFormSubmit => 'जमा करें';
+
+  @override
+  String get liveFormDismiss => 'खारिज करें';
+
+  @override
+  String get liveFormSending => 'फ़ॉर्म भेजा जा रहा है…';
+
+  @override
+  String get liveFormDismissing => 'फ़ॉर्म खारिज किया जा रहा है…';
+
+  @override
+  String get liveFormSent => 'फ़ॉर्म भेजा गया। लाइव स्थिति देखें।';
+
+  @override
+  String get liveFormUnconfirmed =>
+      'प्रस्तुति की पुष्टि नहीं हुई। लाइव स्थिति देखें।';
+
+  @override
+  String get liveFormRefused => 'प्रस्तुति अस्वीकार कर दी गई।';
+
+  @override
+  String get liveFormRequiredField => 'यह फ़ील्ड आवश्यक है।';
+
+  @override
+  String get liveFormInvalidNumber => 'कृपया एक मान्य संख्या दर्ज करें।';
+
+  @override
+  String get liveFormInvalidInteger => 'कृपया एक मान्य पूर्णांक दर्ज करें।';
+
+  @override
+  String get liveFormOpenLink => 'बाहरी लिंक खोलें';
+
+  @override
+  String get liveFormSecretToggle => 'गोपनीय दृश्यता टॉगल करें';
+
+  @override
+  String get liveFormSelectOption => 'एक विकल्प चुनें';
+
+  @override
+  String get liveFormCustomAnswer => 'कस्टम उत्तर';
 }
