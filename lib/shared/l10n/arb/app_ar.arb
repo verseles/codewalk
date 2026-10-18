@@ -806,5 +806,17 @@
   "liveUnrestrictedTurnedOff": "تم إيقاف «بلا قيود». تحتفظ الجلسات الفرعية الحالية بالقاعدة التي نسختها.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "وكيل فرعي",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "الرفض يسوّي أيضًا الطلبات المعلقة الأخرى لهذا الوكيل الفرعي.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "تمت الإجابة في مكان آخر أو لم يعد معلقًا. تابع الحالة المباشرة.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

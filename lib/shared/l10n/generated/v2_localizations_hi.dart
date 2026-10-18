@@ -1046,4 +1046,15 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'बिना प्रतिबंध बंद किया गया। मौजूदा चाइल्ड सत्र कॉपी किया गया नियम रखते हैं।';
+
+  @override
+  String get livePermissionChildBadge => 'उप-एजेंट';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'अस्वीकार करने से इस उप-एजेंट के अन्य लंबित अनुरोध भी सुलझ जाते हैं।';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'पहले ही कहीं और उत्तर दिया गया या अब लंबित नहीं है। लाइव स्थिति देखें।';
 }

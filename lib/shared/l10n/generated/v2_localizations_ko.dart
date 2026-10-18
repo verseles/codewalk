@@ -1001,4 +1001,15 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       '제한 없음을 껐습니다. 기존 하위 세션은 복사한 규칙을 유지합니다.';
+
+  @override
+  String get livePermissionChildBadge => '하위 에이전트';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      '거부하면 이 하위 에이전트의 다른 보류 중인 요청도 해결됩니다.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      '이미 다른 곳에서 응답했거나 더 이상 보류 중이 아닙니다. 실시간 상태를 확인하세요.';
 }

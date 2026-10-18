@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "Sans restriction désactivé. Les sessions enfants existantes gardent la règle copiée.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Sous-agent",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Rejeter règle aussi les autres demandes en attente de ce sous-agent.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Déjà répondu ailleurs ou plus en attente. Suivez l’état en direct.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

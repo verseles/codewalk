@@ -51,13 +51,15 @@ ApprovalChoice _always(List<String> patterns) => ApprovalChoice(
 InteractionRequest _ask(
   SessionRef ref,
   String id, {
+  SessionRef? origin,
+  String? title,
   List<ApprovalChoice>? choices,
   Map<String, Object?>? subject,
 }) => InteractionRequest(
   id: InteractionId(id),
-  owner: SessionOwner(ref),
+  owner: SessionOwner(ref, origin: origin),
   kind: const OpenValue.known(InteractionKind.permission),
-  title: 'read src/file.txt',
+  title: title ?? 'read src/file.txt',
   choices: choices ?? [_once(), _reject()],
   subject: subject == null ? null : CanonicalValue(subject),
 );
@@ -179,6 +181,10 @@ void main() {
       );
       expect(
         permissionNoticeText(l10n, refusedWith('NotFoundError')),
+        l10n.livePermissionAnsweredElsewhere,
+      );
+      expect(
+        permissionNoticeText(l10n, refusedWith('InvalidRequestError')),
         l10n.livePermissionRefused,
       );
     });
@@ -792,6 +798,122 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+
+    testWidgets(
+      'cards order (own requests first, then grouped by child) and sub-agent badge',
+      (tester) async {
+        final child1 = SessionRef(ref.host, ref.harness, 'ses_child_1');
+        final child2 = SessionRef(ref.host, ref.harness, 'ses_child_2');
+        final l10n = V2LocalizationsEn();
+
+        final opening = live.start();
+        handle = directory.grant(ref, outbox: FakeOutbox());
+        handle.replyAvailable = true;
+        await opening;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: Scaffold(body: SessionPermissionCards(live: live)),
+          ),
+        );
+        await tester.pump();
+
+        // Emit interactions in interleaved order:
+        // Child 1 req 1, Parent req 1, Child 2 req 1, Parent req 2, Child 1 req 2
+        final reqC1_1 = _ask(child1, 'req_c1_1', origin: ref, title: 'c1-1');
+        final reqP1 = _ask(ref, 'req_p_1', title: 'p-1');
+        final reqC2_1 = _ask(child2, 'req_c2_1', origin: ref, title: 'c2-1');
+        final reqP2 = _ask(ref, 'req_p_2', title: 'p-2');
+        final reqC1_2 = _ask(child1, 'req_c1_2', origin: ref, title: 'c1-2');
+
+        handle.emit(
+          SessionLiveView(
+            session: ref,
+            phase: SessionLivePhase.live,
+            lastSyncedAt: DateTime.utc(2026, 10, 15, 12),
+            state: liveState(
+              ref,
+              interactions: [reqC1_1, reqP1, reqC2_1, reqP2, reqC1_2],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Assert card existence and keys
+        final cardP1 = find.byKey(const ValueKey('live-permission-req_p_1'));
+        final cardP2 = find.byKey(const ValueKey('live-permission-req_p_2'));
+        final cardC1_1 = find.byKey(
+          const ValueKey('live-permission-ses_child_1/req_c1_1'),
+        );
+        final cardC1_2 = find.byKey(
+          const ValueKey('live-permission-ses_child_1/req_c1_2'),
+        );
+        final cardC2_1 = find.byKey(
+          const ValueKey('live-permission-ses_child_2/req_c2_1'),
+        );
+
+        expect(cardP1, findsOneWidget);
+        expect(cardP2, findsOneWidget);
+        expect(cardC1_1, findsOneWidget);
+        expect(cardC1_2, findsOneWidget);
+        expect(cardC2_1, findsOneWidget);
+
+        // Visual order check:
+        // Own requests first (p1, p2), then child requests grouped by child
+        // in order of first appearance (c1-1, c1-2, then c2-1).
+        final yP1 = tester.getTopLeft(cardP1).dy;
+        final yP2 = tester.getTopLeft(cardP2).dy;
+        final yC1_1 = tester.getTopLeft(cardC1_1).dy;
+        final yC1_2 = tester.getTopLeft(cardC1_2).dy;
+        final yC2_1 = tester.getTopLeft(cardC2_1).dy;
+
+        expect(yP1 < yP2, isTrue, reason: 'P1 must appear before P2');
+        expect(yP2 < yC1_1, isTrue, reason: 'P2 must appear before C1_1');
+        expect(yC1_1 < yC1_2, isTrue, reason: 'C1_1 must appear before C1_2');
+        expect(yC1_2 < yC2_1, isTrue, reason: 'C1_2 must appear before C2_1');
+
+        // Sub-agent badges:
+        // Parent cards must NOT have the child badge
+        expect(
+          find.byKey(const ValueKey('live-permission-child-req_p_1')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('live-permission-child-req_p_2')),
+          findsNothing,
+        );
+
+        // Child cards MUST have the child badge row, icon, and label
+        final badgeC1_1 = find.byKey(
+          const ValueKey('live-permission-child-ses_child_1/req_c1_1'),
+        );
+        final badgeC1_2 = find.byKey(
+          const ValueKey('live-permission-child-ses_child_1/req_c1_2'),
+        );
+        final badgeC2_1 = find.byKey(
+          const ValueKey('live-permission-child-ses_child_2/req_c2_1'),
+        );
+
+        expect(badgeC1_1, findsOneWidget);
+        expect(badgeC1_2, findsOneWidget);
+        expect(badgeC2_1, findsOneWidget);
+
+        // Badge content: 3 child cards, so 3 badges and 3 icons
+        expect(find.text(l10n.livePermissionChildBadge), findsNWidgets(3));
+        expect(
+          find.descendant(
+            of: find.byType(SessionPermissionCards),
+            matching: find.byIcon(Icons.subdirectory_arrow_right),
+          ),
+          findsNWidgets(3),
+        );
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {

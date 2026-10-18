@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "بغیر پابندی آف ہو گیا۔ موجودہ چائلڈ سیشن کاپی کیا گیا قاعدہ رکھتے ہیں۔",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "ذیلی ایجنٹ",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "مسترد کرنے سے اس ذیلی ایجنٹ کی دیگر زیر التواء درخواستیں بھی حل ہو جاتی ہیں۔",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "پہلے ہی کہیں اور جواب دیا جا چکا یا اب زیر التواء نہیں۔ لائیو حالت دیکھیں۔",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

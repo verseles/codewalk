@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "সীমাহীন বন্ধ হয়েছে। বিদ্যমান চাইল্ড সেশন কপি করা নিয়মটি রাখে।",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "সাব-এজেন্ট",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "প্রত্যাখ্যান করলে এই সাব-এজেন্টের অন্যান্য বিচারাধীন অনুরোধও মিটে যাবে।",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "ইতিমধ্যে অন্য কোথাও উত্তর দেওয়া হয়েছে বা আর বিচারাধীন নেই। সরাসরি অবস্থা দেখুন।",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

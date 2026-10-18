@@ -5,6 +5,8 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
 import 'event_projection.dart';
+import 'interaction_projection.dart';
+import 'session_projection.dart';
 import 'session_reader.dart';
 
 /// Readiness predicate for the event stream connection: the transport must be
@@ -59,7 +61,9 @@ final class _Watch {
   bool dirty = false;
   int repairs = 0;
   RequestCancellation? cancellation;
-  final held = <(int, Map<String, Object?>)>[];
+
+  /// Frames kept until the first snapshot; a child frame names its child.
+  final held = <(int, Map<String, Object?>, SessionRef?)>[];
 }
 
 const _retryable = {
@@ -97,10 +101,15 @@ final class OpenCodeStreamOwner {
     this.maxHydrationAttempts = 3,
     this.maxRepairs = 3,
     this.maxHeldFrames = 256,
+    this.observeChildren = false,
+    this.maxChildren = 64,
   }) : _now = now ?? DateTime.now,
        _delay = delay ?? Future<void>.delayed,
        streamId = 'opencode:/api/event:${harness.storageKey}' {
-    if (maxHydrationAttempts <= 0 || maxRepairs < 0 || maxHeldFrames <= 0) {
+    if (maxHydrationAttempts <= 0 ||
+        maxRepairs < 0 ||
+        maxHeldFrames <= 0 ||
+        maxChildren <= 0) {
       throw ArgumentError('Stream owner limits must be positive.');
     }
   }
@@ -113,12 +122,21 @@ final class OpenCodeStreamOwner {
   final int maxHydrationAttempts;
   final int maxRepairs;
   final int maxHeldFrames;
+
+  /// Projects the permission requests of each watched session's direct
+  /// children (sub-agents) into that session, owned by the child with the
+  /// parent as origin (ADR-059 §6). Children are never watched for this.
+  final bool observeChildren;
+
+  /// Children followed per watched parent; later ones are ignored.
+  final int maxChildren;
   final String streamId;
   final DateTime Function() _now;
   final Future<void> Function(Duration) _delay;
 
   final _updates = StreamController<OpenCodeStreamUpdate>.broadcast();
   final _watched = <SessionRef, _Watch>{};
+  final _children = <SessionRef, Set<SessionRef>>{};
   StreamSubscription<SseRecoveryUpdate>? _subscription;
   int? _generation;
   bool _released = false;
@@ -128,6 +146,45 @@ final class OpenCodeStreamOwner {
 
   Stream<OpenCodeStreamUpdate> get updates => _updates.stream;
   Iterable<SessionRef> get watched => List.unmodifiable(_watched.keys);
+
+  /// The children whose permission requests [parent] currently shows.
+  Set<SessionRef> childrenOf(SessionRef parent) =>
+      Set.unmodifiable(_children[parent] ?? const <SessionRef>{});
+
+  /// One coalesced re-read of [ref], for example after a reply was refused
+  /// because someone else answered first.
+  void refresh(SessionRef ref) => _repair(ref);
+
+  void _adopt(SessionRef parent, Iterable<SessionRef> children) {
+    final known = _children.putIfAbsent(parent, () => <SessionRef>{});
+    for (final child in children) {
+      if (child == parent || child.harnessRef != harness) continue;
+      if (known.length >= maxChildren && !known.contains(child)) break;
+      known.add(child);
+    }
+  }
+
+  void _reconcileChildren(SessionRef parent, Iterable<SessionRef> listed) {
+    final active = store.read(parent);
+    final residentChildren = {
+      if (active != null)
+        for (final r in active.interactions)
+          if (r.owner is SessionOwner &&
+              (r.owner as SessionOwner).origin == parent)
+            (r.owner as SessionOwner).session,
+    };
+    final next = <SessionRef>{};
+    for (final child in residentChildren) {
+      if (child == parent || child.harnessRef != harness) continue;
+      next.add(child);
+    }
+    for (final child in listed) {
+      if (child == parent || child.harnessRef != harness) continue;
+      if (next.length >= maxChildren && !next.contains(child)) break;
+      next.add(child);
+    }
+    _children[parent] = next;
+  }
 
   void start() {
     if (_closed || _subscription != null) return;
@@ -152,6 +209,7 @@ final class OpenCodeStreamOwner {
   void unwatch(SessionRef ref) {
     final watch = _watched.remove(ref);
     if (watch == null) return;
+    _children.remove(ref);
     watch.cancellation?.cancel();
     store.close(ref);
   }
@@ -261,6 +319,16 @@ final class OpenCodeStreamOwner {
           readStart: readStart,
         );
         try {
+          if (observeChildren) {
+            // Installed before the children's pending reads, so frames that
+            // arrive meanwhile are held and replayed in order.
+            final listed = await reader.listChildSessions(
+              ref,
+              cancellation: cancellation,
+            );
+            if (!_current(ref, watch, generation) || watch.stalled) return;
+            _reconcileChildren(ref, listed);
+          }
           final snapshot = await reader.hydrateSession(
             ref,
             hydrationGeneration: '$generation',
@@ -269,6 +337,9 @@ final class OpenCodeStreamOwner {
             historyLimit: 200,
             now: _now,
             cancellation: cancellation,
+            children: observeChildren
+                ? (_children[ref] ?? const <SessionRef>{})
+                : const <SessionRef>[],
           );
           if (!_current(ref, watch, generation) || watch.stalled) return;
           final result = store.applySnapshot(ref, snapshot);
@@ -287,9 +358,11 @@ final class OpenCodeStreamOwner {
             ..stalled = false;
           final held = List.of(watch.held);
           watch.held.clear();
-          for (final (seq, value) in held) {
+          for (final (seq, value, child) in held) {
             if (!_current(ref, watch, generation)) return;
-            _apply(ref, value, seq);
+            child == null
+                ? _apply(ref, value, seq)
+                : _applyChild(ref, child, value, seq);
           }
           _handle(ref, result.effects);
           return;
@@ -344,6 +417,7 @@ final class OpenCodeStreamOwner {
   }
 
   void _evict(SessionRef ref) {
+    _children.remove(ref);
     final watch = _watched.remove(ref);
     watch?.cancellation?.cancel();
     store.close(ref);
@@ -385,17 +459,109 @@ final class OpenCodeStreamOwner {
     }
     if (session is! String || session.isEmpty) return;
     final ref = SessionRef(harness.host, harness.harness, session);
+    if (observeChildren && data is Map<String, Object?>) {
+      _routeChild(ref, data, value, seq);
+    }
     final watch = _watched[ref];
     if (watch == null || watch.stalled) return;
+    _hold(ref, watch, value, seq, null);
+  }
+
+  void _hold(
+    SessionRef ref,
+    _Watch watch,
+    Map<String, Object?> value,
+    int seq,
+    SessionRef? child,
+  ) {
     if (!watch.ready) {
       if (watch.held.length >= maxHeldFrames) {
         _setAside(ref, watch);
         return;
       }
-      watch.held.add((seq, value));
+      watch.held.add((seq, value, child));
       return;
     }
-    _apply(ref, value, seq);
+    child == null
+        ? _apply(ref, value, seq)
+        : _applyChild(ref, child, value, seq);
+  }
+
+  /// Adopts a child created under a watched parent and forwards a child's
+  /// permission frames to every watched parent that follows it.
+  void _routeChild(
+    SessionRef ref,
+    Map<String, Object?> data,
+    Map<String, Object?> value,
+    int seq,
+  ) {
+    final type = value['type'];
+    if (type == 'session.created') {
+      final parentId = data['parentID'];
+      if (parentId is! String || parentId.isEmpty) return;
+      try {
+        openCodeSessionId(parentId);
+        openCodeSessionId(ref.nativeId);
+      } on Object {
+        return;
+      }
+      final parent = SessionRef(harness.host, harness.harness, parentId);
+      if (_watched.containsKey(parent)) _adopt(parent, [ref]);
+      return;
+    }
+    if (type == 'session.deleted') {
+      for (final MapEntry(key: parent, value: known) in _children.entries) {
+        if (!known.remove(ref)) continue;
+        final state = store.read(parent);
+        final owned = state?.interactions.any(
+          (r) =>
+              r.owner is SessionOwner &&
+              (r.owner as SessionOwner).session == ref,
+        );
+        if (owned ?? false) _repair(parent);
+      }
+      return;
+    }
+    if (type != 'permission.asked' && type != 'permission.replied') return;
+    for (final MapEntry(key: parent, value: known)
+        in _children.entries.toList()) {
+      if (!known.contains(ref)) continue;
+      final watch = _watched[parent];
+      if (watch == null || watch.stalled) continue;
+      _hold(parent, watch, value, seq, ref);
+    }
+  }
+
+  void _applyChild(
+    SessionRef parent,
+    SessionRef child,
+    Map<String, Object?> value,
+    int seq,
+  ) {
+    final state = store.read(parent);
+    if (state == null) {
+      _watched[parent]?.ready = false;
+      _repair(parent);
+      return;
+    }
+    final SessionEvent? event;
+    try {
+      event = projectOpenCodeInteractionEvent(
+        value,
+        state,
+        sourceVersion: sourceVersion,
+        position: _position(seq),
+        receivedAt: _now(),
+        child: child,
+      );
+    } on Exception {
+      _repair(parent);
+      return;
+    }
+    if (event == null) return;
+    final result = store.apply(parent, event);
+    _emit(OpenCodeSessionUpdated(parent, result.state, result.effects));
+    _handle(parent, result.effects);
   }
 
   void _apply(SessionRef ref, Map<String, Object?> value, int seq) {

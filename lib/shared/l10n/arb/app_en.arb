@@ -1283,5 +1283,17 @@
   "liveUnrestrictedTurnedOff": "Unrestricted turned off. Existing child sessions keep the rule they copied.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Sub-agent",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Rejecting also settles this sub-agent’s other pending requests.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Already answered elsewhere or no longer pending. Follow the live state.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

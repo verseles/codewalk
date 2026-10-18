@@ -194,6 +194,59 @@ final class OpenCodeSessionReader {
     }, cancellation);
   }
 
+  /// Direct children of [parent] (sub-agent sessions), newest first page only.
+  /// Upstream matches `parentID` exactly, so grandchildren never appear.
+  Future<List<SessionRef>> listChildSessions(
+    SessionRef parent, {
+    int limit = maxChildSessions,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (parent.harnessRef != harness) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    try {
+      openCodeSessionId(parent.nativeId);
+      if (limit < 1 || limit > min(maxChildSessions, maxPageItems)) {
+        throw const FormatException();
+      }
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final path = Uri(
+      path: 'api/session',
+      queryParameters: {'parentID': parent.nativeId, 'limit': '$limit'},
+    ).toString();
+    return _read(path, (value) {
+      if (value is! Map<String, Object?> || value['data'] is! List) {
+        throw const FormatException('Malformed OpenCode session page.');
+      }
+      final rows = value['data'] as List;
+      if (rows.length > limit) {
+        throw const FormatException('Child page exceeds its item limit.');
+      }
+      final children = <SessionRef>[];
+      for (final row in rows) {
+        final info = projectOpenCodeSession(row, harness).info;
+        if (info.lineage.parent != parent || info.ref == parent) {
+          throw const FormatException('Child row names another parent.');
+        }
+        if (children.contains(info.ref)) {
+          throw const FormatException('Duplicate child session.');
+        }
+        children.add(info.ref);
+      }
+      return children;
+    }, cancellation);
+  }
+
+  /// One page of children, like the official web app's session family read.
+  static const maxChildSessions = 50;
+
   /// Reads the session's own permission rules from its info record. The
   /// identity is checked like [readSession]; an unexpected rules shape is
   /// returned as unrecognized instead of failing the read.
@@ -399,8 +452,16 @@ final class OpenCodeSessionReader {
     int historyLimit = 50,
     DateTime Function()? now,
     RequestCancellation? cancellation,
+    Iterable<SessionRef> children = const [],
   }) async {
     _checkOpen();
+    final childRefs = children.toList();
+    if (childRefs.length > maxChildSessions * 2 ||
+        childRefs.any((c) => c.harnessRef != harness || c == ref)) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
     if (ref.harnessRef != harness) {
       throw const OpenCodeSessionReadException(
         OpenCodeSessionReadFailure.invalidScope,
@@ -540,6 +601,33 @@ final class OpenCodeSessionReader {
         () => [for (final row in list(value)) openCodePendingForm(row, ref)],
       ),
     );
+    // Children's pending requests join the parent's authoritative collection,
+    // owned by the child with the parent as origin, so a re-hydration never
+    // drops them and a request raised before connecting is still shown.
+    final childPermissions = <InteractionRequest>[];
+    var childEnd = formEnd;
+    for (final child in childRefs) {
+      try {
+        final (rows, _, end) = await timed(
+          Uri(
+            pathSegments: ['api', 'session', child.nativeId, 'permission'],
+          ).toString(),
+          (value) => _projected(
+            () => [
+              for (final row in list(value))
+                openCodePendingPermission(row, child, origin: ref),
+            ],
+          ),
+        );
+        childPermissions.addAll(rows);
+        if (end.isAfter(childEnd)) childEnd = end;
+      } on OpenCodeSessionReadException catch (error) {
+        // Explicit cancellation halts the entire hydration. Any read failure
+        // on a child (deleted, 500, timeout, malformed) is skipped so a child
+        // issue never degrades or sets aside the parent session.
+        if (error.failure == OpenCodeSessionReadFailure.cancelled) rethrow;
+      }
+    }
 
     String? messageOf(ItemId id) {
       try {
@@ -561,7 +649,7 @@ final class OpenCodeSessionReader {
       pending.add(entry);
       admissions.addAll(row.items);
     }
-    final interactions = [...permissions, ...forms];
+    final interactions = [...permissions, ...forms, ...childPermissions];
     final identities = {
       for (final request in interactions) request.identityKey,
     };
@@ -626,7 +714,7 @@ final class OpenCodeSessionReader {
         boundary: boundary(
           'session.permission.list+session.form.list',
           formStart.isBefore(permissionStart) ? formStart : permissionStart,
-          formEnd.isAfter(permissionEnd) ? formEnd : permissionEnd,
+          childEnd.isAfter(permissionEnd) ? childEnd : permissionEnd,
         ),
       ),
       // The session record carries the staged revert; absent means none.

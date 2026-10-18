@@ -185,10 +185,16 @@ class SessionLiveController extends ChangeNotifier {
     _notify();
   }
 
-  SessionPermissionReplyState replyState(InteractionId id) =>
-      _handle?.replyState(id) ?? const SessionPermissionReplyState();
+  /// [owner] is the owning session of a child's request shown here.
+  SessionPermissionReplyState replyState(
+    InteractionId id, {
+    SessionRef? owner,
+  }) =>
+      _handle?.replyState(id, owner: owner) ??
+      const SessionPermissionReplyState();
 
-  bool replying(InteractionId id) => _handle?.replyState(id).busy ?? false;
+  bool replying(InteractionId id, {SessionRef? owner}) =>
+      _handle?.replyState(id, owner: owner).busy ?? false;
 
   /// Whether this screen's lease can send replies at all. A resident card stays
   /// mounted (disabled) while the lease is not current, so a typed note and the
@@ -204,8 +210,16 @@ class SessionLiveController extends ChangeNotifier {
       _credential?.matches(_currentCredential()) == true &&
       phase == SessionLivePhase.live &&
       !(view?.stale ?? true) &&
-      !replying(request.id) &&
+      !replying(request.id, owner: _childOwner(request)) &&
       (_handle?.canReply(request) ?? false);
+
+  /// The owning child session of a request shown in this session, if any.
+  SessionRef? _childOwner(InteractionRequest request) {
+    final owner = request.owner;
+    return owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+  }
 
   Future<void> replyToPermission({
     required InteractionRequest request,
@@ -227,17 +241,26 @@ class SessionLiveController extends ChangeNotifier {
     _notify();
   }
 
+  String _noteKey(InteractionId id, SessionRef? owner) =>
+      owner != null ? '${owner.nativeId}/${id.value}' : id.value;
+
   /// Local draft text for a request's rejection note. The card seeds its field
   /// from here and writes every edit back, so an explicit retry or a lease
   /// re-open cannot discard a note the user already typed.
-  String permissionNote(InteractionId id) => _notes[id.value] ?? '';
+  String permissionNote(InteractionId id, {SessionRef? owner}) =>
+      _notes[_noteKey(id, owner)] ?? '';
 
-  void setPermissionNote(InteractionId id, String value) {
+  void setPermissionNote(
+    InteractionId id,
+    String value, {
+    SessionRef? owner,
+  }) {
     if (_disposed) return;
+    final key = _noteKey(id, owner);
     if (value.isEmpty) {
-      _notes.remove(id.value);
+      _notes.remove(key);
     } else {
-      _notes[id.value] = value;
+      _notes[key] = value;
     }
   }
 
@@ -245,7 +268,9 @@ class SessionLiveController extends ChangeNotifier {
   /// lease is being re-opened, so the drafts must survive it.
   void _pruneNotes(SessionState? state) {
     if (_notes.isEmpty || state == null) return;
-    final resident = {for (final r in state.interactions) r.id.value};
+    final resident = {
+      for (final r in state.interactions) _noteKey(r.id, _childOwner(r)),
+    };
     _notes.removeWhere((key, _) => !resident.contains(key));
   }
 

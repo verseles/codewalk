@@ -2018,6 +2018,24 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Unrestricted turned off. Existing child sessions keep the rule they copied.'**
   String get liveUnrestrictedTurnedOff;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-agent'**
+  String get livePermissionChildBadge;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Rejecting also settles this sub-agent’s other pending requests.'**
+  String get livePermissionChildBatchScope;
+
+  /// V2 manual permission cards
+  ///
+  /// In en, this message translates to:
+  /// **'Already answered elsewhere or no longer pending. Follow the live state.'**
+  String get livePermissionAnsweredElsewhere;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

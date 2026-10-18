@@ -87,7 +87,9 @@ abstract interface class SessionLiveHandle {
   /// Explicit permission replies for this session's interactions, independent
   /// of prompt-ledger storage. The per-request state and single-flight fence
   /// are shared by its open leases; closing never replies.
-  SessionPermissionReplyState replyState(InteractionId id);
+  /// [owner] is the request's owning session when it is a child's request
+  /// shown in this lease's session; the fence is keyed by the owner.
+  SessionPermissionReplyState replyState(InteractionId id, {SessionRef? owner});
   bool canReply(InteractionRequest request);
   Future<void> reply({
     required InteractionRequest request,

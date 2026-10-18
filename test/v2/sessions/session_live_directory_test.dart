@@ -47,6 +47,9 @@ final class _Server {
   /// Whether a PATCH is stored even when its status says otherwise.
   bool? patchApplies;
 
+  /// Child session ids by parent id, served on `GET /api/session?parentID=`.
+  final children = <String, List<String>>{};
+
   /// 1-based indices of `GET /api/session/<id>` reads answered with 500.
   final failSessionReads = <int>{};
   int sessionReads = 0;
@@ -134,6 +137,29 @@ final class _Server {
       await r.response.close();
       return;
     }
+    if (r.method == 'GET' &&
+        tail == 'session' &&
+        r.uri.queryParameters.containsKey('parentID')) {
+      final parent = r.uri.queryParameters['parentID']!;
+      r.response.write(
+        jsonEncode({
+          'data': [
+            for (final child in children[parent] ?? const <String>[])
+              {
+                'id': child,
+                'parentID': parent,
+                'title': 'Child $child',
+                'projectID': 'prj_a',
+                'location': {'directory': '/workspace'},
+                'time': {'created': 1, 'updated': 2},
+              },
+          ],
+          'cursor': <String, Object?>{},
+        }),
+      );
+      await r.response.close();
+      return;
+    }
     final session = segments.length > 3 ? segments[3] : 'ses_one';
     if (r.method == 'GET' && segments.length == 4 && tail == session) {
       if (failSessionReads.contains(++sessionReads)) {
@@ -193,6 +219,21 @@ final class _Server {
       }),
     );
     await r.response.close();
+  }
+
+  /// Sends one ephemeral frame of [type] with [data] to every open stream.
+  Future<void> emit(String type, Map<String, Object?> data) async {
+    final seq = ++_seq;
+    final frame = {
+      'id': 'evt_x$seq',
+      'type': type,
+      'created': 1000 + seq,
+      'data': data,
+    };
+    for (final stream in streams) {
+      stream.write('data: ${jsonEncode(frame)}\n\n');
+      await stream.flush();
+    }
   }
 
   Future<void> execution(String session, String type, {String? reason}) async {
@@ -1807,5 +1848,185 @@ void main() {
       expect(server.sessionRules['ses_one'], [ask]);
       expect(store.recordFor(ref('ses_one')), isNull);
     });
+  });
+
+  group('child requests in the parent (V2-047B3a)', () {
+    Map<String, Object?> ask(String id, String session) => {
+      'id': id,
+      'sessionID': session,
+      'action': 'read',
+      'resources': ['src/a.txt'],
+    };
+
+    Future<SessionLiveHandle> openParent(SessionLiveDirectory directory) async {
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      return handle;
+    }
+
+    InteractionRequest? childRequest(SessionLiveHandle handle, String id) {
+      for (final r in handle.current.state?.interactions ?? const []) {
+        final owner = r.owner;
+        if (r.id.value == id &&
+            owner is SessionOwner &&
+            owner.session == ref('ses_child')) {
+          return r;
+        }
+      }
+      return null;
+    }
+
+    Future<void> eventually(bool Function() test) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!test() && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(test(), isTrue);
+    }
+
+    test('a child request pending before connecting is shown and answered '
+        'on the child route', () async {
+      server.children['ses_one'] = ['ses_child'];
+      server.permissions.add(ask('per_c1', 'ses_child'));
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final handle = await openParent(directory);
+      await eventually(() => childRequest(handle, 'per_c1') != null);
+      final request = childRequest(handle, 'per_c1')!;
+      expect((request.owner as SessionOwner).origin, ref('ses_one'));
+      expect(handle.canReply(request), isTrue);
+      await handle.reply(
+        request: request,
+        response: ApprovalResponse('once'),
+        id: const CommandId('cmd_child'),
+      );
+      expect(server.replies, ['{"decision":"once"}']);
+      expect(
+        server.paths,
+        contains('/proxy/api/session/ses_child/permission/per_c1/reply'),
+      );
+      expect(
+        server.paths.where(
+          (path) => path.endsWith('/ses_one/permission/per_c1/reply'),
+        ),
+        isEmpty,
+      );
+      expect(
+        handle.replyState(request.id, owner: ref('ses_child')).phase,
+        SessionPermissionReplyPhase.requested,
+      );
+    });
+
+    test('live child frames open and settle the parent card', () async {
+      server.children['ses_one'] = ['ses_child'];
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final handle = await openParent(directory);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await server.emit('permission.asked', ask('per_c2', 'ses_child'));
+      await eventually(() => childRequest(handle, 'per_c2') != null);
+      await server.emit('permission.replied', {
+        'sessionID': 'ses_child',
+        'requestID': 'per_c2',
+        'reply': 'once',
+      });
+      await eventually(() => childRequest(handle, 'per_c2') == null);
+      expect(server.replies, isEmpty);
+    });
+
+    test('a child created after the parent is live is followed', () async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final handle = await openParent(directory);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await server.emit('session.created', {
+        'sessionID': 'ses_child',
+        'parentID': 'ses_one',
+      });
+      await server.emit('permission.asked', ask('per_c3', 'ses_child'));
+      await eventually(() => childRequest(handle, 'per_c3') != null);
+    });
+
+    test(
+      'Allow all answers the parent but leaves child requests manual',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.permissions
+          ..add(ask('per_own', 'ses_one'))
+          ..add(ask('per_c4', 'ses_child'));
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        final directory = createSessionLiveDirectory(permissionModes: policy)!;
+        addTearDown(directory.close);
+        final handle = await openParent(directory);
+        await eventually(() => childRequest(handle, 'per_c4') != null);
+        await eventually(() => server.replies.isNotEmpty);
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        expect(server.replies, ['{"decision":"once"}']);
+        expect(
+          server.paths,
+          contains('/proxy/api/session/ses_one/permission/per_own/reply'),
+        );
+        expect(
+          server.paths.where(
+            (path) => path.contains('ses_child/permission/per_c4/reply'),
+          ),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'a 404 reads as answered elsewhere and re-reads, never resends',
+      () async {
+        server
+          ..children['ses_one'] = ['ses_child']
+          ..replyStatus = 404;
+        server.permissions.add(ask('per_c5', 'ses_child'));
+        final directory = createSessionLiveDirectory()!;
+        addTearDown(directory.close);
+        final handle = await openParent(directory);
+        await eventually(() => childRequest(handle, 'per_c5') != null);
+        final childReads = server.paths
+            .where((path) => path == '/proxy/api/session/ses_child/permission')
+            .length;
+        // Someone else answered: the native list no longer has it.
+        server.permissions.clear();
+        await handle.reply(
+          request: childRequest(handle, 'per_c5')!,
+          response: ApprovalResponse('once'),
+          id: const CommandId('cmd_late'),
+        );
+        expect(
+          handle
+              .replyState(
+                const InteractionId('per_c5'),
+                owner: ref('ses_child'),
+              )
+              .receipt
+              ?.error
+              ?.rawType,
+          'NotFoundError',
+        );
+        await eventually(() => childRequest(handle, 'per_c5') == null);
+        expect(
+          server.paths
+              .where(
+                (path) => path == '/proxy/api/session/ses_child/permission',
+              )
+              .length,
+          greaterThan(childReads),
+        );
+        expect(server.replies, hasLength(1));
+      },
+    );
   });
 }

@@ -1058,4 +1058,15 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       '«Без ограничений» выключено. Существующие дочерние сеансы сохраняют скопированное правило.';
+
+  @override
+  String get livePermissionChildBadge => 'Субагент';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'Отклонение также завершает остальные ожидающие запросы этого субагента.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'Уже отвечено в другом месте или больше не ожидает. Следите за состоянием.';
 }

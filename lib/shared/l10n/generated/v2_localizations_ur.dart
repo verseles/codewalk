@@ -1044,4 +1044,15 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'بغیر پابندی آف ہو گیا۔ موجودہ چائلڈ سیشن کاپی کیا گیا قاعدہ رکھتے ہیں۔';
+
+  @override
+  String get livePermissionChildBadge => 'ذیلی ایجنٹ';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'مسترد کرنے سے اس ذیلی ایجنٹ کی دیگر زیر التواء درخواستیں بھی حل ہو جاتی ہیں۔';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'پہلے ہی کہیں اور جواب دیا جا چکا یا اب زیر التواء نہیں۔ لائیو حالت دیکھیں۔';
 }

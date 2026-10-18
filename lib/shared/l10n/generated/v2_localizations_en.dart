@@ -1043,4 +1043,15 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'Unrestricted turned off. Existing child sessions keep the rule they copied.';
+
+  @override
+  String get livePermissionChildBadge => 'Sub-agent';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'Rejecting also settles this sub-agent’s other pending requests.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'Already answered elsewhere or no longer pending. Follow the live state.';
 }

@@ -1069,4 +1069,15 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'Sans restriction désactivé. Les sessions enfants existantes gardent la règle copiée.';
+
+  @override
+  String get livePermissionChildBadge => 'Sous-agent';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'Rejeter règle aussi les autres demandes en attente de ce sous-agent.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'Déjà répondu ailleurs ou plus en attente. Suivez l’état en direct.';
 }

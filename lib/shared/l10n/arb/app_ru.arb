@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "«Без ограничений» выключено. Существующие дочерние сеансы сохраняют скопированное правило.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Субагент",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Отклонение также завершает остальные ожидающие запросы этого субагента.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Уже отвечено в другом месте или больше не ожидает. Следите за состоянием.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

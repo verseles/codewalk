@@ -976,4 +976,13 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveUnrestrictedTurnedOff => '已关闭无限制。现有子会话保留其已复制的规则。';
+
+  @override
+  String get livePermissionChildBadge => '子代理';
+
+  @override
+  String get livePermissionChildBatchScope => '拒绝也会解决此子代理的其他待处理请求。';
+
+  @override
+  String get livePermissionAnsweredElsewhere => '已在其他地方答复或不再待处理。请关注实时状态。';
 }

@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "Uneingeschränkt deaktiviert. Bestehende Untersitzungen behalten die übernommene Regel.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Unteragent",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Ablehnen erledigt auch die anderen ausstehenden Anfragen dieses Unteragenten.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Bereits anderswo beantwortet oder nicht mehr ausstehend. Verfolge den Live-Status.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

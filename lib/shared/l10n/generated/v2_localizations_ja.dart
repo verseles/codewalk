@@ -998,4 +998,15 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       '制限なしをオフにしました。既存の子セッションはコピーしたルールを保持します。';
+
+  @override
+  String get livePermissionChildBadge => 'サブエージェント';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      '拒否すると、このサブエージェントの他の保留中の要求も解決されます。';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'すでに別の場所で回答済みか、保留中ではありません。ライブの状態を確認してください。';
 }

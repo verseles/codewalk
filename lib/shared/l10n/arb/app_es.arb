@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "Sin restricciones desactivado. Las sesiones hijas existentes conservan la regla que copiaron.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Subagente",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Rechazar también resuelve las demás solicitudes pendientes de este subagente.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Ya se respondió en otro lugar o ya no está pendiente. Observa el estado en vivo.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

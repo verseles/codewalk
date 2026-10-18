@@ -1040,4 +1040,15 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'সীমাহীন বন্ধ হয়েছে। বিদ্যমান চাইল্ড সেশন কপি করা নিয়মটি রাখে।';
+
+  @override
+  String get livePermissionChildBadge => 'সাব-এজেন্ট';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'প্রত্যাখ্যান করলে এই সাব-এজেন্টের অন্যান্য বিচারাধীন অনুরোধও মিটে যাবে।';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'ইতিমধ্যে অন্য কোথাও উত্তর দেওয়া হয়েছে বা আর বিচারাধীন নেই। সরাসরি অবস্থা দেখুন।';
 }

@@ -75,22 +75,36 @@ class LiveHandle implements SessionLiveHandle {
   final replies = <(InteractionId, String, String?, CommandId)>[];
   final _replyStates = <String, SessionPermissionReplyState>{};
 
-  @override
-  SessionPermissionReplyState replyState(InteractionId id) =>
-      _replyStates[id.value] ?? const SessionPermissionReplyState();
+  String _replyKey(InteractionId id, SessionRef? owner) =>
+      owner != null ? '${owner.nativeId}/${id.value}' : id.value;
 
   @override
-  bool canReply(InteractionRequest request) =>
-      replyAvailable &&
-      closes == 0 &&
-      request.kind.known == InteractionKind.permission &&
-      request.owner is SessionOwner &&
-      (request.owner as SessionOwner).session == session &&
-      current.phase == SessionLivePhase.live &&
-      !current.stale &&
-      (current.state?.interactions.any((r) => r.id.value == request.id.value) ??
-          false) &&
-      !replyState(request.id).busy;
+  SessionPermissionReplyState replyState(
+    InteractionId id, {
+    SessionRef? owner,
+  }) =>
+      _replyStates[_replyKey(id, owner)] ??
+      const SessionPermissionReplyState();
+
+  @override
+  bool canReply(InteractionRequest request) {
+    final owner = request.owner;
+    final child = owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+    return replyAvailable &&
+        closes == 0 &&
+        request.kind.known == InteractionKind.permission &&
+        owner is SessionOwner &&
+        (owner.session == session || owner.origin == session) &&
+        current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        (current.state?.interactions.any(
+              (r) => r.id.value == request.id.value,
+            ) ??
+            false) &&
+        !replyState(request.id, owner: child).busy;
+  }
 
   @override
   Future<void> reply({
@@ -99,8 +113,13 @@ class LiveHandle implements SessionLiveHandle {
     required CommandId id,
   }) async {
     if (!canReply(request)) return;
+    final owner = request.owner;
+    final child = owner is SessionOwner && owner.session != session
+        ? owner.session
+        : null;
+    final key = _replyKey(request.id, child);
     replies.add((request.id, response.choiceId, response.note, id));
-    _replyStates[request.id.value] = const SessionPermissionReplyState(
+    _replyStates[key] = const SessionPermissionReplyState(
       phase: SessionPermissionReplyPhase.requesting,
     );
     emit(current);
@@ -112,7 +131,7 @@ class LiveHandle implements SessionLiveHandle {
               ),
             ));
     if (closes == 0) {
-      _replyStates[request.id.value] = result;
+      _replyStates[key] = result;
       emit(current);
     }
   }

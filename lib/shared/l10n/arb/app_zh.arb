@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "已关闭无限制。现有子会话保留其已复制的规则。",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "子代理",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "拒绝也会解决此子代理的其他待处理请求。",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "已在其他地方答复或不再待处理。请关注实时状态。",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

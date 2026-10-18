@@ -1038,4 +1038,15 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'تم إيقاف «بلا قيود». تحتفظ الجلسات الفرعية الحالية بالقاعدة التي نسختها.';
+
+  @override
+  String get livePermissionChildBadge => 'وكيل فرعي';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'الرفض يسوّي أيضًا الطلبات المعلقة الأخرى لهذا الوكيل الفرعي.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'تمت الإجابة في مكان آخر أو لم يعد معلقًا. تابع الحالة المباشرة.';
 }

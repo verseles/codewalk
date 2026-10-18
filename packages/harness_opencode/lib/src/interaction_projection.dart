@@ -53,12 +53,18 @@ const _globalSession = 'global';
 /// replied, so replies resolve with an unknown origin; a form cancellation
 /// resolves as cancelled. Form answers, request messages and native metadata
 /// are validated but never copied, and the frame location is never read.
+///
+/// With [child], only that child session's permission events are projected
+/// into the parent [current]: the owner keeps the child's identity with the
+/// parent as origin (ADR-059 §6), so a reply still goes to the child's route.
+/// Child forms stay in the child's own view.
 SessionEvent? projectOpenCodeInteractionEvent(
   Object? value,
   SessionState current, {
   required String sourceVersion,
   required StreamPosition position,
   required DateTime receivedAt,
+  SessionRef? child,
 }) {
   final frame = _object(value);
   final type = frame['type'];
@@ -70,7 +76,15 @@ SessionEvent? projectOpenCodeInteractionEvent(
   final sessionText = _text((form ?? data)['sessionID'], nonempty: true);
   final ref = current.ref;
   final DomainOwner owner;
-  if (!permission && sessionText == _globalSession) {
+  if (child != null) {
+    if (!permission ||
+        child == ref ||
+        child.harnessRef != ref.harnessRef ||
+        sessionText != child.nativeId) {
+      return null;
+    }
+    owner = SessionOwner(child, origin: ref);
+  } else if (!permission && sessionText == _globalSession) {
     owner = GlobalOwner(ref.harnessRef);
   } else {
     if (!sessionText.startsWith('ses')) {
@@ -277,12 +291,17 @@ InteractionRequest _formRequest(
 
 /// The pending request of one row from `GET /api/session/{id}/permission`.
 /// Session-scoped reads never carry another session or a global owner.
-InteractionRequest openCodePendingPermission(Object? row, SessionRef ref) {
+/// With [origin], the row belongs to a child read for that parent's view.
+InteractionRequest openCodePendingPermission(
+  Object? row,
+  SessionRef ref, {
+  SessionRef? origin,
+}) {
   final data = _object(row);
   if (_text(data['sessionID'], nonempty: true) != ref.nativeId) {
     _fail(OpenCodeInteractionProjectionFailure.malformed);
   }
-  return _permissionRequest(data, SessionOwner(ref), {});
+  return _permissionRequest(data, SessionOwner(ref, origin: origin), {});
 }
 
 /// The pending request of one row from `GET /api/session/{id}/form`.

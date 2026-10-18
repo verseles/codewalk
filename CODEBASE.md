@@ -2105,3 +2105,27 @@ remain V2-047B3.
 (cd packages/harness_opencode && dart test test/session_rules_test.dart)
 flutter test --no-pub test/v2/sessions/unrestricted_ownership_store_test.dart test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_permission_mode_chip_test.dart
 ```
+
+## V2-047B3a Child session permission cards (#284, ADR-059 §§2, 8)
+
+```text
+packages/harness_opencode/lib/src/interaction_projection.dart # projectOpenCodeInteractionEvent preserves SessionOwner(child, origin: parent); openCodePendingPermission accepts origin
+packages/harness_opencode/lib/src/session_reader.dart # listChildSessions (GET /api/session?parentID), hydrateSession children: permission reads with error isolation
+packages/harness_opencode/lib/src/stream_owner.dart # observeChildren, _children set with _reconcileChildren on hydration, session.created dynamic adoption with ID validation, permission.* routing to parent stream
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle replyState accepts owner: parameter
+lib/platform/sessions/session_live_factory_io.dart # _ProfileSlot enables observeChildren; reply fence and _replyStates keyed by owning session; canReply accepts owner.origin == ref; late 404 triggers refresh; _canAutoApprove strictly ignores child requests (fail-closed in B3a)
+lib/features/sessions/session_live_controller.dart # replyState/permissionNote/setPermissionNote scoped by owning child; _childOwner derivation; note pruning by scoped key
+lib/features/sessions/session_permission_card.dart # permissionChildOf, permissionKeyOf; visual order (parent's own first, then grouped by child); Sub-agent badge with arrow icon; late 404 mapped to livePermissionAnsweredElsewhere
+tool/l10n/session_permission_catalog.py # livePermissionChildBadge, livePermissionChildBatchScope, livePermissionAnsweredElsewhere across 14 locales
+test/v2/sessions/session_live_directory_test.dart # Child requests integration suite (5 tests covering discovery, routing, late 404, first-reply-wins)
+test/v2/sessions/session_permission_cards_test.dart # Cards order, sub-agent badge, and answered-elsewhere notice widget tests
+test/v2/sessions/live_fakes.dart # FakeLiveHandle supporting child owner scoping in replyState and canReply
+```
+
+Child session permission cards are displayed in the parent live card, routed to the child's own reply route, with fail-closed automatic approval (deferred to B3b) and native first-reply-wins late 404 handling.
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_permission_cards_test.dart
+```
+

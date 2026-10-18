@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "Senza restrizioni disattivato. Le sessioni figlie esistenti mantengono la regola copiata.",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "Sottoagente",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "Rifiutare risolve anche le altre richieste in attesa di questo sottoagente.",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "Già risposto altrove o non più in attesa. Segui lo stato dal vivo.",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

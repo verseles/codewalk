@@ -290,6 +290,7 @@ final class _ProfileSlot {
       store: _store,
       harness: harness,
       sourceVersion: observed,
+      observeChildren: true,
     );
     _connection = connection;
     _owner = owner;
@@ -813,8 +814,23 @@ final class _ProfileSlot {
 
   static String _replyKey(SessionRef ref, String id) => '${ref.storageKey}|$id';
 
-  SessionPermissionReplyState replyState(SessionRef ref, InteractionId id) =>
-      _replyStates[_replyKey(ref, id.value)]?.state ??
+  /// The session that owns [request]: a child's request shown in its parent
+  /// keeps the child, so every view and both paths share one fence.
+  static SessionRef? _owning(InteractionRequest request) {
+    final owner = request.owner;
+    return owner is SessionOwner ? owner.session : null;
+  }
+
+  static String _requestKey(InteractionRequest request) =>
+      _replyKey(_owning(request)!, request.id.value);
+
+  /// [owner] is the request's owning session when it is not [ref] itself.
+  SessionPermissionReplyState replyState(
+    SessionRef ref,
+    InteractionId id, {
+    SessionRef? owner,
+  }) =>
+      _replyStates[_replyKey(owner ?? ref, id.value)]?.state ??
       const SessionPermissionReplyState();
 
   bool get supportsReplies => _replies != null && !isClosed;
@@ -824,19 +840,19 @@ final class _ProfileSlot {
     if (isClosed ||
         _replies == null ||
         owner is! SessionOwner ||
-        owner.session != ref) {
+        (owner.session != ref && owner.origin != ref)) {
       return false;
     }
-    final key = _replyKey(ref, request.id.value);
+    final key = _requestKey(request);
     if ((_replyStates[key]?.inFlight ?? false) ||
-        replyState(ref, request.id).busy) {
+        (_replyStates[key]?.state.busy ?? false)) {
       return false;
     }
     final current = view(ref);
     return current.phase == SessionLivePhase.live &&
         !current.stale &&
         (current.state?.interactions.any(
-              (r) => r.id.value == request.id.value,
+              (r) => r.identityKey == request.identityKey,
             ) ??
             false);
   }
@@ -866,7 +882,7 @@ final class _ProfileSlot {
   }) async {
     final client = _replies;
     if (client == null || !canReply(ref, request)) return;
-    final key = _replyKey(ref, request.id.value);
+    final key = _requestKey(request);
     _replyStates[key]?.dispose();
     final reply = _ReplyRequest(ref);
     _replyStates[key] = reply;
@@ -897,6 +913,12 @@ final class _ProfileSlot {
       _ => SessionPermissionReplyPhase.unconfirmed,
     };
     reply.state = SessionPermissionReplyState(phase: phase, receipt: receipt);
+    // Someone else answered first (or the request is gone): never resend,
+    // read the session once so the card follows the native state.
+    if (receipt.state.known == ReceiptState.rejected &&
+        receipt.error?.rawType == 'NotFoundError') {
+      _owner?.refresh(ref);
+    }
     if (phase == SessionPermissionReplyPhase.requested) {
       // The reply was accepted, not settled. Bound the local waiting state
       // without inferring settlement or automatically repeating the mutation.
@@ -918,16 +940,21 @@ final class _ProfileSlot {
     final state = view.state;
     final resident = {
       for (final r in state?.interactions ?? const <InteractionRequest>[])
-        _replyKey(ref, r.id.value),
+        if (_owning(r) != null) _requestKey(r),
     };
     // The answered fence only shrinks on an authoritative live snapshot that
     // no longer lists the request. Native ids are unique, so a removed request
-    // never returns and cannot re-open a replay window.
+    // never returns and cannot re-open a replay window. A parent's snapshot
+    // is authoritative for the children it follows too.
     if (state != null && view.phase == SessionLivePhase.live && !view.stale) {
-      final prefix = '${ref.storageKey}|';
+      final prefixes = [
+        '${ref.storageKey}|',
+        for (final child in _owner?.childrenOf(ref) ?? const <SessionRef>{})
+          if (!_views.containsKey(child)) '${child.storageKey}|',
+      ];
       answered.removeWhere(
         (key) =>
-            key.startsWith(prefix) &&
+            prefixes.any(key.startsWith) &&
             !resident.contains(key) &&
             !(_replyStates[key]?.inFlight ?? false),
       );
@@ -953,7 +980,10 @@ final class _ProfileSlot {
     }
     // The native `once` choice is the only thing this path may send.
     if (request.automaticChoice?.id != 'once') return false;
-    if (answered.contains(_replyKey(ref, request.id.value))) return false;
+    // A child's request shown in its parent stays manual until the child
+    // policy lands (V2-047B3b).
+    if (_owning(request) != ref) return false;
+    if (answered.contains(_requestKey(request))) return false;
     return canReply(ref, request);
   }
 
@@ -1270,9 +1300,12 @@ final class _LiveHandle implements SessionLiveHandle {
   bool get supportsReplies => !_closed && _slot.supportsReplies;
 
   @override
-  SessionPermissionReplyState replyState(InteractionId id) => _closed
+  SessionPermissionReplyState replyState(
+    InteractionId id, {
+    SessionRef? owner,
+  }) => _closed
       ? const SessionPermissionReplyState()
-      : _slot.replyState(session, id);
+      : _slot.replyState(session, id, owner: owner);
 
   @override
   bool canReply(InteractionRequest request) =>

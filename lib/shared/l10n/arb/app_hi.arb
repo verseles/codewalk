@@ -807,5 +807,17 @@
   "liveUnrestrictedTurnedOff": "बिना प्रतिबंध बंद किया गया। मौजूदा चाइल्ड सत्र कॉपी किया गया नियम रखते हैं।",
   "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBadge": "उप-एजेंट",
+  "@livePermissionChildBadge": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionChildBatchScope": "अस्वीकार करने से इस उप-एजेंट के अन्य लंबित अनुरोध भी सुलझ जाते हैं।",
+  "@livePermissionChildBatchScope": {
+    "description": "V2 manual permission cards"
+  },
+  "livePermissionAnsweredElsewhere": "पहले ही कहीं और उत्तर दिया गया या अब लंबित नहीं है। लाइव स्थिति देखें।",
+  "@livePermissionAnsweredElsewhere": {
+    "description": "V2 manual permission cards"
   }
 }

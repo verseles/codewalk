@@ -30,12 +30,26 @@ class SessionPermissionCards extends StatelessWidget {
       // Only a lease without a reply port keeps the read-only contract; the
       // needs-you line still signals. A resident card stays mounted while the
       // lease is not current (actions disabled) instead of dropping the note.
-      final requests = [
+      final all = [
         for (final request
             in live.state?.interactions ?? const <InteractionRequest>[])
           if (request.kind.known == InteractionKind.permission &&
               live.supportsReplies)
             request,
+      ];
+      // The session's own requests first, then sub-agent requests grouped by
+      // child in order of first appearance.
+      final children = <SessionRef>[];
+      for (final request in all) {
+        final child = permissionChildOf(live.session, request);
+        if (child != null && !children.contains(child)) children.add(child);
+      }
+      final requests = [
+        for (final r in all)
+          if (permissionChildOf(live.session, r) == null) r,
+        for (final child in children)
+          for (final r in all)
+            if (permissionChildOf(live.session, r) == child) r,
       ];
       if (requests.isEmpty) return const SizedBox.shrink();
       return ConstrainedBox(
@@ -47,7 +61,9 @@ class SessionPermissionCards extends StatelessWidget {
             children: [
               for (final request in requests)
                 _PermissionCard(
-                  key: ValueKey('live-permission-${request.id.value}'),
+                  key: ValueKey(
+                    'live-permission-${permissionKeyOf(live.session, request)}',
+                  ),
                   live: live,
                   request: request,
                 ),
@@ -57,6 +73,24 @@ class SessionPermissionCards extends StatelessWidget {
       );
     },
   );
+}
+
+/// The child session that owns [request] when it is a sub-agent request shown
+/// in [session]; null for the session's own requests.
+SessionRef? permissionChildOf(SessionRef session, InteractionRequest request) {
+  final owner = request.owner;
+  return owner is SessionOwner && owner.session != session
+      ? owner.session
+      : null;
+}
+
+/// Widget key part unique across the session and its children, whose native
+/// ids live in separate scopes.
+String permissionKeyOf(SessionRef session, InteractionRequest request) {
+  final child = permissionChildOf(session, request);
+  return child == null
+      ? request.id.value
+      : '${child.nativeId}/${request.id.value}';
 }
 
 /// Finite copy for a reply state; pure and unit-tested. Never raw server text.
@@ -72,6 +106,8 @@ String? permissionNoticeText(
     switch (state.receipt?.error?.rawType) {
       'UnauthorizedError' => l10n.hostsAuthRequired,
       'RateLimited' => l10n.sessionsRateLimited,
+      // Native first-reply-wins: someone else answered, or it is gone.
+      'NotFoundError' => l10n.livePermissionAnsweredElsewhere,
       _ => l10n.livePermissionRefused,
     },
 };
@@ -155,12 +191,18 @@ class _PermissionCardState extends State<_PermissionCard> {
   final _note = TextEditingController();
   bool _showNote = false;
 
+  SessionRef? get _child =>
+      permissionChildOf(widget.live.session, widget.request);
+
   @override
   void initState() {
     super.initState();
     // The controller keeps the draft for this request, so a lease that lost its
     // state (retry/re-open) still shows the note the user already typed.
-    _note.text = widget.live.permissionNote(widget.request.id);
+    _note.text = widget.live.permissionNote(
+      widget.request.id,
+      owner: _child,
+    );
     _showNote = _note.text.isNotEmpty;
   }
 
@@ -181,7 +223,9 @@ class _PermissionCardState extends State<_PermissionCard> {
     final live = widget.live;
     final request = widget.request;
     final l10n = context.v2L10n;
-    final state = live.replyState(request.id);
+    final child = permissionChildOf(live.session, request);
+    final keyId = permissionKeyOf(live.session, request);
+    final state = live.replyState(request.id, owner: child);
     final busy = state.busy;
     final enabled = live.canReply(request) && !busy;
     final once = _offered(request, 'once');
@@ -206,6 +250,30 @@ class _PermissionCardState extends State<_PermissionCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (child != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: 4),
+                child: Row(
+                  key: ValueKey('live-permission-child-$keyId'),
+                  children: [
+                    Icon(
+                      Icons.subdirectory_arrow_right,
+                      size: 16,
+                      color: scheme.onSecondaryContainer,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        l10n.livePermissionChildBadge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(color: scheme.onSecondaryContainer),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Text(request.title, style: Theme.of(context).textTheme.titleSmall),
             if (resources.isNotEmpty)
               Padding(
@@ -254,8 +322,10 @@ class _PermissionCardState extends State<_PermissionCard> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                l10n.livePermissionBatchScope,
-                key: ValueKey('live-permission-batch-${request.id.value}'),
+                child == null
+                    ? l10n.livePermissionBatchScope
+                    : l10n.livePermissionChildBatchScope,
+                key: ValueKey('live-permission-batch-$keyId'),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -268,7 +338,7 @@ class _PermissionCardState extends State<_PermissionCard> {
               children: [
                 if (onceUsable)
                   FilledButton(
-                    key: ValueKey('live-permission-allow-${request.id.value}'),
+                    key: ValueKey('live-permission-allow-$keyId'),
                     onPressed: enabled
                         ? () => _reply(ApprovalResponse('once'))
                         : null,
@@ -276,7 +346,7 @@ class _PermissionCardState extends State<_PermissionCard> {
                   ),
                 if (alwaysPatterns.isNotEmpty)
                   OutlinedButton(
-                    key: ValueKey('live-permission-always-${request.id.value}'),
+                    key: ValueKey('live-permission-always-$keyId'),
                     onPressed: enabled
                         ? () => _reply(ApprovalResponse('always'))
                         : null,
@@ -284,9 +354,7 @@ class _PermissionCardState extends State<_PermissionCard> {
                   ),
                 if (notes)
                   OutlinedButton(
-                    key: ValueKey(
-                      'live-permission-reject-note-${request.id.value}',
-                    ),
+                    key: ValueKey('live-permission-reject-note-$keyId'),
                     onPressed: enabled
                         ? () => setState(() => _showNote = !_showNote)
                         : null,
@@ -294,9 +362,7 @@ class _PermissionCardState extends State<_PermissionCard> {
                   ),
                 if (notes)
                   TextButton(
-                    key: ValueKey(
-                      'live-permission-reject-stop-${request.id.value}',
-                    ),
+                    key: ValueKey('live-permission-reject-stop-$keyId'),
                     onPressed: enabled
                         ? () => _reply(ApprovalResponse('reject'))
                         : null,
@@ -308,7 +374,7 @@ class _PermissionCardState extends State<_PermissionCard> {
             if (_showNote && notes) ...[
               const SizedBox(height: 8),
               TextField(
-                key: ValueKey('live-permission-note-${request.id.value}'),
+                key: ValueKey('live-permission-note-$keyId'),
                 controller: _note,
                 maxLines: 3,
                 minLines: 1,
@@ -317,7 +383,11 @@ class _PermissionCardState extends State<_PermissionCard> {
                   border: const OutlineInputBorder(),
                 ),
                 onChanged: (value) {
-                  widget.live.setPermissionNote(request.id, value);
+                  widget.live.setPermissionNote(
+                    request.id,
+                    value,
+                    owner: child,
+                  );
                   setState(() {});
                 },
               ),
@@ -333,16 +403,18 @@ class _PermissionCardState extends State<_PermissionCard> {
                     onPressed: () => setState(() {
                       _showNote = false;
                       _note.clear();
-                      widget.live.setPermissionNote(request.id, '');
+                      widget.live.setPermissionNote(
+                        request.id,
+                        '',
+                        owner: child,
+                      );
                     }),
                     child: Text(
                       MaterialLocalizations.of(context).cancelButtonLabel,
                     ),
                   ),
                   FilledButton(
-                    key: ValueKey(
-                      'live-permission-note-send-${request.id.value}',
-                    ),
+                    key: ValueKey('live-permission-note-send-$keyId'),
                     onPressed: enabled && _note.text.isNotEmpty
                         ? () => _reply(
                             ApprovalResponse('reject', note: _note.text),
@@ -365,7 +437,7 @@ class _PermissionCardState extends State<_PermissionCard> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     notice,
-                    key: ValueKey('live-permission-notice-${request.id.value}'),
+                    key: ValueKey('live-permission-notice-$keyId'),
                   ),
                 ),
               ),

@@ -1073,4 +1073,15 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'Uneingeschränkt deaktiviert. Bestehende Untersitzungen behalten die übernommene Regel.';
+
+  @override
+  String get livePermissionChildBadge => 'Unteragent';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'Ablehnen erledigt auch die anderen ausstehenden Anfragen dieses Unteragenten.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'Bereits anderswo beantwortet oder nicht mehr ausstehend. Verfolge den Live-Status.';
 }

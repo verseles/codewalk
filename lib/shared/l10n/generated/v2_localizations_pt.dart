@@ -1062,4 +1062,15 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get liveUnrestrictedTurnedOff =>
       'Sem restrições desativado. Sessões filhas existentes mantêm a regra que copiaram.';
+
+  @override
+  String get livePermissionChildBadge => 'Subagente';
+
+  @override
+  String get livePermissionChildBatchScope =>
+      'Rejeitar também encerra os outros pedidos pendentes deste subagente.';
+
+  @override
+  String get livePermissionAnsweredElsewhere =>
+      'Já respondido em outro lugar ou não está mais pendente. Acompanhe o estado ao vivo.';
 }
