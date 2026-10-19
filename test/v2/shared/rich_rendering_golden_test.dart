@@ -18,6 +18,15 @@ ItemMeta _meta(String id) => ItemMeta(
   ),
 );
 
+/// The fixture lays out 564 logical px tall, but the shrink-wrapped height is
+/// reported as 564.00000095 on some architectures. The golden capture rounds
+/// with `ceil`, so that float sliver becomes a 565px image on one host and a
+/// 564px image on another, and `matchesGoldenFile` rejects any size mismatch
+/// before comparing pixels. Pinning the golden canvas to an integral height
+/// keeps the captured image size identical everywhere; the sub-pixel sliver is
+/// clipped, not lost.
+const double _goldenCanvasHeight = 564;
+
 Widget _goldenBody() => SessionTimelineTile(
   item: AssistantText(
     meta: _meta('a1'),
@@ -53,12 +62,22 @@ Future<void> _pumpGolden(
       home: Scaffold(
         body: RepaintBoundary(
           key: const ValueKey('rich_golden'),
-          child: SingleChildScrollView(child: _goldenBody()),
+          child: SizedBox(
+            height: _goldenCanvasHeight,
+            child: SingleChildScrollView(child: _goldenBody()),
+          ),
         ),
       ),
     ),
   );
   await tester.pumpAndSettle();
+  expect(
+    tester.getSize(find.byType(SessionTimelineTile)).height,
+    closeTo(_goldenCanvasHeight, 0.01),
+    reason:
+        'The fixture must keep matching the pinned golden canvas; otherwise '
+        'the capture clips it silently instead of failing on a size change.',
+  );
 }
 
 void main() {
