@@ -499,7 +499,7 @@ void main() {
       final rig = CatalogRig();
       rig.feedGate = Completer<void>();
       await rig.save('a');
-      rig.sessions.initialize();
+      await rig.sessions.initialize();
       await flush();
       final read = rig.sessions.selectProfile('profile_a');
       final source = rig.sources.single;
