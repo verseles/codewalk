@@ -1,0 +1,431 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:codewalk/platform/sessions/permission_mode_store.dart';
+import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../../packages/harness_opencode/test/support/fake_opencode_server.dart';
+import '../../../packages/harness_opencode/test/support/fixture_replay.dart';
+import '../hosts/fakes.dart';
+import '../storage/storage_fakes.dart';
+import 'outbox_fakes.dart';
+
+/// Test-only rig wiring [FakeOpenCodeServer] to the REAL IO factories.
+///
+/// VM loopback only (`127.0.0.1`, ephemeral port). Nothing here is production
+/// code: routes reuse captured 2.0.22 payload shapes, re-keyed to the rig's
+/// native session id where the harness requires identity match
+/// (`sessionID` on permission rows, re-keyed stream frames).
+final class FixtureFlowRig {
+  FixtureFlowRig._(
+    this.server,
+    this.fixtures,
+    this.profiles,
+    this.metadata,
+    this.modes,
+    this.payloads,
+  );
+
+  static Future<FixtureFlowRig> start({
+    required FixtureScenario scenario,
+  }) async {
+    final fixtures = OpenCodeFixtures();
+    final server = await FakeOpenCodeServer.start(
+      scenario: scenario,
+      fixtures: fixtures,
+    );
+    // Real-zone belt for widget tests: if a failed test leaves HTTP internals
+    // parked in a dead fake-async zone, teardown still finishes. A request no
+    // route covered (409) would otherwise let the app tolerate a silently
+    // dropped read, and an SSE epoch beyond the declared streams answers a
+    // tolerated 409 too, so the rig asserts that every request was admitted
+    // and that no extra epoch was opened.
+    addTearDown(() async {
+      await server.close().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {},
+      );
+      final uncovered = server.observations
+          .where(
+            (observation) =>
+                observation.kind == 'mismatch' ||
+                observation.kind == 'stream-epoch-exhausted',
+          )
+          .length;
+      if (uncovered != 0) {
+        throw StateError('Fake routes did not cover $uncovered request(s).');
+      }
+    });
+    final rig = FixtureFlowRig._(
+      server,
+      fixtures,
+      MemoryProfiles(),
+      V2MetadataStore(backend: FakeMetadataBackend()),
+      PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      ),
+      OutboxStore(),
+    );
+    // Default-on policy like a new install; individual tests may override.
+    await rig.modes.initialize();
+    return rig;
+  }
+
+  final FakeOpenCodeServer server;
+  final OpenCodeFixtures fixtures;
+  final MemoryProfiles profiles;
+  final V2MetadataStore metadata;
+  final PermissionModeStore modes;
+  final OutboxStore payloads;
+  int _commands = 0;
+
+  CommandId nextCommand() => CommandId('cmd_${++_commands}');
+
+  Future<({EndpointProfile profile, EndpointCredential credential})> addProfile(
+    String id,
+    String label,
+  ) async {
+    final profile = EndpointProfile(
+      id: id,
+      label: label,
+      endpoint: server.endpoint,
+    );
+    await profiles.save(profile, server.auth.bootstrapPassword);
+    final credential = await profiles.readCredential(profile);
+    return (profile: profile, credential: credential!);
+  }
+
+  SessionRef ref(String profileId, String nativeId) =>
+      SessionRef(HostId(profileId), HarnessInstanceId(profileId), nativeId);
+
+  // Non-null on IO (these tests run on the VM); the stub returns null off-IO.
+  SessionLiveDirectory openDirectory() => createSessionLiveDirectory(
+    payloads: payloads,
+    permissionModes: modes,
+    commandIds: nextCommand,
+  )!;
+}
+
+/// Waits for a live view predicate, like the hand-rolled directory tests.
+Future<T> until<T>(Stream<T> stream, bool Function(T) test) =>
+    stream.firstWhere(test).timeout(const Duration(seconds: 10));
+
+Map<String, Object?> _doc(OpenCodeFixtures fixtures, String path) {
+  final file = File('${fixtures.root.path}/$path');
+  return jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+}
+
+/// Native session id shared by the B captures reused here.
+const String bSessionId = 'ses_1a10548204a0007f0a42202e750e';
+
+/// Captured B session row, usable as-is (native id kept).
+Map<String, Object?> bSessionRow(OpenCodeFixtures fixtures) {
+  final calls =
+      (_doc(fixtures, 'b/disconnect-reconnect.json')['calls'] as List);
+  for (final call in calls) {
+    final c = call as Map<String, Object?>;
+    if (c['method'] == 'GET' &&
+        (c['path'] as String).startsWith('/api/session/ses_')) {
+      return Map<String, Object?>.from((c['response'] as Map)['data'] as Map);
+    }
+  }
+  throw StateError('B session row not found');
+}
+
+/// Captured B message rows, oldest first, for the in-flight state: the first
+/// read of the capture still shows the assistant text as empty (the streamed
+/// text had not landed when that read was served).
+List<Map<String, Object?>> bMessageRows(OpenCodeFixtures fixtures) {
+  final calls =
+      (_doc(fixtures, 'b/disconnect-reconnect.json')['calls'] as List);
+  for (final call in calls) {
+    final c = call as Map<String, Object?>;
+    if (c['method'] == 'GET' &&
+        (c['path'] as String).contains('/message?order=asc')) {
+      return [
+        for (final row in (c['response'] as Map)['data'] as List)
+          Map<String, Object?>.from(row as Map),
+      ];
+    }
+  }
+  throw StateError('B message page not found');
+}
+
+/// Captured B message rows for the completed state: a later read of the same
+/// capture observed the assistant text durably stored (the streamed marker)
+/// plus the idle row. Served only by reads issued after the stream delivered
+/// its text frames, mirroring the native read progression.
+List<Map<String, Object?>> bCompletedMessageRows(OpenCodeFixtures fixtures) {
+  final calls =
+      (_doc(fixtures, 'b/disconnect-reconnect.json')['calls'] as List);
+  List<Map<String, Object?>>? completed;
+  for (final call in calls) {
+    final c = call as Map<String, Object?>;
+    if (c['method'] != 'GET' ||
+        !(c['path'] as String).contains('/message?order=asc')) {
+      continue;
+    }
+    final rows = [
+      for (final row in (c['response'] as Map)['data'] as List)
+        Map<String, Object?>.from(row as Map),
+    ];
+    final hasText = rows.any(
+      (row) => jsonEncode(
+        row['parts'] ?? row['content'] ?? '',
+      ).contains('SP01_B_NATIVE_RECONNECT_OK'),
+    );
+    if (hasText) completed = rows;
+  }
+  if (completed == null) {
+    throw StateError('B completed message page not found');
+  }
+  return completed;
+}
+
+/// Captured B stream frames for [key] (`partialStream` or
+/// `reconnectedStream`), verbatim with real boundaries.
+List<String> bStreamFrames(OpenCodeFixtures fixtures, String key) {
+  final doc = _doc(fixtures, 'b/disconnect-reconnect.json');
+  final frames = (doc[key] as Map)['frames'] as List;
+  return [for (final frame in frames) '${(frame as List).join('\n')}\n\n'];
+}
+
+/// Captured C permission rows, re-keyed to [sessionId].
+///
+/// The projection synthesizes choices from `action`/`save`, so only the
+/// `sessionID` needs rewriting; ids stay captured (first-reply-wins and
+/// stream settlement reference them).
+List<Map<String, Object?>> cPermissionRows(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+) {
+  final calls = (_doc(fixtures, 'c/native-interactions.json')['calls'] as List);
+  for (final call in calls) {
+    final c = call as Map<String, Object?>;
+    if (c['method'] == 'GET' && (c['path'] as String).endsWith('/permission')) {
+      final rows = (c['response'] as Map)['data'] as List;
+      if (rows.isEmpty) continue;
+      return [
+        for (final row in rows)
+          Map<String, Object?>.from(row as Map)..['sessionID'] = sessionId,
+      ];
+    }
+  }
+  throw StateError('C permission rows not found');
+}
+
+/// Captured C `permission.replied` frames for [requestId], re-keyed to
+/// [sessionId]. Emitting these settles the matching resident request.
+List<String> cPermissionRepliedFrames(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+  String requestId,
+) {
+  final events =
+      (_doc(fixtures, 'c/native-interactions.json')['events'] as List);
+  final frames = <String>[];
+  for (final event in events) {
+    final e = event as Map<String, Object?>;
+    if (e['type'] != 'permission.replied') continue;
+    final data = e['data'];
+    if (data is! Map<String, Object?>) continue;
+    if (data['requestID'] != requestId) continue;
+    final fixed = Map<String, Object?>.from(e)
+      ..['data'] = (Map<String, Object?>.from(data)..['sessionID'] = sessionId);
+    frames.add('data: ${jsonEncode(fixed)}\n\n');
+  }
+  if (frames.isEmpty) {
+    throw StateError('C permission replied frames not found for $requestId');
+  }
+  return frames;
+}
+
+/// Captured interrupt acknowledgement shape (`{"interrupted": true}`).
+Map<String, Object?> interruptAck(OpenCodeFixtures fixtures) {
+  for (final name in [
+    'd/foreground-nested-collector-diagnostic.json',
+    'd/foreground-nested-collector-diagnostic-2.json',
+    'd/background-interrupt.json',
+  ]) {
+    Map<String, Object?> doc;
+    try {
+      doc = _doc(fixtures, name);
+    } on Object {
+      continue;
+    }
+    final calls = doc['calls'];
+    if (calls is! List) continue;
+    for (final call in calls) {
+      final c = call as Map<String, Object?>;
+      if (c['method'] == 'POST' &&
+          (c['path'] as String).endsWith('/interrupt') &&
+          c['status'] == 200) {
+        return Map<String, Object?>.from(c['response'] as Map);
+      }
+    }
+  }
+  throw StateError('Captured interrupt acknowledgement not found');
+}
+
+Map<String, Object?> _page(List<Object?> rows) => {
+  'data': rows,
+  'cursor': {'previous': null, 'next': null},
+};
+
+/// Builds a `FixtureExchange` without touching the captures on disk.
+FixtureExchange _exchange({
+  required String method,
+  required String path,
+  Object? request,
+  required int status,
+  Object? response,
+}) => FixtureExchange.fromCapture({
+  'method': method,
+  'path': path,
+  'request': request,
+  'status': status,
+  'response': response,
+}, 'rig/synthetic-target');
+
+/// Standard route set for one watched session.
+///
+/// [messageRows] (oldest first) back the newest-first `order=desc` hydration /
+/// locate reads and the oldest-first `order=asc` history reads. Pass
+/// [descRows] to serve a dynamic newest-first page instead (e.g. a promoted
+/// message that only exists after a send), and/or [ascRows] for a dynamic
+/// oldest-first page (e.g. durable text observed only by later reads); both
+/// receive null to fall back to the static [messageRows]. [times] bounds
+/// every route.
+List<FixtureRoute> sessionRoutes({
+  required Map<String, Object?> sessionRow,
+  required List<Map<String, Object?>> messageRows,
+  List<Map<String, Object?>>? Function()? descRows,
+  List<Map<String, Object?>>? Function()? ascRows,
+  List<Map<String, Object?>> permissionRows = const [],
+  List<Map<String, Object?>> inboxRows = const [],
+  bool activeRunning = false,
+  int times = 10,
+}) {
+  final ses = (sessionRow['id'] as String?) ?? bSessionId;
+  final desc = messageRows.reversed.toList();
+  final descFn = descRows;
+  return [
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session?limit=50&order=desc',
+        status: 200,
+        response: _page([sessionRow]),
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session?parentID=$ses&limit=50',
+        status: 200,
+        response: _page([]),
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/active',
+        status: 200,
+        response: {
+          'data': activeRunning
+              ? {
+                  ses: {'type': 'running'},
+                }
+              : <String, Object?>{},
+        },
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses',
+        status: 200,
+        response: {'data': sessionRow},
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses/inbox',
+        status: 200,
+        response: {'data': inboxRows},
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses/message?limit=200&order=desc',
+        status: 200,
+        response: _page(desc),
+      ),
+      times: times,
+      respond: descFn == null
+          ? null
+          : (_) {
+              final custom = descFn();
+              return _page(<Object?>[for (final row in custom ?? desc) row]);
+            },
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses/message?limit=50&order=asc',
+        status: 200,
+        response: _page(messageRows),
+      ),
+      times: times,
+      respond: ascRows == null
+          ? null
+          : (_) => _page([for (final row in ascRows() ?? messageRows) row]),
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses/permission',
+        status: 200,
+        response: {'data': permissionRows},
+      ),
+      times: times,
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/session/$ses/form',
+        status: 200,
+        response: {'data': <Object?>[]},
+      ),
+      times: times,
+    ),
+  ];
+}
+
+/// Admission echo: the native server confirms the client's own id, text and
+/// delivery, so the response is built from the request (captured shape).
+Map<String, Object?> promptAdmissionEcho(Object? request) {
+  final req = request as Map<String, Object?>;
+  return {
+    'data': {
+      'id': req['id'],
+      'sessionID': (req['sessionID'] as String?) ?? bSessionId,
+      'time': {'created': 1791089345000},
+      'type': 'user',
+      'payload': {'text': req['text']},
+      'delivery': req['delivery'] ?? 'steer',
+    },
+  };
+}

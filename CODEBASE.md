@@ -70,9 +70,9 @@ packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decod
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
 packages/harness_opencode/lib/harness_opencode.dart # Public endpoint-probe, pairing, server-info, version-policy and retry-after exports; no session adapter
 packages/harness_opencode/lib/src/{endpoint_probe,server_info,version_policy,retry_after}.dart # Read-only OpenCode endpoint detection, strict server-info parsing, compatibility policy and Retry-After hints
-packages/harness_opencode/test/support/fixture_replay.dart # Immutable finite scenarios from accepted OpenCode 2.0.22 captures, with strict request matching
+packages/harness_opencode/test/support/fixture_replay.dart # Immutable finite scenarios from accepted OpenCode 2.0.22 captures, with strict positional matching plus routed `FixtureScenario.routed`/`FixtureRoute` keyed replay (cursor mode remains default)
 packages/harness_opencode/test/support/fake_auth.dart # Synthetic Basic/pairing auth with a manually advanced five-minute clock
-packages/harness_opencode/test/support/fake_opencode_server.dart # Test-only IPv4-loopback HTTP/SSE fake with admission faults, explicit SSE epochs and async teardown; not publicly exported
+packages/harness_opencode/test/support/fake_opencode_server.dart # Test-only IPv4-loopback HTTP/SSE fake with admission faults, explicit SSE epochs, routed matching with reserve-before-await admission, SSE header-flush failure observation, `stream-epoch-exhausted` recording and Timer-bounded teardown drains; not publicly exported
 packages/harness_opencode/test/fake_opencode_{server,stream}_test.dart # Real codewalk_net IO transport HTTP/SSE tests
 packages/harness_host/lib/             # Empty public host adapter boundary
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
@@ -2171,5 +2171,30 @@ Interactive forms render all 9 OpenCode 2.0.22 field kinds, evaluate conditional
 # From the repository root
 flutter test --no-pub packages/harness_opencode/test/form_reply_client_test.dart test/v2/sessions/session_form_cards_test.dart
 ```
+
+## V2-060A integrated fixture test-support surface
+
+```text
+packages/harness_opencode/test/support/fixture_replay.dart # Adds `FixtureScenario.routed` plus `FixtureRoute` (`times`, `statusOverrides`, `matchBody`, `respond`, per-admission captured `bodies`) for request-keyed replay
+packages/harness_opencode/test/support/fake_opencode_server.dart # Routed matching with reserve-before-await admission, observed SSE header-flush failures, `stream-epoch-exhausted` recording, Timer-bounded teardown drains
+test/v2/sessions/fixture_flow_support.dart # Test-only rig wiring `FakeOpenCodeServer` to the real v2 session live graph; fails teardown on uncovered routes or extra SSE epochs
+test/v2/sessions/fixture_flow_test.dart # Layer-1 integrated controller/state suite over the real session live source
+test/v2/sessions/fixture_flow_widget_test.dart # Layer-2 integrated widget suite over the real app graph with `runAsync`/`pump` phase discipline
+```
+
+`FixtureFlowRig` wires the fake loopback server to the real v2 dependency graph
+(session live directory, profiles, metadata, permission-mode store, outbox);
+its teardown closes the server and fails when any request was not covered by a
+route or an SSE epoch beyond the declared streams was opened. Layer-1 covers
+the integrated controller/state surface (catalog, history, lost admission,
+identical prompts, inbox promotion, reconnect, colliding native ids,
+permission manual/auto, stop); Layer-2 covers the real app graph over the
+fake server (happy-path send plus fixture-vs-scripted rendered-text
+convergence) without `pumpAndSettle` while an SSE stream is open.
+
+The v2 session suites import the harness package's `test/support/` helpers
+directly (cross-package test→test). This coupling is intentional: a production
+`lib/testing.dart` export surface was reviewed and rejected, so a future
+"fix" must not add public API for tests.
 
 

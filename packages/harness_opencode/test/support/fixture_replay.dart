@@ -42,12 +42,91 @@ final class FixtureScenario {
     this.name, {
     Iterable<FixtureExchange> exchanges = const [],
     Iterable<FixtureStream> streams = const [],
+    Iterable<FixtureRoute> routes = const [],
   }) : exchanges = List.unmodifiable(exchanges),
-       streams = List.unmodifiable(streams);
+       streams = List.unmodifiable(streams),
+       routes = List.unmodifiable(routes.toList());
+
+  FixtureScenario.routed(
+    this.name, {
+    Iterable<FixtureRoute> routes = const [],
+    Iterable<FixtureStream> streams = const [],
+  }) : exchanges = const [],
+       streams = List.unmodifiable(streams),
+       routes = List.unmodifiable(routes.toList());
 
   final String name;
   final List<FixtureExchange> exchanges;
   final List<FixtureStream> streams;
+
+  /// Route-keyed matching for app-level integration: when non-empty, the
+  /// fake matches each request against the first route with remaining hits
+  /// instead of the single positional cursor, so concurrent lease reads and
+  /// repeated identical requests resolve deterministically.
+  final List<FixtureRoute> routes;
+}
+
+/// One route with a bounded hit budget for route-keyed matching.
+///
+/// When [matchBody] is false only method, path and query are compared, which
+/// covers requests whose bodies the rig cannot predict byte-for-byte (for
+/// example client-minted prompt ids). Strict body matching stays the default.
+/// When [respond] is set, the admission response body is built from the
+/// actual request instead of the captured response; the shape must stay the
+/// captured admission shape (id/text/delivery echo), documented at the call
+/// site. [bodies] overrides the response body per admission instead.
+final class FixtureRoute {
+  FixtureRoute(
+    this.exchange, {
+    this.times = 1,
+    this.statusOverrides = const [],
+    this.matchBody = true,
+    this.bodies = const [],
+    this.respond,
+  }) : _remaining = times {
+    if (times <= 0) {
+      throw ArgumentError.value(times, 'times', 'Must be positive.');
+    }
+  }
+
+  final FixtureExchange exchange;
+  final int times;
+  final List<int> statusOverrides;
+  final bool matchBody;
+  final List<Object?> bodies;
+  final Object? Function(Object? requestBody)? respond;
+  int _remaining;
+  int _admissions = 0;
+
+  int get remaining => _remaining;
+
+  /// Reserves one hit and returns its (status, body). Callers must have
+  /// checked [matches] (hence remaining hits) immediately before, with no
+  /// await in between, so concurrent arrivals serialize correctly.
+  ({int status, Object? body}) admit(Object? requestBody) {
+    final index = _admissions;
+    _remaining--;
+    _admissions++;
+    final status = index < statusOverrides.length
+        ? statusOverrides[index]
+        : exchange.status;
+    final body = respond != null
+        ? respond!(requestBody)
+        : index < bodies.length
+        ? bodies[index]
+        : exchange.response;
+    return (status: status, body: body);
+  }
+
+  bool matches(String method, Uri uri, Object? body, bool hasBody) {
+    if (_remaining <= 0) return false;
+    if (!matchBody) {
+      return exchange.method == method &&
+          exchange.target.path == uri.path &&
+          sameJson(exchange.target.queryParametersAll, uri.queryParametersAll);
+    }
+    return exchange.matches(method, uri, body, hasBody);
+  }
 }
 
 /// Loads only accepted 2.0.22 captures; never contacts a native service.

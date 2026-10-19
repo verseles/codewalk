@@ -166,7 +166,14 @@ final class FakeOpenCodeServer {
   }
 
   void _checkFaultAvailable() {
-    if (_closed || _cursor >= scenario.exchanges.length) {
+    if (_closed) {
+      throw StateError('No remaining open exchange to fault.');
+    }
+    if (scenario.routes.isNotEmpty) {
+      if (!scenario.routes.any((route) => route.remaining > 0)) {
+        throw StateError('No remaining open exchange to fault.');
+      }
+    } else if (_cursor >= scenario.exchanges.length) {
       throw StateError('No remaining open exchange to fault.');
     }
     if (_failNext || _holdNext != null) {
@@ -289,6 +296,16 @@ final class FakeOpenCodeServer {
       }
     }
     final index = _cursor;
+    if (scenario.routes.isNotEmpty) {
+      await _handleRouted(
+        request,
+        method: request.method,
+        uri: uri,
+        body: body,
+        hasBody: hasBody,
+      );
+      return;
+    }
     if (index >= scenario.exchanges.length ||
         !scenario.exchanges[index].matches(
           request.method,
@@ -326,9 +343,65 @@ final class FakeOpenCodeServer {
     await _json(request, exchange.status, exchange.response);
   }
 
+  /// Route-keyed admission: the first route with remaining hits whose
+  /// exchange matches handles the request. Observations carry the route's
+  /// index in [FixtureScenario.routes]. Unlike the positional cursor path,
+  /// `failNextExchange`/`holdNextExchange` are route-agnostic here: the armed
+  /// fault or gate is absorbed by the first request any route matches, so
+  /// order the requests under test instead of assuming a specific route.
+  Future<void> _handleRouted(
+    HttpRequest request, {
+    required String method,
+    required Uri uri,
+    required Object? body,
+    required bool hasBody,
+  }) async {
+    var routeIndex = -1;
+    for (var i = 0; i < scenario.routes.length; i++) {
+      if (scenario.routes[i].matches(method, uri, body, hasBody)) {
+        routeIndex = i;
+        break;
+      }
+    }
+    if (routeIndex < 0) {
+      _observations.add((kind: 'mismatch', exchange: null));
+      await _synthetic(request, 409, 'FakeScenarioMismatch');
+      return;
+    }
+    if (_failNext) {
+      _failNext = false;
+      _observations.add((kind: 'before-admission-fault', exchange: routeIndex));
+      await _synthetic(request, 503, 'FakeInjectedFailure');
+      return;
+    }
+    final route = scenario.routes[routeIndex];
+    final gate = _holdNext;
+    _holdNext = null;
+    // Reserve synchronously before any await: concurrent requests see admission.
+    final admission = route.admit(body);
+    _cursor++;
+    _observations.add((kind: 'admitted', exchange: routeIndex));
+    if (gate != null) {
+      gate._admission.complete(true);
+      final decision = await gate._decision.future;
+      if (_closed) return;
+      if (decision == _GateDecision.drop) {
+        _intentional.add(request);
+        final socket = await request.response.detachSocket(writeHeaders: false);
+        socket.destroy();
+        return;
+      }
+    }
+    await _json(request, admission.status, admission.body);
+  }
+
   Future<void> _openStream(HttpRequest request) async {
     final index = _streams.length;
     if (index >= scenario.streams.length) {
+      // An app opening more epochs than the scenario declares is a fidelity
+      // gap like an uncovered route: record it instead of letting the rig
+      // tolerate the 409 while an epoch-count regression stays invisible.
+      _observations.add((kind: 'stream-epoch-exhausted', exchange: null));
       await _synthetic(request, 409, 'FakeStreamEpochExhausted');
       return;
     }
@@ -336,13 +409,27 @@ final class FakeOpenCodeServer {
       ..bufferOutput = false
       ..headers.set('content-type', 'text/event-stream; charset=utf-8')
       ..headers.set('cache-control', 'no-cache');
-    _streams.add(
-      FixtureSseConnection._(this, request, scenario.streams[index]),
+    final connection = FixtureSseConnection._(
+      this,
+      request,
+      scenario.streams[index],
     );
+    _streams.add(connection);
     _observations.add((kind: 'stream-open', exchange: null));
     // Synthetic comment flushes headers without publishing a native event.
     request.response.write(': fake-test-ready\n\n');
-    await request.response.flush();
+    // Serialize recorded frames behind the header flush: `HttpResponse.flush`
+    // keeps the sink bound until its completion microtask runs, so an
+    // immediate `add` would throw in fake-async zones (widget tests). The
+    // failure is observed immediately, like `emitNext`, so a client that
+    // disconnects mid-stream is reported instead of surfacing later as a
+    // rejected queue during `_finish`/`_shutdown`.
+    connection._writes = request.response.flush().then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        if (!_closed) _recordFailure('SSE header flush', error);
+      },
+    );
   }
 
   Future<void> close() => _closing ??= _shutdown();
@@ -355,10 +442,59 @@ final class FakeOpenCodeServer {
     for (final stream in _streams) {
       stream._closed = true;
     }
-    await _server.close(force: true);
-    await _subscription.cancel();
-    await Future.wait(_pending.toList());
-    await Future.wait(_streams.map((stream) => stream._writes));
+    // Widget tests run the fake in a fake-async zone: if the test fails before
+    // its last pump, pending fake-zone microtasks can never run again. Every
+    // drain is bounded so teardown completes instead of hanging forever.
+    await _boundedDrain(_server.close(force: true));
+    await _boundedDrain(_subscription.cancel());
+    await _boundedDrain(Future.wait(_pending.toList()));
+    await _boundedDrain(Future.wait(_streams.map((stream) => stream._writes)));
     assertHealthy();
+  }
+
+  /// Bounds one teardown drain with a real-time [Timer].
+  ///
+  /// `HttpServer.close` and its listen subscription's `cancel` return futures
+  /// whose runtime type argument is `ServerSocket` in dart:io, so
+  /// `Future.timeout`'s generic `onTimeout` return check cannot be satisfied
+  /// there; a Timer-based bound works for every future shape. Timers created
+  /// in the widget fake zone are also inert there, which keeps this drain from
+  /// blocking a real-zone teardown.
+  ///
+  /// A fake-zone timer fires as soon as its test pumps fake time, so only a
+  /// timer that outlives real time marks a stalled drain: a genuine hang in
+  /// the VM path still fails loudly instead of passing as a clean teardown.
+  ///
+  /// The threshold sits between both paths: the VM timer fires at >= 2s real,
+  /// while the widget path needs ~40 pumps (a 2s fake timer at 50ms per pump)
+  /// plus the real yields of `runAsync`, measured at ~0.7-1.2s real on this
+  /// host. 1.5s keeps a loaded runner from turning a legitimate fake-timer
+  /// firing into a spurious teardown failure.
+  Future<void> _boundedDrain(Future<Object?> action) {
+    final completer = Completer<void>();
+    final started = DateTime.now();
+    final timer = Timer(const Duration(seconds: 2), () {
+      if (DateTime.now().difference(started) >=
+          const Duration(milliseconds: 1500)) {
+        _recordFailure(
+          'SSE teardown drain',
+          TimeoutException('teardown drain', const Duration(seconds: 2)),
+        );
+      }
+      if (!completer.isCompleted) completer.complete();
+    });
+    unawaited(
+      action.then<void>(
+        (_) {
+          timer.cancel();
+          if (!completer.isCompleted) completer.complete();
+        },
+        onError: (Object error, StackTrace stack) {
+          timer.cancel();
+          if (!completer.isCompleted) completer.completeError(error, stack);
+        },
+      ),
+    );
+    return completer.future;
   }
 }

@@ -499,4 +499,148 @@ void main() {
     await server.close();
     expect(server.holdNextExchange, throwsStateError);
   });
+
+  group('route-keyed matching (V2-060A)', () {
+    // prompts[0] and prompts[1] share one identical body (same-id replay
+    // capture), so distinguishable exchanges are required here: a create
+    // and a prompt differ in both path and body.
+    FixtureScenario twoRoutes({bool matchBody = true}) {
+      final first = fixtures.admission().exchanges[0];
+      final second = fixtures.admission().exchanges[3];
+      return FixtureScenario.routed(
+        'routes/two',
+        routes: [
+          FixtureRoute(first, matchBody: matchBody),
+          FixtureRoute(second, matchBody: matchBody),
+        ],
+      );
+    }
+
+    test('out-of-order routes admit regardless of declaration order', () async {
+      final scenario = twoRoutes();
+      final (server, client) = await serve(scenario);
+      // Request the second route first: order must not matter.
+      await replay(client, scenario.routes[1].exchange);
+      await replay(client, scenario.routes[0].exchange);
+      expect(server.completedExchanges, 2);
+      expect(
+        server.observations
+            .where((o) => o.kind == 'admitted')
+            .map((o) => o.exchange)
+            .toList(),
+        [1, 0],
+      );
+      await server.close();
+      server.assertHealthy();
+    });
+
+    test(
+      'exhausted times reject with mismatch, other routes still serve',
+      () async {
+        final scenario = twoRoutes();
+        final (server, client) = await serve(scenario);
+        await replay(client, scenario.routes[0].exchange);
+        final exhausted = await send(
+          client,
+          requestFor(scenario.routes[0].exchange),
+        );
+        expect(exhausted.status, 409);
+        // The unused route still admits.
+        await replay(client, scenario.routes[1].exchange);
+        expect(server.completedExchanges, 2);
+        await server.close();
+        server.assertHealthy();
+      },
+    );
+
+    test('statusOverrides replay per-admission statuses', () async {
+      final exchange = fixtures.admission().exchanges[3];
+      final scenario = FixtureScenario.routed(
+        'routes/override',
+        routes: [
+          FixtureRoute(exchange, times: 2, statusOverrides: [503, 200]),
+        ],
+      );
+      final (server, client) = await serve(scenario);
+      final first = await send(client, requestFor(exchange));
+      expect(first.status, 503);
+      final second = await send(client, requestFor(exchange));
+      expect(second.status, 200);
+      expect(jsonDecode(second.text), exchange.response);
+      expect(server.completedExchanges, 2);
+      await server.close();
+      server.assertHealthy();
+    });
+
+    test(
+      'armed fault fires before route admission without consuming a hit',
+      () async {
+        final scenario = twoRoutes();
+        final (server, client) = await serve(scenario);
+        server.failNextExchange();
+        final refused = await send(
+          client,
+          requestFor(scenario.routes[0].exchange),
+        );
+        expect(refused.status, 503);
+        // The refused hit was not consumed.
+        await replay(client, scenario.routes[0].exchange);
+        await replay(client, scenario.routes[1].exchange);
+        expect(server.completedExchanges, 2);
+        await server.close();
+        server.assertHealthy();
+      },
+    );
+
+    test('dropped route admission records admitted and no response', () async {
+      final scenario = twoRoutes();
+      final (server, client) = await serve(scenario);
+      final gate = server.holdNextExchange();
+      final pending = client.send(requestFor(scenario.routes[0].exchange));
+      final checked = expectLater(pending, throwsA(isA<TransportException>()));
+      expect(await gate.admitted, isTrue);
+      gate.drop();
+      await checked;
+      expect(server.observations.where((o) => o.kind == 'admitted').length, 1);
+      // The dropped hit was consumed.
+      final retry = await send(client, requestFor(scenario.routes[0].exchange));
+      expect(retry.status, 409);
+      await server.close();
+      server.assertHealthy();
+    });
+
+    test('matchBody false admits unpredictable bodies by path', () async {
+      final exchange = fixtures.admission().exchanges[3];
+      final scenario = FixtureScenario.routed(
+        'routes/loose',
+        routes: [FixtureRoute(exchange, matchBody: false)],
+      );
+      final (server, client) = await serve(scenario);
+      final forged = TransportRequest(
+        method: exchange.method,
+        path: exchange.target.toString(),
+        headers: {'content-type': 'application/json'},
+        body: utf8.encode(jsonEncode({'id': 'msg_unpredictable'})),
+      );
+      final result = await send(client, forged);
+      expect(result.status, exchange.status);
+      expect(server.completedExchanges, 1);
+      await server.close();
+      server.assertHealthy();
+    });
+
+    test('fault arming with no remaining route hits throws', () async {
+      final exchange = fixtures.admission().exchanges[3];
+      final scenario = FixtureScenario.routed(
+        'routes/single',
+        routes: [FixtureRoute(exchange)],
+      );
+      final (server, client) = await serve(scenario);
+      await replay(client, exchange);
+      expect(server.failNextExchange, throwsStateError);
+      expect(server.holdNextExchange, throwsStateError);
+      await server.close();
+      server.assertHealthy();
+    });
+  });
 }
