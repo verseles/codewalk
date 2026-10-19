@@ -33,6 +33,9 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the re-read is silent: it shows no loading notice, marks nothing stale, and the expanded row survives only while the server still returns that session
 - **Then** a burst of changes collapses into one re-read; the debounce and the minimum interval between re-reads bound the traffic, and the interval grows with consecutive failures
 - **Then** a failed re-read keeps the rows and states that the list is not up to date; three consecutive failures or a rate limit suspend the automatic re-read until a successful manual refresh or a new server selection
+- **Then** the automatic re-read obeys the same fence as a manual one: an expired or unreadable credential, a loading server list or a storage failure stops it, and a rejected credential clears the list and reports the authentication state exactly like a manual read
+- **Then** a stream that ends ends the feed: the list states that it is not up to date and the next successful read acquires a new feed
+- **Then** the local-limit notice appears only when the server has more pages: a complete list of exactly 200 rows is not announced as truncated
 - **Then** the endpoint keeps exactly one event stream: the catalog borrows the live session's stream, and a platform without the live transport keeps the catalog pull-only
 
 ### V2 auxiliary read-only history

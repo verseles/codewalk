@@ -1255,6 +1255,12 @@ final class _CatalogLease implements SessionCatalogChanges {
         .listen((update) {
           final kind = (update as OpenCodeConnectionUpdated).kind;
           _add(SessionCatalogConnection(kind == ConnectionKind.live));
+          if (kind == ConnectionKind.authRequired ||
+              kind == ConnectionKind.incompatible) {
+            // A terminal stream ends the feed: the catalog drops the lease
+            // and re-acquires one on the next read.
+            unawaited(_controller.close());
+          }
         });
   }
 
@@ -1276,6 +1282,7 @@ final class _CatalogLease implements SessionCatalogChanges {
         final subscription = _controller.stream.listen(
           controller.add,
           onError: controller.addError,
+          onDone: controller.close,
         );
         controller.onCancel = subscription.cancel;
       });

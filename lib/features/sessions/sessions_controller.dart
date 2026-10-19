@@ -341,7 +341,10 @@ class SessionsController extends ChangeNotifier {
           // notice and opens the feed.
           _liveFailures = 0;
           _liveSuspended = false;
-          _behind = false;
+          if (refresh) {
+            // A head read reconciles the whole list; a page append does not.
+            _behind = false;
+          }
           unawaited(_ensureChanges());
         }
         if (_livePending && failure == null) {
@@ -422,6 +425,7 @@ class SessionsController extends ChangeNotifier {
     _liveTimer = null;
     _livePending = false;
     _liveConnected = false;
+    _quietRefreshing = false;
     _liveFailures = 0;
     _liveSuspended = false;
     _behind = false;
@@ -437,6 +441,7 @@ class SessionsController extends ChangeNotifier {
   void _onFeedDone(SessionCatalogChanges feed) {
     if (_disposed || !identical(_changes, feed)) return;
     _changes = null;
+    feed.close();
     _behind = true;
     _notify();
   }
@@ -545,7 +550,8 @@ class SessionsController extends ChangeNotifier {
         ..addAll(_liveRequested);
       _pages = _livePagesRead;
       limited =
-          _liveOmitted || (rows.length >= 200 || _livePagesRead >= 10);
+          _liveOmitted ||
+          (_liveHasMore && (rows.length >= 200 || _livePagesRead >= 10));
       hasMore = _liveHasMore && !limited;
       failure = null;
       stale = false;
@@ -555,9 +561,10 @@ class SessionsController extends ChangeNotifier {
       if (!_quietCurrent(generation, epoch, source)) return;
       if (error is SessionCatalogException &&
           error.failure == SessionCatalogFailure.authenticationRequired) {
-        // The same path a manual read takes: the list is cleared and the
-        // feed is released.
+        // The same path a manual read takes: the list is cleared, the
+        // failure is recorded and the feed is released.
         _clear();
+        failure = SessionCatalogFailure.authenticationRequired;
         source.close();
         _source = null;
         _closeChanges();
@@ -573,12 +580,18 @@ class SessionsController extends ChangeNotifier {
         _liveSuspended = true;
       }
     } finally {
-      _quietRefreshing = false;
-      final backoff = 1 << (_liveFailures.clamp(0, 6));
-      _liveEarliestStart = _now().add(liveMinInterval * backoff);
-      if (_livePending) {
-        // A change that arrived during the read becomes one final read.
-        _markLiveChange();
+      if (_quietCurrent(generation, epoch, source)) {
+        _quietRefreshing = false;
+        final backoff = 1 << (_liveFailures.clamp(0, 6));
+        _liveEarliestStart = _now().add(liveMinInterval * backoff);
+        if (_livePending) {
+          // A change that arrived during the read becomes one final read.
+          _markLiveChange();
+        }
+      } else if (identical(source, _source)) {
+        // A manual page superseded this read on the same profile: the flag is
+        // released, but the cooldown and the latch belong to the next read.
+        _quietRefreshing = false;
       }
       _notify();
     }
