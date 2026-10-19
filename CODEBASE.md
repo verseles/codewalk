@@ -2244,7 +2244,7 @@ against the live listener list instead of being subtracted from it, the
 launcher's own process group must be empty afterwards, the user's listening
 ports must be preserved and the user's OpenCode service must still be
 running — a restart by the user is an observation, not a leak — and a failed
-cleanup fails the run. `validate.py` re-checks that record offline
-(39 checks, including the pinned digests) and never contacts a server.
+cleanup fails the run. `validate.py` re-checks that record offline — every
+recorded claim plus the pinned digests — and never contacts a server.
 
 

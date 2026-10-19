@@ -122,6 +122,31 @@ _PROXY_VARS = (
     "ALL_PROXY",
 )
 
+# The credential-shaped variables are stripped from the live-suite child
+# environment too: its output is captured into the evidence bundle, and the
+# user's provider keys have no business there.
+_CREDENTIAL_VARS = (
+    "OPENCODE_CONFIG",
+    "OPENCODE_SERVER_PASSWORD",
+    "OPENCODE_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+    "XAI_API_KEY",
+    "GROQ_API_KEY",
+    "OPENROUTER_API_KEY",
+)
+
+# The shape of a credential. Prose may name these ("No Authorization header
+# was recorded"); only a value with them is a leak.
+SECRET_VALUE_RE = re.compile(
+    r"(?i)(authorization\s*[:=]\s*[\"']?[A-Za-z0-9._\-+/=]{8,}"
+    r"|bearer\s+[A-Za-z0-9._\-]{16,}"
+    r"|basic\s+[A-Za-z0-9+/=]{16,}"
+    r"|\"(password|secret|token|api[_-]?key)\"\s*:\s*\"(?!\[REDACTED\])[^\"]{8,}\")"
+)
+
 
 class Fatal(SystemExit):
     """A fatal launcher error that keeps its message and its reason.
@@ -160,15 +185,26 @@ def _cleanup_ok(cleanup: dict) -> bool:
         and cleanup.get("owned_ports_released")
         and not (cleanup.get("owned_process_group_survivors") or [])
         and cleanup.get("user_opencode_service_alive")
-        and cleanup.get("user_listening_ports_preserved")
     )
 
 
 def _child_env(base: dict) -> dict:
-    """The live-suite child environment: no proxy, loopback explicitly exempt."""
+    """The live-suite child environment: no proxy, no credentials.
+
+    The child's output is captured into the evidence bundle, so the user's
+    provider keys and their OpenCode configuration must not travel with it.
+    """
     env = dict(base)
     for name in _PROXY_VARS:
         env.pop(name, None)
+    for name in _CREDENTIAL_VARS:
+        env.pop(name, None)
+    for name in list(env):
+        upper = name.upper()
+        if upper.startswith("CODEWALK_LIVE_SMOKE"):
+            continue
+        if any(marker in upper for marker in ("TOKEN", "SECRET", "PASSWORD")):
+            env.pop(name, None)
     env["NO_PROXY"] = "127.0.0.1,localhost"
     env["no_proxy"] = "127.0.0.1,localhost"
     return env
@@ -411,14 +447,15 @@ class _StubHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.close_connection = True
             deadline = time.time() + 120
+            reason = "timeout"
             try:
                 while time.time() < deadline:
                     self.wfile.write(b": hold\n\n")
                     self.wfile.flush()
                     time.sleep(0.5)
             except (BrokenPipeError, ConnectionResetError):
-                pass
-            stub.record_hold_aborted()
+                reason = "disconnect"
+            stub.record_hold_end(reason)
             return
         if "APPROVAL" in marker and not has_tool_result:
             fn = next((t for t in tools if t), "read")
@@ -484,7 +521,7 @@ class _StubHandler(BaseHTTPRequestHandler):
 class StubProvider:
     def __init__(self) -> None:
         self.ledger: list[dict] = []
-        self.hold_aborted = 0
+        self.hold_ends: list[str] = []
         self._lock = threading.Lock()
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), _StubHandler)
         self.server.stub = self  # type: ignore[attr-defined]
@@ -522,9 +559,10 @@ class StubProvider:
             )
             return len(self.ledger)
 
-    def record_hold_aborted(self) -> None:
+    def record_hold_end(self, reason: str) -> None:
+        """Why the held stream ended: a client disconnect or the deadline."""
         with self._lock:
-            self.hold_aborted += 1
+            self.hold_ends.append(reason)
 
 
 def _free_port() -> int:
@@ -586,42 +624,60 @@ class EgressAuditor:
     """Samples the owned server's sockets while the live suite runs.
 
     A single post-run sample cannot support a "never observed" claim, so the
-    audit samples continuously and keeps the first violation it sees.
+    audit samples continuously and keeps the first violation it sees. The
+    number of audit invocations is recorded apart from the number of sockets
+    observed: only the former shows that the host was sampled while the
+    suite ran.
     """
 
     def __init__(self, pid: int, interval: float = 2.0) -> None:
         self.pid = pid
         self.interval = interval
-        self.samples = 0
+        self.sockets_observed = 0
+        self.audit_runs = 0
+        self.first_audit_at: str | None = None
+        self.last_audit_at: str | None = None
         self.violation: str | None = None
         self._stop = threading.Event()
         self._stopped = False
         self._thread = threading.Thread(target=self._loop, daemon=True)
 
+    def _audit(self) -> None:
+        violation, observed = _egress_audit(self.pid)
+        stamp = datetime.now(timezone.utc).isoformat()
+        self.audit_runs += 1
+        self.sockets_observed += observed
+        if self.first_audit_at is None:
+            self.first_audit_at = stamp
+        self.last_audit_at = stamp
+        if violation and not self.violation:
+            self.violation = violation
+
     def _loop(self) -> None:
         while not self._stop.is_set():
-            violation, observed = _egress_audit(self.pid)
-            self.samples += observed
-            if violation and not self.violation:
-                self.violation = violation
+            self._audit()
             self._stop.wait(self.interval)
 
     def start(self) -> None:
         self._thread.start()
 
-    def stop(self) -> tuple[str | None, int]:
+    def stop(self) -> dict:
         # Idempotent: the finally block stops the auditor even when the run
         # already stopped it, and a second audit must not double-count.
-        if self._stopped:
-            return self.violation, self.samples
-        self._stopped = True
-        self._stop.set()
-        self._thread.join(timeout=15)
-        violation, observed = _egress_audit(self.pid)
-        self.samples += observed
-        if violation and not self.violation:
-            self.violation = violation
-        return self.violation, self.samples
+        if not self._stopped:
+            self._stopped = True
+            self._stop.set()
+            self._thread.join(timeout=15)
+            self._audit()
+        return {
+            "violation": self.violation,
+            "nonLoopbackPeers": 0 if self.violation is None else 1,
+            "socketsObserved": self.sockets_observed,
+            "auditRuns": self.audit_runs,
+            "firstAuditAt": self.first_audit_at,
+            "lastAuditAt": self.last_audit_at,
+            "auditedAt": datetime.now(timezone.utc).isoformat(),
+        }
 
 
 def _listening_ports() -> list[int]:
@@ -709,6 +765,27 @@ def _repo_head() -> str:
         return "unknown"
 
 
+def _repo_dirty() -> bool:
+    """Whether the repository had uncommitted changes when the run started.
+
+    Only tracked files count: an untracked file elsewhere in the tree does not
+    change what the recorded revision produces. Fail closed: an unreadable
+    git state is reported as dirty, never clean.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--untracked-files=no"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return True
+    if proc.returncode != 0:
+        return True
+    return bool(proc.stdout.strip())
+
+
 def _parse_markers(events: list[str]) -> tuple[list[dict], dict[str, str]]:
     """The QA markers of the live suite, as records and as phase->status."""
     records: list[dict] = []
@@ -725,21 +802,38 @@ def _parse_markers(events: list[str]) -> tuple[list[dict], dict[str, str]]:
     return records, observed
 
 
+def _capability_states(events: list[str]) -> dict[str, str]:
+    """The state of every capability, derived from the marker of its phase.
+
+    A capability without a passing marker is `missing`: the fixture may never
+    claim a phase the run did not observe.
+    """
+    observed = _parse_markers(events)[1]
+    return {
+        capability: observed.get(phase, "missing")
+        for phase, capability in CAPABILITY_PHASES.items()
+    }
+
+
+def _native_cost(events: list[str]) -> float | None:
+    """The native cost the live suite observed, or None when it observed none."""
+    for record in _parse_markers(events)[0]:
+        if record.get("phase") == "native-cost" and "cost" in record:
+            return float(record["cost"])
+    return None
+
+
 def _write_fixture(evidence: dict, out: Path) -> None:
     """Write the committed evidence fixture from this run.
 
     The fixture is generated, never hand-edited: every value comes from the
-    recorded run, so it cannot claim more than the run proved.
+    recorded run, so it cannot claim more than the run proved. Every file is
+    scanned for secret material before it reaches the disk.
     """
-    records, observed = _parse_markers(evidence.get("events", []))
-    capabilities = {
-        capability: observed.get(phase, "missing")
-        for phase, capability in CAPABILITY_PHASES.items()
-    }
-    native_cost = 0.0
-    for record in records:
-        if record.get("phase") == "native-cost" and "cost" in record:
-            native_cost = float(record["cost"])
+    events = evidence.get("events", [])
+    records = _parse_markers(events)[0]
+    capabilities = _capability_states(events)
+    native_cost = _native_cost(events)
     cleanup = evidence.get("cleanup", {})
     egress = evidence.get("egress", {})
     acquisition = evidence.get("acquisition", {})
@@ -761,7 +855,8 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "platform": "Linux aarch64",
         "runtimeVersion": evidence.get("version"),
         "implementationLine": "main",
-        "repoCommit": _repo_head(),
+        "repoCommit": evidence.get("repo_commit"),
+        "repoTreeDirty": evidence.get("repo_dirty"),
         "artifact": {
             "package": f"{NPM_PACKAGE}@{EXPECTED_VERSION}",
             "tarballUrl": acquisition.get("tarball_url"),
@@ -781,15 +876,21 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "flutterExit": evidence.get("flutter_exit"),
         "s0Probe": evidence.get("s0_probe"),
     }
+    hold_ends = evidence.get("stub_hold_ends", []) or []
     ledger_doc = {
         "requests": evidence.get("stub_ledger", []),
-        "holdAborted": evidence.get("stub_hold_aborted"),
+        "holdEnds": hold_ends,
+        "holdAbortedByDisconnect": sum(1 for r in hold_ends if r == "disconnect"),
+        "holdTimedOut": sum(1 for r in hold_ends if r == "timeout"),
         "cap": MAX_STUB_REQUESTS,
     }
     egress_doc = {
         "violation": egress.get("violation"),
         "nonLoopbackPeers": egress.get("nonLoopbackPeers"),
-        "samples": egress.get("samples"),
+        "socketsObserved": egress.get("socketsObserved"),
+        "auditRuns": egress.get("auditRuns"),
+        "firstAuditAt": egress.get("firstAuditAt"),
+        "lastAuditAt": egress.get("lastAuditAt"),
         "auditedAt": egress.get("auditedAt"),
         "policy": (
             "provider.use deny for every provider except the loopback stub; a "
@@ -808,7 +909,7 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "ownedProcessGroupSurvivors": cleanup.get("owned_process_group_survivors"),
         "userListeningPortsBefore": cleanup.get("listening_ports_before"),
         "userListeningPortsAfter": cleanup.get("listening_ports_after"),
-        "userListeningPortsPreserved": cleanup.get("user_listening_ports_preserved"),
+        "userListeningPortsRemoved": cleanup.get("user_listening_ports_removed"),
         "foreignPortsLeft": cleanup.get("foreign_ports_left"),
     }
     files = {
@@ -820,21 +921,23 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "egress.json": egress_doc,
         "cleanup.json": cleanup_doc,
     }
-    out.mkdir(parents=True, exist_ok=True)
-    for name, doc in files.items():
-        (out / name).write_text(json.dumps(doc, indent=2) + "\n")
-    (out / "markers.txt").write_text(
-        "\n".join(
-            "CODEWALK_LIVE_QA " + json.dumps(record) for record in records
-        )
-        + "\n"
+    contents = {name: json.dumps(doc, indent=2) + "\n" for name, doc in files.items()}
+    contents["markers.txt"] = (
+        "\n".join("CODEWALK_LIVE_QA " + json.dumps(record) for record in records) + "\n"
     )
+    # Every file is scanned before it reaches the disk: a leak must never be
+    # written, let alone committed.
+    for name, text in contents.items():
+        _assert_no_secret(text, None, name)
+    out.mkdir(parents=True, exist_ok=True)
+    for name, text in contents.items():
+        (out / name).write_text(text)
     # The digests pin the evidence files; the derived report and the
     # documentation tools stay out of the list.
     digests = []
-    for name in sorted(files) + ["markers.txt"]:
+    for name in sorted(contents):
         digests.append(
-            f"{hashlib.sha256((out / name).read_bytes()).hexdigest()}  {name}"
+            f"{hashlib.sha256(contents[name].encode('utf-8')).hexdigest()}  {name}"
         )
     (out / "SHA256SUMS").write_text("\n".join(digests) + "\n")
 
@@ -859,6 +962,11 @@ def run(
         "host": "linux-aarch64",
         "zero_spend": False,
     }
+    # The provenance of the run itself: the revision and the tree state it
+    # was made from, so the evidence can never name a commit that could not
+    # have produced it.
+    evidence["repo_commit"] = _repo_head()
+    evidence["repo_dirty"] = _repo_dirty()
     try:
         acq_path = root / "acquire.json"
         record = None
@@ -1034,17 +1142,11 @@ def run(
         evidence["flutter_exit"] = proc.returncode
         (root / "flutter-stdout.log").write_text(proc.stdout[-65536:])
         (root / "flutter-stderr.log").write_text(proc.stderr[-65536:])
-        violation, samples = auditor.stop()
-        evidence["egress"] = {
-            "violation": violation,
-            "nonLoopbackPeers": 0 if violation is None else 1,
-            "samples": samples,
-            "auditedAt": datetime.now(timezone.utc).isoformat(),
-        }
+        evidence["egress"] = auditor.stop()
         evidence["stub_requests"] = len(stub.ledger)
-        evidence["stub_hold_aborted"] = stub.hold_aborted
-        if violation:
-            fail(f"zero-spend violated: {violation}")
+        evidence["stub_hold_ends"] = list(stub.hold_ends)
+        if evidence["egress"]["violation"]:
+            fail(f"zero-spend violated: {evidence['egress']['violation']}")
         if proc.returncode != 0:
             evidence["status"] = "failed"
         else:
@@ -1053,12 +1155,17 @@ def run(
         evidence["status"] = _failure_status(e)
         evidence["fatal"] = e.message
         raise
+    except Exception as e:  # noqa: BLE001 - the reason must reach the evidence
+        # A timeout or a failed setup step is a failed run, not an
+        # inconclusive one: the evidence carries the reason.
+        evidence["status"] = "failed"
+        evidence["fatal"] = f"{type(e).__name__}: {e}"
+        raise
     finally:
         # Cleanup: settle nothing, delete nothing user-owned; kill owned only.
         cleanup: dict = {
             "server_exited": True,
             "temp_root_removed": False,
-            "user_opencode_processes_unchanged": False,
         }
         try:
             if server is not None and server.poll() is None:
@@ -1081,22 +1188,14 @@ def run(
         if auditor is not None and "egress" not in evidence:
             # The run stopped before the audit could be closed: close it here
             # so the evidence still carries the audit result.
-            violation, samples = auditor.stop()
-            evidence["egress"] = {
-                "violation": violation,
-                "nonLoopbackPeers": 0 if violation is None else 1,
-                "samples": samples,
-                "auditedAt": datetime.now(timezone.utc).isoformat(),
-            }
+            evidence["egress"] = auditor.stop()
         evidence["wall_seconds"] = round(time.time() - t0, 1)
         evidence["stub_ledger"] = stub.ledger if stub else []
         evidence["events"] = events
         # Zero spend is derived, never asserted: the egress audit found no
-        # violation and the live suite observed a native cost of zero.
-        native_cost = None
-        for record in _parse_markers(events)[0]:
-            if record.get("phase") == "native-cost":
-                native_cost = record.get("cost")
+        # violation and the live suite observed a native cost of zero. A run
+        # that observed no cost at all proves nothing about the spend.
+        native_cost = _native_cost(events)
         evidence["native_cost_usd"] = native_cost
         evidence["zero_spend"] = (
             evidence.get("egress", {}).get("violation") is None and native_cost == 0
@@ -1122,10 +1221,13 @@ def run(
         )
         cleanup["listening_ports_before"] = before.get("listening_ports", [])
         cleanup["listening_ports_after"] = after["listening_ports"]
-        # The run never took a listener away from the host.
-        cleanup["user_listening_ports_preserved"] = set(
-            before.get("listening_ports", [])
-        ) <= set(after["listening_ports"])
+        # A listener that vanished during the run is recorded, not gated: the
+        # user may close one of their own services while the run is live, and
+        # that is not a leak of the run. What the run can be blamed for is
+        # its own group, its own ports and its own tree.
+        cleanup["user_listening_ports_removed"] = sorted(
+            set(before.get("listening_ports", [])) - set(after["listening_ports"])
+        )
         # The launcher's own loopback stub and the disposable server are its
         # sockets; only a foreign leftover would be a leak.
         owned = {stub.port} if stub is not None else set()
@@ -1150,16 +1252,21 @@ def run(
             _processes_in_group(server_pgid) if server_pgid is not None else []
         )
         evidence_out.mkdir(parents=True, exist_ok=True)
-        (evidence_out / "markers.txt").write_text("\n".join(events) + "\n")
+        marker_text = "\n".join(events) + "\n"
+        _assert_no_secret(marker_text, password, "markers.txt")
+        (evidence_out / "markers.txt").write_text(marker_text)
         # Always preserve the client output tails (sanitized): on failure
-        # they are the only diagnosis; on success they are the record.
+        # they are the only diagnosis; on success they are the record. The
+        # scan runs before the write.
         for name in ("flutter-stdout.log", "flutter-stderr.log"):
             src = root / name
             if src.exists():
                 text = src.read_text(encoding="utf-8", errors="replace")
                 if password:
                     text = text.replace(password, "[REDACTED]")
-                (evidence_out / name).write_text(text[-65536:])
+                text = text[-65536:]
+                _assert_no_secret(text, password, name)
+                (evidence_out / name).write_text(text)
         # Scrub the temp root (evidence_out lives outside it).
         if root.exists() and password is not None:
             shutil.rmtree(root, ignore_errors=True)
@@ -1180,34 +1287,43 @@ def run(
         ):
             evidence["status"] = "failed"
             evidence["egress_violation"] = evidence["egress"]["violation"]
-        # The emitted bundle is sanitized as a whole, once.
-        final = _sanitize(evidence, password)
-        (evidence_out / "evidence.json").write_text(
-            json.dumps(final, indent=2) + "\n"
-        )
-        for name in (
-            "evidence.json",
-            "markers.txt",
-            "flutter-stdout.log",
-            "flutter-stderr.log",
-        ):
-            path = evidence_out / name
-            if path.exists():
-                _assert_no_secret(
-                    path.read_text(encoding="utf-8", errors="replace"),
-                    password,
-                    name,
-                )
-        if fixture_out is not None and evidence.get("status") == "delivered-awaiting-acceptance":
-            _write_fixture(final, fixture_out)
-            for path in sorted(fixture_out.glob("*")):
-                if path.is_file():
-                    _assert_no_secret(
-                        path.read_text(encoding="utf-8", errors="replace"),
-                        password,
-                        str(path),
+        # The record must not contradict its own gates: a capability that did
+        # not pass, or a zero-spend claim the run did not prove, is a failed
+        # run, not a delivery.
+        capabilities = _capability_states(events)
+        evidence["capabilities"] = capabilities
+        if evidence.get("status") == "delivered-awaiting-acceptance":
+            if not evidence.get("zero_spend"):
+                evidence["status"] = "failed"
+                evidence["failure"] = "the zero-spend claim does not hold"
+            elif not all(state == "passed" for state in capabilities.values()):
+                evidence["status"] = "failed"
+                evidence["failure"] = (
+                    "a capability did not pass: "
+                    + ", ".join(
+                        f"{name}={state}"
+                        for name, state in capabilities.items()
+                        if state != "passed"
                     )
-            print(f"live-smoke: fixture written to {fixture_out}")
+                )
+        # The emitted bundle is sanitized as a whole, once, and scanned before
+        # it reaches the disk.
+        final = _sanitize(evidence, password)
+        bundle = json.dumps(final, indent=2) + "\n"
+        _assert_no_secret(bundle, password, "evidence.json")
+        (evidence_out / "evidence.json").write_text(bundle)
+        if fixture_out is not None and evidence.get("status") == "delivered-awaiting-acceptance":
+            if evidence.get("repo_dirty"):
+                # The committed fixture must be reproducible from the revision
+                # it names: a run made from a dirty tree cannot be.
+                print(
+                    "live-smoke: fixture not written: the tree was dirty when "
+                    "the run started; commit the changes and run again",
+                    file=sys.stderr,
+                )
+            else:
+                _write_fixture(final, fixture_out)
+                print(f"live-smoke: fixture written to {fixture_out}")
     print(json.dumps({"status": evidence.get("status")}))
     return 0 if evidence.get("status") == "delivered-awaiting-acceptance" else 1
 
@@ -1236,9 +1352,18 @@ def _sanitize(obj: object, password: str | None) -> object:
 
 
 def _assert_no_secret(text: str, password: str | None, where: str) -> None:
-    """The disposable password must not reach any emitted file."""
+    """No secret material may reach an emitted file.
+
+    Two controls: the disposable password itself, and the shape of a
+    credential (an Authorization header, a bearer value, a Basic header or a
+    credential field with a value). The scan runs before the file is written,
+    so a leak never reaches the disk.
+    """
     if password and password in text:
         fail(f"the disposable password leaked into {where}")
+    match = SECRET_VALUE_RE.search(text)
+    if match:
+        fail(f"secret material leaked into {where}: {match.group(0)[:32]!r}")
 
 
 def main(argv: list[str]) -> int:

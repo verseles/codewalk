@@ -292,6 +292,29 @@ class IsolationTests(unittest.TestCase):
         self.assertEqual(env["NO_PROXY"], "127.0.0.1,localhost")
         self.assertEqual(env["no_proxy"], "127.0.0.1,localhost")
 
+    def test_child_env_drops_the_credential_variables(self):
+        env = smoke._child_env(
+            {
+                "OPENCODE_CONFIG": "/home/ubuntu/.config/opencode/opencode.json",
+                "OPENCODE_SERVER_PASSWORD": "s3cr3t",
+                "ANTHROPIC_API_KEY": "sk-ant-000000000000",
+                "GITHUB_TOKEN": "ghp_0000000000000000",
+                "CODEWALK_LIVE_SMOKE_PASSWORD": "disposable",
+                "HOME": "/home/ubuntu",
+                "PATH": "/usr/bin",
+            }
+        )
+        for name in (
+            "OPENCODE_CONFIG",
+            "OPENCODE_SERVER_PASSWORD",
+            "ANTHROPIC_API_KEY",
+            "GITHUB_TOKEN",
+        ):
+            self.assertNotIn(name, env)
+        # The disposable password the launcher owns stays: the suite needs it.
+        self.assertEqual(env["CODEWALK_LIVE_SMOKE_PASSWORD"], "disposable")
+        self.assertEqual(env["HOME"], "/home/ubuntu")
+
     def test_cleanup_ok_requires_every_invariant(self):
         good = {
             "server_exited": True,
@@ -299,7 +322,6 @@ class IsolationTests(unittest.TestCase):
             "owned_ports_released": True,
             "owned_process_group_survivors": [],
             "user_opencode_service_alive": True,
-            "user_listening_ports_preserved": True,
         }
         self.assertTrue(smoke._cleanup_ok(good))
         for key in (
@@ -307,7 +329,6 @@ class IsolationTests(unittest.TestCase):
             "temp_root_removed",
             "owned_ports_released",
             "user_opencode_service_alive",
-            "user_listening_ports_preserved",
         ):
             broken = dict(good)
             broken[key] = False
@@ -369,6 +390,45 @@ class EgressClassifierTests(unittest.TestCase):
 
 
 class FixtureTests(unittest.TestCase):
+    def test_a_capability_without_its_marker_is_missing(self):
+        events = [
+            'CODEWALK_LIVE_QA {"phase": "pairing", "status": "passed"}',
+            'CODEWALK_LIVE_QA {"phase": "native-cost", "status": "passed", "cost": 0}',
+        ]
+        states = smoke._capability_states(events)
+        self.assertEqual(states["pairing"], "passed")
+        self.assertEqual(states["send"], "missing")
+        self.assertEqual(states["stopIdle"], "missing")
+
+    def test_a_missing_cost_marker_is_not_a_measured_zero(self):
+        self.assertIsNone(smoke._native_cost([]))
+        self.assertIsNone(
+            smoke._native_cost(['CODEWALK_LIVE_QA {"phase": "pairing", "status": "passed"}'])
+        )
+        self.assertEqual(
+            smoke._native_cost(
+                ['CODEWALK_LIVE_QA {"phase": "native-cost", "status": "passed", "cost": 0}']
+            ),
+            0,
+        )
+
+    def test_the_secret_scan_catches_a_credential_shape(self):
+        with self.assertRaises(smoke.Fatal):
+            smoke._assert_no_secret(
+                'Authorization: Basic b3BlbmNvZGU6c2VjcmV0cGFzcw==', None, "log"
+            )
+        with self.assertRaises(smoke.Fatal):
+            smoke._assert_no_secret('{"token": "abcdefghijkl"}', None, "log")
+        with self.assertRaises(smoke.Fatal):
+            smoke._assert_no_secret("the password is s3cr3t", "s3cr3t", "log")
+        # Prose that names a credential is not a leak.
+        smoke._assert_no_secret(
+            "No Authorization header, pairing code or paired token was recorded.",
+            None,
+            "log",
+        )
+        smoke._assert_no_secret('{"token": "[REDACTED]"}', None, "log")
+
     def test_the_capability_map_is_total_and_unique(self):
         self.assertEqual(
             set(smoke.CAPABILITY_PHASES),
@@ -402,6 +462,8 @@ class FixtureTests(unittest.TestCase):
             "version": "2.0.22",
             "host": "linux-aarch64",
             "zero_spend": True,
+            "repo_commit": "0" * 40,
+            "repo_dirty": False,
             "events": [
                 'CODEWALK_LIVE_QA {"phase": "pairing", "status": "passed"}',
                 'CODEWALK_LIVE_QA {"phase": "native-cost", "status": "passed", "cost": 0}',
@@ -416,14 +478,17 @@ class FixtureTests(unittest.TestCase):
                 "owned_ports_still_listening": [],
                 "owned_ports_released": True,
                 "owned_process_group_survivors": [],
-                "user_listening_ports_preserved": True,
+                "user_listening_ports_removed": [],
                 "foreign_ports_left": [],
             },
             "egress": {
                 "violation": None,
                 "nonLoopbackPeers": 0,
-                "samples": 3,
-                "auditedAt": "2026-10-19T00:00:00+00:00",
+                "socketsObserved": 3,
+                "auditRuns": 4,
+                "firstAuditAt": "2026-10-19T00:00:00+00:00",
+                "lastAuditAt": "2026-10-19T00:00:20+00:00",
+                "auditedAt": "2026-10-19T00:00:20+00:00",
             },
             "acquisition": {
                 "tarball_url": "https://example.invalid/x.tgz",
@@ -431,6 +496,7 @@ class FixtureTests(unittest.TestCase):
                 "binary_sha256": "b" * 64,
             },
             "stub_ledger": [],
+            "stub_hold_ends": ["disconnect"],
             "stub_requests": 0,
             "wall_seconds": 1.0,
         }

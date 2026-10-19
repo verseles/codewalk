@@ -54,6 +54,10 @@ for line in (ROOT / "SHA256SUMS").read_text().splitlines():
     check(f"digest:{name}", actual == digest)
 
 check("serverVersionIsPinned", provenance["runtimeVersion"] == "2.0.22")
+# The evidence names the revision it was made from, and that revision must
+# have been a clean tree: a run from a dirty tree cannot be reproduced.
+check("provenanceNamesItsRevision", bool(provenance.get("repoCommit")))
+check("provenanceTreeWasClean", provenance.get("repoTreeDirty") is False)
 check(
     "artifactDigestRecorded",
     bool(provenance["artifact"]["tarballSha256"])
@@ -89,12 +93,18 @@ check(
     "toolCallContinuedAfterApproval",
     any(r["has_tool_result"] for r in ledger["requests"]),
 )
+# The held stream must have ended with the client disconnect, not with the
+# hold deadline: that is what proves the disconnect surfaced.
+check(
+    "holdEndedWithTheDisconnect",
+    int(ledger.get("holdAbortedByDisconnect") or 0) >= 1,
+)
 check("noEgressViolation", egress["violation"] is None and egress["nonLoopbackPeers"] == 0)
-check("egressAuditRan", int(egress.get("samples") or 0) >= 1)
+# The audit must have run while the suite ran, not only once at the end.
+check("egressAuditRan", int(egress.get("auditRuns") or 0) >= 2)
 check("serverExited", cleanup["serverExited"] is True)
 check("tempRootRemoved", cleanup["tempRootRemoved"] is True)
 check("userServiceAlive", cleanup["userOpencodeServiceAlive"] is True)
-check("userListeningPortsPreserved", cleanup["userListeningPortsPreserved"] is True)
 check("ownedPortsReleased", cleanup["ownedPortsReleased"] is True)
 check(
     "noOwnedPortStillListening",
@@ -130,6 +140,7 @@ report = {
         # Not gates: the user may act on the host while the run is live, and
         # a change there is not a leak of the run.
         "foreignPortsLeft": cleanup.get("foreignPortsLeft"),
+        "userListeningPortsRemoved": cleanup.get("userListeningPortsRemoved"),
         "userOpencodeProcessesBefore": cleanup.get("userOpencodeProcessesBefore"),
         "userOpencodeProcessesAfter": cleanup.get("userOpencodeProcessesAfter"),
     },
