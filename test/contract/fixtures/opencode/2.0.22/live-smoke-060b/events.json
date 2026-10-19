@@ -5,6 +5,11 @@
       "status": "passed"
     },
     {
+      "cost": 0,
+      "phase": "native-cost",
+      "status": "passed"
+    },
+    {
       "phase": "send",
       "status": "passed"
     },

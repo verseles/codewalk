@@ -1,0 +1,13 @@
+{
+  "unit": "V2-060B",
+  "phases": {
+    "pairing": "pairing",
+    "send": "send",
+    "approval": "approval",
+    "approval-manual": "approvalManual",
+    "approval-auto": "approvalAuto",
+    "reconnect-detection": "reconnect",
+    "stop-reconnect": "stop",
+    "stop-idle": "stopIdle"
+  }
+}

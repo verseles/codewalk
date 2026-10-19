@@ -1,4 +1,5 @@
 CODEWALK_LIVE_QA {"phase": "pairing", "status": "passed"}
+CODEWALK_LIVE_QA {"cost": 0, "phase": "native-cost", "status": "passed"}
 CODEWALK_LIVE_QA {"phase": "send", "status": "passed"}
 CODEWALK_LIVE_QA {"phase": "approval", "status": "passed"}
 CODEWALK_LIVE_QA {"phase": "approval-manual", "status": "passed"}

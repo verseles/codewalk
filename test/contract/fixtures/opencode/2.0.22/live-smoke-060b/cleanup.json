@@ -1,12 +1,20 @@
 {
   "serverExited": true,
   "tempRootRemoved": true,
-  "userOpencodeProcessesUnchanged": true,
-  "ownedPorts": [
-    36451,
-    47727
+  "userOpencodeServiceAlive": true,
+  "userOpencodeProcessesBefore": [
+    503817
   ],
+  "userOpencodeProcessesAfter": [
+    503817
+  ],
+  "ownedPorts": [
+    42543,
+    51577
+  ],
+  "ownedPortsStillListening": [],
   "ownedPortsReleased": true,
+  "ownedProcessGroupSurvivors": [],
   "userListeningPortsBefore": [
     22,
     53,
@@ -45,7 +53,8 @@
     9992,
     9993,
     20251,
-    36451,
     52744
-  ]
+  ],
+  "userListeningPortsPreserved": true,
+  "foreignPortsLeft": []
 }

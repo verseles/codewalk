@@ -55,6 +55,6 @@
       ]
     }
   ],
-  "holdAborted": 0,
+  "holdAborted": 1,
   "cap": 12
 }

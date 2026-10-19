@@ -2,11 +2,21 @@
   "unit": "V2-060B",
   "status": "passed",
   "checks": {
+    "digest:capabilities.json": "passed",
+    "digest:cleanup.json": "passed",
+    "digest:egress.json": "passed",
+    "digest:events.json": "passed",
+    "digest:provenance.json": "passed",
+    "digest:results.json": "passed",
+    "digest:stub-ledger.json": "passed",
+    "digest:markers.txt": "passed",
     "serverVersionIsPinned": "passed",
     "artifactDigestRecorded": "passed",
     "nativeCostIsZero": "passed",
     "zeroSpendDeclared": "passed",
+    "runDelivered": "passed",
     "everyCapabilityObserved": "passed",
+    "everyCapabilityPassed": "passed",
     "markersAgreeWithResults": "passed",
     "clientExitClean": "passed",
     "nativeProbePassed": "passed",
@@ -14,13 +24,17 @@
     "stubScenariosMatchResults": "passed",
     "toolCallContinuedAfterApproval": "passed",
     "noEgressViolation": "passed",
+    "egressAuditRan": "passed",
     "serverExited": "passed",
     "tempRootRemoved": "passed",
-    "userProcessesUnchanged": "passed",
+    "userServiceAlive": "passed",
+    "userListeningPortsPreserved": "passed",
     "ownedPortsReleased": "passed",
-    "noForeignListeningPortLeft": "passed",
+    "noOwnedPortStillListening": "passed",
+    "noOwnedProcessSurvivor": "passed",
     "limitationsRecorded": "passed",
     "noSecretMaterial:README.md": "passed",
+    "noSecretMaterial:capabilities.json": "passed",
     "noSecretMaterial:cleanup.json": "passed",
     "noSecretMaterial:egress.json": "passed",
     "noSecretMaterial:events.json": "passed",
@@ -29,5 +43,15 @@
     "noSecretMaterial:results.json": "passed",
     "noSecretMaterial:stub-ledger.json": "passed"
   },
-  "checkCount": 26
+  "checkCount": 40,
+  "failedChecks": [],
+  "observations": {
+    "foreignPortsLeft": [],
+    "userOpencodeProcessesBefore": [
+      503817
+    ],
+    "userOpencodeProcessesAfter": [
+      503817
+    ]
+  }
 }

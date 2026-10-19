@@ -2,9 +2,12 @@
 """Read-only cross-checks over the V2-060B live-smoke evidence.
 
 Issues no request and starts no service: it only checks that the recorded
-evidence is internally consistent, zero-spend and isolated.
+evidence is internally consistent, zero-spend and isolated. Every file in
+this directory except this script, the documentation and the derived report
+is produced by the launcher from the recorded run.
 """
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -24,6 +27,7 @@ events = read("events.json")
 ledger = read("stub-ledger.json")
 egress = read("egress.json")
 cleanup = read("cleanup.json")
+capabilities = read("capabilities.json")
 markers = [
     json.loads(line.split("CODEWALK_LIVE_QA ", 1)[1])
     for line in (ROOT / "markers.txt").read_text().splitlines()
@@ -34,32 +38,44 @@ checks: dict[str, str] = {}
 
 
 def check(name: str, condition: bool) -> None:
-    assert condition, name
-    checks[name] = "passed"
+    checks[name] = "passed" if condition else "failed"
 
 
 observed = {marker["phase"]: marker["status"] for marker in markers}
+phases = capabilities["phases"]
+
+# The digests pin the evidence files the launcher wrote.
+for line in (ROOT / "SHA256SUMS").read_text().splitlines():
+    if not line.strip():
+        continue
+    digest, name = line.split(None, 1)
+    name = name.strip()
+    actual = hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+    check(f"digest:{name}", actual == digest)
+
 check("serverVersionIsPinned", provenance["runtimeVersion"] == "2.0.22")
-check("artifactDigestRecorded", bool(provenance["artifact"]["tarballSha256"]) and bool(provenance["artifact"]["binarySha256"]))
+check(
+    "artifactDigestRecorded",
+    bool(provenance["artifact"]["tarballSha256"])
+    and bool(provenance["artifact"]["binarySha256"]),
+)
 check("nativeCostIsZero", provenance["nativeCostUSD"] == 0)
 check("zeroSpendDeclared", results["zeroSpend"] is True)
+check("runDelivered", results["status"] == "delivered-awaiting-acceptance")
+# Every capability the fixture claims is backed by the marker of its phase:
+# the phase map is explicit, so a renamed phase can never be skipped.
 check(
     "everyCapabilityObserved",
-    all(
-        results["capabilities"][name] == "passed"
-        for name in (
-            "pairing",
-            "send",
-            "approval",
-            "approvalManual",
-            "approvalAuto",
-            "reconnect",
-            "stop",
-            "stopIdle",
-        )
-    ),
-    )
-check("markersAgreeWithResults", all(observed.get(name) == "passed" for name in results["capabilities"] if name in observed))
+    set(results["capabilities"]) == set(phases.values()),
+)
+check(
+    "everyCapabilityPassed",
+    all(value == "passed" for value in results["capabilities"].values()),
+)
+check(
+    "markersAgreeWithResults",
+    all(observed.get(phase) == "passed" for phase in phases),
+)
 check("clientExitClean", events["flutterExit"] == 0)
 check("nativeProbePassed", events["s0Probe"] == "passed")
 check("stubRequestCapRespected", len(ledger["requests"]) <= ledger["cap"])
@@ -74,38 +90,51 @@ check(
     any(r["has_tool_result"] for r in ledger["requests"]),
 )
 check("noEgressViolation", egress["violation"] is None and egress["nonLoopbackPeers"] == 0)
+check("egressAuditRan", int(egress.get("samples") or 0) >= 1)
 check("serverExited", cleanup["serverExited"] is True)
 check("tempRootRemoved", cleanup["tempRootRemoved"] is True)
-check("userProcessesUnchanged", cleanup["userOpencodeProcessesUnchanged"] is True)
+check("userServiceAlive", cleanup["userOpencodeServiceAlive"] is True)
+check("userListeningPortsPreserved", cleanup["userListeningPortsPreserved"] is True)
 check("ownedPortsReleased", cleanup["ownedPortsReleased"] is True)
 check(
-    "noForeignListeningPortLeft",
-    not (
-        set(cleanup["userListeningPortsAfter"])
-        - set(cleanup["userListeningPortsBefore"])
-        - set(cleanup.get("ownedPorts") or [])
-    ),
+    "noOwnedPortStillListening",
+    not (cleanup.get("ownedPortsStillListening") or []),
+)
+check(
+    "noOwnedProcessSurvivor",
+    not (cleanup.get("ownedProcessGroupSurvivors") or []),
 )
 check("limitationsRecorded", len(results["limitations"]) >= 3)
 
 # No secret material may appear anywhere in this directory: an actual header,
 # a bearer value or a credential field with a value (prose may name them).
+# The derived report and the digest list are excluded: they are regenerated
+# from the evidence and would make the check count unstable.
 secret = re.compile(
     r"(?i)(authorization\s*[:=]\s*[\"']?\S|bearer\s+[A-Za-z0-9._\-]{16,}"
     r"|\"(password|secret|token|code)\"\s*:\s*\"[^\"]{8,}\")"
 )
 for path in sorted(ROOT.iterdir()):
-    if path.suffix == ".py" or path.name == "SHA256SUMS":
+    if path.suffix == ".py" or path.name in ("SHA256SUMS", "validation.json"):
         continue
     check(f"noSecretMaterial:{path.name}", not secret.search(path.read_text()))
 
+failed = sorted(name for name, value in checks.items() if value != "passed")
 report = {
     "unit": "V2-060B",
-    "status": "passed" if all(v == "passed" for v in checks.values()) else "failed",
+    "status": "passed" if not failed else "failed",
     "checks": checks,
     "checkCount": len(checks),
+    "failedChecks": failed,
+    "observations": {
+        # Not gates: the user may act on the host while the run is live, and
+        # a change there is not a leak of the run.
+        "foreignPortsLeft": cleanup.get("foreignPortsLeft"),
+        "userOpencodeProcessesBefore": cleanup.get("userOpencodeProcessesBefore"),
+        "userOpencodeProcessesAfter": cleanup.get("userOpencodeProcessesAfter"),
+    },
 }
 if args.write_report:
     (ROOT / "validation.json").write_text(json.dumps(report, indent=2) + "\n")
-print(json.dumps({"status": report["status"], "checks": len(checks)}))
+print(json.dumps({"status": report["status"], "checks": len(checks), "failed": failed}))
 sys.exit(0 if report["status"] == "passed" else 1)

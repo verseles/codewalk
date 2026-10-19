@@ -58,9 +58,11 @@ void main() {
   ///
   /// The cadence is a balance of two clocks: the fake clock serves the
   /// product's own timers (it must advance, or a timer-awaited future never
-  /// completes), while the real slice gives the live socket time. A too-fast
-  /// fake clock would trip the 45-second SSE watchdog on a healthy stream, so
-  /// the fake step stays small relative to the real one.
+  /// completes), while the real slice gives the live socket time. The fake
+  /// step is smaller than the real one, so the fake clock runs *slower* than
+  /// wall-clock time: the product's 45-second SSE watchdog then elapses later
+  /// in real time than it would in production, and a healthy stream cannot
+  /// trip it early.
   Future<void> pumpSpin(
     WidgetTester tester,
     FutureOr<bool> Function() condition, {
@@ -73,9 +75,9 @@ void main() {
         fail('Timed out waiting for $reason');
       }
       await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 15)),
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 10));
     }
     await tester.pump();
   }
@@ -114,9 +116,9 @@ void main() {
         final deadline = DateTime.now().add(budget);
         while (DateTime.now().isBefore(deadline)) {
           await tester.runAsync(
-            () => Future<void>.delayed(const Duration(milliseconds: 15)),
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
           );
-          await tester.pump(const Duration(milliseconds: 50));
+          await tester.pump(const Duration(milliseconds: 10));
           final empty = await real(
             () async => (await probe.listPermissions(nativeId)).isEmpty,
           );
@@ -307,6 +309,9 @@ void main() {
       }).single;
       // Native cost is a scalar zero on stub turns (tokens break it down).
       expect(assistant['cost'], 0);
+      // The launcher derives the zero-spend claim from this marker: the
+      // evidence cannot assert a cost the suite did not observe.
+      qaMark('native-cost', 'passed', {'cost': assistant['cost']});
       final tokens = assistant['tokens'] as Map;
       expect(tokens['input'], 0);
       expect(tokens['output'], 0);

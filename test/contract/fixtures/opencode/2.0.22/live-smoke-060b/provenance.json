@@ -6,7 +6,7 @@
   "platform": "Linux aarch64",
   "runtimeVersion": "2.0.22",
   "implementationLine": "main",
-  "parentCommit": "2596565d7b9a5c89207b80be68d0006ec4c7bca9",
+  "repoCommit": "7c2cb5f5660c117276e8e2195a7d4a0fa6ddb9c1",
   "artifact": {
     "package": "@opencode/cli-linux-arm64@2.0.22",
     "tarballUrl": "https://registry.npmjs.org/@opencode/cli-linux-arm64/-/cli-linux-arm64-2.0.22.tgz",
@@ -14,9 +14,9 @@
     "binarySha256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815"
   },
   "topology": "owned foreground `opencode serve` on 127.0.0.1 with an ephemeral port, isolated HOME/XDG, a fresh password and a loopback stub provider",
-  "nativeCostUSD": 0,
+  "nativeCostUSD": 0.0,
   "stubRequests": 4,
-  "wallSeconds": 18.4,
+  "wallSeconds": 20.3,
   "launcher": "tool/ci/live_smoke_v2_opencode.py",
   "suite": "test/v2/sessions/live_flow_smoke_test.dart",
   "redactions": [
