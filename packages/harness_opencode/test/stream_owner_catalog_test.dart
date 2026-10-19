@@ -33,6 +33,7 @@ void main() {
       'session.forked',
       'session.renamed',
       'session.deleted',
+      'session.moved',
     ]) {
       await harness.send([
         {
@@ -48,7 +49,24 @@ void main() {
       OpenCodeCatalogChange.forked,
       OpenCodeCatalogChange.renamed,
       OpenCodeCatalogChange.deleted,
+      OpenCodeCatalogChange.moved,
     ]);
+  });
+
+  test('a moved session reaches the catalog', () async {
+    final harness = Harness('ses_a');
+    final changes = <OpenCodeCatalogChange>[];
+    harness.owner.catalogChanges.listen(changes.add);
+    await harness.connect(1);
+    await harness.send([
+      {
+        'id': 'evt_1',
+        'created': 1,
+        'type': 'session.moved',
+        'data': {'sessionID': 'ses_a'},
+      },
+    ]);
+    expect(changes, [OpenCodeCatalogChange.moved]);
   });
 
   test('a frame that is not a lifecycle change is not reported', () async {

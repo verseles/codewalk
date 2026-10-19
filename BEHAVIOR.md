@@ -33,6 +33,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a session the server did not attribute to a project keeps a clearly marked group, and no project is invented for it
 - **Then** the group header shows the reported directory with its last segment as the title, the path is always read left-to-right, and the header carries no count
 - **Then** the grouping follows the rows the server just returned after a live re-read, and the expanded row keeps its group
+- **Then** a session the endpoint moved to another location changes its group with the next re-read
 
 ### V2 live session catalog
 

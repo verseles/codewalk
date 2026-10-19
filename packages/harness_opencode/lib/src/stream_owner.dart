@@ -30,8 +30,9 @@ enum OpenCodeStreamFailure { malformedControl, hydrationExhausted, terminal }
 /// The kind is the whole signal: no session id, title, location or payload
 /// travels with it, because the consumer re-reads the authoritative list
 /// instead of patching a row. A fork is a new session that starts elsewhere
-/// and emits `session.forked` rather than `session.created`.
-enum OpenCodeCatalogChange { created, forked, renamed, deleted }
+/// and emits `session.forked` rather than `session.created`; a move changes
+/// the location a session belongs to.
+enum OpenCodeCatalogChange { created, forked, renamed, deleted, moved }
 
 sealed class OpenCodeStreamUpdate {
   const OpenCodeStreamUpdate();
@@ -281,6 +282,10 @@ final class OpenCodeStreamOwner {
         return OpenCodeCatalogChange.renamed;
       case 'session.deleted':
         return OpenCodeCatalogChange.deleted;
+      case 'session.moved':
+        // A move changes the session's location, so the group it belongs to
+        // changes with it.
+        return OpenCodeCatalogChange.moved;
       default:
         return null;
     }

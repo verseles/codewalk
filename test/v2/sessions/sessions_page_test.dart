@@ -44,7 +44,17 @@ void main() {
           dropdown.onChanged!('profile_a');
           await tester.pump();
           final source = rig.sources.single;
-          source.respond([source.row('first', title: '')], next: 'A');
+          source.respond(
+            [
+              source.row(
+                'first',
+                title: '',
+                directory:
+                    '/a/very/long/workspace/path/that/should/ellipsize/in/the/compact/layout',
+              ),
+            ],
+            next: 'A',
+          );
           await tester.pumpAndSettle();
           expect(find.text(l10n.sessionExportUntitled), findsOneWidget);
           final row = find.byKey(ValueKey(source.row('first').info.ref));
@@ -281,7 +291,7 @@ void main() {
       source.row('one', directory: '/work/alpha', title: 'One'),
       source.row('two', directory: '/work/beta', title: 'Two'),
       source.row('three', directory: '/work/alpha', title: 'Three'),
-    ]);
+    ], next: 'A');
     await tester.pumpAndSettle();
 
     // One header per project, in the order the server returned the groups.
@@ -294,6 +304,61 @@ void main() {
     expect(find.text('Three'), findsOneWidget);
     // The sessions the server did not attribute share one marked group.
     expect(find.text(l10n.sessionsUnknownProject), findsNothing);
+
+    // The grouping is recomputed from the loaded rows: a page that appends a
+    // row to an earlier group keeps that row inside its group.
+    final more = find.byKey(const ValueKey('sessions-more'));
+    await tester.ensureVisible(more);
+    await tester.tap(more);
+    await tester.pump();
+    source.respond([source.row('four', directory: '/work/alpha', title: 'Four')]);
+    await tester.pumpAndSettle();
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('beta'), findsOneWidget);
+    expect(find.text('Four'), findsOneWidget);
+    expect(find.text('One'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
+
+  testWidgets('a session moved elsewhere changes its group', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    final directory = LiveDirectory();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: () => directory,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    source.respond([source.row('one', directory: '/work/alpha', title: 'One')]);
+    await tester.pumpAndSettle();
+    // The feed opens after the first read.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('alpha'), findsOneWidget);
+
+    // The endpoint moved the session: the re-read puts it in the new group.
+    directory.feeds.last.emit(const SessionCatalogChanged());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    source.respond([source.row('one', directory: '/work/beta', title: 'One')]);
+    await tester.pumpAndSettle();
+    expect(find.text('beta'), findsOneWidget);
+    expect(find.text('alpha'), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
