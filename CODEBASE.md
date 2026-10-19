@@ -2180,6 +2180,10 @@ packages/harness_opencode/test/support/fake_opencode_server.dart # Routed matchi
 test/v2/sessions/fixture_flow_support.dart # Test-only rig wiring `FakeOpenCodeServer` to the real v2 session live graph; fails teardown on uncovered routes or extra SSE epochs
 test/v2/sessions/fixture_flow_test.dart # Layer-1 integrated controller/state suite over the real session live source
 test/v2/sessions/fixture_flow_widget_test.dart # Layer-2 integrated widget suite over the real app graph with `runAsync`/`pump` phase discipline
+test/v2/sessions/scripted_live_bridge.dart # Test-only screen bridge serving the real `SessionStore`/reducer from `ScriptedHarnessAdapter` with strict FIFO authored outcomes; no harness code in `lib/`
+test/v2/sessions/scripted_screens_scenarios_test.dart # Nine screen tests running six synthetic scenarios through the real `SessionLivePage` plus screen-shape and coincident-scope cases
+test/v2/sessions/scripted_screens_controls_test.dart # Five control-matrix tests (running/stopping/stale/reconnecting/read-only/attachLive without outbox) with `onPressed` presence/absence assertions
+test/v2/sessions/scripted_screens_no_branch_test.dart # `package:analyzer` AST proof of no harness/product-name branches or test/harness imports in session/app `lib/` surface
 ```
 
 `FixtureFlowRig` wires the fake loopback server to the real v2 dependency graph
