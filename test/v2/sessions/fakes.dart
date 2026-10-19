@@ -81,7 +81,7 @@ class CatalogRig {
     sessions = SessionsController(
       hosts: hosts,
       sourceFactory: create,
-      changesFactory: withFeed ? (_, _) async => createFeed() : null,
+      changesFactory: withFeed ? (_, _) => _openFeed() : null,
       now: now,
       liveDebounce: liveDebounce,
       liveMinInterval: liveMinInterval,
@@ -95,6 +95,16 @@ class CatalogRig {
   /// The endpoint's lifecycle feeds, one per acquisition; the tests drive
   /// the newest one by hand.
   final feeds = <LiveCatalogChanges>[];
+
+  /// Holds the feed acquisition open, so a test can observe what happens
+  /// while it is still opening.
+  Completer<void>? feedGate;
+
+  Future<SessionCatalogChanges> _openFeed() async {
+    final gate = feedGate;
+    if (gate != null) await gate.future;
+    return createFeed();
+  }
 
   LiveCatalogChanges get feed => feeds.last;
 

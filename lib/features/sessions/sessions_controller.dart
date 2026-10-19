@@ -46,13 +46,16 @@ class SessionsController extends ChangeNotifier {
   // The live catalog: the feed, its signals and the bounded re-read they
   // trigger.
   SessionCatalogChanges? _changes;
+  Future<void>? _changesAcquisition;
+  int _changesToken = 0;
   // The feed's subscription belongs to the controller: it is cancelled in
-  // [_closeChanges] when the profile changes or the controller is disposed.
-  // ignore: cancel_subscriptions
+  // [_closeChanges], which runs when the profile changes, when the
+  // controller is disposed and when a newer feed replaces this one.
   StreamSubscription<SessionCatalogSignal>? _changesSubscription;
   Timer? _liveTimer;
   DateTime? _liveEarliestStart;
   bool _livePending = false;
+  bool _liveConnected = false;
   bool _liveSuspended = false;
   bool _behind = false;
   int _liveFailures = 0;
@@ -64,6 +67,7 @@ class SessionsController extends ChangeNotifier {
   Set<String> _liveRequested = const {};
   int _livePagesRead = 0;
   bool _liveHasMore = false;
+  bool _liveOmitted = false;
   final _received = <String>{};
   final _requested = <String>{};
   List<SessionSummary> _sessions = const [];
@@ -229,6 +233,13 @@ class SessionsController extends ChangeNotifier {
         !_ready()) {
       return Future.value();
     }
+    // A manual page supersedes an automatic re-read in flight, so the page
+    // the user just loaded is not replaced by an older traversal. A page
+    // clicked with no automatic read in flight schedules no re-read.
+    if (_quietRefreshing || _livePending) {
+      _generation++;
+      _livePending = true;
+    }
     return _start(refresh: false);
   }
 
@@ -326,9 +337,11 @@ class SessionsController extends ChangeNotifier {
           _source = null;
           _closeChanges();
         } else if (failure == null) {
-          // A successful read lifts a suspension and opens the feed.
+          // A successful authoritative read lifts the suspension, clears the
+          // notice and opens the feed.
           _liveFailures = 0;
           _liveSuspended = false;
+          _behind = false;
           unawaited(_ensureChanges());
         }
         if (_livePending && failure == null) {
@@ -343,44 +356,89 @@ class SessionsController extends ChangeNotifier {
   /// Opens the endpoint's catalog feed for the selected profile.
   ///
   /// The feed shares the endpoint's single event stream, so the list never
-  /// opens a second subscription. A platform without a feed keeps the list
-  /// pull-only, which is not a failure.
+  /// opens a second subscription. The acquisition is single-flight: two
+  /// overlapping calls must not leave an orphan lease holding the endpoint's
+  /// stream open after the profile is left. A platform without a feed keeps
+  /// the list pull-only, which is not a failure.
   Future<void> _ensureChanges() async {
     final factory = changesFactory;
     final profile = _profile;
     if (factory == null || profile == null || _changes != null) return;
+    final pending = _changesAcquisition;
+    if (pending != null) return pending;
+    final token = _changesToken;
+    final acquisition = _acquireChanges(factory, profile, token);
+    _changesAcquisition = acquisition;
+    try {
+      await acquisition;
+    } finally {
+      if (identical(_changesAcquisition, acquisition)) {
+        _changesAcquisition = null;
+      }
+    }
+  }
+
+  Future<void> _acquireChanges(
+    SessionCatalogChangesFactory factory,
+    EndpointProfile profile,
+    int token,
+  ) async {
     final credential = _credential;
     if (credential == null) return;
+    SessionCatalogChanges feed;
     try {
-      final feed = await factory(profile, credential);
-      if (_disposed || !identical(_profile, profile)) {
-        feed.close();
-        return;
-      }
-      _changes = feed;
-      final previous = _changesSubscription;
-      _changesSubscription = feed.signals.listen(_onLiveSignal);
-      if (previous != null) unawaited(previous.cancel());
+      feed = await factory(profile, credential);
     } on Object {
       // The endpoint has no live feed: the list stays pull-only.
+      return;
     }
+    if (_disposed || !identical(_profile, profile) || token != _changesToken) {
+      // The profile changed while the feed was opening: the lease is released
+      // instead of being kept.
+      feed.close();
+      return;
+    }
+    final previous = _changes;
+    _changes = feed;
+    final subscription = _changesSubscription;
+    _changesSubscription = feed.signals.listen(
+      _onLiveSignal,
+      onDone: () => _onFeedDone(feed),
+    );
+    if (subscription != null) unawaited(subscription.cancel());
+    if (previous != null) previous.close();
+    // The feed opened after the list was read, and the server does not
+    // replay: one catch-up read reconciles the window.
+    _markLiveChange();
   }
 
   /// Releases the feed and every timer it armed.
   void _closeChanges() {
+    // The token retires an acquisition that is still opening: the lease it
+    // creates is released instead of being kept for a profile that is gone.
+    _changesToken++;
+    _changesAcquisition = null;
     _liveTimer?.cancel();
     _liveTimer = null;
     _livePending = false;
+    _liveConnected = false;
     _liveFailures = 0;
     _liveSuspended = false;
     _behind = false;
     _liveEarliestStart = null;
-    final subscription = _changesSubscription;
+    unawaited(_changesSubscription?.cancel());
     _changesSubscription = null;
     final feed = _changes;
     _changes = null;
-    if (subscription != null) unawaited(subscription.cancel());
     feed?.close();
+  }
+
+  /// The feed ended: the list may be stale until the next read re-acquires it.
+  void _onFeedDone(SessionCatalogChanges feed) {
+    if (_disposed || !identical(_changes, feed)) return;
+    _changes = null;
+    _behind = true;
+    _notify();
   }
 
   void _onLiveSignal(SessionCatalogSignal signal) {
@@ -389,6 +447,8 @@ class SessionsController extends ChangeNotifier {
       case SessionCatalogChanged():
         _markLiveChange();
       case SessionCatalogConnection(:final connected):
+        if (connected == _liveConnected) break;
+        _liveConnected = connected;
         if (connected) {
           // A reconnect is not continuity: the list re-reads before it may
           // call itself current.
@@ -412,11 +472,18 @@ class SessionsController extends ChangeNotifier {
     _liveTimer = Timer(liveDebounce, _runLive);
   }
 
+  /// Whether a quiet read still describes the current profile and feed.
+  bool _quietCurrent(int generation, int epoch, SessionCatalogSource source) =>
+      !_disposed &&
+      generation == _generation &&
+      epoch == _liveEpoch &&
+      identical(source, _source);
+
   /// Runs the automatic re-read when the debounce and the cooldown allow it.
   Future<void> _runLive() async {
     _liveTimer = null;
     if (_disposed || _liveSuspended) return;
-    if (loading) {
+    if (loading || _quietRefreshing) {
       // A read is in flight: the pending latch becomes one final read.
       return;
     }
@@ -442,6 +509,9 @@ class SessionsController extends ChangeNotifier {
   Future<void> _syncLive() async {
     final source = _source;
     if (source == null || _profile == null) return;
+    // The automatic read obeys the same fence as a manual one: an expired or
+    // unreadable credential, a loading host list or a storage failure stops it.
+    if (!_ready(createSource: false)) return;
     final generation = _generation;
     final epoch = _liveEpoch;
     // The re-read follows the depth already loaded, inside the existing
@@ -452,11 +522,20 @@ class SessionsController extends ChangeNotifier {
     try {
       final rows = await _readLivePages(source, generation, epoch, depth);
       if (rows == null) return;
-      final refs = {for (final row in rows) row.info.ref};
       final selected = _selectedSession;
       _sessions = List.unmodifiable(rows);
-      _selectedSession =
-          selected != null && refs.contains(selected.info.ref) ? selected : null;
+      // The expanded row survives only while the server still returns that
+      // session, and it shows the row the server just returned.
+      SessionSummary? fresh;
+      if (selected != null) {
+        for (final row in rows) {
+          if (row.info.ref == selected.info.ref) {
+            fresh = row;
+            break;
+          }
+        }
+      }
+      _selectedSession = fresh;
       _cursor = _liveCursor;
       _received
         ..clear()
@@ -465,10 +544,25 @@ class SessionsController extends ChangeNotifier {
         ..clear()
         ..addAll(_liveRequested);
       _pages = _livePagesRead;
-      hasMore = _liveHasMore;
+      limited =
+          _liveOmitted || (rows.length >= 200 || _livePagesRead >= 10);
+      hasMore = _liveHasMore && !limited;
+      failure = null;
+      stale = false;
       _liveFailures = 0;
       _behind = false;
     } on Object catch (error) {
+      if (!_quietCurrent(generation, epoch, source)) return;
+      if (error is SessionCatalogException &&
+          error.failure == SessionCatalogFailure.authenticationRequired) {
+        // The same path a manual read takes: the list is cleared and the
+        // feed is released.
+        _clear();
+        source.close();
+        _source = null;
+        _closeChanges();
+        return;
+      }
       // The rows stay: a failed re-read marks the list behind, it never
       // empties it.
       _liveFailures++;
@@ -482,6 +576,10 @@ class SessionsController extends ChangeNotifier {
       _quietRefreshing = false;
       final backoff = 1 << (_liveFailures.clamp(0, 6));
       _liveEarliestStart = _now().add(liveMinInterval * backoff);
+      if (_livePending) {
+        // A change that arrived during the read becomes one final read.
+        _markLiveChange();
+      }
       _notify();
     }
   }
@@ -500,16 +598,12 @@ class SessionsController extends ChangeNotifier {
     final requested = <String>{};
     String? cursor;
     var pages = 0;
+    var omitted = false;
     for (var page = 0; page < depth; page++) {
       if (cursor != null) requested.add(cursor);
       final task = source.list(SessionQuery(limit: 50, cursor: cursor));
       final result = await task.result;
-      if (_disposed ||
-          generation != _generation ||
-          epoch != _liveEpoch ||
-          !identical(source, _source)) {
-        return null;
-      }
+      if (!_quietCurrent(generation, epoch, source)) return null;
       if (result.items.length > 50) {
         throw const SessionCatalogException(
           SessionCatalogFailure.incompatibleResponse,
@@ -522,7 +616,11 @@ class SessionsController extends ChangeNotifier {
             SessionCatalogFailure.incompatibleResponse,
           );
         }
-        if (rows.length < 200) rows.add(row);
+        if (rows.length < 200) {
+          rows.add(row);
+        } else {
+          omitted = true;
+        }
       }
       pages++;
       final next = result.nextCursor;
@@ -532,6 +630,7 @@ class SessionsController extends ChangeNotifier {
         _liveRequested = requested;
         _livePagesRead = pages;
         _liveHasMore = false;
+        _liveOmitted = omitted;
         return rows;
       }
       if (!cursors.add(next)) {
@@ -544,6 +643,7 @@ class SessionsController extends ChangeNotifier {
     _liveRequested = requested;
     _livePagesRead = pages;
     _liveHasMore = true;
+    _liveOmitted = omitted;
     return rows;
   }
 

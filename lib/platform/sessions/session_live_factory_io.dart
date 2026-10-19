@@ -71,8 +71,9 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     final key = '${profile.id}|${profile.endpoint}';
     var slot = _slots[key];
     if (slot != null && !slot.credential.matches(credential)) {
-      // Never multiplex two secrets over one stream.
-      if (slot.handles.isNotEmpty) {
+      // Never multiplex two secrets over one stream: a live session or a
+      // catalog lease still holds the profile.
+      if (slot.handles.isNotEmpty || slot.catalogLeases > 0) {
         throw const SessionLiveException(
           SessionLiveFailure.authenticationRequired,
         );

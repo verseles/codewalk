@@ -374,6 +374,11 @@ void main() {
       source.respond([source.row('1')]);
       await read;
       await settle();
+      // The feed opened after the read, so one catch-up read follows it.
+      if (source.tasks.length > 1) {
+        source.respond([source.row('1')]);
+        await settle();
+      }
       return rig;
     }
 
@@ -381,11 +386,11 @@ void main() {
       final rig = await loaded();
       final source = rig.sources.single;
       expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
-      expect(source.tasks, hasLength(1));
+      expect(source.tasks, hasLength(2), reason: 'the read and the catch-up');
 
       rig.feed.emit(const SessionCatalogChanged());
       await settle();
-      expect(source.tasks, hasLength(2), reason: 'the change triggers one read');
+      expect(source.tasks, hasLength(3), reason: 'the change triggers one read');
       source.respond([source.row('1'), source.row('2')]);
       await settle();
       expect(
@@ -462,15 +467,20 @@ void main() {
     test('a burst of changes collapses into one read', () async {
       final rig = await loaded();
       final source = rig.sources.single;
+      final before = source.tasks.length;
       for (var i = 0; i < 5; i++) {
         rig.feed.emit(const SessionCatalogChanged());
       }
       await settle();
-      expect(source.tasks, hasLength(2), reason: 'one read, not five');
+      expect(source.tasks, hasLength(before + 1), reason: 'one read, not five');
     });
 
-    test('the list is behind while the feed is not connected', () async {
+    test('the list is behind after the feed drops', () async {
       final rig = await loaded();
+      expect(rig.sessions.behind, isFalse);
+      // The feed connects, then drops: only the drop makes the list behind.
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
       expect(rig.sessions.behind, isFalse);
       rig.feed.emit(const SessionCatalogConnection(false));
       await settle();
@@ -483,6 +493,42 @@ void main() {
       expect(feed.closes, 0);
       rig.dispose();
       expect(feed.closes, 1);
+    });
+
+    test('a feed that is still opening is not opened twice', () async {
+      final rig = CatalogRig();
+      rig.feedGate = Completer<void>();
+      await rig.save('a');
+      rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      // The feed is still opening: a second read must not open a second one.
+      final second = rig.sessions.refresh();
+      rig.sources.last.respond([rig.sources.last.row('1')]);
+      await second;
+      await settle();
+      rig.feedGate!.complete();
+      await settle();
+      expect(rig.feeds, hasLength(1), reason: 'the acquisition is single-flight');
+    });
+
+    test('a successful manual refresh clears the behind notice', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.fail(SessionCatalogFailure.connection);
+      await settle();
+      expect(rig.sessions.behind, isTrue);
+      final read = rig.sessions.refresh();
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      expect(rig.sessions.behind, isFalse);
     });
 
     test('without a feed the list stays pull-only', () async {

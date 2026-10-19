@@ -2231,6 +2231,25 @@ void main() {
       );
     });
 
+    test('the feed reports the current connection state to a late subscriber',
+        () async {
+      server.running.add('ses_one');
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final lease = await directory.catalogChanges(
+        profile: p,
+        credential: credential,
+      );
+      addTearDown(lease.close);
+      final signals = <SessionCatalogSignal>[];
+      lease.signals.listen(signals.add);
+      await eventually(
+        () => signals
+            .whereType<SessionCatalogConnection>()
+            .any((signal) => signal.connected),
+      );
+    });
+
     test('the profile stays open while the feed is held', () async {
       server.running.add('ses_one');
       final directory = createSessionLiveDirectory()!;

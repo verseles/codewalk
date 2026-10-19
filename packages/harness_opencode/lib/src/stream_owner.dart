@@ -164,8 +164,8 @@ final class OpenCodeStreamOwner {
 
   Stream<OpenCodeStreamUpdate> get updates => _updates.stream;
 
-  /// The connection state, for a subscriber that arrives after the owner
-  /// already reported one.
+  /// The connection state of the stream, for a subscriber that arrives after
+  /// the owner already reported one. A per-session update never changes it.
   ConnectionKind? get connectionKind => _connectionKind;
 
   /// The session lifecycle changes of every session of this harness, watched
@@ -261,8 +261,10 @@ final class OpenCodeStreamOwner {
 
   void _emit(OpenCodeStreamUpdate update) {
     if (_closed) return;
-    if (update case OpenCodeConnectionUpdated(:final kind)) {
-      _connectionKind = kind;
+    if (update case OpenCodeConnectionUpdated(:final kind, :final session)) {
+      // A per-session update is not a stream update: the stream stays live
+      // while one watched session is degraded.
+      if (session == null) _connectionKind = kind;
     }
     _updates.add(update);
   }

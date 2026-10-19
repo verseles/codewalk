@@ -195,7 +195,8 @@ final class OpenCodeProfileSlot {
   }
 
   /// Releases one catalog feed; the profile closes with its last holder.
-  void releaseCatalog() {
+  void _releaseCatalog(_CatalogLease lease) {
+    _leases.remove(lease);
     if (_catalogLeases == 0) return;
     _catalogLeases--;
     if (handles.isEmpty && _catalogLeases == 0) {
@@ -1244,26 +1245,40 @@ final class _ReplyRequest {
 /// owner's payload-free catalog signal and keeps the profile alive while the
 /// catalog needs it.
 final class _CatalogLease implements SessionCatalogChanges {
-  _CatalogLease(this._slot, OpenCodeStreamOwner owner) {
-    _changes = owner.catalogChanges.listen((_) => _add(const SessionCatalogChanged()));
-    _connection = owner.updates
+  _CatalogLease(this._slot, this._owner) {
+    _changes = _owner.catalogChanges.listen((_) => _add(const SessionCatalogChanged()));
+    // Only a stream-level update describes the endpoint's stream: a
+    // per-session degradation leaves the stream live.
+    _connection = _owner.updates
         .where((update) => update is OpenCodeConnectionUpdated)
+        .where((update) => (update as OpenCodeConnectionUpdated).session == null)
         .listen((update) {
           final kind = (update as OpenCodeConnectionUpdated).kind;
           _add(SessionCatalogConnection(kind == ConnectionKind.live));
         });
-    final kind = owner.connectionKind;
-    if (kind != null) _add(SessionCatalogConnection(kind == ConnectionKind.live));
   }
 
   final OpenCodeProfileSlot _slot;
+  final OpenCodeStreamOwner _owner;
   final _controller = StreamController<SessionCatalogSignal>.broadcast();
   late final StreamSubscription<OpenCodeCatalogChange> _changes;
   late final StreamSubscription<OpenCodeStreamUpdate> _connection;
   bool _closed = false;
 
   @override
-  Stream<SessionCatalogSignal> get signals => _controller.stream;
+  Stream<SessionCatalogSignal> get signals => Stream.multi((controller) {
+        // A subscriber that arrives late learns the current state first: a
+        // broadcast controller would drop it.
+        final kind = _owner.connectionKind;
+        if (kind != null) {
+          controller.add(SessionCatalogConnection(kind == ConnectionKind.live));
+        }
+        final subscription = _controller.stream.listen(
+          controller.add,
+          onError: controller.addError,
+        );
+        controller.onCancel = subscription.cancel;
+      });
 
   void _add(SessionCatalogSignal signal) {
     if (!_closed && !_controller.isClosed) _controller.add(signal);
@@ -1276,7 +1291,7 @@ final class _CatalogLease implements SessionCatalogChanges {
     unawaited(_changes.cancel());
     unawaited(_connection.cancel());
     unawaited(_controller.close());
-    _slot.releaseCatalog();
+    _slot._releaseCatalog(this);
   }
 }
 
