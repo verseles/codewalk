@@ -85,12 +85,16 @@ SessionRef? permissionChildOf(SessionRef session, InteractionRequest request) {
 }
 
 /// Widget key part unique across the session and its children, whose native
-/// ids live in separate scopes.
+/// ids live in separate scopes. A request owned by anything other than the
+/// very session it is shown in (a different project's request, a global one)
+/// shares no id namespace with it either, so the owning scope disambiguates.
 String permissionKeyOf(SessionRef session, InteractionRequest request) {
   final child = permissionChildOf(session, request);
-  return child == null
+  if (child != null) return '${child.nativeId}/${request.id.value}';
+  final owner = request.owner;
+  return owner is SessionOwner
       ? request.id.value
-      : '${child.nativeId}/${request.id.value}';
+      : '${owner.scopeKey}/${request.id.value}';
 }
 
 /// Finite copy for a reply state; pure and unit-tested. Never raw server text.
