@@ -1,0 +1,5 @@
+{
+  "violation": null,
+  "nonLoopbackPeers": 0,
+  "policy": "provider.use deny for every provider except the loopback stub; a proxy black hole and an egress audit fail the run closed"
+}

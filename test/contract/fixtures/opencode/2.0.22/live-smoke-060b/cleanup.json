@@ -1,0 +1,51 @@
+{
+  "serverExited": true,
+  "tempRootRemoved": true,
+  "userOpencodeProcessesUnchanged": true,
+  "ownedPorts": [
+    36451,
+    47727
+  ],
+  "ownedPortsReleased": true,
+  "userListeningPortsBefore": [
+    22,
+    53,
+    53,
+    111,
+    443,
+    631,
+    1025,
+    4096,
+    6379,
+    8025,
+    8082,
+    9001,
+    9002,
+    9991,
+    9992,
+    9993,
+    20251,
+    52744
+  ],
+  "userListeningPortsAfter": [
+    22,
+    53,
+    53,
+    111,
+    443,
+    631,
+    1025,
+    4096,
+    6379,
+    8025,
+    8082,
+    9001,
+    9002,
+    9991,
+    9992,
+    9993,
+    20251,
+    36451,
+    52744
+  ]
+}

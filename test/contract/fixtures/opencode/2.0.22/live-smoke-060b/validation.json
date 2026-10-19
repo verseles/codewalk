@@ -1,0 +1,33 @@
+{
+  "unit": "V2-060B",
+  "status": "passed",
+  "checks": {
+    "serverVersionIsPinned": "passed",
+    "artifactDigestRecorded": "passed",
+    "nativeCostIsZero": "passed",
+    "zeroSpendDeclared": "passed",
+    "everyCapabilityObserved": "passed",
+    "markersAgreeWithResults": "passed",
+    "clientExitClean": "passed",
+    "nativeProbePassed": "passed",
+    "stubRequestCapRespected": "passed",
+    "stubScenariosMatchResults": "passed",
+    "toolCallContinuedAfterApproval": "passed",
+    "noEgressViolation": "passed",
+    "serverExited": "passed",
+    "tempRootRemoved": "passed",
+    "userProcessesUnchanged": "passed",
+    "ownedPortsReleased": "passed",
+    "noForeignListeningPortLeft": "passed",
+    "limitationsRecorded": "passed",
+    "noSecretMaterial:README.md": "passed",
+    "noSecretMaterial:cleanup.json": "passed",
+    "noSecretMaterial:egress.json": "passed",
+    "noSecretMaterial:events.json": "passed",
+    "noSecretMaterial:markers.txt": "passed",
+    "noSecretMaterial:provenance.json": "passed",
+    "noSecretMaterial:results.json": "passed",
+    "noSecretMaterial:stub-ledger.json": "passed"
+  },
+  "checkCount": 26
+}

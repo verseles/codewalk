@@ -1,0 +1,46 @@
+{
+  "markers": [
+    {
+      "phase": "pairing",
+      "status": "passed"
+    },
+    {
+      "phase": "send",
+      "status": "passed"
+    },
+    {
+      "phase": "approval",
+      "status": "passed"
+    },
+    {
+      "phase": "approval-manual",
+      "status": "passed"
+    },
+    {
+      "phase": "final",
+      "status": "passed"
+    },
+    {
+      "phase": "approval-auto",
+      "status": "passed"
+    },
+    {
+      "phase": "reconnect-detection",
+      "status": "passed"
+    },
+    {
+      "phase": "stop-reconnect",
+      "status": "passed"
+    },
+    {
+      "phase": "stop-idle",
+      "status": "passed"
+    },
+    {
+      "phase": "final",
+      "status": "passed"
+    }
+  ],
+  "flutterExit": 0,
+  "s0Probe": "passed"
+}

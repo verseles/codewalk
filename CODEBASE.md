@@ -2201,4 +2201,37 @@ directly (cross-package test→test). This coupling is intentional: a production
 `lib/testing.dart` export surface was reviewed and rejected, so a future
 "fix" must not add public API for tests.
 
+## V2-060B live OpenCode 2.0.22 smoke surface
+
+```text
+tool/ci/live_smoke_v2_opencode.py # Disposable-run launcher: official artifact acquisition with digest verification, isolated HOME/XDG, loopback stub provider, owned foreground server, egress audit, cleanup proof, sanitized evidence
+tool/ci/test_v2_live_smoke.py # Launcher unit tests: tar-member filter, digest checks, config invariants, stub scenarios, request cap, redaction, egress classifier
+test/v2/sessions/live_smoke_support.dart # Test-only `IsolateRelay` (own-isolate loopback relay with cut/restore) and `NativeProbe` (session create/select, permission create/list, messages, interrupt, saved approvals)
+test/v2/sessions/live_flow_smoke_test.dart # Opt-in live suite: the real screens (pairing, send, tool-originated approval, manual approval) plus a headless directory test (automatic approval, transport drop and recovery, Stop, idle interrupt)
+test/contract/fixtures/opencode/2.0.22/live-smoke-060b/ # The recorded evidence: results, provenance, events, stub ledger, egress, cleanup, and a read-only validator
+```
+
+The launcher never installs into the user's tree and never runs `opencode
+service`: it fetches `@opencode/cli-linux-arm64@2.0.22` from the official npm
+registry, verifies the registry SHA-512 integrity plus the pinned tarball and
+binary SHA-256 digests, and runs the binary as an owned foreground `serve` on
+`127.0.0.1` with an ephemeral port, an isolated `HOME`/`XDG_*` tree, a fresh
+password and a committed disposable project. The only provider the server may
+use is a loopback stub (deterministic tokens, `cost` 0) selected by an
+explicit `provider.use` deny-all-but-stub policy; a proxy black hole and a
+socket-level egress audit fail the run closed on any non-loopback peer.
+
+The suite is opt-in: without the launcher-owned environment variables it
+skips and contacts nothing. Two clock disciplines matter in the widget half:
+real socket work runs in `tester.runAsync` slices (a bare await on a live
+future never completes in the fake-async zone), and the SSE watchdog's 45
+seconds are fake time, so a fast fake clock drops a healthy stream. The
+transport drop itself is produced by the own-isolate relay, because a
+same-isolate socket pipe never dispatches its events inside the fake zone.
+
+The evidence in `test/contract/fixtures/opencode/2.0.22/live-smoke-060b/`
+records the per-capability results, the artifact digests, the stub ledger,
+the egress audit and the isolation/cleanup proof; `validate.py` re-checks that
+record offline (26 checks) and never contacts a server.
+
 
