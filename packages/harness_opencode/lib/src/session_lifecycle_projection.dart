@@ -128,6 +128,9 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
         ownership: const OwnershipInfo.unknown(
           reason: 'nativeSessionMetadataHasNoOwnershipProof',
         ),
+        // The canonical directory is the project identity; the upstream
+        // project id stays an annotation.
+        project: ProjectRef(ref.host, directory, upstreamProjectId: projectId),
         lineage: SessionLineage(
           parent: parent == null
               ? null

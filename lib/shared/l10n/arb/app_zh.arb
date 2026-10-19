@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[已截断 {count} 个字符] {reason}",
   "mathExpressionLabel": "数学",
   "mermaidCopySourceTooltip": "复制源码",
-  "mermaidDiagramLabel": "Mermaid 图表"
+  "mermaidDiagramLabel": "Mermaid 图表",
+  "sessionsUnknownProject": "未报告项目的会话",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

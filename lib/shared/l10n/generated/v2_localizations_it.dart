@@ -1143,4 +1143,7 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get mermaidDiagramLabel => 'Diagramma Mermaid';
+
+  @override
+  String get sessionsUnknownProject => 'Sessioni senza progetto dichiarato';
 }

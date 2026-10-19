@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[{count}자 잘림] {reason}",
   "mathExpressionLabel": "수식",
   "mermaidCopySourceTooltip": "소스 복사",
-  "mermaidDiagramLabel": "Mermaid 다이어그램"
+  "mermaidDiagramLabel": "Mermaid 다이어그램",
+  "sessionsUnknownProject": "프로젝트가 보고되지 않은 세션",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

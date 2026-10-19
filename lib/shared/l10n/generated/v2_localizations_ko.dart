@@ -1074,4 +1074,7 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get mermaidDiagramLabel => 'Mermaid 다이어그램';
+
+  @override
+  String get sessionsUnknownProject => '프로젝트가 보고되지 않은 세션';
 }

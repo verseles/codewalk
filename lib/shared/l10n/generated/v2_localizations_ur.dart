@@ -1119,4 +1119,8 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get mermaidDiagramLabel => 'متسیستری خاکہ';
+
+  @override
+  String get sessionsUnknownProject =>
+      'ایسے سیشنز جن کا کوئی پروجیکٹ رپورٹ نہیں ہوا';
 }

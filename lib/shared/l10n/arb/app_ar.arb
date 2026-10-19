@@ -880,5 +880,9 @@
   "chatMessageTruncatedChars": "[تم اقتطاع {count} حرفًا] {reason}",
   "mathExpressionLabel": "رياضيات",
   "mermaidCopySourceTooltip": "نسخ المصدر",
-  "mermaidDiagramLabel": "مخطط Mermaid"
+  "mermaidDiagramLabel": "مخطط Mermaid",
+  "sessionsUnknownProject": "جلسات بلا مشروع مُبلَّغ عنه",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

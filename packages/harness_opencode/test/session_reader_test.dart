@@ -101,7 +101,10 @@ void main() {
         'ses_a',
       ]);
       expect(first.items.first.info.title, '');
-      expect(first.items.first.info.project, isNull);
+      // The server's canonical directory is the project identity; the
+      // upstream project id stays an annotation.
+      expect(first.items.first.info.project?.canonicalDirectory, '/project');
+      expect(first.items.first.info.project?.upstreamProjectId, 'global');
       expect(first.items.first.info.ownership.kind, OwnershipKind.unknown);
       expect(first.items.first.execution, isNull);
       expect(first.boundary, isNull);

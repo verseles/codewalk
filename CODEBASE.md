@@ -2277,3 +2277,25 @@ collapses into one read, and the minimum interval between reads grows with the
 consecutive failures. A failed read keeps the rows and marks the list behind;
 three consecutive failures or a rate limit suspend the automatic read until a
 successful manual refresh or a new server selection.
+
+## V2-043D grouped session catalog (#392)
+
+```text
+lib/features/sessions/session_grouping.dart # The pure projection: the loaded sessions grouped by the project the server reported, in first-appearance order, and the flat item list the page renders
+lib/features/sessions/sessions_page.dart # The list renders a group header per project; the header block, the notices and the Load more control stay outside the groups
+packages/harness_opencode/lib/src/session_projection.dart # The session carries the project: the server's location directory scoped by the endpoint host, with the upstream project id as an annotation
+packages/harness_opencode/lib/src/session_lifecycle_projection.dart # The same project on the lifecycle projection, so a created or renamed session keeps its group
+tool/l10n/sessions_catalog.py # The scoped catalog with the unattributed-group copy
+```
+
+The group key is the **ProjectRef** identity: the endpoint host plus the
+canonical directory the server reported for the session. The upstream project
+id is an annotation only, because the server resolves a Git directory without
+an initial commit to the literal `projectID: "global"` and several directories
+can share one upstream id. A session the server did not attribute keeps a null
+project and shares one marked group; no project is invented.
+
+The grouping is a projection of what the server returned, never a re-sort: the
+groups appear in the first appearance of their first row, the rows inside a
+group keep the server's order, and the retained v1 reference groups the same
+way (`lib/presentation/utils/session_tab_grouping.dart`).

@@ -53,11 +53,23 @@ class CatalogSource implements SessionCatalogSource {
     return task;
   }
 
-  SessionSummary row(String id, {String? title}) => SessionSummary(
+  SessionSummary row(
+    String id, {
+    String? title,
+    String? directory,
+    String? upstream,
+  }) => SessionSummary(
     info: SessionInfo(
       ref: SessionRef(harness.host, harness.harness, 'ses_$id'),
       title: title ?? id,
       ownership: const OwnershipInfo.unknown(reason: 'not observed'),
+      project: directory == null
+          ? null
+          : ProjectRef(
+              harness.host,
+              directory,
+              upstreamProjectId: upstream,
+            ),
     ),
     updatedAt: DateTime.utc(2026, 10, 12),
   );

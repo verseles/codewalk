@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[{count} वर्ण छोटे किए गए] {reason}",
   "mathExpressionLabel": "गणित",
   "mermaidCopySourceTooltip": "स्रोत कॉपी करें",
-  "mermaidDiagramLabel": "मरमेड आरेख (Mermaid Diagram)"
+  "mermaidDiagramLabel": "मरमेड आरेख (Mermaid Diagram)",
+  "sessionsUnknownProject": "बिना रिपोर्ट किए गए प्रोजेक्ट वाले सत्र",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

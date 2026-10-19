@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[troncati {count} caratteri] {reason}",
   "mathExpressionLabel": "Matematica",
   "mermaidCopySourceTooltip": "Copia sorgente",
-  "mermaidDiagramLabel": "Diagramma Mermaid"
+  "mermaidDiagramLabel": "Diagramma Mermaid",
+  "sessionsUnknownProject": "Sessioni senza progetto dichiarato",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

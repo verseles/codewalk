@@ -25,6 +25,15 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
 
+### V2 grouped session catalog
+
+- **Given** the v2 session catalog has loaded sessions
+- **When** the server attributed them to projects
+- **Then** the list groups them by the canonical directory the server reported, scoped by the endpoint host; the groups follow the order the server returned and the rows inside a group keep the server's order
+- **Then** a session the server did not attribute to a project keeps a clearly marked group, and no project is invented for it
+- **Then** the group header shows the reported directory with its last segment as the title, the path is always read left-to-right, and the header carries no count
+- **Then** the grouping follows the rows the server just returned after a live re-read, and the expanded row keeps its group
+
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog

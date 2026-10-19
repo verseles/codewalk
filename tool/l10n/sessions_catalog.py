@@ -5,6 +5,7 @@ NEW_KEYS = (
     "sessionsPreviousResults", "sessionsLimit", "sessionsHistoryUnavailable",
     "sessionsUnavailable", "sessionsReadFailed", "sessionsTimeout",
     "sessionsInvalidCursor", "sessionsRateLimited",
+    "sessionsUnknownProject",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -38,4 +39,23 @@ RATE_COPY = {
     "ru": "Сервер ограничил запросы. Подождите перед повторной попыткой вручную.",
     "zh": "服务器限制了请求。请等待后手动重试。",
 }
-COPY = {locale: values + (RATE_COPY[locale],) for locale, values in COPY.items()}
+PROJECT_COPY = {
+    "en": "Sessions without a reported project",
+    "pt": "Sessões sem projeto informado",
+    "es": "Sesiones sin proyecto informado",
+    "fr": "Sessions sans projet signalé",
+    "de": "Sitzungen ohne gemeldetes Projekt",
+    "it": "Sessioni senza progetto dichiarato",
+    "ar": "جلسات بلا مشروع مُبلَّغ عنه",
+    "ur": "ایسے سیشنز جن کا کوئی پروجیکٹ رپورٹ نہیں ہوا",
+    "bn": "যেসব সেশনের প্রকল্প জানানো হয়নি",
+    "hi": "बिना रिपोर्ट किए गए प्रोजेक्ट वाले सत्र",
+    "ja": "プロジェクトが報告されていないセッション",
+    "ko": "프로젝트가 보고되지 않은 세션",
+    "ru": "Сеансы без указанного проекта",
+    "zh": "未报告项目的会话",
+}
+COPY = {
+    locale: values + (RATE_COPY[locale], PROJECT_COPY[locale])
+    for locale, values in COPY.items()
+}

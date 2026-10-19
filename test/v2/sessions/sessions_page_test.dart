@@ -253,4 +253,88 @@ void main() {
       rig.dispose();
     },
   );
+
+  testWidgets('the list groups the sessions by their project', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    source.respond([
+      source.row('one', directory: '/work/alpha', title: 'One'),
+      source.row('two', directory: '/work/beta', title: 'Two'),
+      source.row('three', directory: '/work/alpha', title: 'Three'),
+    ]);
+    await tester.pumpAndSettle();
+
+    // One header per project, in the order the server returned the groups.
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('beta'), findsOneWidget);
+    expect(find.text('/work/alpha'), findsOneWidget);
+    expect(find.text('/work/beta'), findsOneWidget);
+    expect(find.text('One'), findsOneWidget);
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.text('Three'), findsOneWidget);
+    // The sessions the server did not attribute share one marked group.
+    expect(find.text(l10n.sessionsUnknownProject), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
+
+  testWidgets(
+    'the sessions the server did not attribute keep a marked group',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      await rig.save('a');
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: LiveDirectory.new,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await tester.pumpAndSettle();
+      final l10n = dependencies.localizations.current;
+      final dropdown = tester.widget<DropdownButton<String>>(
+        find.byKey(const ValueKey('sessions-profile')),
+      );
+      dropdown.onChanged!('profile_a');
+      await tester.pump();
+      final source = rig.sources.single;
+      source.respond([
+        source.row('one', directory: '/work/alpha', title: 'One'),
+        source.row('two', title: 'Two'),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('alpha'), findsOneWidget);
+      expect(find.text(l10n.sessionsUnknownProject), findsOneWidget);
+      expect(find.text('Two'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
 }

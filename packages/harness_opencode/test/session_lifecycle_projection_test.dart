@@ -37,6 +37,31 @@ SessionState withInfo(SessionInfo info) => reduce(
 ).state;
 
 void main() {
+  test('the session carries the project the server reported', () {
+    final info = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'projectID': 'prj_a',
+      'location': {'directory': '/workspace/project'},
+      'time': {'created': 1000, 'updated': 1000},
+    }, historyHarness).info;
+    // The canonical directory is the project identity; the upstream project
+    // id stays an annotation.
+    expect(info.project?.canonicalDirectory, '/workspace/project');
+    expect(info.project?.upstreamProjectId, 'prj_a');
+    expect(info.project?.host, historyHarness.host);
+  });
+
+  test('a session the server did not attribute keeps no project', () {
+    final info = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'projectID': 'global',
+      'time': {'created': 1000, 'updated': 1000},
+    }, historyHarness).info;
+    expect(info.project, isNull);
+  });
+
   test('created projects the info the HTTP session record yields', () {
     final events = projectLifecycle(
       lifecycleFrame(
@@ -60,7 +85,11 @@ void main() {
       'title': 'First title',
       'ownership': 'unknown',
       'ownershipReason': 'nativeSessionMetadataHasNoOwnershipProof',
-      'project': null,
+      'project': ProjectRef(
+        historyHarness.host,
+        '/workspace/project',
+        upstreamProjectId: 'prj_a',
+      ).storageKey,
       'parent': SessionRef(
         historyRef.host,
         historyRef.harness,

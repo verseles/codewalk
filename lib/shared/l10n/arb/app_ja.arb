@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[{count}文字を切り詰め] {reason}",
   "mathExpressionLabel": "数式",
   "mermaidCopySourceTooltip": "ソースをコピー",
-  "mermaidDiagramLabel": "Mermaidダイアグラム"
+  "mermaidDiagramLabel": "Mermaidダイアグラム",
+  "sessionsUnknownProject": "プロジェクトが報告されていないセッション",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

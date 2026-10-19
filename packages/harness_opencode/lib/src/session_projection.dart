@@ -12,13 +12,21 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
   final updated = _instant(time['updated']);
   final parent = data['parentID'];
   final metadata = <String, Object?>{};
+  // The upstream project id is an annotation: several directories can share
+  // one, and an unborn Git directory resolves to the literal "global".
+  String? upstreamProjectId;
   final project = data['projectID'];
   if (project != null) {
-    metadata['nativeProjectId'] = _text(project);
+    upstreamProjectId = _text(project);
+    metadata['nativeProjectId'] = upstreamProjectId;
   }
+  // The canonical directory is the project identity (ADR-023: key projects by
+  // host plus canonical directory).
+  String? directory;
   final location = data['location'];
   if (location != null) {
-    metadata['nativeDirectory'] = _text(_object(location)['directory']);
+    directory = _text(_object(location)['directory']);
+    metadata['nativeDirectory'] = directory;
   }
 
   ForkLineage? fork;
@@ -41,6 +49,13 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
       ownership: const OwnershipInfo.unknown(
         reason: 'nativeSessionMetadataHasNoOwnershipProof',
       ),
+      project: directory == null
+          ? null
+          : ProjectRef(
+              harness.host,
+              directory,
+              upstreamProjectId: upstreamProjectId,
+            ),
       lineage: SessionLineage(
         parent: parent == null
             ? null

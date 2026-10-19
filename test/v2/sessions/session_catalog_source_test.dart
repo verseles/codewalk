@@ -61,7 +61,11 @@ void main() {
         addTearDown(source.close);
         final first = await source.list(SessionQuery()).result;
         expect(first.items.single.info.ref.harnessRef, source.harness);
-        expect(first.items.single.info.project, isNull);
+        // The server's canonical directory is the project identity.
+        expect(
+          first.items.single.info.project?.canonicalDirectory,
+          '/not-a-canonical-project',
+        );
         expect(first.items.single.execution, isNull);
         final next = await source
             .list(SessionQuery(cursor: first.nextCursor))

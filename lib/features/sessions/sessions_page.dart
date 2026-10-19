@@ -8,6 +8,7 @@ import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
 import 'session_live_controller.dart';
@@ -53,6 +54,9 @@ class _SessionsPageState extends State<SessionsPage> {
     }
     final hosts = controller.hosts;
     final available = !hosts.loading && !hosts.storageError;
+    // The list is grouped by the project the server attributed each session
+    // to; the groups follow the rows the server returned.
+    final items = sessionListItems(controller.sessions);
     final notices = <String>[
       if (hosts.storageError) l10n.hostsProfileStorageError,
       if (hosts.loading || controller.loading) l10n.sessionsLoading,
@@ -73,7 +77,7 @@ class _SessionsPageState extends State<SessionsPage> {
         constraints: const BoxConstraints(maxWidth: 960),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: controller.sessions.length + 2,
+          itemCount: items.length + 2,
           itemBuilder: (context, index) {
             if (index == 0) {
               return Column(
@@ -161,7 +165,7 @@ class _SessionsPageState extends State<SessionsPage> {
                 ],
               );
             }
-            if (index == controller.sessions.length + 1) {
+            if (index == items.length + 1) {
               return Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
@@ -177,10 +181,79 @@ class _SessionsPageState extends State<SessionsPage> {
                 ),
               );
             }
-            final row = controller.sessions[index - 1];
-            final expanded =
-                controller.selectedSession?.info.ref == row.info.ref;
-            return Card(
+            final item = items[index - 1];
+            return switch (item) {
+              SessionGroupHeader(:final group) => _groupHeader(context, group),
+              SessionRow(:final session) => _row(
+                context,
+                controller,
+                available,
+                session,
+              ),
+            };
+          },
+        ),
+      ),
+    );
+  }
+
+  /// The header of one project group: the directory the server reported, with
+  /// its last segment as the title. The path is always left-to-right, so the
+  /// separators do not reorder in a right-to-left locale.
+  Widget _groupHeader(BuildContext context, SessionGroup group) {
+    final l10n = context.v2L10n;
+    final directory = group.project?.canonicalDirectory;
+    if (directory == null) {
+      return Semantics(
+        header: true,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+          child: Text(
+            l10n.sessionsUnknownProject,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+      );
+    }
+    final segments = directory
+        .split(RegExp(r'[/\\]'))
+        .where((segment) => segment.isNotEmpty);
+    final title = segments.isEmpty ? directory : segments.last;
+    return Semantics(
+      header: true,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            Text(
+              directory,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textDirection: TextDirection.ltr,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(
+    BuildContext context,
+    SessionsController controller,
+    bool available,
+    SessionSummary row,
+  ) {
+    final l10n = context.v2L10n;
+    final expanded = controller.selectedSession?.info.ref == row.info.ref;
+    return Card(
               key: ValueKey<SessionRef>(row.info.ref),
               child: InkWell(
                 onTap: () => controller.inspect(row.info.ref),
@@ -247,10 +320,6 @@ class _SessionsPageState extends State<SessionsPage> {
                   ),
                 ),
               ),
-            );
-          },
-        ),
-      ),
     );
   }
 

@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[{count} অক্ষর ছাঁটা হয়েছে] {reason}",
   "mathExpressionLabel": "গণিত",
   "mermaidCopySourceTooltip": "কপি উৎস",
-  "mermaidDiagramLabel": "মারমেইড ডায়াগ্রাম"
+  "mermaidDiagramLabel": "মারমেইড ডায়াগ্রাম",
+  "sessionsUnknownProject": "যেসব সেশনের প্রকল্প জানানো হয়নি",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }

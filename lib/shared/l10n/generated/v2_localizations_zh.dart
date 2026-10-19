@@ -1047,4 +1047,7 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get mermaidDiagramLabel => 'Mermaid 图表';
+
+  @override
+  String get sessionsUnknownProject => '未报告项目的会话';
 }

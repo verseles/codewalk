@@ -2156,6 +2156,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Mermaid Diagram'**
   String get mermaidDiagramLabel;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions without a reported project'**
+  String get sessionsUnknownProject;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

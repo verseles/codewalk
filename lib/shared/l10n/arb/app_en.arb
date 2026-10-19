@@ -1383,5 +1383,9 @@
   "mermaidDiagramLabel": "Mermaid Diagram",
   "@mermaidDiagramLabel": {
     "description": "CodeWalk UI string — mermaidDiagramLabel"
+  },
+  "sessionsUnknownProject": "Sessions without a reported project",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

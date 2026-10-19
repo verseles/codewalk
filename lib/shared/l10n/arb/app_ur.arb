@@ -881,5 +881,9 @@
   "chatMessageTruncatedChars": "[{count} حروف مختصر] {reason}",
   "mathExpressionLabel": "ریاضی",
   "mermaidCopySourceTooltip": "ماخذ کاپی کریں۔",
-  "mermaidDiagramLabel": "متسیستری خاکہ"
+  "mermaidDiagramLabel": "متسیستری خاکہ",
+  "sessionsUnknownProject": "ایسے سیشنز جن کا کوئی پروجیکٹ رپورٹ نہیں ہوا",
+  "@sessionsUnknownProject": {
+    "description": "V2 bounded read-only session catalog"
+  }
 }
