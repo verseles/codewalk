@@ -107,7 +107,8 @@ bool? _sendEnabled(WidgetTester tester) {
 const _allowKey = ValueKey('live-permission-allow-controls-permission');
 const _rejectKey = ValueKey(
   'live-permission-reject-stop-controls-permission',
-);const _formKey = ValueKey('live-form-controls-form');
+);
+const _formKey = ValueKey('live-form-controls-form');
 const _submitKey = ValueKey('form-submit-controls-form');
 const _dismissKey = ValueKey('form-dismiss-controls-form');
 
