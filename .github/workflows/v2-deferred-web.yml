@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  FLUTTER_VERSION: "3.44.0"
+  FLUTTER_VERSION: "3.44.1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
