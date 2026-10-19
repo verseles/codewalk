@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -358,4 +359,144 @@ void main() {
       expect(source.closes, 1);
     },
   );
+
+  group('the live catalog', () {
+    Future<void> settle() =>
+        Future<void>.delayed(const Duration(milliseconds: 20));
+
+    Future<CatalogRig> loaded() async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      return rig;
+    }
+
+    test('a lifecycle change re-reads the list from the head', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
+      expect(source.tasks, hasLength(1));
+
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      expect(source.tasks, hasLength(2), reason: 'the change triggers one read');
+      source.respond([source.row('1'), source.row('2')]);
+      await settle();
+      expect(
+        rig.sessions.sessions.map((s) => s.info.ref.nativeId),
+        ['ses_1', 'ses_2'],
+      );
+    });
+
+    test('a change the server does not return invents no row', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
+    });
+
+    test('a deleted row disappears after the re-read', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.respond([]);
+      await settle();
+      expect(rig.sessions.sessions, isEmpty);
+    });
+
+    test('the expanded row survives while the server returns it', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      final ref = source.row('1').info.ref;
+      rig.sessions.inspect(ref);
+      expect(rig.sessions.selectedSession, isNotNull);
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.selectedSession, isNotNull);
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.respond([]);
+      await settle();
+      expect(rig.sessions.selectedSession, isNull);
+    });
+
+    test('a quiet re-read never shows the loading or the stale state',
+        () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      expect(rig.sessions.loading, isFalse);
+      expect(rig.sessions.stale, isFalse);
+      expect(rig.sessions.quietRefreshing, isTrue);
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.quietRefreshing, isFalse);
+    });
+
+    test('a failed re-read keeps the rows and marks the list behind',
+        () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      source.fail(SessionCatalogFailure.connection);
+      await settle();
+      expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
+      expect(rig.sessions.behind, isTrue);
+      expect(rig.sessions.failure, isNull, reason: 'the catalog failure is its own');
+    });
+
+    test('a burst of changes collapses into one read', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      for (var i = 0; i < 5; i++) {
+        rig.feed.emit(const SessionCatalogChanged());
+      }
+      await settle();
+      expect(source.tasks, hasLength(2), reason: 'one read, not five');
+    });
+
+    test('the list is behind while the feed is not connected', () async {
+      final rig = await loaded();
+      expect(rig.sessions.behind, isFalse);
+      rig.feed.emit(const SessionCatalogConnection(false));
+      await settle();
+      expect(rig.sessions.behind, isTrue);
+    });
+
+    test('disposing the controller releases the feed', () async {
+      final rig = await loaded();
+      final feed = rig.feed;
+      expect(feed.closes, 0);
+      rig.dispose();
+      expect(feed.closes, 1);
+    });
+
+    test('without a feed the list stays pull-only', () async {
+      final rig = CatalogRig(withFeed: false);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      expect(rig.sessions.sessions, hasLength(1));
+      expect(rig.sessions.behind, isFalse);
+    });
+  });
 }

@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'history_fakes.dart';
+import 'live_fakes.dart';
 
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
@@ -28,6 +29,7 @@ void main() {
             profileRepository: rig.repository,
             endpointProber: FakeProber(),
             sessionCatalogFactory: rig.create,
+            sessionLiveDirectory: LiveDirectory.new,
             sessionHistoryFactory: (p, c, ref) {
               final source = HistorySource(ref);
               sources.add(source);

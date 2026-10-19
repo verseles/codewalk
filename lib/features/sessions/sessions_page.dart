@@ -59,6 +59,7 @@ class _SessionsPageState extends State<SessionsPage> {
       if (available && hosts.profiles.isEmpty) l10n.serversNoServersFound,
       if (controller.failure != null) _failure(l10n, controller.failure!),
       if (controller.stale) l10n.sessionsPreviousResults,
+      if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
       if (controller.loaded &&
           !controller.loading &&

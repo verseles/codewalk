@@ -1,12 +1,14 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
+import 'live_fakes.dart';
 
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
@@ -25,6 +27,7 @@ void main() {
             profileRepository: rig.repository,
             endpointProber: FakeProber(),
             sessionCatalogFactory: rig.create,
+            sessionLiveDirectory: LiveDirectory.new,
           );
           dependencies.preferences.setLocale(locale);
           await tester.pumpWidget(
@@ -134,6 +137,7 @@ void main() {
       profileRepository: rig.repository,
       endpointProber: FakeProber(),
       sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
     );
     dependencies.preferences.setLocale(const Locale('ar'));
     await tester.pumpWidget(
@@ -159,4 +163,94 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
   });
+
+  testWidgets(
+    'a session created elsewhere appears without a manual refresh',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      final directory = LiveDirectory();
+      await rig.save('a');
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await tester.pumpAndSettle();
+      final controller = dependencies.sessions!;
+      final dropdown = tester.widget<DropdownButton<String>>(
+        find.byKey(const ValueKey('sessions-profile')),
+      );
+      dropdown.onChanged!('profile_a');
+      await tester.pump();
+      final source = rig.sources.single;
+      source.respond([source.row('first')]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(ValueKey(source.row('first').info.ref)), findsOneWidget);
+
+      // A session starts elsewhere: the endpoint's stream reports it and the
+      // list re-reads itself, without a manual refresh.
+      directory.feeds.last.emit(const SessionCatalogChanged());
+      // The catalog debounces the re-read; the clock has to pass it.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      source.respond([source.row('first'), source.row('second')]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(ValueKey(source.row('second').info.ref)), findsOneWidget);
+      expect(controller.sessions, hasLength(2));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
+
+  testWidgets(
+    'a failed re-read keeps the rows and says the list is not up to date',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      final directory = LiveDirectory();
+      await rig.save('a');
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await tester.pumpAndSettle();
+      final l10n = dependencies.localizations.current;
+      final dropdown = tester.widget<DropdownButton<String>>(
+        find.byKey(const ValueKey('sessions-profile')),
+      );
+      dropdown.onChanged!('profile_a');
+      await tester.pump();
+      final source = rig.sources.single;
+      source.respond([source.row('first')]);
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.liveStale), findsNothing);
+
+      directory.feeds.last.emit(const SessionCatalogChanged());
+      // The catalog debounces the re-read; the clock has to pass it.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      source.fail(SessionCatalogFailure.connection);
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.liveStale), findsOneWidget);
+      expect(find.byKey(ValueKey(source.row('first').info.ref)), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
 }

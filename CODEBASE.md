@@ -2248,3 +2248,32 @@ cleanup fails the run. `validate.py` re-checks that record offline — every
 recorded claim plus the pinned digests — and never contacts a server.
 
 
+
+## V2-043C live session catalog (#391)
+
+```text
+lib/shared/sessions/session_catalog_changes.dart # The catalog's port: a payload-free lifecycle feed plus the transport state, and the factory that acquires it
+lib/shared/sessions/session_live_source.dart # `SessionLiveDirectory.catalogChanges(...)`: the endpoint's single event stream, shared with the live sessions
+lib/platform/sessions/opencode_profile_slot.dart # The per-profile runtime: the authenticated transport, the session reader, the one event stream, the owner, the live handles and the catalog lease
+lib/platform/sessions/session_live_factory_io.dart # The live directory: the per-profile slots, the catalog lease and the credential fence
+packages/harness_opencode/lib/src/stream_owner.dart # The owner emits the payload-free catalog signal for session.created/forked/renamed/deleted before every filter, and exposes its connection kind
+lib/features/sessions/sessions_controller.dart # The catalog: the quiet authoritative re-read, the debounce and the cooldown, the behind and suspended states
+lib/features/sessions/sessions_page.dart # The list shows the existing "not up to date" notice while the catalog is behind
+```
+
+The endpoint keeps **one** event stream per profile (`v2-plan.md` fact 4: "One
+stream per endpoint; buffer + hydrate on every reconnect; never assume
+continuity"). The session catalog does not open a second subscription: it
+takes a **catalog lease** on the same per-profile runtime the live sessions
+use, and the last lease and the last live handle together close the stream.
+
+The lease listens to the owner's payload-free catalog signal — the kind of the
+lifecycle change, never a session id, title or payload — and to the owner's
+connection state. A change is only a **trigger**: the list is always rebuilt
+from an authoritative `GET /api/session` re-read, from the head to the depth
+already loaded, applied as a whole. The re-read is silent (no loading or stale
+notice, the expanded row survives while the server still returns it), a burst
+collapses into one read, and the minimum interval between reads grows with the
+consecutive failures. A failed read keeps the rows and marks the list behind;
+three consecutive failures or a rate limit suspend the automatic read until a
+successful manual refresh or a new server selection.

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
 
@@ -7,12 +10,26 @@ class SessionsController extends ChangeNotifier {
   SessionsController({
     required this.hosts,
     required this.sourceFactory,
+    this.changesFactory,
     DateTime Function()? now,
+    this.liveDebounce = const Duration(milliseconds: 300),
+    this.liveMinInterval = const Duration(seconds: 2),
   }) : _now = now ?? DateTime.now {
     hosts.addListener(_hostsChanged);
   }
   final HostsController hosts;
   final SessionCatalogFactory sourceFactory;
+
+  /// The endpoint's session lifecycle feed, when the platform has one. It is
+  /// the endpoint's single event stream, shared with the live sessions: the
+  /// list never opens a second subscription.
+  final SessionCatalogChangesFactory? changesFactory;
+
+  /// How long a burst of changes collapses before the re-read starts.
+  final Duration liveDebounce;
+
+  /// The shortest interval between two automatic re-reads.
+  final Duration liveMinInterval;
   final DateTime Function() _now;
   EndpointProfile? _profile;
   EndpointCredential? _credential;
@@ -26,6 +43,27 @@ class SessionsController extends ChangeNotifier {
   int _generation = 0;
   int _pages = 0;
   String? _cursor;
+  // The live catalog: the feed, its signals and the bounded re-read they
+  // trigger.
+  SessionCatalogChanges? _changes;
+  // The feed's subscription belongs to the controller: it is cancelled in
+  // [_closeChanges] when the profile changes or the controller is disposed.
+  // ignore: cancel_subscriptions
+  StreamSubscription<SessionCatalogSignal>? _changesSubscription;
+  Timer? _liveTimer;
+  DateTime? _liveEarliestStart;
+  bool _livePending = false;
+  bool _liveSuspended = false;
+  bool _behind = false;
+  int _liveFailures = 0;
+  int _liveEpoch = 0;
+  bool _quietRefreshing = false;
+  // The pagination state the last automatic re-read observed.
+  String? _liveCursor;
+  Set<String> _liveCursors = const {};
+  Set<String> _liveRequested = const {};
+  int _livePagesRead = 0;
+  bool _liveHasMore = false;
   final _received = <String>{};
   final _requested = <String>{};
   List<SessionSummary> _sessions = const [];
@@ -40,6 +78,13 @@ class SessionsController extends ChangeNotifier {
   bool stale = false;
   bool loaded = false;
   bool get refreshing => loading && _refreshing;
+
+  /// The list may not reflect the endpoint: the last authoritative read did
+  /// not succeed, or the feed that would trigger the next one dropped.
+  bool get behind => _behind;
+
+  /// An automatic re-read is running; it never shows the loading notice.
+  bool get quietRefreshing => _quietRefreshing;
   Future<void> initialize() => _initialization ??= hosts.load();
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -55,6 +100,7 @@ class SessionsController extends ChangeNotifier {
     if (closeSource) {
       _source?.close();
       _source = null;
+      _closeChanges();
     }
   }
 
@@ -278,10 +324,227 @@ class SessionsController extends ChangeNotifier {
         if (failure == SessionCatalogFailure.authenticationRequired) {
           source.close();
           _source = null;
+          _closeChanges();
+        } else if (failure == null) {
+          // A successful read lifts a suspension and opens the feed.
+          _liveFailures = 0;
+          _liveSuspended = false;
+          unawaited(_ensureChanges());
+        }
+        if (_livePending && failure == null) {
+          // A change that arrived during the read becomes one final read.
+          _markLiveChange();
         }
         _notify();
       }
     }
+  }
+
+  /// Opens the endpoint's catalog feed for the selected profile.
+  ///
+  /// The feed shares the endpoint's single event stream, so the list never
+  /// opens a second subscription. A platform without a feed keeps the list
+  /// pull-only, which is not a failure.
+  Future<void> _ensureChanges() async {
+    final factory = changesFactory;
+    final profile = _profile;
+    if (factory == null || profile == null || _changes != null) return;
+    final credential = _credential;
+    if (credential == null) return;
+    try {
+      final feed = await factory(profile, credential);
+      if (_disposed || !identical(_profile, profile)) {
+        feed.close();
+        return;
+      }
+      _changes = feed;
+      final previous = _changesSubscription;
+      _changesSubscription = feed.signals.listen(_onLiveSignal);
+      if (previous != null) unawaited(previous.cancel());
+    } on Object {
+      // The endpoint has no live feed: the list stays pull-only.
+    }
+  }
+
+  /// Releases the feed and every timer it armed.
+  void _closeChanges() {
+    _liveTimer?.cancel();
+    _liveTimer = null;
+    _livePending = false;
+    _liveFailures = 0;
+    _liveSuspended = false;
+    _behind = false;
+    _liveEarliestStart = null;
+    final subscription = _changesSubscription;
+    _changesSubscription = null;
+    final feed = _changes;
+    _changes = null;
+    if (subscription != null) unawaited(subscription.cancel());
+    feed?.close();
+  }
+
+  void _onLiveSignal(SessionCatalogSignal signal) {
+    if (_disposed) return;
+    switch (signal) {
+      case SessionCatalogChanged():
+        _markLiveChange();
+      case SessionCatalogConnection(:final connected):
+        if (connected) {
+          // A reconnect is not continuity: the list re-reads before it may
+          // call itself current.
+          _liveEpoch++;
+          _markLiveChange();
+        } else {
+          _behind = true;
+          _notify();
+        }
+    }
+  }
+
+  /// Arms the automatic re-read.
+  ///
+  /// The debounce is not reset by a later change: a burst collapses into one
+  /// read, and the pending latch keeps at most one more.
+  void _markLiveChange() {
+    if (_disposed || _liveSuspended) return;
+    _livePending = true;
+    if (_liveTimer != null) return;
+    _liveTimer = Timer(liveDebounce, _runLive);
+  }
+
+  /// Runs the automatic re-read when the debounce and the cooldown allow it.
+  Future<void> _runLive() async {
+    _liveTimer = null;
+    if (_disposed || _liveSuspended) return;
+    if (loading) {
+      // A read is in flight: the pending latch becomes one final read.
+      return;
+    }
+    final now = _now();
+    final earliest = _liveEarliestStart;
+    if (earliest != null && now.isBefore(earliest)) {
+      // The cooldown still runs: keep the latch and wait for it.
+      _livePending = true;
+      _liveTimer = Timer(earliest.difference(now), _runLive);
+      return;
+    }
+    if (!_livePending) return;
+    _livePending = false;
+    await _syncLive();
+  }
+
+  /// The authoritative re-read: from the head to the depth already loaded,
+  /// applied all or nothing.
+  ///
+  /// The event is only a trigger: the rows always come from the server. The
+  /// read never sets the loading or the stale flag, so the list neither
+  /// flickers nor loses the expanded row while it follows the endpoint.
+  Future<void> _syncLive() async {
+    final source = _source;
+    if (source == null || _profile == null) return;
+    final generation = _generation;
+    final epoch = _liveEpoch;
+    // The re-read follows the depth already loaded, inside the existing
+    // page and row limits.
+    final depth = _pages.clamp(1, 10);
+    _quietRefreshing = true;
+    _notify();
+    try {
+      final rows = await _readLivePages(source, generation, epoch, depth);
+      if (rows == null) return;
+      final refs = {for (final row in rows) row.info.ref};
+      final selected = _selectedSession;
+      _sessions = List.unmodifiable(rows);
+      _selectedSession =
+          selected != null && refs.contains(selected.info.ref) ? selected : null;
+      _cursor = _liveCursor;
+      _received
+        ..clear()
+        ..addAll(_liveCursors);
+      _requested
+        ..clear()
+        ..addAll(_liveRequested);
+      _pages = _livePagesRead;
+      hasMore = _liveHasMore;
+      _liveFailures = 0;
+      _behind = false;
+    } on Object catch (error) {
+      // The rows stay: a failed re-read marks the list behind, it never
+      // empties it.
+      _liveFailures++;
+      _behind = true;
+      if (_liveFailures >= 3 ||
+          (error is SessionCatalogException &&
+              error.failure == SessionCatalogFailure.rateLimited)) {
+        _liveSuspended = true;
+      }
+    } finally {
+      _quietRefreshing = false;
+      final backoff = 1 << (_liveFailures.clamp(0, 6));
+      _liveEarliestStart = _now().add(liveMinInterval * backoff);
+      _notify();
+    }
+  }
+
+  /// The pages from the head to [depth], or null when the read was
+  /// superseded. The traversal is validated exactly like a manual read.
+  Future<List<SessionSummary>?> _readLivePages(
+    SessionCatalogSource source,
+    int generation,
+    int epoch,
+    int depth,
+  ) async {
+    final rows = <SessionSummary>[];
+    final refs = <SessionRef>{};
+    final cursors = <String>{};
+    final requested = <String>{};
+    String? cursor;
+    var pages = 0;
+    for (var page = 0; page < depth; page++) {
+      if (cursor != null) requested.add(cursor);
+      final task = source.list(SessionQuery(limit: 50, cursor: cursor));
+      final result = await task.result;
+      if (_disposed ||
+          generation != _generation ||
+          epoch != _liveEpoch ||
+          !identical(source, _source)) {
+        return null;
+      }
+      if (result.items.length > 50) {
+        throw const SessionCatalogException(
+          SessionCatalogFailure.incompatibleResponse,
+        );
+      }
+      for (final row in result.items) {
+        if (row.info.ref.harnessRef != source.harness ||
+            !refs.add(row.info.ref)) {
+          throw const SessionCatalogException(
+            SessionCatalogFailure.incompatibleResponse,
+          );
+        }
+        if (rows.length < 200) rows.add(row);
+      }
+      pages++;
+      final next = result.nextCursor;
+      if (next == null) {
+        _liveCursor = null;
+        _liveCursors = cursors;
+        _liveRequested = requested;
+        _livePagesRead = pages;
+        _liveHasMore = false;
+        return rows;
+      }
+      if (!cursors.add(next)) {
+        throw const SessionCatalogException(SessionCatalogFailure.invalidCursor);
+      }
+      cursor = next;
+    }
+    _liveCursor = cursor;
+    _liveCursors = cursors;
+    _liveRequested = requested;
+    _livePagesRead = pages;
+    _liveHasMore = true;
+    return rows;
   }
 
   void inspect(SessionRef ref) {

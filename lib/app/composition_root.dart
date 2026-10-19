@@ -89,10 +89,26 @@ AppDependencies createAppDependencies({
       diagnostics: locator<DiagnosticsController>(),
     ),
   );
+  // The live directory owns the endpoint's single event stream; the session
+  // catalog listens to the same one, so the directory is created first and
+  // the catalog borrows its feed.
+  final liveDirectory =
+      (sessionLiveDirectory ??
+      () => createSessionLiveDirectory(
+        payloads: createV2PayloadStore(metadata),
+        permissionModes: permissionModes,
+        unrestrictedOwnership: unrestrictedOwnership,
+      ))();
   locator.registerSingleton(
     SessionsController(
       hosts: locator<HostsController>(),
       sourceFactory: sessionCatalogFactory ?? createSessionCatalogSource,
+      changesFactory: liveDirectory == null
+          ? null
+          : (profile, credential) => liveDirectory.catalogChanges(
+              profile: profile,
+              credential: credential,
+            ),
     ),
   );
   locator.registerSingleton(AppNavigationController());
@@ -124,13 +140,7 @@ AppDependencies createAppDependencies({
     hosts: locator<HostsController>(),
     sessions: locator<SessionsController>(),
     historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
-    liveDirectory:
-        (sessionLiveDirectory ??
-        () => createSessionLiveDirectory(
-          payloads: createV2PayloadStore(metadata),
-          permissionModes: permissionModes,
-          unrestrictedOwnership: unrestrictedOwnership,
-        ))(),
+    liveDirectory: liveDirectory,
     permissionModes: permissionModes,
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),

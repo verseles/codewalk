@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk/features/hosts/hosts_controller.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 
@@ -70,18 +71,39 @@ class CatalogSource implements SessionCatalogSource {
 }
 
 class CatalogRig {
-  CatalogRig({DateTime Function()? now}) {
+  CatalogRig({
+    DateTime Function()? now,
+    Duration liveDebounce = Duration.zero,
+    Duration liveMinInterval = Duration.zero,
+    bool withFeed = true,
+  }) {
     hosts = HostsController(repository: repository, prober: FakeProber());
     sessions = SessionsController(
       hosts: hosts,
       sourceFactory: create,
+      changesFactory: withFeed ? (_, _) async => createFeed() : null,
       now: now,
+      liveDebounce: liveDebounce,
+      liveMinInterval: liveMinInterval,
     );
   }
   final repository = GatedProfiles();
   late final HostsController hosts;
   late final SessionsController sessions;
   final sources = <CatalogSource>[];
+
+  /// The endpoint's lifecycle feeds, one per acquisition; the tests drive
+  /// the newest one by hand.
+  final feeds = <LiveCatalogChanges>[];
+
+  LiveCatalogChanges get feed => feeds.last;
+
+  LiveCatalogChanges createFeed() {
+    final created = LiveCatalogChanges();
+    feeds.add(created);
+    return created;
+  }
+
   CatalogSource create(EndpointProfile profile, EndpointCredential credential) {
     final source = CatalogSource(profile);
     sources.add(source);
@@ -92,5 +114,22 @@ class CatalogRig {
   void dispose() {
     sessions.dispose();
     hosts.dispose();
+  }
+}
+
+/// The catalog feed of an endpoint, driven by hand.
+class LiveCatalogChanges implements SessionCatalogChanges {
+  final _controller = StreamController<SessionCatalogSignal>.broadcast();
+  int closes = 0;
+
+  @override
+  Stream<SessionCatalogSignal> get signals => _controller.stream;
+
+  void emit(SessionCatalogSignal signal) => _controller.add(signal);
+
+  @override
+  void close() {
+    closes++;
+    unawaited(_controller.close());
   }
 }

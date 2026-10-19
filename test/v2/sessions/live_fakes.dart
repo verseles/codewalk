@@ -8,6 +8,8 @@ import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
+import 'fakes.dart';
+
 class LiveHandle implements SessionLiveHandle {
   LiveHandle(this.session, {this.outbox});
   @override
@@ -310,23 +312,6 @@ class LiveDirectory implements SessionLiveDirectory {
 
   @override
   Future<void> close() async => closes++;
-}
-
-/// The catalog feed of a live endpoint, driven by hand.
-class LiveCatalogChanges implements SessionCatalogChanges {
-  final _controller = StreamController<SessionCatalogSignal>.broadcast();
-  int closes = 0;
-
-  @override
-  Stream<SessionCatalogSignal> get signals => _controller.stream;
-
-  void emit(SessionCatalogSignal signal) => _controller.add(signal);
-
-  @override
-  void close() {
-    closes++;
-    unawaited(_controller.close());
-  }
 }
 
 final _now = DateTime.utc(2026, 10, 15);

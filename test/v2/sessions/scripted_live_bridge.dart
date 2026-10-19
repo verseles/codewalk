@@ -55,7 +55,7 @@ final class ScriptedLiveBridge implements SessionLiveDirectory {
 
   /// The catalog feed of the scripted endpoint; the scripted scenarios drive
   /// the live path, so the feed stays inert here.
-  final _InertCatalogChanges feed = _InertCatalogChanges();
+  final InertCatalogChanges feed = InertCatalogChanges();
 
   @override
   Future<SessionCatalogChanges> catalogChanges({
@@ -489,7 +489,7 @@ PromptDraft scriptedDraftFor(String text) => PromptDraft(
 );
 
 /// A catalog feed that never reports anything.
-final class _InertCatalogChanges implements SessionCatalogChanges {
+final class InertCatalogChanges implements SessionCatalogChanges {
   final _controller = StreamController<SessionCatalogSignal>.broadcast();
 
   @override
