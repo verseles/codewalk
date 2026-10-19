@@ -6,11 +6,13 @@
     "digest:cleanup.json": "passed",
     "digest:egress.json": "passed",
     "digest:events.json": "passed",
+    "digest:markers.txt": "passed",
     "digest:provenance.json": "passed",
     "digest:results.json": "passed",
     "digest:stub-ledger.json": "passed",
-    "digest:markers.txt": "passed",
     "serverVersionIsPinned": "passed",
+    "provenanceNamesItsRevision": "passed",
+    "provenanceTreeWasClean": "passed",
     "artifactDigestRecorded": "passed",
     "nativeCostIsZero": "passed",
     "zeroSpendDeclared": "passed",
@@ -23,12 +25,12 @@
     "stubRequestCapRespected": "passed",
     "stubScenariosMatchResults": "passed",
     "toolCallContinuedAfterApproval": "passed",
+    "holdEndedWithTheDisconnect": "passed",
     "noEgressViolation": "passed",
     "egressAuditRan": "passed",
     "serverExited": "passed",
     "tempRootRemoved": "passed",
     "userServiceAlive": "passed",
-    "userListeningPortsPreserved": "passed",
     "ownedPortsReleased": "passed",
     "noOwnedPortStillListening": "passed",
     "noOwnedProcessSurvivor": "passed",
@@ -43,15 +45,16 @@
     "noSecretMaterial:results.json": "passed",
     "noSecretMaterial:stub-ledger.json": "passed"
   },
-  "checkCount": 40,
+  "checkCount": 42,
   "failedChecks": [],
   "observations": {
     "foreignPortsLeft": [],
+    "userListeningPortsRemoved": [],
     "userOpencodeProcessesBefore": [
-      503817
+      866784
     ],
     "userOpencodeProcessesAfter": [
-      503817
+      866784
     ]
   }
 }

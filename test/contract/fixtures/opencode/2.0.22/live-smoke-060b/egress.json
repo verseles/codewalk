@@ -1,7 +1,10 @@
 {
   "violation": null,
   "nonLoopbackPeers": 0,
-  "samples": 13,
-  "auditedAt": "2026-10-19T18:17:15.930884+00:00",
+  "socketsObserved": 13,
+  "auditRuns": 8,
+  "firstAuditAt": "2026-10-19T18:40:06.244978+00:00",
+  "lastAuditAt": "2026-10-19T18:40:20.052111+00:00",
+  "auditedAt": "2026-10-19T18:40:20.052127+00:00",
   "policy": "provider.use deny for every provider except the loopback stub; a proxy black hole and a continuous egress audit fail the run closed"
 }

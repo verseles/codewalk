@@ -3,14 +3,14 @@
   "tempRootRemoved": true,
   "userOpencodeServiceAlive": true,
   "userOpencodeProcessesBefore": [
-    503817
+    866784
   ],
   "userOpencodeProcessesAfter": [
-    503817
+    866784
   ],
   "ownedPorts": [
-    42543,
-    51577
+    45813,
+    58051
   ],
   "ownedPortsStillListening": [],
   "ownedPortsReleased": true,
@@ -55,6 +55,6 @@
     20251,
     52744
   ],
-  "userListeningPortsPreserved": true,
+  "userListeningPortsRemoved": [],
   "foreignPortsLeft": []
 }

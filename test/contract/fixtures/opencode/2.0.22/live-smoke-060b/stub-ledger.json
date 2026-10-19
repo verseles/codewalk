@@ -55,6 +55,10 @@
       ]
     }
   ],
-  "holdAborted": 1,
+  "holdEnds": [
+    "disconnect"
+  ],
+  "holdAbortedByDisconnect": 1,
+  "holdTimedOut": 0,
   "cap": 12
 }

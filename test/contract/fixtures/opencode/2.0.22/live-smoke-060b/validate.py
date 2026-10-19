@@ -125,6 +125,8 @@ secret = re.compile(
     r"|\"(password|secret|token|code)\"\s*:\s*\"[^\"]{8,}\")"
 )
 for path in sorted(ROOT.iterdir()):
+    if not path.is_file():
+        continue
     if path.suffix == ".py" or path.name in ("SHA256SUMS", "validation.json"):
         continue
     check(f"noSecretMaterial:{path.name}", not secret.search(path.read_text()))
