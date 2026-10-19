@@ -9,6 +9,7 @@ import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
 import 'package:codewalk/platform/sessions/unrestricted_ownership_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
@@ -2192,5 +2193,67 @@ void main() {
         expect(server.replies, hasLength(1));
       },
     );
+  });
+
+  group('the catalog feed shares the endpoint stream', () {
+    Future<void> eventually(bool Function() test) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!test() && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(test(), isTrue);
+    }
+
+    test('the feed reports the lifecycle of a session nobody watches', () async {
+      server.running.add('ses_one');
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final lease = await directory.catalogChanges(
+        profile: p,
+        credential: credential,
+      );
+      addTearDown(lease.close);
+      final signals = <SessionCatalogSignal>[];
+      lease.signals.listen(signals.add);
+      await eventually(
+        () => signals
+            .whereType<SessionCatalogConnection>()
+            .any((signal) => signal.connected),
+      );
+      // The endpoint keeps one stream: the feed opened no second one.
+      expect(server.events, 1);
+      server.streams.last.write(
+        'data: ${jsonEncode({'type': 'session.created', 'data': {'sessionID': 'ses_two'}})}\n\n',
+      );
+      await server.streams.last.flush();
+      await eventually(
+        () => signals.whereType<SessionCatalogChanged>().isNotEmpty,
+      );
+    });
+
+    test('the profile stays open while the feed is held', () async {
+      server.running.add('ses_one');
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final lease = await directory.catalogChanges(
+        profile: p,
+        credential: credential,
+      );
+      addTearDown(lease.close);
+      // No live session: the feed alone holds the profile's stream open.
+      await eventually(() => server.events == 1);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(server.events, 1);
+      lease.close();
+      // The profile closed with its last holder: the next live session
+      // opens a new stream instead of reusing the closed one.
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await eventually(() => server.events == 2);
+    });
   });
 }

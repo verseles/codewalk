@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'prompt_outbox.dart';
+import 'session_catalog_changes.dart';
 import 'session_permission_reply.dart';
 import 'session_stop.dart';
 import 'session_unrestricted.dart';
@@ -134,5 +135,14 @@ abstract interface class SessionLiveDirectory {
     required EndpointCredential credential,
     required SessionRef session,
   });
+
+  /// The session lifecycle feed of one selected profile, sharing the
+  /// endpoint's single event stream with its live sessions. Acquiring it
+  /// never opens a second subscription.
+  Future<SessionCatalogChanges> catalogChanges({
+    required EndpointProfile profile,
+    required EndpointCredential credential,
+  });
+
   Future<void> close();
 }

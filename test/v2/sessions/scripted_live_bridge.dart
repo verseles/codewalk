@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codewalk/shared/sessions/prompt_outbox.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
@@ -51,6 +52,16 @@ final class ScriptedLiveBridge implements SessionLiveDirectory {
   final SessionStore store = SessionStore(maxSessions: 4);
   ScriptedLiveHandle? handle;
   int closes = 0;
+
+  /// The catalog feed of the scripted endpoint; the scripted scenarios drive
+  /// the live path, so the feed stays inert here.
+  final _InertCatalogChanges feed = _InertCatalogChanges();
+
+  @override
+  Future<SessionCatalogChanges> catalogChanges({
+    required EndpointProfile profile,
+    required EndpointCredential credential,
+  }) async => feed;
 
   ScriptedHarnessAdapter get adapter => scenario.adapter;
   SessionRef get ref => scenario.ref;
@@ -476,3 +487,14 @@ PromptDraft scriptedDraftFor(String text) => PromptDraft(
     ),
   ],
 );
+
+/// A catalog feed that never reports anything.
+final class _InertCatalogChanges implements SessionCatalogChanges {
+  final _controller = StreamController<SessionCatalogSignal>.broadcast();
+
+  @override
+  Stream<SessionCatalogSignal> get signals => _controller.stream;
+
+  @override
+  void close() => unawaited(_controller.close());
+}

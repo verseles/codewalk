@@ -25,6 +25,14 @@ bool openCodeServerConnected(SseFrame frame) {
 /// Finite stream-owner failure categories; never native content.
 enum OpenCodeStreamFailure { malformedControl, hydrationExhausted, terminal }
 
+/// A session lifecycle change the catalog observes.
+///
+/// The kind is the whole signal: no session id, title, location or payload
+/// travels with it, because the consumer re-reads the authoritative list
+/// instead of patching a row. A fork is a new session that starts elsewhere
+/// and emits `session.forked` rather than `session.created`.
+enum OpenCodeCatalogChange { created, forked, renamed, deleted }
+
 sealed class OpenCodeStreamUpdate {
   const OpenCodeStreamUpdate();
 }
@@ -143,9 +151,11 @@ final class OpenCodeStreamOwner {
   final Future<void> Function(Duration) _delay;
 
   final _updates = StreamController<OpenCodeStreamUpdate>.broadcast();
+  final _catalogChanges = StreamController<OpenCodeCatalogChange>.broadcast();
   final _watched = <SessionRef, _Watch>{};
   final _children = <SessionRef, Set<SessionRef>>{};
   StreamSubscription<SseRecoveryUpdate>? _subscription;
+  ConnectionKind? _connectionKind;
   int? _generation;
   bool _released = false;
   bool _woke = false;
@@ -153,6 +163,16 @@ final class OpenCodeStreamOwner {
   int _seq = 0;
 
   Stream<OpenCodeStreamUpdate> get updates => _updates.stream;
+
+  /// The connection state, for a subscriber that arrives after the owner
+  /// already reported one.
+  ConnectionKind? get connectionKind => _connectionKind;
+
+  /// The session lifecycle changes of every session of this harness, watched
+  /// or not. The catalog listens here so the list can follow a session that
+  /// starts, is renamed or is deleted elsewhere.
+  Stream<OpenCodeCatalogChange> get catalogChanges => _catalogChanges.stream;
+
   Iterable<SessionRef> get watched => List.unmodifiable(_watched.keys);
 
   /// The children whose permission requests [parent] currently shows.
@@ -230,6 +250,7 @@ final class OpenCodeStreamOwner {
     }
     await _subscription?.cancel();
     await _updates.close();
+    await _catalogChanges.close();
   }
 
   StreamPosition _position(int seq) => StreamPosition(
@@ -239,7 +260,35 @@ final class OpenCodeStreamOwner {
   );
 
   void _emit(OpenCodeStreamUpdate update) {
-    if (!_closed) _updates.add(update);
+    if (_closed) return;
+    if (update case OpenCodeConnectionUpdated(:final kind)) {
+      _connectionKind = kind;
+    }
+    _updates.add(update);
+  }
+
+  /// The lifecycle change a frame carries, or null for every other frame.
+  static OpenCodeCatalogChange? _catalogChangeOf(Object? type) {
+    if (type is! String) return null;
+    switch (type) {
+      case 'session.created':
+        return OpenCodeCatalogChange.created;
+      case 'session.forked':
+        return OpenCodeCatalogChange.forked;
+      case 'session.renamed':
+        return OpenCodeCatalogChange.renamed;
+      case 'session.deleted':
+        return OpenCodeCatalogChange.deleted;
+      default:
+        return null;
+    }
+  }
+
+  void _emitCatalogChange(Object? type) {
+    if (_closed) return;
+    final change = _catalogChangeOf(type);
+    if (change == null || _catalogChanges.isClosed) return;
+    _catalogChanges.add(change);
   }
 
   void _onUpdate(SseRecoveryUpdate update) {
@@ -457,6 +506,11 @@ final class OpenCodeStreamOwner {
       return;
     }
     if (value is! Map<String, Object?>) return;
+    // The catalog observes the lifecycle of every session, watched or not.
+    // The signal carries only the kind, and it is emitted before every
+    // filter, so a frame the child routing consumes or the watch filter
+    // drops still reaches the list.
+    _emitCatalogChange(value['type']);
     final data = value['data'];
     Object? session;
     if (data is Map<String, Object?>) {
