@@ -210,6 +210,7 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
       bridge.intent == OpenIntent.attachLive &&
       _closes == 0 &&
       !_stopping &&
+      !stopState.busy &&
       _phase == SessionLivePhase.live &&
       !_stale &&
       _nextInterrupt < bridge.interruptIds.length &&
@@ -383,6 +384,9 @@ final class ScriptedPromptOutbox implements PromptOutbox {
       return const OutboxSubmission.refused('notScripted');
     }
     final authored = handle.bridge.sendIds[_next++];
+    // Delivery is intentionally not forwarded: the authored prompt outcome
+    // matches promptIntent(scriptedDraft()) exactly, so the bridge proves the
+    // composer path while the toggle is asserted as local UI state only.
     final receipt = await handle._native.send(
       scriptedDraftFor(draft.text),
       id: authored,

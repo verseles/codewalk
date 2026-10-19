@@ -81,12 +81,17 @@ SessionRef? formChildOf(SessionRef session, InteractionRequest request) {
       : null;
 }
 
-/// Widget key part unique across the session and its children.
+/// Widget key part unique across the session and its children, whose native
+/// ids live in separate scopes. A request owned by anything other than the
+/// very session it is shown in (a different project's request, a global one)
+/// shares no id namespace with it either, so the owning scope disambiguates.
 String formKeyOf(SessionRef session, InteractionRequest request) {
   final child = formChildOf(session, request);
-  return child == null
+  if (child != null) return '${child.nativeId}/${request.id.value}';
+  final owner = request.owner;
+  return owner is SessionOwner
       ? request.id.value
-      : '${child.nativeId}/${request.id.value}';
+      : '${owner.scopeKey}/${request.id.value}';
 }
 
 /// Localized copy for a form reply state.

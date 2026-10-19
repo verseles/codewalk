@@ -4,7 +4,7 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/rendering/canonical_message_body.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ConnectionState, FormField;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../packages/codewalk_core/test/support/scripted_harness_adapter.dart';
@@ -411,6 +411,111 @@ void main() {
     expect(find.byKey(allowKey), findsNothing);
     expect(scenario.adapter.remainingSteps, 0);
   });
+
+  testWidgets('coincident reply: answering the own card never leaks busy or '
+      'notice state onto the foreign card with the same native id',
+      (tester) async {
+    final scenario = _coincidentReplyScenario();
+    addTearDown(scenario.adapter.dispose);
+    final bridge = ScriptedLiveBridge(
+      scenario,
+      hydrations: const ['coincident-reply-hydration'],
+      respondIds: const [respondId],
+    );
+    final live = await _mount(tester, bridge);
+    await _pumpUntil(tester, () => live.phase == SessionLivePhase.live);
+
+    // The own and the project request share one native interaction id but
+    // mount as independent cards.
+    await _steps(tester, scenario.adapter, 3);
+    const ownKey = ValueKey('live-permission-coincident-reply');
+    final projectKey = ValueKey(
+      'live-permission-${ProjectOwner(otherProject, harness: scriptedHarness).scopeKey}/coincident-reply',
+    );
+    expect(find.byKey(ownKey), findsOneWidget);
+    expect(find.byKey(projectKey), findsOneWidget);
+    // The foreign card is never answerable, before or after the own reply.
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.descendant(
+              of: find.byKey(projectKey),
+              matching: find.byType(FilledButton),
+            ),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(ownKey),
+        matching: find.byType(FilledButton),
+      ),
+    );
+    await tester.pump();
+    expect(scenario.adapter.commands, hasLength(1));
+    expect(scenario.adapter.commands.single.id, respondId);
+    expect(find.text('Reply sent. Follow the live state.'), findsOneWidget);
+    // The notice and the busy indicator stay on the answered card only.
+    expect(
+      find.descendant(
+        of: find.byKey(projectKey),
+        matching: find.text('Reply sent. Follow the live state.'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(projectKey),
+        matching: find.byType(LinearProgressIndicator),
+      ),
+      findsNothing,
+    );
+    expect(scenario.adapter.remainingSteps, 0);
+  });
+
+  testWidgets('coincident forms: an own and a project form with the same '
+      'native id mount with independent keys', (tester) async {
+    final scenario = _coincidentFormsScenario();
+    addTearDown(scenario.adapter.dispose);
+    final bridge = ScriptedLiveBridge(
+      scenario,
+      hydrations: const ['coincident-forms-hydration'],
+    );
+    final live = await _mount(tester, bridge);
+    await _pumpUntil(tester, () => live.phase == SessionLivePhase.live);
+
+    await _steps(tester, scenario.adapter, 3);
+    const ownFormKey = ValueKey('live-form-coincident-form');
+    final projectFormKey = ValueKey(
+      'live-form-${ProjectOwner(otherProject, harness: scriptedHarness).scopeKey}/coincident-form',
+    );
+    expect(find.byKey(ownFormKey), findsOneWidget);
+    expect(find.byKey(projectFormKey), findsOneWidget);
+    // The lease cannot reply to forms, so both submits stay disabled.
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const ValueKey('form-submit-coincident-form')),
+          )
+          .onPressed,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(
+              ValueKey(
+                'form-submit-${ProjectOwner(otherProject, harness: scriptedHarness).scopeKey}/coincident-form',
+              ),
+            ),
+          )
+          .onPressed,
+      isNull,
+    );
+    expect(scenario.adapter.remainingSteps, 0);
+  });
 }
 
 ScriptedScenario _shapeScenario() {
@@ -512,6 +617,183 @@ ScriptedScenario _shapeScenario() {
               response: ApprovalResponse('once'),
               resolvedAt: scriptedNow,
               source: CanonicalValue({'syntheticResponder': 'this-client'}),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// An own and a project permission request sharing one native id. Only the
+/// own request is answerable; replying to it must not leak busy, notice or
+/// draft state onto the foreign card.
+ScriptedScenario _coincidentReplyScenario() {
+  const owner = SessionOwner(ownedRef);
+  const id = InteractionId('coincident-reply');
+  InteractionRequest permission(DomainOwner requestOwner) =>
+      InteractionRequest(
+        id: id,
+        owner: requestOwner,
+        kind: const OpenValue.known(InteractionKind.permission),
+        title: 'Synthetic permission',
+        autoApprovable: false,
+        choices: [
+          ApprovalChoice(
+            id: 'once',
+            label: 'Allow once',
+            allows: true,
+            scope: const OpenValue.known(ApprovalScope.once),
+            resolutionScope: const OpenValue.known(ResolutionScope.request),
+          ),
+        ],
+      );
+  return ScriptedScenario(
+    'screen_coincident_reply',
+    scriptedAdapter(
+      reads: [
+        ScriptedRead(
+          id: 'coincident-reply-read',
+          ref: ownedRef,
+          generation: 'coincident-reply-hydration',
+          collections: const [
+            SessionCollection.info,
+            SessionCollection.timeline,
+            SessionCollection.execution,
+          ],
+          build: (b) => SessionSnapshot(
+            ref: ownedRef,
+            hydrationGeneration: 'coincident-reply-hydration',
+            info: SnapshotValue(
+              value: scriptedInfo(ownedRef),
+              boundary: b[SessionCollection.info]!,
+            ),
+            timeline: SnapshotCollection(
+              values: const [],
+              boundary: b[SessionCollection.timeline]!,
+            ),
+            execution: SnapshotValue(
+              value: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.idle),
+              ),
+              boundary: b[SessionCollection.execution]!,
+            ),
+          ),
+        ),
+      ],
+      outcomes: [
+        acceptedOutcome(
+          respondId,
+          owner,
+          MutationOperation.respond,
+          responseIntent(id, ApprovalResponse('once')),
+        ),
+      ],
+      steps: [
+        EmitEvent(
+          ownedRef,
+          ExecutionChanged(
+            meta: scriptedMeta(1),
+            state: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+        EmitEvent(
+          ownedRef,
+          InteractionOpened(
+            meta: scriptedMeta(2),
+            request: permission(owner),
+          ),
+        ),
+        EmitEvent(
+          ownedRef,
+          InteractionOpened(
+            meta: scriptedMeta(3),
+            request: permission(
+              ProjectOwner(otherProject, harness: scriptedHarness),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// An own and a project form sharing one native id, proving the scope
+/// qualification of form keys mirrors the permission fix.
+ScriptedScenario _coincidentFormsScenario() {
+  const owner = SessionOwner(ownedRef);
+  const id = InteractionId('coincident-form');
+  InteractionRequest form(DomainOwner requestOwner) => InteractionRequest(
+    id: id,
+    owner: requestOwner,
+    kind: const OpenValue.known(InteractionKind.form),
+    title: 'Synthetic form',
+    form: FormSpec(
+      fields: [
+        FormField(
+          key: 'name',
+          kind: const OpenValue.known(FormFieldKind.string),
+          title: 'Name',
+        ),
+      ],
+    ),
+  );
+  return ScriptedScenario(
+    'screen_coincident_forms',
+    scriptedAdapter(
+      reads: [
+        ScriptedRead(
+          id: 'coincident-forms-read',
+          ref: ownedRef,
+          generation: 'coincident-forms-hydration',
+          collections: const [
+            SessionCollection.info,
+            SessionCollection.timeline,
+            SessionCollection.execution,
+          ],
+          build: (b) => SessionSnapshot(
+            ref: ownedRef,
+            hydrationGeneration: 'coincident-forms-hydration',
+            info: SnapshotValue(
+              value: scriptedInfo(ownedRef),
+              boundary: b[SessionCollection.info]!,
+            ),
+            timeline: SnapshotCollection(
+              values: const [],
+              boundary: b[SessionCollection.timeline]!,
+            ),
+            execution: SnapshotValue(
+              value: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.idle),
+              ),
+              boundary: b[SessionCollection.execution]!,
+            ),
+          ),
+        ),
+      ],
+      outcomes: const [],
+      steps: [
+        EmitEvent(
+          ownedRef,
+          ExecutionChanged(
+            meta: scriptedMeta(1),
+            state: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+        EmitEvent(
+          ownedRef,
+          InteractionOpened(meta: scriptedMeta(2), request: form(owner)),
+        ),
+        EmitEvent(
+          ownedRef,
+          InteractionOpened(
+            meta: scriptedMeta(3),
+            request: form(
+              ProjectOwner(otherProject, harness: scriptedHarness),
             ),
           ),
         ),

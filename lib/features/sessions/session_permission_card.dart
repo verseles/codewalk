@@ -198,15 +198,19 @@ class _PermissionCardState extends State<_PermissionCard> {
   SessionRef? get _child =>
       permissionChildOf(widget.live.session, widget.request);
 
+  /// A request owned by anything other than a session is never answerable, so
+  /// its card must not share the viewed session's reply and note slots with a
+  /// coincident own request.
+  bool get _foreign => widget.request.owner is! SessionOwner;
+
   @override
   void initState() {
     super.initState();
     // The controller keeps the draft for this request, so a lease that lost its
     // state (retry/re-open) still shows the note the user already typed.
-    _note.text = widget.live.permissionNote(
-      widget.request.id,
-      owner: _child,
-    );
+    _note.text = _foreign
+        ? ''
+        : widget.live.permissionNote(widget.request.id, owner: _child);
     _showNote = _note.text.isNotEmpty;
   }
 
@@ -229,7 +233,11 @@ class _PermissionCardState extends State<_PermissionCard> {
     final l10n = context.v2L10n;
     final child = permissionChildOf(live.session, request);
     final keyId = permissionKeyOf(live.session, request);
-    final state = live.replyState(request.id, owner: child);
+    // Same independence as the draft above: a foreign card never reflects
+    // the viewed session's reply progress or notice.
+    final state = _foreign
+        ? const SessionPermissionReplyState()
+        : live.replyState(request.id, owner: child);
     final busy = state.busy;
     final enabled = live.canReply(request) && !busy;
     final once = _offered(request, 'once');
@@ -387,11 +395,13 @@ class _PermissionCardState extends State<_PermissionCard> {
                   border: const OutlineInputBorder(),
                 ),
                 onChanged: (value) {
-                  widget.live.setPermissionNote(
-                    request.id,
-                    value,
-                    owner: child,
-                  );
+                  if (!_foreign) {
+                    widget.live.setPermissionNote(
+                      request.id,
+                      value,
+                      owner: child,
+                    );
+                  }
                   setState(() {});
                 },
               ),
@@ -407,11 +417,13 @@ class _PermissionCardState extends State<_PermissionCard> {
                     onPressed: () => setState(() {
                       _showNote = false;
                       _note.clear();
-                      widget.live.setPermissionNote(
-                        request.id,
-                        '',
-                        owner: child,
-                      );
+                      if (!_foreign) {
+                        widget.live.setPermissionNote(
+                          request.id,
+                          '',
+                          owner: child,
+                        );
+                      }
                     }),
                     child: Text(
                       MaterialLocalizations.of(context).cancelButtonLabel,

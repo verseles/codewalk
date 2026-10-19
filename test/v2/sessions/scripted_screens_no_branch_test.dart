@@ -150,6 +150,32 @@ final class _NoBranchVisitor extends RecursiveAstVisitor<void> {
     super.visitExportDirective(node);
   }
 
+  @override
+  void visitStringInterpolation(StringInterpolation node) {
+    for (final element in node.elements) {
+      if (element is InterpolationString) {
+        final lower = element.value.toLowerCase();
+        for (final token in _harnessTokens) {
+          if (lower.contains(token)) {
+            violations.add('${_at(node)}: string "$lower" mentions "$token"');
+          }
+        }
+        if (products.contains(lower.trim())) {
+          violations.add(
+            '${_at(node)}: string "$lower" is a harness/product name',
+          );
+        }
+      }
+    }
+    super.visitStringInterpolation(node);
+  }
+
+  @override
+  void visitPartDirective(PartDirective node) {
+    _checkUri(node, node.uri.stringValue);
+    super.visitPartDirective(node);
+  }
+
   void _checkUri(AstNode node, String? uri) {
     if (uri == null) return;
     final lower = uri.toLowerCase();

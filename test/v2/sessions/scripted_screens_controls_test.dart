@@ -68,24 +68,46 @@ Future<void> _steps(
   await tester.pump();
 }
 
+/// A second authored interrupt id, so the matrix can prove the stop gate stays
+/// shut while the first request is still busy.
+const interruptId2 = CommandId('scripted-interrupt-2');
+
+const _noOutboxAllow = ValueKey(
+  'live-permission-allow-nooutbox-permission',
+);
+
 ScriptedLiveBridge _bridge(
   ScriptedScenario scenario, {
   OpenIntent intent = OpenIntent.attachLive,
   List<CommandId> sendIds = const [],
+  List<CommandId> respondIds = const [],
   List<CommandId> interruptIds = const [],
 }) => ScriptedLiveBridge(
   scenario,
   intent: intent,
   hydrations: const ['controls-hydration'],
   sendIds: sendIds,
+  respondIds: respondIds,
   interruptIds: interruptIds,
 );
+
+/// Whether the composer's send control is currently enabled, whatever its
+/// wide/narrow variant is.
+bool? _sendEnabled(WidgetTester tester) {
+  final widget = tester.widget(
+    find.byKey(const ValueKey('live-composer-send')),
+  );
+  return switch (widget) {
+    FilledButton(onPressed: final callback) => callback != null,
+    IconButton(onPressed: final callback) => callback != null,
+    _ => null,
+  };
+}
 
 const _allowKey = ValueKey('live-permission-allow-controls-permission');
 const _rejectKey = ValueKey(
   'live-permission-reject-stop-controls-permission',
-);
-const _formKey = ValueKey('live-form-controls-form');
+);const _formKey = ValueKey('live-form-controls-form');
 const _submitKey = ValueKey('form-submit-controls-form');
 const _dismissKey = ValueKey('form-dismiss-controls-form');
 
@@ -98,7 +120,7 @@ void main() {
       final bridge = _bridge(
         scenario,
         sendIds: const [sendId],
-        interruptIds: const [interruptId],
+        interruptIds: const [interruptId, interruptId2],
       );
       final live = await _mount(tester, bridge);
       await _pumpUntil(tester, () => live.phase == SessionLivePhase.live);
@@ -168,9 +190,11 @@ void main() {
       );
       // The accepted receipt leaves the stop in its requested phase: the
       // notice stays, the ready control gives way to the busy state, and the
-      // slot stays occupied while the request waits.
+      // slot stays occupied while the request waits. The gate stays shut even
+      // though a second authored interrupt id remains.
       expect(live.stopState.phase, SessionStopPhase.requested);
       expect(live.stopping, isTrue);
+      expect(live.canStop, isFalse);
       expect(find.text('Stop requested…'), findsOneWidget);
       expect(find.byKey(const ValueKey('live-stop')), findsNothing);
       expect(send, findsNothing);
@@ -243,6 +267,7 @@ void main() {
         'synthetic prompt',
       );
       await tester.pump();
+      expect(_sendEnabled(tester), isFalse);
       final send = find.byKey(const ValueKey('live-composer-send'));
       await tester.ensureVisible(send);
       await tester.tap(send, warnIfMissed: false);
@@ -298,6 +323,42 @@ void main() {
         findsOneWidget,
       );
       expect(scenario.adapter.commands, isEmpty);
+      expect(scenario.adapter.remainingSteps, 0);
+    });
+
+    testWidgets('replies without a ledger: the permission card stays '
+        'answerable while the composer explains the missing outbox',
+        (tester) async {
+      final scenario = _noOutboxScenario();
+      addTearDown(scenario.adapter.dispose);
+      // attachLive with no sendIds: the lease keeps replies but the outbox
+      // is missing, so cards gate on while the composer gates off.
+      final bridge = _bridge(scenario, respondIds: const [respondId]);
+      final live = await _mount(tester, bridge);
+      await _pumpUntil(tester, () => live.phase == SessionLivePhase.live);
+
+      await _steps(tester, scenario.adapter, 2);
+      expect(live.supportsReplies, isTrue);
+      expect(live.outbox, isNull);
+      expect(
+        find.text('Prompt sending is unavailable in this view.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('live-composer-input')), findsNothing);
+      expect(
+        tester.widget<FilledButton>(find.byKey(_noOutboxAllow)).onPressed,
+        isNotNull,
+      );
+
+      await tester.tap(find.byKey(_noOutboxAllow));
+      await tester.pump();
+      expect(scenario.adapter.commands, hasLength(1));
+      expect(scenario.adapter.commands.single.id, respondId);
+      expect(
+        scenario.adapter.commands.single.operation.known,
+        MutationOperation.respond,
+      );
+      expect(find.text('Reply sent. Follow the live state.'), findsOneWidget);
       expect(scenario.adapter.remainingSteps, 0);
     });
   });
@@ -398,6 +459,12 @@ ScriptedScenario _controlsScenario({bool sendFirst = false}) {
             MutationOperation.interrupt,
             interruptIntent(scriptedInterrupt),
           ),
+          acceptedOutcome(
+            interruptId2,
+            owner,
+            MutationOperation.interrupt,
+            interruptIntent(scriptedInterrupt),
+          ),
         ] else ...[
           acceptedOutcome(
             interruptId,
@@ -433,6 +500,87 @@ ScriptedScenario _controlsScenario({bool sendFirst = false}) {
         ),
         const EmitConnection(
           ConnectionState(kind: OpenValue.known(ConnectionKind.reconnecting)),
+        ),
+      ],
+    ),
+  );
+}
+
+/// A live lease with replies but no outbox ledger: one native permission on a
+/// running turn, answerable through the card while the composer stays off.
+ScriptedScenario _noOutboxScenario() {
+  const owner = SessionOwner(ownedRef);
+  const permissionId = InteractionId('nooutbox-permission');
+  final permission = InteractionRequest(
+    id: permissionId,
+    owner: owner,
+    kind: const OpenValue.known(InteractionKind.permission),
+    title: 'Synthetic permission',
+    autoApprovable: false,
+    choices: [
+      ApprovalChoice(
+        id: 'once',
+        label: 'Allow once',
+        allows: true,
+        scope: const OpenValue.known(ApprovalScope.once),
+        resolutionScope: const OpenValue.known(ResolutionScope.request),
+      ),
+    ],
+  );
+  return ScriptedScenario(
+    'screen_no_outbox',
+    scriptedAdapter(
+      reads: [
+        ScriptedRead(
+          id: 'nooutbox-read',
+          ref: ownedRef,
+          generation: 'controls-hydration',
+          collections: const [
+            SessionCollection.info,
+            SessionCollection.timeline,
+            SessionCollection.execution,
+          ],
+          build: (b) => SessionSnapshot(
+            ref: ownedRef,
+            hydrationGeneration: 'controls-hydration',
+            info: SnapshotValue(
+              value: scriptedInfo(ownedRef),
+              boundary: b[SessionCollection.info]!,
+            ),
+            timeline: SnapshotCollection(
+              values: const [],
+              boundary: b[SessionCollection.timeline]!,
+            ),
+            execution: SnapshotValue(
+              value: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.idle),
+              ),
+              boundary: b[SessionCollection.execution]!,
+            ),
+          ),
+        ),
+      ],
+      outcomes: [
+        acceptedOutcome(
+          respondId,
+          owner,
+          MutationOperation.respond,
+          responseIntent(permissionId, ApprovalResponse('once')),
+        ),
+      ],
+      steps: [
+        EmitEvent(
+          ownedRef,
+          ExecutionChanged(
+            meta: scriptedMeta(1),
+            state: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+        EmitEvent(
+          ownedRef,
+          InteractionOpened(meta: scriptedMeta(2), request: permission),
         ),
       ],
     ),
