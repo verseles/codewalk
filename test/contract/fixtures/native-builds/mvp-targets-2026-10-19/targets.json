@@ -1,0 +1,112 @@
+{
+  "unit": "V2-020CA",
+  "issue": 356,
+  "recorded_at": "2026-10-19",
+  "revision": "e17d647fbaaaddec9d7d7a9ae396463ece04f150",
+  "supersedes": {
+    "recorded_at": "2026-10-17",
+    "revision": "846b9e5d",
+    "note": "The targets and the commands are unchanged; this record refreshes the aggregate evidence on the current revision."
+  },
+  "entry_point": "lib/main_v2.dart",
+  "entry_point_sha256": "8660317e7d66cacc0b76be1654f0ed46be0c10c608ce2a58ac8f868af71d5388",
+  "governed_packages": [
+    "packages/codewalk_core",
+    "packages/codewalk_net",
+    "packages/harness_opencode",
+    "packages/harness_host"
+  ],
+  "targets": [
+    {"scope": "native-mvp", "platform": "android", "target": "12/API 31", "status": "compiler-ci-observed", "pending": "device install/launch, signing, layout and permission flows"},
+    {"scope": "native-mvp", "platform": "linux", "target": "x64", "status": "debug-build-and-preview-visual-observed", "pending": "release AOT, installed-device acceptance, distribution"},
+    {"scope": "native-mvp", "platform": "linux", "target": "arm64", "status": "debug-compiler-observed", "pending": "GUI/install", "evidence": "test/contract/fixtures/native-builds/linux-arm64-74202310"},
+    {"scope": "deferred-post-mvp", "platform": "web-chrome", "target": "manual-checkpoint", "status": "not-accepted", "evidence": ".github/workflows/v2-deferred-web.yml"},
+    {"scope": "deferred-post-mvp", "platform": "ios", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"},
+    {"scope": "deferred-post-mvp", "platform": "macos", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"},
+    {"scope": "deferred-post-mvp", "platform": "windows", "target": "full-parent", "status": "not-accepted", "owner": "V2-020C#255"}
+  ],
+  "commands": [
+    {"make": "v2-architecture", "command": "dart run tool/ci/import_rules.dart", "ci_job": "quality"},
+    {"make": "v2-foundations", "command": "python3 tool/ci/check_v2_foundations.py", "ci_job": "v2_foundations"},
+    {"make": "v2-native-check", "command": "python3 tool/ci/check_v2_foundations.py --profile native", "ci_job": "v2_native_checks"},
+    {"make": "v2-android-debug", "command": "python3 tool/ci/build_v2_native.py android", "ci_job": "v2_native_builds (android)"},
+    {"make": "v2-linux-debug", "command": "python3 tool/ci/build_v2_native.py linux", "ci_job": "v2_native_builds (linux)"},
+    {"make": "v2-linux-preview-package", "command": "tool/preview/preview_linux.py package", "ci_job": "v2_native_builds (linux)"},
+    {"make": "v2-linux-preview-smoke", "command": "tool/ci/smoke_v2_linux_preview.py", "ci_job": "v2_native_builds (linux)"},
+    {"make": "v2-smoke", "command": "flutter test --no-pub test/v2", "ci_job": "v2_native_checks (test phase)"}
+  ],
+  "aggregate_evidence": {
+    "v2_native_check": {
+      "result": "exit 0",
+      "packages": 4,
+      "explicit_entry_point": true,
+      "package_tests_passed": 896,
+      "app_v2_tests_passed": 947,
+      "skipped": 4,
+      "skip_reasons": [
+        {"reason": "browser-only hard guard; native durability is covered separately", "tests": 1, "test": "test/v2/migration/v1_data_importer_test.dart"},
+        {"reason": "authorized isolated native OpenCode 2.0.22 runtime", "tests": 2, "test": "test/v2/sessions/live_flow_smoke_test.dart"},
+        {"reason": "authorized isolated native OpenCode 2.0.22 runtime", "tests": 1, "test": "test/v2/pairing/live_pairing_test.dart"}
+      ]
+    },
+    "ci_run": 39306060265,
+    "ci_jobs": {
+      "quality": "success",
+      "v2_foundations": "success",
+      "v2_native_checks": "success",
+      "v2_native_builds": ["android: success", "linux: success"],
+      "coverage": "success",
+      "windows_build": "success",
+      "test_shards": "skipped"
+    }
+  },
+  "compiler_evidence": {
+    "linux_x64": {
+      "command": ["flutter", "build", "linux", "--debug", "--no-pub", "--target", "lib/main_v2.dart", "--target-platform", "linux-x64"],
+      "built": "build/linux/x64/debug/bundle/codewalk",
+      "source_commit": "e17d647fbaaaddec9d7d7a9ae396463ece04f150",
+      "source_dirty": false,
+      "preview_smoke": {
+        "archive_sha256": "97c25d285f2df6ff0d62aa8116484af17f8719f489a1e297584bafa3a7f2c8f5",
+        "target": "Ubuntu 24.04 Linux x64 X11/software",
+        "checks": 17,
+        "native_visual": "pass",
+        "release_mvp": "not-tested",
+        "server_pairing": "not-tested",
+        "gpu_wayland": "not-tested"
+      }
+    },
+    "android_arm64": {
+      "command": ["flutter", "build", "apk", "--debug", "--no-pub", "--target", "lib/main_v2.dart", "--target-platform", "android-arm64", "--split-per-abi"],
+      "built": "build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk",
+      "source_commit": "e17d647fbaaaddec9d7d7a9ae396463ece04f150",
+      "source_dirty": false
+    },
+    "toolchain": {
+      "flutter": "3.44.1 (924134a44c189315be2148659913dda1671cbe99)",
+      "dart": "3.12.1",
+      "engine": "c416acfeb8126e097f758c664aaa3da929e27da0"
+    },
+    "ci_artifacts": {
+      "linux_preview": {"name": "codewalk-v2-preview-linux-x64-39306060265-1", "zip_sha256": "86b32e7c38bce368fb8270feb1a24daf43ff7b3c8907ee61ceb14f760ba403a2", "bytes": 101162895},
+      "linux_compiler": {"name": "v2-native-linux-39306060265-1", "zip_sha256": "d267dbad2ca13da7359163a676a173f6f3c38b3c3e87bdba8a2f27220ab790fe", "bytes": 1038296},
+      "android_compiler": {"name": "v2-native-android-39306060265-1", "zip_sha256": "c8b7e59dfbbd476dbbc46ab8b31ef66a19070a2b358b31b9124a385e4fd49179", "bytes": 119082220}
+    }
+  },
+  "lifecycle": {
+    "path_manifest": "tool/ci/v2_architecture_manifest.json",
+    "enforcer": "tool/ci/import_rules.dart",
+    "removals_or_suppressions": "none",
+    "v2_discovery": "governed packages plus the explicit entry point only",
+    "cutover_retirement_owner": "V2-084"
+  },
+  "not_claimed": [
+    "android/linux device acceptance",
+    "packaging or distribution",
+    "release AOT, installed-device acceptance and the MVP beta channel",
+    "MVP acceptance (V2-086) and G1-G5",
+    "publication authority (V2-077A)",
+    "installed cohort migration (V1-02A, V2-076A)",
+    "full-parent V2-020C/V2-020 closure for deferred platforms"
+  ]
+}
