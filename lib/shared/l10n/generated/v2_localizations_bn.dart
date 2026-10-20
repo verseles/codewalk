@@ -1246,13 +1246,13 @@ class V2LocalizationsBn extends V2Localizations {
   String get sessionsCreateOtherDirectory => 'অন্য ডিরেক্টরি…';
 
   @override
-  String get sessionsCreateDirectoryHint => 'ডিরেক্টরির একেজী পথ';
+  String get sessionsCreateDirectoryHint => 'ডিরেক্টরির পরম পথ';
 
   @override
   String get sessionsCreateConfirm => 'তৈরি করুন';
 
   @override
-  String get sessionsCreateDirectoryAbsolute => 'পথটি অবশ্যই একেজী হতে হবে';
+  String get sessionsCreateDirectoryAbsolute => 'পথটি অবশ্যই পরম পথ হতে হবে';
 
   @override
   String get sessionsCreateDirectoryTooLong => 'পথটি অতিরিক্ত দীর্ঘ';

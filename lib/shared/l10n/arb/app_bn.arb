@@ -1038,7 +1038,7 @@
   "@sessionsCreateOtherDirectory": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateDirectoryHint": "ডিরেক্টরির একেজী পথ",
+  "sessionsCreateDirectoryHint": "ডিরেক্টরির পরম পথ",
   "@sessionsCreateDirectoryHint": {
     "description": "V2 bounded read-only session catalog"
   },
@@ -1046,7 +1046,7 @@
   "@sessionsCreateConfirm": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateDirectoryAbsolute": "পথটি অবশ্যই একেজী হতে হবে",
+  "sessionsCreateDirectoryAbsolute": "পথটি অবশ্যই পরম পথ হতে হবে",
   "@sessionsCreateDirectoryAbsolute": {
     "description": "V2 bounded read-only session catalog"
   },

@@ -1046,7 +1046,7 @@
   "@sessionsCreateConfirm": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateDirectoryAbsolute": "راستہ مطلق ہونی چاہیے",
+  "sessionsCreateDirectoryAbsolute": "راستہ مطلق ہونا چاہیے",
   "@sessionsCreateDirectoryAbsolute": {
     "description": "V2 bounded read-only session catalog"
   },

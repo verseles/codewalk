@@ -5,6 +5,8 @@ import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/platform/sessions/session_action_source_io.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +17,7 @@ import 'live_fakes.dart';
 
 void main() {
   late FakeActionSource actions;
+  late LiveDirectory live;
 
   Future<(CatalogSource source, V2Localizations l10n, SessionsController controller)>
   open(
@@ -29,12 +32,13 @@ void main() {
     actions = FakeActionSource(endpointSupport: support);
     final rig = CatalogRig();
     await rig.save('a');
+    live = LiveDirectory();
     final dependencies = createAppDependencies(
       initialLink: Uri(path: '/sessions'),
       profileRepository: rig.repository,
       endpointProber: FakeProber(),
       sessionCatalogFactory: rig.create,
-      sessionLiveDirectory: LiveDirectory.new,
+      sessionLiveDirectory: () => live,
       sessionActionFactory: (profile, credential) => actions,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
@@ -416,6 +420,89 @@ void main() {
     ]);
     await tester.pumpAndSettle();
     expect(find.text('Second'), findsOneWidget);
+  });
+
+  testWidgets('the create never dispatches a project the list dropped', (
+    tester,
+  ) async {
+    final (source, l10n, controller) = await open(
+      tester,
+      rows: (source) => [
+        source.row('first', title: 'First', directory: '/work/alpha'),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
+    );
+    await tester.pumpAndSettle();
+    // The endpoint stops reporting the project.
+    final refresh = controller.refresh();
+    await tester.pump();
+    source.respond([source.row('first', title: 'First')]);
+    await refresh;
+    await tester.pumpAndSettle();
+    // The dialog shows no selected project, so it sends nothing.
+    expect(
+      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
+      findsNothing,
+    );
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('sessions-create-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+  });
+
+  testWidgets('a create refused because the list is not current says so', (
+    tester,
+  ) async {
+    final (source, l10n, controller) = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/other',
+    );
+    await tester.pump();
+    // The list becomes the previous result, so nothing is sent.
+    final refresh = controller.refresh();
+    await tester.pump();
+    source.fail(SessionCatalogFailure.connection);
+    await refresh;
+    await tester.pumpAndSettle();
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('sessions-create-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+    expect(actions.calls, isNot(contains('create')));
+    expect(
+      find.byKey(const ValueKey('sessions-create-unavailable')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a create refused while a re-read pends says the list is not current', (
+    tester,
+  ) async {
+    final (source, l10n, controller) = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/other',
+    );
+    await tester.pump();
+    // A live change arms the re-read, and the dispatch refuses the create.
+    live.feeds.last.emit(const SessionCatalogChanged());
+    await tester.pump();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pumpAndSettle();
+    expect(actions.calls, isNot(contains('create')));
+    expect(
+      find.byKey(const ValueKey('sessions-create-unavailable')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the local hide hides the row', (tester) async {

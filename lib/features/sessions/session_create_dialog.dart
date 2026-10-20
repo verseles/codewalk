@@ -62,19 +62,42 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
     return null;
   }
 
+  /// The project the user chose, while the endpoint still reports it.
+  ///
+  /// A live update can drop a project from the catalog. The dialog then
+  /// shows no selected project, and it never dispatches a directory it does
+  /// not show.
+  String? get _selection {
+    final selected = _selected;
+    if (selected == null) return null;
+    return widget.controller.knownDirectories.contains(selected)
+        ? selected
+        : null;
+  }
+
   /// Whether the dialog can send a create.
   bool get _canSubmit {
     if (_submitting) return false;
-    if (_selected != null) return true;
+    if (_listNotCurrent) return false;
+    if (_selection != null) return true;
     return _typed.isNotEmpty && _pathProblem() == null;
   }
+
+  /// Whether the list stopped being the endpoint's current answer.
+  ///
+  /// The durable states disable the confirm, exactly as the row menu does.
+  /// A pending re-read keeps it usable and the dispatch refuses, which the
+  /// dialog reports after the attempt.
+  bool get _listNotCurrent =>
+      widget.controller.createReason == SessionActionReason.listNotCurrent;
 
   Future<void> _create() async {
     if (_submitting) return;
     final typed = _typed;
-    final directory = _selected ?? (typed.isEmpty ? null : typed);
+    final selection = _selection;
+    final directory = selection ?? (typed.isEmpty ? null : typed);
     if (directory == null) return;
-    if (_selected == null && _pathProblem() != null) {
+    if (selection == null && _pathProblem() != null) {
       // The path is refused locally, so nothing is sent.
       setState(() {});
       return;
@@ -94,9 +117,8 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
     }
     if (outcome == SessionActionOutcome.unavailable &&
         widget.controller.reconciling) {
-      // The create was never sent: the list is not the endpoint's current
-      // answer yet, so the user retries instead of believing that a command
-      // failed.
+      // The create was never sent: a pending re-read may have outdated the
+      // list, so the user retries instead of believing that a command failed.
       setState(() => _unavailable = true);
       return;
     }
@@ -129,7 +151,7 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
   Widget _dialog(BuildContext context) {
     final l10n = context.v2L10n;
     final directories = widget.controller.knownDirectories;
-    final selected = directories.contains(_selected) ? _selected : null;
+    final selected = _selection;
     final problem = selected == null ? _pathProblem() : null;
     return AlertDialog(
       scrollable: true,
@@ -184,7 +206,7 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
                 ),
               ),
             ),
-          if (_unavailable)
+          if (_listNotCurrent || _unavailable)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(

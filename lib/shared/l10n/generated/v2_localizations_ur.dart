@@ -1258,7 +1258,7 @@ class V2LocalizationsUr extends V2Localizations {
   String get sessionsCreateConfirm => 'بنائیں';
 
   @override
-  String get sessionsCreateDirectoryAbsolute => 'راستہ مطلق ہونی چاہیے';
+  String get sessionsCreateDirectoryAbsolute => 'راستہ مطلق ہونا چاہیے';
 
   @override
   String get sessionsCreateDirectoryTooLong => 'راستہ بہت طویل ہے';

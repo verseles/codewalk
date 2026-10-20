@@ -72,6 +72,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the new session appears through the next authoritative read, with the endpoint's own record; the receipt never becomes a row
 - **Then** a create that the endpoint refused, or whose answer was lost, says so and is never sent again
 - **Then** a create that was not sent because the list was not the endpoint's current answer says that instead, and the list keeps no failure notice for a command that never left
+- **Then** the dialog sends only what it shows: a project the endpoint stopped reporting is not chosen any more, and the confirm waits for a path that is
 - **Then** the create is offered only while the list is the endpoint's current answer — not a previous result and not behind — and the endpoint's own commands are available, and the reason is shown when it is not
 
 ### V2 live session catalog

@@ -1046,7 +1046,7 @@
   "@sessionsCreateConfirm": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateDirectoryAbsolute": "पथ निश्चित रूप से पूर्ण होना चाहिए",
+  "sessionsCreateDirectoryAbsolute": "पथ निरपेक्ष होना चाहिए",
   "@sessionsCreateDirectoryAbsolute": {
     "description": "V2 bounded read-only session catalog"
   },

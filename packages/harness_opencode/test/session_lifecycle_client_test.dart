@@ -352,6 +352,17 @@ void main() {
       expect(transport.requests, isEmpty);
     });
 
+    test('the create refuses a relative directory locally', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      await expectLater(
+        client(transport).create(id: id, directory: 'work/project'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
     test('the rename refuses an oversized title locally', () async {
       final transport = _Transport(
         (_, _) => response(null, status: 204, empty: true),
