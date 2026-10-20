@@ -52,7 +52,6 @@ AppDependencies createAppDependencies({
   DateTime Function()? sessionClock,
   SessionLiveDirectory? Function()? sessionLiveDirectory,
   PermissionModeStore? permissionModeStore,
-  HiddenSessionStore? hiddenSessionStore,
   SessionActionFactory? sessionActionFactory,
   HiddenSessionStore? hiddenStore,
 }) {
@@ -68,8 +67,7 @@ AppDependencies createAppDependencies({
   // Records the Unrestricted rules CodeWalk added, so only those are removed.
   final unrestrictedOwnership = UnrestrictedOwnershipStore(store: metadata);
   // The sessions hidden in CodeWalk: a local state the endpoint never sees.
-  final hiddenSessions =
-      hiddenStore ?? hiddenSessionStore ?? HiddenSessionStore(store: metadata);
+  final hiddenSessions = hiddenStore ?? HiddenSessionStore(store: metadata);
   // The session actions of a profile: the endpoint's own commands and the
   // local hide.
   final prober = endpointProber ?? createEndpointProber();

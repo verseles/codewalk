@@ -328,7 +328,7 @@ class _DeleteDialogState extends State<_DeleteDialog> {
               });
               _count();
             },
-            child: Text(l10n.sessionsActionDeleteCounting),
+            child: Text(l10n.chatRetry),
           ),
       ],
     );

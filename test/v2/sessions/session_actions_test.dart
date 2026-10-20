@@ -1,6 +1,7 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_actions_menu.dart';
+import 'package:codewalk/platform/sessions/session_action_source_io.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -144,6 +145,53 @@ void main() {
     await tester.tap(find.text(l10n.commonDelete).last);
     await tester.pumpAndSettle();
     expect(actions.calls, contains('delete'));
+  });
+
+  testWidgets('the long press opens the row menu', (tester) async {
+    final (source, l10n) = await open(tester);
+    // The long press is on the row, not on the overflow button.
+    await tester.longPress(find.text('First'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsActionRename), findsOneWidget);
+  });
+
+  test('the action source observes the version with the profile probe', () async {
+    final prober = FakeProber();
+    final source = createSessionActionSource(
+      profile('a'),
+      EndpointCredential(
+        kind: EndpointAuthKind.password,
+        secret: 'secret',
+      ),
+      prober,
+    );
+    // The probe observed 2.0.22, so the endpoint's own commands are
+    // available.
+    expect((await source.support()).available, isTrue);
+    source.close();
+  });
+
+  test('a transient probe failure is observed again', () async {
+    final prober = FakeProber()
+      ..assessment = const EndpointAssessment(
+        EndpointStatus.unreachable,
+      );
+    final source = createSessionActionSource(
+      profile('a'),
+      EndpointCredential(
+        kind: EndpointAuthKind.password,
+        secret: 'secret',
+      ),
+      prober,
+    );
+    expect((await source.support()).available, isFalse);
+    // The endpoint answers now, so the actions come back.
+    prober.assessment = const EndpointAssessment(
+      EndpointStatus.compatible,
+      version: '2.0.22',
+    );
+    expect((await source.support()).available, isTrue);
+    source.close();
   });
 
   testWidgets('the local hide hides the row', (tester) async {

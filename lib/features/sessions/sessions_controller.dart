@@ -90,6 +90,9 @@ class SessionsController extends ChangeNotifier {
   /// The outcome of the last command that did not go through, so the list can
   /// say so instead of closing the interaction silently.
   SessionActionOutcome? _actionFailure;
+
+  /// A command whose answer was lost is waiting for its reconciliation.
+  bool _actionPending = false;
   SessionActionFilter _filter = SessionActionFilter.active;
   final _received = <String>{};
   final _requested = <String>{};
@@ -123,6 +126,10 @@ class SessionsController extends ChangeNotifier {
   /// The outcome of the last command that did not go through.
   SessionActionOutcome? get actionFailure => _actionFailure;
 
+  /// A command whose answer was lost is waiting for the re-read that
+  /// reconciles it.
+  bool get actionUncertain => _actionPending;
+
   /// A change is waiting for its re-read, so the loaded rows may be
   /// outdated and no action is offered.
   bool get reconciling => _livePending;
@@ -136,6 +143,9 @@ class SessionsController extends ChangeNotifier {
 
   /// Whether the local hide can be read and written.
   bool get hideAvailable => _actions?.hideAvailable ?? false;
+
+  /// Whether the local hide state could not be read.
+  bool get hideUnreadable => _actions?.hideUnreadable ?? false;
 
   /// Whether the row is hidden in CodeWalk.
   bool isHidden(SessionSummary row) => _actions?.isHidden(row) ?? false;
@@ -174,11 +184,16 @@ class SessionsController extends ChangeNotifier {
       _source = null;
       _actions?.close();
       _actions = null;
+      // The new endpoint has not been observed yet.
+      _actionSupport = const SessionActionSupport(
+        SessionActionReason.versionUnverified,
+      );
       _closeChanges();
     }
   }
 
   void _clear() {
+    _actionFailure = null;
     _ownershipTimer?.cancel();
     _ownershipTimer = null;
     _sessions = const [];
@@ -581,7 +596,9 @@ class SessionsController extends ChangeNotifier {
     final source = _actions;
     if (source == null) return false;
     final written = await source.setHidden(row, hidden: hidden);
-    if (!written) {
+    if (written) {
+      _actionFailure = null;
+    } else {
       _actionFailure = SessionActionOutcome.unavailable;
     }
     _notify();
@@ -611,6 +628,10 @@ class SessionsController extends ChangeNotifier {
         behind ||
         _livePending ||
         !_sessions.any((current) => current.info.ref == row.info.ref)) {
+      // The intent is no longer authorized, and the user asked for it: the
+      // list says so instead of closing the interaction silently.
+      _actionFailure = SessionActionOutcome.unavailable;
+      _notify();
       return SessionActionOutcome.unavailable;
     }
     _pendingActions.add(row.info.ref);
@@ -624,8 +645,13 @@ class SessionsController extends ChangeNotifier {
         // command is reconciled there, never replayed.
         _markLiveChange();
       }
-      if (outcome != SessionActionOutcome.accepted) {
+      if (outcome == SessionActionOutcome.rejected ||
+          outcome == SessionActionOutcome.unavailable) {
         _actionFailure = outcome;
+      } else if (outcome == SessionActionOutcome.uncertain) {
+        // The command may already have been applied: the re-read reconciles
+        // it, and the list waits instead of calling it a failure.
+        _actionPending = true;
       }
       return outcome;
     } on ArgumentError {

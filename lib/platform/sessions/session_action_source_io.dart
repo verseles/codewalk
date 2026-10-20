@@ -51,12 +51,31 @@ final class _NativeSource implements SessionActionSource {
   /// The profile's own prober: the version is observed, never assumed.
   final EndpointProber _prober;
   SessionActionSupport? _support;
+  Future<SessionActionSupport>? _probing;
+  EndpointProbeTask? _probeTask;
+
+  /// Whether the last probe settled on a definitive answer. A transient
+  /// state is probed again instead of disabling the actions for good.
+  bool _definitive = false;
   String? _version;
   bool _closed = false;
 
   @override
-  Future<SessionActionSupport> support() async =>
-      _support ??= await _probeSupport();
+  Future<SessionActionSupport> support() async {
+    final known = _support;
+    if (known != null && _definitive) return known;
+    final pending = _probing;
+    if (pending != null) return pending;
+    final future = _probeSupport();
+    _probing = future;
+    try {
+      final support = await future;
+      if (_definitive) _support = support;
+      return support;
+    } finally {
+      _probing = null;
+    }
+  }
 
   /// The endpoint's own contract decides: the commands of the version the
   /// profile's probe observed, and nothing else.
@@ -64,22 +83,36 @@ final class _NativeSource implements SessionActionSource {
   /// The probe is read-only and it is the profile's own, so a capability is
   /// never discovered by trying a mutation.
   Future<SessionActionSupport> _probeSupport() async {
-    final assessment = await _prober.start(_endpoint, _secret).result;
-    if (assessment.status == EndpointStatus.authenticationRequired) {
-      return const SessionActionSupport(
-        SessionActionReason.authenticationRequired,
-      );
+    final task = _prober.start(_endpoint, _secret);
+    _probeTask = task;
+    try {
+      final assessment = await task.result;
+      if (assessment.status == EndpointStatus.authenticationRequired) {
+        _definitive = true;
+        return const SessionActionSupport(
+          SessionActionReason.authenticationRequired,
+        );
+      }
+      final version = assessment.version;
+      if (version == null || !assessment.canUse) {
+        // A transient state: the next request observes the endpoint again.
+        _definitive = false;
+        return const SessionActionSupport(
+          SessionActionReason.versionUnverified,
+        );
+      }
+      _definitive = true;
+      if (OpenCodeCompatibility.parse(version)?.toString() != '2.0.22') {
+        // A known version that does not define these commands.
+        return const SessionActionSupport(
+          SessionActionReason.versionUnverified,
+        );
+      }
+      _version = version;
+      return const SessionActionSupport(SessionActionReason.none);
+    } finally {
+      _probeTask = null;
     }
-    final version = assessment.version;
-    if (version == null ||
-        !assessment.canUse ||
-        OpenCodeCompatibility.parse(version)?.toString() != '2.0.22') {
-      return const SessionActionSupport(
-        SessionActionReason.versionUnverified,
-      );
-    }
-    _version = version;
-    return const SessionActionSupport(SessionActionReason.none);
   }
 
   /// The client, once the endpoint's version was verified.
@@ -189,6 +222,8 @@ final class _NativeSource implements SessionActionSource {
   void close() {
     if (_closed) return;
     _closed = true;
+    _probeTask?.cancel();
+    _probeTask = null;
     _reader.dispose();
     _transport.close();
   }

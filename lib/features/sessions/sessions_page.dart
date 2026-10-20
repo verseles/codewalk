@@ -82,7 +82,8 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
       if (controller.actionFailure != null) l10n.sessionsActionFailed,
-      if (!controller.hideAvailable) l10n.sessionsActionUnavailableStore,
+      if (controller.hideUnreadable) l10n.sessionsActionUnavailableStore,
+      if (controller.actionUncertain) l10n.sessionsActionPending,
       if (controller.loaded &&
           !controller.loading &&
           !controller.stale &&
