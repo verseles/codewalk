@@ -237,6 +237,110 @@ void main() {
       }
     });
 
+    test('a success status outside the contract is uncertain', () async {
+      // The contract answers 204 to a rename; a 200 is out of contract.
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}, status: 200),
+      );
+      final attempt = await client(transport).rename(
+        session: session,
+        id: id,
+        title: 'T',
+      );
+      expect(attempt.receipt.state.known, ReceiptState.uncertain);
+      expect(attempt.receipt.reason, 'status200');
+    });
+
+    test('a create that answers with another session is refused', () async {
+      final transport = _Transport(
+        (_, _) => response({
+          'data': sessionRecord(
+            nativeId: 'ses_other',
+            title: 'T',
+            directory: '/work/project',
+          ),
+        }),
+      );
+      final attempt = await client(transport).create(
+        id: id,
+        directory: '/work/project',
+        nativeSessionId: 'ses_minted',
+        title: 'T',
+      );
+      expect(attempt.receipt.state.known, ReceiptState.rejected);
+      expect(attempt.receipt.error?.rawType, 'SessionIdentityOccupied');
+      expect(attempt.receipt.error?.action?.known, ErrorAction.refresh);
+    });
+
+    test('the refusals carry the action and the retryable hint', () async {
+      final cases = {
+        401: ErrorAction.authenticate,
+        403: ErrorAction.authenticate,
+        404: ErrorAction.refresh,
+      };
+      for (final entry in cases.entries) {
+        final transport = _Transport(
+          (_, _) => response(null, status: entry.key, empty: true),
+        );
+        final attempt = await client(transport).rename(
+          session: session,
+          id: id,
+          title: 'T',
+        );
+        expect(attempt.receipt.error?.action?.known, entry.value);
+      }
+      final limited = _Transport(
+        (_, _) => response(null, status: 429, empty: true),
+      );
+      final attempt = await client(limited).rename(
+        session: session,
+        id: id,
+        title: 'T',
+      );
+      expect(attempt.receipt.error?.retryable, isTrue);
+    });
+
+    test('a refusal keeps the exact payload that was sent', () async {
+      final transport = _Transport(
+        (_, _) => response(null, status: 400, empty: true),
+      );
+      final attempt = await client(transport).rename(
+        session: session,
+        id: id,
+        title: 'T',
+      );
+      expect(attempt.payload, '{"title":"T"}');
+    });
+
+    test('the create refuses an invalid identifier locally', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      expect(
+        () => client(transport).create(
+          id: id,
+          directory: '/work/project',
+          nativeSessionId: 'not-a-session',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
+    test('the create refuses an unbounded text locally', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      expect(
+        () => client(transport).create(
+          id: id,
+          directory: '/work/${'x' * 5000}',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
     test('an unknown status is uncertain', () async {
       final transport = _Transport(
         (_, _) => response(null, status: 500, empty: true),
@@ -352,6 +456,83 @@ void main() {
       );
       expect(attempt.payload, '{"title":"New title"}');
       expect(attempt.session, isNull);
+    });
+
+    test('the occupancy rule is checked on the title alone', () async {
+      // The endpoint answers a same-identifier create with the session that
+      // identifier owns, keeping its own title.
+      final transport = _Transport(
+        (_, _) => response({
+          'data': sessionRecord(
+            nativeId: 'ses_minted',
+            title: 'The original title',
+            directory: '/work/project',
+          ),
+        }),
+      );
+      final attempt = await client(transport).create(
+        id: id,
+        directory: '/work/project',
+        nativeSessionId: 'ses_minted',
+        title: 'The new title',
+      );
+      expect(attempt.receipt.state.known, ReceiptState.rejected);
+      expect(attempt.receipt.error?.rawType, 'SessionIdentityOccupied');
+    });
+
+    test('an identical create is admitted', () async {
+      final transport = _Transport(
+        (_, _) => response({
+          'data': sessionRecord(
+            nativeId: 'ses_minted',
+            title: 'T',
+            directory: '/work/project',
+          ),
+        }),
+      );
+      final attempt = await client(transport).create(
+        id: id,
+        directory: '/work/project',
+        nativeSessionId: 'ses_minted',
+        title: 'T',
+      );
+      expect(attempt.receipt.state.known, ReceiptState.accepted);
+      expect(attempt.receipt.nativeRef, 'ses_minted');
+    });
+
+    test('a deadline that passes is uncertain', () async {
+      final transport = _Transport(
+        (_, _) async {
+          await Future<void>.delayed(const Duration(seconds: 5));
+          return response(null, status: 204, empty: true);
+        },
+      );
+      final attempt = await client(
+        transport,
+        deadline: const Duration(milliseconds: 50),
+      ).rename(session: session, id: id, title: 'T');
+      expect(attempt.receipt.state.known, ReceiptState.uncertain);
+      expect(attempt.receipt.reason, 'timeout');
+    });
+
+    test('a cancellation in flight is uncertain', () async {
+      final cancellation = RequestCancellation();
+      final transport = _Transport(
+        (_, _) async {
+          // The cancellation lands after the request was handed over.
+          cancellation.cancel();
+          await Future<void>.delayed(const Duration(seconds: 5));
+          return response(null, status: 204, empty: true);
+        },
+      );
+      final attempt = await client(transport).rename(
+        session: session,
+        id: id,
+        title: 'T',
+        cancellation: cancellation,
+      );
+      expect(attempt.receipt.state.known, ReceiptState.uncertain);
+      expect(attempt.receipt.reason, 'cancelled');
     });
 
     test('the attempt never replays', () async {

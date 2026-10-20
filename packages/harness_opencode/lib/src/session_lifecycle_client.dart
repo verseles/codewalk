@@ -36,6 +36,19 @@ final class OpenCodeSessionLifecycleAttempt {
   final SessionSummary? session;
 }
 
+/// The bound of an identifier or a path the client sends to the endpoint.
+const _idLimit = 4096;
+
+/// The bound of a title the client sends to the endpoint. It matches the
+/// title the lifecycle projection accepts, so the client never sends a title
+/// the projection would later reject.
+const _titleLimit = 256 * 1024;
+
+bool _boundedText(String value, int bytes) =>
+    value.length <= bytes &&
+    utf8.encode(value).length <= bytes &&
+    utf8.decode(utf8.encode(value)) == value;
+
 /// Sends the official 2.0.22 session lifecycle commands.
 ///
 /// The five commands share the transport, the connected version, the deadline,
@@ -50,7 +63,7 @@ final class OpenCodeSessionLifecycleClient {
     required this.harness,
     required this.connectedVersion,
     this.deadline = const Duration(seconds: 20),
-    this.maxBodyBytes = 4096,
+    this.maxBodyBytes = 1024 * 1024,
   }) {
     if (deadline <= Duration.zero || maxBodyBytes <= 0) {
       throw ArgumentError('Session command bounds must be positive.');
@@ -61,6 +74,9 @@ final class OpenCodeSessionLifecycleClient {
   final HarnessRef harness;
   final String connectedVersion;
   final Duration deadline;
+
+  /// The bound of the response the endpoint answers with. A create and a
+  /// fork answer with a whole session record, not with a small receipt.
   final int maxBodyBytes;
 
   /// Creates a session at the given directory.
@@ -79,6 +95,23 @@ final class OpenCodeSessionLifecycleClient {
       ProjectRef(harness.host, directory),
       harness: harness,
     );
+    if (nativeSessionId != null) {
+      try {
+        openCodeSessionId(nativeSessionId);
+      } on FormatException {
+        throw ArgumentError.value(
+          nativeSessionId,
+          'nativeSessionId',
+          'Not a native session identifier',
+        );
+      }
+    }
+    if (directory.isEmpty || !_boundedText(directory, _idLimit)) {
+      throw ArgumentError('The create body carries a bounded directory');
+    }
+    if (title != null && !_boundedText(title, _titleLimit)) {
+      throw ArgumentError('The create body carries a bounded title');
+    }
     // The optional keys are omitted, not set to null: the endpoint tells an
     // absent key from a null one.
     final body = <String, Object?>{'location': {'directory': directory}};
@@ -92,11 +125,13 @@ final class OpenCodeSessionLifecycleClient {
       method: 'POST',
       pathSegments: const ['api', 'session'],
       body: body,
-      expectsSession: true,
+      expectedStatus: 200,
+      notFoundType: 'NotFoundError',
       // A create with the caller's identifier may return the session that
       // identifier already owns, with the new fields ignored.
       occupiedTitle: nativeSessionId == null ? null : title,
       occupiedDirectory: nativeSessionId == null ? null : directory,
+      occupiedNativeId: nativeSessionId,
       cancellation: cancellation,
     );
   }
@@ -107,21 +142,26 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     required String title,
     RequestCancellation? cancellation,
-  }) => _send(
-    id: id,
-    operation: MutationOperation.rename,
+  }) {
+    if (!_boundedText(title, _titleLimit)) {
+      throw ArgumentError('The rename body carries a bounded title');
+    }
+    return _send(
+      id: id,
+      operation: MutationOperation.rename,
     owner: SessionOwner(session),
     intent: CanonicalValue({
       'sessionID': session.nativeId,
       'title': title,
     }),
-    method: 'PATCH',
-    pathSegments: ['api', 'session', session.nativeId],
-    body: {'title': title},
-    expectsSession: false,
-    session: session,
-    cancellation: cancellation,
-  );
+      method: 'PATCH',
+      pathSegments: ['api', 'session', session.nativeId],
+      body: {'title': title},
+      expectedStatus: 204,
+      session: session,
+      cancellation: cancellation,
+    );
+  }
 
   /// Deletes the session and its child sessions.
   ///
@@ -140,7 +180,7 @@ final class OpenCodeSessionLifecycleClient {
     method: 'DELETE',
     pathSegments: ['api', 'session', session.nativeId],
     body: null,
-    expectsSession: false,
+    expectedStatus: 204,
     session: session,
     cancellation: cancellation,
   );
@@ -155,6 +195,9 @@ final class OpenCodeSessionLifecycleClient {
     String? before,
     RequestCancellation? cancellation,
   }) {
+    if (before != null && !_boundedText(before, _idLimit)) {
+      throw ArgumentError('The fork body carries a bounded boundary');
+    }
     final body = <String, Object?>{};
     if (before != null) body['before'] = before;
     final intent = <String, Object?>{'sessionID': session.nativeId};
@@ -167,7 +210,8 @@ final class OpenCodeSessionLifecycleClient {
       method: 'POST',
       pathSegments: ['api', 'session', session.nativeId, 'fork'],
       body: body,
-      expectsSession: true,
+      expectedStatus: 200,
+      notFoundType: 'NotFoundError',
       session: session,
       cancellation: cancellation,
     );
@@ -190,7 +234,7 @@ final class OpenCodeSessionLifecycleClient {
     method: 'POST',
     pathSegments: ['api', 'session', session.nativeId, 'view'],
     body: {'idle': idle},
-    expectsSession: false,
+    expectedStatus: 204,
     session: session,
     cancellation: cancellation,
   );
@@ -203,9 +247,11 @@ final class OpenCodeSessionLifecycleClient {
     required String method,
     required List<String> pathSegments,
     required Map<String, Object?>? body,
-    required bool expectsSession,
+    required int expectedStatus,
+    String notFoundType = 'SessionNotFoundError',
     String? occupiedTitle,
     String? occupiedDirectory,
+    String? occupiedNativeId,
     SessionRef? session,
     RequestCancellation? cancellation,
   }) async {
@@ -217,14 +263,16 @@ final class OpenCodeSessionLifecycleClient {
       connectedVersion: connectedVersion,
       intent: intent,
     );
+    // The exact body is kept once it was handed to the transport, so a
+    // refusal or an uncertainty can still be reconciled against it.
+    String? sentPayload;
     OpenCodeSessionLifecycleAttempt finish(
       CommandReceipt receipt, {
-      String? payload,
       SessionSummary? summary,
     }) => OpenCodeSessionLifecycleAttempt(
       command: command,
       receipt: receipt,
-      payload: payload,
+      payload: sentPayload,
       session: summary,
     );
     OpenCodeSessionLifecycleAttempt unavailable(String reason) => finish(
@@ -237,19 +285,24 @@ final class OpenCodeSessionLifecycleClient {
     OpenCodeSessionLifecycleAttempt uncertain(String reason) => finish(
       CommandReceipt.uncertain(id: id, owner: owner, reason: reason),
     );
-    OpenCodeSessionLifecycleAttempt rejected(ErrorKind kind, String type) =>
-        finish(
-          CommandReceipt.rejected(
-            id: id,
-            owner: owner,
-            error: ErrorInfo(
-              kind: OpenValue.known(kind),
-              rawType: type,
-              rawMessage: '',
-              retryable: false,
-            ),
-          ),
-        );
+    OpenCodeSessionLifecycleAttempt rejected(
+      ErrorKind kind,
+      String type, {
+      ErrorAction? action,
+      bool retryable = false,
+    }) => finish(
+      CommandReceipt.rejected(
+        id: id,
+        owner: owner,
+        error: ErrorInfo(
+          kind: OpenValue.known(kind),
+          rawType: type,
+          rawMessage: '',
+          retryable: retryable,
+          action: action == null ? null : OpenValue.known(action),
+        ),
+      ),
+    );
 
     // Only the observed 2.0.22 semantics are relied on.
     if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
@@ -269,6 +322,7 @@ final class OpenCodeSessionLifecycleClient {
 
     final payload = body == null ? null : jsonEncode(body);
     final payloadBytes = payload == null ? null : utf8.encode(payload);
+    sentPayload = payload;
     final token = RequestCancellation();
     final expired = Completer<Never>();
     expired.future.ignore();
@@ -314,15 +368,24 @@ final class OpenCodeSessionLifecycleClient {
       // A refusal is known from the status; the native body is never read,
       // because its messages echo identifiers and paths.
       final status = current.statusCode;
-      if (status != 200 && status != 204) {
+      if (status != expectedStatus) {
         return switch (status) {
           400 => rejected(ErrorKind.protocol, 'InvalidRequestError'),
-          401 || 403 => rejected(ErrorKind.auth, 'UnauthorizedError'),
-          404 => rejected(ErrorKind.protocol, 'SessionNotFoundError'),
-          429 => rejected(ErrorKind.rateLimit, 'RateLimited'),
+          401 || 403 => rejected(
+            ErrorKind.auth,
+            'UnauthorizedError',
+            action: ErrorAction.authenticate,
+          ),
+          404 => rejected(
+            ErrorKind.protocol,
+            notFoundType,
+            action: ErrorAction.refresh,
+          ),
+          429 => rejected(ErrorKind.rateLimit, 'RateLimited', retryable: true),
           final other => uncertain('status$other'),
         };
       }
+      final expectsSession = expectedStatus == 200;
       if (!expectsSession) {
         // A 204 with no body: the exchange was admitted.
         return finish(
@@ -331,7 +394,6 @@ final class OpenCodeSessionLifecycleClient {
             owner: owner,
             nativeRef: session?.nativeId,
           ),
-          payload: payload,
         );
       }
       final bytes = await Future.any<Uint8List>([
@@ -348,12 +410,28 @@ final class OpenCodeSessionLifecycleClient {
       // identifier already owns and ignores the changed fields, so a response
       // that does not match the intent is not the session the caller asked
       // for.
+      if (occupiedNativeId != null &&
+          summary.info.ref.nativeId != occupiedNativeId) {
+        return rejected(
+          ErrorKind.protocol,
+          'SessionIdentityOccupied',
+          action: ErrorAction.refresh,
+        );
+      }
       if (occupiedTitle != null && summary.info.title != occupiedTitle) {
-        return rejected(ErrorKind.protocol, 'SessionIdentityOccupied');
+        return rejected(
+          ErrorKind.protocol,
+          'SessionIdentityOccupied',
+          action: ErrorAction.refresh,
+        );
       }
       if (occupiedDirectory != null &&
           summary.info.project?.canonicalDirectory != occupiedDirectory) {
-        return rejected(ErrorKind.protocol, 'SessionIdentityOccupied');
+        return rejected(
+          ErrorKind.protocol,
+          'SessionIdentityOccupied',
+          action: ErrorAction.refresh,
+        );
       }
       return finish(
         CommandReceipt.accepted(
@@ -361,7 +439,6 @@ final class OpenCodeSessionLifecycleClient {
           owner: owner,
           nativeRef: summary.info.ref.nativeId,
         ),
-        payload: payload,
         summary: summary,
       );
     } on TransportException catch (error) {
