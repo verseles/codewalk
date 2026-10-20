@@ -1188,4 +1188,10 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsChildParentElsewhere => '子会话 · 父会话未在此显示';
+
+  @override
+  String get chatGoToLatest => '转到最新消息';
+
+  @override
+  String get chatGoToFirst => '转到第一条消息';
 }

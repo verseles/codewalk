@@ -1269,4 +1269,10 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'ذیلی سیشن · بنیادی سیشن یہاں نہیں دکھایا گیا';
+
+  @override
+  String get chatGoToLatest => 'تازہ ترین پیغام پر جائیں۔';
+
+  @override
+  String get chatGoToFirst => 'پہلے پیغام پر جائیں۔';
 }

@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "Дочерняя сессия · родительская сессия здесь не показана",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "Перейти к последнему сообщению",
+  "chatGoToFirst": "Перейти к первому сообщению"
 }

@@ -11,10 +11,11 @@ import 'session_composer.dart';
 import 'session_composer_controller.dart';
 import 'session_form_card.dart';
 import 'session_live_controller.dart';
+import 'session_live_scroll.dart';
+import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
 import 'session_stop_button.dart';
-import 'session_timeline_tile.dart';
 
 /// Minimum height the prompt composer keeps beside a resident permission card.
 const double _composerFloor = 56;
@@ -32,6 +33,10 @@ class _SessionLivePageState extends State<SessionLivePage> {
   late final SessionComposerController _composer;
   final _draft = TextEditingController();
 
+  /// The scroll and viewport rules of the timeline: the list follows the
+  /// newest content while the user stays at the bottom.
+  final _scroll = SessionLiveScroll();
+
   @override
   void initState() {
     super.initState();
@@ -45,9 +50,79 @@ class _SessionLivePageState extends State<SessionLivePage> {
   void dispose() {
     _composer.dispose();
     _draft.dispose();
+    _scroll.dispose();
     widget.controller.dispose();
     super.dispose();
   }
+
+  /// The block above the timeline items: the phase, the notices and the
+  /// retry. It scrolls with the items, so a long session keeps its status
+  /// in reach.
+  Widget _header(
+    BuildContext context,
+    SessionLiveController c,
+    V2Localizations l10n,
+    TextTheme textTheme, {
+    required String? failure,
+    required String? execution,
+    required String? outcome,
+    required bool needsYou,
+    required SessionLiveView? view,
+    required bool canAct,
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(
+        canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
+        style: textTheme.titleMedium,
+      ),
+      Text(c.profile.label, maxLines: 2, overflow: TextOverflow.ellipsis),
+      Semantics(
+        liveRegion: true,
+        container: true,
+        child: Column(
+          key: const ValueKey('live-status'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (failure != null) Text(failure) else Text(_phase(l10n, c.phase)),
+            if (view?.stale ?? false) Text(l10n.liveStale),
+          ],
+        ),
+      ),
+      // Outside the live region: it changes on every event.
+      if (view?.lastSyncedAt case final synced?)
+        Text('${l10n.liveLastSynced}: ${_time(context, synced)}'),
+      if (execution != null || outcome != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (execution != null)
+                Chip(
+                  key: const ValueKey('live-execution'),
+                  label: Text(execution),
+                ),
+              if (outcome != null) Chip(label: Text(outcome)),
+            ],
+          ),
+        ),
+      if (needsYou && execution != l10n.liveNeedsYou)
+        Text(l10n.liveNeedsYou, key: const ValueKey('live-needs-you')),
+      if (c.state?.hasMoreHistory ?? false) Text(l10n.historyLimit),
+      if (c.canRetry)
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton(
+            key: const ValueKey('live-retry'),
+            onPressed: c.retry,
+            child: Text(l10n.liveRetry),
+          ),
+        ),
+      const SizedBox(height: 8),
+    ],
+  );
 
   String? _failure(V2Localizations l10n, SessionLiveFailure? failure) =>
       switch (failure) {
@@ -113,6 +188,19 @@ class _SessionLivePageState extends State<SessionLivePage> {
       final execution = _execution(l10n, state?.execution);
       final outcome = _outcome(l10n, state?.execution?.lastOutcome);
       final needsYou = state?.interactions.isNotEmpty ?? false;
+      // A settled session has no turn in flight, so a finished answer can be
+      // offered to the reader from its start.
+      final settled = switch (state?.execution?.kind.known) {
+        null => false,
+        ExecutionKind.running => false,
+        ExecutionKind.waitingForApproval => false,
+        ExecutionKind.waitingForInput => false,
+        ExecutionKind.retrying => false,
+        ExecutionKind.interrupting => false,
+        ExecutionKind.interruptedPendingResume => false,
+        ExecutionKind.idle => true,
+        ExecutionKind.unknown => false,
+      };
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
         appBar: AppBar(
@@ -189,90 +277,22 @@ class _SessionLivePageState extends State<SessionLivePage> {
                         semanticsLabel: l10n.liveConnecting,
                       ),
                     Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: items.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index > 0) {
-                            final item = items[index - 1];
-                            return SessionTimelineTile(
-                              key: ValueKey(item.id),
-                              item: item,
-                            );
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                canAct
-                                    ? l10n.composerLiveSession
-                                    : l10n.liveReadOnly,
-                                style: textTheme.titleMedium,
-                              ),
-                              Text(
-                                c.profile.label,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Semantics(
-                                liveRegion: true,
-                                container: true,
-                                child: Column(
-                                  key: const ValueKey('live-status'),
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    if (failure != null)
-                                      Text(failure)
-                                    else
-                                      Text(_phase(l10n, c.phase)),
-                                    if (view?.stale ?? false)
-                                      Text(l10n.liveStale),
-                                  ],
-                                ),
-                              ),
-                              // Outside the live region: it changes on every event.
-                              if (view?.lastSyncedAt case final synced?)
-                                Text(
-                                  '${l10n.liveLastSynced}: ${_time(context, synced)}',
-                                ),
-                              if (execution != null || outcome != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      if (execution != null)
-                                        Chip(
-                                          key: const ValueKey('live-execution'),
-                                          label: Text(execution),
-                                        ),
-                                      if (outcome != null)
-                                        Chip(label: Text(outcome)),
-                                    ],
-                                  ),
-                                ),
-                              if (needsYou && execution != l10n.liveNeedsYou)
-                                Text(
-                                  l10n.liveNeedsYou,
-                                  key: const ValueKey('live-needs-you'),
-                                ),
-                              if (state?.hasMoreHistory ?? false)
-                                Text(l10n.historyLimit),
-                              if (c.canRetry)
-                                Align(
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: TextButton(
-                                    key: const ValueKey('live-retry'),
-                                    onPressed: c.retry,
-                                    child: Text(l10n.liveRetry),
-                                  ),
-                                ),
-                              const SizedBox(height: 8),
-                            ],
-                          );
-                        },
+                      child: SessionLiveTimeline(
+                        items: items,
+                        scroll: _scroll,
+                        settled: settled,
+                        headerBuilder: (context) => _header(
+                          context,
+                          c,
+                          l10n,
+                          textTheme,
+                          failure: failure,
+                          execution: execution,
+                          outcome: outcome,
+                          needsYou: needsYou,
+                          view: view,
+                          canAct: canAct,
+                        ),
                       ),
                     ),
                     SafeArea(

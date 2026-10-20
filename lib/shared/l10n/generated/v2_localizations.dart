@@ -2426,6 +2426,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Child session · parent not shown here'**
   String get sessionsChildParentElsewhere;
+
+  /// CodeWalk UI string — chatGoToLatest
+  ///
+  /// In en, this message translates to:
+  /// **'Go to latest message'**
+  String get chatGoToLatest;
+
+  /// CodeWalk UI string — chatGoToFirst
+  ///
+  /// In en, this message translates to:
+  /// **'Go to first message'**
+  String get chatGoToFirst;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

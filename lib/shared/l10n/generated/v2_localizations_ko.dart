@@ -1215,4 +1215,10 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsChildParentElsewhere => '하위 세션 · 상위 세션이 여기에 표시되지 않음';
+
+  @override
+  String get chatGoToLatest => '최신 메시지로 이동';
+
+  @override
+  String get chatGoToFirst => '첫 메시지로 이동';
 }

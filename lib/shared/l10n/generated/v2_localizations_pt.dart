@@ -1288,4 +1288,10 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'Sessão filha · a sessão mãe não aparece aqui';
+
+  @override
+  String get chatGoToLatest => 'Ir para última mensagem';
+
+  @override
+  String get chatGoToFirst => 'Ir para primeira mensagem';
 }

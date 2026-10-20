@@ -1263,4 +1263,10 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'শিশু সেশন · মূল সেশন এখানে দেখানো হয়নি';
+
+  @override
+  String get chatGoToLatest => 'সর্বশেষ বার্তা যান';
+
+  @override
+  String get chatGoToFirst => 'প্রথম মেসেজে যান';
 }

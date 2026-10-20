@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "শিশু সেশন · মূল সেশন এখানে দেখানো হয়নি",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "সর্বশেষ বার্তা যান",
+  "chatGoToFirst": "প্রথম মেসেজে যান"
 }

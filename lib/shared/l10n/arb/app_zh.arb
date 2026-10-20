@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "子会话 · 父会话未在此显示",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "转到最新消息",
+  "chatGoToFirst": "转到第一条消息"
 }

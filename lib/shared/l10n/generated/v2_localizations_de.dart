@@ -1300,4 +1300,10 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'Untergeordnete Sitzung · übergeordnete Sitzung hier nicht angezeigt';
+
+  @override
+  String get chatGoToLatest => 'Zur neuesten Nachricht gehen';
+
+  @override
+  String get chatGoToFirst => 'Zur ersten Nachricht gehen';
 }

@@ -22,7 +22,11 @@ from pairing_catalog import KEYS as PAIRING_KEYS, COPY as PAIRING_COPY
 from diagnostics_catalog import PORT_KEYS as DIAGNOSTICS_KEYS, NEW_KEYS as DIAGNOSTICS_NEW_KEYS, COPY as DIAGNOSTICS_COPY
 from sessions_catalog import PORT_KEYS as SESSION_KEYS, NEW_KEYS as SESSION_NEW_KEYS, COPY as SESSION_COPY
 from session_history_catalog import PORT_KEYS as HISTORY_KEYS, NEW_KEYS as HISTORY_NEW_KEYS, COPY as HISTORY_COPY
-from session_live_catalog import NEW_KEYS as LIVE_NEW_KEYS, COPY as LIVE_COPY
+from session_live_catalog import (
+    PORT_KEYS as LIVE_PORT_KEYS,
+    NEW_KEYS as LIVE_NEW_KEYS,
+    COPY as LIVE_COPY,
+)
 from session_composer_catalog import NEW_KEYS as COMPOSER_NEW_KEYS, COPY as COMPOSER_COPY
 from session_permission_catalog import NEW_KEYS as PERMISSION_NEW_KEYS, COPY as PERMISSION_COPY
 from session_stop_catalog import NEW_KEYS as STOP_NEW_KEYS, COPY as STOP_COPY
@@ -123,7 +127,7 @@ KEYS |= set(PAIRING_KEYS)
 KEYS |= DIAGNOSTICS_KEYS | set(DIAGNOSTICS_NEW_KEYS)
 KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
 KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
-KEYS |= set(LIVE_NEW_KEYS)
+KEYS |= LIVE_PORT_KEYS | set(LIVE_NEW_KEYS)
 KEYS |= set(COMPOSER_NEW_KEYS)
 KEYS |= set(PERMISSION_NEW_KEYS)
 KEYS |= set(STOP_NEW_KEYS)
@@ -274,6 +278,13 @@ def port_live_copy() -> None:
     for locale in LOCALES:
         path = SOURCE / "arb" / f"app_{locale}.arb"
         arb = json.loads(path.read_text(encoding="utf-8"))
+        legacy = json.loads(
+            (ROOT / "lib/l10n" / f"app_{locale}.arb").read_text(encoding="utf-8")
+        )
+        for key in sorted(LIVE_PORT_KEYS):
+            arb[key] = legacy[key]
+            if "@" + key in legacy:
+                arb["@" + key] = legacy["@" + key]
         for key, value in zip(LIVE_NEW_KEYS, LIVE_COPY[locale], strict=True):
             arb[key] = value
             arb["@" + key] = {"description": "V2 live read-only session view"}

@@ -1213,4 +1213,10 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsChildParentElsewhere => '子セッション・親セッションはここに表示されていません';
+
+  @override
+  String get chatGoToLatest => '最新のメッセージへ移動';
+
+  @override
+  String get chatGoToFirst => '最初のメッセージへ移動';
 }

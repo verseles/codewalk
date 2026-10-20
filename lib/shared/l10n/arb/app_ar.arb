@@ -1060,5 +1060,7 @@
   "sessionsChildParentElsewhere": "جلسة فرعية · الجلسة الأم غير معروضة هنا",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "الانتقال إلى أحدث رسالة",
+  "chatGoToFirst": "الانتقال إلى الرسالة الأولى"
 }

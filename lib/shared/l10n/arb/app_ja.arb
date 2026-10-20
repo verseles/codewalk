@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "子セッション・親セッションはここに表示されていません",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "最新のメッセージへ移動",
+  "chatGoToFirst": "最初のメッセージへ移動"
 }

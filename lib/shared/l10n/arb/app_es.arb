@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "Sesión hija · la sesión madre no se muestra aquí",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "Ir al último mensaje",
+  "chatGoToFirst": "Ir al primer mensaje"
 }

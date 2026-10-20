@@ -1283,4 +1283,10 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'Дочерняя сессия · родительская сессия здесь не показана';
+
+  @override
+  String get chatGoToLatest => 'Перейти к последнему сообщению';
+
+  @override
+  String get chatGoToFirst => 'Перейти к первому сообщению';
 }

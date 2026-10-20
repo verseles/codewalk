@@ -1272,4 +1272,10 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'चाइल्ड सत्र · मूल सत्र यहाँ नहीं दिखाया गया';
+
+  @override
+  String get chatGoToLatest => 'नवीनतम संदेश पर जाएं';
+
+  @override
+  String get chatGoToFirst => 'पहले संदेश पर जाएं';
 }

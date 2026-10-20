@@ -1061,5 +1061,7 @@
   "sessionsChildParentElsewhere": "चाइल्ड सत्र · मूल सत्र यहाँ नहीं दिखाया गया",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
-  }
+  },
+  "chatGoToLatest": "नवीनतम संदेश पर जाएं",
+  "chatGoToFirst": "पहले संदेश पर जाएं"
 }

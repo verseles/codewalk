@@ -1294,4 +1294,10 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'Session enfant · session parente non affichée ici';
+
+  @override
+  String get chatGoToLatest => 'Aller au dernier message';
+
+  @override
+  String get chatGoToFirst => 'Aller au premier message';
 }

@@ -1563,5 +1563,13 @@
   "sessionsChildParentElsewhere": "Child session · parent not shown here",
   "@sessionsChildParentElsewhere": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatGoToLatest": "Go to latest message",
+  "@chatGoToLatest": {
+    "description": "CodeWalk UI string — chatGoToLatest"
+  },
+  "chatGoToFirst": "Go to first message",
+  "@chatGoToFirst": {
+    "description": "CodeWalk UI string — chatGoToFirst"
   }
 }

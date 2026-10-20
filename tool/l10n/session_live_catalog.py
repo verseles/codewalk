@@ -1,4 +1,9 @@
-PORT_KEYS: set[str] = set()
+PORT_KEYS = {
+    # The jump controls carry the retained reference's own strings, so the
+    # v2 controls read exactly like the v1 ones.
+    "chatGoToLatest",
+    "chatGoToFirst",
+}
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",
     "liveReconnecting", "liveStale", "liveLastSynced", "liveDegraded",

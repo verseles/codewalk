@@ -1262,4 +1262,10 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get sessionsChildParentElsewhere =>
       'جلسة فرعية · الجلسة الأم غير معروضة هنا';
+
+  @override
+  String get chatGoToLatest => 'الانتقال إلى أحدث رسالة';
+
+  @override
+  String get chatGoToFirst => 'الانتقال إلى الرسالة الأولى';
 }
