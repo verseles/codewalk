@@ -1185,4 +1185,22 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableStore => '숨겨진 세션 목록을 읽을 수 없습니다.';
+
+  @override
+  String get sessionsCreateNew => '새 세션';
+
+  @override
+  String get sessionsCreateTitle => '세션 만들기';
+
+  @override
+  String get sessionsCreateProject => '프로젝트';
+
+  @override
+  String get sessionsCreateOtherDirectory => '다른 디렉터리…';
+
+  @override
+  String get sessionsCreateDirectoryHint => '디렉터리의 절대 경로';
+
+  @override
+  String get sessionsCreateConfirm => '만들기';
 }

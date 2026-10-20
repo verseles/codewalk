@@ -1232,4 +1232,22 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'লুকানো সেশনের তালিকা পড়া যায়নি।';
+
+  @override
+  String get sessionsCreateNew => 'নতুন সেশন';
+
+  @override
+  String get sessionsCreateTitle => 'সেশন তৈরি করুন';
+
+  @override
+  String get sessionsCreateProject => 'প্রকল্প';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'অন্য ডিরেক্টরি…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'ডিরেক্টরির নির্বাচিত পথ';
+
+  @override
+  String get sessionsCreateConfirm => 'তৈরি করুন';
 }

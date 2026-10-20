@@ -97,6 +97,16 @@ abstract interface class SessionActionSource {
   /// count could not be read.
   Future<int?> childCount(SessionSummary row);
 
+  /// Creates a session at the given canonical directory.
+  ///
+  /// The body carries the directory and, when the caller supplies one, the
+  /// title. The identifier is the endpoint's, and the effect is observed by
+  /// the authoritative read.
+  Future<SessionActionOutcome> create({
+    required String directory,
+    String? title,
+  });
+
   /// Renames the session.
   Future<SessionActionOutcome> rename(SessionSummary row, String title);
 

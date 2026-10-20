@@ -218,6 +218,23 @@ final class FakeActionSource implements SessionActionSource {
   @override
   Future<int?> childCount(SessionSummary row) async => children;
 
+  /// The directories the created sessions asked for.
+  final created = <String>[];
+
+  /// The titles the created sessions carried.
+  final createdTitles = <String?>[];
+
+  @override
+  Future<SessionActionOutcome> create({
+    required String directory,
+    String? title,
+  }) async {
+    calls.add('create');
+    created.add(directory);
+    createdTitles.add(title);
+    return outcomes['create'] ?? SessionActionOutcome.accepted;
+  }
+
   @override
   Future<SessionActionOutcome> rename(SessionSummary row, String title) async {
     calls.add('rename');

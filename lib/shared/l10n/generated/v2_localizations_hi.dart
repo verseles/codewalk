@@ -1241,4 +1241,22 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'छिपाए गए सत्रों की सूची नहीं पढ़ी जा सकी।';
+
+  @override
+  String get sessionsCreateNew => 'नया सत्र';
+
+  @override
+  String get sessionsCreateTitle => 'सत्र बनाएँ';
+
+  @override
+  String get sessionsCreateProject => 'प्रोजेक्ट';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'कोई अन्य निर्देशिका…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'निर्देशिका का निरपेक्ष पथ';
+
+  @override
+  String get sessionsCreateConfirm => 'बनाएँ';
 }

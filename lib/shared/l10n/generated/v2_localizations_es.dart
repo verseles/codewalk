@@ -1258,4 +1258,22 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'No se pudo leer la lista de sesiones ocultas.';
+
+  @override
+  String get sessionsCreateNew => 'Nueva sesión';
+
+  @override
+  String get sessionsCreateTitle => 'Crear una sesión';
+
+  @override
+  String get sessionsCreateProject => 'Proyecto';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'Otro directorio…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'La ruta absoluta del directorio';
+
+  @override
+  String get sessionsCreateConfirm => 'Crear';
 }

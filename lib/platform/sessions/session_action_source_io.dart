@@ -152,6 +152,26 @@ final class _NativeSource implements SessionActionSource {
   }
 
   @override
+  Future<SessionActionOutcome> create({
+    required String directory,
+    String? title,
+  }) async {
+    final client = _client();
+    if (client == null) return SessionActionOutcome.unavailable;
+    try {
+      final attempt = await client.create(
+        id: mintCommandId(),
+        directory: directory,
+        title: title,
+      );
+      return _outcome(attempt.receipt);
+    } on ArgumentError {
+      // A local refusal, such as a path over the bound.
+      return SessionActionOutcome.unavailable;
+    }
+  }
+
+  @override
   Future<SessionActionOutcome> rename(SessionSummary row, String title) async {
     final client = _client();
     if (client == null) return SessionActionOutcome.unavailable;

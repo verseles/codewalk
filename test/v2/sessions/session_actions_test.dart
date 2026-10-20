@@ -1,6 +1,7 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_actions_menu.dart';
+import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/platform/sessions/session_action_source_io.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
@@ -15,7 +16,8 @@ import 'live_fakes.dart';
 void main() {
   late FakeActionSource actions;
 
-  Future<(CatalogSource source, V2Localizations l10n)> open(
+  Future<(CatalogSource source, V2Localizations l10n, SessionsController controller)>
+  open(
     WidgetTester tester, {
     List<SessionSummary> Function(CatalogSource source)? rows,
     SessionActionSupport support = const SessionActionSupport(
@@ -47,11 +49,11 @@ void main() {
     actions.children = children;
     source.respond(rows?.call(source) ?? [source.row('first', title: 'First')]);
     await tester.pumpAndSettle();
-    return (source, dependencies.localizations.current);
+    return (source, dependencies.localizations.current, dependencies.sessions!);
   }
 
   testWidgets('the row offers the filter and the actions', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     expect(find.byKey(const ValueKey('sessions-filter')), findsOneWidget);
     expect(find.text('First'), findsOneWidget);
     await tester.tap(
@@ -65,7 +67,7 @@ void main() {
   });
 
   testWidgets('the mark as viewed entry needs an unread row', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     await tester.tap(
       find.byKey(ValueKey('session-actions-${source.row('first').info.ref.storageKey}')),
     );
@@ -74,7 +76,7 @@ void main() {
   });
 
   testWidgets('the unread mark follows the endpoint epochs', (tester) async {
-    final (source, l10n) = await open(
+    final (source, l10n, _) = await open(
       tester,
       viewStates: {},
     );
@@ -94,7 +96,7 @@ void main() {
   testWidgets('an unavailable action is disabled with its reason', (
     tester,
   ) async {
-    final (source, l10n) = await open(
+    final (source, l10n, _) = await open(
       tester,
       support: const SessionActionSupport(
         SessionActionReason.versionUnverified,
@@ -115,7 +117,7 @@ void main() {
   });
 
   testWidgets('a rename sends the new title', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     final row = source.row('first', title: 'First');
     await tester.tap(
       find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
@@ -132,7 +134,7 @@ void main() {
   });
 
   testWidgets('the delete warns about the child sessions', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     final row = source.row('first', title: 'First');
     await tester.tap(
       find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
@@ -148,7 +150,7 @@ void main() {
   });
 
   testWidgets('the long press opens the row menu', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     // The long press is on the row, not on the overflow button.
     await tester.longPress(find.text('First'));
     await tester.pumpAndSettle();
@@ -195,7 +197,7 @@ void main() {
   });
 
   testWidgets('an uncertain command waits for the re-read', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     actions.outcomes['rename'] = SessionActionOutcome.uncertain;
     final row = source.row('first', title: 'First');
     await tester.tap(
@@ -214,7 +216,7 @@ void main() {
   });
 
   testWidgets('the delete warning carries the child count', (tester) async {
-    final (source, l10n) = await open(tester, children: 3);
+    final (source, l10n, _) = await open(tester, children: 3);
     final row = source.row('first', title: 'First');
     await tester.tap(
       find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
@@ -225,8 +227,68 @@ void main() {
     expect(find.textContaining('3'), findsWidgets);
   });
 
+  testWidgets('the create sends the chosen project directory', (tester) async {
+    final (source, l10n, _) = await open(
+      tester,
+      rows: (source) => [
+        source.row('first', title: 'First', directory: '/work/alpha'),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsCreateTitle), findsOneWidget);
+    // The path is on the group's header and on the choice.
+    expect(find.text('/work/alpha'), findsWidgets);
+    await tester.tap(
+      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pumpAndSettle();
+    expect(actions.calls, contains('create'));
+    expect(actions.created, ['/work/alpha']);
+  });
+
+  testWidgets('the create sends a free-form directory', (tester) async {
+    final (source, l10n, _) = await open(
+      tester,
+      rows: (source) => [
+        source.row('first', title: 'First', directory: '/work/alpha'),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/other',
+    );
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pumpAndSettle();
+    expect(actions.created, ['/work/other']);
+  });
+
+  testWidgets('a refused create says so', (tester) async {
+    final (source, l10n, controller) = await open(
+      tester,
+      rows: (source) => [
+        source.row('first', title: 'First', directory: '/work/alpha'),
+      ],
+    );
+    actions.outcomes['create'] = SessionActionOutcome.rejected;
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pumpAndSettle();
+    // The refused create is reported by the list and by the dialog.
+    expect(controller.actionFailure, SessionActionOutcome.rejected);
+  });
+
   testWidgets('the local hide hides the row', (tester) async {
-    final (source, l10n) = await open(tester);
+    final (source, l10n, _) = await open(tester);
     final row = source.row('first', title: 'First');
     await tester.tap(
       find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),

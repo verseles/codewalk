@@ -61,6 +61,16 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a command whose answer was lost is reconciled by the next authoritative read and never sent again, and the list says that the command did not go through
 - **Then** the unread marker follows the endpoint's own idle transitions: a session that finishes while the list is open is marked unread without a manual refresh
 - **Then** the local hide that could not be read is never overwritten, the rows stay visible and the list says that the hidden list is unavailable
+
+### V2 session creation
+
+- **Given** the v2 session catalog shows a saved server
+- **When** the user starts a new session
+- **Then** a dialog offers the projects the endpoint already reported, with the canonical directory always read left-to-right, and a free-form absolute path for a project the list has not shown
+- **Then** the request carries only that directory, the endpoint names the session, and the client never sends a model, an agent, the metadata, the permissions, a parent identifier or a directory header
+- **Then** the new session appears through the next authoritative read, with the endpoint's own record; the receipt never becomes a row
+- **Then** a create that the endpoint refused, or whose answer was lost, says so and is never sent again
+- **Then** the create is offered only while the list is the endpoint's current answer and the endpoint's own commands are available, and the reason is shown when it is not
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog

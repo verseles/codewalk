@@ -30,6 +30,12 @@ final class _UnsupportedSource implements SessionActionSource {
   Future<int?> childCount(SessionSummary row) async => null;
 
   @override
+  Future<SessionActionOutcome> create({
+    required String directory,
+    String? title,
+  }) async => SessionActionOutcome.unavailable;
+
+  @override
   Future<SessionActionOutcome> rename(SessionSummary row, String title) async =>
       SessionActionOutcome.unavailable;
 

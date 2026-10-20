@@ -2317,7 +2317,23 @@ answers with another session is refused, because the endpoint returns the
 session that identifier already owns and ignores the changed fields. The
 client mints no identifier and authorizes nothing.
 
-## V2-043G session row actions (#393)
+## V2-043H session creation (#396)
+
+```text
+lib/features/sessions/session_create_dialog.dart # The project choice: the canonical directories the endpoint reported and the free-form absolute path
+lib/features/sessions/sessions_controller.dart # The create command, its in-flight state, its reason precedence and the authoritative re-read that shows the new session
+lib/platform/sessions/session_action_source_io.dart # The create command with the exact body: the directory and, when the caller supplies one, the title
+tool/l10n/sessions_catalog.py # The scoped catalog with the creation copy
+```
+
+The create is a projection of the endpoint's own contract: the body carries
+the chosen canonical directory and the title, the identifier is the endpoint's
+and the new session reaches the list with the next authoritative read. The
+projects are the directories the endpoint already reported, plus a free-form
+absolute path, because a profile without a session has no project to offer
+and the created session carries its own location, so the next read groups it.
+
+## V2-043G session row actions (#395)
 
 ```text
 lib/shared/sessions/session_actions.dart # The port: the action vocabulary, the reasons an action is unavailable, the unread marker and the local hide

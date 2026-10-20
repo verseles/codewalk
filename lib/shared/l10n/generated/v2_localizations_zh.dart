@@ -1158,4 +1158,22 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableStore => '无法读取隐藏会话列表。';
+
+  @override
+  String get sessionsCreateNew => '新建会话';
+
+  @override
+  String get sessionsCreateTitle => '创建会话';
+
+  @override
+  String get sessionsCreateProject => '项目';
+
+  @override
+  String get sessionsCreateOtherDirectory => '其他目录…';
+
+  @override
+  String get sessionsCreateDirectoryHint => '目录的绝对路径';
+
+  @override
+  String get sessionsCreateConfirm => '创建';
 }

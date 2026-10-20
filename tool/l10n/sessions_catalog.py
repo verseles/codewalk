@@ -38,6 +38,12 @@ NEW_KEYS = (
     "sessionsFilterHidden",
     "sessionsFilterAll",
     "sessionsActionUnavailableStore",
+    "sessionsCreateNew",
+    "sessionsCreateTitle",
+    "sessionsCreateProject",
+    "sessionsCreateOtherDirectory",
+    "sessionsCreateDirectoryHint",
+    "sessionsCreateConfirm",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -119,10 +125,27 @@ ACTION_COPY = {
     "ru": ("Действия", "Отметить прочитанным", "Переименовать", "Форкнуть отсюда", "Скрыть в CodeWalk", "Показать в CodeWalk", "Удалить", "Переименовать сессию", "Новое название", "Сохранить", "Удалить сессию", "Это навсегда удалит \"{title}\". Выполняющийся turn будет прерван.", "Также будут удалены дочерние сессии ({count}) и всё, что находится ниже них.", "Также будут удалены как минимум {count} дочерних сессий и всё, что находится ниже них.", "Также будут удалены дочерние сессии и всё, что находится ниже них.", "Считаем дочерние сессии…", "Версия endpoint не проверена.", "Эта платформа не может обратиться к endpoint.", "Endpoint отклонил учётные данные.", "Список — не текущий ответ endpoint.", "Для этой сессии выполняется другая команда.", "В этой сессии нечего отмечать прочитанным.", "Не прочитано", "Выполняется…", "Команда не прошла.", "Активные", "Скрытые", "Все", "Не удалось прочитать список скрытых сессий."),
     "zh": ("操作", "标记为已读", "重命名", "从此处分支", "在 CodeWalk 中隐藏", "在 CodeWalk 中显示", "删除", "重命名会话", "新标题", "保存", "删除会话", "这将永久删除“{title}”。正在运行的回合会被中断。", "这还会删除 {count} 个子会话及其下的一切。", "这还会删除至少 {count} 个子会话及其下的一切。", "这还会删除子会话及其下的一切。", "正在统计子会话…", "未验证端点版本。", "此平台无法访问端点。", "端点拒绝了凭据。", "列表不是端点的当前回答。", "此会话有另一个命令正在运行。", "此会话没有可标记为已读的内容。", "未读", "处理中…", "命令未成功。", "活动", "已隐藏", "全部", "无法读取隐藏会话列表。"),
 }
+CREATE_COPY = {
+    "en": ("New session", "Create a session", "Project", "Other directory…", "The absolute path of the directory", "Create"),
+    "pt": ("Nova sessão", "Criar uma sessão", "Projeto", "Outro diretório…", "O caminho absoluto do diretório", "Criar"),
+    "es": ("Nueva sesión", "Crear una sesión", "Proyecto", "Otro directorio…", "La ruta absoluta del directorio", "Crear"),
+    "fr": ("Nouvelle session", "Créer une session", "Projet", "Another dossier…", "Le chemin absolu du dossier", "Créer"),
+    "de": ("Neue Sitzung", "Sitzung erstellen", "Projekt", "Anderes Verzeichnis…", "Der absolute Pfad des Verzeichnisses", "Erstellen"),
+    "it": ("Nuova sessione", "Crea una sessione", "Progetto", "Altra directory…", "Il percorso assoluto della directory", "Crea"),
+    "ar": ("جلسة جديدة", "إنشاء جلسة", "المشروع", "مجلد آخر…", "المسار المطلق للمجلد", "إنشاء"),
+    "ur": ("نیا سیشن", "سیشن بنائیں", "پروجیکٹ", "دوسرا ڈائریکٹری…", "ڈائریکٹری کا مطلق راستہ", "بنائیں"),
+    "bn": ("নতুন সেশন", "সেশন তৈরি করুন", "প্রকল্প", "অন্য ডিরেক্টরি…", "ডিরেক্টরির নির্বাচিত পথ", "তৈরি করুন"),
+    "hi": ("नया सत्र", "सत्र बनाएँ", "प्रोजेक्ट", "कोई अन्य निर्देशिका…", "निर्देशिका का निरपेक्ष पथ", "बनाएँ"),
+    "ja": ("新しいセッション", "セッションを作成", "プロジェクト", "別のディレクトリ…", "ディレクトリの絶対パス", "作成"),
+    "ko": ("새 세션", "세션 만들기", "프로젝트", "다른 디렉터리…", "디렉터리의 절대 경로", "만들기"),
+    "ru": ("Новая сессия", "Создать сессию", "Проект", "Другой каталог…", "Абсолютный путь к каталогу", "Создать"),
+    "zh": ("新建会话", "创建会话", "项目", "其他目录…", "目录的绝对路径", "创建"),
+}
 COPY = {
     locale: values
     + (RATE_COPY[locale], PROJECT_COPY[locale])
     + OWNERSHIP_COPY[locale]
     + ACTION_COPY[locale]
+    + CREATE_COPY[locale]
     for locale, values in COPY.items()
 }

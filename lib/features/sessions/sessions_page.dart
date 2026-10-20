@@ -12,6 +12,7 @@ import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import 'session_actions_menu.dart';
+import 'session_create_dialog.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
@@ -73,6 +74,12 @@ class _SessionsPageState extends State<SessionsPage> {
     // The list is grouped by the project the server attributed each session
     // to; the groups follow the rows the server returned.
     final items = sessionListItems(controller.sessions);
+    final createReason =
+        controller.selectedProfile != null &&
+            controller.createReason != SessionActionReason.none &&
+            controller.createReason != SessionActionReason.commandInFlight
+        ? _actionReasonText(l10n, controller.createReason)
+        : null;
     final notices = <String>[
       if (hosts.storageError) l10n.hostsProfileStorageError,
       if (hosts.loading || controller.loading) l10n.sessionsLoading,
@@ -84,6 +91,7 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.actionFailure != null) l10n.sessionsActionFailed,
       if (controller.hideUnreadable) l10n.sessionsActionUnavailableStore,
       if (controller.actionUncertain) l10n.sessionsActionPending,
+      ?createReason,
       if (controller.loaded &&
           !controller.loading &&
           !controller.stale &&
@@ -170,6 +178,21 @@ class _SessionsPageState extends State<SessionsPage> {
                             const Icon(Icons.arrow_drop_down),
                           ],
                         ),
+                      ),
+                      // The create is a compact control, so the header does
+                      // not push the rows out of a small viewport.
+                      IconButton.filled(
+                        key: const ValueKey('sessions-create'),
+                        tooltip: l10n.sessionsCreateNew,
+                        onPressed:
+                            available &&
+                                controller.selectedProfile != null &&
+                                !controller.creating &&
+                                controller.createReason ==
+                                    SessionActionReason.none
+                            ? () => _openCreate(context, controller)
+                            : null,
+                        icon: const Icon(Icons.add),
                       ),
                       FilledButton.tonal(
                         key: const ValueKey('sessions-refresh'),
@@ -278,6 +301,33 @@ class _SessionsPageState extends State<SessionsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  /// The reason the create is not offered, as the plan's controls say.
+  String? _actionReasonText(
+    V2Localizations l10n,
+    SessionActionReason reason,
+  ) => switch (reason) {
+    SessionActionReason.none => null,
+    SessionActionReason.versionUnverified =>
+      l10n.sessionsActionUnavailableVersion,
+    SessionActionReason.unsupportedPlatform =>
+      l10n.sessionsActionUnavailablePlatform,
+    SessionActionReason.authenticationRequired =>
+      l10n.sessionsActionUnavailableAuth,
+    SessionActionReason.listNotCurrent => l10n.sessionsActionUnavailableList,
+    SessionActionReason.commandInFlight => l10n.sessionsActionUnavailableBusy,
+    SessionActionReason.noIdleMarker => l10n.sessionsActionUnavailableMarker,
+  };
+
+  Future<void> _openCreate(
+    BuildContext context,
+    SessionsController controller,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => SessionCreateDialog(controller: controller),
     );
   }
 

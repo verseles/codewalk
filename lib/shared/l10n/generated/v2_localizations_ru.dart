@@ -1252,4 +1252,22 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'Не удалось прочитать список скрытых сессий.';
+
+  @override
+  String get sessionsCreateNew => 'Новая сессия';
+
+  @override
+  String get sessionsCreateTitle => 'Создать сессию';
+
+  @override
+  String get sessionsCreateProject => 'Проект';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'Другой каталог…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'Абсолютный путь к каталогу';
+
+  @override
+  String get sessionsCreateConfirm => 'Создать';
 }

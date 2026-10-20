@@ -1237,4 +1237,23 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'The hidden list could not be read.';
+
+  @override
+  String get sessionsCreateNew => 'New session';
+
+  @override
+  String get sessionsCreateTitle => 'Create a session';
+
+  @override
+  String get sessionsCreateProject => 'Project';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'Other directory…';
+
+  @override
+  String get sessionsCreateDirectoryHint =>
+      'The absolute path of the directory';
+
+  @override
+  String get sessionsCreateConfirm => 'Create';
 }

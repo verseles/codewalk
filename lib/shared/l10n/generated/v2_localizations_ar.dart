@@ -1231,4 +1231,22 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'تعذّرت قراءة قائمة الجلسات المخفية.';
+
+  @override
+  String get sessionsCreateNew => 'جلسة جديدة';
+
+  @override
+  String get sessionsCreateTitle => 'إنشاء جلسة';
+
+  @override
+  String get sessionsCreateProject => 'المشروع';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'مجلد آخر…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'المسار المطلق للمجلد';
+
+  @override
+  String get sessionsCreateConfirm => 'إنشاء';
 }

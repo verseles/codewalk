@@ -1238,4 +1238,22 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'چھپی ہوئی سیشنز کی فہرست نہیں پڑھی جا سکی۔';
+
+  @override
+  String get sessionsCreateNew => 'نیا سیشن';
+
+  @override
+  String get sessionsCreateTitle => 'سیشن بنائیں';
+
+  @override
+  String get sessionsCreateProject => 'پروجیکٹ';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'دوسرا ڈائریکٹری…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'ڈائریکٹری کا مطلق راستہ';
+
+  @override
+  String get sessionsCreateConfirm => 'بنائیں';
 }

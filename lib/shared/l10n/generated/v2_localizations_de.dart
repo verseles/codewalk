@@ -1268,4 +1268,23 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'Die Liste der ausgeblendeten Sitzungen konnte nicht gelesen werden.';
+
+  @override
+  String get sessionsCreateNew => 'Neue Sitzung';
+
+  @override
+  String get sessionsCreateTitle => 'Sitzung erstellen';
+
+  @override
+  String get sessionsCreateProject => 'Projekt';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'Anderes Verzeichnis…';
+
+  @override
+  String get sessionsCreateDirectoryHint =>
+      'Der absolute Pfad des Verzeichnisses';
+
+  @override
+  String get sessionsCreateConfirm => 'Erstellen';
 }

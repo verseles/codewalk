@@ -1021,5 +1021,29 @@
   "sessionsActionUnavailableStore": "无法读取隐藏会话列表。",
   "@sessionsActionUnavailableStore": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateNew": "新建会话",
+  "@sessionsCreateNew": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateTitle": "创建会话",
+  "@sessionsCreateTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateProject": "项目",
+  "@sessionsCreateProject": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateOtherDirectory": "其他目录…",
+  "@sessionsCreateOtherDirectory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryHint": "目录的绝对路径",
+  "@sessionsCreateDirectoryHint": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateConfirm": "创建",
+  "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

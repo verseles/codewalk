@@ -93,6 +93,9 @@ class SessionsController extends ChangeNotifier {
 
   /// A command whose answer was lost is waiting for its reconciliation.
   bool _actionPending = false;
+
+  /// A create is in flight.
+  bool _creating = false;
   SessionActionFilter _filter = SessionActionFilter.active;
   final _received = <String>{};
   final _requested = <String>{};
@@ -136,6 +139,34 @@ class SessionsController extends ChangeNotifier {
 
   /// Whether a command for this row is in flight.
   bool actionPending(SessionRef ref) => _pendingActions.contains(ref);
+
+  /// Whether a create is in flight.
+  bool get creating => _creating;
+
+  /// Why the create is not offered, in the plan's precedence: the create in
+  /// flight, then the endpoint's support, then the currency of the rows.
+  SessionActionReason get createReason {
+    if (_creating) return SessionActionReason.commandInFlight;
+    final support = _actionSupport.reason;
+    if (support != SessionActionReason.none) return support;
+    if (!loaded || stale || behind) {
+      return SessionActionReason.listNotCurrent;
+    }
+    return SessionActionReason.none;
+  }
+
+  /// The canonical directories the endpoint reported, in the order the server
+  /// first showed them. They are the projects the user can start a session in.
+  List<String> get knownDirectories {
+    final seen = <String>{};
+    final directories = <String>[];
+    for (final row in _sessions) {
+      final directory = row.info.project?.canonicalDirectory;
+      if (directory == null || !seen.add(directory)) continue;
+      directories.add(directory);
+    }
+    return directories;
+  }
 
   /// The unread marker of a row, from the endpoint's own epochs.
   SessionViewState viewState(SessionSummary row) =>
@@ -571,6 +602,49 @@ class SessionsController extends ChangeNotifier {
     if (_disposed || !identical(source, _actions)) return;
     _actionSupport = support;
     _notify();
+  }
+
+  /// Creates a session at the given canonical directory.
+  ///
+  /// The receipt is an admission: the new session reaches the list with the
+  /// next authoritative read, and an uncertain create is reconciled there and
+  /// never resent.
+  Future<SessionActionOutcome> create({
+    required String directory,
+    String? title,
+  }) async {
+    final source = _actions;
+    if (source == null) return SessionActionOutcome.unavailable;
+    if (_creating) return SessionActionOutcome.unavailable;
+    if (!_ready(createSource: false) ||
+        _actionSupport.reason != SessionActionReason.none ||
+        stale ||
+        behind ||
+        _livePending) {
+      _actionFailure = SessionActionOutcome.unavailable;
+      _notify();
+      return SessionActionOutcome.unavailable;
+    }
+    _creating = true;
+    _actionFailure = null;
+    _notify();
+    try {
+      final outcome = await source.create(directory: directory, title: title);
+      if (!identical(source, _actions)) {
+        // The profile changed while the create was in flight.
+        return outcome;
+      }
+      if (outcome == SessionActionOutcome.accepted ||
+          outcome == SessionActionOutcome.uncertain) {
+        _markLiveChange();
+      } else {
+        _actionFailure = outcome;
+      }
+      return outcome;
+    } finally {
+      _creating = false;
+      _notify();
+    }
   }
 
   /// Renames the row. The effect is observed by the authoritative re-read.

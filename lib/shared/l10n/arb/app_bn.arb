@@ -1021,5 +1021,29 @@
   "sessionsActionUnavailableStore": "লুকানো সেশনের তালিকা পড়া যায়নি।",
   "@sessionsActionUnavailableStore": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateNew": "নতুন সেশন",
+  "@sessionsCreateNew": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateTitle": "সেশন তৈরি করুন",
+  "@sessionsCreateTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateProject": "প্রকল্প",
+  "@sessionsCreateProject": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateOtherDirectory": "অন্য ডিরেক্টরি…",
+  "@sessionsCreateOtherDirectory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryHint": "ডিরেক্টরির নির্বাচিত পথ",
+  "@sessionsCreateDirectoryHint": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateConfirm": "তৈরি করুন",
+  "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

@@ -2366,6 +2366,42 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'The hidden list could not be read.'**
   String get sessionsActionUnavailableStore;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'New session'**
+  String get sessionsCreateNew;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Create a session'**
+  String get sessionsCreateTitle;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get sessionsCreateProject;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Other directory…'**
+  String get sessionsCreateOtherDirectory;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The absolute path of the directory'**
+  String get sessionsCreateDirectoryHint;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get sessionsCreateConfirm;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

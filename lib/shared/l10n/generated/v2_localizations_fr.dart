@@ -1263,4 +1263,22 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get sessionsActionUnavailableStore =>
       'La liste des sessions masquées n\'a pas pu être lue.';
+
+  @override
+  String get sessionsCreateNew => 'Nouvelle session';
+
+  @override
+  String get sessionsCreateTitle => 'Créer une session';
+
+  @override
+  String get sessionsCreateProject => 'Projet';
+
+  @override
+  String get sessionsCreateOtherDirectory => 'Another dossier…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'Le chemin absolu du dossier';
+
+  @override
+  String get sessionsCreateConfirm => 'Créer';
 }

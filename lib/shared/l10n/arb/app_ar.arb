@@ -1020,5 +1020,29 @@
   "sessionsActionUnavailableStore": "تعذّرت قراءة قائمة الجلسات المخفية.",
   "@sessionsActionUnavailableStore": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateNew": "جلسة جديدة",
+  "@sessionsCreateNew": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateTitle": "إنشاء جلسة",
+  "@sessionsCreateTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateProject": "المشروع",
+  "@sessionsCreateProject": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateOtherDirectory": "مجلد آخر…",
+  "@sessionsCreateOtherDirectory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryHint": "المسار المطلق للمجلد",
+  "@sessionsCreateDirectoryHint": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateConfirm": "إنشاء",
+  "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

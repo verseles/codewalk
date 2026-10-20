@@ -1183,4 +1183,22 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableStore => '非表示のセッション一覧を読み取れませんでした。';
+
+  @override
+  String get sessionsCreateNew => '新しいセッション';
+
+  @override
+  String get sessionsCreateTitle => 'セッションを作成';
+
+  @override
+  String get sessionsCreateProject => 'プロジェクト';
+
+  @override
+  String get sessionsCreateOtherDirectory => '別のディレクトリ…';
+
+  @override
+  String get sessionsCreateDirectoryHint => 'ディレクトリの絶対パス';
+
+  @override
+  String get sessionsCreateConfirm => '作成';
 }
