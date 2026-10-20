@@ -165,7 +165,7 @@ void main() {
     );
   });
 
-  test('a proof without a source has no deadline', () {
+  test('an ownership without a proof has no deadline', () {
     expect(
       ownershipLabelDelay(
         const OwnershipInfo.unknown(reason: 'noProof'),
@@ -173,5 +173,34 @@ void main() {
       ),
       isNull,
     );
+  });
+
+  test('a deadline that has passed has no wake-up left', () {
+    // The proof is exactly one tick past its window: the label already
+    // changed, and a zero delay would re-arm the timer forever.
+    expect(
+      ownershipLabelDelay(
+        proven(OwnershipKind.liveShared),
+        now: now.add(
+          sessionOwnershipProofMaxAge + const Duration(microseconds: 1),
+        ),
+      ),
+      isNull,
+    );
+  });
+
+  test('a far deadline is bounded so a timer can hold it', () {
+    // A proof observed far in the future would overflow a timer on the web.
+    final delay = ownershipLabelDelay(
+      OwnershipInfo.known(
+        OwnershipKind.liveShared,
+        proof: OwnershipProof(
+          source: 'adapterObservation',
+          observedAt: now.add(const Duration(days: 30)),
+        ),
+      ),
+      now: now,
+    );
+    expect(delay, sessionOwnershipProofMaxAge);
   });
 }

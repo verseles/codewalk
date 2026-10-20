@@ -24,20 +24,26 @@ OwnershipKind displayedSessionOwnership(
   return ownership.effectiveKindAt(now, maxAge: maxAge);
 }
 
-/// The first instant the label of a row can change.
+/// The delay until the label of a row can change.
 ///
 /// The proof leaves its freshness window, it expires, or it becomes usable.
-/// It is null when the label can no longer change, and it is never negative:
-/// a deadline in the past means the label already changed.
+/// The delay is bounded: a deadline far away would exceed the timer a
+/// platform can hold, so the caller re-arms it in steps. It is null when the
+/// label can no longer change.
 Duration? ownershipLabelDelay(
   OwnershipInfo ownership, {
   required DateTime now,
   Duration maxAge = sessionOwnershipProofMaxAge,
 }) {
   final proof = ownership.proof;
-  if (proof == null) return null;
+  // A proof without a source proves nothing, so its label never changes.
+  if (proof == null || proof.source.isEmpty) return null;
   final start = proof.observedAt;
-  if (now.isBefore(start)) return start.difference(now);
+  if (now.isBefore(start)) {
+    final until = start.difference(now);
+    if (until <= Duration.zero) return null;
+    return until > maxAge ? maxAge : until;
+  }
   final expiresAt = proof.expiresAt;
   if (expiresAt != null && !now.isBefore(expiresAt)) return null;
   // The proof stays fresh while its age is at most the window, so it goes
@@ -48,7 +54,9 @@ Duration? ownershipLabelDelay(
     final expiry = expiresAt.difference(now);
     if (expiry < delay) delay = expiry;
   }
-  return delay.isNegative ? null : delay;
+  // A deadline that has already passed needs no wake-up: the label changed
+  // with it, and a zero delay would re-arm the timer forever.
+  return delay > Duration.zero ? delay : null;
 }
 
 /// The label of one ownership kind.

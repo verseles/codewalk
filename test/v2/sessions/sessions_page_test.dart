@@ -1,5 +1,6 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/session_ownership.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
@@ -460,6 +461,61 @@ void main() {
     await tester.pump(const Duration(minutes: 6));
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
+
+  testWidgets('the label stops exactly when its proof goes stale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var clock = DateTime.utc(2026, 10, 20, 12);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
+      sessionClock: () => clock,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    source.respond([
+      source.row(
+        'proven',
+        title: 'Proven',
+        ownership: OwnershipInfo.known(
+          OwnershipKind.liveShared,
+          proof: OwnershipProof(source: 'adapterObservation', observedAt: clock),
+        ),
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+
+    // The exact instant the proof leaves its window. The label becomes
+    // unknown and the deadline timer drains: it must not re-arm itself at
+    // the boundary, which would keep the list awake forever.
+    clock = clock.add(
+      sessionOwnershipProofMaxAge + const Duration(microseconds: 1),
+    );
+    await tester.pump(const Duration(minutes: 6));
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
