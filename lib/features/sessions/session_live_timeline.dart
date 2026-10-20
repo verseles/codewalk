@@ -49,8 +49,11 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// whatever made it: a new item or a longer one.
   double? _lastMaxScrollExtent;
 
-  /// The number of items the last build saw.
+  /// The number of items and the signature of the last one the previous
+  /// build saw, so the arrival of content is known from the items
+  /// themselves, even when the row that changed is not laid out.
   int _lastItemCount = 0;
+  _TailSignature? _lastTail;
 
   /// Whether the timeline already landed on the newest content.
   bool _landed = false;
@@ -99,11 +102,17 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     super.dispose();
   }
 
+  /// Whether a notification comes from the timeline's own list, not from a
+  /// scrollable inside a row such as a code block, a formula or a diagram.
+  static bool _ownList(ViewportNotificationMixin notification, Axis axis) =>
+      notification.depth == 0 && axis == Axis.vertical;
+
   /// The reader's own scroll: a drag and the fling after it set a scroll
   /// direction, and so does a wheel; the timeline's jumps never do. A scroll
   /// that ends at the bottom, even one that could not move, gives the bottom
   /// back to the follow.
   bool _onScroll(ScrollNotification notification) {
+    if (!_ownList(notification, notification.metrics.axis)) return false;
     if (notification is UserScrollNotification) {
       if (notification.direction != ScrollDirection.idle) {
         widget.scroll.markUserIntent();
@@ -116,21 +125,27 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     return false;
   }
 
-  /// The content dimensions changed: a growth is followed while the reader
-  /// is at the bottom, and marked otherwise.
+  /// The content dimensions changed. A growth is followed while the reader
+  /// is at the bottom; it never marks the control, because a smaller viewport
+  /// or a taller header also grows the extent without any new content.
   bool _onMetrics(ScrollMetricsNotification notification) {
+    if (!_ownList(notification, notification.metrics.axis)) return false;
     final extent = notification.metrics.maxScrollExtent;
     final last = _lastMaxScrollExtent;
     _lastMaxScrollExtent = extent;
-    if (last != null && extent > last) _contentGrew();
+    if (last != null && extent > last && widget.scroll.following) {
+      _requestFollow();
+    }
     return false;
   }
 
-  void _contentGrew() {
+  /// Content arrived: a new item, or a last item that grew or changed. It is
+  /// followed while the reader is at the bottom, and marked otherwise.
+  void _contentArrived() {
     if (widget.scroll.following) {
       _requestFollow();
     } else {
-      widget.scroll.onContentGrewAway();
+      widget.scroll.onContentArrivedAway();
     }
   }
 
@@ -139,16 +154,31 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     _followPasses = 0;
     if (_followScheduled) return;
     _followScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _afterNextFrame(() {
       _followScheduled = false;
-      if (mounted) _follow();
+      _follow();
     });
+  }
+
+  /// Runs [action] after the next frame and asks for that frame: a post-frame
+  /// callback alone waits for a frame something else requests, which may
+  /// never come on a still screen.
+  void _afterNextFrame(VoidCallback action) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) action();
+    });
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   /// Moves the viewport to the newest content, in the frames the content
   /// takes to settle, then offers a pending finished answer.
   void _follow() {
-    if (!widget.scroll.mayFollow) return;
+    if (!widget.scroll.mayFollow) {
+      // The reader is elsewhere: an answer that settled meanwhile is not
+      // offered later, when it would pull the reader away from the tail.
+      _revealPending = false;
+      return;
+    }
     final controller = widget.scroll.controller;
     if (!controller.hasClients) return;
     final target = controller.position.maxScrollExtent;
@@ -163,9 +193,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     // The content may still grow in the next frame, and its extent is only
     // known then.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _follow();
-    });
+    _afterNextFrame(_follow);
   }
 
   /// The follow reached the tail: a pending finished answer is revealed.
@@ -205,17 +233,21 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
+    final tail = items.isEmpty ? null : _tailSignature(items.last);
     if (!_landed) {
       // The first build lands on the newest content.
       _landed = true;
       _requestFollow();
-    } else if (items.length != _lastItemCount) {
-      // A new item is a growth even before the viewport reports it.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _contentGrew();
-      });
+    } else if (items.length > _lastItemCount ||
+        (items.length == _lastItemCount && tail != _lastTail)) {
+      // Content arrived, even if the row that changed is not laid out. A
+      // removal is not an arrival.
+      _afterNextFrame(_contentArrived);
     }
     _lastItemCount = items.length;
+    _lastTail = tail;
+    // The answer row sets its context again when the list lays it out.
+    _answerContext = null;
     final answerIndex = _lastAnswerIndex(items);
     return ListenableBuilder(
       listenable: widget.scroll,
@@ -267,6 +299,13 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   bool get _showJumpControl =>
       !widget.scroll.following && !widget.scroll.revealed;
 
+  /// The reader asked for the newest content: a finished answer that waited
+  /// is not offered on top of it.
+  void _onJumpToLatest() {
+    _revealPending = false;
+    widget.scroll.jumpToLatest();
+  }
+
   /// The control that returns to the newest content, marked when content
   /// arrived below the reader.
   Widget _jumpToLatest(BuildContext context) {
@@ -276,7 +315,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       key: const ValueKey('live-jump-latest'),
       heroTag: 'live-jump-latest',
       tooltip: context.v2L10n.chatGoToLatest,
-      onPressed: widget.scroll.jumpToLatest,
+      onPressed: _onJumpToLatest,
       backgroundColor: unread ? scheme.primary : scheme.surfaceContainerHigh,
       foregroundColor: unread ? scheme.onPrimary : scheme.onSurfaceVariant,
       child: Icon(
@@ -285,3 +324,19 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     );
   }
 }
+
+/// A bounded signature of the last item: its identity, generation, status
+/// and text length. A change means content arrived at the tail.
+typedef _TailSignature = (ItemId, String, ItemStatus?, int);
+
+_TailSignature _tailSignature(TimelineItem item) => (
+  item.id,
+  item.generation,
+  item.status.known,
+  switch (item) {
+    AssistantText(:final text) => text.length,
+    Reasoning(:final text) => text.length,
+    UserInput(:final text) => text.length,
+    _ => 0,
+  },
+);

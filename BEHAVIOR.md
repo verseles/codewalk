@@ -104,13 +104,13 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the v2 live session screen shows the resident timeline items
 - **When** the screen opens
 - **Then** the list lands on the newest content; the items stay in the server's order, the header scrolls with them, and nothing is invented
-- **Then** a live update follows the newest content while the reader is at the bottom, whether it adds an item or makes one longer, and the follow is a single move, not an animation that trails the content
-- **Then** a deliberate scroll by the user - a drag, a fling or a wheel - stops the follow, keeps the content where the reader put it, and offers a control to return to the newest content
-- **Then** the reader's scroll keeps priority for a short hold, and the follow resumes only when the reader comes back to the bottom or uses the control
-- **Then** content that arrives under a reader marks the control, which returns to the newest content and resumes the follow
-- **Then** a settled answer that does not fit the viewport is offered from its start, and it counts as read, so no control appears for it; when the next turn starts the timeline returns to the newest content
+- **Then** a live update follows the newest content while the reader is at the bottom, whether it adds an item or makes one longer, and the follow is a single move, not an animation that trails the content; it does not wait for another screen update to happen
+- **Then** a deliberate scroll by the user - a drag, a fling or a wheel - stops the follow, keeps the content where the reader put it, and offers a control to return to the newest content; scrolling a code block, a formula or a diagram sideways inside a row is not a scroll of the timeline
+- **Then** the reader's scroll keeps priority until the gesture ends: the follow resumes only when the reader's gesture ends at the bottom or the reader uses the control, even if the gesture started within the bottom
+- **Then** content that arrives under a reader - a new item, or the last item growing, even far below the reader - marks the control, which returns to the newest content and resumes the follow; a removal, a taller header or a smaller viewport, such as an open keyboard, does not mark it
+- **Then** a settled answer that does not fit the viewport is offered from its start, and it counts as read, so no control appears for it; when the next turn starts the timeline returns to the newest content; an answer that settled while the reader was elsewhere is never offered later
 - **Then** a scroll that cannot leave the bottom keeps the follow, and the control sits at the end edge in both directions
-- **Then** the row keeps every affordance it had: the expand gesture, the actions menu, the ownership label and the unread mark
+- **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the control
 
 ### V2 auxiliary read-only history
 

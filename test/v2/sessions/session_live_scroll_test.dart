@@ -429,51 +429,404 @@ void main() {
     });
   });
 
+  group('the review corrections', () {
+    testWidgets('a code block scrolled sideways does not stop the follow', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => [
+          ..._answers(ref, 3),
+          AssistantText(
+            meta: liveMeta(ref, 'code'),
+            text: '```\n${'wide_code_line ' * 60}\n```',
+            complete: true,
+          ),
+        ],
+        settled: false,
+      );
+      final controller = _controller(tester);
+      final sideways = find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable &&
+            axisDirectionToAxis(widget.axisDirection) == Axis.horizontal,
+      );
+      expect(sideways, findsWidgets);
+      // The reader scrolls the code block sideways and keeps the finger down
+      // while the turn streams: the timeline is not the one being scrolled.
+      final gesture = await tester.startGesture(
+        tester.getCenter(sideways.first),
+      );
+      await gesture.moveBy(const Offset(-40, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(-120, 0));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('live-jump-latest')), findsNothing);
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              ..._answers(live.ref, 3),
+              AssistantText(
+                meta: liveMeta(live.ref, 'code'),
+                text: '```\n${'wide_code_line ' * 60}\n```',
+                complete: true,
+              ),
+              ..._answers(live.ref, 6).skip(3),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(controller.offset, controller.position.maxScrollExtent);
+      expect(find.byKey(const ValueKey('live-jump-latest')), findsNothing);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.maxScrollExtent);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets(
+      'a streamed growth is followed without any other frame request',
+      (tester) async {
+        final live = await _openLive(
+          tester,
+          (ref) => _answers(ref, 30),
+          settled: false,
+        );
+        final controller = _controller(tester);
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: [
+                ..._answers(live.ref, 29),
+                AssistantText(
+                  meta: liveMeta(live.ref, 'a29'),
+                  text: 'row 29 ${'streamed ' * 120}',
+                  complete: false,
+                ),
+              ],
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(controller.offset, controller.position.maxScrollExtent);
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      },
+      // Without semantics nothing else requests the frame the follow waits
+      // for, as on a phone without a screen reader.
+      semanticsEnabled: false,
+    );
+
+    testWidgets('a slow drag that starts at the tail keeps its priority', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(ListView)),
+      );
+      // The first move stays within the bottom epsilon, then the drag goes
+      // farther in the same direction, which reports no new direction.
+      await gesture.moveBy(const Offset(0, 0.5));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, 150));
+      await tester.pump();
+      final held = controller.offset;
+      expect(held, lessThan(controller.position.maxScrollExtent));
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 41),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(controller.offset, held);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.offset, lessThan(controller.position.maxScrollExtent));
+      expect(find.byKey(const ValueKey('live-jump-latest')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('an answer that settled while the reader was away stays put', (
+      tester,
+    ) async {
+      List<TimelineItem> turn(SessionRef ref, {int extra = 0}) => [
+        ..._answers(ref, 10),
+        AssistantText(
+          meta: liveMeta(ref, 'final'),
+          text: 'final answer ${'body ' * 400}',
+          complete: true,
+        ),
+        // Content that is not an answer, so the old answer stays the last.
+        for (var i = 0; i < extra; i++)
+          TurnOutcome(
+            meta: liveMeta(ref, 'late$i'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+          ),
+      ];
+      final live = await _openLive(tester, turn, settled: false);
+      final controller = _controller(tester);
+      // The reader moves away while the turn runs, then the turn settles.
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: turn(live.ref),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The reader drags back to the tail, then content arrives: the old
+      // answer is not revealed on top of the tail the reader came back to.
+      await tester.drag(find.byType(ListView), const Offset(0, -20000));
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.maxScrollExtent);
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: turn(live.ref, extra: 1),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.maxScrollExtent);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets(
+      'an answer that settled while the reader was away is not offered after the control',
+      (tester) async {
+        List<TimelineItem> turn(SessionRef ref, {int extra = 0}) => [
+          ..._answers(ref, 10),
+          AssistantText(
+            meta: liveMeta(ref, 'final'),
+            text: 'final answer ${'body ' * 400}',
+            complete: true,
+          ),
+          // Content that is not an answer, so the old answer stays the last.
+          for (var i = 0; i < extra; i++)
+            TurnOutcome(
+              meta: liveMeta(ref, 'late$i'),
+              kind: const OpenValue.known(OutcomeKind.succeeded),
+            ),
+        ];
+        final live = await _openLive(tester, turn, settled: false);
+        final controller = _controller(tester);
+        // The reader moves away while the turn runs, then the turn settles.
+        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.pumpAndSettle();
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: turn(live.ref),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.idle),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // The reader returns with the control, then content arrives.
+        await tester.tap(find.byKey(const ValueKey('live-jump-latest')));
+        await tester.pumpAndSettle();
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: turn(live.ref, extra: 1),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.idle),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(controller.offset, controller.position.maxScrollExtent);
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      },
+    );
+
+    testWidgets('a tail that grows far below the reader marks the control', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 80),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      controller.jumpTo(0);
+      await tester.pumpAndSettle();
+      // The drag marks the reader's priority; the reader is now far above
+      // the tail, outside the list's cache.
+      await tester.drag(find.byType(ListView), const Offset(0, 50));
+      await tester.pumpAndSettle();
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              ..._answers(live.ref, 79),
+              AssistantText(
+                meta: liveMeta(live.ref, 'a79'),
+                text: 'row 79 ${'streamed ' * 60}',
+                complete: false,
+              ),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final control = find.byKey(const ValueKey('live-jump-latest'));
+      final fab = tester.widget<FloatingActionButton>(control);
+      expect(
+        fab.backgroundColor,
+        Theme.of(tester.element(control)).colorScheme.primary,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a removal or a smaller viewport does not mark the control', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      Color? background() => tester
+          .widget<FloatingActionButton>(
+            find.byKey(const ValueKey('live-jump-latest')),
+          )
+          .backgroundColor;
+      final plain = background();
+      // The last items are removed (a revert): nothing arrived below.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 38),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(background(), plain);
+      // The viewport shrinks, as when the keyboard opens.
+      tester.view.physicalSize = const Size(390, 600);
+      await tester.pumpAndSettle();
+      expect(background(), plain);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+  });
+
   group('the scroll rules', () {
-    test('the follow stops when the user scrolls', () {
-      final scroll = SessionLiveScroll(now: () => DateTime.utc(2026, 10, 20));
+    test('the follow stops when the reader scrolls', () {
+      final scroll = SessionLiveScroll();
       expect(scroll.following, isTrue);
       expect(scroll.mayFollow, isTrue);
       scroll.markUserIntent();
       expect(scroll.following, isFalse);
       expect(scroll.mayFollow, isFalse);
-      // The intent holds for the retained reference's window.
-      expect(scroll.hasUserIntent, isTrue);
     });
 
-    test('the content that grows under a reader is marked', () {
-      final scroll = SessionLiveScroll(now: () => DateTime.utc(2026, 10, 20));
+    test('content that arrives under a reader is marked', () {
+      final scroll = SessionLiveScroll();
       scroll.markUserIntent();
-      scroll.onContentGrewAway();
+      scroll.onContentArrivedAway();
       expect(scroll.unreadBelow, isTrue);
     });
 
     test('a reader at the bottom is followed and not marked', () {
-      final scroll = SessionLiveScroll(now: () => DateTime.utc(2026, 10, 20));
-      scroll.onContentGrewAway();
+      final scroll = SessionLiveScroll();
+      scroll.onContentArrivedAway();
       expect(scroll.unreadBelow, isFalse);
     });
 
-    test('the intent hold expires', () {
-      var now = DateTime.utc(2026, 10, 20);
-      final scroll = SessionLiveScroll(now: () => now);
-      scroll.markUserIntent();
-      expect(scroll.hasUserIntent, isTrue);
-      now = now.add(const Duration(seconds: 2));
-      expect(scroll.hasUserIntent, isFalse);
-    });
-
     test('a revealed answer is not a reader\'s scroll', () {
-      final scroll = SessionLiveScroll(now: () => DateTime.utc(2026, 10, 20));
+      final scroll = SessionLiveScroll();
       scroll.reveal();
       expect(scroll.revealed, isTrue);
       expect(scroll.following, isFalse);
       // A programmatic move never counts as the reader's.
       scroll.runProgrammatic(scroll.markUserIntent);
       expect(scroll.revealed, isTrue);
-      expect(scroll.hasUserIntent, isFalse);
       scroll.markUserIntent();
       expect(scroll.revealed, isFalse);
+    });
+
+    test('the control resumes the follow and clears the mark', () {
+      final scroll = SessionLiveScroll();
+      scroll.markUserIntent();
+      scroll.onContentArrivedAway();
+      scroll.jumpToLatest();
+      expect(scroll.following, isTrue);
+      expect(scroll.unreadBelow, isFalse);
     });
   });
 }

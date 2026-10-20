@@ -1,34 +1,26 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// The scroll and viewport rules of the live session timeline.
 ///
 /// The list follows the newest content while the reader is at the bottom. A
 /// deliberate scroll by the reader stops that follow, and the follow resumes
-/// when the reader comes back to the bottom or asks for the newest content
-/// explicitly.
+/// only when the reader's gesture ends at the bottom or the reader asks for
+/// the newest content explicitly.
 ///
 /// Every threshold is a logical pixel, so a scaled text and a right-to-left
 /// locale need no separate rule.
 final class SessionLiveScroll extends ChangeNotifier {
-  SessionLiveScroll({DateTime Function()? now, ScrollController? controller})
-    : _now = now ?? DateTime.now,
-      controller = controller ?? ScrollController();
+  SessionLiveScroll({ScrollController? controller})
+    : controller = controller ?? ScrollController();
 
   /// The distance from the bottom within which the viewport counts as the
   /// bottom. One logical pixel, like the retained reference.
   static const double bottomEpsilon = 1;
 
-  /// How long a reader's scroll keeps priority over the follow, like the
-  /// retained reference. Reaching the bottom ends it early.
-  static const Duration userIntentHold = Duration(milliseconds: 900);
-
-  /// The clock the intent hold is measured against.
-  final DateTime Function() _now;
-
   /// The scrollable the live timeline renders.
   final ScrollController controller;
 
-  DateTime? _lastUserIntentAt;
   bool _following = true;
   bool _unreadBelow = false;
   bool _revealed = false;
@@ -58,16 +50,16 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// Whether the viewport is at the bottom.
   bool get atBottom => distanceToBottom <= bottomEpsilon;
 
-  /// Whether the reader scrolled recently enough to keep priority over the
-  /// follow.
-  bool get hasUserIntent {
-    final last = _lastUserIntentAt;
-    if (last == null) return false;
-    return _now().difference(last) < userIntentHold;
-  }
+  /// Whether a gesture of the reader is moving the list right now: a drag,
+  /// the fling after it or a wheel. The timeline's own jumps never set it.
+  bool get userScrolling =>
+      controller.hasClients &&
+      controller.position.userScrollDirection != ScrollDirection.idle;
 
-  /// Whether a follow may move the viewport now.
-  bool get mayFollow => _following && !hasUserIntent && !_programmatic;
+  /// Whether a follow may move the viewport now. The reader's priority is
+  /// carried by [following]: it stays off until the reader is back at the
+  /// bottom with no gesture in progress, or uses the control.
+  bool get mayFollow => _following && !_programmatic;
 
   /// Records a deliberate scroll by the reader: a drag, a fling or a wheel.
   ///
@@ -75,20 +67,19 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// so a live update never pulls the content away from the reader.
   void markUserIntent() {
     if (_programmatic) return;
-    _lastUserIntentAt = _now();
     if (!_following && !_revealed) return;
     _following = false;
     _revealed = false;
     notifyListeners();
   }
 
-  /// Records that the viewport moved.
+  /// Records that the viewport moved or a gesture ended.
   ///
-  /// At the bottom the reader's priority ends, the follow resumes and the
-  /// mark of unseen content is cleared.
+  /// At the bottom, once no gesture is in progress, the follow resumes and
+  /// the mark of unseen content is cleared. A gesture still in progress keeps
+  /// its priority even while it is within the bottom epsilon.
   void onViewportChanged() {
-    if (!atBottom) return;
-    _lastUserIntentAt = null;
+    if (!atBottom || userScrolling) return;
     if (_following && !_unreadBelow && !_revealed) return;
     _following = true;
     _unreadBelow = false;
@@ -96,9 +87,9 @@ final class SessionLiveScroll extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Records that the content grew while the reader was away from the
-  /// bottom, so the control that returns to it is marked.
-  void onContentGrewAway() {
+  /// Records that content arrived while the reader was away from the bottom,
+  /// so the control that returns to it is marked.
+  void onContentArrivedAway() {
     if (_following || _unreadBelow) return;
     _unreadBelow = true;
     notifyListeners();
@@ -134,7 +125,6 @@ final class SessionLiveScroll extends ChangeNotifier {
     _following = true;
     _revealed = false;
     _unreadBelow = false;
-    _lastUserIntentAt = null;
     if (controller.hasClients) {
       runProgrammatic(
         () => controller.jumpTo(controller.position.maxScrollExtent),

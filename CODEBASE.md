@@ -2281,7 +2281,7 @@ successful manual refresh or a new server selection.
 ## V2-044C1 live session timeline viewport (#279)
 
 ```text
-lib/features/sessions/session_live_scroll.dart # The viewport rules: the follow, the reader's priority, the bottom epsilon, the intent hold and the state of the content below
+lib/features/sessions/session_live_scroll.dart # The viewport rules: the follow, the reader's priority until the gesture ends, the bottom epsilon and the state of the content below
 lib/features/sessions/session_live_timeline.dart # The timeline: the forward list with the header, the follow of the newest content, the reveal of a finished answer and the control that returns to the tail
 lib/features/sessions/session_live_page.dart # The live screen renders the timeline and keeps the footer, the cards and the composer outside it
 tool/l10n/session_live_catalog.py # The scoped catalog with the jump controls' copy, ported from the retained reference
@@ -2291,9 +2291,12 @@ The viewport is a projection of the resident items, never a second list: the
 items keep the server's order and the header scrolls with them. The follow
 moves the viewport to the newest content whenever the content grows - a new
 item or a longer one - while the reader is at the bottom. A drag, a fling or a
-wheel stops it; the public scroll direction is the evidence, so the
-timeline's own jumps never count. The follow resumes when the reader comes
-back to the bottom or uses the control that returns to the tail. A settled
+wheel on the timeline's own list stops it; the public scroll direction is the
+evidence, so the timeline's own jumps and a scrollable inside a row never
+count. The follow resumes when the reader's gesture ends at the bottom or the
+reader uses the control that returns to the tail. The control is marked from
+the items themselves (a new item or a changed last item), not from the
+layout. Each follow asks for its own frame. A settled
 answer that does not fit the viewport is offered from its start once the
 follow reaches the tail, counts as read, and gives the tail back when the next
 turn starts.
