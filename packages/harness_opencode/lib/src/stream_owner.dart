@@ -171,7 +171,7 @@ final class OpenCodeStreamOwner {
 
   /// The session lifecycle changes of every session of this harness, watched
   /// or not. The catalog listens here so the list can follow a session that
-  /// starts, is renamed or is deleted elsewhere.
+  /// starts, is renamed, is deleted or is moved elsewhere.
   Stream<OpenCodeCatalogChange> get catalogChanges => _catalogChanges.stream;
 
   Iterable<SessionRef> get watched => List.unmodifiable(_watched.keys);

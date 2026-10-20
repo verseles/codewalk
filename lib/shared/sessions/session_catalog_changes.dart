@@ -21,8 +21,8 @@ sealed class SessionCatalogSignal {
   const SessionCatalogSignal();
 }
 
-/// A session lifecycle change: created, forked, renamed or deleted. The kind
-/// never travels with it.
+/// A session lifecycle change: created, forked, renamed, deleted or moved. The
+/// kind never travels with it.
 final class SessionCatalogChanged extends SessionCatalogSignal {
   const SessionCatalogChanged();
 }

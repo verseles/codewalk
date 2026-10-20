@@ -2256,7 +2256,7 @@ lib/shared/sessions/session_catalog_changes.dart # The catalog's port: a payload
 lib/shared/sessions/session_live_source.dart # `SessionLiveDirectory.catalogChanges(...)`: the endpoint's single event stream, shared with the live sessions
 lib/platform/sessions/opencode_profile_slot.dart # The per-profile runtime: the authenticated transport, the session reader, the one event stream, the owner, the live handles and the catalog lease
 lib/platform/sessions/session_live_factory_io.dart # The live directory: the per-profile slots, the catalog lease and the credential fence
-packages/harness_opencode/lib/src/stream_owner.dart # The owner emits the payload-free catalog signal for session.created/forked/renamed/deleted before every filter, and exposes its connection kind
+packages/harness_opencode/lib/src/stream_owner.dart # The owner emits the payload-free catalog signal for session.created/forked/renamed/deleted/moved before every filter, and exposes its connection kind
 lib/features/sessions/sessions_controller.dart # The catalog: the quiet authoritative re-read, the debounce and the cooldown, the behind and suspended states
 lib/features/sessions/sessions_page.dart # The list shows the existing "not up to date" notice while the catalog is behind
 ```

@@ -160,7 +160,11 @@ void main() {
     final read = dependencies.sessions!.selectProfile('profile_a');
     final source = rig.sources.single;
     final title = '**not markdown** ${'long '.padRight(400, 'x')}';
-    source.respond([source.row('one', title: title)]);
+    const directory =
+        '/a/very/long/workspace/path/that/should/ellipsize/in/the/compact/layout';
+    source.respond([
+      source.row('one', title: title, directory: directory),
+    ]);
     await read;
     await tester.pumpAndSettle();
     await tester.ensureVisible(
@@ -169,6 +173,11 @@ void main() {
     await tester.tap(find.byKey(ValueKey(source.row('one').info.ref)));
     await tester.pumpAndSettle();
     expect(find.text(title), findsOneWidget);
+    // The group header is laid out at 2x, and its path is always read
+    // left-to-right, so the separators do not reorder in a right-to-left
+    // locale.
+    final path = tester.widget<Text>(find.text(directory));
+    expect(path.textDirection, TextDirection.ltr);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
@@ -317,6 +326,15 @@ void main() {
     expect(find.text('beta'), findsOneWidget);
     expect(find.text('Four'), findsOneWidget);
     expect(find.text('One'), findsOneWidget);
+    // The order is the projected order: the alpha group keeps its rows
+    // together, the beta group follows it, and the row the later page added
+    // stays inside the alpha group.
+    double topOf(String text) => tester.getTopLeft(find.text(text)).dy;
+    expect(topOf('alpha'), lessThan(topOf('One')));
+    expect(topOf('One'), lessThan(topOf('Three')));
+    expect(topOf('Three'), lessThan(topOf('Four')));
+    expect(topOf('Four'), lessThan(topOf('beta')));
+    expect(topOf('beta'), lessThan(topOf('Two')));
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();

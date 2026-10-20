@@ -82,4 +82,28 @@ void main() {
     expect(items[2], isA<SessionGroupHeader>());
     expect(items[3], isA<SessionRow>());
   });
+
+  test('the flat list keeps the exact header and row sequence', () {
+    final items = sessionListItems([
+      _row('a', directory: '/work/one'),
+      _row('b', directory: '/work/two'),
+      _row('c', directory: '/work/one'),
+    ]);
+    expect(
+      items.map(
+        (item) => switch (item) {
+          SessionGroupHeader(:final group) =>
+            'header:${group.project?.canonicalDirectory}',
+          SessionRow(:final session) => 'row:${session.info.ref.nativeId}',
+        },
+      ),
+      [
+        'header:/work/one',
+        'row:ses_a',
+        'row:ses_c',
+        'header:/work/two',
+        'row:ses_b',
+      ],
+    );
+  });
 }
