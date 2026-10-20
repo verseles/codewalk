@@ -882,6 +882,53 @@ dart analyze --fatal-infos
 dart test test/permission_reply_client_test.dart test/interaction_projection_test.dart test/interaction_replay_test.dart
 ```
 
+## Session lifecycle commands
+
+[V2-043F / #394](https://github.com/verseles/codewalk/issues/394) adds
+`OpenCodeSessionLifecycleClient`, a harness-only producer for the official
+2.0.22 session lifecycle commands. One client carries the five commands,
+because they share the transport, the connected version, the deadline, the
+body bound, the ownership assertion, the command and receipt construction and
+one status vocabulary.
+
+- `create` sends `POST /api/session` with `location.directory` always in the
+  body (the endpoint ignores the directory header on this route and falls
+  back to the server process directory), plus the optional caller identifier
+  and title. The client never mints an identifier: without one the key is
+  omitted and the endpoint mints it.
+- `rename` sends `PATCH /api/session/{id}` with `{title}`.
+- `delete` sends `DELETE /api/session/{id}` with no body. The endpoint
+  interrupts the execution and deletes the children; the receipt does not
+  prove that the cascade settled.
+- `fork` sends `POST /api/session/{id}/fork` with the optional `before`
+  boundary. The endpoint answers with a new root session.
+- `markViewed` sends `POST /api/session/{id}/view` with `{idle}`, the
+  observed idle transition.
+
+Only a connected version of exactly `2.0.22` receives a command; anything
+else answers `unavailable('unverifiedVersion')` and nothing is sent. A refusal
+is known from the status alone and the native body is never read, because its
+messages echo identifiers and paths: `400` is a protocol refusal, `401` and
+`403` an authentication refusal, `404` a missing session, `429` a rate limit,
+and any other status stays uncertain. A create with the caller's identifier
+that answers with another session is refused as `SessionIdentityOccupied`,
+because the endpoint returns the session that identifier already owns and
+ignores the changed fields.
+
+The receipt admits the exchange and never proves the effect: the effect is
+server-side and is observed later by the endpoint's stream or by an
+authoritative re-read. The client never retries, replays, persists or updates
+the catalog, and it does not authorize anything: the capability guard owns
+that decision.
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/session_lifecycle_client_test.dart
+```
+
 ## Provenance and limits
 
 Fixtures remain under

@@ -2300,6 +2300,23 @@ groups appear in the first appearance of their first row, the rows inside a
 group keep the server's order, and the retained v1 reference groups the same
 way (`lib/presentation/utils/session_tab_grouping.dart`).
 
+## V2-043F session lifecycle commands (#394)
+
+```text
+packages/harness_opencode/lib/src/session_lifecycle_client.dart # The harness-only producer for the official 2.0.22 session commands: create, rename, delete, fork and mark-as-viewed, sharing one version gate, one bounded request path and one status vocabulary
+packages/codewalk_core/lib/src/commands.dart # MutationOperation gains rename and markViewed; create, fork, delete and archive keep their meaning
+```
+
+The client sends one command per exchange and never retries, replays or
+persists. The receipt admits the exchange and never proves the effect: the
+effect is server-side and is observed later by the endpoint's stream or by an
+authoritative re-read. Only a connected version of exactly `2.0.22` receives a
+command; the refusal comes from the status alone, because a native error body
+echoes identifiers and paths. A create with the caller's identifier that
+answers with another session is refused, because the endpoint returns the
+session that identifier already owns and ignores the changed fields. The
+client mints no identifier and authorizes nothing.
+
 ## V2-043E session ownership label (#393)
 
 ```text

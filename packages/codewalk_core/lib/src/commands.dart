@@ -25,6 +25,10 @@ enum MutationOperation {
   terminalInput,
   terminalResize,
   terminalClose,
+  /// Replaces a session's title.
+  rename,
+  /// Marks the observed idle transition of a session as viewed.
+  markViewed,
   unknown,
 }
 
