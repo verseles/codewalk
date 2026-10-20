@@ -905,5 +905,121 @@
   "sessionsOwnershipUnknown": "स्वामित्व अज्ञात",
   "@sessionsOwnershipUnknown": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionsMenu": "क्रियाएँ",
+  "@sessionsActionsMenu": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionMarkViewed": "पढ़ा हुआ चिह्नित करें",
+  "@sessionsActionMarkViewed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRename": "नाम बदलें",
+  "@sessionsActionRename": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFork": "यहाँ से फ़ोर्क करें",
+  "@sessionsActionFork": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionHide": "CodeWalk में छिपाएँ",
+  "@sessionsActionHide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnhide": "CodeWalk में दिखाएँ",
+  "@sessionsActionUnhide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDelete": "हटाएँ",
+  "@sessionsActionDelete": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameTitle": "सत्र का नाम बदलें",
+  "@sessionsActionRenameTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameLabel": "नया शीर्षक",
+  "@sessionsActionRenameLabel": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameSave": "सहेजें",
+  "@sessionsActionRenameSave": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteTitle": "सत्र हटाएँ",
+  "@sessionsActionDeleteTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteBody": "यह \"{title}\" को स्थायी रूप से हटा देता है। चल रहा टर्न रोक दिया जाता है।",
+  "@sessionsActionDeleteBody": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildren": "यह {count} चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।",
+  "@sessionsActionDeleteChildren": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenAtLeast": "यह कम से कम {count} चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।",
+  "@sessionsActionDeleteChildrenAtLeast": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenUnknown": "यह चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।",
+  "@sessionsActionDeleteChildrenUnknown": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteCounting": "चाइल्ड सत्र गिने जा रहे हैं…",
+  "@sessionsActionDeleteCounting": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableVersion": "एंडपॉइंट का संस्करण सत्यापित नहीं है।",
+  "@sessionsActionUnavailableVersion": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailablePlatform": "यह प्लेटफ़ॉर्म एंडपॉइंट तक नहीं पहुँच सकता।",
+  "@sessionsActionUnavailablePlatform": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableAuth": "एंडपॉइंट ने क्रेडेंशियल अस्वीकार कर दिए।",
+  "@sessionsActionUnavailableAuth": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableList": "सूची एंडपॉइंट का मौजूदा उत्तर नहीं है।",
+  "@sessionsActionUnavailableList": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableBusy": "इस सत्र के लिए कोई अन्य कमांड चल रहा है।",
+  "@sessionsActionUnavailableBusy": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableMarker": "इस सत्र में पढ़े हुए के रूप में चिह्नित करने को कुछ नहीं है।",
+  "@sessionsActionUnavailableMarker": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnread": "अपठित",
+  "@sessionsActionUnread": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionPending": "चल रहा है…",
+  "@sessionsActionPending": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFailed": "कमांड सफल नहीं हुई।",
+  "@sessionsActionFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterActive": "सक्रिय",
+  "@sessionsFilterActive": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterHidden": "छिपाए गए",
+  "@sessionsFilterHidden": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterAll": "सभी",
+  "@sessionsFilterAll": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableStore": "छिपाए गए सत्रों की सूची नहीं पढ़ी जा सकी।",
+  "@sessionsActionUnavailableStore": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

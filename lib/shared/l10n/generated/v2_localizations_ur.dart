@@ -1138,4 +1138,104 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'ملکیت نامعلوم';
+
+  @override
+  String get sessionsActionsMenu => 'اقدامات';
+
+  @override
+  String get sessionsActionMarkViewed => 'پڑھ شدہ کہ لکھا گیا';
+
+  @override
+  String get sessionsActionRename => 'نام بدلیں';
+
+  @override
+  String get sessionsActionFork => 'یہاں سے کاپی';
+
+  @override
+  String get sessionsActionHide => 'CodeWalk میں چھپائیں';
+
+  @override
+  String get sessionsActionUnhide => 'CodeWalk میں دکھائیں';
+
+  @override
+  String get sessionsActionDelete => 'حذف کریں';
+
+  @override
+  String get sessionsActionRenameTitle => 'سیشن کا نام بدلیں';
+
+  @override
+  String get sessionsActionRenameLabel => 'نیا عنوان';
+
+  @override
+  String get sessionsActionRenameSave => 'محفوظ کریں';
+
+  @override
+  String get sessionsActionDeleteTitle => 'سیشن حذف کریں';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'یہ \"$title\" کو مستقل طور پر حذف کر دیتا ہے۔ جاری رن ٹیک رکھ دیا جاتا ہے۔';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'یہ $count ذیلی سیشنز اور ان سے نیچے کی ہر چیز کو بھی حذف کر دیتا ہے۔';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'یہ کم از کم $count ذیلی سیشنز اور ان سے نیچے کی ہر چیز کو بھی حذف کر دیتا ہے۔';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'یہ ذیلی سیشنز اور ان سے نیچے کی ہر چیز کو بھی حذف کر دیتا ہے۔';
+
+  @override
+  String get sessionsActionDeleteCounting => 'ذیلی سیشنز گن رہے ہیں…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'اینڈ پوائنٹ کا ورژن تصدیق شدہ نہیں۔';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'یہ پلیٹ فارم اینڈ پوائنٹ تک نہیں پہنچ سکتا۔';
+
+  @override
+  String get sessionsActionUnavailableAuth => 'اینڈ پوائنٹ نے سند توڑ کر دیے۔';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'فہریہ اینڈ پوائنٹ کا موجودہ جواب نہیں۔';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'اس سیشن کے لیے کوئی اور کمانڈ چل رہی ہے۔';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'اس سیشن میں پڑھا ہوا دکھانے کے لیے کچھ نہیں ہے۔';
+
+  @override
+  String get sessionsActionUnread => 'غیر پڑھا ہوا';
+
+  @override
+  String get sessionsActionPending => 'جاری ہے…';
+
+  @override
+  String get sessionsActionFailed => 'کمانڈ کامیاب نہیں ہوئی۔';
+
+  @override
+  String get sessionsFilterActive => 'فعال';
+
+  @override
+  String get sessionsFilterHidden => 'چھپی ہوئے';
+
+  @override
+  String get sessionsFilterAll => 'سب';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'چھپی ہوئی سیشنز کی فہرست نہیں پڑھی جا سکی۔';
 }

@@ -13,7 +13,9 @@ import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
+import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
+import '../platform/sessions/session_action_source_io.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
@@ -25,6 +27,7 @@ import '../platform/storage/preferences_backend.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/releases/release_source.dart';
+import '../shared/sessions/session_actions.dart';
 import '../shared/sessions/session_catalog_source.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
@@ -49,6 +52,9 @@ AppDependencies createAppDependencies({
   DateTime Function()? sessionClock,
   SessionLiveDirectory? Function()? sessionLiveDirectory,
   PermissionModeStore? permissionModeStore,
+  HiddenSessionStore? hiddenSessionStore,
+  SessionActionFactory? sessionActionFactory,
+  HiddenSessionStore? hiddenStore,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -61,6 +67,19 @@ AppDependencies createAppDependencies({
       permissionModeStore ?? PermissionModeStore(store: metadata);
   // Records the Unrestricted rules CodeWalk added, so only those are removed.
   final unrestrictedOwnership = UnrestrictedOwnershipStore(store: metadata);
+  // The sessions hidden in CodeWalk: a local state the endpoint never sees.
+  final hiddenSessions =
+      hiddenStore ?? hiddenSessionStore ?? HiddenSessionStore(store: metadata);
+  // The session actions of a profile: the endpoint's own commands and the
+  // local hide.
+  final actionFactory =
+      sessionActionFactory ??
+      (profile, credential, version) => createSessionActionSource(
+        profile,
+        credential,
+        version,
+        hidden: hiddenSessions,
+      );
   locator.registerSingleton<DiagnosticsController>(
     diagnostics ?? DiagnosticsController(),
   );
@@ -104,6 +123,7 @@ AppDependencies createAppDependencies({
     SessionsController(
       hosts: locator<HostsController>(),
       sourceFactory: sessionCatalogFactory ?? createSessionCatalogSource,
+      actionFactory: actionFactory,
       now: sessionClock,
       changesFactory: liveDirectory == null
           ? null
@@ -144,6 +164,7 @@ AppDependencies createAppDependencies({
     historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
     liveDirectory: liveDirectory,
     permissionModes: permissionModes,
+    hiddenSessions: hiddenSessions,
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
@@ -168,6 +189,7 @@ Future<AppDependencies> loadAppDependencies({
   // defaulting to Allow all.
   await dependencies.permissionModes?.initialize();
   await dependencies.unrestrictedOwnership?.initialize();
+  await dependencies.hiddenSessions?.initialize();
   if (listenNativeLinks) {
     final links = dependencies.links = NativePairingLinks((uri) {
       if (dependencies.isDisposed) return;

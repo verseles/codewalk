@@ -52,6 +52,45 @@ void main() {
     expect(info.project?.host, historyHarness.host);
   });
 
+  test('the summary carries the endpoint unread marker', () {
+    final summary = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'time': {'created': 1000, 'updated': 2000, 'idle': 3000},
+    }, historyHarness);
+    // The marker is on the summary, not on the info: the session's identity
+    // does not change when the unread marker does.
+    expect(summary.view?.idleAt.millisecondsSinceEpoch, 3000);
+    expect(summary.view?.viewedAt, isNull);
+    expect(summary.view?.unread, isTrue);
+    expect(summary.info.metadata?.toJson(), isNot(contains('nativeIdle')));
+  });
+
+  test('a seen idle transition is not unread', () {
+    final summary = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'time': {'created': 1000, 'updated': 2000, 'idle': 3000, 'viewed': 3000},
+    }, historyHarness);
+    expect(summary.view?.unread, isFalse);
+    // An older view does not cover a newer idle transition.
+    final older = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'time': {'created': 1000, 'updated': 2000, 'idle': 3000, 'viewed': 2500},
+    }, historyHarness);
+    expect(older.view?.unread, isTrue);
+  });
+
+  test('a record without an idle carries no marker', () {
+    final summary = projectOpenCodeSession({
+      'id': 'ses_a',
+      'title': 'First title',
+      'time': {'created': 1000, 'updated': 2000},
+    }, historyHarness);
+    expect(summary.view, isNull);
+  });
+
   test('a session the server did not attribute keeps no project', () {
     final info = projectOpenCodeSession({
       'id': 'ses_a',

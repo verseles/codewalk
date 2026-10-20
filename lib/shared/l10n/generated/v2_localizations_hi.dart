@@ -1140,4 +1140,105 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'स्वामित्व अज्ञात';
+
+  @override
+  String get sessionsActionsMenu => 'क्रियाएँ';
+
+  @override
+  String get sessionsActionMarkViewed => 'पढ़ा हुआ चिह्नित करें';
+
+  @override
+  String get sessionsActionRename => 'नाम बदलें';
+
+  @override
+  String get sessionsActionFork => 'यहाँ से फ़ोर्क करें';
+
+  @override
+  String get sessionsActionHide => 'CodeWalk में छिपाएँ';
+
+  @override
+  String get sessionsActionUnhide => 'CodeWalk में दिखाएँ';
+
+  @override
+  String get sessionsActionDelete => 'हटाएँ';
+
+  @override
+  String get sessionsActionRenameTitle => 'सत्र का नाम बदलें';
+
+  @override
+  String get sessionsActionRenameLabel => 'नया शीर्षक';
+
+  @override
+  String get sessionsActionRenameSave => 'सहेजें';
+
+  @override
+  String get sessionsActionDeleteTitle => 'सत्र हटाएँ';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'यह \"$title\" को स्थायी रूप से हटा देता है। चल रहा टर्न रोक दिया जाता है।';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'यह $count चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'यह कम से कम $count चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'यह चाइल्ड सत्र और उनके नीचे की हर चीज़ भी हटा देता है।';
+
+  @override
+  String get sessionsActionDeleteCounting => 'चाइल्ड सत्र गिने जा रहे हैं…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'एंडपॉइंट का संस्करण सत्यापित नहीं है।';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'यह प्लेटफ़ॉर्म एंडपॉइंट तक नहीं पहुँच सकता।';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'एंडपॉइंट ने क्रेडेंशियल अस्वीकार कर दिए।';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'सूची एंडपॉइंट का मौजूदा उत्तर नहीं है।';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'इस सत्र के लिए कोई अन्य कमांड चल रहा है।';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'इस सत्र में पढ़े हुए के रूप में चिह्नित करने को कुछ नहीं है।';
+
+  @override
+  String get sessionsActionUnread => 'अपठित';
+
+  @override
+  String get sessionsActionPending => 'चल रहा है…';
+
+  @override
+  String get sessionsActionFailed => 'कमांड सफल नहीं हुई।';
+
+  @override
+  String get sessionsFilterActive => 'सक्रिय';
+
+  @override
+  String get sessionsFilterHidden => 'छिपाए गए';
+
+  @override
+  String get sessionsFilterAll => 'सभी';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'छिपाए गए सत्रों की सूची नहीं पढ़ी जा सकी।';
 }

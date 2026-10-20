@@ -905,5 +905,121 @@
   "sessionsOwnershipUnknown": "মালিকানা অজানা",
   "@sessionsOwnershipUnknown": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionsMenu": "অ্যাকশন",
+  "@sessionsActionsMenu": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionMarkViewed": "পঠিত হিসেবে চিহ্নিত করুন",
+  "@sessionsActionMarkViewed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRename": "নাম বদলান",
+  "@sessionsActionRename": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFork": "এখান থেকে ফর্ক",
+  "@sessionsActionFork": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionHide": "CodeWalk-এ লুকান",
+  "@sessionsActionHide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnhide": "CodeWalk-এ দেখান",
+  "@sessionsActionUnhide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDelete": "মুছুন",
+  "@sessionsActionDelete": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameTitle": "সেশনের নাম বদলান",
+  "@sessionsActionRenameTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameLabel": "নতুন শিরোনাম",
+  "@sessionsActionRenameLabel": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameSave": "সংরক্ষণ",
+  "@sessionsActionRenameSave": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteTitle": "সেশন মুছুন",
+  "@sessionsActionDeleteTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteBody": "এটি \"{title}\" স্থায়ীভাবে মুছে ফেলবে। চলমান টার্ন বন্ধ হবে।",
+  "@sessionsActionDeleteBody": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildren": "এতে {count}টি শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।",
+  "@sessionsActionDeleteChildren": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenAtLeast": "এতে অন্তত {count}টি শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।",
+  "@sessionsActionDeleteChildrenAtLeast": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenUnknown": "এতে শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।",
+  "@sessionsActionDeleteChildrenUnknown": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteCounting": "শিশু সেশন গোনা হচ্ছে…",
+  "@sessionsActionDeleteCounting": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableVersion": "এন্ডপয়েন্টের সংস্করণ যাচাই করা হয়নি।",
+  "@sessionsActionUnavailableVersion": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailablePlatform": "এই প্ল্যাটফর্ম এন্ডপয়েন্টে পৌঁছাতে পারে না।",
+  "@sessionsActionUnavailablePlatform": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableAuth": "এন্ডপয়েন্ট শর্তাবলী প্রত্যাখ্যান করেছে।",
+  "@sessionsActionUnavailableAuth": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableList": "তালিকাটি এন্ডপয়েন্টের বর্তমান উত্তর নয়।",
+  "@sessionsActionUnavailableList": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableBusy": "এই সেশনে আরেকটি কমান্ড চলছে।",
+  "@sessionsActionUnavailableBusy": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableMarker": "এই সেশনে পঠিত হিসেবে চিহ্নিত করার মতো কিছু নেই।",
+  "@sessionsActionUnavailableMarker": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnread": "অপঠিত",
+  "@sessionsActionUnread": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionPending": "চলছে…",
+  "@sessionsActionPending": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFailed": "কমান্ডটি কাজ করেনি।",
+  "@sessionsActionFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterActive": "সক্রিয়",
+  "@sessionsFilterActive": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterHidden": "লুকানো",
+  "@sessionsFilterHidden": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterAll": "সব",
+  "@sessionsFilterAll": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableStore": "লুকানো সেশনের তালিকা পড়া যায়নি।",
+  "@sessionsActionUnavailableStore": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

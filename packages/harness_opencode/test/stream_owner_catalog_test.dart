@@ -34,6 +34,7 @@ void main() {
       'session.renamed',
       'session.deleted',
       'session.moved',
+      'session.viewed',
     ]) {
       await harness.send([
         {
@@ -50,6 +51,7 @@ void main() {
       OpenCodeCatalogChange.renamed,
       OpenCodeCatalogChange.deleted,
       OpenCodeCatalogChange.moved,
+      OpenCodeCatalogChange.viewed,
     ]);
   });
 

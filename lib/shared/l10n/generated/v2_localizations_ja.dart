@@ -1090,4 +1090,97 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => '所有権不明';
+
+  @override
+  String get sessionsActionsMenu => '操作';
+
+  @override
+  String get sessionsActionMarkViewed => '既読にする';
+
+  @override
+  String get sessionsActionRename => '名前を変更';
+
+  @override
+  String get sessionsActionFork => 'ここからフォーク';
+
+  @override
+  String get sessionsActionHide => 'CodeWalk に隠す';
+
+  @override
+  String get sessionsActionUnhide => 'CodeWalk に表示';
+
+  @override
+  String get sessionsActionDelete => '削除';
+
+  @override
+  String get sessionsActionRenameTitle => 'セッション名を変更';
+
+  @override
+  String get sessionsActionRenameLabel => '新しいタイトル';
+
+  @override
+  String get sessionsActionRenameSave => '保存';
+
+  @override
+  String get sessionsActionDeleteTitle => 'セッションを削除';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return '「$title」を完全に削除します。実行中のターンは停止されます。';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return '子セッション $count 件とその下もすべて削除されます。';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return '少なくとも $count 件の子セッションとその下もすべて削除されます。';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown => '子セッションとその下もすべて削除されます。';
+
+  @override
+  String get sessionsActionDeleteCounting => '子セッションを数えています…';
+
+  @override
+  String get sessionsActionUnavailableVersion => 'エンドポイントのバージョンが未検証です。';
+
+  @override
+  String get sessionsActionUnavailablePlatform => 'このプラットフォームはエンドポイントに接続できません。';
+
+  @override
+  String get sessionsActionUnavailableAuth => 'エンドポイントが資格情報を拒否しました。';
+
+  @override
+  String get sessionsActionUnavailableList => '一覧はエンドポイントの最新の回答ではありません。';
+
+  @override
+  String get sessionsActionUnavailableBusy => 'このセッションでは別のコマンドが実行中です。';
+
+  @override
+  String get sessionsActionUnavailableMarker => 'このセッションには既読にする対象がありません。';
+
+  @override
+  String get sessionsActionUnread => '未読';
+
+  @override
+  String get sessionsActionPending => '処理中…';
+
+  @override
+  String get sessionsActionFailed => 'コマンドは実行されませんでした。';
+
+  @override
+  String get sessionsFilterActive => '有効';
+
+  @override
+  String get sessionsFilterHidden => '非表示';
+
+  @override
+  String get sessionsFilterAll => 'すべて';
+
+  @override
+  String get sessionsActionUnavailableStore => '非表示のセッション一覧を読み取れませんでした。';
 }

@@ -1130,4 +1130,105 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'الملكية غير معروفة';
+
+  @override
+  String get sessionsActionsMenu => 'الإجراءات';
+
+  @override
+  String get sessionsActionMarkViewed => 'تعليم كمقروء';
+
+  @override
+  String get sessionsActionRename => 'إعادة تسمية';
+
+  @override
+  String get sessionsActionFork => 'تفرع من هنا';
+
+  @override
+  String get sessionsActionHide => 'إخفاء في CodeWalk';
+
+  @override
+  String get sessionsActionUnhide => 'إظهار في CodeWalk';
+
+  @override
+  String get sessionsActionDelete => 'حذف';
+
+  @override
+  String get sessionsActionRenameTitle => 'إعادة تسمية الجلسة';
+
+  @override
+  String get sessionsActionRenameLabel => 'عنوان جديد';
+
+  @override
+  String get sessionsActionRenameSave => 'حفظ';
+
+  @override
+  String get sessionsActionDeleteTitle => 'حذف الجلسة';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'سيؤدي هذا إلى حذف \"$title\" نهائيًا، ويوقف أي تنفيذ جارٍ.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'سيؤدي هذا أيضًا إلى حذف $count جلسة فرعية وكل ما تحتها.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'سيؤدي هذا أيضًا إلى حذف $count جلسة فرعية على الأقل وكل ما تحتها.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'سيؤدي هذا أيضًا إلى حذف الجلسات الفرعية وكل ما تحتها.';
+
+  @override
+  String get sessionsActionDeleteCounting => 'جارٍ عدّ الجلسات الفرعية…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'لم يتم التحقق من إصدار نقطة النهاية.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'لا يمكن لهذه المنصة الوصول إلى نقطة النهاية.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'رفضت نقطة النهاية بيانات الاعتماد.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'القائمة ليست الإجابة الحالية لنقطة النهاية.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'هناك أمر آخر قيد التنفيذ لهذه الجلسة.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'لا يوجد في هذه الجلسة ما يمكن تعليمه كمقروء.';
+
+  @override
+  String get sessionsActionUnread => 'غير مقروء';
+
+  @override
+  String get sessionsActionPending => 'جارٍ التنفيذ…';
+
+  @override
+  String get sessionsActionFailed => 'لم ينجح الأمر.';
+
+  @override
+  String get sessionsFilterActive => 'النشطة';
+
+  @override
+  String get sessionsFilterHidden => 'المخفية';
+
+  @override
+  String get sessionsFilterAll => 'الكل';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'تعذّرت قراءة قائمة الجلسات المخفية.';
 }

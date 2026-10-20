@@ -1157,4 +1157,105 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'Propiedad desconocida';
+
+  @override
+  String get sessionsActionsMenu => 'Acciones';
+
+  @override
+  String get sessionsActionMarkViewed => 'Marcar como leído';
+
+  @override
+  String get sessionsActionRename => 'Renombrar';
+
+  @override
+  String get sessionsActionFork => 'Bifurcar desde aquí';
+
+  @override
+  String get sessionsActionHide => 'Ocultar en CodeWalk';
+
+  @override
+  String get sessionsActionUnhide => 'Mostrar en CodeWalk';
+
+  @override
+  String get sessionsActionDelete => 'Eliminar';
+
+  @override
+  String get sessionsActionRenameTitle => 'Renombrar la sesión';
+
+  @override
+  String get sessionsActionRenameLabel => 'Nuevo título';
+
+  @override
+  String get sessionsActionRenameSave => 'Guardar';
+
+  @override
+  String get sessionsActionDeleteTitle => 'Eliminar la sesión';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'Esto elimina \"$title\" definitivamente. Se detiene una ejecución en curso.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'Esto también elimina $count sesiones hijas y todo lo que cuelgue de ellas.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'Esto también elimina al menos $count sesiones hijas y todo lo que cuelgue de ellas.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'Esto también elimina las sesiones hijas y todo lo que cuelgue de ellas.';
+
+  @override
+  String get sessionsActionDeleteCounting => 'Contando las sesiones hijas…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'La versión del endpoint no está verificada.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'Esta plataforma no puede acceder al endpoint.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'El endpoint rechazó la credencial.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'La lista no es la respuesta actual del endpoint.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'Ya hay otro comando en curso para esta sesión.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'Esta sesión no tiene nada que marcar como leído.';
+
+  @override
+  String get sessionsActionUnread => 'No leído';
+
+  @override
+  String get sessionsActionPending => 'Procesando…';
+
+  @override
+  String get sessionsActionFailed => 'El comando no se completó.';
+
+  @override
+  String get sessionsFilterActive => 'Activas';
+
+  @override
+  String get sessionsFilterHidden => 'Ocultas';
+
+  @override
+  String get sessionsFilterAll => 'Todas';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'No se pudo leer la lista de sesiones ocultas.';
 }

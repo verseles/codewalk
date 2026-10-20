@@ -174,7 +174,9 @@ void main() {
     await tester.ensureVisible(
       find.byKey(ValueKey(source.row('one').info.ref)),
     );
-    await tester.tap(find.byKey(ValueKey(source.row('one').info.ref)));
+    // The title is tapped, not the card: at 2x the card is taller than the
+    // viewport and its center can sit below the visible area.
+    await tester.tap(find.text(title));
     await tester.pumpAndSettle();
     expect(find.text(title), findsOneWidget);
     // The group header is laid out at 2x, and its path is always read

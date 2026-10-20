@@ -2192,6 +2192,180 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Ownership unknown'**
   String get sessionsOwnershipUnknown;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get sessionsActionsMenu;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as viewed'**
+  String get sessionsActionMarkViewed;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get sessionsActionRename;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Fork from here'**
+  String get sessionsActionFork;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Hide in CodeWalk'**
+  String get sessionsActionHide;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Show in CodeWalk'**
+  String get sessionsActionUnhide;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sessionsActionDelete;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Rename the session'**
+  String get sessionsActionRenameTitle;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'New title'**
+  String get sessionsActionRenameLabel;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get sessionsActionRenameSave;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the session'**
+  String get sessionsActionDeleteTitle;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes \"{title}\" for good. A running turn is stopped.'**
+  String sessionsActionDeleteBody(Object title);
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This also deletes {count} child sessions and everything below them.'**
+  String sessionsActionDeleteChildren(Object count);
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This also deletes at least {count} child sessions and everything below them.'**
+  String sessionsActionDeleteChildrenAtLeast(Object count);
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This also deletes the child sessions and everything below them.'**
+  String get sessionsActionDeleteChildrenUnknown;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Counting the child sessions…'**
+  String get sessionsActionDeleteCounting;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The endpoint\'\'s version is not verified.'**
+  String get sessionsActionUnavailableVersion;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This platform cannot reach the endpoint.'**
+  String get sessionsActionUnavailablePlatform;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The endpoint refused the credential.'**
+  String get sessionsActionUnavailableAuth;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The list is not the endpoint\'\'s current answer.'**
+  String get sessionsActionUnavailableList;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Another command is running for this session.'**
+  String get sessionsActionUnavailableBusy;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This session has nothing to mark as viewed.'**
+  String get sessionsActionUnavailableMarker;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get sessionsActionUnread;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get sessionsActionPending;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The command did not go through.'**
+  String get sessionsActionFailed;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get sessionsFilterActive;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get sessionsFilterHidden;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sessionsFilterAll;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The hidden list could not be read.'**
+  String get sessionsActionUnavailableStore;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

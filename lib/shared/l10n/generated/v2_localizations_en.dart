@@ -1136,4 +1136,105 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'Ownership unknown';
+
+  @override
+  String get sessionsActionsMenu => 'Actions';
+
+  @override
+  String get sessionsActionMarkViewed => 'Mark as viewed';
+
+  @override
+  String get sessionsActionRename => 'Rename';
+
+  @override
+  String get sessionsActionFork => 'Fork from here';
+
+  @override
+  String get sessionsActionHide => 'Hide in CodeWalk';
+
+  @override
+  String get sessionsActionUnhide => 'Show in CodeWalk';
+
+  @override
+  String get sessionsActionDelete => 'Delete';
+
+  @override
+  String get sessionsActionRenameTitle => 'Rename the session';
+
+  @override
+  String get sessionsActionRenameLabel => 'New title';
+
+  @override
+  String get sessionsActionRenameSave => 'Save';
+
+  @override
+  String get sessionsActionDeleteTitle => 'Delete the session';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'This deletes \"$title\" for good. A running turn is stopped.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'This also deletes $count child sessions and everything below them.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'This also deletes at least $count child sessions and everything below them.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'This also deletes the child sessions and everything below them.';
+
+  @override
+  String get sessionsActionDeleteCounting => 'Counting the child sessions…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'The endpoint\'s version is not verified.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'This platform cannot reach the endpoint.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'The endpoint refused the credential.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'The list is not the endpoint\'s current answer.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'Another command is running for this session.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'This session has nothing to mark as viewed.';
+
+  @override
+  String get sessionsActionUnread => 'Unread';
+
+  @override
+  String get sessionsActionPending => 'Working…';
+
+  @override
+  String get sessionsActionFailed => 'The command did not go through.';
+
+  @override
+  String get sessionsFilterActive => 'Active';
+
+  @override
+  String get sessionsFilterHidden => 'Hidden';
+
+  @override
+  String get sessionsFilterAll => 'All';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'The hidden list could not be read.';
 }

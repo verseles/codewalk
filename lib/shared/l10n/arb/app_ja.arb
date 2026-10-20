@@ -905,5 +905,121 @@
   "sessionsOwnershipUnknown": "所有権不明",
   "@sessionsOwnershipUnknown": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionsMenu": "操作",
+  "@sessionsActionsMenu": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionMarkViewed": "既読にする",
+  "@sessionsActionMarkViewed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRename": "名前を変更",
+  "@sessionsActionRename": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFork": "ここからフォーク",
+  "@sessionsActionFork": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionHide": "CodeWalk に隠す",
+  "@sessionsActionHide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnhide": "CodeWalk に表示",
+  "@sessionsActionUnhide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDelete": "削除",
+  "@sessionsActionDelete": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameTitle": "セッション名を変更",
+  "@sessionsActionRenameTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameLabel": "新しいタイトル",
+  "@sessionsActionRenameLabel": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameSave": "保存",
+  "@sessionsActionRenameSave": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteTitle": "セッションを削除",
+  "@sessionsActionDeleteTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteBody": "「{title}」を完全に削除します。実行中のターンは停止されます。",
+  "@sessionsActionDeleteBody": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildren": "子セッション {count} 件とその下もすべて削除されます。",
+  "@sessionsActionDeleteChildren": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenAtLeast": "少なくとも {count} 件の子セッションとその下もすべて削除されます。",
+  "@sessionsActionDeleteChildrenAtLeast": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenUnknown": "子セッションとその下もすべて削除されます。",
+  "@sessionsActionDeleteChildrenUnknown": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteCounting": "子セッションを数えています…",
+  "@sessionsActionDeleteCounting": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableVersion": "エンドポイントのバージョンが未検証です。",
+  "@sessionsActionUnavailableVersion": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailablePlatform": "このプラットフォームはエンドポイントに接続できません。",
+  "@sessionsActionUnavailablePlatform": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableAuth": "エンドポイントが資格情報を拒否しました。",
+  "@sessionsActionUnavailableAuth": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableList": "一覧はエンドポイントの最新の回答ではありません。",
+  "@sessionsActionUnavailableList": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableBusy": "このセッションでは別のコマンドが実行中です。",
+  "@sessionsActionUnavailableBusy": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableMarker": "このセッションには既読にする対象がありません。",
+  "@sessionsActionUnavailableMarker": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnread": "未読",
+  "@sessionsActionUnread": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionPending": "処理中…",
+  "@sessionsActionPending": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFailed": "コマンドは実行されませんでした。",
+  "@sessionsActionFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterActive": "有効",
+  "@sessionsFilterActive": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterHidden": "非表示",
+  "@sessionsFilterHidden": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterAll": "すべて",
+  "@sessionsFilterAll": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableStore": "非表示のセッション一覧を読み取れませんでした。",
+  "@sessionsActionUnavailableStore": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

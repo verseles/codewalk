@@ -7,6 +7,7 @@ import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
+import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
@@ -32,6 +33,7 @@ class AppDependencies {
     this.liveDirectory,
     this.permissionModes,
     this.unrestrictedOwnership,
+    this.hiddenSessions,
   });
 
   final AppPreferencesController preferences;
@@ -49,6 +51,9 @@ class AppDependencies {
 
   /// CodeWalk's own Unrestricted insertions, loaded with the policy.
   final UnrestrictedOwnershipStore? unrestrictedOwnership;
+
+  /// The sessions hidden in CodeWalk, a local state the endpoint never sees.
+  final HiddenSessionStore? hiddenSessions;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -71,6 +76,7 @@ class AppDependencies {
     hosts.dispose();
     preferences.dispose();
     permissionModes?.dispose();
+    hiddenSessions?.dispose();
     releaseHistory?.dispose();
     diagnostics?.dispose();
   }

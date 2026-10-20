@@ -905,5 +905,121 @@
   "sessionsOwnershipUnknown": "Proprietà sconosciuta",
   "@sessionsOwnershipUnknown": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionsMenu": "Azioni",
+  "@sessionsActionsMenu": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionMarkViewed": "Segna come letto",
+  "@sessionsActionMarkViewed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRename": "Rinomina",
+  "@sessionsActionRename": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFork": "Fork da qui",
+  "@sessionsActionFork": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionHide": "Nascondi in CodeWalk",
+  "@sessionsActionHide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnhide": "Mostra in CodeWalk",
+  "@sessionsActionUnhide": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDelete": "Elimina",
+  "@sessionsActionDelete": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameTitle": "Rinomina la sessione",
+  "@sessionsActionRenameTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameLabel": "Nuovo titolo",
+  "@sessionsActionRenameLabel": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionRenameSave": "Salva",
+  "@sessionsActionRenameSave": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteTitle": "Elimina la sessione",
+  "@sessionsActionDeleteTitle": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteBody": "Questo elimina definitivamente \"{title}\". Un''esecuzione in corso viene interrotta.",
+  "@sessionsActionDeleteBody": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildren": "Questo elimina anche {count} sessioni figlie e tutto ciò che contengono.",
+  "@sessionsActionDeleteChildren": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenAtLeast": "Questo elimina anche almeno {count} sessioni figlie e tutto ciò che contengono.",
+  "@sessionsActionDeleteChildrenAtLeast": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteChildrenUnknown": "Questo elimina anche le sessioni figlie e tutto ciò che contengono.",
+  "@sessionsActionDeleteChildrenUnknown": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionDeleteCounting": "Conteggio delle sessioni figlie…",
+  "@sessionsActionDeleteCounting": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableVersion": "La versione dell''endpoint non è verificata.",
+  "@sessionsActionUnavailableVersion": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailablePlatform": "Questa piattaforma non può raggiungere l''endpoint.",
+  "@sessionsActionUnavailablePlatform": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableAuth": "L''endpoint ha rifiutato le credenziali.",
+  "@sessionsActionUnavailableAuth": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableList": "L''elenco non è la risposta attuale dell''endpoint.",
+  "@sessionsActionUnavailableList": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableBusy": "Un altro comando è in corso per questa sessione.",
+  "@sessionsActionUnavailableBusy": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableMarker": "Questa sessione non ha nulla da segnare come letto.",
+  "@sessionsActionUnavailableMarker": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnread": "Non letto",
+  "@sessionsActionUnread": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionPending": "In corso…",
+  "@sessionsActionPending": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionFailed": "Il comando non è andato a buon fine.",
+  "@sessionsActionFailed": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterActive": "Attive",
+  "@sessionsFilterActive": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterHidden": "Nascoste",
+  "@sessionsFilterHidden": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsFilterAll": "Tutte",
+  "@sessionsFilterAll": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsActionUnavailableStore": "Non è stato possibile leggere l''elenco delle sessioni nascoste.",
+  "@sessionsActionUnavailableStore": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

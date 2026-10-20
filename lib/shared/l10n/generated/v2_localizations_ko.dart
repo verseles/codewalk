@@ -1092,4 +1092,97 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => '소유권 알 수 없음';
+
+  @override
+  String get sessionsActionsMenu => '작업';
+
+  @override
+  String get sessionsActionMarkViewed => '읽음으로 표시';
+
+  @override
+  String get sessionsActionRename => '이름 바꾸기';
+
+  @override
+  String get sessionsActionFork => '여기서 분기';
+
+  @override
+  String get sessionsActionHide => 'CodeWalk에서 숨기기';
+
+  @override
+  String get sessionsActionUnhide => 'CodeWalk에 표시';
+
+  @override
+  String get sessionsActionDelete => '삭제';
+
+  @override
+  String get sessionsActionRenameTitle => '세션 이름 바꾸기';
+
+  @override
+  String get sessionsActionRenameLabel => '새 제목';
+
+  @override
+  String get sessionsActionRenameSave => '저장';
+
+  @override
+  String get sessionsActionDeleteTitle => '세션 삭제';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return '\"$title\" 세션을 영구히 삭제합니다. 실행 중인 턴은 중단됩니다.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return '하위 세션 $count개와 그 아래 모든 항목도 삭제됩니다.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return '최소 $count개의 하위 세션과 그 아래 모든 항목도 삭제됩니다.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown => '하위 세션과 그 아래 모든 항목도 삭제됩니다.';
+
+  @override
+  String get sessionsActionDeleteCounting => '하위 세션 수 세는 중…';
+
+  @override
+  String get sessionsActionUnavailableVersion => '엔드포인트 버전이 확인되지 않았습니다.';
+
+  @override
+  String get sessionsActionUnavailablePlatform => '이 플랫폼은 엔드포인트에 연결할 수 없습니다.';
+
+  @override
+  String get sessionsActionUnavailableAuth => '엔드포인트가 자격 증명을 거부했습니다.';
+
+  @override
+  String get sessionsActionUnavailableList => '목록은 엔드포인트의 현재 답이 아닙니다.';
+
+  @override
+  String get sessionsActionUnavailableBusy => '이 세션에서 다른 명령이 실행 중입니다.';
+
+  @override
+  String get sessionsActionUnavailableMarker => '이 세션에는 읽음으로 표시할 항목이 없습니다.';
+
+  @override
+  String get sessionsActionUnread => '읽지 않음';
+
+  @override
+  String get sessionsActionPending => '처리 중…';
+
+  @override
+  String get sessionsActionFailed => '명령이 실행되지 않았습니다.';
+
+  @override
+  String get sessionsFilterActive => '활성';
+
+  @override
+  String get sessionsFilterHidden => '숨김';
+
+  @override
+  String get sessionsFilterAll => '전체';
+
+  @override
+  String get sessionsActionUnavailableStore => '숨겨진 세션 목록을 읽을 수 없습니다.';
 }

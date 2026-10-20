@@ -86,10 +86,34 @@ final class SessionInfo {
 }
 
 final class SessionSummary {
-  const SessionSummary({required this.info, this.execution, this.updatedAt});
+  const SessionSummary({
+    required this.info,
+    this.execution,
+    this.updatedAt,
+    this.view,
+  });
   final SessionInfo info;
   final ExecutionState? execution;
   final DateTime? updatedAt;
+
+  /// The endpoint's unread marker, when the record carried one.
+  ///
+  /// It belongs to the summary and not to the info, because a session's
+  /// identity does not change when the unread marker does: the created event
+  /// carries no marker, and the info it projects still equals the info of
+  /// the later read.
+  final SessionViewMarker? view;
+}
+
+/// The endpoint's unread marker for a session: the last idle transition and
+/// when that transition was seen.
+final class SessionViewMarker {
+  const SessionViewMarker({required this.idleAt, this.viewedAt});
+  final DateTime idleAt;
+  final DateTime? viewedAt;
+
+  /// The session is unread while its latest idle transition was not seen.
+  bool get unread => viewedAt == null || viewedAt!.isBefore(idleAt);
 }
 
 final class SessionQuery {

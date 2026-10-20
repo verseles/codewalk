@@ -45,6 +45,18 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the label follows the rows the server just returned after a live re-read, and the expanded row keeps its label
 - **Then** no ownership is inferred from the endpoint address, the port, the profile or the server's title, and the label never authorizes an action
 
+### V2 session row actions
+
+- **Given** the v2 session catalog shows a row
+- **When** the row's overflow control is opened
+- **Then** it offers mark as viewed (only on a row the endpoint reports as unread), rename, fork from here, hide in CodeWalk and delete
+- **Then** an action the connected endpoint's own version does not define is disabled and shows the reason, and a command already running for that row disables the control
+- **Then** the unread marker is the endpoint's own: the session went idle and that transition was not seen yet
+- **Then** a rename refuses an empty title locally, and the new title appears after the next authoritative read
+- **Then** a delete asks for a confirmation that names the session, says the action cannot be undone and that a running turn is stopped, and warns with the real number of child sessions; the confirmation waits for that count
+- **Then** a fork copies the whole session history, because a catalog row has no message position
+- **Then** hide in CodeWalk is a local state the endpoint never sees: the row stops being shown, it comes back through the hidden filter, and a local state that could not be read is never overwritten
+- **Then** no command patches a row: the effect is observed by the next authoritative read, and a refused or uncertain command leaves the rows as the endpoint last answered them
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog

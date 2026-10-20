@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
+import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import 'session_actions_menu.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
@@ -131,6 +133,29 @@ class _SessionsPageState extends State<SessionsPage> {
                   const SizedBox(height: 12),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
+                    child: PopupMenuButton<SessionActionFilter>(
+                      key: const ValueKey('sessions-filter'),
+                      tooltip: l10n.sessionsFilterActive,
+                      onSelected: controller.setFilter,
+                      itemBuilder: (context) => [
+                        for (final filter in SessionActionFilter.values)
+                          PopupMenuItem<SessionActionFilter>(
+                            value: filter,
+                            child: Text(_filterLabel(l10n, filter)),
+                          ),
+                      ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_filterLabel(l10n, controller.filter)),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
                     child: FilledButton.tonal(
                       key: const ValueKey('sessions-refresh'),
                       onPressed:
@@ -246,6 +271,41 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
+  /// The label of the filter that shows which sessions the list holds.
+  String _filterLabel(V2Localizations l10n, SessionActionFilter filter) =>
+      switch (filter) {
+        SessionActionFilter.active => l10n.sessionsFilterActive,
+        SessionActionFilter.hidden => l10n.sessionsFilterHidden,
+        SessionActionFilter.all => l10n.sessionsFilterAll,
+      };
+
+  /// The endpoint's own unread marker: the session went idle and that
+  /// transition was not seen yet.
+  Widget _unreadMark(BuildContext context, SessionSummary row) {
+    final l10n = context.v2L10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.circle,
+            size: 10,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            l10n.sessionsActionUnread,
+            key: ValueKey('session-unread-${row.info.ref.storageKey}'),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _row(
     BuildContext context,
     SessionsController controller,
@@ -263,38 +323,61 @@ class _SessionsPageState extends State<SessionsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        row.info.title.trim().isEmpty
-                            ? l10n.sessionExportUntitled
-                            : row.info.title,
-                        maxLines: expanded ? null : 3,
-                        overflow: expanded ? null : TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      // The ownership the adapter proved, and nothing else:
-                      // an unproven, stale or expired proof, and a list that
-                      // is not the endpoint's current answer, show unknown.
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          sessionOwnershipLabel(
-                            l10n,
-                            displayedSessionOwnership(
-                              row.info.ownership,
-                              now: controller.now,
-                              current: !controller.stale && !controller.behind,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  row.info.title.trim().isEmpty
+                                      ? l10n.sessionExportUntitled
+                                      : row.info.title,
+                                  maxLines: expanded ? null : 3,
+                                  overflow: expanded
+                                      ? null
+                                      : TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                // The ownership the adapter proved, and
+                                // nothing else: an unproven, stale or expired
+                                // proof, and a list that is not the
+                                // endpoint's current answer, show unknown.
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    sessionOwnershipLabel(
+                                      l10n,
+                                      displayedSessionOwnership(
+                                        row.info.ownership,
+                                        now: controller.now,
+                                        current: !controller.stale &&
+                                            !controller.behind,
+                                      ),
+                                    ),
+                                    key: ValueKey(
+                                      'session-ownership-${row.info.ref.storageKey}',
+                                    ),
+                                    style: Theme.of(context).textTheme.labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ),
+                                if (controller.viewState(row) ==
+                                    SessionViewState.unread)
+                                  _unreadMark(context, row),
+                              ],
                             ),
                           ),
-                          key: ValueKey(
-                            'session-ownership-${row.info.ref.storageKey}',
+                          SessionActionsMenu(
+                            controller: controller,
+                            row: row,
                           ),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
+                        ],
                       ),
                       if (expanded) ...[
                         if (row.updatedAt case final date?)

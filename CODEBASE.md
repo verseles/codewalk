@@ -2317,6 +2317,26 @@ answers with another session is refused, because the endpoint returns the
 session that identifier already owns and ignores the changed fields. The
 client mints no identifier and authorizes nothing.
 
+## V2-043G session row actions (#393)
+
+```text
+lib/shared/sessions/session_actions.dart # The port: the action vocabulary, the reasons an action is unavailable, the unread marker and the local hide
+lib/platform/sessions/session_action_source_io.dart # The OpenCode actions: the endpoint's own commands, the children count and the local hide
+lib/platform/sessions/hidden_session_store.dart # The sessions hidden in CodeWalk, a local state the endpoint never sees
+lib/features/sessions/session_actions_menu.dart # The row's overflow control, the rename dialog and the delete confirmation with the cascade count
+lib/features/sessions/sessions_controller.dart # The action support, the pending commands, the filter and the commands that never patch a row
+```
+
+The authorization is the endpoint's own contract, the profile's credential and
+the currency of the loaded rows: the ownership of a session is evidence, not
+permission, and the OpenCode endpoint reports it as unknown, so it is never
+consulted. The version is the one the profile's own probe observed, so a
+capability is never discovered by trying a mutation. The unread marker is the
+endpoint's `time.viewed` against `time.idle`, carried on the summary and not
+on the info, because a session's identity does not change when the marker
+does. No command patches a row: the effect is observed by the quiet
+authoritative re-read.
+
 ## V2-043E session ownership label (#393)
 
 ```text

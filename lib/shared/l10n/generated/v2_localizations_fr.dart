@@ -1162,4 +1162,105 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'Propriété inconnue';
+
+  @override
+  String get sessionsActionsMenu => 'Actions';
+
+  @override
+  String get sessionsActionMarkViewed => 'Marquer comme vu';
+
+  @override
+  String get sessionsActionRename => 'Renommer';
+
+  @override
+  String get sessionsActionFork => 'Forker à partir d\'ici';
+
+  @override
+  String get sessionsActionHide => 'Masquer dans CodeWalk';
+
+  @override
+  String get sessionsActionUnhide => 'Afficher dans CodeWalk';
+
+  @override
+  String get sessionsActionDelete => 'Supprimer';
+
+  @override
+  String get sessionsActionRenameTitle => 'Renommer la session';
+
+  @override
+  String get sessionsActionRenameLabel => 'Nouveau titre';
+
+  @override
+  String get sessionsActionRenameSave => 'Enregistrer';
+
+  @override
+  String get sessionsActionDeleteTitle => 'Supprimer la session';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'Cela supprime \"$title\" définitivement. Une exécution en cours est arrêtée.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'Cela supprime aussi $count sessions enfants et tout ce qu\'elles contiennent.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'Cela supprime aussi au moins $count sessions enfants et tout ce qu\'elles contiennent.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'Cela supprime aussi les sessions enfants et tout ce qu\'elles contiennent.';
+
+  @override
+  String get sessionsActionDeleteCounting => 'Comptage des sessions enfants…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'La version du point de terminaison n\'est pas vérifiée.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'Cette plateforme ne peut pas joindre le point de terminaison.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'Le point de terminaison a refusé les identifiants.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'La liste n\'est pas la réponse actuelle du point de terminaison.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'Une autre commande est en cours pour cette session.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'Cette session n\'a rien à marquer comme vu.';
+
+  @override
+  String get sessionsActionUnread => 'Non lu';
+
+  @override
+  String get sessionsActionPending => 'En cours…';
+
+  @override
+  String get sessionsActionFailed => 'La commande n\'a pas abouti.';
+
+  @override
+  String get sessionsFilterActive => 'Actives';
+
+  @override
+  String get sessionsFilterHidden => 'Masquées';
+
+  @override
+  String get sessionsFilterAll => 'Toutes';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'La liste des sessions masquées n\'a pas pu être lue.';
 }

@@ -1065,4 +1065,97 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => '归属未知';
+
+  @override
+  String get sessionsActionsMenu => '操作';
+
+  @override
+  String get sessionsActionMarkViewed => '标记为已读';
+
+  @override
+  String get sessionsActionRename => '重命名';
+
+  @override
+  String get sessionsActionFork => '从此处分支';
+
+  @override
+  String get sessionsActionHide => '在 CodeWalk 中隐藏';
+
+  @override
+  String get sessionsActionUnhide => '在 CodeWalk 中显示';
+
+  @override
+  String get sessionsActionDelete => '删除';
+
+  @override
+  String get sessionsActionRenameTitle => '重命名会话';
+
+  @override
+  String get sessionsActionRenameLabel => '新标题';
+
+  @override
+  String get sessionsActionRenameSave => '保存';
+
+  @override
+  String get sessionsActionDeleteTitle => '删除会话';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return '这将永久删除“$title”。正在运行的回合会被中断。';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return '这还会删除 $count 个子会话及其下的一切。';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return '这还会删除至少 $count 个子会话及其下的一切。';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown => '这还会删除子会话及其下的一切。';
+
+  @override
+  String get sessionsActionDeleteCounting => '正在统计子会话…';
+
+  @override
+  String get sessionsActionUnavailableVersion => '未验证端点版本。';
+
+  @override
+  String get sessionsActionUnavailablePlatform => '此平台无法访问端点。';
+
+  @override
+  String get sessionsActionUnavailableAuth => '端点拒绝了凭据。';
+
+  @override
+  String get sessionsActionUnavailableList => '列表不是端点的当前回答。';
+
+  @override
+  String get sessionsActionUnavailableBusy => '此会话有另一个命令正在运行。';
+
+  @override
+  String get sessionsActionUnavailableMarker => '此会话没有可标记为已读的内容。';
+
+  @override
+  String get sessionsActionUnread => '未读';
+
+  @override
+  String get sessionsActionPending => '处理中…';
+
+  @override
+  String get sessionsActionFailed => '命令未成功。';
+
+  @override
+  String get sessionsFilterActive => '活动';
+
+  @override
+  String get sessionsFilterHidden => '已隐藏';
+
+  @override
+  String get sessionsFilterAll => '全部';
+
+  @override
+  String get sessionsActionUnavailableStore => '无法读取隐藏会话列表。';
 }

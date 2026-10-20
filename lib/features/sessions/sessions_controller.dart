@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
@@ -12,6 +13,7 @@ class SessionsController extends ChangeNotifier {
     required this.hosts,
     required this.sourceFactory,
     this.changesFactory,
+    this.actionFactory,
     DateTime Function()? now,
     this.liveDebounce = const Duration(milliseconds: 300),
     this.liveMinInterval = const Duration(seconds: 2),
@@ -25,6 +27,10 @@ class SessionsController extends ChangeNotifier {
   /// the endpoint's single event stream, shared with the live sessions: the
   /// list never opens a second subscription.
   final SessionCatalogChangesFactory? changesFactory;
+
+  /// The factory of the session actions of the selected profile: the
+  /// endpoint's own commands and the local hide.
+  final SessionActionFactory? actionFactory;
 
   /// How long a burst of changes collapses before the re-read starts.
   final Duration liveDebounce;
@@ -73,12 +79,55 @@ class SessionsController extends ChangeNotifier {
   int _livePagesRead = 0;
   bool _liveHasMore = false;
   bool _liveOmitted = false;
+  // The session actions: the endpoint's own commands, the local hide and the
+  // commands that are in flight.
+  SessionActionSource? _actions;
+  SessionActionSupport _actionSupport = const SessionActionSupport(
+    SessionActionReason.versionUnverified,
+  );
+  final _pendingActions = <SessionRef>{};
+  SessionActionFilter _filter = SessionActionFilter.active;
   final _received = <String>{};
   final _requested = <String>{};
   List<SessionSummary> _sessions = const [];
   SessionSummary? _selectedSession;
   EndpointProfile? get selectedProfile => _profile;
-  List<SessionSummary> get sessions => _sessions;
+  List<SessionSummary> get sessions {
+    final source = _actions;
+    if (source == null || _filter == SessionActionFilter.all) return _sessions;
+    return _sessions
+        .where((row) {
+          final hidden = source.isHidden(row);
+          return _filter == SessionActionFilter.hidden ? hidden : !hidden;
+        })
+        .toList(growable: false);
+  }
+
+  /// Which sessions the catalog shows.
+  SessionActionFilter get filter => _filter;
+
+  /// Shows the active, the hidden or every session.
+  void setFilter(SessionActionFilter filter) {
+    if (_filter == filter) return;
+    _filter = filter;
+    _notify();
+  }
+
+  /// The endpoint's support for the session actions.
+  SessionActionSupport get actionSupport => _actionSupport;
+
+  /// Whether a command for this row is in flight.
+  bool actionPending(SessionRef ref) => _pendingActions.contains(ref);
+
+  /// The unread marker of a row, from the endpoint's own epochs.
+  SessionViewState viewState(SessionSummary row) =>
+      _actions?.viewState(row) ?? SessionViewState.unknown;
+
+  /// Whether the local hide can be read and written.
+  bool get hideAvailable => _actions?.hideAvailable ?? false;
+
+  /// Whether the row is hidden in CodeWalk.
+  bool isHidden(SessionSummary row) => _actions?.isHidden(row) ?? false;
   SessionSummary? get selectedSession => _selectedSession;
   SessionCatalogFailure? failure;
   bool loading = false;
@@ -112,6 +161,8 @@ class SessionsController extends ChangeNotifier {
     if (closeSource) {
       _source?.close();
       _source = null;
+      _actions?.close();
+      _actions = null;
       _closeChanges();
     }
   }
@@ -209,7 +260,15 @@ class SessionsController extends ChangeNotifier {
       return false;
     }
     try {
-      if (createSource) _source ??= sourceFactory(current, credential!);
+      if (createSource) {
+        _source ??= sourceFactory(current, credential!);
+        _actions ??= actionFactory?.call(
+          current,
+          credential!,
+          hosts.assessments[current.id]?.version,
+        );
+        if (_actions != null) unawaited(_probeActions());
+      }
       return true;
     } on SessionCatalogException catch (error) {
       failure = error.failure;
@@ -474,6 +533,76 @@ class SessionsController extends ChangeNotifier {
           _behind = true;
           _notify();
         }
+    }
+  }
+
+  Future<void> _probeActions() async {
+    final source = _actions;
+    if (source == null) return;
+    final support = await source.support();
+    if (_disposed || !identical(source, _actions)) return;
+    _actionSupport = support;
+    _notify();
+  }
+
+  /// Renames the row. The effect is observed by the authoritative re-read.
+  Future<SessionActionOutcome> rename(SessionSummary row, String title) =>
+      _run(row, () => _actions!.rename(row, title));
+
+  /// Deletes the row and its children.
+  Future<SessionActionOutcome> delete(SessionSummary row) =>
+      _run(row, () => _actions!.delete(row));
+
+  /// Copies the row's history into a new root session.
+  Future<SessionActionOutcome> fork(SessionSummary row) =>
+      _run(row, () => _actions!.fork(row));
+
+  /// Marks the row's idle transition as viewed.
+  Future<SessionActionOutcome> markViewed(SessionSummary row) =>
+      _run(row, () => _actions!.markViewed(row));
+
+  /// The direct children of the row, for the cascade warning. Null when the
+  /// count could not be read.
+  Future<int?> childCount(SessionSummary row) async =>
+      _actions?.childCount(row);
+
+  /// Hides the row in CodeWalk, or shows it again.
+  Future<bool> setHidden(
+    SessionSummary row, {
+    required bool hidden,
+  }) async {
+    final source = _actions;
+    if (source == null) return false;
+    final written = await source.setHidden(row, hidden: hidden);
+    _notify();
+    return written;
+  }
+
+  /// Runs one command for a row.
+  ///
+  /// The row is never patched: the effect is observed by the quiet
+  /// authoritative re-read, and a refused or uncertain command leaves the
+  /// rows exactly as the endpoint last answered.
+  Future<SessionActionOutcome> _run(
+    SessionSummary row,
+    Future<SessionActionOutcome> Function() command,
+  ) async {
+    final source = _actions;
+    if (source == null) return SessionActionOutcome.unavailable;
+    if (_pendingActions.contains(row.info.ref)) {
+      return SessionActionOutcome.unavailable;
+    }
+    _pendingActions.add(row.info.ref);
+    _notify();
+    try {
+      final outcome = await command();
+      if (outcome == SessionActionOutcome.accepted) {
+        _markLiveChange();
+      }
+      return outcome;
+    } finally {
+      _pendingActions.remove(row.info.ref);
+      _notify();
     }
   }
 

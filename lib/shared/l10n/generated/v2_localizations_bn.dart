@@ -1132,4 +1132,104 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'মালিকানা অজানা';
+
+  @override
+  String get sessionsActionsMenu => 'অ্যাকশন';
+
+  @override
+  String get sessionsActionMarkViewed => 'পঠিত হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get sessionsActionRename => 'নাম বদলান';
+
+  @override
+  String get sessionsActionFork => 'এখান থেকে ফর্ক';
+
+  @override
+  String get sessionsActionHide => 'CodeWalk-এ লুকান';
+
+  @override
+  String get sessionsActionUnhide => 'CodeWalk-এ দেখান';
+
+  @override
+  String get sessionsActionDelete => 'মুছুন';
+
+  @override
+  String get sessionsActionRenameTitle => 'সেশনের নাম বদলান';
+
+  @override
+  String get sessionsActionRenameLabel => 'নতুন শিরোনাম';
+
+  @override
+  String get sessionsActionRenameSave => 'সংরক্ষণ';
+
+  @override
+  String get sessionsActionDeleteTitle => 'সেশন মুছুন';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'এটি \"$title\" স্থায়ীভাবে মুছে ফেলবে। চলমান টার্ন বন্ধ হবে।';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'এতে $countটি শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'এতে অন্তত $countটি শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'এতে শিশু সেশন এবং তার নিচের সবকিছুও মুছে যাবে।';
+
+  @override
+  String get sessionsActionDeleteCounting => 'শিশু সেশন গোনা হচ্ছে…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'এন্ডপয়েন্টের সংস্করণ যাচাই করা হয়নি।';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'এই প্ল্যাটফর্ম এন্ডপয়েন্টে পৌঁছাতে পারে না।';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'এন্ডপয়েন্ট শর্তাবলী প্রত্যাখ্যান করেছে।';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'তালিকাটি এন্ডপয়েন্টের বর্তমান উত্তর নয়।';
+
+  @override
+  String get sessionsActionUnavailableBusy => 'এই সেশনে আরেকটি কমান্ড চলছে।';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'এই সেশনে পঠিত হিসেবে চিহ্নিত করার মতো কিছু নেই।';
+
+  @override
+  String get sessionsActionUnread => 'অপঠিত';
+
+  @override
+  String get sessionsActionPending => 'চলছে…';
+
+  @override
+  String get sessionsActionFailed => 'কমান্ডটি কাজ করেনি।';
+
+  @override
+  String get sessionsFilterActive => 'সক্রিয়';
+
+  @override
+  String get sessionsFilterHidden => 'লুকানো';
+
+  @override
+  String get sessionsFilterAll => 'সব';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'লুকানো সেশনের তালিকা পড়া যায়নি।';
 }

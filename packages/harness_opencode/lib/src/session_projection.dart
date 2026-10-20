@@ -28,6 +28,15 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
     directory = _text(_object(location)['directory']);
     metadata['nativeDirectory'] = directory;
   }
+  // The unread marker: the endpoint's idle and viewed epochs. They are
+  // optional fields of the record, so an absent or unusable value leaves the
+  // marker out instead of failing the page.
+  SessionViewMarker? view;
+  final idle = _optionalEpoch(time['idle']);
+  if (idle != null) {
+    final viewed = _optionalEpoch(time['viewed']);
+    view = SessionViewMarker(idleAt: idle, viewedAt: viewed);
+  }
 
   ForkLineage? fork;
   if (data['fork'] != null) {
@@ -43,6 +52,7 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
   }
 
   return SessionSummary(
+    view: view,
     info: SessionInfo(
       ref: SessionRef(harness.host, harness.harness, id),
       title: title as String? ?? '',
@@ -96,6 +106,18 @@ Map<String, Object?> _object(Object? value) {
 DateTime _instant(Object? value) {
   if (value is! num || !value.isFinite || value.abs() > 8640000000000000) {
     _malformed();
+  }
+  return DateTime.fromMicrosecondsSinceEpoch(
+    (value * 1000).round(),
+    isUtc: true,
+  );
+}
+
+/// An optional epoch in milliseconds, or null when the value is absent or not
+/// a usable instant.
+DateTime? _optionalEpoch(Object? value) {
+  if (value is! num || !value.isFinite || value.abs() > 8640000000000000) {
+    return null;
   }
   return DateTime.fromMicrosecondsSinceEpoch(
     (value * 1000).round(),

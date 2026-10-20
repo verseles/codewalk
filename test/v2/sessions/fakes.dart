@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk/features/hosts/hosts_controller.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
+import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -156,4 +157,105 @@ class LiveCatalogChanges implements SessionCatalogChanges {
     closes++;
     unawaited(_controller.close());
   }
+}
+
+
+/// A scripted session action source for the widget tests.
+///
+/// It answers the platform's contract without a transport: the support, the
+/// unread marker, the child count, the commands and the local hide.
+final class FakeActionSource implements SessionActionSource {
+  FakeActionSource({
+    this.endpointSupport = const SessionActionSupport(
+      SessionActionReason.none,
+    ),
+    this.children = 0,
+    Map<String, SessionViewState> viewStates = const {},
+  }) : viewStates = {...viewStates};
+
+  /// The endpoint's support for the actions.
+  SessionActionSupport endpointSupport;
+
+  /// The direct children of a row, or null when the count cannot be read.
+  int? children;
+
+  /// The unread marker of a row, by its storage key.
+  Map<String, SessionViewState> viewStates = {};
+
+  /// The outcome of every command, by its name.
+  final outcomes = <String, SessionActionOutcome>{};
+
+  /// The commands the tests received, in order.
+  final calls = <String>[];
+
+  /// The titles the renames carried.
+  final titles = <String>[];
+
+  /// The sessions hidden in CodeWalk, by their storage key.
+  final hidden = <String>{};
+
+  /// Whether the local hide can be read and written.
+  @override
+  bool hideAvailable = true;
+
+  @override
+  final HarnessRef harness = const HarnessRef(
+    HostId('host-a'),
+    HarnessInstanceId('native-a'),
+  );
+
+  @override
+  Future<SessionActionSupport> support() async => endpointSupport;
+
+  @override
+  SessionViewState viewState(SessionSummary row) =>
+      viewStates[row.info.ref.storageKey] ?? SessionViewState.unknown;
+
+  @override
+  Future<int?> childCount(SessionSummary row) async => children;
+
+  @override
+  Future<SessionActionOutcome> rename(SessionSummary row, String title) async {
+    calls.add('rename');
+    titles.add(title);
+    return outcomes['rename'] ?? SessionActionOutcome.accepted;
+  }
+
+  @override
+  Future<SessionActionOutcome> delete(SessionSummary row) async {
+    calls.add('delete');
+    return outcomes['delete'] ?? SessionActionOutcome.accepted;
+  }
+
+  @override
+  Future<SessionActionOutcome> fork(SessionSummary row) async {
+    calls.add('fork');
+    return outcomes['fork'] ?? SessionActionOutcome.accepted;
+  }
+
+  @override
+  Future<SessionActionOutcome> markViewed(SessionSummary row) async {
+    calls.add('markViewed');
+    return outcomes['markViewed'] ?? SessionActionOutcome.accepted;
+  }
+
+  @override
+  bool isHidden(SessionSummary row) => hidden.contains(row.info.ref.storageKey);
+
+  @override
+  Future<bool> setHidden(
+    SessionSummary row, {
+    required bool hidden,
+  }) async {
+    calls.add(hidden ? 'hide' : 'unhide');
+    if (hidden) {
+      this.hidden.add(row.info.ref.storageKey);
+    } else {
+      this.hidden.remove(row.info.ref.storageKey);
+    }
+    return true;
+  }
+
+  @override
+  void close() {}
 }

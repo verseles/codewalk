@@ -1151,4 +1151,105 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'Владелец неизвестен';
+
+  @override
+  String get sessionsActionsMenu => 'Действия';
+
+  @override
+  String get sessionsActionMarkViewed => 'Отметить прочитанным';
+
+  @override
+  String get sessionsActionRename => 'Переименовать';
+
+  @override
+  String get sessionsActionFork => 'Форкнуть отсюда';
+
+  @override
+  String get sessionsActionHide => 'Скрыть в CodeWalk';
+
+  @override
+  String get sessionsActionUnhide => 'Показать в CodeWalk';
+
+  @override
+  String get sessionsActionDelete => 'Удалить';
+
+  @override
+  String get sessionsActionRenameTitle => 'Переименовать сессию';
+
+  @override
+  String get sessionsActionRenameLabel => 'Новое название';
+
+  @override
+  String get sessionsActionRenameSave => 'Сохранить';
+
+  @override
+  String get sessionsActionDeleteTitle => 'Удалить сессию';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'Это навсегда удалит \"$title\". Выполняющийся turn будет прерван.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'Также будут удалены дочерние сессии ($count) и всё, что находится ниже них.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'Также будут удалены как минимум $count дочерних сессий и всё, что находится ниже них.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'Также будут удалены дочерние сессии и всё, что находится ниже них.';
+
+  @override
+  String get sessionsActionDeleteCounting => 'Считаем дочерние сессии…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'Версия endpoint не проверена.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'Эта платформа не может обратиться к endpoint.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'Endpoint отклонил учётные данные.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'Список — не текущий ответ endpoint.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'Для этой сессии выполняется другая команда.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'В этой сессии нечего отмечать прочитанным.';
+
+  @override
+  String get sessionsActionUnread => 'Не прочитано';
+
+  @override
+  String get sessionsActionPending => 'Выполняется…';
+
+  @override
+  String get sessionsActionFailed => 'Команда не прошла.';
+
+  @override
+  String get sessionsFilterActive => 'Активные';
+
+  @override
+  String get sessionsFilterHidden => 'Скрытые';
+
+  @override
+  String get sessionsFilterAll => 'Все';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'Не удалось прочитать список скрытых сессий.';
 }

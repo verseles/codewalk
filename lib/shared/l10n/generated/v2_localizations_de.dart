@@ -1166,4 +1166,106 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get sessionsOwnershipUnknown => 'Eigentum unbekannt';
+
+  @override
+  String get sessionsActionsMenu => 'Aktionen';
+
+  @override
+  String get sessionsActionMarkViewed => 'Als gelesen markieren';
+
+  @override
+  String get sessionsActionRename => 'Umbenennen';
+
+  @override
+  String get sessionsActionFork => 'Von hier abzweigen';
+
+  @override
+  String get sessionsActionHide => 'In CodeWalk ausblenden';
+
+  @override
+  String get sessionsActionUnhide => 'In CodeWalk anzeigen';
+
+  @override
+  String get sessionsActionDelete => 'Löschen';
+
+  @override
+  String get sessionsActionRenameTitle => 'Sitzung umbenennen';
+
+  @override
+  String get sessionsActionRenameLabel => 'Neuer Titel';
+
+  @override
+  String get sessionsActionRenameSave => 'Speichern';
+
+  @override
+  String get sessionsActionDeleteTitle => 'Sitzung löschen';
+
+  @override
+  String sessionsActionDeleteBody(Object title) {
+    return 'Damit wird \"$title\" endgültig gelöscht. Ein laufender Durchlauf wird gestoppt.';
+  }
+
+  @override
+  String sessionsActionDeleteChildren(Object count) {
+    return 'Damit werden auch $count untergeordnete Sitzungen und alles darunter gelöscht.';
+  }
+
+  @override
+  String sessionsActionDeleteChildrenAtLeast(Object count) {
+    return 'Damit werden auch mindestens $count untergeordnete Sitzungen und alles darunter gelöscht.';
+  }
+
+  @override
+  String get sessionsActionDeleteChildrenUnknown =>
+      'Damit werden auch die untergeordneten Sitzungen und alles darunter gelöscht.';
+
+  @override
+  String get sessionsActionDeleteCounting =>
+      'Untergeordnete Sitzungen werden gezählt…';
+
+  @override
+  String get sessionsActionUnavailableVersion =>
+      'Die Version des Endpunkts ist nicht geprüft.';
+
+  @override
+  String get sessionsActionUnavailablePlatform =>
+      'Diese Plattform erreicht den Endpunkt nicht.';
+
+  @override
+  String get sessionsActionUnavailableAuth =>
+      'Der Endpunkt hat die Anmeldedaten abgelehnt.';
+
+  @override
+  String get sessionsActionUnavailableList =>
+      'Die Liste ist nicht die aktuelle Antwort des Endpunkts.';
+
+  @override
+  String get sessionsActionUnavailableBusy =>
+      'Für diese Sitzung läuft bereits ein anderer Befehl.';
+
+  @override
+  String get sessionsActionUnavailableMarker =>
+      'Diese Sitzung hat nichts als gelesen zu markieren.';
+
+  @override
+  String get sessionsActionUnread => 'Ungelesen';
+
+  @override
+  String get sessionsActionPending => 'Wird ausgeführt…';
+
+  @override
+  String get sessionsActionFailed => 'Der Befehl ist nicht durchgegangen.';
+
+  @override
+  String get sessionsFilterActive => 'Aktive';
+
+  @override
+  String get sessionsFilterHidden => 'Ausgeblendete';
+
+  @override
+  String get sessionsFilterAll => 'Alle';
+
+  @override
+  String get sessionsActionUnavailableStore =>
+      'Die Liste der ausgeblendeten Sitzungen konnte nicht gelesen werden.';
 }
