@@ -618,11 +618,12 @@ class SessionsController extends ChangeNotifier {
     if (_creating) return SessionActionOutcome.unavailable;
     if (!_ready(createSource: false) ||
         _actionSupport.reason != SessionActionReason.none ||
+        !loaded ||
         stale ||
         behind ||
         _livePending) {
-      _actionFailure = SessionActionOutcome.unavailable;
-      _notify();
+      // Nothing was sent, so the list keeps no failure notice: the dialog
+      // says why the create was refused and the user retries.
       return SessionActionOutcome.unavailable;
     }
     _creating = true;
@@ -636,7 +637,12 @@ class SessionsController extends ChangeNotifier {
       }
       if (outcome == SessionActionOutcome.accepted ||
           outcome == SessionActionOutcome.uncertain) {
+        // The effect is observed by the authoritative re-read. An uncertain
+        // create is reconciled there and never sent again.
         _markLiveChange();
+        if (outcome == SessionActionOutcome.uncertain) {
+          _actionPending = true;
+        }
       } else {
         _actionFailure = outcome;
       }

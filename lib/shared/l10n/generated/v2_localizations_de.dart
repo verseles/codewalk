@@ -1287,4 +1287,10 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => 'Erstellen';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'Der Pfad muss absolut sein';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'Der Pfad ist zu lang';
 }

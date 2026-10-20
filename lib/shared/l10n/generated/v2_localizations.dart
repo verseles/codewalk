@@ -2402,6 +2402,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get sessionsCreateConfirm;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The path must be absolute'**
+  String get sessionsCreateDirectoryAbsolute;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'The path is too long'**
+  String get sessionsCreateDirectoryTooLong;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

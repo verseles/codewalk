@@ -262,6 +262,7 @@ void main() {
       find.byKey(const ValueKey('sessions-create-directory')),
       '/work/other',
     );
+    await tester.pump();
     await tester.tap(find.text(l10n.sessionsCreateConfirm));
     await tester.pumpAndSettle();
     expect(actions.created, ['/work/other']);
@@ -285,6 +286,136 @@ void main() {
     await tester.pumpAndSettle();
     // The refused create is reported by the list and by the dialog.
     expect(controller.actionFailure, SessionActionOutcome.rejected);
+    expect(find.byKey(const ValueKey('sessions-create-failed')), findsOneWidget);
+  });
+
+  testWidgets('the create is disabled with its reason when it is not offered', (
+    tester,
+  ) async {
+    final (_, l10n, _) = await open(
+      tester,
+      support: const SessionActionSupport(
+        SessionActionReason.versionUnverified,
+      ),
+    );
+    final button = tester.widget<IconButton>(
+      find.byKey(const ValueKey('sessions-create')),
+    );
+    expect(button.onPressed, isNull);
+    expect(find.text(l10n.sessionsActionUnavailableVersion), findsWidgets);
+  });
+
+  testWidgets('a relative path is refused before anything is sent', (
+    tester,
+  ) async {
+    final (_, _, _) = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      'work/other',
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('sessions-create-invalid')), findsOneWidget);
+    // The confirm stays disabled while the path is not usable.
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('sessions-create-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+    expect(actions.calls, isNot(contains('create')));
+  });
+
+  testWidgets('a path over the bound is refused before anything is sent', (
+    tester,
+  ) async {
+    final (_, _, _) = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/${'x' * 5000}',
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('sessions-create-invalid')), findsOneWidget);
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('sessions-create-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+    expect(actions.calls, isNot(contains('create')));
+  });
+
+  testWidgets('the confirm is disabled while the create is in flight', (
+    tester,
+  ) async {
+    final (source, l10n, _) = await open(tester);
+    actions.createDelay = const Duration(milliseconds: 200);
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/other',
+    );
+    await tester.pump();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pump();
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('sessions-create-confirm')),
+    );
+    expect(confirm.onPressed, isNull);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+    // A second tap never sent a second create.
+    expect(actions.created, ['/work/other']);
+  });
+
+  testWidgets('a create whose answer was lost says the list is working', (
+    tester,
+  ) async {
+    final (source, l10n, _) = await open(tester);
+    actions.outcomes['create'] = SessionActionOutcome.uncertain;
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-create-directory')),
+      '/work/other',
+    );
+    await tester.pump();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pumpAndSettle();
+    // The dialog closes and the list waits for the authoritative read.
+    expect(find.byKey(const ValueKey('sessions-create-confirm')), findsNothing);
+    expect(find.text(l10n.sessionsActionPending), findsWidgets);
+  });
+
+  testWidgets('the created session arrives through the authoritative read', (
+    tester,
+  ) async {
+    final (source, l10n, _) = await open(
+      tester,
+      rows: (source) => [
+        source.row('first', title: 'First', directory: '/work/alpha'),
+      ],
+    );
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsCreateConfirm));
+    await tester.pump();
+    // The receipt never becomes a row.
+    expect(find.text('Second'), findsNothing);
+    // The endpoint's own record arrives with the next authoritative read.
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    expect(source.tasks.length, 2);
+    source.respond([
+      source.row('first', title: 'First', directory: '/work/alpha'),
+      source.row('second', title: 'Second', directory: '/work/alpha'),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text('Second'), findsOneWidget);
   });
 
   testWidgets('the local hide hides the row', (tester) async {

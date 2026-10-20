@@ -1249,4 +1249,10 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => 'إنشاء';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'يجب أن يكون المسار مطلقًا';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'المسار طويل جدًا';
 }

@@ -185,6 +185,9 @@ final class FakeActionSource implements SessionActionSource {
   /// The outcome of every command, by its name.
   final outcomes = <String, SessionActionOutcome>{};
 
+  /// How long the create waits before it answers.
+  Duration createDelay = Duration.zero;
+
   /// The commands the tests received, in order.
   final calls = <String>[];
 
@@ -232,6 +235,9 @@ final class FakeActionSource implements SessionActionSource {
     calls.add('create');
     created.add(directory);
     createdTitles.add(title);
+    if (createDelay > Duration.zero) {
+      await Future<void>.delayed(createDelay);
+    }
     return outcomes['create'] ?? SessionActionOutcome.accepted;
   }
 

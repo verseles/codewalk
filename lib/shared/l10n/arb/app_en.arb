@@ -1547,5 +1547,13 @@
   "sessionsCreateConfirm": "Create",
   "@sessionsCreateConfirm": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryAbsolute": "The path must be absolute",
+  "@sessionsCreateDirectoryAbsolute": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryTooLong": "The path is too long",
+  "@sessionsCreateDirectoryTooLong": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

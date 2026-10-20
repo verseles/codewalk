@@ -1034,7 +1034,7 @@
   "@sessionsCreateProject": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateOtherDirectory": "Another dossier…",
+  "sessionsCreateOtherDirectory": "Autre dossier…",
   "@sessionsCreateOtherDirectory": {
     "description": "V2 bounded read-only session catalog"
   },
@@ -1044,6 +1044,14 @@
   },
   "sessionsCreateConfirm": "Créer",
   "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryAbsolute": "Le chemin doit être absolu",
+  "@sessionsCreateDirectoryAbsolute": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryTooLong": "Le chemin est trop long",
+  "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
   }
 }

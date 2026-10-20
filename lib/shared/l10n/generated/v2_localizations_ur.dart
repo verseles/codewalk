@@ -1249,11 +1249,17 @@ class V2LocalizationsUr extends V2Localizations {
   String get sessionsCreateProject => 'پروجیکٹ';
 
   @override
-  String get sessionsCreateOtherDirectory => 'دوسرا ڈائریکٹری…';
+  String get sessionsCreateOtherDirectory => 'دوسری ڈائریکٹری…';
 
   @override
   String get sessionsCreateDirectoryHint => 'ڈائریکٹری کا مطلق راستہ';
 
   @override
   String get sessionsCreateConfirm => 'بنائیں';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'راستہ مطلق ہونی چاہیے';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'راستہ بہت طویل ہے';
 }

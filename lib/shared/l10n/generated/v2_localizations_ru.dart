@@ -1270,4 +1270,10 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => 'Создать';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'Путь должен быть абсолютным';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'Путь слишком длинный';
 }

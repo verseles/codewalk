@@ -1203,4 +1203,10 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => '만들기';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => '경로는 절대 경로여야 합니다';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => '경로가 너무 깁니다';
 }

@@ -1176,4 +1176,10 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => '创建';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => '路径必须是绝对路径';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => '路径太长';
 }

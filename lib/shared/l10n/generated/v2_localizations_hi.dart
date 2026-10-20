@@ -1259,4 +1259,11 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => 'बनाएँ';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute =>
+      'पथ निश्चित रूप से पूर्ण होना चाहिए';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'पथ बहुत लंबा है';
 }

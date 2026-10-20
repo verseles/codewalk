@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../shared/l10n/l10n_context.dart';
@@ -24,6 +26,8 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
   final _directory = TextEditingController();
   String? _selected;
   bool _failed = false;
+  bool _submitting = false;
+  bool _unavailable = false;
 
   @override
   void dispose() {
@@ -41,16 +45,59 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
     return segments.isEmpty ? directory : segments.last;
   }
 
+  /// The path the user typed, trimmed.
+  String get _typed => _directory.text.trim();
+
+  /// The reason the typed path cannot be sent, or null when it can.
+  ///
+  /// The rules mirror the client: a relative path would be resolved against
+  /// the endpoint's process directory, and a path over the bound would be
+  /// refused there, so both are refused here with a readable reason.
+  String? _pathProblem() {
+    final l10n = context.v2L10n;
+    final value = _typed;
+    if (value.isEmpty) return null;
+    if (!_absolutePath(value)) return l10n.sessionsCreateDirectoryAbsolute;
+    if (!_boundedPath(value)) return l10n.sessionsCreateDirectoryTooLong;
+    return null;
+  }
+
+  /// Whether the dialog can send a create.
+  bool get _canSubmit {
+    if (_submitting) return false;
+    if (_selected != null) return true;
+    return _typed.isNotEmpty && _pathProblem() == null;
+  }
+
   Future<void> _create() async {
-    final typed = _directory.text.trim();
+    if (_submitting) return;
+    final typed = _typed;
     final directory = _selected ?? (typed.isEmpty ? null : typed);
     if (directory == null) return;
-    setState(() => _failed = false);
+    if (_selected == null && _pathProblem() != null) {
+      // The path is refused locally, so nothing is sent.
+      setState(() {});
+      return;
+    }
+    setState(() {
+      _failed = false;
+      _unavailable = false;
+      _submitting = true;
+    });
     final outcome = await widget.controller.create(directory: directory);
     if (!mounted) return;
+    setState(() => _submitting = false);
     if (outcome == SessionActionOutcome.accepted ||
         outcome == SessionActionOutcome.uncertain) {
       Navigator.of(context).pop();
+      return;
+    }
+    if (outcome == SessionActionOutcome.unavailable &&
+        widget.controller.reconciling) {
+      // The create was never sent: the list is not the endpoint's current
+      // answer yet, so the user retries instead of believing that a command
+      // failed.
+      setState(() => _unavailable = true);
       return;
     }
     // The create did not go through: the dialog says so, because the list's
@@ -58,11 +105,32 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
     setState(() => _failed = true);
   }
 
+  /// An absolute path: a POSIX root or a Windows drive.
+  static bool _absolutePath(String value) =>
+      value.startsWith('/') || RegExp(r'^[A-Za-z]:[\\/]').hasMatch(value);
+
+  /// The client's bound on the path it sends, mirrored so the dialog refuses
+  /// it locally instead of letting the client refuse it later.
+  static bool _boundedPath(String value) =>
+      value.length <= _pathLimit &&
+      utf8.encode(value).length <= _pathLimit &&
+      utf8.decode(utf8.encode(value)) == value;
+
   @override
   Widget build(BuildContext context) {
+    // The projects follow the controller: a project the endpoint reports
+    // while the dialog is open is offered without reopening it.
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) => _dialog(context),
+    );
+  }
+
+  Widget _dialog(BuildContext context) {
     final l10n = context.v2L10n;
     final directories = widget.controller.knownDirectories;
     final selected = directories.contains(_selected) ? _selected : null;
+    final problem = selected == null ? _pathProblem() : null;
     return AlertDialog(
       scrollable: true,
       title: Text(l10n.sessionsCreateTitle),
@@ -105,6 +173,28 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
             l10n.sessionsCreateOtherDirectory,
             style: Theme.of(context).textTheme.titleSmall,
           ),
+          if (problem != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                problem,
+                key: const ValueKey('sessions-create-invalid'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          if (_unavailable)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l10n.sessionsActionUnavailableList,
+                key: const ValueKey('sessions-create-unavailable'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
           if (_failed)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -120,12 +210,16 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
             key: const ValueKey('sessions-create-directory'),
             controller: _directory,
             textDirection: TextDirection.ltr,
+            // The path is machine-typed, so the spell checker never rewrites
+            // a segment of it.
+            autocorrect: false,
+            enableSuggestions: false,
             decoration: InputDecoration(
               labelText: l10n.sessionsCreateDirectoryHint,
             ),
-            onChanged: (_) {
-              if (_selected != null) setState(() => _selected = null);
-            },
+            onChanged: (_) => setState(() {
+              if (_selected != null) _selected = null;
+            }),
           ),
         ],
       ),
@@ -136,10 +230,14 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
         ),
         FilledButton(
           key: const ValueKey('sessions-create-confirm'),
-          onPressed: _create,
+          onPressed: _canSubmit ? _create : null,
           child: Text(l10n.sessionsCreateConfirm),
         ),
       ],
     );
   }
 }
+
+/// The bound of the path the client sends, the same bound the harness client
+/// applies to the create's directory.
+const int _pathLimit = 4096;

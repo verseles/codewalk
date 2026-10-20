@@ -1274,11 +1274,17 @@ class V2LocalizationsFr extends V2Localizations {
   String get sessionsCreateProject => 'Projet';
 
   @override
-  String get sessionsCreateOtherDirectory => 'Another dossier…';
+  String get sessionsCreateOtherDirectory => 'Autre dossier…';
 
   @override
   String get sessionsCreateDirectoryHint => 'Le chemin absolu du dossier';
 
   @override
   String get sessionsCreateConfirm => 'Créer';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'Le chemin doit être absolu';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'Le chemin est trop long';
 }

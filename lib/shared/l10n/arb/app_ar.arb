@@ -1044,5 +1044,13 @@
   "sessionsCreateConfirm": "إنشاء",
   "@sessionsCreateConfirm": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryAbsolute": "يجب أن يكون المسار مطلقًا",
+  "@sessionsCreateDirectoryAbsolute": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryTooLong": "المسار طويل جدًا",
+  "@sessionsCreateDirectoryTooLong": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

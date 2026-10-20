@@ -1274,4 +1274,11 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => 'Criar';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute =>
+      'O caminho precisa ser absoluto';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'O caminho é longo demais';
 }

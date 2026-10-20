@@ -44,6 +44,11 @@ const _idLimit = 4096;
 /// the projection would later reject.
 const _titleLimit = 256 * 1024;
 
+/// An absolute path: a POSIX root or a Windows drive.
+bool _absolutePath(String value) =>
+    value.startsWith('/') ||
+    RegExp(r'^[A-Za-z]:[\\/]').hasMatch(value);
+
 bool _boundedText(String value, int bytes) =>
     value.length <= bytes &&
     utf8.encode(value).length <= bytes &&
@@ -103,6 +108,11 @@ final class OpenCodeSessionLifecycleClient {
     }
     if (directory.isEmpty || !_boundedText(directory, _idLimit)) {
       throw ArgumentError('The create body carries a bounded directory');
+    }
+    if (!_absolutePath(directory)) {
+      // A relative path would be resolved against the endpoint's process
+      // directory, which is the user's home under the background service.
+      throw ArgumentError('The create body carries an absolute directory');
     }
     if (title != null && !_boundedText(title, _titleLimit)) {
       throw ArgumentError('The create body carries a bounded title');

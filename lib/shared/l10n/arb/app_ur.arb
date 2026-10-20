@@ -1034,7 +1034,7 @@
   "@sessionsCreateProject": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateOtherDirectory": "دوسرا ڈائریکٹری…",
+  "sessionsCreateOtherDirectory": "دوسری ڈائریکٹری…",
   "@sessionsCreateOtherDirectory": {
     "description": "V2 bounded read-only session catalog"
   },
@@ -1044,6 +1044,14 @@
   },
   "sessionsCreateConfirm": "بنائیں",
   "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryAbsolute": "راستہ مطلق ہونی چاہیے",
+  "@sessionsCreateDirectoryAbsolute": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryTooLong": "راستہ بہت طویل ہے",
+  "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
   }
 }

@@ -1038,12 +1038,20 @@
   "@sessionsCreateOtherDirectory": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsCreateDirectoryHint": "ডিরেক্টরির নির্বাচিত পথ",
+  "sessionsCreateDirectoryHint": "ডিরেক্টরির একেজী পথ",
   "@sessionsCreateDirectoryHint": {
     "description": "V2 bounded read-only session catalog"
   },
   "sessionsCreateConfirm": "তৈরি করুন",
   "@sessionsCreateConfirm": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryAbsolute": "পথটি অবশ্যই একেজী হতে হবে",
+  "@sessionsCreateDirectoryAbsolute": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsCreateDirectoryTooLong": "পথটি অতিরিক্ত দীর্ঘ",
+  "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
   }
 }

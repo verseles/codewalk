@@ -1201,4 +1201,10 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsCreateConfirm => '作成';
+
+  @override
+  String get sessionsCreateDirectoryAbsolute => 'パスは絶対パスである必要があります';
+
+  @override
+  String get sessionsCreateDirectoryTooLong => 'パスが長すぎます';
 }

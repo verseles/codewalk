@@ -2322,7 +2322,9 @@ client mints no identifier and authorizes nothing.
 ```text
 lib/features/sessions/session_create_dialog.dart # The project choice: the canonical directories the endpoint reported and the free-form absolute path
 lib/features/sessions/sessions_controller.dart # The create command, its in-flight state, its reason precedence and the authoritative re-read that shows the new session
+lib/features/sessions/sessions_page.dart # The new-session control of the header and the reason line
 lib/platform/sessions/session_action_source_io.dart # The create command with the exact body: the directory and, when the caller supplies one, the title
+lib/shared/sessions/session_actions.dart # The port that carries the create, its reason vocabulary and its outcome
 tool/l10n/sessions_catalog.py # The scoped catalog with the creation copy
 ```
 

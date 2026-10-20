@@ -67,10 +67,13 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the v2 session catalog shows a saved server
 - **When** the user starts a new session
 - **Then** a dialog offers the projects the endpoint already reported, with the canonical directory always read left-to-right, and a free-form absolute path for a project the list has not shown
+- **Then** the free-form path is checked before anything is sent: it must be absolute and within the bound the client sends, and the confirm stays disabled while it is not
 - **Then** the request carries only that directory, the endpoint names the session, and the client never sends a model, an agent, the metadata, the permissions, a parent identifier or a directory header
 - **Then** the new session appears through the next authoritative read, with the endpoint's own record; the receipt never becomes a row
 - **Then** a create that the endpoint refused, or whose answer was lost, says so and is never sent again
-- **Then** the create is offered only while the list is the endpoint's current answer and the endpoint's own commands are available, and the reason is shown when it is not
+- **Then** a create that was not sent because the list was not the endpoint's current answer says that instead, and the list keeps no failure notice for a command that never left
+- **Then** the create is offered only while the list is the endpoint's current answer — not a previous result and not behind — and the endpoint's own commands are available, and the reason is shown when it is not
+
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog
