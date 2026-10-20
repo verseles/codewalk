@@ -885,5 +885,25 @@
   "sessionsUnknownProject": "Sessões sem projeto informado",
   "@sessionsUnknownProject": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipLiveShared": "Compartilhado ao vivo",
+  "@sessionsOwnershipLiveShared": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipHostOwned": "Deste host",
+  "@sessionsOwnershipHostOwned": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipSavedHistory": "Histórico salvo",
+  "@sessionsOwnershipSavedHistory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipRunningElsewhere": "Executando em outro lugar",
+  "@sessionsOwnershipRunningElsewhere": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipUnknown": "Propriedade desconhecida",
+  "@sessionsOwnershipUnknown": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

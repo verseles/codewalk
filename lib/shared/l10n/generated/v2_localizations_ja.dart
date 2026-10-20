@@ -1075,4 +1075,19 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => 'プロジェクトが報告されていないセッション';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'ライブ共有';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'このホストの';
+
+  @override
+  String get sessionsOwnershipSavedHistory => '保存された履歴';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => '別の場所で実行中';
+
+  @override
+  String get sessionsOwnershipUnknown => '所有権不明';
 }

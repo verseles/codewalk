@@ -87,6 +87,9 @@ class SessionsController extends ChangeNotifier {
   /// not succeed, or the feed that would trigger the next one dropped.
   bool get behind => _behind;
 
+  /// The injected clock. The list never reads the wall clock on its own.
+  DateTime get now => _now();
+
   /// An automatic re-read is running; it never shows the loading notice.
   bool get quietRefreshing => _quietRefreshing;
   Future<void> initialize() => _initialization ??= hosts.load();

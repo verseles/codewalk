@@ -885,5 +885,25 @@
   "sessionsUnknownProject": "プロジェクトが報告されていないセッション",
   "@sessionsUnknownProject": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipLiveShared": "ライブ共有",
+  "@sessionsOwnershipLiveShared": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipHostOwned": "このホストの",
+  "@sessionsOwnershipHostOwned": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipSavedHistory": "保存された履歴",
+  "@sessionsOwnershipSavedHistory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipRunningElsewhere": "別の場所で実行中",
+  "@sessionsOwnershipRunningElsewhere": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipUnknown": "所有権不明",
+  "@sessionsOwnershipUnknown": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

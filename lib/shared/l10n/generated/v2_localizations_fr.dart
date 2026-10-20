@@ -1147,4 +1147,19 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => 'Sessions sans projet signalé';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'Partagé en direct';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'De cet hôte';
+
+  @override
+  String get sessionsOwnershipSavedHistory => 'Historique enregistré';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => 'Exécuté ailleurs';
+
+  @override
+  String get sessionsOwnershipUnknown => 'Propriété inconnue';
 }

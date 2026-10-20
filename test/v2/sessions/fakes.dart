@@ -58,11 +58,13 @@ class CatalogSource implements SessionCatalogSource {
     String? title,
     String? directory,
     String? upstream,
+    OwnershipInfo? ownership,
   }) => SessionSummary(
     info: SessionInfo(
       ref: SessionRef(harness.host, harness.harness, 'ses_$id'),
       title: title ?? id,
-      ownership: const OwnershipInfo.unknown(reason: 'not observed'),
+      ownership:
+          ownership ?? const OwnershipInfo.unknown(reason: 'not observed'),
       project: directory == null
           ? null
           : ProjectRef(

@@ -885,5 +885,25 @@
   "sessionsUnknownProject": "बिना रिपोर्ट किए गए प्रोजेक्ट वाले सत्र",
   "@sessionsUnknownProject": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipLiveShared": "लाइव साझा",
+  "@sessionsOwnershipLiveShared": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipHostOwned": "इस होस्ट का",
+  "@sessionsOwnershipHostOwned": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipSavedHistory": "सहेजा गया इतिहास",
+  "@sessionsOwnershipSavedHistory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipRunningElsewhere": "कहीं और चल रहा है",
+  "@sessionsOwnershipRunningElsewhere": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipUnknown": "स्वामित्व अज्ञात",
+  "@sessionsOwnershipUnknown": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

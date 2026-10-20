@@ -1123,4 +1123,19 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get sessionsUnknownProject =>
       'ایسے سیشنز جن کا کوئی پروجیکٹ رپورٹ نہیں ہوا';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'براہ راست شیئر شدہ';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'اس ہوسٹ کا';
+
+  @override
+  String get sessionsOwnershipSavedHistory => 'محفوظ تاریخ';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => 'کہیں اور چل رہا ہے';
+
+  @override
+  String get sessionsOwnershipUnknown => 'ملکیت نامعلوم';
 }

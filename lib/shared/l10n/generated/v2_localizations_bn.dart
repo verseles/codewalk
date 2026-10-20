@@ -1117,4 +1117,19 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => 'যেসব সেশনের প্রকল্প জানানো হয়নি';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'লাইভে ভাগ করা';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'এই হোস্টের';
+
+  @override
+  String get sessionsOwnershipSavedHistory => 'সংরক্ষিত ইতিহাস';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => 'অন্য কোথাও চলছে';
+
+  @override
+  String get sessionsOwnershipUnknown => 'মালিকানা অজানা';
 }

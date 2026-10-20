@@ -885,5 +885,25 @@
   "sessionsUnknownProject": "未报告项目的会话",
   "@sessionsUnknownProject": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipLiveShared": "实时共享",
+  "@sessionsOwnershipLiveShared": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipHostOwned": "属于此主机",
+  "@sessionsOwnershipHostOwned": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipSavedHistory": "已保存的历史记录",
+  "@sessionsOwnershipSavedHistory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipRunningElsewhere": "在其他位置运行",
+  "@sessionsOwnershipRunningElsewhere": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipUnknown": "归属未知",
+  "@sessionsOwnershipUnknown": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

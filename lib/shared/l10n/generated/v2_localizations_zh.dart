@@ -1050,4 +1050,19 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => '未报告项目的会话';
+
+  @override
+  String get sessionsOwnershipLiveShared => '实时共享';
+
+  @override
+  String get sessionsOwnershipHostOwned => '属于此主机';
+
+  @override
+  String get sessionsOwnershipSavedHistory => '已保存的历史记录';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => '在其他位置运行';
+
+  @override
+  String get sessionsOwnershipUnknown => '归属未知';
 }

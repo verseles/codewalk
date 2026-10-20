@@ -1387,5 +1387,25 @@
   "sessionsUnknownProject": "Sessions without a reported project",
   "@sessionsUnknownProject": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipLiveShared": "Live shared",
+  "@sessionsOwnershipLiveShared": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipHostOwned": "Owned by this host",
+  "@sessionsOwnershipHostOwned": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipSavedHistory": "Saved history",
+  "@sessionsOwnershipSavedHistory": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipRunningElsewhere": "Running elsewhere",
+  "@sessionsOwnershipRunningElsewhere": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsOwnershipUnknown": "Ownership unknown",
+  "@sessionsOwnershipUnknown": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

@@ -1136,4 +1136,19 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => 'Сеансы без указанного проекта';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'Общий в реальном времени';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'Принадлежит этому хосту';
+
+  @override
+  String get sessionsOwnershipSavedHistory => 'Сохранённая история';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => 'Выполняется в другом месте';
+
+  @override
+  String get sessionsOwnershipUnknown => 'Владелец неизвестен';
 }

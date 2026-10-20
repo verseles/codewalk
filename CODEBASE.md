@@ -2299,3 +2299,21 @@ The grouping is a projection of what the server returned, never a re-sort: the
 groups appear in the first appearance of their first row, the rows inside a
 group keep the server's order, and the retained v1 reference groups the same
 way (`lib/presentation/utils/session_tab_grouping.dart`).
+
+## V2-043E session ownership label (#393)
+
+```text
+lib/features/sessions/session_ownership.dart # The pure projection: the ownership a row may show (a fresh proof, otherwise unknown) and the plan's vocabulary mapped to the localized copy
+lib/features/sessions/sessions_page.dart # The row shows the ownership label under the title; the label is display-only and never authorizes an action
+lib/features/sessions/sessions_controller.dart # The injected clock, so the list never reads the wall clock on its own
+tool/l10n/sessions_catalog.py # The scoped catalog with the five ownership labels
+```
+
+The row shows only the ownership its adapter proved: a known kind needs an
+`OwnershipProof` that is still fresh, and a list that is not the endpoint's
+current answer shows the unknown label. Nothing is inferred from the endpoint
+address, the port, the profile or the server's title — the domain forbids
+inferring topology, and the capability guard treats the ownership kinds as a
+mutation authority, so an unproven kind is never claimed. The OpenCode
+projection keeps reporting `OwnershipInfo.unknown`, so a directly connected
+OpenCode session shows the unknown label until an adapter supplies a proof.

@@ -1077,4 +1077,19 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsUnknownProject => '프로젝트가 보고되지 않은 세션';
+
+  @override
+  String get sessionsOwnershipLiveShared => '실시간 공유';
+
+  @override
+  String get sessionsOwnershipHostOwned => '이 호스트 소유';
+
+  @override
+  String get sessionsOwnershipSavedHistory => '저장된 기록';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => '다른 곳에서 실행 중';
+
+  @override
+  String get sessionsOwnershipUnknown => '소유권 알 수 없음';
 }

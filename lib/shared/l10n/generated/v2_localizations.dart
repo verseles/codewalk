@@ -2162,6 +2162,36 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Sessions without a reported project'**
   String get sessionsUnknownProject;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Live shared'**
+  String get sessionsOwnershipLiveShared;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Owned by this host'**
+  String get sessionsOwnershipHostOwned;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Saved history'**
+  String get sessionsOwnershipSavedHistory;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Running elsewhere'**
+  String get sessionsOwnershipRunningElsewhere;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Ownership unknown'**
+  String get sessionsOwnershipUnknown;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

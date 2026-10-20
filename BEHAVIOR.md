@@ -35,6 +35,15 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the grouping follows the rows the server just returned after a live re-read, and the expanded row keeps its group
 - **Then** a session the endpoint moved to another location changes its group with the next re-read
 
+### V2 session ownership label
+
+- **Given** the v2 session catalog shows a row
+- **When** the row carries an ownership the adapter proved
+- **Then** the row shows that ownership's label — live shared, owned by this host, saved history or running elsewhere — under the title, in every locale and layout
+- **Then** a row whose ownership is not proven, whose proof is older than the display window or already expired, and a list that is not the endpoint's current answer, show the ownership unknown label
+- **Then** the label follows the rows the server just returned after a live re-read, and the expanded row keeps its label
+- **Then** no ownership is inferred from the endpoint address, the port, the profile or the server's title, and the label never authorizes an action
+
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog

@@ -6,6 +6,9 @@ NEW_KEYS = (
     "sessionsUnavailable", "sessionsReadFailed", "sessionsTimeout",
     "sessionsInvalidCursor", "sessionsRateLimited",
     "sessionsUnknownProject",
+    "sessionsOwnershipLiveShared", "sessionsOwnershipHostOwned",
+    "sessionsOwnershipSavedHistory", "sessionsOwnershipRunningElsewhere",
+    "sessionsOwnershipUnknown",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -55,7 +58,23 @@ PROJECT_COPY = {
     "ru": "Сеансы без указанного проекта",
     "zh": "未报告项目的会话",
 }
+OWNERSHIP_COPY = {
+    "en": ("Live shared", "Owned by this host", "Saved history", "Running elsewhere", "Ownership unknown"),
+    "pt": ("Compartilhado ao vivo", "Deste host", "Histórico salvo", "Executando em outro lugar", "Propriedade desconhecida"),
+    "es": ("Compartido en vivo", "De este host", "Historial guardado", "Ejecutándose en otro sitio", "Propiedad desconocida"),
+    "fr": ("Partagé en direct", "De cet hôte", "Historique enregistré", "Exécuté ailleurs", "Propriété inconnue"),
+    "de": ("Live geteilt", "Von diesem Host", "Gespeicherte Historie", "Läuft anderswo", "Eigentum unbekannt"),
+    "it": ("Condiviso in diretta", "Di questo host", "Cronologia salvata", "In esecuzione altrove", "Proprietà sconosciuta"),
+    "ar": ("مشترك مباشرة", "مملوك لهذا المضيف", "سجل محفوظ", "يعمل في مكان آخر", "الملكية غير معروفة"),
+    "ur": ("براہ راست شیئر شدہ", "اس ہوسٹ کا", "محفوظ تاریخ", "کہیں اور چل رہا ہے", "ملکیت نامعلوم"),
+    "bn": ("লাইভে ভাগ করা", "এই হোস্টের", "সংরক্ষিত ইতিহাস", "অন্য কোথাও চলছে", "মালিকানা অজানা"),
+    "hi": ("लाइव साझा", "इस होस्ट का", "सहेजा गया इतिहास", "कहीं और चल रहा है", "स्वामित्व अज्ञात"),
+    "ja": ("ライブ共有", "このホストの", "保存された履歴", "別の場所で実行中", "所有権不明"),
+    "ko": ("실시간 공유", "이 호스트 소유", "저장된 기록", "다른 곳에서 실행 중", "소유권 알 수 없음"),
+    "ru": ("Общий в реальном времени", "Принадлежит этому хосту", "Сохранённая история", "Выполняется в другом месте", "Владелец неизвестен"),
+    "zh": ("实时共享", "属于此主机", "已保存的历史记录", "在其他位置运行", "归属未知"),
+}
 COPY = {
-    locale: values + (RATE_COPY[locale], PROJECT_COPY[locale])
+    locale: values + (RATE_COPY[locale], PROJECT_COPY[locale]) + OWNERSHIP_COPY[locale]
     for locale, values in COPY.items()
 }

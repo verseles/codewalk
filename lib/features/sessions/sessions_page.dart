@@ -13,6 +13,7 @@ import 'session_history_controller.dart';
 import 'session_history_page.dart';
 import 'session_live_controller.dart';
 import 'session_live_page.dart';
+import 'session_ownership.dart';
 import 'sessions_controller.dart';
 
 class SessionsPage extends StatefulWidget {
@@ -269,6 +270,31 @@ class _SessionsPageState extends State<SessionsPage> {
                         maxLines: expanded ? null : 3,
                         overflow: expanded ? null : TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      // The ownership the adapter proved, and nothing else:
+                      // an unproven, stale or expired proof, and a list that
+                      // is not the endpoint's current answer, show unknown.
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          sessionOwnershipLabel(
+                            l10n,
+                            displayedSessionOwnership(
+                              row.info.ownership,
+                              now: controller.now,
+                              current: !controller.stale && !controller.behind,
+                            ),
+                          ),
+                          key: ValueKey(
+                            'session-ownership-${row.info.ref.storageKey}',
+                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
                       ),
                       if (expanded) ...[
                         if (row.updatedAt case final date?)

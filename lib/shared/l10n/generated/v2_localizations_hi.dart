@@ -1125,4 +1125,19 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get sessionsUnknownProject =>
       'बिना रिपोर्ट किए गए प्रोजेक्ट वाले सत्र';
+
+  @override
+  String get sessionsOwnershipLiveShared => 'लाइव साझा';
+
+  @override
+  String get sessionsOwnershipHostOwned => 'इस होस्ट का';
+
+  @override
+  String get sessionsOwnershipSavedHistory => 'सहेजा गया इतिहास';
+
+  @override
+  String get sessionsOwnershipRunningElsewhere => 'कहीं और चल रहा है';
+
+  @override
+  String get sessionsOwnershipUnknown => 'स्वामित्व अज्ञात';
 }

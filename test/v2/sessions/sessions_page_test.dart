@@ -3,6 +3,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -57,6 +58,8 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.text(l10n.sessionExportUntitled), findsOneWidget);
+          // The ownership label is on every row, in every locale and size.
+          expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
           final row = find.byKey(ValueKey(source.row('first').info.ref));
           await tester.tap(row);
           await tester.pumpAndSettle();
@@ -203,6 +206,7 @@ void main() {
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
       await tester.pumpAndSettle();
       final controller = dependencies.sessions!;
+      final l10n = dependencies.localizations.current;
       final dropdown = tester.widget<DropdownButton<String>>(
         find.byKey(const ValueKey('sessions-profile')),
       );
@@ -219,10 +223,25 @@ void main() {
       // The catalog debounces the re-read; the clock has to pass it.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      source.respond([source.row('first'), source.row('second')]);
+      source.respond([
+        source.row('first'),
+        source.row(
+          'second',
+          ownership: OwnershipInfo.known(
+            OwnershipKind.liveShared,
+            proof: OwnershipProof(
+              source: 'adapterObservation',
+              observedAt: DateTime.now(),
+            ),
+          ),
+        ),
+      ]);
       await tester.pumpAndSettle();
       expect(find.byKey(ValueKey(source.row('second').info.ref)), findsOneWidget);
       expect(controller.sessions, hasLength(2));
+      // The label follows the rows the server just returned.
+      expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+      expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       rig.dispose();
@@ -272,6 +291,120 @@ void main() {
       rig.dispose();
     },
   );
+
+  testWidgets('the row shows only the ownership its adapter proved', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    final observedAt = DateTime.now();
+    OwnershipInfo proven(OwnershipKind kind) => OwnershipInfo.known(
+      kind,
+      proof: OwnershipProof(source: 'adapterObservation', observedAt: observedAt),
+    );
+    source.respond([
+      source.row('live', title: 'Live', ownership: proven(OwnershipKind.liveShared)),
+      source.row('host', title: 'Host', ownership: proven(OwnershipKind.hostOwned)),
+      source.row(
+        'saved',
+        title: 'Saved',
+        ownership: proven(OwnershipKind.savedHistory),
+      ),
+      source.row(
+        'elsewhere',
+        title: 'Elsewhere',
+        ownership: proven(OwnershipKind.runningElsewhere),
+      ),
+      source.row('plain', title: 'Plain'),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipHostOwned), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipSavedHistory), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipRunningElsewhere), findsOneWidget);
+    // The session the adapter did not prove shows the unknown label.
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
+
+  testWidgets('an expired proof and a list that is behind show unknown', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    final directory = LiveDirectory();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: () => directory,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    source.respond([
+      source.row(
+        'stale',
+        title: 'Stale',
+        ownership: OwnershipInfo.known(
+          OwnershipKind.liveShared,
+          proof: OwnershipProof(
+            source: 'adapterObservation',
+            observedAt: DateTime.now().subtract(const Duration(hours: 1)),
+          ),
+        ),
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    // The proof is older than the display window: the label is unknown.
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+
+    // A list that is not the endpoint's current answer shows unknown too.
+    directory.feeds.last.emit(const SessionCatalogChanged());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    source.fail(SessionCatalogFailure.connection);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.liveStale), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
 
   testWidgets('the list groups the sessions by their project', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
