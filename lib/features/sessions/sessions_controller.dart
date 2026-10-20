@@ -194,6 +194,7 @@ class SessionsController extends ChangeNotifier {
 
   void _clear() {
     _actionFailure = null;
+    _actionPending = false;
     _ownershipTimer?.cancel();
     _ownershipTimer = null;
     _sessions = const [];
@@ -397,6 +398,11 @@ class SessionsController extends ChangeNotifier {
       }
       _sessions = List.unmodifiable(merged);
       _armOwnershipDeadline();
+      // The read reconciled whatever the last command left uncertain, and it
+      // observes the endpoint's support again when the last observation was
+      // not definitive.
+      _actionPending = false;
+      unawaited(_probeActions());
       if (refresh) _selectedSession = null;
       _pages++;
       if (next != null) _received.add(next);
@@ -596,6 +602,10 @@ class SessionsController extends ChangeNotifier {
     final source = _actions;
     if (source == null) return false;
     final written = await source.setHidden(row, hidden: hidden);
+    if (!identical(source, _actions)) {
+      // The profile changed while the local hide was in flight.
+      return written;
+    }
     if (written) {
       _actionFailure = null;
     } else {
@@ -639,6 +649,11 @@ class SessionsController extends ChangeNotifier {
     _notify();
     try {
       final outcome = await command(source);
+      if (!identical(source, _actions)) {
+        // The profile changed while the command was in flight: the result
+        // belongs to the old profile and must not touch the new one.
+        return outcome;
+      }
       if (outcome == SessionActionOutcome.accepted ||
           outcome == SessionActionOutcome.uncertain) {
         // The effect is observed by the authoritative re-read. An uncertain
@@ -728,6 +743,11 @@ class SessionsController extends ChangeNotifier {
       final selected = _selectedSession;
       _sessions = List.unmodifiable(rows);
       _armOwnershipDeadline();
+      // The re-read reconciled whatever the last command left uncertain, and
+      // it observes the endpoint's support again when the last observation
+      // was not definitive.
+      _actionPending = false;
+      unawaited(_probeActions());
       // The expanded row survives only while the server still returns that
       // session, and it shows the row the server just returned.
       SessionSummary? fresh;

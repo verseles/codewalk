@@ -116,13 +116,16 @@ DateTime _instant(Object? value) {
 /// An optional epoch in milliseconds, or null when the value is absent or not
 /// a usable instant.
 DateTime? _optionalEpoch(Object? value) {
-  if (value is! num || !value.isFinite || value.abs() > 8640000000000000) {
+  if (value is! num || !value.isFinite) return null;
+  final millis = value.round();
+  if (millis.abs() > 8640000000000000) return null;
+  try {
+    return DateTime.fromMicrosecondsSinceEpoch(millis * 1000, isUtc: true);
+  } on ArgumentError {
+    // The marker is optional: an unusable epoch leaves it out instead of
+    // failing the read.
     return null;
   }
-  return DateTime.fromMicrosecondsSinceEpoch(
-    (value * 1000).round(),
-    isUtc: true,
-  );
 }
 
 Never _malformed() =>

@@ -194,6 +194,37 @@ void main() {
     source.close();
   });
 
+  testWidgets('an uncertain command waits for the re-read', (tester) async {
+    final (source, l10n) = await open(tester);
+    actions.outcomes['rename'] = SessionActionOutcome.uncertain;
+    final row = source.row('first', title: 'First');
+    await tester.tap(
+      find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsActionRename));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Renamed');
+    await tester.tap(find.text(l10n.sessionsActionRenameSave));
+    await tester.pumpAndSettle();
+    // The command's answer was lost: the list waits instead of calling it a
+    // failure.
+    expect(find.text(l10n.sessionsActionPending), findsOneWidget);
+    expect(find.text(l10n.sessionsActionFailed), findsNothing);
+  });
+
+  testWidgets('the delete warning carries the child count', (tester) async {
+    final (source, l10n) = await open(tester, children: 3);
+    final row = source.row('first', title: 'First');
+    await tester.tap(
+      find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsActionDelete));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('3'), findsWidgets);
+  });
+
   testWidgets('the local hide hides the row', (tester) async {
     final (source, l10n) = await open(tester);
     final row = source.row('first', title: 'First');
