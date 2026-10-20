@@ -2305,7 +2305,7 @@ way (`lib/presentation/utils/session_tab_grouping.dart`).
 ```text
 lib/features/sessions/session_ownership.dart # The pure projection: the ownership a row may show (a fresh proof, otherwise unknown) and the plan's vocabulary mapped to the localized copy
 lib/features/sessions/sessions_page.dart # The row shows the ownership label under the title; the label is display-only and never authorizes an action
-lib/features/sessions/sessions_controller.dart # The injected clock, so the list never reads the wall clock on its own
+lib/features/sessions/sessions_controller.dart # The injected clock, so the list never reads the wall clock on its own, and the display deadline of the loaded rows' proofs: the list wakes up when a label would outlive its proof, without any server traffic
 tool/l10n/sessions_catalog.py # The scoped catalog with the five ownership labels
 ```
 

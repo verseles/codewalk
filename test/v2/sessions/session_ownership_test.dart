@@ -118,4 +118,60 @@ void main() {
       'Ownership unknown',
     );
   });
+
+  test('a proof without a source is rejected by the domain', () {
+    // The projection also refuses a sourceless proof, because the domain's
+    // own check is an assertion, which a release build drops.
+    expect(
+      () => OwnershipProof(source: '', observedAt: now),
+      throwsA(isA<AssertionError>()),
+    );
+  });
+
+  test('the label deadline is the end of the freshness window', () {
+    final delay = ownershipLabelDelay(
+      proven(OwnershipKind.liveShared),
+      now: now,
+    );
+    // The proof stays fresh while its age is at most the window, so the
+    // label changes one tick later.
+    expect(
+      delay,
+      sessionOwnershipProofMaxAge + const Duration(microseconds: 1),
+    );
+  });
+
+  test('a proof that expires sooner sets the earlier deadline', () {
+    final delay = ownershipLabelDelay(
+      proven(
+        OwnershipKind.liveShared,
+        expiresAt: now.add(const Duration(minutes: 1)),
+      ),
+      now: now,
+    );
+    expect(delay, const Duration(minutes: 1));
+  });
+
+  test('an expired proof has no deadline left', () {
+    expect(
+      ownershipLabelDelay(
+        proven(
+          OwnershipKind.liveShared,
+          expiresAt: now.subtract(const Duration(seconds: 1)),
+        ),
+        now: now,
+      ),
+      isNull,
+    );
+  });
+
+  test('a proof without a source has no deadline', () {
+    expect(
+      ownershipLabelDelay(
+        const OwnershipInfo.unknown(reason: 'noProof'),
+        now: now,
+      ),
+      isNull,
+    );
+  });
 }

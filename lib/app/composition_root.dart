@@ -46,6 +46,7 @@ AppDependencies createAppDependencies({
   DateTime Function()? releaseClock,
   SessionCatalogFactory? sessionCatalogFactory,
   SessionHistoryFactory? sessionHistoryFactory,
+  DateTime Function()? sessionClock,
   SessionLiveDirectory? Function()? sessionLiveDirectory,
   PermissionModeStore? permissionModeStore,
 }) {
@@ -103,6 +104,7 @@ AppDependencies createAppDependencies({
     SessionsController(
       hosts: locator<HostsController>(),
       sourceFactory: sessionCatalogFactory ?? createSessionCatalogSource,
+      now: sessionClock,
       changesFactory: liveDirectory == null
           ? null
           : (profile, credential) => liveDirectory.catalogChanges(

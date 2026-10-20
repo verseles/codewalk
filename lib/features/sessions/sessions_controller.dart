@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
+import 'session_ownership.dart';
 
 class SessionsController extends ChangeNotifier {
   SessionsController({
@@ -54,6 +55,10 @@ class SessionsController extends ChangeNotifier {
   StreamSubscription<SessionCatalogSignal>? _changesSubscription;
   Timer? _liveTimer;
   DateTime? _liveEarliestStart;
+  // The display deadline of the loaded rows' ownership proofs: the label of a
+  // row stops being shown when its proof goes stale, and the list does not
+  // read the clock on its own.
+  Timer? _ownershipTimer;
   bool _livePending = false;
   bool _liveConnected = false;
   bool _liveSuspended = false;
@@ -112,6 +117,8 @@ class SessionsController extends ChangeNotifier {
   }
 
   void _clear() {
+    _ownershipTimer?.cancel();
+    _ownershipTimer = null;
     _sessions = const [];
     _selectedSession = null;
     _cursor = null;
@@ -308,6 +315,7 @@ class SessionsController extends ChangeNotifier {
         }
       }
       _sessions = List.unmodifiable(merged);
+      _armOwnershipDeadline();
       if (refresh) _selectedSession = null;
       _pages++;
       if (next != null) _received.add(next);
@@ -532,6 +540,7 @@ class SessionsController extends ChangeNotifier {
       if (rows == null) return;
       final selected = _selectedSession;
       _sessions = List.unmodifiable(rows);
+      _armOwnershipDeadline();
       // The expanded row survives only while the server still returns that
       // session, and it shows the row the server just returned.
       SessionSummary? fresh;
@@ -680,10 +689,40 @@ class SessionsController extends ChangeNotifier {
   }
 
   void close() => dispose();
+
+  /// Arms the display deadline of the loaded rows' ownership proofs.
+  ///
+  /// The label of a row shows its ownership only while the proof is fresh,
+  /// and the list is rebuilt by the controller's notifications. The timer
+  /// wakes the list at the earliest deadline among the loaded rows, without
+  /// any server traffic, so a label never outlives its proof.
+  void _armOwnershipDeadline() {
+    _ownershipTimer?.cancel();
+    _ownershipTimer = null;
+    Duration? delay;
+    for (final session in _sessions) {
+      final candidate = ownershipLabelDelay(
+        session.info.ownership,
+        now: _now(),
+      );
+      if (candidate == null) continue;
+      if (delay == null || candidate < delay) delay = candidate;
+    }
+    if (delay == null) return;
+    _ownershipTimer = Timer(delay, () {
+      _ownershipTimer = null;
+      if (_disposed) return;
+      _notify();
+      _armOwnershipDeadline();
+    });
+  }
+
   @override
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    _ownershipTimer?.cancel();
+    _ownershipTimer = null;
     hosts.removeListener(_hostsChanged);
     _invalidate(closeSource: true);
     super.dispose();

@@ -349,7 +349,7 @@ void main() {
     rig.dispose();
   });
 
-  testWidgets('an expired proof and a list that is behind show unknown', (
+  testWidgets('a list that is not the current answer shows unknown', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -375,25 +375,33 @@ void main() {
     dropdown.onChanged!('profile_a');
     await tester.pump();
     final source = rig.sources.single;
-    source.respond([
-      source.row(
-        'stale',
-        title: 'Stale',
-        ownership: OwnershipInfo.known(
-          OwnershipKind.liveShared,
-          proof: OwnershipProof(
-            source: 'adapterObservation',
-            observedAt: DateTime.now().subtract(const Duration(hours: 1)),
-          ),
+    SessionSummary fresh() => source.row(
+      'fresh',
+      title: 'Fresh',
+      ownership: OwnershipInfo.known(
+        OwnershipKind.liveShared,
+        proof: OwnershipProof(
+          source: 'adapterObservation',
+          observedAt: DateTime.now(),
         ),
       ),
-    ]);
+    );
+    source.respond([fresh()]);
     await tester.pumpAndSettle();
-    // The proof is older than the display window: the label is unknown.
+    // The proof is fresh, so the row shows the ownership it proved.
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+
+    // A manual refresh in flight: the rows are not the endpoint's current
+    // answer, so the label falls back to unknown.
+    await tester.tap(find.byKey(const ValueKey('sessions-refresh')));
+    await tester.pump();
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    source.respond([fresh()]);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
-    // A list that is not the endpoint's current answer shows unknown too.
+    // A failed re-read marks the list as behind: same fallback.
     directory.feeds.last.emit(const SessionCatalogChanged());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -401,6 +409,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.liveStale), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
+
+  testWidgets('the label stops when its proof goes stale', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var clock = DateTime.utc(2026, 10, 20, 12);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
+      sessionClock: () => clock,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final dropdown = tester.widget<DropdownButton<String>>(
+      find.byKey(const ValueKey('sessions-profile')),
+    );
+    dropdown.onChanged!('profile_a');
+    await tester.pump();
+    final source = rig.sources.single;
+    source.respond([
+      source.row(
+        'proven',
+        title: 'Proven',
+        ownership: OwnershipInfo.known(
+          OwnershipKind.liveShared,
+          proof: OwnershipProof(source: 'adapterObservation', observedAt: clock),
+        ),
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+
+    // The proof leaves its freshness window. The list wakes up at the
+    // deadline, without any catalog event or user interaction, and the label
+    // falls back to unknown.
+    clock = clock.add(const Duration(minutes: 6));
+    await tester.pump(const Duration(minutes: 6));
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();

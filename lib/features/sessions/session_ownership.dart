@@ -18,7 +18,37 @@ OwnershipKind displayedSessionOwnership(
   Duration maxAge = sessionOwnershipProofMaxAge,
 }) {
   if (!current) return OwnershipKind.unknown;
+  // A proof without a source names no observation, so it proves nothing.
+  final proof = ownership.proof;
+  if (proof == null || proof.source.isEmpty) return OwnershipKind.unknown;
   return ownership.effectiveKindAt(now, maxAge: maxAge);
+}
+
+/// The first instant the label of a row can change.
+///
+/// The proof leaves its freshness window, it expires, or it becomes usable.
+/// It is null when the label can no longer change, and it is never negative:
+/// a deadline in the past means the label already changed.
+Duration? ownershipLabelDelay(
+  OwnershipInfo ownership, {
+  required DateTime now,
+  Duration maxAge = sessionOwnershipProofMaxAge,
+}) {
+  final proof = ownership.proof;
+  if (proof == null) return null;
+  final start = proof.observedAt;
+  if (now.isBefore(start)) return start.difference(now);
+  final expiresAt = proof.expiresAt;
+  if (expiresAt != null && !now.isBefore(expiresAt)) return null;
+  // The proof stays fresh while its age is at most the window, so it goes
+  // stale one tick later.
+  var delay =
+      start.add(maxAge).difference(now) + const Duration(microseconds: 1);
+  if (expiresAt != null) {
+    final expiry = expiresAt.difference(now);
+    if (expiry < delay) delay = expiry;
+  }
+  return delay.isNegative ? null : delay;
 }
 
 /// The label of one ownership kind.
