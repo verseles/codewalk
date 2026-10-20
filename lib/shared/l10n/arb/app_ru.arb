@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "Путь слишком длинный",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "Дочерняя сессия",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "Дочерняя сессия · родительская сессия здесь не показана",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

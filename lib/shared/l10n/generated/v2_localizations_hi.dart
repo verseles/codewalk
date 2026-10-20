@@ -1265,4 +1265,11 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'पथ बहुत लंबा है';
+
+  @override
+  String get sessionsChildSession => 'चाइल्ड सत्र';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'चाइल्ड सत्र · मूल सत्र यहाँ नहीं दिखाया गया';
 }

@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "路径太长",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "子会话",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "子会话 · 父会话未在此显示",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

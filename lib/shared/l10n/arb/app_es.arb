@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "La ruta es demasiado larga",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "Sesión hija",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "Sesión hija · la sesión madre no se muestra aquí",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

@@ -1209,4 +1209,10 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => '경로가 너무 깁니다';
+
+  @override
+  String get sessionsChildSession => '하위 세션';
+
+  @override
+  String get sessionsChildParentElsewhere => '하위 세션 · 상위 세션이 여기에 표시되지 않음';
 }

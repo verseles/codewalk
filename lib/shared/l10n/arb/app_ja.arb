@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "パスが長すぎます",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "子セッション",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "子セッション・親セッションはここに表示されていません",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

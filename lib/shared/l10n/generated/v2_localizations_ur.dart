@@ -1262,4 +1262,11 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'راستہ بہت طویل ہے';
+
+  @override
+  String get sessionsChildSession => 'ذیلی سیشن';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'ذیلی سیشن · بنیادی سیشن یہاں نہیں دکھایا گیا';
 }

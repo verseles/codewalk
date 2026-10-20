@@ -1207,4 +1207,10 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'パスが長すぎます';
+
+  @override
+  String get sessionsChildSession => '子セッション';
+
+  @override
+  String get sessionsChildParentElsewhere => '子セッション・親セッションはここに表示されていません';
 }

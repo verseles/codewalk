@@ -1293,4 +1293,11 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'Der Pfad ist zu lang';
+
+  @override
+  String get sessionsChildSession => 'Untergeordnete Sitzung';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'Untergeordnete Sitzung · übergeordnete Sitzung hier nicht angezeigt';
 }

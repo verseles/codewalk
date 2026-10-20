@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "راستہ بہت طویل ہے",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "ذیلی سیشن",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "ذیلی سیشن · بنیادی سیشن یہاں نہیں دکھایا گیا",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

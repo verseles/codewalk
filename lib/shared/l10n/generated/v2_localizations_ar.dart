@@ -1255,4 +1255,11 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'المسار طويل جدًا';
+
+  @override
+  String get sessionsChildSession => 'جلسة فرعية';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'جلسة فرعية · الجلسة الأم غير معروضة هنا';
 }

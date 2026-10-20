@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "Der Pfad ist zu lang",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "Untergeordnete Sitzung",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "Untergeordnete Sitzung · übergeordnete Sitzung hier nicht angezeigt",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

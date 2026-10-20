@@ -21,6 +21,11 @@ import 'session_live_page.dart';
 import 'session_ownership.dart';
 import 'sessions_controller.dart';
 
+/// The start indent of one nesting level, and the deepest level the list
+/// indents: deeper rows still nest, at the cap's indent.
+const _nestingIndent = 16.0;
+const _nestingMaxLevels = 3;
+
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
   @override
@@ -72,7 +77,8 @@ class _SessionsPageState extends State<SessionsPage> {
     final hosts = controller.hosts;
     final available = !hosts.loading && !hosts.storageError;
     // The list is grouped by the project the server attributed each session
-    // to; the groups follow the rows the server returned.
+    // to; the groups follow the rows the server returned, and inside a group
+    // a child is drawn under the parent its record names.
     final items = sessionListItems(controller.sessions);
     final createReason =
         controller.selectedProfile != null &&
@@ -243,12 +249,27 @@ class _SessionsPageState extends State<SessionsPage> {
             final item = items[index - 1];
             return switch (item) {
               SessionGroupHeader(:final group) => _groupHeader(context, group),
-              SessionRow(:final session) => _row(
-                context,
-                controller,
-                available,
-                session,
-              ),
+              SessionRow(
+                :final session,
+                :final depth,
+                :final parentElsewhere,
+              ) =>
+                _nested(
+                  context,
+                  session,
+                  depth,
+                  _row(
+                    context,
+                    controller,
+                    available,
+                    session,
+                    lineage: depth > 0
+                        ? l10n.sessionsChildSession
+                        : parentElsewhere
+                        ? l10n.sessionsChildParentElsewhere
+                        : null,
+                  ),
+                ),
             };
           },
         ),
@@ -366,12 +387,61 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
+  /// A nested row: indented from the start edge by its depth, up to a cap
+  /// that keeps a phone's content width, with a guide along the start edge.
+  /// The directional insets mirror in a right-to-left locale.
+  Widget _nested(
+    BuildContext context,
+    SessionSummary row,
+    int depth,
+    Widget card,
+  ) {
+    if (depth == 0) return card;
+    final level = depth.clamp(1, _nestingMaxLevels);
+    return Padding(
+      key: ValueKey('session-nesting-${row.info.ref.storageKey}'),
+      padding: EdgeInsetsDirectional.only(
+        start: _nestingIndent * (level - 1) + 8,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: BorderDirectional(
+            start: BorderSide(
+              width: 2,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+        ),
+        // The border paints over the box, so the padding clears it.
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 8),
+          child: card,
+        ),
+      ),
+    );
+  }
+
+  /// The lineage of a child row: a nested child, or a child whose parent is
+  /// not drawn above it.
+  Widget _lineage(BuildContext context, SessionSummary row, String text) =>
+      Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          text,
+          key: ValueKey('session-lineage-${row.info.ref.storageKey}'),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+
   Widget _row(
     BuildContext context,
     SessionsController controller,
     bool available,
-    SessionSummary row,
-  ) {
+    SessionSummary row, {
+    String? lineage,
+  }) {
     final l10n = context.v2L10n;
     final expanded = controller.selectedSession?.info.ref == row.info.ref;
     void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
@@ -448,6 +518,8 @@ class _SessionsPageState extends State<SessionsPage> {
                                         ),
                                   ),
                                 ),
+                                if (lineage != null)
+                                  _lineage(context, row, lineage),
                                 if (controller.viewState(row) ==
                                     SessionViewState.unread)
                                   _unreadMark(context, row),

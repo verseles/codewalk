@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "পথটি অতিরিক্ত দীর্ঘ",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "শিশু সেশন",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "শিশু সেশন · মূল সেশন এখানে দেখানো হয়নি",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

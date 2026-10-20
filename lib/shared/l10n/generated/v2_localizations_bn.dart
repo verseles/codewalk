@@ -1256,4 +1256,11 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'পথটি অতিরিক্ত দীর্ঘ';
+
+  @override
+  String get sessionsChildSession => 'শিশু সেশন';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'শিশু সেশন · মূল সেশন এখানে দেখানো হয়নি';
 }

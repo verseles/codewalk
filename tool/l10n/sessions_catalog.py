@@ -46,6 +46,8 @@ NEW_KEYS = (
     "sessionsCreateConfirm",
     "sessionsCreateDirectoryAbsolute",
     "sessionsCreateDirectoryTooLong",
+    "sessionsChildSession",
+    "sessionsChildParentElsewhere",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -143,11 +145,28 @@ CREATE_COPY = {
     "ru": ("Новая сессия", "Создать сессию", "Проект", "Другой каталог…", "Абсолютный путь к каталогу", "Создать", "Путь должен быть абсолютным", "Путь слишком длинный"),
     "zh": ("新建会话", "创建会话", "项目", "其他目录…", "目录的绝对路径", "创建", "路径必须是绝对路径", "路径太长"),
 }
+LINEAGE_COPY = {
+    "en": ("Child session", "Child session · parent not shown here"),
+    "pt": ("Sessão filha", "Sessão filha · a sessão mãe não aparece aqui"),
+    "es": ("Sesión hija", "Sesión hija · la sesión madre no se muestra aquí"),
+    "fr": ("Session enfant", "Session enfant · session parente non affichée ici"),
+    "de": ("Untergeordnete Sitzung", "Untergeordnete Sitzung · übergeordnete Sitzung hier nicht angezeigt"),
+    "it": ("Sessione figlia", "Sessione figlia · sessione madre non mostrata qui"),
+    "ar": ("جلسة فرعية", "جلسة فرعية · الجلسة الأم غير معروضة هنا"),
+    "ur": ("ذیلی سیشن", "ذیلی سیشن · بنیادی سیشن یہاں نہیں دکھایا گیا"),
+    "bn": ("শিশু সেশন", "শিশু সেশন · মূল সেশন এখানে দেখানো হয়নি"),
+    "hi": ("चाइल्ड सत्र", "चाइल्ड सत्र · मूल सत्र यहाँ नहीं दिखाया गया"),
+    "ja": ("子セッション", "子セッション・親セッションはここに表示されていません"),
+    "ko": ("하위 세션", "하위 세션 · 상위 세션이 여기에 표시되지 않음"),
+    "ru": ("Дочерняя сессия", "Дочерняя сессия · родительская сессия здесь не показана"),
+    "zh": ("子会话", "子会话 · 父会话未在此显示"),
+}
 COPY = {
     locale: values
     + (RATE_COPY[locale], PROJECT_COPY[locale])
     + OWNERSHIP_COPY[locale]
     + ACTION_COPY[locale]
     + CREATE_COPY[locale]
+    + LINEAGE_COPY[locale]
     for locale, values in COPY.items()
 }

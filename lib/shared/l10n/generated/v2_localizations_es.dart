@@ -1282,4 +1282,11 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'La ruta es demasiado larga';
+
+  @override
+  String get sessionsChildSession => 'Sesión hija';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'Sesión hija · la sesión madre no se muestra aquí';
 }

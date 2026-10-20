@@ -35,6 +35,17 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the grouping follows the rows the server just returned after a live re-read, and the expanded row keeps its group
 - **Then** a session the endpoint moved to another location changes its group with the next re-read
 
+### V2 nested session catalog
+
+- **Given** the v2 session catalog has loaded sessions whose records name a parent session
+- **When** the list is drawn
+- **Then** inside each project group a child is drawn under the parent its record names, recursively, so a grandchild sits under its own parent; the lineage comes only from the record's parent, and a fork is never nested
+- **Then** the top-level rows keep the server's order and each parent stays where the server put it, its children following it in the server's order among siblings; a child the server listed before its parent therefore moves under that parent
+- **Then** a nested row is indented from the start edge with a guide line and says it is a child session; the indent stops growing after three levels, while deeper rows still nest
+- **Then** a child whose parent is not drawn above it (not loaded yet, hidden, in another group, or a lineage that loops) stays a top-level row where the server put it and says its parent is not shown here; no parent, project or row is invented and no row is dropped or shown twice
+- **Then** the nesting follows the rows the server just returned: a page or a live re-read that brings the parent nests the child, and one that no longer returns it leaves the child where the server put it
+- **Then** a nested row keeps every row affordance: the expand gesture, the actions menu, the ownership label and the unread mark; there is no collapse toggle, and deleting a parent still warns with the endpoint's count of its direct children
+
 ### V2 session ownership label
 
 - **Given** the v2 session catalog shows a row

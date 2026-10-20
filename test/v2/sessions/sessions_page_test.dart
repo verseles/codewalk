@@ -675,4 +675,238 @@ void main() {
       rig.dispose();
     },
   );
+  group('nesting', () {
+    Future<(CatalogSource, V2Localizations, LiveDirectory)> openList(
+      WidgetTester tester, {
+      Size size = const Size(390, 844),
+      Locale? locale,
+      double scale = 1,
+      DateTime Function()? clock,
+    }) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      addTearDown(rig.dispose);
+      final directory = LiveDirectory();
+      await rig.save('a');
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+        sessionClock: clock,
+      );
+      if (locale != null) dependencies.preferences.setLocale(locale);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+          child: CodeWalkV2Bootstrap(dependencies: dependencies),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final dropdown = tester.widget<DropdownButton<String>>(
+        find.byKey(const ValueKey('sessions-profile')),
+      );
+      dropdown.onChanged!('profile_a');
+      await tester.pump();
+      return (
+        rig.sources.single,
+        dependencies.localizations.current,
+        directory,
+      );
+    }
+
+    for (final size in [const Size(390, 844), const Size(1280, 800)]) {
+      for (final locale in [const Locale('en'), const Locale('ar')]) {
+        testWidgets(
+          'a child is drawn under its parent at $size/${locale.languageCode}',
+          (tester) async {
+            final (source, l10n, _) = await openList(
+              tester,
+              size: size,
+              locale: locale,
+            );
+            source.respond([
+              source.row(
+                'grand',
+                directory: '/work/alpha',
+                title: 'Grand',
+                parent: 'child',
+              ),
+              source.row(
+                'child',
+                directory: '/work/alpha',
+                title: 'Child',
+                parent: 'root',
+              ),
+              source.row('root', directory: '/work/alpha', title: 'Root'),
+            ]);
+            await tester.pumpAndSettle();
+            double topOf(String text) => tester.getTopLeft(find.text(text)).dy;
+            expect(topOf('Root'), lessThan(topOf('Child')));
+            expect(topOf('Child'), lessThan(topOf('Grand')));
+            final rtl = locale.languageCode == 'ar';
+            double startOf(String id) {
+              final card = find.byKey(ValueKey(source.row(id).info.ref));
+              return rtl
+                  ? -tester.getTopRight(card).dx
+                  : tester.getTopLeft(card).dx;
+            }
+
+            expect(startOf('child') - startOf('root'), 16);
+            expect(startOf('grand') - startOf('root'), 32);
+            expect(find.text(l10n.sessionsChildSession), findsNWidgets(2));
+            expect(find.text(l10n.sessionsChildParentElsewhere), findsNothing);
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox.shrink());
+          },
+        );
+      }
+    }
+
+    testWidgets('the indent stops at its cap at 2x in a right-to-left locale', (
+      tester,
+    ) async {
+      final (source, _, _) = await openList(
+        tester,
+        locale: const Locale('ar'),
+        scale: 2,
+      );
+      final long = 'long '.padRight(400, 'x');
+      source.respond([
+        for (var i = 4; i >= 0; i--)
+          source.row(
+            'n$i',
+            directory: '/work/alpha',
+            title: 'n$i $long',
+            parent: i == 0 ? null : 'n${i - 1}',
+          ),
+      ]);
+      await tester.pumpAndSettle();
+      // At 2x each card is taller than the viewport and the list builds
+      // lazily, so each start edge is read while its card is in view.
+      final start = <String, double>{};
+      for (var i = 0; i <= 4; i++) {
+        final card = find.byKey(ValueKey(source.row('n$i').info.ref));
+        await tester.scrollUntilVisible(
+          card,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        start['n$i'] = -tester.getTopRight(card).dx;
+      }
+      expect(start['n3']! - start['n0']!, 48);
+      expect(start['n4'], start['n3']);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('a child whose parent is on the next page nests once loaded', (
+      tester,
+    ) async {
+      final (source, l10n, _) = await openList(tester);
+      source.respond([
+        source.row('c', directory: '/work/alpha', title: 'Child', parent: 'p'),
+      ], next: 'A');
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.sessionsChildParentElsewhere), findsOneWidget);
+      final card = find.byKey(ValueKey(source.row('c').info.ref));
+      final before = tester.getTopLeft(card).dx;
+
+      final more = find.byKey(const ValueKey('sessions-more'));
+      await tester.ensureVisible(more);
+      await tester.tap(more);
+      await tester.pump();
+      source.respond([
+        source.row('p', directory: '/work/alpha', title: 'Parent'),
+      ]);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Parent')).dy,
+        lessThan(tester.getTopLeft(find.text('Child')).dy),
+      );
+      expect(card, findsOneWidget);
+      expect(tester.getTopLeft(card).dx - before, 16);
+      expect(find.text(l10n.sessionsChildSession), findsOneWidget);
+      expect(find.text(l10n.sessionsChildParentElsewhere), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('the live re-read nests and un-nests a child', (tester) async {
+      // The automatic re-read keeps a cooldown on the session clock.
+      var now = DateTime.utc(2026, 10, 20, 12);
+      final (source, l10n, directory) = await openList(
+        tester,
+        clock: () => now,
+      );
+      source.respond([
+        source.row('root', directory: '/work/alpha', title: 'Root'),
+      ]);
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.tap(find.text('Root'));
+      await tester.pumpAndSettle();
+      final history = find.byKey(
+        ValueKey('history-open-${source.row('root').info.ref.storageKey}'),
+      );
+      expect(history, findsOneWidget);
+
+      // A subagent child was created: the quiet re-read nests it under the
+      // parent, and the expanded parent stays expanded.
+      directory.feeds.last.emit(const SessionCatalogChanged());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      source.respond([
+        source.row(
+          'child',
+          directory: '/work/alpha',
+          title: 'Child',
+          parent: 'root',
+        ),
+        source.row('root', directory: '/work/alpha', title: 'Root'),
+      ]);
+      await tester.pumpAndSettle();
+      final child = find.byKey(ValueKey(source.row('child').info.ref));
+      final root = find.byKey(ValueKey(source.row('root').info.ref));
+      expect(child, findsOneWidget);
+      expect(tester.getTopLeft(child).dx - tester.getTopLeft(root).dx, 16);
+      expect(history, findsOneWidget);
+      expect(find.text(l10n.sessionsLoading), findsNothing);
+      expect(find.text(l10n.sessionsPreviousResults), findsNothing);
+
+      // The nested row keeps its own actions.
+      await tester.longPress(find.text('Child'));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.sessionsActionRename), findsOneWidget);
+      await tester.tapAt(Offset.zero);
+      await tester.pumpAndSettle();
+
+      // The parent is gone from the next answer: the child stays, once, where
+      // the server put it, and says its parent is not shown.
+      // The automatic re-read waits for its cooldown.
+      now = now.add(const Duration(seconds: 3));
+      directory.feeds.last.emit(const SessionCatalogChanged());
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      source.respond([
+        source.row(
+          'child',
+          directory: '/work/alpha',
+          title: 'Child',
+          parent: 'root',
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(child, findsOneWidget);
+      expect(root, findsNothing);
+      expect(find.text(l10n.sessionsChildParentElsewhere), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  });
 }

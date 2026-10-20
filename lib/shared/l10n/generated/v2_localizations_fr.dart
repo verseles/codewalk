@@ -1287,4 +1287,11 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'Le chemin est trop long';
+
+  @override
+  String get sessionsChildSession => 'Session enfant';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'Session enfant · session parente non affichée ici';
 }

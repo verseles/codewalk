@@ -1182,4 +1182,10 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => '路径太长';
+
+  @override
+  String get sessionsChildSession => '子会话';
+
+  @override
+  String get sessionsChildParentElsewhere => '子会话 · 父会话未在此显示';
 }

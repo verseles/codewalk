@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "पथ बहुत लंबा है",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "चाइल्ड सत्र",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "चाइल्ड सत्र · मूल सत्र यहाँ नहीं दिखाया गया",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

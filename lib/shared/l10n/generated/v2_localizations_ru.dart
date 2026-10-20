@@ -1276,4 +1276,11 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionsCreateDirectoryTooLong => 'Путь слишком длинный';
+
+  @override
+  String get sessionsChildSession => 'Дочерняя сессия';
+
+  @override
+  String get sessionsChildParentElsewhere =>
+      'Дочерняя сессия · родительская сессия здесь не показана';
 }

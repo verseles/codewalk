@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "Il percorso è troppo lungo",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "Sessione figlia",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "Sessione figlia · sessione madre non mostrata qui",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

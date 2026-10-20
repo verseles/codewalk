@@ -1052,5 +1052,13 @@
   "sessionsCreateDirectoryTooLong": "المسار طويل جدًا",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "جلسة فرعية",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "جلسة فرعية · الجلسة الأم غير معروضة هنا",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

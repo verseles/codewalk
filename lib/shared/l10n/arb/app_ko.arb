@@ -1053,5 +1053,13 @@
   "sessionsCreateDirectoryTooLong": "경로가 너무 깁니다",
   "@sessionsCreateDirectoryTooLong": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildSession": "하위 세션",
+  "@sessionsChildSession": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionsChildParentElsewhere": "하위 세션 · 상위 세션이 여기에 표시되지 않음",
+  "@sessionsChildParentElsewhere": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

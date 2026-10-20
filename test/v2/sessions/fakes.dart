@@ -60,9 +60,15 @@ class CatalogSource implements SessionCatalogSource {
     String? directory,
     String? upstream,
     OwnershipInfo? ownership,
+    String? parent,
   }) => SessionSummary(
     info: SessionInfo(
       ref: SessionRef(harness.host, harness.harness, 'ses_$id'),
+      lineage: SessionLineage(
+        parent: parent == null
+            ? null
+            : SessionRef(harness.host, harness.harness, 'ses_$parent'),
+      ),
       title: title ?? id,
       ownership:
           ownership ?? const OwnershipInfo.unknown(reason: 'not observed'),

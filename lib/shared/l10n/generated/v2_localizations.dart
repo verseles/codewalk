@@ -2414,6 +2414,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'The path is too long'**
   String get sessionsCreateDirectoryTooLong;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Child session'**
+  String get sessionsChildSession;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Child session · parent not shown here'**
+  String get sessionsChildParentElsewhere;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

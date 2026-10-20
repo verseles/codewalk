@@ -2300,6 +2300,22 @@ groups appear in the first appearance of their first row, the rows inside a
 group keep the server's order, and the retained v1 reference groups the same
 way (`lib/presentation/utils/session_tab_grouping.dart`).
 
+## V2-043I nested session catalog (#397)
+
+```text
+lib/features/sessions/session_grouping.dart # nestSessionRows: one group's rows nested under the parent each record names, with the row's depth and whether its parent is drawn elsewhere
+lib/features/sessions/sessions_page.dart # The nested row: the capped start indent, the guide line and the lineage label; the row itself is unchanged
+tool/l10n/sessions_catalog.py # The scoped catalog with the child-session and parent-not-shown copy
+```
+
+The nesting is a second projection over a group's rows: the lineage comes only
+from the record's parent (never from a fork), the top-level rows and the
+siblings keep the server's order, and each parent stays where the server put
+it. A child whose parent is not in the same group stays a top-level row, and
+so does every row of a lineage that loops, while a row that hangs off the loop
+still nests under its own parent; every loaded row is drawn exactly once. No request is
+added; the plain catalog page already carries the children.
+
 ## V2-043F session lifecycle commands (#394)
 
 ```text
