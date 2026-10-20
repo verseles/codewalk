@@ -171,9 +171,14 @@ void main() {
     ]);
     await read;
     await tester.pumpAndSettle();
-    await tester.ensureVisible(
+    // At 2x the header takes most of the compact viewport, so the row is
+    // scrolled into view before it is tapped.
+    await tester.scrollUntilVisible(
       find.byKey(ValueKey(source.row('one').info.ref)),
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
+    await tester.pumpAndSettle();
     // The title is tapped, not the card: at 2x the card is taller than the
     // viewport and its center can sit below the visible area.
     await tester.tap(find.text(title));

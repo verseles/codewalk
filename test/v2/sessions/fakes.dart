@@ -198,6 +198,10 @@ final class FakeActionSource implements SessionActionSource {
   @override
   bool hideAvailable = true;
 
+  /// Whether the local hide state could not be read.
+  @override
+  bool hideUnreadable = false;
+
   @override
   final HarnessRef harness = const HarnessRef(
     HostId('host-a'),

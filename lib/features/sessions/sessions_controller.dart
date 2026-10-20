@@ -86,6 +86,10 @@ class SessionsController extends ChangeNotifier {
     SessionActionReason.versionUnverified,
   );
   final _pendingActions = <SessionRef>{};
+
+  /// The outcome of the last command that did not go through, so the list can
+  /// say so instead of closing the interaction silently.
+  SessionActionOutcome? _actionFailure;
   SessionActionFilter _filter = SessionActionFilter.active;
   final _received = <String>{};
   final _requested = <String>{};
@@ -115,6 +119,13 @@ class SessionsController extends ChangeNotifier {
 
   /// The endpoint's support for the session actions.
   SessionActionSupport get actionSupport => _actionSupport;
+
+  /// The outcome of the last command that did not go through.
+  SessionActionOutcome? get actionFailure => _actionFailure;
+
+  /// A change is waiting for its re-read, so the loaded rows may be
+  /// outdated and no action is offered.
+  bool get reconciling => _livePending;
 
   /// Whether a command for this row is in flight.
   bool actionPending(SessionRef ref) => _pendingActions.contains(ref);
@@ -262,11 +273,7 @@ class SessionsController extends ChangeNotifier {
     try {
       if (createSource) {
         _source ??= sourceFactory(current, credential!);
-        _actions ??= actionFactory?.call(
-          current,
-          credential!,
-          hosts.assessments[current.id]?.version,
-        );
+        _actions ??= actionFactory?.call(current, credential!);
         if (_actions != null) unawaited(_probeActions());
       }
       return true;
@@ -547,19 +554,19 @@ class SessionsController extends ChangeNotifier {
 
   /// Renames the row. The effect is observed by the authoritative re-read.
   Future<SessionActionOutcome> rename(SessionSummary row, String title) =>
-      _run(row, () => _actions!.rename(row, title));
+      _run(row, (source) => source.rename(row, title));
 
   /// Deletes the row and its children.
   Future<SessionActionOutcome> delete(SessionSummary row) =>
-      _run(row, () => _actions!.delete(row));
+      _run(row, (source) => source.delete(row));
 
   /// Copies the row's history into a new root session.
   Future<SessionActionOutcome> fork(SessionSummary row) =>
-      _run(row, () => _actions!.fork(row));
+      _run(row, (source) => source.fork(row));
 
   /// Marks the row's idle transition as viewed.
   Future<SessionActionOutcome> markViewed(SessionSummary row) =>
-      _run(row, () => _actions!.markViewed(row));
+      _run(row, (source) => source.markViewed(row));
 
   /// The direct children of the row, for the cascade warning. Null when the
   /// count could not be read.
@@ -574,6 +581,9 @@ class SessionsController extends ChangeNotifier {
     final source = _actions;
     if (source == null) return false;
     final written = await source.setHidden(row, hidden: hidden);
+    if (!written) {
+      _actionFailure = SessionActionOutcome.unavailable;
+    }
     _notify();
     return written;
   }
@@ -585,21 +595,43 @@ class SessionsController extends ChangeNotifier {
   /// rows exactly as the endpoint last answered.
   Future<SessionActionOutcome> _run(
     SessionSummary row,
-    Future<SessionActionOutcome> Function() command,
+    Future<SessionActionOutcome> Function(SessionActionSource source) command,
   ) async {
     final source = _actions;
     if (source == null) return SessionActionOutcome.unavailable;
     if (_pendingActions.contains(row.info.ref)) {
       return SessionActionOutcome.unavailable;
     }
+    // The intent is validated again right before the send: the profile, the
+    // credential, the endpoint's support, the currency of the rows and the
+    // row's own membership can all have changed while a dialog was open.
+    if (!_ready(createSource: false) ||
+        _actionSupport.reason != SessionActionReason.none ||
+        stale ||
+        behind ||
+        _livePending ||
+        !_sessions.any((current) => current.info.ref == row.info.ref)) {
+      return SessionActionOutcome.unavailable;
+    }
     _pendingActions.add(row.info.ref);
+    _actionFailure = null;
     _notify();
     try {
-      final outcome = await command();
-      if (outcome == SessionActionOutcome.accepted) {
+      final outcome = await command(source);
+      if (outcome == SessionActionOutcome.accepted ||
+          outcome == SessionActionOutcome.uncertain) {
+        // The effect is observed by the authoritative re-read. An uncertain
+        // command is reconciled there, never replayed.
         _markLiveChange();
       }
+      if (outcome != SessionActionOutcome.accepted) {
+        _actionFailure = outcome;
+      }
       return outcome;
+    } on ArgumentError {
+      // A local refusal, such as a title over the bound.
+      _actionFailure = SessionActionOutcome.unavailable;
+      return SessionActionOutcome.unavailable;
     } finally {
       _pendingActions.remove(row.info.ref);
       _notify();

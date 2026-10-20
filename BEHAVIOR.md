@@ -57,6 +57,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a fork copies the whole session history, because a catalog row has no message position
 - **Then** hide in CodeWalk is a local state the endpoint never sees: the row stops being shown, it comes back through the hidden filter, and a local state that could not be read is never overwritten
 - **Then** no command patches a row: the effect is observed by the next authoritative read, and a refused or uncertain command leaves the rows as the endpoint last answered them
+- **Then** the command is checked again right before it is sent: a profile, a credential, an endpoint version, the currency of the rows or the row itself that changed while the dialog was open refuses the command
+- **Then** a command whose answer was lost is reconciled by the next authoritative read and never sent again, and the list says that the command did not go through
+- **Then** the unread marker follows the endpoint's own idle transitions: a session that finishes while the list is open is marked unread without a manual refresh
+- **Then** the local hide that could not be read is never overwritten, the rows stay visible and the list says that the hidden list is unavailable
 ### V2 live session catalog
 
 - **Given** a saved server is selected in the v2 session catalog

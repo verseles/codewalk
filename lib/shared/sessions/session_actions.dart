@@ -4,7 +4,6 @@ typedef SessionActionFactory =
     SessionActionSource Function(
       EndpointProfile profile,
       EndpointCredential credential,
-      String? version,
     );
 
 /// Why an action is not available for the loaded rows.
@@ -119,6 +118,10 @@ abstract interface class SessionActionSource {
 
   /// Whether the local hide state can be read and written.
   bool get hideAvailable;
+
+  /// Whether the local hide state could not be read. Its content is unknown,
+  /// so it is never overwritten and the list says so.
+  bool get hideUnreadable;
 
   void close();
 }

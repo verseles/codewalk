@@ -2335,7 +2335,10 @@ capability is never discovered by trying a mutation. The unread marker is the
 endpoint's `time.viewed` against `time.idle`, carried on the summary and not
 on the info, because a session's identity does not change when the marker
 does. No command patches a row: the effect is observed by the quiet
-authoritative re-read.
+authoritative re-read. The command is validated again right before it is
+sent, an uncertain answer is reconciled by that re-read and never replayed,
+and the terminal execution events join the catalog changes, so a session that
+goes idle is marked unread without a manual refresh.
 
 ## V2-043E session ownership label (#393)
 

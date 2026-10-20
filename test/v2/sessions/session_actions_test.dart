@@ -21,7 +21,7 @@ void main() {
       SessionActionReason.none,
     ),
     Map<String, SessionViewState> viewStates = const {},
-    int? children,
+    int children = 0,
   }) async {
     actions = FakeActionSource(endpointSupport: support);
     final rig = CatalogRig();
@@ -32,7 +32,7 @@ void main() {
       endpointProber: FakeProber(),
       sessionCatalogFactory: rig.create,
       sessionLiveDirectory: LiveDirectory.new,
-      sessionActionFactory: (profile, credential, version) => actions,
+      sessionActionFactory: (profile, credential) => actions,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
     await tester.pumpAndSettle();
@@ -140,7 +140,8 @@ void main() {
     await tester.tap(find.text(l10n.sessionsActionDelete));
     await tester.pumpAndSettle();
     expect(find.textContaining('First'), findsWidgets);
-    await tester.tap(find.text(l10n.commonDelete));
+    // The dialog's own button: the menu entry carried the same word.
+    await tester.tap(find.text(l10n.commonDelete).last);
     await tester.pumpAndSettle();
     expect(actions.calls, contains('delete'));
   });

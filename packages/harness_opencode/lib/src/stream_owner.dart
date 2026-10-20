@@ -31,7 +31,8 @@ enum OpenCodeStreamFailure { malformedControl, hydrationExhausted, terminal }
 /// travels with it, because the consumer re-reads the authoritative list
 /// instead of patching a row. A fork is a new session that starts elsewhere
 /// and emits `session.forked` rather than `session.created`; a move changes
-/// the location a session belongs to; a view updates the unread watermark.
+/// the location a session belongs to; a view updates the unread watermark; and
+/// a session that goes idle advances that watermark.
 enum OpenCodeCatalogChange {
   created,
   forked,
@@ -39,6 +40,7 @@ enum OpenCodeCatalogChange {
   deleted,
   moved,
   viewed,
+  idled,
 }
 
 sealed class OpenCodeStreamUpdate {
@@ -296,6 +298,12 @@ final class OpenCodeStreamOwner {
       case 'session.viewed':
         // A view updates the unread watermark, so the marker changes with it.
         return OpenCodeCatalogChange.viewed;
+      case 'session.execution.succeeded':
+      case 'session.execution.failed':
+      case 'session.execution.interrupted':
+        // The session went idle: the endpoint's unread marker advances with
+        // it, so the list re-reads.
+        return OpenCodeCatalogChange.idled;
       default:
         return null;
     }

@@ -9,9 +9,9 @@ import 'hidden_session_store.dart';
 SessionActionSource createSessionActionSource(
   EndpointProfile profile,
   EndpointCredential credential,
-  String? version, {
+  EndpointProber prober, {
   HiddenSessionStore? hidden,
-}) => _NativeSource(profile, credential, version, hidden);
+}) => _NativeSource(profile, credential, prober, hidden);
 
 /// The session actions of one connected OpenCode endpoint.
 ///
@@ -24,9 +24,11 @@ final class _NativeSource implements SessionActionSource {
   _NativeSource(
     EndpointProfile profile,
     EndpointCredential credential,
-    this._version,
+    this._prober,
     this._hidden,
   ) : harness = HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id)) {
+    _endpoint = profile.endpoint;
+    _secret = credential.secret;
     _transport = IoEndpointHttpTransport(
       endpoint: profile.endpoint,
       headers: basicEndpointHeaders(
@@ -40,29 +42,43 @@ final class _NativeSource implements SessionActionSource {
 
   @override
   final HarnessRef harness;
+  late final Uri _endpoint;
+  late final String _secret;
   late final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
   final HiddenSessionStore? _hidden;
 
-  /// The version the profile's own probe observed.
-  final String? _version;
+  /// The profile's own prober: the version is observed, never assumed.
+  final EndpointProber _prober;
   SessionActionSupport? _support;
+  String? _version;
   bool _closed = false;
 
   @override
   Future<SessionActionSupport> support() async =>
-      _support ??= _probeSupport();
+      _support ??= await _probeSupport();
 
   /// The endpoint's own contract decides: the commands of the version the
   /// profile's probe observed, and nothing else.
-  SessionActionSupport _probeSupport() {
-    final version = _version;
+  ///
+  /// The probe is read-only and it is the profile's own, so a capability is
+  /// never discovered by trying a mutation.
+  Future<SessionActionSupport> _probeSupport() async {
+    final assessment = await _prober.start(_endpoint, _secret).result;
+    if (assessment.status == EndpointStatus.authenticationRequired) {
+      return const SessionActionSupport(
+        SessionActionReason.authenticationRequired,
+      );
+    }
+    final version = assessment.version;
     if (version == null ||
+        !assessment.canUse ||
         OpenCodeCompatibility.parse(version)?.toString() != '2.0.22') {
       return const SessionActionSupport(
         SessionActionReason.versionUnverified,
       );
     }
+    _version = version;
     return const SessionActionSupport(SessionActionReason.none);
   }
 
@@ -151,6 +167,9 @@ final class _NativeSource implements SessionActionSource {
 
   @override
   bool get hideAvailable => _hidden?.loaded == true && !(_hidden?.unreadable ?? true);
+
+  @override
+  bool get hideUnreadable => _hidden?.unreadable ?? false;
 
   @override
   bool isHidden(SessionSummary row) =>

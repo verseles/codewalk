@@ -18,11 +18,15 @@ class SessionActionsMenu extends StatefulWidget {
   const SessionActionsMenu({
     required this.controller,
     required this.row,
+    required this.menuKey,
     super.key,
   });
 
   final SessionsController controller;
   final SessionSummary row;
+
+  /// The key of the popup, so the row's own gestures open the same menu.
+  final GlobalKey<PopupMenuButtonState> menuKey;
 
   @override
   State<SessionActionsMenu> createState() => _SessionActionsMenuState();
@@ -37,6 +41,8 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     final support = controller.actionSupport;
     final pending = controller.actionPending(row.info.ref);
     final listCurrent = !controller.stale && !controller.behind;
+    // The menu stays usable while a re-read is pending; the dispatch refuses
+    // a row that a pending change may have outdated.
     final enabled = support.available && listCurrent && !pending;
     final reason = _reasonText(
       l10n,
@@ -46,8 +52,10 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     );
     final hidden = controller.isHidden(row);
     final unread = controller.viewState(row) == SessionViewState.unread;
-    return PopupMenuButton<SessionRowAction>(
+    return KeyedSubtree(
       key: ValueKey('session-actions-${row.info.ref.storageKey}'),
+      child: PopupMenuButton<SessionRowAction>(
+      key: widget.menuKey,
       icon: const Icon(Icons.more_vert),
       tooltip: l10n.sessionsActionsMenu,
       enabled: !pending,
@@ -82,9 +90,14 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
         PopupMenuItem<SessionRowAction>(
           value: SessionRowAction.delete,
           enabled: enabled,
-          child: _label(l10n.sessionsActionDelete, reason),
+          child: _label(
+            l10n.sessionsActionDelete,
+            reason,
+            destructive: true,
+          ),
         ),
       ],
+      ),
     );
   }
 
@@ -111,20 +124,28 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     };
   }
 
-  Widget _label(String title, String? reason) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(title),
-      if (reason != null)
-        Text(
-          reason,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget _label(String title, String? reason, {bool destructive = false}) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: destructive
+                ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  )
+                : null,
           ),
-        ),
-    ],
-  );
+          if (reason != null)
+            Text(
+              reason,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
+      );
 
   Future<void> _run(BuildContext context, SessionRowAction action) async {
     final controller = widget.controller;
@@ -204,6 +225,7 @@ class _RenameDialogState extends State<_RenameDialog> {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     return AlertDialog(
+      scrollable: true,
       title: Text(l10n.sessionsActionRenameTitle),
       content: TextField(
         controller: _text,
@@ -264,6 +286,7 @@ class _DeleteDialogState extends State<_DeleteDialog> {
         : widget.row.info.title;
     final children = _children;
     return AlertDialog(
+      scrollable: true,
       title: Text(l10n.sessionsActionDeleteTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -289,9 +312,24 @@ class _DeleteDialogState extends State<_DeleteDialog> {
           child: Text(l10n.commonCancel),
         ),
         TextButton(
-          onPressed: _counted ? () => Navigator.of(context).pop(true) : null,
+          // The delete waits for a known count: the count is not a lock, but
+          // the user is told what the endpoint will delete.
+          onPressed: _counted && children != null
+              ? () => Navigator.of(context).pop(true)
+              : null,
           child: Text(l10n.commonDelete),
         ),
+        if (_counted && children == null)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _counted = false;
+                _children = null;
+              });
+              _count();
+            },
+            child: Text(l10n.sessionsActionDeleteCounting),
+          ),
       ],
     );
   }

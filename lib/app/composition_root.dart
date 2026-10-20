@@ -15,7 +15,7 @@ import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
-import '../platform/sessions/session_action_source_io.dart';
+import '../platform/sessions/session_action_source.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
@@ -72,12 +72,13 @@ AppDependencies createAppDependencies({
       hiddenStore ?? hiddenSessionStore ?? HiddenSessionStore(store: metadata);
   // The session actions of a profile: the endpoint's own commands and the
   // local hide.
+  final prober = endpointProber ?? createEndpointProber();
   final actionFactory =
       sessionActionFactory ??
-      (profile, credential, version) => createSessionActionSource(
+      (profile, credential) => createSessionActionSource(
         profile,
         credential,
-        version,
+        prober,
         hidden: hiddenSessions,
       );
   locator.registerSingleton<DiagnosticsController>(
@@ -99,7 +100,7 @@ AppDependencies createAppDependencies({
             metadata: metadata,
             credentials: createV2EndpointCredentials(metadata),
           ),
-      prober: endpointProber ?? createEndpointProber(),
+      prober: prober,
       diagnostics: locator<DiagnosticsController>(),
     ),
   );

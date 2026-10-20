@@ -1,5 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -28,6 +30,17 @@ class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
   bool _openingHistory = false;
   bool _openingLive = false;
+
+  /// The popup of each row, so the row's own gestures open the same menu.
+  final _menuKeys = <String, GlobalKey<PopupMenuButtonState>>{};
+
+  GlobalKey<PopupMenuButtonState> _menuKey(SessionRef ref) =>
+      _menuKeys.putIfAbsent(
+        ref.storageKey,
+        () => GlobalKey<PopupMenuButtonState>(
+          debugLabel: 'session-actions-${ref.storageKey}',
+        ),
+      );
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -68,6 +81,8 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.stale) l10n.sessionsPreviousResults,
       if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
+      if (controller.actionFailure != null) l10n.sessionsActionFailed,
+      if (!controller.hideAvailable) l10n.sessionsActionUnavailableStore,
       if (controller.loaded &&
           !controller.loading &&
           !controller.stale &&
@@ -131,11 +146,14 @@ class _SessionsPageState extends State<SessionsPage> {
                         : null,
                   ),
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: PopupMenuButton<SessionActionFilter>(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      PopupMenuButton<SessionActionFilter>(
                       key: const ValueKey('sessions-filter'),
-                      tooltip: l10n.sessionsFilterActive,
+                      tooltip: _filterLabel(l10n, controller.filter),
                       onSelected: controller.setFilter,
                       itemBuilder: (context) => [
                         for (final filter in SessionActionFilter.values)
@@ -144,44 +162,35 @@ class _SessionsPageState extends State<SessionsPage> {
                             child: Text(_filterLabel(l10n, filter)),
                           ),
                       ],
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_filterLabel(l10n, controller.filter)),
-                          const Icon(Icons.arrow_drop_down),
-                        ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(_filterLabel(l10n, controller.filter)),
+                            const Icon(Icons.arrow_drop_down),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: FilledButton.tonal(
-                      key: const ValueKey('sessions-refresh'),
-                      onPressed:
-                          available &&
-                              controller.selectedProfile != null &&
-                              !controller.refreshing
-                          ? controller.refresh
-                          : null,
-                      child: Text(l10n.chatRefresh),
-                    ),
-                  ),
-                  if (hosts.storageError)
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TextButton(
-                        onPressed: hosts.loading ? null : hosts.load,
-                        child: Text(l10n.chatRetry),
+                      FilledButton.tonal(
+                        key: const ValueKey('sessions-refresh'),
+                        onPressed:
+                            available &&
+                                controller.selectedProfile != null &&
+                                !controller.refreshing
+                            ? controller.refresh
+                            : null,
+                        child: Text(l10n.chatRefresh),
                       ),
-                    ),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton(
-                      key: const ValueKey('sessions-hosts'),
-                      onPressed: () => context.go('/hosts'),
-                      child: Text(l10n.onboardingConnectRunningServer),
-                    ),
+                      if (hosts.storageError)
+                        TextButton(
+                          onPressed: hosts.loading ? null : hosts.load,
+                          child: Text(l10n.chatRetry),
+                        ),
+                      TextButton(
+                        key: const ValueKey('sessions-hosts'),
+                        onPressed: () => context.go('/hosts'),
+                        child: Text(l10n.onboardingConnectRunningServer),
+                      ),
+                    ],
                   ),
                   for (final notice in notices)
                     Padding(
@@ -314,10 +323,31 @@ class _SessionsPageState extends State<SessionsPage> {
   ) {
     final l10n = context.v2L10n;
     final expanded = controller.selectedSession?.info.ref == row.info.ref;
+    void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
     return Card(
               key: ValueKey<SessionRef>(row.info.ref),
-              child: InkWell(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onSecondaryTapUp: (_) => openMenu(),
+                child: CallbackShortcuts(
+                  bindings: {
+                    const SingleActivator(
+                      LogicalKeyboardKey.contextMenu,
+                    ): openMenu,
+                    const SingleActivator(
+                      LogicalKeyboardKey.f10,
+                      shift: true,
+                    ): openMenu,
+                  },
+                  child: Semantics(
+                    customSemanticsActions: {
+                      CustomSemanticsAction(
+                        label: l10n.sessionsActionsMenu,
+                      ): openMenu,
+                    },
+                    child: InkWell(
                 onTap: () => controller.inspect(row.info.ref),
+                onLongPress: openMenu,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -376,6 +406,7 @@ class _SessionsPageState extends State<SessionsPage> {
                           SessionActionsMenu(
                             controller: controller,
                             row: row,
+                            menuKey: _menuKey(row.info.ref),
                           ),
                         ],
                       ),
@@ -429,7 +460,10 @@ class _SessionsPageState extends State<SessionsPage> {
                   ),
                 ),
               ),
-    );
+                    ),
+                  ),
+                ),
+            );
   }
 
   String _date(BuildContext context, DateTime date) {
