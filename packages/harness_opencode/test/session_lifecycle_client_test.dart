@@ -316,8 +316,8 @@ void main() {
       final transport = _Transport(
         (_, _) => response({'data': sessionRecord()}),
       );
-      expect(
-        () => client(transport).create(
+      await expectLater(
+        client(transport).create(
           id: id,
           directory: '/work/project',
           nativeSessionId: 'not-a-session',
@@ -327,12 +327,67 @@ void main() {
       expect(transport.requests, isEmpty);
     });
 
+    test('the fork and the create name a 404 neutrally', () async {
+      final transport = _Transport(
+        (_, _) => response(null, status: 404, empty: true),
+      );
+      final forked = await client(transport).fork(session: session, id: id);
+      expect(forked.receipt.error?.rawType, 'NotFoundError');
+      expect(forked.receipt.error?.action?.known, ErrorAction.refresh);
+      final created = await client(transport).create(
+        id: id,
+        directory: '/work/project',
+      );
+      expect(created.receipt.error?.rawType, 'NotFoundError');
+    });
+
+    test('the create refuses an empty directory locally', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      await expectLater(
+        client(transport).create(id: id, directory: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
+    test('the rename refuses an oversized title locally', () async {
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
+      await expectLater(
+        client(transport).rename(
+          session: session,
+          id: id,
+          title: 'x' * (256 * 1024 + 1),
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
+    test('the fork refuses a boundary that is not a message', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      await expectLater(
+        client(transport).fork(session: session, id: id, before: 'ses_one'),
+        throwsA(isA<ArgumentError>()),
+      );
+      await expectLater(
+        client(transport).fork(session: session, id: id, before: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(transport.requests, isEmpty);
+    });
+
     test('the create refuses an unbounded text locally', () async {
       final transport = _Transport(
         (_, _) => response({'data': sessionRecord()}),
       );
-      expect(
-        () => client(transport).create(
+      await expectLater(
+        client(transport).create(
           id: id,
           directory: '/work/${'x' * 5000}',
         ),

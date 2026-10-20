@@ -90,19 +90,14 @@ final class OpenCodeSessionLifecycleClient {
     String? nativeSessionId,
     String? title,
     RequestCancellation? cancellation,
-  }) {
-    final owner = ProjectOwner(
-      ProjectRef(harness.host, directory),
-      harness: harness,
-    );
+  })async {
     if (nativeSessionId != null) {
       try {
         openCodeSessionId(nativeSessionId);
       } on FormatException {
-        throw ArgumentError.value(
-          nativeSessionId,
-          'nativeSessionId',
+        throw ArgumentError(
           'Not a native session identifier',
+          'nativeSessionId',
         );
       }
     }
@@ -112,6 +107,10 @@ final class OpenCodeSessionLifecycleClient {
     if (title != null && !_boundedText(title, _titleLimit)) {
       throw ArgumentError('The create body carries a bounded title');
     }
+    final owner = ProjectOwner(
+      ProjectRef(harness.host, directory),
+      harness: harness,
+    );
     // The optional keys are omitted, not set to null: the endpoint tells an
     // absent key from a null one.
     final body = <String, Object?>{'location': {'directory': directory}};
@@ -142,7 +141,7 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     required String title,
     RequestCancellation? cancellation,
-  }) {
+  })async {
     if (!_boundedText(title, _titleLimit)) {
       throw ArgumentError('The rename body carries a bounded title');
     }
@@ -172,7 +171,7 @@ final class OpenCodeSessionLifecycleClient {
     required SessionRef session,
     required CommandId id,
     RequestCancellation? cancellation,
-  }) => _send(
+  }) async => _send(
     id: id,
     operation: MutationOperation.delete,
     owner: SessionOwner(session),
@@ -194,9 +193,10 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     String? before,
     RequestCancellation? cancellation,
-  }) {
-    if (before != null && !_boundedText(before, _idLimit)) {
-      throw ArgumentError('The fork body carries a bounded boundary');
+  })async {
+    if (before != null &&
+        (!before.startsWith('msg_') || !_boundedText(before, _idLimit))) {
+      throw ArgumentError('The fork body carries a bounded message boundary');
     }
     final body = <String, Object?>{};
     if (before != null) body['before'] = before;
@@ -223,7 +223,7 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     required int idle,
     RequestCancellation? cancellation,
-  }) => _send(
+  }) async => _send(
     id: id,
     operation: MutationOperation.markViewed,
     owner: SessionOwner(session),
@@ -446,6 +446,8 @@ final class OpenCodeSessionLifecycleClient {
       if (response == null &&
           (error.failure == TransportFailure.invalidTarget ||
               error.failure == TransportFailure.invalidRequest)) {
+        // The transport refused the request itself, so nothing was sent.
+        sentPayload = null;
         return unavailable(error.failure.name);
       }
       return uncertain(error.failure.name);

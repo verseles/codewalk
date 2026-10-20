@@ -2307,8 +2307,8 @@ packages/harness_opencode/lib/src/session_lifecycle_client.dart # The harness-on
 packages/codewalk_core/lib/src/commands.dart # MutationOperation gains rename and markViewed; create, fork, delete and archive keep their meaning
 ```
 
-The client sends one command per exchange and never retries, replays or
-persists. The receipt admits the exchange and never proves the effect: the
+The client sends one command per exchange, accepts only that command's
+contract status, and never retries, replays or persists. The receipt admits the exchange and never proves the effect: the
 effect is server-side and is observed later by the endpoint's stream or by an
 authoritative re-read. Only a connected version of exactly `2.0.22` receives a
 command; the refusal comes from the status alone, because a native error body

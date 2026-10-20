@@ -909,8 +909,11 @@ Only a connected version of exactly `2.0.22` receives a command; anything
 else answers `unavailable('unverifiedVersion')` and nothing is sent. A refusal
 is known from the status alone and the native body is never read, because its
 messages echo identifiers and paths: `400` is a protocol refusal, `401` and
-`403` an authentication refusal, `404` a missing session, `429` a rate limit,
-and any other status stays uncertain. A create with the caller's identifier
+`403` an authentication refusal, `404` a missing session where the contract
+guarantees it and a neutral not-found elsewhere, `429` a rate limit, and any
+other status stays uncertain. Each command also accepts only its own
+contract status: `200` for the create and the fork, `204` for the rename, the
+delete and the mark-viewed. A create with the caller's identifier
 that answers with another session is refused as `SessionIdentityOccupied`,
 because the endpoint returns the session that identifier already owns and
 ignores the changed fields.
