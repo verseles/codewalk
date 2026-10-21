@@ -49,6 +49,8 @@ const _credentials = {
   'refreshtoken',
   'apitoken',
   'privatekey',
+  'secretaccesskey',
+  'awssecretaccesskey',
   'clientsecret',
   'providerstate',
   'providerresultstate',

@@ -330,6 +330,21 @@ void main() {
     },
   );
 
+  test('an AWS secret access key under its own key is redacted', () {
+    final event =
+        projectTool(
+              toolFrame(
+                'called',
+                input: {'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMIK7MDENG'},
+              ),
+              current: startedTool(),
+            )!
+            as ItemUpserted;
+    final item = event.item as ToolCall;
+    expect(item.input!.value, {'AWS_SECRET_ACCESS_KEY': '[redacted]'});
+    expect(item.source.extra!.value, containsPair('inputRedacted', true));
+  });
+
   test('keys are measured as kept, not as redacted', () {
     // Keys keep their text: one that reads like a credential assignment must
     // still count at its full size.

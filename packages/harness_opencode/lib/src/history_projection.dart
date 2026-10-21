@@ -35,6 +35,8 @@ List<TimelineItem> projectOpenCodeHistory(
     'refreshtoken',
     'apitoken',
     'privatekey',
+    'secretaccesskey',
+    'awssecretaccesskey',
     'clientsecret',
     'providerstate',
     'providerresultstate',
@@ -151,7 +153,16 @@ List<TimelineItem> projectOpenCodeHistory(
         if (fieldBytes > 65536) malformed();
         for (final entry in v.entries) {
           measure(entry.key, depth + 1, key: true);
+          final before = fieldBytes;
           measure(entry.value, depth + 1);
+          // Short values expand to the JSON string "[redacted]" (12 bytes).
+          if (redact &&
+              credentials.contains(
+                entry.key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), ''),
+              ) &&
+              fieldBytes - before < 12) {
+            fieldBytes += 12 - (fieldBytes - before);
+          }
         }
       } else {
         malformed();
