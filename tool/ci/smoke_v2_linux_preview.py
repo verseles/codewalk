@@ -186,8 +186,14 @@ def smoke(archive_path, evidence):
             # The app opens into the workspace: the list beside an empty detail.
             expect(window, ["CodeWalk", "Conversations", "Choose a session"], "01-initial")
             click(window, "Connect to a running server")
-            expect(window, ["No servers found", "Pair a server"], "02-hosts")
-            click(window, "Pair")
+            expect(window, ["Servers", "No servers found"], "02-hosts")
+            # The full-width page leaves its outlined button hard to read, so
+            # the pairing opens by keyboard order when OCR misses it: Add
+            # Server, then Pair a server.
+            if locate(capture(window, snapshot), "Pair a server") is not None:
+                click(window, "Pair")
+            else:
+                run(["xdotool", "key", "--clearmodifiers", "Tab", "Tab", "Return"])
             expect(window, ["Pairing link", "Open QR image"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])
             expect(window, ["Appearance", "Shortcuts"], "04-settings-wide")
