@@ -1263,15 +1263,15 @@ Before starting, ensure the Issue contains:
 5. **Owner checkpoints.** The orchestrator prepares the artifact and the instructions; the owner only tests, decides or authorizes. Feedback is recorded on the tracking Issue. Blocking defects become at most one bounded correction row right after the checkpoint, approved by the owner; everything else is `after-mvp`.
 6. **Reporting.** Every unit ends with: `Seq <x> accepted → next Seq <y> (<id>); phase <n>/6; owner pending: <…>`.
 7. **Drift audit.** At each owner checkpoint, every commit and closed Issue since the previous checkpoint must map to a row of this table; anything else is reported as a deviation.
-8. **Issue contract.** Each roadmap Issue carries `Roadmap: §11.6 rev 1 · Seq · Phase · Previous · Next · Exit · Owner action`. The milestone "MVP beta (Android/Linux)" holds exactly the roadmap Issues; deferred Issues carry `after-mvp`; a pinned tracking Issue mirrors this table with the commit of each accepted row. Live status lives in the Issues, not in this table.
+8. **Issue contract.** Each roadmap Issue carries `Roadmap: §11.6 rev 1 · Seq · Phase · Previous · Next · Exit · Owner action`. The milestone "MVP beta (Android/Linux)" holds exactly the roadmap Issues; deferred Issues carry `after-mvp`; the pinned tracking Issue #398 mirrors this table with the commit of each accepted row. Live status lives in the Issues, not in this table.
 
 **Phase 0 — Lock the roadmap**
 
 | Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
 |---|---|---|---|---|---|---|
-| 0.1 | CP0 | Gate placement, MVP scope, rule alignment and devices decided | The target is fixed before code | — | Decided 2026-10-21 (§17) | Decided |
-| 0.2 | Roadmap revision 1 | This section, §§0/1/2/9/11/12/15/16/17/20, `AGENTS.md` and ADR alignment, the milestone, the tracking Issue, Issue headers and the new child Issues | The order is encoded where the executor reads it | 0.1 | Plan and Issues agree; every row has an Issue; the milestone equals the rows | — |
-| 0.3 | Evidence hygiene | Accepted but untracked evidence (`test/contract/fixtures/codex/0.160.1/`, `test/contract/fixtures/opencode/2.0.22/web-configured-origin/`) versioned with provenance, or its discard recorded | Accepted G1-prerequisite and Web-origin evidence lives outside Git | 0.2 | No orphan evidence in `git status`; links on #245 and #247 | — |
+| 0.1 | CP0 (#398) | Gate placement, MVP scope, rule alignment and devices decided | The target is fixed before code | — | Decided 2026-10-21 (§17) | Decided |
+| 0.2 | Roadmap revision 1 (#398) | This section, §§0/1/2/9/11/12/15/16/17/20, `AGENTS.md` and ADR alignment, the milestone, the tracking Issue, Issue headers and the new child Issues | The order is encoded where the executor reads it | 0.1 | Plan and Issues agree; every row has an Issue; the milestone equals the rows | — |
+| 0.3 | Evidence hygiene (#399) | Accepted but untracked evidence (`test/contract/fixtures/codex/0.160.1/`, `test/contract/fixtures/opencode/2.0.22/web-configured-origin/`) versioned with provenance, or its discard recorded | Accepted G1-prerequisite and Web-origin evidence lives outside Git | 0.2 | No orphan evidence in `git status`; links on #245 and #247 | — |
 
 **Phase 1 — Finish the live timeline (`main`)**
 
@@ -1279,27 +1279,27 @@ Before starting, ensure the Issue contains:
 |---|---|---|---|---|---|---|
 | 1.1 | V2-044C1 (#279) | The five accepted review-round-2 fixes, re-review, then push of `831423d9`, `96e70fa3` and the fix commit | Parked code must land before more timeline work | 0.2 | Review converged; `make check` green; CI green; #279 updated | — |
 | 1.2 | V2-044C2 (#279) | Older-history pagination through the stream owner (cursor limit 200), stop at 500 resident without evicting the newest, the history viewer as the fallback, the 2,000-total/500-resident case, golden timelines, legacy test dispositions | Last criteria of #279 and #276; long sessions | 1.1 | ≤500 resident, bounded mounted rows and a stable anchor in the structural case; golden fixtures; dispositions recorded; #279 closed | — |
-| 1.3 | V2-044D (#276) | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized | Tool rows show only a name and shell rows "part unavailable"; a coding session cannot be followed | 1.2 | Compact/wide/RTL/2× tests; bounded content; #276 closed | — |
+| 1.3 | V2-044D (#400; parent #276) | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized | Tool rows show only a name and shell rows "part unavailable"; a coding session cannot be followed | 1.2 | Compact/wide/RTL/2× tests; bounded content; #276 closed | — |
 
 **Phase 2 — v1-parity workspace (`main`)**
 
 | Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
 |---|---|---|---|---|---|---|
-| 2.1 | V2-070A (#301) | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session | The owner rejected the bootstrap rail (2026-10-11) | 1.3 | v1 invariant map recorded first; compact/wide/RTL/2× tests; no harness branching | — |
-| 2.2 | V2-070B (#301) | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, restore after restart | The v1 working model | 2.1 | Idempotent restore; no cross-host collision | — |
-| 2.3 | V2-070C (#301) | Drafts that survive process death and per-session input history; canned answers stay post-MVP | A lost prompt is a daily blocker | 2.2 | Kill/relaunch keeps the draft; history per session | — |
-| 2.4 | V2-043J (#275) | Session activity in the sidebar rows: running, needs you, unread — from observed state only | Shows which session needs attention | 2.1 | Each mark has an observed source; unknown stays unknown | — |
-| 2.5 | CP1 | The orchestrator delivers a launched build; the owner tests the workspace on the Galaxy S25, Linux x64 and Linux ARM64 | First experience check of the navigation | 2.4 | Feedback recorded; at most one correction row 2.6 | Test and report |
+| 2.1 | V2-070A (#401; parent #301) | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session | The owner rejected the bootstrap rail (2026-10-11) | 1.3 | v1 invariant map recorded first; compact/wide/RTL/2× tests; no harness branching | — |
+| 2.2 | V2-070B (#402; parent #301) | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, restore after restart | The v1 working model | 2.1 | Idempotent restore; no cross-host collision | — |
+| 2.3 | V2-070C (#403; parent #301) | Drafts that survive process death and per-session input history; canned answers stay post-MVP | A lost prompt is a daily blocker | 2.2 | Kill/relaunch keeps the draft; history per session | — |
+| 2.4 | V2-043J (#404; parent #275) | Session activity in the sidebar rows: running, needs you, unread — from observed state only | Shows which session needs attention | 2.1 | Each mark has an observed source; unknown stays unknown | — |
+| 2.5 | CP1 (#398) | The orchestrator delivers a launched build; the owner tests the workspace on the Galaxy S25, Linux x64 and Linux ARM64 | First experience check of the navigation | 2.4 | Feedback recorded; at most one correction row 2.6 | Test and report |
 
 **Phase 3 — Daily chat essentials (`main`)**
 
 | Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
 |---|---|---|---|---|---|---|
-| 3.1 | V2-046B (#281) | Execution truth: active-list reconciliation, outcomes, interrupted/resuming, parent idle while children run, retry shown from harness events (countdown only when observed) | Daily use needs a truthful running/failed state | 1.1 | Outcome fixtures; nothing derived from `session.status` | — |
-| 3.2 | V2-054A (#293) | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 routes, applied before send, external changes reconciled; no favorites or recents | Otherwise every session is stuck on the server default | 2.1 | Race test: a change applies to the intended session only; an unavailable route hides the control with a reason | — |
-| 3.3 | V2-055A (#294) | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action; no meters or cost | An assistant error is an "unavailable part" today | 3.1 | 2.0.22 fixtures; unknown never renders as zero | — |
-| 3.4 | V2-042C (#274) | Device reliability evidence on the Galaxy S25, an Android 12/API 31 emulator and Linux x64/ARM64 (drop, Wi-Fi↔cellular, background/foreground, server restart, a session started in the TUI); the durable log stays off; MVP disposition of #243/#244/#239 | Scripted recovery is not device evidence | 3.3 | Matrix recorded; no duplicates or stuck running; #274, #275 and #281 closed or their remaining criteria marked post-MVP with the reason | Keep the devices reachable |
-| 3.5 | CP2 | The owner uses a development build daily for 2–3 days | Real daily use before release work | 3.4 | Feedback recorded; at most one correction row 3.6 | Use and report |
+| 3.1 | V2-046B (#405; parent #281) | Execution truth: active-list reconciliation, outcomes, interrupted/resuming, parent idle while children run, retry shown from harness events (countdown only when observed) | Daily use needs a truthful running/failed state | 1.1 | Outcome fixtures; nothing derived from `session.status` | — |
+| 3.2 | V2-054A (#406; parent #293) | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 routes, applied before send, external changes reconciled; no favorites or recents | Otherwise every session is stuck on the server default | 2.1 | Race test: a change applies to the intended session only; an unavailable route hides the control with a reason | — |
+| 3.3 | V2-055A (#407; parent #294) | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action; no meters or cost | An assistant error is an "unavailable part" today | 3.1 | 2.0.22 fixtures; unknown never renders as zero | — |
+| 3.4 | V2-042C (#408; parent #274) | Device reliability evidence on the Galaxy S25, an Android 12/API 31 emulator and Linux x64/ARM64 (drop, Wi-Fi↔cellular, background/foreground, server restart, a session started in the TUI); the durable log stays off; MVP disposition of #243/#244/#239 | Scripted recovery is not device evidence | 3.3 | Matrix recorded; no duplicates or stuck running; #274, #275 and #281 closed or their remaining criteria marked post-MVP with the reason | Keep the devices reachable |
+| 3.5 | CP2 (#398) | The owner uses a development build daily for 2–3 days | Real daily use before release work | 3.4 | Feedback recorded; at most one correction row 3.6 | Use and report |
 
 **Phase 4 — v1 transition cohort (branch `v1`)**
 
@@ -1315,7 +1315,7 @@ Before starting, ensure the Issue contains:
 |---|---|---|---|---|---|---|
 | 5.1 | V2-077A (#362) | Native beta updater and selector, prerelease ordering, exact tag, actual v2 entry point, fail-closed guards on every `main` push/tag/workflow path | Nothing v2 is published before the guards | 4.3 | Negative guard tests on every path; dry runs; no Web/latest/legacy overwrite | — |
 | 5.2 | V2-076A (#361) | Installed-cohort migration: importer and startup wiring, install-over from 4.3 on the Galaxy S25 and Linux x64/ARM64, v1 keys preserved, idempotent restart | The data-preservation promise | 4.3, 2.3 | Evidence on the three targets | CP4: allow the upgrade |
-| 5.3 | V2-060C (#321) | Re-proof of the integrated flow on the new workspace: fake integrated flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error) | V2-060A/B predate the new shell | 2.3, 3.2, 3.4 | Fake and live logs; no regression | — |
+| 5.3 | V2-060C (#409) | Re-proof of the integrated flow on the new workspace: fake integrated flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error) | V2-060A/B predate the new shell | 2.3, 3.2, 3.4 | Fake and live logs; no regression | — |
 | 5.4 | V2-078A (#357) | Android/Linux package, install, signature and functional evidence; G3/G4 rerun; the provisional G5 revision revalidated | Entry evidence for the beta | 5.1, 5.2, 5.3 | Per-target evidence; deferred platforms pending, not passed | — |
 | 5.5 | V2-071 (#302) | Visual-parity sign-off against v1 on the packaged candidate | The only remaining #302 criterion | 5.4 | Checklist signed; gaps fixed or `after-mvp` | CP5: sign off |
 
@@ -1678,7 +1678,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 |---|---|---|
 | V2-042A ([#379](https://github.com/verseles/codewalk/issues/379)) | V2-023, V2-040, V2-041, V2-056A, V2-028D, V2-043A, V2-044A1, V2-044A5, V2-044A7, V2-044A11 | Pure-read hydration of one session into a `SessionSnapshot`: sequential active → session → inbox → newest history (`order=desc`, reversed by native row, direction-carrying continuation) → permissions → forms; per-read boundaries on the caller's `readStart` (one combined interactions slot); whole-snapshot failure; running/idle plus last page outcome; inbox, permission and form rows through builders shared with A5/A7; history-promoted inbox entries settled. Capture B replay: recorded reads then 38 stream frames, no duplicate identities or leftover pending. No stream owner, buffering, reconnect, global lists, children discovery, UI or parent/MVP acceptance. |
 | V2-042B ([#380](https://github.com/verseles/codewalk/issues/380)) | V2-042A, V2-044A11 | `OpenCodeStreamOwner`: `server.connected` gate, per-generation hydration from one read start then release, ordered apply through `projectOpenCodeEvent` (per-session hold until the first snapshot), coalesced bounded repairs, set-aside of failing sessions, eviction on not-found, disconnect handling; hydration reads the staged revert; Core drops admission protection for live-delivered input. Done-when cases (drop mid-text/mid-tool, pending approval, revert, overflow, restart with `shutdown`) pass with unique identities and no stuck running; a scripted connection replaces transport timers. No durable log, children discovery, global lists, sending, app controller or MVP acceptance. |
-| V2-042C (§11.6 Seq 3.4) | V2-042B, V2-046B, V2-055A | Device reliability evidence on the owner's Galaxy S25 (Android 16), an Android 12/API 31 emulator and Linux x64/ARM64: network drop, Wi-Fi↔cellular, background/foreground, server restart with `shutdown`, a session started in the TUI appearing live; no duplicates or stuck running; the durable log stays off with the reason; MVP disposition of #243/#244/#239 (inconclusive observations get a documented conservative fallback, remaining targets are post-MVP). Closes V2-042 and V2-043, or marks their remaining criteria post-MVP with the reason. |
+| V2-042C (#408, §11.6 Seq 3.4) | V2-042B, V2-046B, V2-055A | Device reliability evidence on the owner's Galaxy S25 (Android 16), an Android 12/API 31 emulator and Linux x64/ARM64: network drop, Wi-Fi↔cellular, background/foreground, server restart with `shutdown`, a session started in the TUI appearing live; no duplicates or stuck running; the durable log stays off with the reason; MVP disposition of #243/#244/#239 (inconclusive observations get a documented conservative fallback, remaining targets are post-MVP). Closes V2-042 and V2-043, or marks their remaining criteria post-MVP with the reason. |
 
 #### V2-043 — Session index and lifecycle
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1699,7 +1699,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 | V2-043G ([#395](https://github.com/verseles/codewalk/issues/395)) | V2-043B, V2-043C, V2-043F | The visible catalog row offers the session actions — rename, delete with the children-cascade warning, fork from here, mark as viewed and hide in CodeWalk — with the endpoint's own unread marker, a local hide that survives a restart, the refusal of the actions the endpoint did not define, and the localized copy in the scoped catalog. No create flow, no children nesting and no timeline. |
 | V2-043H ([#396](https://github.com/verseles/codewalk/issues/396)) | V2-043B, V2-043C, V2-043F | The visible catalog creates a session: the user chooses the project (and the harness when more than one is available), the request always carries the chosen canonical directory, the new session arrives through the quiet authoritative read with the endpoint's own record, and a refused or uncertain create says so and is never replayed. No children nesting, no model/agent/effort choice and no timeline. |
 | V2-043I ([#397](https://github.com/verseles/codewalk/issues/397)) | V2-043A, V2-043B, V2-043C, V2-043D | The visible catalog nests the child sessions under the parent the endpoint attributed them to, keeping the server's order and leaving a child whose parent is not loaded where the server put it; the lineage comes from the record, never from an inference. No per-parent request, no model/agent/effort choice, no harness badge, no activity chip and no timeline. |
-| V2-043J (§11.6 Seq 2.4) | V2-043I, V2-070A | Session activity in the workspace sidebar rows: running, needs you and unread, each from an observed source; unknown stays unknown; no harness badge while one harness exists. |
+| V2-043J (#404, §11.6 Seq 2.4) | V2-043I, V2-070A | Session activity in the workspace sidebar rows: running, needs you and unread, each from an observed source; unknown stays unknown; no harness badge while one harness exists. |
 
 #### V2-044 — Timeline projection
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1742,7 +1742,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 |---|---|---|
 | V2-044C1 (#279, §11.6 Seq 1.1) | V2-044B2 | Live timeline viewport: lands on the newest content, follows growth while the reader is at the bottom, yields to a drag/fling/wheel, return control marked by arriving content, tall settled answer revealed from its start; the five accepted review-round-2 fixes applied before push. |
 | V2-044C2 (#279, §11.6 Seq 1.2) | V2-044C1 | Older-history pagination through the stream owner (cursor limit 200), stop at 500 resident without evicting the newest, the history viewer as the fallback, the 2,000-total/500-resident structural case, golden timelines and the §8.3 legacy test dispositions. |
-| V2-044D (§11.6 Seq 1.3) | V2-044C2 | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized; compact/wide/RTL/2× tests. |
+| V2-044D (#400, §11.6 Seq 1.3) | V2-044C2 | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized; compact/wide/RTL/2× tests. |
 
 #### V2-045 — Sending and outbox
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
@@ -1772,7 +1772,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
 | V2-046A ([#387](https://github.com/verseles/codewalk/issues/387)) | V2-044A4, V2-042A, V2-042B, V2-044B2, V2-045E; delivered V2-005D interrupt recordings as evidence | Native live/current/running session Stop: one bare version-gated 2.0.22 POST, no resume/replay/ledger requirement, shared per-session lease fence, bounded HTTP/settlement and authoritative stream state. Empty-draft Send/Stop swap and focused double-Escape preserve v1 behavior; 14 locales, compact/landscape/wide composer, loopback reconnect/same-history outcome and late-terminal regressions. HTTP acceptance is not settlement, and the session endpoint has no turn CAS. No retry countdown, child/all-background control, new capture, installed/MVP acceptance or parent closure. |
-| V2-046B (§11.6 Seq 3.1) | V2-046A, V2-044C1 | Execution truth: active-list reconciliation, succeeded/failed/interrupted outcomes, interrupted-as-resuming, parent idle while children run, retry shown from harness events with a countdown only when observed; nothing derived from `session.status`; outcome fixtures. Remaining retry/quota observations follow #243's documented disposition. |
+| V2-046B (#405, §11.6 Seq 3.1) | V2-046A, V2-044C1 | Execution truth: active-list reconciliation, succeeded/failed/interrupted outcomes, interrupted-as-resuming, parent idle while children run, retry shown from harness events with a countdown only when observed; nothing derived from `session.status`; outcome fixtures. Remaining retry/quota observations follow #243's documented disposition. |
 
 #### V2-047 — Permissions and modes
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1845,7 +1845,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
-| V2-054A (§11.6 Seq 3.2) | V2-044B2, V2-045E, V2-005A, V2-070A | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 catalog and session routes, applied before send, external changes reconciled; an unavailable route hides the control with a reason; race test. Favorites/recents and the rest of the parent are post-MVP. |
+| V2-054A (#406, §11.6 Seq 3.2) | V2-044B2, V2-045E, V2-005A, V2-070A | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 catalog and session routes, applied before send, external changes reconciled; an unavailable route hides the control with a reason; race test. Favorites/recents and the rest of the parent are post-MVP. |
 
 #### V2-055 — Usage, context, errors
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1855,7 +1855,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
-| V2-055A (§11.6 Seq 3.3) | V2-046B, V2-044A6 | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action, from 2.0.22 fixtures; unknown never renders as zero. The context meter, tokens and cost stay post-MVP. |
+| V2-055A (#407, §11.6 Seq 3.3) | V2-046B, V2-044A6 | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action, from 2.0.22 fixtures; unknown never renders as zero. The context meter, tokens and cost stay post-MVP. |
 
 #### V2-056 — Fake OpenCode v2 server and contract drift checks
 - **Type / size / labels:** test · M · `milestone:v2.0` `area:opencode` `type:test`
@@ -1879,7 +1879,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 |---|---|---|
 | V2-060A | V2-020B, V2-024A, V2-027, V2-041, V2-043, V2-044B, V2-045, V2-046, V2-047, V2-056A | Integrated fake flow through real shared screens/controllers; fault/collision/widget tests pass on the supported development targets. |
 | V2-060B | V2-060A, V2-005B, V2-005C | Minimal live smoke on a disposable host and agreed reference target; record pairing/send/approval/stop/reconnect results. Missing target resources stay pending, not a release or G3 pass. |
-| V2-060C (§11.6 Seq 5.3) | V2-060A, V2-060B, V2-070C, V2-054A, V2-055A, V2-042C | Re-proof on the new workspace: the integrated fake flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error card); no regression against V2-060A/B. |
+| V2-060C (#409, §11.6 Seq 5.3) | V2-060A, V2-060B, V2-070C, V2-054A, V2-055A, V2-042C | Re-proof on the new workspace: the integrated fake flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error card); no regression against V2-060A/B. |
 
 ### 12.5 Milestone v2.0 — App features, platforms, release
 
@@ -1891,9 +1891,9 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
-| V2-070A (§11.6 Seq 2.1) | V2-044D, V2-043I, V2-044B2, V2-045E, V2-071C | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session; the v1 invariant map is recorded before code; compact/wide/RTL/2× tests; no harness branching. |
-| V2-070B (§11.6 Seq 2.2) | V2-070A | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, idempotent restore after restart; no cross-host collision. |
-| V2-070C (§11.6 Seq 2.3) | V2-070B, V2-027 | Drafts that survive process death and per-session input history. Canned answers stay post-MVP. |
+| V2-070A (#401, §11.6 Seq 2.1) | V2-044D, V2-043I, V2-044B2, V2-045E, V2-071C | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session; the v1 invariant map is recorded before code; compact/wide/RTL/2× tests; no harness branching. |
+| V2-070B (#402, §11.6 Seq 2.2) | V2-070A | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, idempotent restore after restart; no cross-host collision. |
+| V2-070C (#403, §11.6 Seq 2.3) | V2-070B, V2-027 | Drafts that survive process death and per-session input history. Canned answers stay post-MVP. |
 
 #### V2-071 — Rendering, themes, settings, shortcuts, logs, release history
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui`
