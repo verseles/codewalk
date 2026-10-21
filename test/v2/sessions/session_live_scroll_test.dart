@@ -1439,6 +1439,61 @@ void main() {
       live.rig.dispose();
     });
 
+    testWidgets('a change the reader already saw does not mark the control', (
+      tester,
+    ) async {
+      List<TimelineItem> items(SessionRef ref, {bool blocked = false}) => [
+        ..._answers(ref, 39),
+        Notice(
+          meta: liveMeta(ref, 'n1'),
+          kind: const OpenValue.known(NoticeKind.continuation),
+          text: blocked ? 'blocked' : 'working',
+        ),
+      ];
+      final live = await _openLive(tester, (ref) => items(ref), settled: false);
+      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      // The item changes with the same size, so the extent does not move and
+      // the reader, at the bottom, has already seen it.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: items(live.ref, blocked: true),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The reader moves away: the control is offered, unmarked.
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      expect(jumpControl(), findsOneWidget);
+      expect(controlColor(tester), scheme.surfaceContainerHigh);
+      // The turn settles with the same items: nothing arrived, so the
+      // control stays unmarked.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: items(live.ref, blocked: true),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controlColor(tester), scheme.surfaceContainerHigh);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
   });
 
   group('the scroll rules', () {

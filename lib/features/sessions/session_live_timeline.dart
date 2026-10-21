@@ -168,8 +168,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     if (!controller.hasClients) return false;
     final position = controller.position;
     return switch (direction) {
-      // The reverse direction moves the offset up, the forward direction
-      // moves it down.
+      // The reverse direction grows the offset, towards the end of the
+      // list; the forward direction shrinks it, towards the zero position.
       ScrollDirection.reverse => position.pixels < position.maxScrollExtent,
       ScrollDirection.forward => position.pixels > position.minScrollExtent,
       ScrollDirection.idle => false,
@@ -254,6 +254,9 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     final target = controller.position.maxScrollExtent;
     if ((target - controller.position.pixels).abs() < 0.5) {
+      // The viewport is already at the content, so the arrival it may carry
+      // is accounted for.
+      _arrivalPending = false;
       _settled();
       return;
     }
