@@ -11,8 +11,23 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
 - **When** its root widget mounts
-- **Then** an independent Material3 app shows a `CodeWalk` app bar and navigation for conversations, hosts and settings
-- **Then** viewports below 840 logical pixels use bottom navigation, while wider viewports use a navigation rail
+- **Then** an independent Material3 app opens into the workspace: the projects and sessions list, with no destination bar or rail
+- **Then** below 600 logical pixels the list is the page; from 600 it stays beside the detail in a fixed pane, 260 wide below 840 and 300 from there, and the detail shows an empty state until a session opens
+- **Then** settings and servers open from the list as secondary pages over it; their back button and the system back return to the list, and a page opened by a link with nothing under it goes to the list
+
+### V2 workspace
+
+- **Given** the v2 list has loaded sessions of a server
+- **When** they belong to several projects
+- **Then** only the sessions of one project show at a time, the first project the server returned by default; tapping another project header shows its sessions, and the sessions with no project are a project of their own
+- **Then** a project the user tapped stays shown until it leaves the rows, and the choice is dropped when the list is cleared, as with a change of server
+- **When** the user opens a session from the list or follows a `/s/<server>/<session>` link
+- **Then** both land on the same route inside the workspace: the server is the saved profile with that id and the list follows it; the session is the loaded row with the same identity or, outside the loaded rows, one direct read of that server
+- **Then** an unsaved server, a server that wants a login, a session the server no longer has and an unreadable session each have their own notice; the login and unreadable notices offer a retry, and a read answering another session is never opened in its place
+- **Then** from 600 logical pixels the session opens beside the list; below that it takes the window and the list moves to a drawer, opened from the session's app bar
+- **Then** the system back from a session closes an open drawer first, then returns to the list instead of leaving the app
+- **Then** an open session, its draft and its live connection stay through refreshes and filters of the list, a reload of the saved servers and a resize between compact and wide; choosing another server in the list closes it and shows that server's sessions
+- **Then** the new-session shortcut opens the create of the list when it is offered, and the settings shortcut opens settings over the current page
 
 - **Given** the user opens conversations in this v2 app
 - **When** the corresponding route is displayed

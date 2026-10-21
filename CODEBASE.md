@@ -1593,6 +1593,8 @@ lib/platform/sessions/session_history_factory.dart # Conditional native IO and u
 lib/platform/sessions/session_history_factory_io.dart # Fresh `/api/info` version probe per page; authenticated read-only `OpenCodeSessionReader` (`limit: 50`)
 lib/features/sessions/{session_history_controller,session_history_page}.dart # Fenced auxiliary history controller and plain-text read-only page
 lib/features/sessions/sessions_page.dart # Selected catalog-row history entry pushed on the root navigator
+lib/app/app_shell.dart # V2 workspace (V2-070A): list page below 600 dp, fixed 260/300 dp list pane from 600 dp, compact session route with the list in a drawer and system back to the list; secondary pages with a back app bar
+lib/features/sessions/session_route_page.dart # `/s/<profileId>/<nativeId>` resolution: saved profile, loaded row or one `SessionCatalogSource.read`, distinct unknown-server/login/not-found/unreadable notices; owns the live controller once resolved
 lib/app/{composition_root,app_dependencies,v2_bootstrap}.dart # Typed history-factory composition and Provider injection
 packages/harness_opencode/lib/src/{session_reader,history_projection}.dart # Native-message to canonical timeline projection, up to 500 projected items per page
 test/v2/sessions/session_history_{source,controller,page}_test.dart # Native source, fences/paging, responsive history, and Back/intent regressions
