@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "children": [
+    {
+      "label": "official-proxy",
+      "reaped": true,
+      "returnCode": -15
+    },
+    {
+      "label": "cap",
+      "reaped": true,
+      "returnCode": 0
+    },
+    {
+      "label": "jwt",
+      "reaped": true,
+      "returnCode": 0
+    },
+    {
+      "label": "guard",
+      "reaped": true,
+      "returnCode": 1
+    }
+  ],
+  "ownedPortsRefuseConnection": [
+    true,
+    true
+  ],
+  "defaultDaemonStillRunningSameVersionSocket": true,
+  "runtimeRemoved": true,
+  "noDefaultDaemonLifecycleMutation": true,
+  "temporarySecretsRetained": false,
+  "sharedSessionsRequested": false,
+  "daemonPidUnchangedVerified": false
+}

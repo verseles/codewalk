@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "status": "observed-partial",
+  "scope": "HTTP-upgrade headers only",
+  "startedAtUtc": "2026-10-05T21:11:43.608215+00:00",
+  "elapsedSeconds": 0.272,
+  "requests": [
+    {
+      "index": 0,
+      "topology": "shared-daemon-direct-uds",
+      "case": "valid-upgrade",
+      "status": 101,
+      "expectedStatus": 101,
+      "websocketAcceptValid": true,
+      "observedAtUtc": "2026-10-05T21:11:43.620650+00:00"
+    },
+    {
+      "index": 1,
+      "topology": "shared-daemon-official-proxy",
+      "case": "valid-upgrade",
+      "status": 101,
+      "expectedStatus": 101,
+      "websocketAcceptValid": true,
+      "observedAtUtc": "2026-10-05T21:11:43.625558+00:00"
+    },
+    {
+      "index": 2,
+      "topology": "dedicated-ws-capability",
+      "case": "missing",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.695760+00:00"
+    },
+    {
+      "index": 3,
+      "topology": "dedicated-ws-capability",
+      "case": "wrong",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.696093+00:00"
+    },
+    {
+      "index": 4,
+      "topology": "dedicated-ws-capability",
+      "case": "valid",
+      "status": 101,
+      "expectedStatus": 101,
+      "websocketAcceptValid": true,
+      "observedAtUtc": "2026-10-05T21:11:43.696482+00:00"
+    },
+    {
+      "index": 5,
+      "topology": "dedicated-ws-capability",
+      "case": "origin-null",
+      "status": 403,
+      "expectedStatus": 403,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.696975+00:00"
+    },
+    {
+      "index": 6,
+      "topology": "dedicated-ws-capability",
+      "case": "origin-https",
+      "status": 403,
+      "expectedStatus": 403,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.697312+00:00"
+    },
+    {
+      "index": 7,
+      "topology": "dedicated-ws-jwt",
+      "case": "missing",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.775454+00:00"
+    },
+    {
+      "index": 8,
+      "topology": "dedicated-ws-jwt",
+      "case": "wrong-signature",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.776874+00:00"
+    },
+    {
+      "index": 9,
+      "topology": "dedicated-ws-jwt",
+      "case": "expired",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.777301+00:00"
+    },
+    {
+      "index": 10,
+      "topology": "dedicated-ws-jwt",
+      "case": "future-nbf",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.777812+00:00"
+    },
+    {
+      "index": 11,
+      "topology": "dedicated-ws-jwt",
+      "case": "wrong-issuer",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.778185+00:00"
+    },
+    {
+      "index": 12,
+      "topology": "dedicated-ws-jwt",
+      "case": "wrong-audience",
+      "status": 401,
+      "expectedStatus": 401,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.778957+00:00"
+    },
+    {
+      "index": 13,
+      "topology": "dedicated-ws-jwt",
+      "case": "valid",
+      "status": 101,
+      "expectedStatus": 101,
+      "websocketAcceptValid": true,
+      "observedAtUtc": "2026-10-05T21:11:43.779396+00:00"
+    },
+    {
+      "index": 14,
+      "topology": "dedicated-ws-jwt",
+      "case": "origin",
+      "status": 403,
+      "expectedStatus": 403,
+      "websocketAcceptValid": null,
+      "observedAtUtc": "2026-10-05T21:11:43.780179+00:00"
+    }
+  ],
+  "nonloopbackGuard": {
+    "nonzeroExit": true,
+    "explicitBeforeBindRefusal": true,
+    "boundReachableLan": false,
+    "returnCode": 1
+  },
+  "applicationMessages": 0
+}

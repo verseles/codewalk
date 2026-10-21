@@ -1,0 +1,126 @@
+{
+  "status": "delivered-awaiting-acceptance",
+  "boundary": "Chrome/Flutter configured-origin subset; issue247 remains partial/open",
+  "repositoryHEAD": "124d3b9e20928f88a2d10ed9d88e60d714a760fd",
+  "capturedAt": "2026-10-05T15:36:53.783Z",
+  "captureSavedAt": "2026-10-05T15:36:59.797649+00:00",
+  "host": "Linux aarch64",
+  "flutter": "3.44.1",
+  "dart": "3.12.1",
+  "packageWeb": "1.1.1",
+  "node": "v24.19.0",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "nativeVersion": "2.0.22",
+  "topology": "Owned foreground serve --hostname127.0.0.1 --port0 --cors exact custom.test HTTP origin; browser-only DNS maps both static origins to loopback",
+  "nativeArchiveURL": "https://registry.npmjs.org/@opencode/cli-linux-arm64/-/cli-linux-arm64-2.0.22.tgz",
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "npmIntegrity": "sha512-t/yuu9Dqd/M44dFH95bphu7ikO6FATMQuVk/91QBnCMzsP8zVrXU7zAxD1wVLpYYUDqIonEmi80XETlFqx7chw==",
+  "archiveMemberSHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "officialSourceTag": "527f0b931d1f9b3ebd34e106c51b31ce5db5b075",
+  "sourceTagIsExactBinaryBuildCommit": false,
+  "flutterSourceSHA256": "d7bed83f0c97ff663fae816a756a372455db4ef2933cc843320cef4a03c601c4",
+  "buildSHA256": "5276e9a99594ca6d63e1ee086c3a5999915cf29bd315225426d84fb4e6fa1a29",
+  "probeSourceSHA256": "a8ffce9a41476367e6fb9314c5de5eea1781bf2cb7cbcf2fac19cc5e243a7601",
+  "validatorSHA256": "abd9c9dbe491e548513026e4a4c532ae4a3abad4a52dc8a3453d240c81066955",
+  "runtimeBudgetSeconds": 1200,
+  "nativeCaptureBudgetSeconds": 180,
+  "nativeInferenceTurns": 0,
+  "nativeInferenceCostUSD": 0,
+  "nativeSessionCount": 1,
+  "review": {
+    "priorNativeReports": 8,
+    "recoveryHandshakeFailures": 11,
+    "failureReason": "HTTP429 usage limit; four prior helpers never produced reports",
+    "recoveredReviewer": "helperGrok-47-medium",
+    "rounds": [
+      "initial fixes required; main approved four corrections",
+      "code re-review approved without findings",
+      "actual evidence/archive fallback re-review approved without findings"
+    ],
+    "implementedCorrections": [
+      "archive-member and executable hash enforcement",
+      "owned OS-selected listener checked before auth",
+      "effective private Chromium roots and restricted cleanup environment",
+      "typed visibility timeout without masking real hidden/tooling failures",
+      "post-arm hidden visibility bounded by stopped reader completion",
+      "both distinct page shutdown records with matching origins",
+      "successful visible allowed-page arm required for either lifecycle outcome",
+      "strict shutdown success and credential booleans plus integer-zero readers",
+      "matching final observation and honest inconclusion across all recorded allowed-page lifecycle histories, calls and stream attempts"
+    ],
+    "validatorReview": {
+      "scope": "offline validator corrections J5-J9; frozen collector and native evidence unchanged",
+      "eligibleHelpers": [
+        "helperCodex-6-astra-medium",
+        "helperCodex-6-astra-xhigh",
+        "helperCodex-6-luna-max-2",
+        "helperCodex-6-luna-max-3",
+        "helperCodex-6-luna-max",
+        "helperCodex-6.1-sol-high",
+        "helperCodex-6.1-sol-max",
+        "helperCodex-6.1-sol-xhigh",
+        "helperGemini-38-flash-high",
+        "helperGemini-38-flash-low",
+        "helperGemini-38-flash-medium",
+        "helperGrok-47-medium"
+      ],
+      "readyHandshakes": 12,
+      "rounds": [
+        {
+          "round": 1,
+          "approve": 10,
+          "fixRequired": 2,
+          "judge": "fixed unconditional arming and strict success/reader types"
+        },
+        {
+          "round": 2,
+          "approve": 9,
+          "fixRequired": 3,
+          "judge": "fixed final mirror and contradictory inconclusive recovery evidence"
+        },
+        {
+          "round": 3,
+          "approve": 10,
+          "fixRequired": 2,
+          "judge": "fixed residual allowed ArmLifecycle/FinalShutdown history contradiction"
+        },
+        {
+          "round": 4,
+          "approve": 12,
+          "fixRequired": 0,
+          "judge": "all accepted fixes resolved; no actionable regressions"
+        }
+      ],
+      "boundedRecoveries": [
+        "round1 Grok output formatting",
+        "round2 Gemini-low transport error, Gemini-high/Grok output formatting",
+        "round3 Gemini-low/Gemini-high/Grok output formatting",
+        "round4 Astra-xhigh/Gemini-medium after orchestrator executor interruption; Grok output formatting"
+      ],
+      "sameSessionKeysRetained": true,
+      "finalRecommendation": "approve",
+      "finalRisk": "low",
+      "failedHelpers": [],
+      "sessionCleanup": "all 12 recorded sessions closed successfully once at job end",
+      "nativeRerun": false,
+      "nativeCaptureUnchanged": true
+    }
+  },
+  "notEstablished": [
+    "Safari",
+    "trusted HTTPS page to actual HTTP LAN/LNA/mixed-content",
+    "OS suspend/mobile lifecycle",
+    "service restart in browser",
+    "terminal-on-Web product decision",
+    "production adapter or full SP04 acceptance"
+  ],
+  "retention": "Sanitized capture/probe/validator/Dart-as-text/dependency declarations only; no credentials, provider data, binary archive, executable, compiled bundle or private runtime retained",
+  "publication": "Local uncommitted fixture; no commit/push/deploy/release"
+}

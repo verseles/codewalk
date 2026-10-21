@@ -1,0 +1,271 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+class ProbeFailure implements Exception {
+  const ProbeFailure(this.reason);
+  final String reason;
+}
+
+/// Records only two correlated replies. No thread content is retained.
+Future<Map<String, Object?>> initializeProbe({
+  required Uri endpoint,
+  String? unixSocket,
+  String? transportToken,
+  Duration deadline = const Duration(seconds: 5),
+}) async {
+  if (endpoint.scheme != 'ws' ||
+      endpoint.userInfo.isNotEmpty ||
+      endpoint.hasQuery ||
+      endpoint.hasFragment ||
+      endpoint.path != '/' ||
+      (unixSocket == null && endpoint.host != '127.0.0.1') ||
+      (unixSocket != null && transportToken != null)) {
+    throw const ProbeFailure('unsafe-endpoint');
+  }
+  if (transportToken != null &&
+      !RegExp(r'^[A-Za-z0-9._~-]{32,4096}$').hasMatch(transportToken)) {
+    throw const ProbeFailure('unsafe-token');
+  }
+  final client = HttpClient()..findProxy = (_) => 'DIRECT';
+  ConnectionTask<Socket>? connection;
+  Socket? ownedSocket;
+  var closing = false;
+  client.connectionFactory = (uri, proxyHost, proxyPort) async {
+    if (closing || proxyHost != null || proxyPort != null) {
+      throw const ProbeFailure('unexpected-connector');
+    }
+    final task = await Socket.startConnect(
+      unixSocket == null
+          ? InternetAddress.loopbackIPv4
+          : InternetAddress(unixSocket, type: InternetAddressType.unix),
+      unixSocket == null ? endpoint.port : 0,
+    );
+    connection = task;
+    if (closing) task.cancel();
+    final socket = task.socket.then((socket) {
+      if (closing) {
+        socket.destroy();
+        throw const ProbeFailure('closed-connector');
+      }
+      ownedSocket = socket;
+      return socket;
+    });
+    return ConnectionTask.fromSocket(socket, task.cancel);
+  };
+  WebSocket? socket;
+  StreamSubscription<dynamic>? subscription;
+  Directory? project;
+  Completer<Map<String, Object?>>? pending;
+  String? pendingId;
+  String? pendingMethod;
+  String? terminalFailure;
+  var received = 0;
+  var dropped = 0;
+  final frames = <Map<String, Object?>>[];
+  void fail(String reason) {
+    terminalFailure ??= reason;
+    final waiter = pending;
+    if (waiter != null && !waiter.isCompleted) {
+      waiter.completeError(ProbeFailure(reason));
+    }
+  }
+
+  try {
+    project = await Directory.systemTemp.createTemp('cw-init-project-');
+    socket = await WebSocket.connect(
+      endpoint.toString(),
+      customClient: client,
+      compression: CompressionOptions.compressionOff,
+      headers: transportToken == null
+          ? null
+          : {'Authorization': 'Bearer $transportToken'},
+    ).timeout(deadline);
+    subscription = socket.listen(
+      (dynamic event) {
+        if (closing) return;
+        if (++received > 32 ||
+            event is! String ||
+            utf8.encode(event).length > 8192) {
+          fail('input-limit');
+          return;
+        }
+        try {
+          final decoded = jsonDecode(event);
+          if (decoded is! Map<String, dynamic> ||
+              decoded.containsKey('method') ||
+              decoded['id'] is! String ||
+              decoded['id'] != pendingId ||
+              pending == null ||
+              pending!.isCompleted) {
+            dropped++;
+            return;
+          }
+          if (decoded.containsKey('error') ||
+              decoded['result'] is! Map<String, dynamic>) {
+            fail('invalid-rpc-result');
+            return;
+          }
+          final result = decoded['result'] as Map<String, dynamic>;
+          Map<String, Object?> retained;
+          if (pendingMethod == 'initialize') {
+            if (result['codexHome'] is! String ||
+                !(result['codexHome'] as String).startsWith('/') ||
+                result['userAgent'] is! String ||
+                result['platformFamily'] != 'unix' ||
+                result['platformOs'] != 'linux') {
+              fail('invalid-initialize-shape');
+              return;
+            }
+            retained = {
+              'codexHome': '<redacted-codex-home>',
+              'userAgent': '<redacted-user-agent>',
+              'platformFamily': result['platformFamily'],
+              'platformOs': result['platformOs'],
+            };
+          } else {
+            if (result['data'] is! List ||
+                (result['data'] as List).isNotEmpty ||
+                result['nextCursor'] != null ||
+                result['backwardsCursor'] != null) {
+              fail('unexpected-scoped-list');
+              return;
+            }
+            retained = {
+              'data': <Object?>[],
+              if (result.containsKey('nextCursor')) 'nextCursor': null,
+              if (result.containsKey('backwardsCursor'))
+                'backwardsCursor': null,
+            };
+          }
+          final reply = <String, Object?>{
+            'id': decoded['id'],
+            'result': retained,
+          };
+          frames.add({
+            'index': frames.length,
+            'direction': 'server',
+            'frame': reply,
+          });
+          pending!.complete(retained);
+        } on Object {
+          fail('malformed-message');
+        }
+      },
+      onError: (Object error) => fail('stream-error'),
+      onDone: () => fail('early-close'),
+    );
+
+    Future<void> request(
+      String method,
+      String id,
+      Map<String, Object?> params,
+    ) async {
+      if (method != 'initialize' && method != 'thread/list') {
+        throw const ProbeFailure('forbidden-method');
+      }
+      if (terminalFailure != null) throw ProbeFailure(terminalFailure!);
+      pendingId = id;
+      pendingMethod = method;
+      final waiter = Completer<Map<String, Object?>>();
+      pending = waiter;
+      final wire = <String, Object?>{
+        'id': id,
+        'method': method,
+        'params': params,
+      };
+      final record = method == 'thread/list'
+          ? <String, Object?>{
+              ...wire,
+              'params': {...params, 'cwd': '<owned-project>'},
+            }
+          : wire;
+      frames.add({
+        'index': frames.length,
+        'direction': 'client',
+        'frame': record,
+      });
+      socket!.add(jsonEncode(wire));
+      await waiter.future.timeout(deadline);
+      pending = null;
+      pendingId = null;
+      pendingMethod = null;
+      if (terminalFailure != null) throw ProbeFailure(terminalFailure!);
+    }
+
+    await request('initialize', 'cw-init-1', {
+      'clientInfo': {'name': 'codewalk_g1_initialize', 'version': '0.1'},
+      'capabilities': {'experimentalApi': true},
+    });
+    final initialized = <String, Object?>{
+      'method': 'initialized',
+      'params': <String, Object?>{},
+    };
+    frames.add({
+      'index': frames.length,
+      'direction': 'client',
+      'frame': initialized,
+    });
+    socket.add(jsonEncode(initialized));
+    await request('thread/list', 'cw-list-2', {
+      'cwd': project.path,
+      'sourceKinds': ['cli', 'appServer'],
+      'useStateDbOnly': true,
+      'limit': 1,
+    });
+    return {
+      'status': 'observed-partial',
+      'frames': frames,
+      'droppedMessages': dropped,
+      'receivedMessages': received,
+      'freshProjectCreated': true,
+      'postInitializeScopedRpcSucceeded': true,
+      'initializedHasAcknowledgment': false,
+      'redactions': ['/result/codexHome', '/result/userAgent', '/params/cwd'],
+      'inputLimit':
+          '8192 bytes after SDK assembly; not a wire allocation bound',
+      'providerInferenceRequests': 0,
+      'threadsCreated': 0,
+      'turnsStarted': 0,
+    };
+  } finally {
+    closing = true;
+    if (socket != null) {
+      try {
+        await socket.close().timeout(const Duration(milliseconds: 300));
+      } on Object {
+        /* The owned connector is destroyed below. */
+      }
+    }
+    ownedSocket?.destroy();
+    if (ownedSocket == null) connection?.cancel();
+    client.close(force: true);
+    await subscription?.cancel();
+    if (project != null) await project.delete(recursive: true);
+  }
+}
+
+Future<void> main(List<String> args) async {
+  try {
+    if (args.length != 2 || (args[0] != '--uds' && args[0] != '--ws')) {
+      throw const ProbeFailure('invalid-arguments');
+    }
+    final uds = args[0] == '--uds';
+    final result = await initializeProbe(
+      endpoint: uds ? Uri.parse('ws://localhost/') : Uri.parse(args[1]),
+      unixSocket: uds ? args[1] : null,
+      transportToken: uds ? null : Platform.environment['CW_G1_WS_TOKEN'],
+    );
+    stdout.writeln(jsonEncode(result));
+  } on Object catch (error) {
+    stdout.writeln(
+      jsonEncode({
+        'status': 'inconclusive',
+        'errorClass': error is ProbeFailure
+            ? error.reason
+            : error.runtimeType.toString(),
+      }),
+    );
+    exitCode = 1;
+  }
+}

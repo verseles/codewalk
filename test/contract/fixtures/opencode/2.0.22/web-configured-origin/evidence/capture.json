@@ -1,0 +1,1166 @@
+{
+  "startedAt": "2026-10-05T15:36:53.783Z",
+  "smoke": false,
+  "calls": [
+    {
+      "label": "ReadinessInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791214617853,
+      "atMs": 1791214617877
+    },
+    {
+      "label": "CreateOwnedSession",
+      "method": "POST",
+      "path": "/api/session",
+      "status": 200,
+      "listenerOwned": true,
+      "startedMs": 1791214618524,
+      "atMs": 1791214618552,
+      "title": "SP04 owned initial"
+    },
+    {
+      "label": "RenameFirst",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791214618640,
+      "atMs": 1791214618694,
+      "title": "SP04 configured-origin live 🚀"
+    },
+    {
+      "label": "RenameHiddenGap",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791214618865,
+      "atMs": 1791214619006,
+      "title": "SP04 real-hidden gap"
+    },
+    {
+      "label": "RenameResumedLive",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791214619253,
+      "atMs": 1791214619262,
+      "title": "SP04 real-visible live"
+    },
+    {
+      "label": "DeleteOwnedSession",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "status": 204,
+      "listenerOwned": true,
+      "startedMs": 1791214619277,
+      "atMs": 1791214619285
+    },
+    {
+      "label": "VerifyDeletedSession",
+      "method": "GET",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "status": 404,
+      "listenerOwned": true,
+      "startedMs": 1791214619289,
+      "atMs": 1791214619294
+    }
+  ],
+  "operations": [
+    {
+      "label": "ConfigureAllowed",
+      "page": "allowed",
+      "atMs": 1791214617887,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389"
+      }
+    },
+    {
+      "label": "AllowedInfo",
+      "page": "allowed",
+      "atMs": 1791214617903,
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "version": "2.0.22",
+          "pid": 1398360,
+          "urls": [
+            "http://127.0.0.1:33077"
+          ],
+          "paths": {
+            "tmp": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/tmp/opencode"
+          }
+        }
+      }
+    },
+    {
+      "label": "ConfigureBadAuth",
+      "page": "allowed",
+      "atMs": 1791214617909,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389"
+      }
+    },
+    {
+      "label": "BadAuthInfo",
+      "page": "allowed",
+      "atMs": 1791214617920,
+      "result": {
+        "ok": true,
+        "status": 401,
+        "body": {
+          "_tag": "UnauthorizedError",
+          "message": "Authentication required"
+        }
+      }
+    },
+    {
+      "label": "ConfigureDenied",
+      "page": "denied",
+      "atMs": 1791214618429,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-denied.test:33389"
+      }
+    },
+    {
+      "label": "DeniedInfo",
+      "page": "denied",
+      "atMs": 1791214618457,
+      "result": {
+        "ok": false,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "DeniedSSE",
+      "page": "denied",
+      "atMs": 1791214618518,
+      "result": {
+        "ok": false,
+        "errorType": "minified:bx"
+      }
+    },
+    {
+      "label": "ConfigureOwnedSession",
+      "page": "allowed",
+      "atMs": 1791214618578,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389"
+      }
+    },
+    {
+      "label": "InitialConnected",
+      "page": "allowed",
+      "atMs": 1791214618636,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389",
+        "visibility": "visible",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214617937,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618561,
+            "state": "visible"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 1,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "endedMs": null,
+            "aborted": false,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214618593,
+                "read": 1
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214618592
+              }
+            ],
+            "errorType": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "InitialLive",
+      "page": "allowed",
+      "atMs": 1791214618806,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389",
+        "visibility": "visible",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214617937,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618561,
+            "state": "visible"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 1,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "endedMs": null,
+            "aborted": false,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214618593,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb6084200102JWFXblg9TSVs",
+                  "created": 1791214618690,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 configured-origin live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214618698,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214618592
+              },
+              {
+                "bytes": 413,
+                "atMs": 1791214618658
+              },
+              {
+                "bytes": 365,
+                "atMs": 1791214618697
+              }
+            ],
+            "errorType": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "ArmLifecycle",
+      "page": "allowed",
+      "atMs": 1791214618815,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389",
+        "visibility": "visible",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214617937,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618561,
+            "state": "visible"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 1,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "endedMs": null,
+            "aborted": false,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214618593,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb6084200102JWFXblg9TSVs",
+                  "created": 1791214618690,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 configured-origin live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214618698,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214618592
+              },
+              {
+                "bytes": 413,
+                "atMs": 1791214618658
+              },
+              {
+                "bytes": 365,
+                "atMs": 1791214618697
+              }
+            ],
+            "errorType": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "FinalObservedState",
+      "page": "allowed",
+      "atMs": 1791214619266,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389",
+        "visibility": "visible",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214617937,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618561,
+            "state": "visible"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618821,
+            "state": "hidden"
+          },
+          {
+            "kind": "hiddenStopped",
+            "atMs": 1791214618827,
+            "attempt": 1
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214619014,
+            "state": "visible"
+          },
+          {
+            "kind": "visibleRecovered",
+            "atMs": 1791214619193,
+            "attempt": 2,
+            "id": "ses_1a10cb607960009fad91ba2b767a",
+            "title": "SP04 real-hidden gap"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 1,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "endedMs": 1791214618826,
+            "aborted": true,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214618593,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb6084200102JWFXblg9TSVs",
+                  "created": 1791214618690,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 configured-origin live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214618698,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214618592
+              },
+              {
+                "bytes": 413,
+                "atMs": 1791214618658
+              },
+              {
+                "bytes": 365,
+                "atMs": 1791214618697
+              }
+            ],
+            "errorType": "JSObject"
+          },
+          {
+            "number": 2,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": false,
+            "released": false,
+            "endedMs": null,
+            "aborted": false,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb609b6001btc6r4KvNFilSj",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214619073,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb60a7b001mYyCabwwrNwWax",
+                  "created": 1791214619259,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 real-visible live"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 3,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214619263,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214619073
+              },
+              {
+                "bytes": 1757,
+                "atMs": 1791214619184
+              },
+              {
+                "bytes": 355,
+                "atMs": 1791214619263
+              }
+            ],
+            "errorType": null
+          }
+        ]
+      }
+    },
+    {
+      "label": "FinalShutdown",
+      "page": "allowed",
+      "atMs": 1791214619270,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:33389",
+        "visibility": "visible",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214617937,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618561,
+            "state": "visible"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618821,
+            "state": "hidden"
+          },
+          {
+            "kind": "hiddenStopped",
+            "atMs": 1791214618827,
+            "attempt": 1
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214619014,
+            "state": "visible"
+          },
+          {
+            "kind": "visibleRecovered",
+            "atMs": 1791214619193,
+            "attempt": 2,
+            "id": "ses_1a10cb607960009fad91ba2b767a",
+            "title": "SP04 real-hidden gap"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 0,
+        "attempts": [
+          {
+            "number": 1,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "endedMs": 1791214618826,
+            "aborted": true,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214618593,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb6084200102JWFXblg9TSVs",
+                  "created": 1791214618690,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 configured-origin live 🚀"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 1,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214618698,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214618592
+              },
+              {
+                "bytes": 413,
+                "atMs": 1791214618658
+              },
+              {
+                "bytes": 365,
+                "atMs": 1791214618697
+              }
+            ],
+            "errorType": "JSObject"
+          },
+          {
+            "number": 2,
+            "status": 200,
+            "mediaType": "text/event-stream",
+            "connected": true,
+            "ended": true,
+            "released": true,
+            "endedMs": 1791214619267,
+            "aborted": true,
+            "events": [
+              {
+                "event": {
+                  "id": "evt_10cb609b6001btc6r4KvNFilSj",
+                  "type": "server.connected",
+                  "data": {}
+                },
+                "atMs": 1791214619073,
+                "read": 1
+              },
+              {
+                "event": {
+                  "id": "evt_10cb60a7b001mYyCabwwrNwWax",
+                  "created": 1791214619259,
+                  "type": "session.renamed",
+                  "location": {
+                    "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+                  },
+                  "data": {
+                    "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                    "title": "SP04 real-visible live"
+                  },
+                  "durable": {
+                    "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                    "seq": 3,
+                    "version": 1
+                  }
+                },
+                "atMs": 1791214619263,
+                "read": 3
+              }
+            ],
+            "chunks": [
+              {
+                "bytes": 96,
+                "atMs": 1791214619073
+              },
+              {
+                "bytes": 1757,
+                "atMs": 1791214619184
+              },
+              {
+                "bytes": 355,
+                "atMs": 1791214619263
+              }
+            ],
+            "errorType": "JSObject"
+          }
+        ],
+        "credentialsCleared": true
+      }
+    },
+    {
+      "label": "FinalShutdown",
+      "page": "denied",
+      "atMs": 1791214619273,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-denied.test:33389",
+        "visibility": "hidden",
+        "lifecycle": [
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618559,
+            "state": "hidden"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214618833,
+            "state": "visible"
+          },
+          {
+            "kind": "visibilitychange",
+            "atMs": 1791214619010,
+            "state": "hidden"
+          }
+        ],
+        "lifecycleError": null,
+        "activeReaders": 0,
+        "attempts": [
+          {
+            "number": 1,
+            "status": null,
+            "mediaType": null,
+            "connected": false,
+            "ended": true,
+            "released": false,
+            "endedMs": 1791214618470,
+            "aborted": true,
+            "events": [],
+            "chunks": [],
+            "errorType": "JSObject"
+          }
+        ],
+        "credentialsCleared": true
+      }
+    }
+  ],
+  "network": [
+    {
+      "page": "allowed",
+      "id": "1398168.10",
+      "path": "/api/info",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "87C159915CA40DE0FC24DB44C5B29F3C",
+      "path": "/api/info",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "1398168.11",
+      "path": "/api/info",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 401,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "denied",
+      "id": "1398195.10",
+      "path": "/api/info",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {},
+      "failure": {
+        "canceled": false,
+        "cors": "PreflightMissingAllowOriginHeader",
+        "blocked": null
+      }
+    },
+    {
+      "page": "denied",
+      "id": "3EB1E04E0F8F18A63F78B0415FECBF11",
+      "path": "/api/info",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-denied.test:33389"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "page": "denied",
+      "id": "1CF893F8CDA47A1C37A9E91397EF3F8C",
+      "path": "/api/event",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-denied.test:33389"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "page": "denied",
+      "id": "1398195.11",
+      "path": "/api/event",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {},
+      "failure": {
+        "canceled": false,
+        "cors": "PreflightMissingAllowOriginHeader",
+        "blocked": null
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "1398168.12",
+      "path": "/api/event",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389",
+        "content-type": "text/event-stream"
+      },
+      "failure": {
+        "canceled": true,
+        "cors": null,
+        "blocked": null
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "298A75A41F6D3FF5961FF93C074DEB0B",
+      "path": "/api/event",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "1398168.13",
+      "path": "/api/event",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389",
+        "content-type": "text/event-stream"
+      },
+      "failure": {
+        "canceled": true,
+        "cors": null,
+        "blocked": null
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "1398168.14",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "method": "GET",
+      "authorizationPresent": true,
+      "request": {
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 200,
+      "response": {
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "page": "allowed",
+      "id": "B4C15571E1998D433A30FDFF218DB831",
+      "path": "/api/session/ses_1a10cb607960009fad91ba2b767a",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "request": {
+        "access-control-request-headers": "authorization",
+        "access-control-request-method": "GET",
+        "origin": "http://cw-sp04-allowed.test:33389"
+      },
+      "status": 204,
+      "response": {
+        "access-control-allow-headers": "authorization",
+        "access-control-allow-origin": "http://cw-sp04-allowed.test:33389"
+      }
+    }
+  ],
+  "served": {
+    "/index.html": "a8e40fef3349c163ec8541a639f6dcdeb03a579296f64b34a4f69e025cb2e2ef",
+    "/flutter_bootstrap.js": "76b797835aa8f411980b6c8d85dd8764979b762a0303dcb183d3f1f290fdf880",
+    "/canvaskit/canvaskit.js": "7361b744487f98262f77ac507006b3eae37830430048ab7811a626b79f34a52c",
+    "/main.dart.js": "5276e9a99594ca6d63e1ee086c3a5999915cf29bd315225426d84fb4e6fa1a29",
+    "/canvaskit/canvaskit.wasm": "6bdfaa51c76845c02ea90153d44f56f99da51de44a7ee0ea15ccaeb33ed8f476",
+    "/assets/FontManifest.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "lifecycleResult": "observed-page-visibility-recovery",
+  "allowedOrigin": "http://cw-sp04-allowed.test:33389",
+  "deniedOrigin": "http://cw-sp04-denied.test:33389",
+  "buildSHA256": "5276e9a99594ca6d63e1ee086c3a5999915cf29bd315225426d84fb4e6fa1a29",
+  "sourceSHA256": "d7bed83f0c97ff663fae816a756a372455db4ef2933cc843320cef4a03c601c4",
+  "browserPrivateRoots": {
+    "home": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/home",
+    "config": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/config",
+    "data": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/data",
+    "cache": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/cache",
+    "state": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/state",
+    "tmp": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/tmp",
+    "run": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/run"
+  },
+  "browserLaunch": "confined-direct-binary",
+  "cdpPort": 42765,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "archiveSHA256": "49e5466de60f65001cddd7583419f842140697daead2b4d8826be54d9056e70b",
+  "archiveMemberSHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "binarySHA256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "isolation": {
+    "modelsFetchDisabled": true,
+    "projectConfigDisabled": true,
+    "inheritedProviderCredentials": false
+  },
+  "info": {
+    "version": "2.0.22",
+    "pid": 1398360,
+    "urls": [
+      "http://127.0.0.1:33077"
+    ],
+    "paths": {
+      "tmp": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/tmp/opencode"
+    }
+  },
+  "nativePort": 33077,
+  "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+  "final": {
+    "ok": true,
+    "origin": "http://cw-sp04-allowed.test:33389",
+    "visibility": "visible",
+    "lifecycle": [
+      {
+        "kind": "visibilitychange",
+        "atMs": 1791214617937,
+        "state": "hidden"
+      },
+      {
+        "kind": "visibilitychange",
+        "atMs": 1791214618561,
+        "state": "visible"
+      },
+      {
+        "kind": "visibilitychange",
+        "atMs": 1791214618821,
+        "state": "hidden"
+      },
+      {
+        "kind": "hiddenStopped",
+        "atMs": 1791214618827,
+        "attempt": 1
+      },
+      {
+        "kind": "visibilitychange",
+        "atMs": 1791214619014,
+        "state": "visible"
+      },
+      {
+        "kind": "visibleRecovered",
+        "atMs": 1791214619193,
+        "attempt": 2,
+        "id": "ses_1a10cb607960009fad91ba2b767a",
+        "title": "SP04 real-hidden gap"
+      }
+    ],
+    "lifecycleError": null,
+    "activeReaders": 1,
+    "attempts": [
+      {
+        "number": 1,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": true,
+        "released": true,
+        "endedMs": 1791214618826,
+        "aborted": true,
+        "events": [
+          {
+            "event": {
+              "id": "evt_10cb607dc001WNIVRzMrlfx4EJ",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791214618593,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_10cb6084200102JWFXblg9TSVs",
+              "created": 1791214618690,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                "title": "SP04 configured-origin live 🚀"
+              },
+              "durable": {
+                "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                "seq": 1,
+                "version": 1
+              }
+            },
+            "atMs": 1791214618698,
+            "read": 3
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "atMs": 1791214618592
+          },
+          {
+            "bytes": 413,
+            "atMs": 1791214618658
+          },
+          {
+            "bytes": 365,
+            "atMs": 1791214618697
+          }
+        ],
+        "errorType": "JSObject"
+      },
+      {
+        "number": 2,
+        "status": 200,
+        "mediaType": "text/event-stream",
+        "connected": true,
+        "ended": false,
+        "released": false,
+        "endedMs": null,
+        "aborted": false,
+        "events": [
+          {
+            "event": {
+              "id": "evt_10cb609b6001btc6r4KvNFilSj",
+              "type": "server.connected",
+              "data": {}
+            },
+            "atMs": 1791214619073,
+            "read": 1
+          },
+          {
+            "event": {
+              "id": "evt_10cb60a7b001mYyCabwwrNwWax",
+              "created": 1791214619259,
+              "type": "session.renamed",
+              "location": {
+                "directory": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/runtime/project"
+              },
+              "data": {
+                "sessionID": "ses_1a10cb607960009fad91ba2b767a",
+                "title": "SP04 real-visible live"
+              },
+              "durable": {
+                "aggregateID": "ses_1a10cb607960009fad91ba2b767a",
+                "seq": 3,
+                "version": 1
+              }
+            },
+            "atMs": 1791214619263,
+            "read": 3
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "atMs": 1791214619073
+          },
+          {
+            "bytes": 1757,
+            "atMs": 1791214619184
+          },
+          {
+            "bytes": 355,
+            "atMs": 1791214619263
+          }
+        ],
+        "errorType": null
+      }
+    ]
+  },
+  "result": "configured-origin-browser-subset-pass",
+  "cleanup": {
+    "errors": [],
+    "session404": true,
+    "snapPrivateRootAbsent": true,
+    "processGroupsAbsent": true,
+    "listenersAbsent": true,
+    "nativeRuntimeAbsent": true
+  }
+}

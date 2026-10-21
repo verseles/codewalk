@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "fullG1Accepted": false,
+  "g2Accepted": false,
+  "g5Accepted": false,
+  "fullSp04Accepted": false,
+  "rows": [
+    {
+      "id": "shared-direct-upgrade",
+      "status": "observed",
+      "artifact": "../transport-upgrade-linux/native-http.json",
+      "requestIndices": [
+        0
+      ]
+    },
+    {
+      "id": "shared-proxy-upgrade",
+      "status": "observed",
+      "artifact": "../transport-upgrade-linux/native-http.json",
+      "requestIndices": [
+        1
+      ]
+    },
+    {
+      "id": "capability-auth-origin",
+      "status": "observed",
+      "artifact": "../transport-upgrade-linux/native-http.json",
+      "requestIndices": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "jwt-auth-origin",
+      "status": "observed",
+      "artifact": "../transport-upgrade-linux/native-http.json",
+      "requestIndices": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "noauth-nonloopback-refusal",
+      "status": "observed",
+      "artifact": "../transport-upgrade-linux/native-http.json",
+      "evidenceKey": "nonloopbackGuard"
+    },
+    {
+      "id": "initialize",
+      "status": "observed-partial",
+      "requiredEvidence": "Initialize/initialized and connected wire runtime provenance",
+      "artifact": "native-initialize.json",
+      "casePaths": [
+        "shared-direct-uds",
+        "official-raw-proxy-uds",
+        "cap-authenticated-ws",
+        "jwt-authenticated-ws"
+      ],
+      "observed": "One initialize/initialized and subsequent empty owned-project thread/list per native topology; connected shared-daemon runtime version separately verified; no initialized ACK/serverVersion/capability echo inferred.",
+      "acceptanceLimit": "Linux subset; no live TUI sharing or full G1 acceptance."
+    },
+    {
+      "id": "tui-discovery",
+      "status": "pending",
+      "requiredEvidence": "Exact owned cwd + sourceKinds cli + useStateDbOnly TUI thread discovery"
+    },
+    {
+      "id": "live-resume-approval",
+      "status": "pending",
+      "requiredEvidence": "Running TUI resume and pending approval replay"
+    },
+    {
+      "id": "second-client-resolution",
+      "status": "pending",
+      "requiredEvidence": "Second-client approval and serverRequest/resolved"
+    },
+    {
+      "id": "text-reasoning-tools",
+      "status": "pending",
+      "requiredEvidence": "Native incremental content, tools and authoritative completion"
+    },
+    {
+      "id": "questions-input",
+      "status": "pending",
+      "requiredEvidence": "Negotiated typed questions/input"
+    },
+    {
+      "id": "plan",
+      "status": "pending",
+      "requiredEvidence": "Native plan updates"
+    },
+    {
+      "id": "steer-interrupt",
+      "status": "pending",
+      "requiredEvidence": "Expected-turn steering and interruption"
+    },
+    {
+      "id": "children-background",
+      "status": "pending",
+      "requiredEvidence": "Owned child/background lineage, completion and stop"
+    },
+    {
+      "id": "usage-quota",
+      "status": "pending",
+      "requiredEvidence": "Native usage, cumulative scopes and available quota/rate signals"
+    },
+    {
+      "id": "errors-retry",
+      "status": "pending",
+      "requiredEvidence": "Controlled native failure and explicit retry/stop"
+    },
+    {
+      "id": "dedicated-remote-tui",
+      "status": "pending",
+      "requiredEvidence": "Authenticated dedicated listener, explicit remote TUI and second protocol client"
+    },
+    {
+      "id": "disconnect-rejoin",
+      "status": "pending",
+      "requiredEvidence": "Mid-turn disconnect/rejoin and authoritative recovery"
+    },
+    {
+      "id": "authenticated-nonloopback",
+      "status": "pending",
+      "requiredEvidence": "Authenticated nonloopback listener acceptance under owned network isolation"
+    },
+    {
+      "id": "linux-attach-recommendation",
+      "status": "pending",
+      "requiredEvidence": "Recommendation based on complete native attachment observations"
+    },
+    {
+      "id": "macos-windows",
+      "status": "pending",
+      "requiredEvidence": "Actual macOS/Windows attachment observations and recommendations"
+    }
+  ],
+  "subset": "linux-initialize-and-scoped-empty-query"
+}

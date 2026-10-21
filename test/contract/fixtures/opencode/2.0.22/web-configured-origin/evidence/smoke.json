@@ -1,0 +1,73 @@
+{
+  "startedAt": "2026-10-05T15:30:47.221Z",
+  "smoke": true,
+  "calls": [],
+  "operations": [
+    {
+      "label": "FinalShutdown",
+      "page": "allowed",
+      "atMs": 1791214250158,
+      "result": {
+        "ok": true,
+        "origin": "http://cw-sp04-allowed.test:34611",
+        "visibility": "visible",
+        "lifecycle": [],
+        "lifecycleError": null,
+        "activeReaders": 0,
+        "attempts": [],
+        "credentialsCleared": true
+      }
+    }
+  ],
+  "network": [],
+  "served": {
+    "/index.html": "a8e40fef3349c163ec8541a639f6dcdeb03a579296f64b34a4f69e025cb2e2ef",
+    "/flutter_bootstrap.js": "76b797835aa8f411980b6c8d85dd8764979b762a0303dcb183d3f1f290fdf880",
+    "/canvaskit/canvaskit.js": "7361b744487f98262f77ac507006b3eae37830430048ab7811a626b79f34a52c",
+    "/main.dart.js": "5276e9a99594ca6d63e1ee086c3a5999915cf29bd315225426d84fb4e6fa1a29",
+    "/canvaskit/canvaskit.wasm": "6bdfaa51c76845c02ea90153d44f56f99da51de44a7ee0ea15ccaeb33ed8f476",
+    "/assets/FontManifest.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "nativeInferenceTurns": 0,
+  "inferenceCostUSD": 0,
+  "lifecycleResult": "not-run",
+  "allowedOrigin": "http://cw-sp04-allowed.test:34611",
+  "deniedOrigin": "http://cw-sp04-denied.test:34611",
+  "buildSHA256": "5276e9a99594ca6d63e1ee086c3a5999915cf29bd315225426d84fb4e6fa1a29",
+  "sourceSHA256": "d7bed83f0c97ff663fae816a756a372455db4ef2933cc843320cef4a03c601c4",
+  "browserPrivateRoots": {
+    "home": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/home",
+    "config": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/config",
+    "data": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/data",
+    "cache": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/cache",
+    "state": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/state",
+    "tmp": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/tmp",
+    "run": "/tmp/opencode/codewalk-sp04-20261005-3QxigNOr/run"
+  },
+  "browserLaunch": "confined-direct-binary",
+  "cdpPort": 45097,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.57",
+    "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.11"
+  },
+  "bridge": {
+    "ok": true,
+    "origin": "http://cw-sp04-allowed.test:34611",
+    "visibility": "visible",
+    "lifecycle": [],
+    "lifecycleError": null,
+    "activeReaders": 0,
+    "attempts": []
+  },
+  "result": "browser-only-smoke-pass",
+  "cleanup": {
+    "errors": [],
+    "snapPrivateRootAbsent": true,
+    "processGroupsAbsent": true,
+    "listenersAbsent": true,
+    "nativeRuntimeAbsent": true
+  }
+}

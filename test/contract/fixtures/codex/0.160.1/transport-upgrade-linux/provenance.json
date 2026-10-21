@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "platform": {
+    "os": "linux",
+    "architecture": "aarch64"
+  },
+  "repositoryHead": "124d3b9e20928f88a2d10ed9d88e60d714a760fd",
+  "executables": {
+    "dedicatedServer": {
+      "version": "0.160.1",
+      "sha256": "fbbaec80443919f86dd63648a0b62759cf6f1d0e09310602fde96885e0bceb3e"
+    },
+    "proxyCli": {
+      "version": "0.160.0",
+      "sha256": "50b06603bdcdac39b714f5c3e68583c002b8ad8779ebfdaaf4932ff016b379c0"
+    }
+  },
+  "sharedDaemon": {
+    "reportedAppServerVersionBefore": "0.160.1",
+    "reportedAppServerVersionAfter": "0.160.1",
+    "versionEvidence": "read-only daemon version command; no initialize response captured"
+  },
+  "publicSource": {
+    "repository": "https://github.com/openai/codex",
+    "commitReference": "d27764b82f7118f674371e6d6e76271d9d606edb",
+    "installedBuildCommitVerified": false
+  },
+  "schema": {
+    "generatorVersions": [
+      "0.160.0",
+      "0.160.1"
+    ],
+    "experimental": true,
+    "fileCountPerVersion": 440,
+    "relativePathAndFileHashDigest": "602ced3d16d0427f2d9d98dded7151331046d0295b701edf2d94cffff8267044",
+    "isNativeCapture": false
+  },
+  "executionDeclaration": "https://github.com/verseles/codewalk/issues/245#issuecomment-6002965632",
+  "commands": [
+    {
+      "label": "official-proxy",
+      "executableVersion": "0.160.0",
+      "argv": [
+        "<proxy-cli>",
+        "app-server",
+        "proxy",
+        "--sock",
+        "<default-daemon-socket>"
+      ],
+      "cwd": "<owned-runtime>"
+    },
+    {
+      "label": "cap",
+      "executableVersion": "0.160.1",
+      "argv": [
+        "<server-bin>",
+        "app-server",
+        "--listen",
+        "ws://127.0.0.1:0",
+        "--ws-auth",
+        "capability-token",
+        "--ws-token-file",
+        "<owned-runtime>/cap/token"
+      ],
+      "cwd": "<owned-runtime>/cap"
+    },
+    {
+      "label": "jwt",
+      "executableVersion": "0.160.1",
+      "argv": [
+        "<server-bin>",
+        "app-server",
+        "--listen",
+        "ws://127.0.0.1:0",
+        "--ws-auth",
+        "signed-bearer-token",
+        "--ws-shared-secret-file",
+        "<owned-runtime>/jwt/secret",
+        "--ws-issuer",
+        "codewalk-g1",
+        "--ws-audience",
+        "codewalk-g1-capture",
+        "--ws-max-clock-skew-seconds",
+        "0"
+      ],
+      "cwd": "<owned-runtime>/jwt"
+    },
+    {
+      "label": "guard",
+      "executableVersion": "0.160.1",
+      "argv": [
+        "<server-bin>",
+        "app-server",
+        "--listen",
+        "ws://192.0.2.1:0"
+      ],
+      "cwd": "<owned-runtime>/guard"
+    }
+  ],
+  "bounds": {
+    "providerInferenceRequests": 0,
+    "threads": 0,
+    "turns": 0,
+    "applicationMessages": 0,
+    "upgradeRequests": 15,
+    "nativeSeconds": 180
+  },
+  "transportCredentials": "generated for this invocation; values not retained",
+  "modelAuthenticationUsed": false,
+  "subscriptionMonetaryValue": "unknown",
+  "portOwnershipEvidence": "child socket inode and loopback LISTEN port checked before credentials; assertion passed; raw descriptor data not retained",
+  "rawHeadersOrProtocolFramesRetained": false,
+  "collectorKind": "one-off CLI/standard-library HTTP command orchestration; no WebSocket frames"
+}

@@ -1,0 +1,152 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'initialize.dart';
+
+Future<void> scenario(String name, String mode) async {
+  final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+  final peers = <WebSocket>[];
+  final methods = <String>[];
+  final private = 'FOREIGN_PRIVATE_SENTINEL';
+  final subscription = server.listen((request) async {
+    final peer = await WebSocketTransformer.upgrade(request);
+    peers.add(peer);
+    peer.listen((event) {
+      final frame = jsonDecode(event as String) as Map<String, dynamic>;
+      methods.add(frame['method'] as String);
+      if (frame['method'] == 'initialize') {
+        if (mode == 'silent') return;
+        if (mode == 'oversize') {
+          peer.add('x' * 8193);
+          return;
+        }
+        if (mode == 'rpc-error') {
+          peer.add(
+            jsonEncode({
+              'id': frame['id'],
+              'error': {'code': -1, 'message': private},
+            }),
+          );
+          return;
+        }
+        peer.add(
+          jsonEncode({
+            'id': 1,
+            'result': {'secret': private},
+          }),
+        );
+        peer.add(
+          jsonEncode({
+            'method': 'thread/started',
+            'params': {'secret': private},
+          }),
+        );
+        peer.add(
+          jsonEncode({
+            'id': frame['id'],
+            'method': 'item/tool/requestUserInput',
+            'params': {'secret': private},
+          }),
+        );
+        peer.add(
+          jsonEncode({
+            'id': frame['id'],
+            'result': {
+              'codexHome': '/private/$private',
+              'userAgent': private,
+              'platformFamily': 'unix',
+              'platformOs': mode == 'bad-shape' ? private : 'linux',
+              'unknownSecret': private,
+            },
+          }),
+        );
+        if (mode == 'early-close') unawaited(peer.close());
+      } else if (frame['method'] == 'thread/list') {
+        if (mode == 'early-close') return;
+        final params = frame['params'] as Map<String, dynamic>;
+        if (params['useStateDbOnly'] != true ||
+            params['limit'] != 1 ||
+            jsonEncode(params['sourceKinds']) != '["cli","appServer"]' ||
+            !Directory(params['cwd'] as String).existsSync()) {
+          throw StateError('invalid scoped request');
+        }
+        peer.add(
+          jsonEncode({
+            'id': frame['id'],
+            'result': {
+              'data': mode == 'foreign-list'
+                  ? [
+                      {'secret': private},
+                    ]
+                  : [],
+              'nextCursor': mode == 'cursor' ? private : null,
+              'backwardsCursor': null,
+              'unknownSecret': private,
+            },
+          }),
+        );
+      }
+    });
+  });
+  try {
+    Map<String, Object?>? result;
+    Object? failure;
+    try {
+      result = await initializeProbe(
+        endpoint: Uri.parse('ws://127.0.0.1:${server.port}/'),
+        deadline: const Duration(milliseconds: 150),
+      );
+    } on Object catch (error) {
+      failure = error;
+    }
+    if (mode == 'valid') {
+      if (failure != null || result == null)
+        throw StateError('valid exchange failed');
+      final serialized = jsonEncode(result);
+      final frames = result['frames'] as List;
+      if (serialized.contains(private) ||
+          frames.length != 5 ||
+          result['droppedMessages'] != 3 ||
+          jsonEncode(methods) != '["initialize","initialized","thread/list"]') {
+        throw StateError('privacy/order assertion failed');
+      }
+    } else if (failure == null) {
+      throw StateError('negative control unexpectedly passed');
+    } else if (mode == 'early-close' &&
+        (failure is! ProbeFailure || failure.reason != 'early-close')) {
+      throw StateError('early close lost its fixed failure class');
+    }
+    stdout.writeln('PASS $name');
+  } finally {
+    await subscription.cancel();
+    for (final peer in peers) {
+      await peer.close();
+    }
+    await server.close(force: true);
+  }
+}
+
+Future<void> main() async {
+  await scenario(
+    'foreign traffic, typed correlation, redaction and scoped ordering',
+    'valid',
+  );
+  for (final mode in [
+    'silent',
+    'oversize',
+    'rpc-error',
+    'bad-shape',
+    'foreign-list',
+    'cursor',
+    'early-close',
+  ]) {
+    await scenario(mode, mode);
+  }
+  try {
+    await initializeProbe(endpoint: Uri.parse('ws://outside.invalid/'));
+    throw StateError('unsafe endpoint accepted');
+  } on ProbeFailure catch (error) {
+    if (error.reason != 'unsafe-endpoint') rethrow;
+  }
+  stdout.writeln('PASS forbidden external endpoint');
+}

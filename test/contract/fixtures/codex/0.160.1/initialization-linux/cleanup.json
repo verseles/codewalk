@@ -1,0 +1,51 @@
+{
+  "processes": [
+    {
+      "label": "jwt-authenticated-ws-client",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "jwt-listener",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "cap-authenticated-ws-client",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "cap-listener",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "official-raw-proxy-uds-client",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "official-proxy-bridge",
+      "reaped": true,
+      "exitCode": 0
+    },
+    {
+      "label": "shared-direct-uds-client",
+      "reaped": true,
+      "exitCode": 0
+    }
+  ],
+  "ownedProxyChildrenObserved": 1,
+  "ownedProxyChildrenGone": true,
+  "privateBridgeSocketAbsent": true,
+  "ownedPortsClosed": [
+    true,
+    true
+  ],
+  "runtimeRemoved": true,
+  "defaultSocketIdentityUnchanged": true,
+  "defaultDaemonVersionUnchanged": true,
+  "errors": [],
+  "durationSeconds": 0.037834
+}

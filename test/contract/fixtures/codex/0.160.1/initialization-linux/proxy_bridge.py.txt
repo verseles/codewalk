@@ -1,0 +1,99 @@
+"""Private single-client Unix bridge to the official raw stdio proxy."""
+import argparse
+import json
+import os
+from pathlib import Path
+import selectors
+import signal
+import socket
+import subprocess
+import time
+
+
+def serve_once(path, command, timeout=20, ready=None):
+    path = Path(path)
+    parent = path.parent.stat()
+    if parent.st_uid != os.getuid() or parent.st_mode & 0o077:
+        raise ValueError("nonprivate socket directory")
+    if path.exists() or path.is_symlink():
+        raise ValueError("socket path already exists")
+    listener = socket.socket(socket.AF_UNIX)
+    client = child = None
+    created = False
+    forwarded = 0
+    try:
+        listener.bind(str(path)); created = True
+        os.chmod(path, 0o600)
+        listener.listen(1); listener.settimeout(timeout)
+        if ready is not None: ready()
+        client, _ = listener.accept()
+        listener.close()
+        child = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=subprocess.DEVNULL, start_new_session=True, bufsize=0)
+        client.setblocking(False)
+        os.set_blocking(child.stdin.fileno(), False)
+        os.set_blocking(child.stdout.fileno(), False)
+        to_child = bytearray(); to_client = bytearray()
+        until = time.monotonic() + timeout
+        with selectors.DefaultSelector() as selector:
+            while True:
+                for key in list(selector.get_map().values()):
+                    selector.unregister(key.fileobj)
+                client_events = (selectors.EVENT_READ if not to_child else 0)
+                if to_client: client_events |= selectors.EVENT_WRITE
+                if client_events: selector.register(client, client_events, "client")
+                if not to_client: selector.register(child.stdout, selectors.EVENT_READ, "stdout")
+                if to_child: selector.register(child.stdin, selectors.EVENT_WRITE, "stdin")
+                remaining = until - time.monotonic()
+                if remaining <= 0: raise TimeoutError()
+                events = selector.select(remaining)
+                if not events: raise TimeoutError()
+                eof = False
+                for key, event in events:
+                    if key.data == "client":
+                        if event & selectors.EVENT_WRITE:
+                            sent = client.send(to_client); del to_client[:sent]
+                        if event & selectors.EVENT_READ:
+                            chunk = client.recv(4096)
+                            if not chunk: eof = True; break
+                            to_child.extend(chunk); forwarded += len(chunk)
+                    elif key.data == "stdout":
+                        chunk = os.read(child.stdout.fileno(), 4096)
+                        if not chunk: eof = True; break
+                        to_client.extend(chunk); forwarded += len(chunk)
+                    else:
+                        sent = os.write(child.stdin.fileno(), to_child); del to_child[:sent]
+                    if forwarded > 131072: raise ValueError("byte limit")
+                if eof: break
+        return forwarded
+    finally:
+        listener.close()
+        if client is not None: client.close()
+        if child is not None:
+            if child.poll() is None:
+                try: os.killpg(child.pid, signal.SIGTERM)
+                except ProcessLookupError: pass
+                try: child.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    try: os.killpg(child.pid, signal.SIGKILL)
+                    except ProcessLookupError: pass
+                    child.wait(timeout=2)
+            child.stdin.close(); child.stdout.close()
+        if created: path.unlink(missing_ok=True)
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--socket", required=True)
+    p.add_argument("--cli", required=True)
+    p.add_argument("--daemon-socket", required=True)
+    a = p.parse_args()
+    try:
+        serve_once(a.socket, [a.cli, "app-server", "proxy", "--sock", a.daemon_socket],
+                   ready=lambda: print(json.dumps({"ready": True}), flush=True))
+    except Exception as error:
+        print(json.dumps({"status": "inconclusive", "errorClass": type(error).__name__}), flush=True)
+        raise SystemExit(1)
+
+
+if __name__ == "__main__": main()

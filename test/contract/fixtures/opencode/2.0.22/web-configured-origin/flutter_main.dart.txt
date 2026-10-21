@@ -1,0 +1,302 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:js_interop';
+import 'package:flutter/widgets.dart';
+import 'package:web/web.dart' as web;
+
+@JS('cwSp04')
+external set bridge(JSFunction value);
+
+String base = '', authorization = '', session = '';
+Future<void> transition = Future<void>.value();
+final attempts = <Sse>[];
+final lifecycle = <Map<String, Object?>>[];
+bool armed = false, awaitingResume = false;
+String? lifecycleError;
+Sse? current;
+
+int now() => DateTime.now().millisecondsSinceEpoch;
+void mark(String kind, [Map<String, Object?> extra = const {}]) =>
+    lifecycle.add({'kind': kind, 'atMs': now(), ...extra});
+
+Future<T> serial<T>(Future<T> Function() action) {
+  final result = transition.then((_) => action());
+  transition = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+  return result;
+}
+
+void main() {
+  bridge = ((JSString input) => dispatch(input.toDart).toJS).toJS;
+  web.document.addEventListener(
+    'visibilitychange',
+    ((web.Event _) {
+      final state = web.document.visibilityState;
+      mark('visibilitychange', {'state': state});
+      if (!armed) return;
+      unawaited(
+        serial(() async {
+          if (!armed) return;
+          if (state == 'hidden') {
+            await stop();
+            awaitingResume = true;
+            mark('hiddenStopped', {'attempt': current?.number});
+          } else if (state == 'visible' && awaitingResume) {
+            await start();
+            final snapshot = await request('/api/session/$session');
+            if (snapshot['status'] != 200) throw StateError('snapshot status');
+            final data = (snapshot['body'] as Map)['data'] as Map;
+            if (data['id'] != session) throw StateError('snapshot identity');
+            awaitingResume = false;
+            mark('visibleRecovered', {
+              'attempt': current!.number,
+              'id': data['id'],
+              'title': data['title'],
+            });
+          }
+        }).catchError((Object error) {
+          lifecycleError = error.runtimeType.toString();
+        }),
+      );
+    }).toJS,
+  );
+  runApp(const SizedBox.shrink());
+}
+
+Future<JSString> dispatch(String input) async {
+  try {
+    final o = jsonDecode(input) as Map<String, dynamic>;
+    Object result;
+    switch (o['op']) {
+      case 'configure':
+        result = await serial(() async {
+          armed = false;
+          awaitingResume = false;
+          await stop();
+          base = o['base'] as String;
+          authorization = o['authorization'] as String;
+          session = (o['session'] as String?) ?? '';
+          return {'ok': true, 'origin': web.window.location.origin};
+        });
+      case 'info':
+        result = await request('/api/info');
+      case 'start':
+        result = await serial(() async {
+          await start();
+          return state();
+        });
+      case 'state':
+        result = state();
+      case 'arm':
+        result = await serial(() async {
+          if (current == null || current!.ended || !current!.connected) {
+            throw StateError('connected stream required');
+          }
+          armed = true;
+          return state();
+        });
+      case 'shutdown':
+        result = await serial(() async {
+          armed = false;
+          try {
+            await stop();
+          } finally {
+            authorization = '';
+          }
+          return {...state(), 'credentialsCleared': authorization.isEmpty};
+        });
+      default:
+        throw ArgumentError('unknown operation');
+    }
+    return jsonEncode(result).toJS;
+  } catch (error) {
+    return jsonEncode({
+      'ok': false,
+      'errorType': error.runtimeType.toString(),
+    }).toJS;
+  }
+}
+
+Map<String, Object?> state() => {
+  'ok': true,
+  'origin': web.window.location.origin,
+  'visibility': web.document.visibilityState,
+  'lifecycle': lifecycle,
+  'lifecycleError': lifecycleError,
+  'activeReaders': attempts.where((a) => !a.ended).length,
+  'attempts': attempts.map((a) => a.result()).toList(),
+};
+
+Future<Map<String, Object?>> request(String path) async {
+  final controller = web.AbortController();
+  final timer = Timer(const Duration(seconds: 12), () => controller.abort());
+  final headers = web.Headers();
+  headers.set('Authorization', authorization);
+  headers.set('Accept', 'application/json');
+  try {
+    final response = await web.window
+        .fetch(
+          (base + path).toJS,
+          web.RequestInit(
+            headers: headers,
+            signal: controller.signal,
+            credentials: 'omit',
+          ),
+        )
+        .toDart;
+    final text = (await response.text().toDart).toDart;
+    final json =
+        response.headers.get('content-type')?.contains('application/json') ==
+        true;
+    return {
+      'ok': true,
+      'status': response.status,
+      'body': text.isEmpty
+          ? null
+          : json
+          ? jsonDecode(text)
+          : {'bytes': utf8.encode(text).length},
+    };
+  } finally {
+    timer.cancel();
+  }
+}
+
+Future<void> stop() async {
+  final old = current;
+  if (old == null) return;
+  old.controller.abort();
+  await old.done.timeout(const Duration(seconds: 12));
+}
+
+Future<void> start() async {
+  await stop();
+  final next = Sse(attempts.length + 1);
+  current = next;
+  attempts.add(next);
+  next.done = next.read();
+  final timer = Timer(
+    const Duration(seconds: 12),
+    () => next.controller.abort(),
+  );
+  try {
+    for (var i = 0; i < 240 && !next.connected && !next.ended; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    if (!next.connected) {
+      next.controller.abort();
+      await next.done.timeout(const Duration(seconds: 12));
+      throw StateError('SSE connection failed');
+    }
+  } finally {
+    timer.cancel();
+  }
+}
+
+class Sse {
+  Sse(this.number);
+  final int number;
+  final controller = web.AbortController();
+  final events = <Map<String, Object?>>[], chunks = <Map<String, Object?>>[];
+  late Future<void> done;
+  bool connected = false, ended = false, released = false;
+  int? status, endedMs;
+  String? mediaType, errorType;
+  String pending = '';
+
+  Future<void> read() async {
+    web.ReadableStreamDefaultReader? reader;
+    StreamController<List<int>>? bytes;
+    Future<void>? decoding;
+    try {
+      final headers = web.Headers();
+      headers.set('Authorization', authorization);
+      headers.set('Accept', 'text/event-stream');
+      final response = await web.window
+          .fetch(
+            '$base/api/event'.toJS,
+            web.RequestInit(
+              headers: headers,
+              signal: controller.signal,
+              credentials: 'omit',
+            ),
+          )
+          .toDart;
+      status = response.status;
+      mediaType = response.headers.get('content-type');
+      if (status != 200 ||
+          mediaType?.startsWith('text/event-stream') != true ||
+          response.body == null) {
+        await response.body?.cancel().toDart;
+        throw StateError('SSE response rejected');
+      }
+      reader = web.ReadableStreamDefaultReader(response.body!);
+      bytes = StreamController<List<int>>();
+      decoding = bytes.stream
+          .transform(utf8.decoder)
+          .forEach((text) {
+            pending += text;
+            while (pending.contains('\n\n')) {
+              final end = pending.indexOf('\n\n');
+              final frame = pending.substring(0, end);
+              pending = pending.substring(end + 2);
+              final data = frame
+                  .split('\n')
+                  .where((s) => s.startsWith('data:'))
+                  .map((s) => s.substring(5).trimLeft())
+                  .join('\n');
+              if (data.isEmpty) continue;
+              final event = jsonDecode(data) as Map<String, dynamic>;
+              if (event['type'] == 'server.connected' ||
+                  (event['type'] == 'session.renamed' &&
+                      (event['data'] as Map)['sessionID'] == session)) {
+                events.add({
+                  'event': event,
+                  'atMs': now(),
+                  'read': chunks.length,
+                });
+                if (event['type'] == 'server.connected') connected = true;
+              }
+            }
+          })
+          .catchError((Object error) {
+            errorType = error.runtimeType.toString();
+            controller.abort();
+          });
+      while (true) {
+        final part = await reader.read().toDart;
+        if (part.done) break;
+        final chunk = (part.value as JSUint8Array).toDart;
+        chunks.add({'bytes': chunk.length, 'atMs': now()});
+        bytes.add(chunk);
+      }
+    } catch (error) {
+      errorType = error.runtimeType.toString();
+    } finally {
+      try {
+        await bytes?.close();
+        await decoding;
+      } catch (error) {
+        errorType ??= error.runtimeType.toString();
+      } finally {
+        reader?.releaseLock();
+        released = reader != null;
+        endedMs = now();
+        ended = true;
+      }
+    }
+  }
+
+  Map<String, Object?> result() => {
+    'number': number,
+    'status': status,
+    'mediaType': mediaType,
+    'connected': connected,
+    'ended': ended,
+    'released': released,
+    'endedMs': endedMs,
+    'aborted': controller.signal.aborted,
+    'events': events,
+    'chunks': chunks,
+    'errorType': errorType,
+  };
+}

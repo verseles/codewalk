@@ -1,0 +1,132 @@
+{
+  "connections": [
+    {
+      "droppedMessages": 9,
+      "frames": [
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-1", "method": "initialize", "params": {"capabilities": {"experimentalApi": true}, "clientInfo": {"name": "codewalk_g1_owned_thread", "version": "0.1"}}},
+          "index": 0
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-1", "result": {"codexHome": "<redacted-codex-home>", "platformFamily": "unix", "platformOs": "linux", "userAgent": "<redacted-user-agent>"}},
+          "index": 1
+        },
+        {
+          "direction": "client",
+          "frame": {"method": "initialized", "params": {}},
+          "index": 2
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-2", "method": "thread/list", "params": {"cwd": "<owned-project>", "limit": 2, "sourceKinds": ["cli", "vscode", "exec", "appServer", "subAgent", "subAgentReview", "subAgentCompact", "subAgentThreadSpawn", "subAgentOther", "unknown"], "useStateDbOnly": true}},
+          "index": 3
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-2", "result": {"backwardsCursor": null, "data": [], "nextCursor": null}},
+          "index": 4
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-3", "method": "thread/start", "params": {"approvalPolicy": "never", "cwd": "<owned-project>", "environments": [], "ephemeral": false, "sandbox": "read-only"}},
+          "index": 5
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-3", "result": {"approvalPolicy": "never", "cwd": "<owned-project>", "sandbox": {"type": "readOnly"}, "thread": {"cwd": "<owned-project>", "ephemeral": false, "id": "<owned-thread>", "source": "vscode", "turns": []}}},
+          "index": 6
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-4", "method": "thread/read", "params": {"includeTurns": false, "threadId": "<owned-thread>"}},
+          "index": 7
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-4", "result": {"thread": {"cwd": "<owned-project>", "ephemeral": false, "id": "<owned-thread>", "source": "vscode", "turns": []}}},
+          "index": 8
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-5", "method": "thread/list", "params": {"cwd": "<owned-project>", "limit": 2, "sourceKinds": ["cli", "vscode", "exec", "appServer", "subAgent", "subAgentReview", "subAgentCompact", "subAgentThreadSpawn", "subAgentOther", "unknown"], "useStateDbOnly": true}},
+          "index": 9
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-5", "result": {"backwardsCursor": null, "data": [], "nextCursor": null}},
+          "index": 10
+        }
+      ],
+      "receivedMessages": 14
+    },
+    {
+      "droppedMessages": 6,
+      "frames": [
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-1", "method": "initialize", "params": {"capabilities": {"experimentalApi": true}, "clientInfo": {"name": "codewalk_g1_owned_thread", "version": "0.1"}}},
+          "index": 0
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-1", "result": {"codexHome": "<redacted-codex-home>", "platformFamily": "unix", "platformOs": "linux", "userAgent": "<redacted-user-agent>"}},
+          "index": 1
+        },
+        {
+          "direction": "client",
+          "frame": {"method": "initialized", "params": {}},
+          "index": 2
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-2", "method": "thread/read", "params": {"includeTurns": false, "threadId": "<owned-thread>"}},
+          "index": 3
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-2", "result": {"thread": {"cwd": "<owned-project>", "ephemeral": false, "id": "<owned-thread>", "source": "vscode", "turns": []}}},
+          "index": 4
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-3", "method": "thread/delete", "params": {"threadId": "<owned-thread>"}},
+          "index": 5
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-3", "result": {}},
+          "index": 6
+        },
+        {
+          "direction": "client",
+          "frame": {"id": "cw-owned-4", "method": "thread/list", "params": {"cwd": "<owned-project>", "limit": 2, "sourceKinds": ["cli", "vscode", "exec", "appServer", "subAgent", "subAgentReview", "subAgentCompact", "subAgentThreadSpawn", "subAgentOther", "unknown"], "useStateDbOnly": true}},
+          "index": 7
+        },
+        {
+          "direction": "server",
+          "frame": {"id": "cw-owned-4", "result": {"backwardsCursor": null, "data": [], "nextCursor": null}},
+          "index": 8
+        }
+      ],
+      "receivedMessages": 10
+    }
+  ],
+  "inputLimit": "64 messages/8192UTF8bytes per connection after SDK assembly; not a wire allocation bound",
+  "listedBeforeAnyTurn": false,
+  "modelSpendExpectedUsd": 0,
+  "ownedProjectRemoved": true,
+  "ownershipEstablished": true,
+  "providerInferenceRequests": 0,
+  "scopedListEmptyAfterDelete": true,
+  "secondClientReadSucceeded": true,
+  "source": "vscode",
+  "status": "observed-partial",
+  "subscriptionMonetaryValue": "unknown",
+  "targetedDeleteSucceeded": true,
+  "threadStartRequestsAttempted": 1,
+  "threadsStarted": 1,
+  "tuiObserved": false,
+  "turnsStarted": 0
+}

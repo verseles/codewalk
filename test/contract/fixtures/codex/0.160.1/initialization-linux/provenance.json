@@ -1,0 +1,134 @@
+{
+  "sourceSha256": {
+    "initialize.dart": "cae5eb97de373d0c5fb6e3b239bbd3a85f7a252237ae06a8c9a80bb607f165aa",
+    "self_test.dart": "11319349cf8498371bbcfb508838fe2e157ecf75af7932fc16ab66723f0e031d",
+    "proxy_bridge.py": "ec9c30ed1e7633d1d589f33dd3ac5f0646129b6d801d8d530b6ef661eb889888",
+    "test_proxy_bridge.py": "d7e0bf933535f391e77fe534dd4a0c8866087ddbc8d5d8bc10ae3aeb8004a757"
+  },
+  "serverVersion": "0.160.1",
+  "serverSha256": "fbbaec80443919f86dd63648a0b62759cf6f1d0e09310602fde96885e0bceb3e",
+  "proxyCliVersion": "0.160.0",
+  "proxyCliSha256": "50b06603bdcdac39b714f5c3e68583c002b8ad8779ebfdaaf4932ff016b379c0",
+  "defaultDaemonBefore": {
+    "status": "running",
+    "backend": "pid",
+    "cliVersion": "0.160.1",
+    "appServerVersion": "0.160.1",
+    "managedCodexVersion": "0.160.1"
+  },
+  "defaultDaemonAfter": {
+    "status": "running",
+    "backend": "pid",
+    "cliVersion": "0.160.1",
+    "appServerVersion": "0.160.1",
+    "managedCodexVersion": "0.160.1"
+  },
+  "sourceReferenceCommit": "d27764b82f7118f674371e6d6e76271d9d606edb",
+  "installedBuildCommit": "unverified",
+  "dartVersion": "3.12.1",
+  "platform": "linux-aarch64",
+  "schemaVersion": 1,
+  "evidenceKind": "native-observation-after-explicit-redaction",
+  "declaration": "https://github.com/verseles/codewalk/issues/245#issuecomment-6004979870",
+  "declarationBodySha256": "2eb002e0d0a2579493d47be028eae09e01c3edd0a0c7d2b2e60c696017af1b0e",
+  "officialDocumentation": "https://learn.chatgpt.com/docs/app-server",
+  "nativeResultSha256": "b7d66f0fc3021322bf1eac9b7d7bcbc4291c2dd8d1bd2224dfaad75329b06673",
+  "review": {
+    "initialHelpersCompleted": 12,
+    "reReviewHelpersDispatched": 12,
+    "reReviewApprovals": 11,
+    "reReviewRemainingFindings": 0,
+    "boundedRuntimeFailures": [
+      {
+        "helper": "helperCodex-6-luna-max-3",
+        "attempts": 2,
+        "reason": "SESSION_CODEX_ERROR: turn failed"
+      }
+    ],
+    "sessionsClosed": 12,
+    "judgeApprovedFixes": [
+      "Catch disappearing owned process groups and still reap/clean",
+      "Abort test receive loop on early EOF",
+      "Preserve terminal connection failure class"
+    ],
+    "offlineChecks": "Tests OK: dart analyze initialize.dart self_test.dart; dart self_test.dart (9controls); python3 -B -m unittest -v test_proxy_bridge (5controls)"
+  },
+  "environment": "Private fresh child HOME/CODEX_HOME/TMPDIR/XDG under owned0700 runtime; clean allowlist. Existing shared daemon retains user-established authentication. No credential read/copy/export; fresh listener transport credentials generated0600.",
+  "commands": [
+    [
+      "<server-0.160.1>",
+      "app-server",
+      "daemon",
+      "version"
+    ],
+    [
+      "<dart-3.12.1>",
+      "<source>/initialize.dart",
+      "--uds",
+      "<default-control-socket>"
+    ],
+    [
+      "python3",
+      "<source>/proxy_bridge.py",
+      "--socket",
+      "<owned-runtime>/proxy/bridge.sock",
+      "--cli",
+      "<cli-0.160.0>",
+      "--daemon-socket",
+      "<default-control-socket>"
+    ],
+    [
+      "<dart-3.12.1>",
+      "<source>/initialize.dart",
+      "--uds",
+      "<owned-runtime>/proxy/bridge.sock"
+    ],
+    [
+      "<server-0.160.1>",
+      "app-server",
+      "--listen",
+      "ws://127.0.0.1:0",
+      "--ws-auth",
+      "capability-token",
+      "--ws-token-file",
+      "<owned-runtime>/cap/token"
+    ],
+    [
+      "<dart-3.12.1>",
+      "<source>/initialize.dart",
+      "--ws",
+      "ws://127.0.0.1:<verified-owned-port>/"
+    ],
+    [
+      "<server-0.160.1>",
+      "app-server",
+      "--listen",
+      "ws://127.0.0.1:0",
+      "--ws-auth",
+      "signed-bearer-token",
+      "--ws-shared-secret-file",
+      "<owned-runtime>/jwt/secret",
+      "--ws-issuer",
+      "codewalk-g1",
+      "--ws-audience",
+      "codewalk-g1-capture",
+      "--ws-max-clock-skew-seconds",
+      "0"
+    ],
+    [
+      "<dart-3.12.1>",
+      "<source>/initialize.dart",
+      "--ws",
+      "ws://127.0.0.1:<verified-owned-port>/"
+    ]
+  ],
+  "clientAuthEnvironment": "CW_G1_WS_TOKEN, generated values never retained",
+  "redactions": [
+    "initialize.result.codexHome",
+    "initialize.result.userAgent",
+    "thread/list.params.cwd"
+  ],
+  "capturePositionMeaning": "Each connection has local frame indices; they are not upstream durable sequence numbers.",
+  "receivedInputBound": "32messages/8192UTF8bytes after SDK assembly; not a hard wire/allocation bound",
+  "proxyByteBound": 131072
+}

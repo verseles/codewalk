@@ -1,0 +1,96 @@
+import os
+from pathlib import Path
+import socket
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+from unittest import mock
+from proxy_bridge import serve_once
+
+
+class BridgeTest(unittest.TestCase):
+    def test_private_stream_and_cleanup(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "proxy.sock"
+            ready = threading.Event(); errors = []; counts = []
+            command = [sys.executable, "-u", "-c", "import os;\nwhile True:\n b=os.read(0,4096)\n if not b:break\n os.write(1,b)"]
+            def run():
+                try: counts.append(serve_once(path, command, timeout=3, ready=ready.set))
+                except Exception as error: errors.append(type(error).__name__)
+            thread = threading.Thread(target=run); thread.start()
+            self.assertTrue(ready.wait(2))
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            payload = bytes(range(256)) * 32
+            with socket.socket(socket.AF_UNIX) as client:
+                client.settimeout(2); client.connect(str(path))
+                for start in range(0, len(payload), 37): client.sendall(payload[start:start+37])
+                result = b""
+                while len(result) < len(payload):
+                    chunk = client.recv(389)
+                    self.assertTrue(chunk, "unexpected early EOF")
+                    result += chunk
+                self.assertEqual(result, payload)
+            thread.join(4)
+            self.assertFalse(thread.is_alive()); self.assertEqual(errors, [])
+            self.assertEqual(counts, [len(payload)*2]); self.assertFalse(path.exists())
+
+    def test_disappearing_owned_process_group_still_cleans_socket(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / "proxy.sock"
+            ready = threading.Event(); errors = []; children = []
+            original_popen = subprocess.Popen
+            original_killpg = os.killpg
+            command = [sys.executable, "-u", "-c", "import os;\nwhile True:\n b=os.read(0,4096)\n if not b:break\n os.write(1,b)"]
+            def spawn(*args, **kwargs):
+                child = original_popen(*args, **kwargs)
+                children.append(child)
+                return child
+            def vanished(group, signum):
+                self.assertEqual(group, children[0].pid)
+                original_killpg(group, signum)
+                children[0].wait(timeout=2)
+                raise ProcessLookupError()
+            def run():
+                try: serve_once(path, command, timeout=3, ready=ready.set)
+                except Exception as error: errors.append(type(error).__name__)
+            with mock.patch("proxy_bridge.subprocess.Popen", side_effect=spawn), \
+                    mock.patch("proxy_bridge.os.killpg", side_effect=vanished):
+                thread = threading.Thread(target=run); thread.start()
+                try:
+                    self.assertTrue(ready.wait(2))
+                    with socket.socket(socket.AF_UNIX) as client:
+                        client.settimeout(2); client.connect(str(path))
+                        client.sendall(b"x"); self.assertEqual(client.recv(1), b"x")
+                    thread.join(4)
+                    self.assertFalse(thread.is_alive()); self.assertEqual(errors, [])
+                    self.assertFalse(path.exists())
+                    self.assertIsNotNone(children[0].returncode)
+                    self.assertTrue(children[0].stdin.closed)
+                    self.assertTrue(children[0].stdout.closed)
+                finally:
+                    for child in children:
+                        if child.poll() is None:
+                            original_killpg(child.pid, 9); child.wait(timeout=2)
+                    thread.join(4)
+
+    def test_existing_socket_path_is_preserved(self):
+        with tempfile.TemporaryDirectory() as root:
+            path=Path(root)/"existing";path.write_text("preserve")
+            with self.assertRaises(ValueError): serve_once(path, ["unused"])
+            self.assertEqual(path.read_text(), "preserve")
+
+    def test_public_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as root:
+            os.chmod(root, 0o755)
+            with self.assertRaises(ValueError): serve_once(Path(root)/"proxy.sock", ["unused"])
+
+    def test_accept_timeout_cleans_owned_socket(self):
+        with tempfile.TemporaryDirectory() as root:
+            path=Path(root)/"proxy.sock"
+            with self.assertRaises(TimeoutError): serve_once(path,["unused"],timeout=0.05)
+            self.assertFalse(path.exists())
+
+
+if __name__ == "__main__": unittest.main()
