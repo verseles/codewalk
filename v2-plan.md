@@ -1,11 +1,11 @@
 # CodeWalk v2 — Implementation Plan
 
-> **Status:** Option A confirmed; the one-unit execution contract is in §§11.5 and 20. On 2026-10-03, `main` was at `8280ea80`, retaining the legacy reference tree; local `v1` was at `cb582cf9`, descending from its creation point `d1ed5ee9`. Reconcile live refs, Issues and publication evidence before acting; these snapshots are not checkout instructions or completion claims.
+> **Status:** Option A confirmed; the one-unit execution contract is in §11.5 and, until the MVP is accepted, the order of work is fixed by the MVP roadmap in §11.6 (revision 1, owner decision 2026-10-21). On 2026-10-03, `main` was at `8280ea80`, retaining the legacy reference tree; local `v1` was at `cb582cf9`, descending from its creation point `d1ed5ee9`. Reconcile live refs, Issues and publication evidence before acting; these snapshots are not checkout instructions or completion claims.
 > **Inventory baseline:** repository revision `14fbf519`, CodeWalk `1.265.0+1790827338`. Legacy maintenance has since advanced; do not infer the current release or branch state from this inventory baseline.
 > **Evidence snapshot:** 2026-10-02; Codex server/transport facts rechecked on 2026-10-03 against CLI/source 0.160.0 (§3.3). Upstream projects change weekly; every pinned fact below must be re-checked by the spike that owns it before code depends on it.
 > **Inputs:** the research pack in `plan/` (dossiers `00`–`31` plus raw evidence folders), the historical decision round `plan/02-decisions.md`, sixteen original planner reports in `plan/helper-plans/`, and a subsequent twelve-helper readiness assessment reconciled against local evidence. Current decisions are in §2, not in the historical answers or helper proposals.
 > **Language:** English (decision D12). The product discussion happened in Portuguese; decisions are recorded here in English with their intent.
-> **Current MVP boundary (owner amendment, 2026-10-08):** Android/Linux only. Web/Chrome, Safari, iOS, Windows and macOS follow MVP and remain full-GA obligations. The real native v1.266 migration-source cohort precedes MVP; final stable v1.266.0 and Windows/macOS transition acceptance follow it (§9, ADR-060). This is planned scope, not completed acceptance.
+> **Current MVP boundary (owner amendment, 2026-10-08):** Android/Linux only. Web/Chrome, Safari, iOS, Windows and macOS follow MVP and remain full-GA obligations. The real native v1.266 migration-source cohort precedes MVP; final stable v1.266.0 and Windows/macOS transition acceptance follow it (§9, ADR-060). This is planned scope, not completed acceptance. **Gate placement (owner amendment, 2026-10-21):** the MVP beta requires G3, G4 and the provisional G5 revision; G1, G2 and the final G5 are the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA (§11.6).
 
 ---
 
@@ -41,7 +41,7 @@
 
 **Authority and live state.** Applicable project rules govern execution; §2 and §17 govern current product intent. Pinned official contracts and the owning spike govern upstream facts. `plan/02-decisions.md`, original helper reports and older summaries are historical inputs, not newer decisions. GitHub Issues are the canonical task tracker. This document defines scope, dependencies and acceptance; its checklist does not replace live Issue state. The orchestrator's Task Memory is its recovery mechanism, not another backlog.
 
-**Execution boundary.** Select one dependency-ready, bounded Issue or child Issue under §11.5. Its V2 advance-command protocol governs ordinary continuation of this plan; `flow` is the separate release workflow. Planning estimates are not execution units. A plan item that mentions a commit, push, installer, release or deploy does not itself authorize that action; follow the authorization already granted for the active task and applicable project rules. Technical choices that preserve decisions and invariants belong to the orchestrator; consequential changes follow §17.
+**Execution boundary.** Until V2-086 is accepted, execute the next row of the fixed MVP roadmap (§11.6) under the one-unit contract of §11.5; dependency readiness alone never makes another Issue eligible. The V2 advance-command protocol governs ordinary continuation of this plan; `flow` is the separate release workflow. Planning estimates are not execution units. A plan item that mentions a commit, push, installer, release or deploy does not itself authorize that action; follow the authorization already granted for the active task and applicable project rules. Technical choices that preserve decisions and invariants belong to the orchestrator; consequential changes follow §17.
 
 **Normative words.**
 
@@ -69,7 +69,7 @@ CodeWalk v2 is a rewrite of the client on a new skeleton inside this repository.
 The seven key outcomes:
 
 1. **OpenCode v2, direct.** The app connects straight to the official OpenCode v2 service (`/api/*`, pairing, one live event stream). No extra software is required for OpenCode users in v2.0.
-2. **Multi-harness by design.** Ports and adapters, a canonical event model, and capability descriptors exist from the first commit. OpenCode is simply the first adapter. Five release gates (G1–G5) prevent the code from becoming "OpenCode-shaped" again, which is what happened to v1.
+2. **Multi-harness by design.** Ports and adapters, a canonical event model, and capability descriptors exist from the first commit. OpenCode is simply the first adapter. Five release gates (G1–G5) prevent the code from becoming "OpenCode-shaped" again, which is what happened to v1. The opt-in Android/Linux MVP beta requires G3, G4 and the provisional G5; G1, G2 and the final G5 follow it as the first post-MVP phase, before any further feature, v2.1 and GA (owner amendment, 2026-10-21).
 3. **Hybrid topology (D01).** OpenCode connects directly; Codex, Claude Code, Pi, Muse, Grok, and dsh are reached through the **CodeWalk Host**, a small TypeScript/Node service on the user's machine. Codex already has a native authenticated app-server; the host remains the chosen integration route for protocol translation, continuous approvals, attention, and push. The host translates every native protocol into **one** CodeWalk protocol. Additional direct adapters require the rule in §6.12 and a separate architecture decision. The path toward "everything through the host" stays open.
 4. **Release train (D02).** v2.0 OpenCode → v2.1 Host + Codex → v2.2 Claude Code + Pi → v2.3 Grok Build + Muse Code. DeepSeek Harness (`dsh`) remains experimental.
 5. **"Allow all" stays ON by default (D05)** for every session, as in v1. Underneath, it approves each request **once**, like the official OpenCode clients, so agent restrictions and the user's deny rules keep working and no permanent rules are written. Users can switch a session to another mode when the harness supports it.
@@ -81,7 +81,8 @@ flowchart LR
   V1N["v1.266.0-native.N\nreal Android/Linux cohort"] --> MVP["v2 MVP beta: Android/Linux\nroutine v1 maintenance freezes"]
   MVP --> V1F["post-MVP stable v1.266.0\nWindows/macOS transition completion"]
   V1F --> V20["v2.0 GA\nOpenCode v2\n6 platforms"]
-  MVP --> V20
+  MVP --> GATES["G1/G2 + final G5\nfirst post-MVP phase"]
+  GATES --> V20
   V20 --> V21["v2.1\nCodeWalk Host\n+ Codex\n+ push sinks"]
   V21 --> V22["v2.2\nClaude Code\n+ Pi"]
   V22 --> V23["v2.3\nGrok Build\n+ Muse Code"]
@@ -97,7 +98,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 | ID | Topic | Final decision (short) | Who decided |
 |---|---|---|---|
 | D01 | Connection architecture | Hybrid: OpenCode direct; CodeWalk Host translates all other harnesses; direct adapters allowed for future harness servers; path to universal gateway preserved | Product owner (option A + clauses) |
-| D02 | Release phases | v2.0 OpenCode only, with gates G1–G5; v2.1 Host + Codex; v2.2 Claude + Pi; v2.3 Grok + Muse; dsh experimental | Product owner ("A with gates") |
+| D02 | Release phases | v2.0 OpenCode only, with gates G1–G5; the Android/Linux MVP beta needs G3/G4/provisional G5 and G1/G2/final G5 follow it; v2.1 Host + Codex; v2.2 Claude + Pi; v2.3 Grok + Muse; dsh experimental | Product owner ("A with gates"; MVP gate placement amended 2026-10-21) |
 | D03 | Rewrite strategy | New skeleton in this repo; legacy `v1` branch now; `main` retains v1 reference code until validated replacement/cutover; selective reuse | Product owner (option A); initial main contents delegated to orchestrator |
 | D04 | App identity and legacy | Same app ID; real native v1.266 cohort before MVP; full stable transition after MVP; routine maintenance freezes at acceptance with finite transition-completion exception; legacy stays downloadable | Product owner (option C; split-transition amendment 2026-10-08) |
 | D05 | Allow-all | ON by default for all sessions; automatic one-time approval; switchable modes per harness capability | Product owner (refined) |
@@ -142,7 +143,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 
 ### D02 — Release phases: v2.0 OpenCode only, with five gates
 
-**Decision.** v2.0 GA = complete OpenCode v2 client on all six platforms (iOS subject to prerequisites, §15). Its earlier usable MVP is Android/Linux only, retaining G1–G5; Web/Chrome/Safari, iOS, Windows and macOS follow MVP. v2.1 = CodeWalk Host + Codex (+ OpenCode observer and push sinks). v2.2 = Claude Code + Pi. v2.3 = Grok Build + Muse Code. dsh stays experimental.
+**Decision.** v2.0 GA = complete OpenCode v2 client on all six platforms (iOS subject to prerequisites, §15). Its earlier usable MVP is Android/Linux only and requires G3, G4 and the provisional G5 revision; G1, G2 and the final G5 are the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA (owner amendment, 2026-10-21). Web/Chrome/Safari, iOS, Windows and macOS follow MVP. v2.1 = CodeWalk Host + Codex (+ OpenCode observer and push sinks). v2.2 = Claude Code + Pi. v2.3 = Grok Build + Muse Code. dsh stays experimental.
 
 **Why.**
 
@@ -151,7 +152,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 - The host is the riskiest component (packaging a Node runtime for Linux/macOS/Windows on x64 and ARM64, pairing, security). Separating it from the OpenCode migration prevents one risk from delaying the other.
 - Codex goes first among host harnesses because its shared daemon already provides files, search, terminals, rate limits, and live multi-client sessions; it exercises the host with the fewest host-provided gap services. Claude Code needs the host to provide file listing, search, git and terminals, plus a policy gate, so it follows. Pi pairs naturally with Claude (both are host-spawned stdio processes needing the same gap services). Grok and Muse are younger and extension-heavy. dsh cannot replay history through its public surface.
 
-**The product owner's concern and the answer.** Shipping OpenCode first must **not** produce an OpenCode-shaped design that causes rework and bugs when the next harness arrives. Gates G1–G5 (§11.2) make that a release blocker: real Codex and Claude recordings MUST fit the canonical model without schema changes before v2.0 ships, a fake harness with different capabilities MUST run on the same screens, and CI MUST reject UI code that knows which harness it is talking to.
+**The product owner's concern and the answer.** Shipping OpenCode first must **not** produce an OpenCode-shaped design that causes rework and bugs when the next harness arrives. Gates G1–G5 (§11.2) make that a release blocker: real Codex and Claude recordings MUST fit the canonical model without schema changes before v2.0 ships, a fake harness with different capabilities MUST run on the same screens, and CI MUST reject UI code that knows which harness it is talking to. **Amendment, 2026-10-21:** the opt-in MVP beta may precede G1/G2 because it is OpenCode-only, the CHP has no consumer before v2.1, and the canonical model and CHP stay at a provisional revision until G2/G5 freeze them; the gates still block v2.0 GA, every v2.1 Host unit and every other post-MVP feature, and a breaking model change before then follows §17.
 
 **Rejected.** v2.0 with Codex (+2–3 engineering weeks before the first release, host becomes a launch prerequisite); v2.0 with Codex and Claude previews (more delay and policy risk).
 
@@ -1044,7 +1045,7 @@ flowchart TD
   A --> I["V1-05A shared contract + Linux acceptance"]
   I --> N["V1-02A real installed v1.266.0-native.N Android/Linux cohort"]
   N --> U["V2-076A installed native migration + V2-077A native publication guards"]
-  U --> F["Android/Linux v2.0.0-beta.N opt-in; G1-G5 + native evidence"]
+  U --> F["Android/Linux v2.0.0-beta.N opt-in; G3/G4/provisional G5 + native evidence"]
   F --> M["V2-086 accepted usable MVP: freeze v1 maintenance"]
   A --> P["bounded legacy fixes during migration"]
   P -.-> M
@@ -1114,12 +1115,14 @@ This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It i
 ### 9.6 Maintenance window and MVP freeze
 
 - Before MVP, validate/install the real Android/Linux V1-02A cohort. Final stable v1.266.0 with full Windows/macOS transition acceptance follows MVP. Bounded legacy fixes remain possible until acceptance; new product work belongs to v2.
-- `V2-086` is an explicit owner checkpoint: an installable opt-in **Android/Linux-only** beta proves connection/pairing, session/history, sending/streamed tools, permissions, stop/reconnect and preservation/import from the installed cohort. Agree flows, Android reference devices and Linux architectures before the run. Web/Chrome/Safari, iOS, Windows and macOS are post-MVP.
+- `V2-086` is an explicit owner checkpoint: an installable opt-in **Android/Linux-only** beta proves connection/pairing, session/history, sending/streamed tools, permissions, stop/reconnect and preservation/import from the installed cohort. Agree flows, Android reference devices and Linux architectures before the run. The beta requires G3, G4 and the provisional G5; G1/G2/final G5 follow it (§11.6 phase 7). Web/Chrome/Safari, iOS, Windows and macOS are post-MVP.
 - **Owner amendment, 2026-10-08:** native-only MVP supersedes the 2026-10-06 Chrome-in-MVP decision (retained in §17 history). Use V2-028D, V2-020CA, V1-02A, V2-076A, V2-077A and V2-078A without full cross-platform parent closure. Deferred targets remain pending for full GA; this is no fallback/tier approval or missing-check pass.
 - Acceptance freezes routine v1 development/releases and records the last stable artifact plus the migration-source cohort. Preserve downloads and production Web. The sole finite planned exception completes Windows/macOS acceptance and final stable v1.266.0; any other later critical exception needs an explicit decision. Do not restart routine maintenance.
-- The freeze does **not** waive G1–G5, remaining v2.0 scope, platform gates, or the reviewer loop. Beta feedback and the remaining work continue in v2; only GA promotes stable/latest and production Web.
+- The freeze does **not** waive G1–G5 (G1/G2/final G5 are §11.6 phase 7, right after the MVP), remaining v2.0 scope, platform gates, or the reviewer loop. Beta feedback and the remaining work continue in v2; only GA promotes stable/latest and production Web.
 
 **Owner clarification, 2026-10-10.** The Android OS reference is **Android 12 / API 31** and Linux targets are **x64 and ARM64**. This declares targets, not installed evidence, and does not raise the application's minimum SDK. The orchestrator owns technical setup, implementation, checks, review, packaging and native smoke testing. The owner evaluates the experience only after receiving a usable application; code review, build troubleshooting or choosing an SDK are not owner prerequisites. `V2-020D` provides the first isolated native development preview before product feedback, independently of the full native matrix and public-beta checkpoint. It does not freeze v1 or accept the MVP.
+
+**Owner device (2026-10-21).** The owner tests on a Galaxy S25 (Android 16), Linux x64 and Linux ARM64. Android 12/API 31 remains the reference floor, evidenced on an emulator; minSdk does not change.
 
 ---
 
@@ -1151,18 +1154,18 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 | **v1.266.0-native.N** (explicit native cohort) | Real installed Android/Linux v1.266 source, gate/shared Linux installer evidence; opt-in prerelease, never latest or ordinary stable/v1/v2-beta content | V1-02A before MVP; separately authorized immutable artifacts, signatures/build codes/digests and installation evidence |
 | **v1.266.0** (last planned stable v1 minor) | D04 gate, full Windows/macOS installer/transition acceptance, approved announcement | V1-02 after MVP and before GA; finite exception to routine v1 freeze |
 | **v1.266.x** (temporary maintenance) | Bounded fixes while migrating; no new v1 product work | Until the product owner accepts the v2 MVP |
-| **v2.0.0-beta.N / MVP** | Opt-in usable OpenCode v2 subset on Android/Linux only; all other platforms post-MVP; freeze routine v1 maintenance | V2-086; installed native cohort migration, G1–G5, native platform/flow evidence, V2-077A safeguards and explicit owner acceptance; never stable promotion |
+| **v2.0.0-beta.N / MVP** | Opt-in usable OpenCode v2 subset on Android/Linux only; all other platforms post-MVP; freeze routine v1 maintenance | V2-086; installed native cohort migration, G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), native platform/flow evidence, V2-077A safeguards and explicit owner acceptance; never stable promotion |
 | **v2.0** | Complete OpenCode v2 client on Android, Linux, macOS, Windows, Web; iOS per prerequisites; managed desktop install; migration from v1; local notifications + Android monitor | Gates G1–G5 pass; platform gates pass; review loop clean |
 | **v2.1** | CodeWalk Host (desktop + headless npm); Codex via shared daemon; OpenCode observer (24/7 "Allow all", attention); push sinks (ntfy, UnifiedPush, webhook, Web Push); Android overlay and Android Auto return; experimental usage connectors | Host packaging proven on all desktop targets; Codex live-attach acceptance passes |
 | **v2.2** | Host workspace services; Claude Code; Pi | Claude licensing/policy gate passes |
 | **v2.3** | Grok Build (ACP + extensions); Muse Code | Muse distribution gate passes; extension fixtures pinned |
 | **Experimental** | dsh; generic ACP agents | Upstream adds history replay / stabilizes |
 
-**Development preview, not a release-train entry:** `V2-020D` delivers one usable, isolated native artifact for early visual feedback. It is not `v2.0.0-beta.N`, an updater/installer channel, a migration cohort or an MVP pass. Actual installation/extraction, launch and visual smoke must be evidenced before handoff; a compiler artifact alone is insufficient. G1–G5 and native publication safeguards remain mandatory for public beta, and V1-04 remains mandatory before any rewritten Web preview/deployment.
+**Development preview, not a release-train entry:** `V2-020D` delivers one usable, isolated native artifact for early visual feedback. It is not `v2.0.0-beta.N`, an updater/installer channel, a migration cohort or an MVP pass. Actual installation/extraction, launch and visual smoke must be evidenced before handoff; a compiler artifact alone is insufficient. G3, G4, the provisional G5 and native publication safeguards remain mandatory for the public beta (G1/G2/final G5 follow it, §11.6 phase 7), and V1-04 remains mandatory before any rewritten Web preview/deployment.
 
 ### 11.2 The five v2.0 gates (answer to "will v2.0 be OpenCode-shaped?")
 
-The v2.0 release is **blocked** until all five pass. Each gate is a work item in §12. Keep these architecture gates for public MVP prereleases too: freezing v1 at the accepted MVP (§9.6) does not waive D02's safeguards or promote the beta to stable. GA additionally requires the remaining feature scope and platform/release gates.
+The v2.0 release is **blocked** until all five pass. Each gate is a work item in §12. The opt-in Android/Linux MVP beta requires G3, G4 and the provisional G5 revision; G1, G2 and the final G5 are §11.6 phase 7, right after the MVP and before any other post-MVP feature, any v2.1 Host work and GA (owner amendment, 2026-10-21). Freezing v1 at the accepted MVP (§9.6) does not waive D02's safeguards or promote the beta to stable. GA additionally requires the remaining feature scope and platform/release gates.
 
 | Gate | What must be true | Why it prevents rework | Work item |
 |---|---|---|---|
@@ -1202,13 +1205,13 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 ### 11.5 One-unit execution contract
 
-**Unit and readiness.** The orchestrator executes one open, bounded Issue at a time, within the authorized milestone/task. A parent with children is an acceptance aggregate, not a multi-week execution unit. Choose a child whose listed dependencies have accepted evidence, whose resources are available and whose required human decision is settled. Prefer the smallest unit that unblocks the critical path; numeric ID or textual order is not scheduling authority. An `[U]` fact permits starting its owning investigation, not implementing its consumers as if the fact were verified.
+**Unit and readiness.** The orchestrator executes one open, bounded unit at a time, within the authorized milestone/task. Until V2-086 is accepted, that unit is always the next row of the fixed MVP roadmap (§11.6), chosen by its next-unit rule; dependency readiness alone never makes another Issue eligible. A parent with children is an acceptance aggregate, not a multi-week execution unit. A row runs only when its dependencies have accepted evidence, its resources are available and its required human decision is settled. An `[U]` fact permits starting its owning investigation, not implementing its consumers as if the fact were verified.
 
-**V2 advance commands (owner clarification, 2026-10-06).** When executing this `v2-plan.md`, `avançar`, `continuar`, `advance`, or `continue` authorizes the orchestrator to resume unfinished work or autonomously select and execute the next ready, bounded v2 unit under the agreed scope and current permissions. Each command covers one complete unit unless the user explicitly requests further units or continuous execution. The user need not select routine technical steps or repeat settled decisions.
+**V2 advance commands (owner clarification, 2026-10-06).** When executing this `v2-plan.md`, `avançar`, `continuar`, `advance`, or `continue` authorizes the orchestrator to resume unfinished work or execute the next row of the fixed MVP roadmap (§11.6) under the agreed scope and current permissions. Each command covers one complete unit unless the user explicitly requests further units or continuous execution. The user need not select routine technical steps or repeat settled decisions.
 
 **Required planning before execution.** Before executing each v2 unit, check the canonical planner triggers. When planning is requested or the unit needs independent planning because of architectural impact, broad cross-module scope, consequential tradeoffs or unresolved complexity, load `planner` and consult all eligible helpers before implementation. A recorded handoff may satisfy that prerequisite only while it covers the unit and its scope, assumptions and evidence remain valid; materially changed conditions or an explicit request for planning require a new planning round. `avançar`/`continuar` never waive necessary planning. Follow the skill's persistence/recovery rules and routine-work exemptions.
 
-**Autonomy and quality.** The orchestrator owns preflight, investigation, implementation, applicable tests/checks, review and required re-review, documentation, Issue/Task Memory records, cleanup and a concise outcome/next-step report. Follow the canonical `reviewer` skill, including all eligible helpers and persistence/recovery. Review each coherent, verified code stage and resolve required corrections before completion or push; static docs-only changes retain their exemption unless review is requested. Ask only under **Human control** below and the applicable correctness/safety stop rules. When a path is blocked, consider another eligible unit within the agreed scope and budget; preserve the blocker without bypassing acceptance criteria.
+**Autonomy and quality.** The orchestrator owns preflight, investigation, implementation, applicable tests/checks, review and required re-review, documentation, Issue/Task Memory records, cleanup and a concise outcome/next-step report. Follow the canonical `reviewer` skill, including all eligible helpers and persistence/recovery. Review each coherent, verified code stage and resolve required corrections before completion or push; static docs-only changes retain their exemption unless review is requested. Ask only under **Human control** below and the applicable correctness/safety stop rules. When a row is blocked, follow §11.6: take the next row whose dependencies do not include the blocked one, or stop and report; preserve the blocker without bypassing acceptance criteria.
 
 **Technical delivery versus product acceptance.** Complete and record technical QA as the orchestrator; do not ask the owner to accept code or unseen features. Choose and document a suitable available native test environment within existing permissions, provide the tested artifact and simple opening instructions, then request experience feedback. A missing owner phone model does not block preparation of a safe development preview; actual device gaps remain explicit before later installed/MVP acceptance. The owner's instruction to continue autonomously authorizes successive ready bounded units, preserving each unit's preflight, stage commit and permission boundaries; it does not turn planning into a release or installation authorization.
 
@@ -1232,11 +1235,109 @@ Before starting, ensure the Issue contains:
 2. **Execute:** produce only that output, following the inspected contract. Keep unrelated discoveries as follow-ups in Issues. Use the applicable research, URL, test, ADR/CODEBASE, reviewer and publication workflows; do not introduce another progress-file system.
 3. **Stop or accept:** validate the unit and review a coherent code stage. On missing resources, failed assumptions, essential-check failure, conflict with existing work or a required product/MUST decision, preserve evidence and stop that path. Replan before repeating a failed core approach; after three failed fixes, request a decision rather than looping. A time/cost limit stops the unit unless an already-authorized budget permits extension.
 4. **Record and resume:** record artifacts, commands/results, revision, fixture provenance, review outcome, limitations and the next bounded action in the Issue and existing recovery mechanism. On resume, reconcile these with live files; do not repeat an installation, release or uncertain mutation merely because its previous result is unclear.
-5. **Finish:** accept only the evidence-backed output and apply the stage-commit boundary above before any next unit/stage. A parent closes only when every child and parent criterion is accepted. Stop after this unit unless the user's active instruction authorizes selecting the next one. Issue closure and release/fix closure follow the project's tracker policy.
+5. **Finish:** accept only the evidence-backed output and apply the stage-commit boundary above before any next unit/stage. A parent closes only when every child and parent criterion is accepted. Stop after this unit unless the user's active instruction authorizes executing the next §11.6 row. Issue closure and release/fix closure follow the project's tracker policy.
 
 **Result states:** `accepted` (all applicable criteria passed), `delivered-awaiting-acceptance` (output ready, human/device/CI confirmation outstanding), `blocked` (named missing dependency/resource/decision), or `inconclusive` (experiment did not establish the fact). An approved capability downgrade/fallback is documented explicitly; it does not fabricate a passing test or waive a release gate. Use these distinctions in the Issue body, not a second tracker.
 
 **Human control.** Ask only for a changed D-decision/MUST or ADR exception, consequential scope/platform/distribution tradeoff, risk/cost outside the agreed limits, trust/installation consent, required announcement/publication authorization, or MVP acceptance. Resolve reversible technical details inside the established contracts autonomously. Installation consent and project trust are product interactions; the orchestrator's publication authority is a separate execution boundary. An unavailable optional resource blocks its dependent unit, not independent documentary foundations.
+
+### 11.6 Fixed MVP roadmap (revision 1, 2026-10-21)
+
+**Why this section exists.** Until 2026-10-20 the executor chose any dependency-ready unit. That let many small polish units run while the MVP blockers stayed untouched. The product owner asked for a fixed, ordered path to the MVP that a lower-effort executor follows without re-deriving the plan. **Until V2-086 is accepted, this section is the only scheduling authority for v2 work.** §12 and the GitHub Issues define scope and acceptance; they never make a unit eligible on their own. Decisions, invariants, quality gates and permissions are unchanged (§§2, 4, 11.4, 11.5).
+
+**Owner decisions behind revision 1 (CP0, 2026-10-21).**
+
+- **Gates:** the MVP beta requires G3, G4 and the provisional G5 revision. G1, G2 and the final G5 are phase 7, the first work after the MVP, required before any other post-MVP feature, any v2.1 Host work and v2.0 GA (§§2 D02, 11.2).
+- **Scope:** no extras beyond the core below. Deferred to after the MVP (`after-mvp`, still v2.0 GA scope): the background-work tray (V2-049), revert/fork/diff (V2-050), files (V2-051), terminal (V2-052), commands/mentions/attachments (V2-053), model favorites/recents (rest of V2-054), usage/context meters and cost (rest of V2-055), canned answers (rest of V2-070), the Android background monitor (V2-011/V2-074), managed install (V2-075), voice, exports, accessibility/performance passes and reverse-proxy/Tailscale extras (V2-072/073/079/080/081/082).
+- **Rules:** `AGENTS.md` and the ADRs follow this section.
+- **Devices:** the owner tests on a Galaxy S25 (Android 16), Linux x64 and Linux ARM64. Android 12/API 31 stays the reference floor, evidenced on an emulator; minSdk does not change.
+
+**What the MVP contains.** Pairing and profiles; the session catalog; the live timeline with older-history pagination and readable tool/shell results; sending with steer/queue; permissions and forms; Stop; truthful execution state; per-session model/agent selection; typed errors; the v1-parity workspace (projects, session tabs, drafts, input history, session activity); device-proven reconnect; the installed v1.266 → v2 migration; fail-closed publication guards; native evidence on the three targets.
+
+**Rules.**
+
+1. **Next unit.** Resume the row in progress. Otherwise take the lowest-Seq row that is not `accepted`, whose dependency rows are `accepted`, and that does not wait for an owner action. If no row qualifies, stop and report the pending owner action. Never pick work outside this table.
+2. **One row, one output.** A unit delivers only its row's output. A finding that does not affect the row's exit criteria, correctness or safety becomes an Issue labelled `after-mvp` and is not executed now. Reviewer suggestions follow the same rule.
+3. **Splitting.** A row larger than one unit may be split into `n.a`, `n.b` at the same position. A split never adds scope and is recorded on the tracking Issue.
+4. **Changes.** Inserting, removing or reordering rows, or changing scope or a gate, requires the owner's approval and a dated §17 row, applied in the same change to this table and to the affected Issues. Seq numbers are never renumbered; an insertion takes a sub-number.
+5. **Owner checkpoints.** The orchestrator prepares the artifact and the instructions; the owner only tests, decides or authorizes. Feedback is recorded on the tracking Issue. Blocking defects become at most one bounded correction row right after the checkpoint, approved by the owner; everything else is `after-mvp`.
+6. **Reporting.** Every unit ends with: `Seq <x> accepted → next Seq <y> (<id>); phase <n>/6; owner pending: <…>`.
+7. **Drift audit.** At each owner checkpoint, every commit and closed Issue since the previous checkpoint must map to a row of this table; anything else is reported as a deviation.
+8. **Issue contract.** Each roadmap Issue carries `Roadmap: §11.6 rev 1 · Seq · Phase · Previous · Next · Exit · Owner action`. The milestone "MVP beta (Android/Linux)" holds exactly the roadmap Issues; deferred Issues carry `after-mvp`; a pinned tracking Issue mirrors this table with the commit of each accepted row. Live status lives in the Issues, not in this table.
+
+**Phase 0 — Lock the roadmap**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 0.1 | CP0 | Gate placement, MVP scope, rule alignment and devices decided | The target is fixed before code | — | Decided 2026-10-21 (§17) | Decided |
+| 0.2 | Roadmap revision 1 | This section, §§0/1/2/9/11/12/15/16/17/20, `AGENTS.md` and ADR alignment, the milestone, the tracking Issue, Issue headers and the new child Issues | The order is encoded where the executor reads it | 0.1 | Plan and Issues agree; every row has an Issue; the milestone equals the rows | — |
+| 0.3 | Evidence hygiene | Accepted but untracked evidence (`test/contract/fixtures/codex/0.160.1/`, `test/contract/fixtures/opencode/2.0.22/web-configured-origin/`) versioned with provenance, or its discard recorded | Accepted G1-prerequisite and Web-origin evidence lives outside Git | 0.2 | No orphan evidence in `git status`; links on #245 and #247 | — |
+
+**Phase 1 — Finish the live timeline (`main`)**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 1.1 | V2-044C1 (#279) | The five accepted review-round-2 fixes, re-review, then push of `831423d9`, `96e70fa3` and the fix commit | Parked code must land before more timeline work | 0.2 | Review converged; `make check` green; CI green; #279 updated | — |
+| 1.2 | V2-044C2 (#279) | Older-history pagination through the stream owner (cursor limit 200), stop at 500 resident without evicting the newest, the history viewer as the fallback, the 2,000-total/500-resident case, golden timelines, legacy test dispositions | Last criteria of #279 and #276; long sessions | 1.1 | ≤500 resident, bounded mounted rows and a stable anchor in the structural case; golden fixtures; dispositions recorded; #279 closed | — |
+| 1.3 | V2-044D (#276) | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized | Tool rows show only a name and shell rows "part unavailable"; a coding session cannot be followed | 1.2 | Compact/wide/RTL/2× tests; bounded content; #276 closed | — |
+
+**Phase 2 — v1-parity workspace (`main`)**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 2.1 | V2-070A (#301) | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session | The owner rejected the bootstrap rail (2026-10-11) | 1.3 | v1 invariant map recorded first; compact/wide/RTL/2× tests; no harness branching | — |
+| 2.2 | V2-070B (#301) | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, restore after restart | The v1 working model | 2.1 | Idempotent restore; no cross-host collision | — |
+| 2.3 | V2-070C (#301) | Drafts that survive process death and per-session input history; canned answers stay post-MVP | A lost prompt is a daily blocker | 2.2 | Kill/relaunch keeps the draft; history per session | — |
+| 2.4 | V2-043J (#275) | Session activity in the sidebar rows: running, needs you, unread — from observed state only | Shows which session needs attention | 2.1 | Each mark has an observed source; unknown stays unknown | — |
+| 2.5 | CP1 | The orchestrator delivers a launched build; the owner tests the workspace on the Galaxy S25, Linux x64 and Linux ARM64 | First experience check of the navigation | 2.4 | Feedback recorded; at most one correction row 2.6 | Test and report |
+
+**Phase 3 — Daily chat essentials (`main`)**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 3.1 | V2-046B (#281) | Execution truth: active-list reconciliation, outcomes, interrupted/resuming, parent idle while children run, retry shown from harness events (countdown only when observed) | Daily use needs a truthful running/failed state | 1.1 | Outcome fixtures; nothing derived from `session.status` | — |
+| 3.2 | V2-054A (#293) | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 routes, applied before send, external changes reconciled; no favorites or recents | Otherwise every session is stuck on the server default | 2.1 | Race test: a change applies to the intended session only; an unavailable route hides the control with a reason | — |
+| 3.3 | V2-055A (#294) | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action; no meters or cost | An assistant error is an "unavailable part" today | 3.1 | 2.0.22 fixtures; unknown never renders as zero | — |
+| 3.4 | V2-042C (#274) | Device reliability evidence on the Galaxy S25, an Android 12/API 31 emulator and Linux x64/ARM64 (drop, Wi-Fi↔cellular, background/foreground, server restart, a session started in the TUI); the durable log stays off; MVP disposition of #243/#244/#239 | Scripted recovery is not device evidence | 3.3 | Matrix recorded; no duplicates or stuck running; #274, #275 and #281 closed or their remaining criteria marked post-MVP with the reason | Keep the devices reachable |
+| 3.5 | CP2 | The owner uses a development build daily for 2–3 days | Real daily use before release work | 3.4 | Feedback recorded; at most one correction row 3.6 | Use and report |
+
+**Phase 4 — v1 transition cohort (branch `v1`)**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 4.1 | V1-01 (#227) | v1 updater major-version gate: Update, Stay on v1, Later; stay mode lists only `v1.*` | D04: v1 users decide with full information | 0.2 | #227 tests; manual check on Android and Linux | — |
+| 4.2 | V1-05A (#229) | Installer channel and exact-tag handoff (app and `install.sh`); Windows/macOS stay post-MVP | Required before the cohort exists | 4.1 | Offline pagination/semver/channel fixtures pass on Linux | — |
+| 4.3 | V1-02A (#359) | `v1.266.0-native.N` built, signed and published as a prerelease (never latest) for Android and Linux x64/ARM64, installed on the owner's devices | The migration source must be real | 4.2 | Tag, commit, build code, signatures and digests recorded; selectors exclude the cohort | CP3: authorize publication and install |
+
+**Phase 5 — Beta machinery (`main`)**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 5.1 | V2-077A (#362) | Native beta updater and selector, prerelease ordering, exact tag, actual v2 entry point, fail-closed guards on every `main` push/tag/workflow path | Nothing v2 is published before the guards | 4.3 | Negative guard tests on every path; dry runs; no Web/latest/legacy overwrite | — |
+| 5.2 | V2-076A (#361) | Installed-cohort migration: importer and startup wiring, install-over from 4.3 on the Galaxy S25 and Linux x64/ARM64, v1 keys preserved, idempotent restart | The data-preservation promise | 4.3, 2.3 | Evidence on the three targets | CP4: allow the upgrade |
+| 5.3 | V2-060C (#321) | Re-proof of the integrated flow on the new workspace: fake integrated flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error) | V2-060A/B predate the new shell | 2.3, 3.2, 3.4 | Fake and live logs; no regression | — |
+| 5.4 | V2-078A (#357) | Android/Linux package, install, signature and functional evidence; G3/G4 rerun; the provisional G5 revision revalidated | Entry evidence for the beta | 5.1, 5.2, 5.3 | Per-target evidence; deferred platforms pending, not passed | — |
+| 5.5 | V2-071 (#302) | Visual-parity sign-off against v1 on the packaged candidate | The only remaining #302 criterion | 5.4 | Checklist signed; gaps fixed or `after-mvp` | CP5: sign off |
+
+**Phase 6 — MVP**
+
+| Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|---|
+| 6.1 | V2-086 (#321) | Opt-in `v2.0.0-beta.1` published from the verified candidate (prerelease, not latest); native checklist run on the three targets | Ship exactly what was tested | 5.5 | Correct tag and assets; no Web/latest/legacy side effect; checklist pass | CP6: authorize publication |
+| 6.2 | V2-086 (#321) | Owner acceptance and the v1 maintenance freeze record | The MVP | 6.1 | Explicit acceptance; freeze tags/commits recorded; GA obligations tracked | CP7: accept |
+
+**Phase 7 — Real harness gates, right after the MVP**
+
+| Seq | ID / Issue | Output | Depends on | Exit criteria | Owner action |
+|---|---|---|---|---|---|
+| 7.1 | V2-006 (#245) | Codex recordings covering the §13.1 matrix | 6.2 | Observed scenarios with version/topology/provenance; no synthetic pass | Codex login and a spend limit |
+| 7.2 | V2-007 (#246) | Claude Code recordings covering the §13.1 matrix | 6.2 | Same | Claude Code login and a spend limit |
+| 7.3 | V2-022C (#260) | The canonical model reviewed against both recordings; every gap resolved | 7.1, 7.2 | Each observed concept mapped or explicitly resolved | — |
+| 7.4 | V2-026 (#266), V2-025 (#265) | G2 mappings and reducer assertions; the final G5 at the same revision | 7.3 | G1, G2 and G5 accepted at one revision | — |
+
+Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v2.0 GA. Until it passes, the canonical model and the CHP stay at their provisional revision, and a breaking model change is allowed only through §17.
+
+**Effort.** Phases 0–6 hold about 22 executor units. At the observed 2–3 hours per unit, that is roughly 45–70 executor hours plus the owner's checkpoints; it is an allowance, not a calendar commitment.
 
 ---
 
@@ -1267,7 +1368,7 @@ Before starting, ensure the Issue contains:
 - OpenCode adapter: [ ] V2-040 · [ ] V2-041 · [ ] V2-042 · [ ] V2-043 · [ ] V2-044 · [ ] V2-045 · [ ] V2-046 · [ ] V2-047 · [ ] V2-048 · [ ] V2-049 · [ ] V2-050 · [ ] V2-051 · [ ] V2-052 · [ ] V2-053 · [ ] V2-054 · [ ] V2-055 · [ ] V2-056 · [ ] V2-060 (internal vertical slice)
 - App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · [ ] V2-076 · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085 · [ ] V2-086
 
-**Bounded Android/Linux MVP path:** V2-028D native transport, V2-020CA native aggregate, V1-02A installed source, V2-076A native migration, V2-077A native update/publication controls and V2-078A native evidence feed V2-086 alongside unchanged core features and G1–G5. Full Web/Chrome/Safari/iOS/Windows/macOS parents and the final stable legacy transition remain post-MVP/GA obligations; no parent closes by child acceptance alone.
+**Bounded Android/Linux MVP path:** V2-028D native transport, V2-020CA native aggregate, V1-02A installed source, V2-076A native migration, V2-077A native update/publication controls and V2-078A native evidence feed V2-086 alongside the core features, G3, G4 and the provisional G5; G1/G2/final G5 follow the MVP. **Order:** the fixed MVP roadmap in §11.6 decides what runs next; the checkboxes above are a scope index and live status is in the Issues. Full Web/Chrome/Safari/iOS/Windows/macOS parents and the final stable legacy transition remain post-MVP/GA obligations; no parent closes by child acceptance alone.
 
 **Milestone v2.1 — CodeWalk Host + Codex**
 - [ ] V21-001 · [ ] V21-002 · [ ] V21-003 · [ ] V21-004 · [ ] V21-005 · [ ] V21-006 · [ ] V21-007 · [ ] V21-008 · [ ] V21-009 · [ ] V21-010 · [ ] V21-011 · [ ] V21-012
@@ -1397,6 +1498,7 @@ Before starting, ensure the Issue contains:
 | V2-005E | V2-005B | Durable-log cursors, real filesystem escapes/TOCTOU, attachments/PDF, bandwidth with three concurrent sessions, service credentials and CORS; per-capability proof or explicit unavailable fallback, with measurements/provenance. |
 
 #### V2-006 — SP-02: Codex recordings (gate G1)
+- **Roadmap:** §11.6 phase 7, Seq 7.1 — right after the MVP and before any other post-MVP feature, v2.1 Host work and GA (owner amendment, 2026-10-21).
 - **Type / size / labels:** spike · M · `milestone:v2.0` `gate` `type:spike`
 - **Depends on:** V2-001
 - **Resources:** disposable project and machine with Codex CLI/daemon and user-established authentication; split capture/topology experiments under §11.5 before starting.
@@ -1405,6 +1507,7 @@ Before starting, ensure the Issue contains:
 - **Done when:** [ ] observed fixtures and the complete G1 scenario matrix in `test/contract/fixtures/codex/<server-version>/`, labeled by daemon vs dedicated-listener topology; [ ] note with the host attach recommendation for Linux/macOS/Windows and verified auth/browser/reconnect limits; [ ] dedicated-listener results distinguish supported live sharing from unverified behavior and never claim attachment to existing default-daemon sessions. Uncaptured required scenarios remain pending/inconclusive, not synthetic G1 passes.
 
 #### V2-007 — SP-03: Claude Code recordings (gate G1)
+- **Roadmap:** §11.6 phase 7, Seq 7.2 — right after the MVP and before any other post-MVP feature, v2.1 Host work and GA (owner amendment, 2026-10-21).
 - **Type / size / labels:** spike · M · `milestone:v2.0` `gate` `type:spike`
 - **Depends on:** V2-001
 - **Resources:** disposable project and machine with Claude Code logged in by the user (or user-established API-key mode); split captures under §11.5 and establish project trust before runtime activation.
@@ -1477,7 +1580,7 @@ Before starting, ensure the Issue contains:
 - **Experience:** show implemented Hosts/Pairing, Settings/Appearance, supported Shortcuts, App Logs and Release history. Reconcile actual capabilities at handoff; Conversations/session routes remain placeholders until their owning features land. Do not claim functional chat.
 - **Isolation:** preserve production identity/data policies and installed v1. The current debug APK's shared application ID is not permission to replace v1. Prove isolation of identity or disposable execution environment, files, preferences, credentials/keyring and deep links. `cw2.*`, HOME/XDG redirection or Linux `NON_UNIQUE` alone do not prove isolation. Any development-identity change needs its applicable design/ADR assessment before implementation.
 - **Done when:** [ ] required technical checks/review pass; [ ] the exact artifact is installed/extracted and launched in the declared isolated environment; [ ] navigation, applicable layouts, settings/back, appearance persistence/restart and diagnostic/history states have visual smoke evidence; [ ] a usable owner-accessible artifact, digests, source/SDK/target/signature provenance, sanitized screenshots/logs, completed checklist and simple opening/removal instructions are delivered; [ ] untested server/device paths and placeholders are explicit. Screenshots alone or a compiler-only output are not delivery. Owner experience feedback is separate from technical QA and from V2-086 acceptance.
-- **Boundary:** no release/tag, installer/updater channel, latest promotion, legacy overwrite, rewritten Web deployment, migration-source substitution or runtime compatibility switch. Verify side effects and authority for the chosen development handoff; existing relevant source-push/tag/workflow guards still apply. Public beta keeps G1–G5, V2-077A and installed native acceptance. Completion does not close V2-020CA, V2-078A, V2-086 or full GA parents. Record missing resources rather than inventing a pass.
+- **Boundary:** no release/tag, installer/updater channel, latest promotion, legacy overwrite, rewritten Web deployment, migration-source substitution or runtime compatibility switch. Verify side effects and authority for the chosen development handoff; existing relevant source-push/tag/workflow guards still apply. Public beta keeps G3, G4, the provisional G5, V2-077A and installed native acceptance (G1/G2/final G5 follow it, §11.6 phase 7). Completion does not close V2-020CA, V2-078A, V2-086 or full GA parents. Record missing resources rather than inventing a pass.
 
 #### V2-021 — Gate G4: architecture rules in CI
 - **Type / size / labels:** test · S · `milestone:v2.0` `gate` `area:core`
@@ -1495,7 +1598,7 @@ Before starting, ensure the Issue contains:
 |---|---|---|
 | V2-022A | V2-020A, V2-021 | Identity and ownership value types; pure-Dart value/collision tests, independently compilable without ports referencing future model definitions. |
 | V2-022B | V2-022A | Canonical items/events, capabilities, interactions/forms/work/usage/error definitions and their ports; unknown-value/lifecycle tests and per-operation uncertain/retry/unavailable contract, with no wire/platform imports. |
-| V2-022C | V2-022B, V2-006, V2-007 | Review the model against the observed G1 scenario matrix; document missing concepts and resolve them before G2, retaining fixture traceability. |
+| V2-022C | V2-022B, V2-006, V2-007 | §11.6 Seq 7.3, after the MVP. Review the model against the observed G1 scenario matrix; document missing concepts and resolve them before G2, retaining fixture traceability. |
 
 #### V2-023 — Reducer and session store
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
@@ -1515,12 +1618,14 @@ Before starting, ensure the Issue contains:
 | V2-024B | V2-024A, V2-060A | Run those scenarios through the actual shared session/chat/composer screens; widget tests prove hidden/unavailable controls and no harness-name branches. G3 passes only here, not when A alone is delivered. |
 
 #### V2-025 — Gate G5: CHP v1 schema and examples
+- **Roadmap:** the MVP beta uses the provisional revision, revalidated at §11.6 Seq 5.4; the final revision is frozen with G2 at Seq 7.4.
 - **Type / size / labels:** feature · M · `milestone:v2.0` `gate` `area:core`
 - **Depends on:** V2-022B
 - **Scope:** `contracts/codewalk-host-v1/` JSON Schema with named canonical payload definitions plus CHP envelopes, commands, receipts, snapshots and capabilities. Reuse definitions rather than treating transport and domain as interchangeable; record which definition validates each expectation. Add examples, Dart validation and versioning rules.
 - **Done when:** [ ] schema/examples merged and every example validated; [ ] the app-facing revision and canonical definition references are explicit; [ ] release evidence matches G2's final revision. Model/schema fixes invalidate earlier G2/G5 results and require revalidation, not a dependency cycle or premature Host implementation.
 
 #### V2-026 — Gate G2: two-adapter fit
+- **Roadmap:** §11.6 phase 7, Seq 7.4 — right after the MVP and before any other post-MVP feature, v2.1 Host work and GA (owner amendment, 2026-10-21).
 - **Type / size / labels:** test · M · `milestone:v2.0` `gate` `area:core`
 - **Depends on:** V2-006, V2-007, V2-022, V2-023, V2-025
 - **Why:** The core protection against an OpenCode-shaped model.
@@ -1573,6 +1678,7 @@ Before starting, ensure the Issue contains:
 |---|---|---|
 | V2-042A ([#379](https://github.com/verseles/codewalk/issues/379)) | V2-023, V2-040, V2-041, V2-056A, V2-028D, V2-043A, V2-044A1, V2-044A5, V2-044A7, V2-044A11 | Pure-read hydration of one session into a `SessionSnapshot`: sequential active → session → inbox → newest history (`order=desc`, reversed by native row, direction-carrying continuation) → permissions → forms; per-read boundaries on the caller's `readStart` (one combined interactions slot); whole-snapshot failure; running/idle plus last page outcome; inbox, permission and form rows through builders shared with A5/A7; history-promoted inbox entries settled. Capture B replay: recorded reads then 38 stream frames, no duplicate identities or leftover pending. No stream owner, buffering, reconnect, global lists, children discovery, UI or parent/MVP acceptance. |
 | V2-042B ([#380](https://github.com/verseles/codewalk/issues/380)) | V2-042A, V2-044A11 | `OpenCodeStreamOwner`: `server.connected` gate, per-generation hydration from one read start then release, ordered apply through `projectOpenCodeEvent` (per-session hold until the first snapshot), coalesced bounded repairs, set-aside of failing sessions, eviction on not-found, disconnect handling; hydration reads the staged revert; Core drops admission protection for live-delivered input. Done-when cases (drop mid-text/mid-tool, pending approval, revert, overflow, restart with `shutdown`) pass with unique identities and no stuck running; a scripted connection replaces transport timers. No durable log, children discovery, global lists, sending, app controller or MVP acceptance. |
+| V2-042C (§11.6 Seq 3.4) | V2-042B, V2-046B, V2-055A | Device reliability evidence on the owner's Galaxy S25 (Android 16), an Android 12/API 31 emulator and Linux x64/ARM64: network drop, Wi-Fi↔cellular, background/foreground, server restart with `shutdown`, a session started in the TUI appearing live; no duplicates or stuck running; the durable log stays off with the reason; MVP disposition of #243/#244/#239 (inconclusive observations get a documented conservative fallback, remaining targets are post-MVP). Closes V2-042 and V2-043, or marks their remaining criteria post-MVP with the reason. |
 
 #### V2-043 — Session index and lifecycle
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1593,6 +1699,7 @@ Before starting, ensure the Issue contains:
 | V2-043G ([#395](https://github.com/verseles/codewalk/issues/395)) | V2-043B, V2-043C, V2-043F | The visible catalog row offers the session actions — rename, delete with the children-cascade warning, fork from here, mark as viewed and hide in CodeWalk — with the endpoint's own unread marker, a local hide that survives a restart, the refusal of the actions the endpoint did not define, and the localized copy in the scoped catalog. No create flow, no children nesting and no timeline. |
 | V2-043H ([#396](https://github.com/verseles/codewalk/issues/396)) | V2-043B, V2-043C, V2-043F | The visible catalog creates a session: the user chooses the project (and the harness when more than one is available), the request always carries the chosen canonical directory, the new session arrives through the quiet authoritative read with the endpoint's own record, and a refused or uncertain create says so and is never replayed. No children nesting, no model/agent/effort choice and no timeline. |
 | V2-043I ([#397](https://github.com/verseles/codewalk/issues/397)) | V2-043A, V2-043B, V2-043C, V2-043D | The visible catalog nests the child sessions under the parent the endpoint attributed them to, keeping the server's order and leaving a child whose parent is not loaded where the server put it; the lineage comes from the record, never from an inference. No per-parent request, no model/agent/effort choice, no harness badge, no activity chip and no timeline. |
+| V2-043J (§11.6 Seq 2.4) | V2-043I, V2-070A | Session activity in the workspace sidebar rows: running, needs you and unread, each from an observed source; unknown stays unknown; no harness badge while one harness exists. |
 
 #### V2-044 — Timeline projection
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1629,6 +1736,14 @@ Before starting, ensure the Issue contains:
 | V2-044B1 ([#367](https://github.com/verseles/codewalk/issues/367)) | V2-020B, V2-043B, V2-044A1 | Explicit auxiliary native history screen from a loaded catalog row; canonical port/controller, actual endpoint version before each page, credential/scope/cancellation fences, manual ordered pagination and explicit 500-item/ten-page limits. Compact/wide/RTL and 14-localization tests; inactive composer and minimized unsupported markers. No external-link auto-read, rich resolver, SSE/hydration, lifecycle/send/approval, scroll-performance or whole-parent/MVP acceptance. Preserve final v1 appearance and interaction requirements. |
 | V2-044B2 ([#381](https://github.com/verseles/codewalk/issues/381)) | V2-044B1, V2-042B, V2-043B | Explicit live read-only native screen from a loaded catalog row: one `GET /api/event` per endpoint profile shared by every open screen (refcount; last screen closes it), exact 2.0.22 probe before streaming (fail closed), one secret per stream, eight watched sessions per stream (`capacity`), hydration through `OpenCodeStreamOwner`. Visible phase/failure, stale state and local last-synced time in a live region; execution chip (incl. resumption after a server restart), last outcome, a read-only “waiting for your answer” line, bounded-history notice and retry for terminal states only. Shared timeline tile with history (outcome and missing-prefix marker). Compact/wide/RTL and 14-localization tests, loopback stream tests; inactive composer. Hidden on Web. The stream owner now also stops on a terminal refusal of an attempt that never connected (401 on reconnection). No sending, answering, interruption, revert, background suspension (§6.15), pagination/scroll performance or whole-parent/MVP acceptance. |
 
+**Roadmap children (2026-10-21, §11.6).** V2-044C is executed in two stages and V2-044D adds readable results; the parent criteria stay as written.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-044C1 (#279, §11.6 Seq 1.1) | V2-044B2 | Live timeline viewport: lands on the newest content, follows growth while the reader is at the bottom, yields to a drag/fling/wheel, return control marked by arriving content, tall settled answer revealed from its start; the five accepted review-round-2 fixes applied before push. |
+| V2-044C2 (#279, §11.6 Seq 1.2) | V2-044C1 | Older-history pagination through the stream owner (cursor limit 200), stop at 500 resident without evicting the newest, the history viewer as the fallback, the 2,000-total/500-resident structural case, golden timelines and the §8.3 legacy test dispositions. |
+| V2-044D (§11.6 Seq 1.3) | V2-044C2 | Readable tool and shell results: bounded tool input/output, shell command/output and outcome, collapsed by default like v1; unknown items stay minimized; compact/wide/RTL/2× tests. |
+
 #### V2-045 — Sending and outbox
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
 - **Depends on:** V2-044B, V2-005B, V2-027
@@ -1657,6 +1772,7 @@ Before starting, ensure the Issue contains:
 | Child | Complete start dependencies | Bounded output and acceptance |
 |---|---|---|
 | V2-046A ([#387](https://github.com/verseles/codewalk/issues/387)) | V2-044A4, V2-042A, V2-042B, V2-044B2, V2-045E; delivered V2-005D interrupt recordings as evidence | Native live/current/running session Stop: one bare version-gated 2.0.22 POST, no resume/replay/ledger requirement, shared per-session lease fence, bounded HTTP/settlement and authoritative stream state. Empty-draft Send/Stop swap and focused double-Escape preserve v1 behavior; 14 locales, compact/landscape/wide composer, loopback reconnect/same-history outcome and late-terminal regressions. HTTP acceptance is not settlement, and the session endpoint has no turn CAS. No retry countdown, child/all-background control, new capture, installed/MVP acceptance or parent closure. |
+| V2-046B (§11.6 Seq 3.1) | V2-046A, V2-044C1 | Execution truth: active-list reconciliation, succeeded/failed/interrupted outcomes, interrupted-as-resuming, parent idle while children run, retry shown from harness events with a countdown only when observed; nothing derived from `session.status`; outcome fixtures. Remaining retry/quota observations follow #243's documented disposition. |
 
 #### V2-047 — Permissions and modes
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
@@ -1727,11 +1843,19 @@ Before starting, ensure the Issue contains:
 - **Scope:** catalog, favorites/recents (keep UI), session-level changes applied before send, notices for switches, external changes reflected.
 - **Done when:** [ ] race test: model change during send applies to the intended session only.
 
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-054A (§11.6 Seq 3.2) | V2-044B2, V2-045E, V2-005A, V2-070A | Per-session model and agent selection (variant when the model exposes one) through the official 2.0.22 catalog and session routes, applied before send, external changes reconciled; an unavailable route hides the control with a reason; race test. Favorites/recents and the rest of the parent are post-MVP. |
+
 #### V2-055 — Usage, context, errors
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
 - **Depends on:** V2-044B, V2-005D
 - **Scope:** context meter from the last step and `limit.context`; tokens and cost; typed error cards with recovery actions; quota shown only from structured limit errors; "not exposed by OpenCode" copy.
 - **Done when:** [ ] cost sums every step once; [ ] unknown values never shown as zero.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-055A (§11.6 Seq 3.3) | V2-046B, V2-044A6 | Typed error cards (authentication, rate limit, quota, context, provider, network, version, unknown) with one recovery action, from 2.0.22 fixtures; unknown never renders as zero. The context meter, tokens and cost stay post-MVP. |
 
 #### V2-056 — Fake OpenCode v2 server and contract drift checks
 - **Type / size / labels:** test · M · `milestone:v2.0` `area:opencode` `type:test`
@@ -1755,14 +1879,21 @@ Before starting, ensure the Issue contains:
 |---|---|---|
 | V2-060A | V2-020B, V2-024A, V2-027, V2-041, V2-043, V2-044B, V2-045, V2-046, V2-047, V2-056A | Integrated fake flow through real shared screens/controllers; fault/collision/widget tests pass on the supported development targets. |
 | V2-060B | V2-060A, V2-005B, V2-005C | Minimal live smoke on a disposable host and agreed reference target; record pairing/send/approval/stop/reconnect results. Missing target resources stay pending, not a release or G3 pass. |
+| V2-060C (§11.6 Seq 5.3) | V2-060A, V2-060B, V2-070C, V2-054A, V2-055A, V2-042C | Re-proof on the new workspace: the integrated fake flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error card); no regression against V2-060A/B. |
 
 ### 12.5 Milestone v2.0 — App features, platforms, release
 
 #### V2-070 — Tabs, drafts, input history, canned answers
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui`
 - **Depends on:** V2-043, V2-044B, V2-045, V2-027
-- **Scope:** port UI; state keyed by `SessionRef`; drafts survive process death; canned answers.
+- **Scope:** port UI; state keyed by `SessionRef`; drafts survive process death; canned answers. **Owner feedback (2026-10-11):** the bootstrap Conversations/Servers/Settings destinations are not an approved replacement for the v1 project/sidebar/session-tab/chat workspace; this item now owns that v1-parity workspace.
 - **Done when:** [ ] existing widget tests for kept features pass after the port.
+
+| Child | Complete start dependencies | Bounded output and acceptance |
+|---|---|---|
+| V2-070A (§11.6 Seq 2.1) | V2-044D, V2-043I, V2-044B2, V2-045E, V2-071C | v1-parity shell: projects sidebar (drawer on compact, persistent on wide) → the project's sessions → chat; servers and settings secondary; a session link opens the session; the v1 invariant map is recorded before code; compact/wide/RTL/2× tests; no harness branching. |
+| V2-070B (§11.6 Seq 2.2) | V2-070A | Session tabs keyed by `SessionRef`: open, close, switch, per-project sets, MRU switcher, idempotent restore after restart; no cross-host collision. |
+| V2-070C (§11.6 Seq 2.3) | V2-070B, V2-027 | Drafts that survive process death and per-session input history. Canned answers stay post-MVP. |
 
 #### V2-071 — Rendering, themes, settings, shortcuts, logs, release history
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui`
@@ -1888,10 +2019,10 @@ Before starting, ensure the Issue contains:
 
 #### V2-086 — Usable MVP beta and v1 maintenance freeze
 - **Type / size / labels:** test + chore · M · `milestone:v2.0` `area:release`
-- **Depends on:** V1-02A, V2-040, V2-041, V2-042, V2-043, V2-044, V2-045, V2-046, V2-047, V2-060, V2-070, V2-071, V2-076A, V2-077A, V2-078A, G1–G5
+- **Depends on:** the §11.6 rows 0.2–5.5: V1-02A, V2-040, V2-041, V2-042C, V2-043J, V2-044C1, V2-044C2, V2-044D, V2-045, V2-046B, V2-047, V2-048, V2-054A, V2-055A, V2-060C, V2-070A, V2-070B, V2-070C, V2-071, V2-076A, V2-077A, V2-078A; G3, G4 and the provisional G5 revision. G1, G2 and the final G5 follow in §11.6 phase 7 (owner amendment, 2026-10-21).
 - **Sequencing:** this is an earlier acceptance checkpoint, despite its higher stable ID; it does not depend on GA or V2-084.
 - **Why:** The product owner wants v1 fixes available during migration and routine v1 maintenance frozen once v2 is usable, rather than maintaining v1 until the complete v2.0 GA release.
-- **Scope:** agree the Android/Linux-only flow checklist, reference devices/architectures and §15.4 evidence; name any extra native feature producer (for example forms V2-048 if included). Under active beta-publication authority, publish installable opt-in `v2.0.0-beta.N` with actual v2 entry point, G1–G5 and V2-077A safeguards passing. Verify native OpenCode flows, real installed V1-02A → V2-076A migration/data preservation, channels and reconnect, then collect explicit owner acceptance. Deferred-platform/full-parent closure is not an MVP prerequisite. Record stable legacy/cohort tags and commits; freeze routine v1 while preserving downloads/production Web, with only finite original Windows/macOS/final-stable transition completion allowed. Finish all remaining v2 features/platform/GA gates. Private smoke, fixture-only migration, missing runner or pending owner acceptance is not this checkpoint.
+- **Scope:** agree the Android/Linux-only flow checklist, reference devices/architectures and §15.4 evidence; name any extra native feature producer (for example forms V2-048 if included). Under active beta-publication authority, publish installable opt-in `v2.0.0-beta.N` with actual v2 entry point, G3, G4, the provisional G5 and V2-077A safeguards passing. Verify native OpenCode flows, real installed V1-02A → V2-076A migration/data preservation, channels and reconnect, then collect explicit owner acceptance. Deferred-platform/full-parent closure is not an MVP prerequisite. Record stable legacy/cohort tags and commits; freeze routine v1 while preserving downloads/production Web, with only finite original Windows/macOS/final-stable transition completion allowed. Finish all remaining v2 features/platform/GA gates. Private smoke, fixture-only migration, missing runner or pending owner acceptance is not this checkpoint.
 - **Done when:** [ ] native checklist, installed migration and safeguards evidenced; [ ] owner accepts the usable MVP; [ ] freeze artifact/cohort and finite transition exception recorded; [ ] beta is not latest and no unsafe Web publication/legacy overwrite occurs; [ ] full six-platform/transition GA obligations remain pending and traceable; [ ] no full-tree merges or runtime compatibility switch.
 
 ### 12.6 Milestone v2.1 — CodeWalk Host + Codex
@@ -2201,7 +2332,7 @@ This table specifies **required evidence**, not completed checks. Store each che
 
 | Target | Compile/package evidence | Functional/device evidence | Signing/distribution and permitted tier |
 |---|---|---|---|
-| Android | Actual-v2 APK on x64 CI; global build-code/channel checks | Android 12 / API 31 reference; record actual device/emulator and ABI. Pairing/send/permissions/stop/reconnect/import; background budget separately V2-074/080 | Installable APK before owner acceptance; no local ARM64 APK claim; the reference does not raise minSdk |
+| Android | Actual-v2 APK on x64 CI; global build-code/channel checks | Android 12 / API 31 reference on an emulator plus the owner's Galaxy S25 (Android 16); record actual device/emulator and ABI. Pairing/send/permissions/stop/reconnect/import; background budget separately V2-074/080 | Installable APK before owner acceptance; no local ARM64 APK claim; the reference does not raise minSdk |
 | Linux | Native runner app/package builds for both x64 and ARM64 | Desktop flow and installer/service lifecycle on each declared architecture; one architecture's pass does not pass the other | Tested published artifacts; unsupported optional host/runtime capability explicitly labelled |
 | macOS | Native macOS runner app/package build | Desktop flow, installer and managed-service procedure on declared architecture | Signing/notarization requires Apple prerequisites; approved connect-only fallback from SP-06 is explicit |
 | Windows | Native Windows runner app/package build | Desktop flow and staged installer/recovery/service acceptance | Tested artifact and declared architectures; no Linux-only shell test substituted for Windows acceptance |
@@ -2212,7 +2343,7 @@ This table specifies **required evidence**, not completed checks. Store each che
 
 **Early visual handoff:** V2-020D proves only its selected first target and tested surfaces; it is not the complete matrix. The orchestrator chooses and records the available reference environment and handles technical QA. Ask the owner for product feedback after usable delivery, not for abstract technical acceptance. Preserve separate compiler, launch, installed-device, migration and publication results. Known failed post-MVP browser checks remain visible; they neither become native start prerequisites nor permit a global-green/GA claim.
 
-Before V2-086, agree Android/Linux-only flows, Android reference devices and Linux architectures. Record Web/Chrome/Safari, iOS, Windows and macOS as **deferred-post-MVP**, never `pass` or approved tiers. V2-028D feeds native feature consumers; V2-020CA/V2-028D/V2-076A → V2-078A and V1-02A/V2-076A/V2-077A/V2-078A → V2-086 are bounded native paths without full-parent closure. Real installed cohort migration, G1–G5, all native checklist checks and independently verified publication guards remain mandatory; explicit owner acceptance is separate. Before GA, complete the full six-platform matrix at approved tiers, final stable transition, V1-04, remaining code/feature checks, cutover and publication evidence. Missing optional signing/resources may retain an already permitted build-only tier; failed required checks/review corrections cannot be excused. Reuse evidence only while code/entry point, source/version, topology and platform assumptions remain valid.
+Before V2-086, agree Android/Linux-only flows, Android reference devices and Linux architectures. Record Web/Chrome/Safari, iOS, Windows and macOS as **deferred-post-MVP**, never `pass` or approved tiers. V2-028D feeds native feature consumers; V2-020CA/V2-028D/V2-076A → V2-078A and V1-02A/V2-076A/V2-077A/V2-078A → V2-086 are bounded native paths without full-parent closure. Real installed cohort migration, G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), all native checklist checks and independently verified publication guards remain mandatory; explicit owner acceptance is separate. Before GA, complete the full six-platform matrix at approved tiers, final stable transition, V1-04, remaining code/feature checks, cutover and publication evidence. Missing optional signing/resources may retain an already permitted build-only tier; failed required checks/review corrections cannot be excused. Reuse evidence only while code/entry point, source/version, topology and platform assumptions remain valid.
 
 ---
 
@@ -2220,6 +2351,7 @@ Before V2-086, agree Android/Linux-only flows, Android reference devices and Lin
 
 - Web/Chrome, Safari, iOS, Windows and macOS are deferred until after the Android/Linux-only MVP (owner amendment, 2026-10-08). Full GA retains all six platform families and their required approved-tier evidence. The earlier Chrome-in-MVP decision remains history only.
 - Final stable v1.266.0 and Windows/macOS legacy transition acceptance are post-MVP; real installed Android/Linux v1.266.0-native.N source migration remains required before MVP. Only finite completion of the original transition is excepted from routine v1 freeze.
+- MVP feature deferrals (owner decision, 2026-10-21; labelled `after-mvp`, still v2.0 GA scope): the background-work tray (V2-049), revert/fork/diff (V2-050), files (V2-051), terminal (V2-052), commands/mentions/attachments (V2-053), model favorites/recents (rest of V2-054), usage/context meters and cost (rest of V2-055), canned answers (rest of V2-070), the Android background monitor (V2-011/V2-074), managed install (V2-075), voice (V2-072), exports (V2-073), accessibility/performance passes (V2-079/V2-080), reverse-proxy authentication (V2-081) and embedded Tailscale (V2-082).
 - OpenCode v1 support in v2 (legacy only).
 - A CodeWalk-hosted relay or push service (D07/D08).
 - Live control of an already-running Claude Code or Pi terminal session (no official surface).
@@ -2254,6 +2386,7 @@ Implementation will contradict some details. When it does:
 | 2026-10-06 | Define v2 `avançar`/`continuar` as autonomous execution of the next ready, bounded unit; reserve explicit `flow` for releases; require the pre-execution planner check and a stage commit before transition, with Task Memory included | §§0, 11.5, 20; `AGENTS.md` | Product owner approved the v2-specific execution clarification, reinforced necessary planning and authorized stage commits. Every project commit includes canonical `.task-memory/`; preserve planner/reviewer requirements, necessary human decisions, unrelated work, other permissions and all release gates |
 | 2026-10-08 | Supersede Chrome-in-MVP with Android/Linux-only MVP; defer Web/Chrome/Safari, iOS, Windows/macOS; split real v1.266.0-native.N installed-source cohort before MVP from full final stable transition after MVP; add V2-028D, V1-02A, V2-076A and V2-077A and retarget V2-020CA/078A | D02/D04/D09; §§1–2, 5–6, 9–17, 20; ADR-060; `AGENTS.md`; GitHub contracts/native dependencies | Owner requested all remaining platforms post-MVP and chose divided transition. Preserve installed migration, G1–G5, native target/owner acceptance and full GA obligations; native guards must fail closed on every relevant push/tag path before publication without full V1-04. No missing check is passed and no runtime/release/hosting change is made by this documentary recut |
 | 2026-10-10 | Declare Android 12/API 31 and Linux x64/ARM64; distinguish orchestrator-owned technical delivery from product feedback; add bounded V2-020D (#363) for an isolated native visual preview | §§9.6, 11.1, 11.5, 12.3, 15.4, 20; #356/#357/#321/#362/#255; `AGENTS.md` | Owner does not code and evaluates experience only after receiving a usable app. First preview may use one verified native target; full MVP matrix, public-beta G1–G5, publication guards and installed migration remain required. No minSdk, runtime, production identity or publication-policy change. Autonomous continuation retains bounded units and existing permissions |
+| 2026-10-21 | Fixed MVP roadmap revision 1 (§11.6) becomes the only scheduling authority until V2-086; the MVP beta requires G3, G4 and the provisional G5, while G1, G2 and the final G5 move to the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA; MVP scope adds readable tool results (V2-044D), execution truth (V2-046B), model/agent selection (V2-054A), typed errors (V2-055A), the v1-parity workspace (V2-070A–C), session activity (V2-043J), device reliability evidence (V2-042C) and a re-proof on the new shell (V2-060C), and defers the features listed in §16; the owner's Galaxy S25 (Android 16) joins Linux x64/ARM64, with Android 12/API 31 kept as the emulator reference floor | D02/D09; §§0–2, 9.6, 11.1–11.6, 12, 15.4, 16, 20; ADR-058, ADR-060; `AGENTS.md`; GitHub milestone, tracking Issue and roadmap Issues | The owner asked for a fixed, hard path to the MVP that a lower-effort executor follows without drift, after many polish units ran while MVP blockers stayed untouched. Eight helpers planned it independently; the orchestrator judged their proposals. At CP0 the owner chose the post-MVP gate placement, no extra scope, rule alignment, and declared the test devices |
 
 ---
 
@@ -2292,12 +2425,10 @@ Implementation will contradict some details. When it does:
 
 ## 20. Execution start
 
-1. **Select and preflight:** follow §11.5, including its V2 advance-command protocol and stage-commit boundary, within the active authorization. Reconcile live branch/commit/worktree and Issues; verify already delivered preparation V1-03/V2-001 instead of recreating it. Select one dependency-ready child with scope, resources, budget, exact checks and acceptance recorded. v2 work belongs on `main`; legacy work belongs on `v1`.
-   **Immediate visual-delivery path:** preflight V2-020D (#363) using the accepted foundation/pairing/settings producers. Deliver one isolated, launched and technically checked native artifact before asking the owner to evaluate the experience. Linux ARM64 and the remaining public-beta/MVP producers continue separately; this early handoff neither waits for nor passes those aggregate gates.
-2. **Legacy/publication path:** V1-01 → V1-05A → V1-02A on `v1` supplies the real installed native cohort under separate publication authority. Windows/macOS V1-05B/C → final stable V1-02 follows MVP. V1-04 establishes the full Web split before any rewritten v2 Web preview/deploy/cutover/GA; earlier native-only publication needs independently verified V2-077A guards for every relevant source-push/tag/workflow side effect. Retaining reference code is intentional. Current instructions determine unit/publication authority.
-3. **Foundations/captures:** reconcile V2-001 → V2-002/003/004; start dependency-ready SP-01 children and SP-02/SP-03 captures with disposable authorized resources. Missing resources block the affected capture/consumer, not independent documentation. V2-020A and V2-021 establish the package/architecture boundary; V2-022A/B and V2-023 permit the first reducer test replaying SP-01's plain-turn fixture.
-4. **Internal vertical slice and gates:** V2-020B, V2-027, native V2-028A/D, V2-024A and V2-056A produce profiles/pairing/stream/session/timeline/send/permissions/stop infrastructure. Follow §12 dependencies to V2-060A → V2-024B (G3), then V2-060B live smoke. V2-025 (G5) starts from V2-022B; V2-026 (G2) needs real Codex/Claude captures and model/reducer/schema outputs. Freeze/revalidate G2/G5 at the same final revision. A fake without screens or private smoke is not a public beta gate.
-5. **Acceptance/publication:** prepare V2-020CA/078A native evidence, real V1-02A → V2-076A installed migration and V2-077A safeguards; under beta authority V2-086 requires Android/Linux reference-target flows, G1–G5 and explicit owner acceptance. Then freeze routine v1 with only finite original-transition completion excepted. Finish all deferred platforms, full V1-05/V1-02/V1-04/V2-008/009/020C/028/076/077/078 and remaining features/feedback before cutover/GA. Only V2-084 → V2-085 promotes stable/latest/production Web. Preserve consent/publication boundaries, record evidence/next action and stop after the unit unless continuation is authorized.
+1. **Follow the fixed roadmap.** Until V2-086 is accepted, execute §11.6: resume the row in progress, otherwise take the next row by its next-unit rule, under the one-unit contract of §11.5 (preflight, planner check, implementation, checks, reviewer loop, documentation, stage commit). Never pick an Issue outside §11.6. v2 work belongs on `main`; the transition-cohort rows run on `v1`.
+2. **Owner checkpoints.** CP1–CP7 in §11.6 are where the owner tests, authorizes or accepts. The orchestrator prepares the artifact and simple instructions; the owner never codes, chooses SDKs or diagnoses builds.
+3. **Publication boundaries are unchanged.** V1-04 precedes any rewritten v2 Web preview/deployment, cutover or GA. Native publication of v2 needs the verified V2-077A guards (§11.6 Seq 5.1) and explicit owner authority; the v1.266 native cohort (Seq 4.3) needs its own authority.
+4. **After the MVP.** §11.6 phase 7 (G1, G2 and the final G5) runs first, before any other post-MVP feature, any v2.1 Host work and GA. The remaining v2.0 scope, the deferred platforms, the full V1-05/V1-02/V1-04 transition and the GA gates follow in a later roadmap revision.
 
 ```bash
 source ~/paths
