@@ -171,6 +171,80 @@ void main() {
     },
   );
 
+  for (final entry in {
+    404: SessionCatalogFailure.notFound,
+    401: SessionCatalogFailure.authenticationRequired,
+    502: SessionCatalogFailure.unavailable,
+  }.entries) {
+    test('a session read maps native ${entry.key} safely', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => server.close(force: true));
+      server.listen((request) async {
+        request.response.statusCode = entry.key;
+        request.response.write('private native error body');
+        await request.response.close();
+      });
+      final source = createSessionCatalogSource(
+        EndpointProfile(
+          id: 'profile_a',
+          label: 'Native',
+          endpoint: Uri.parse('http://127.0.0.1:${server.port}/'),
+        ),
+        EndpointCredential(
+          kind: EndpointAuthKind.password,
+          secret: 'fake-secret',
+        ),
+      );
+      addTearDown(source.close);
+      final ref = SessionRef(
+        source.harness.host,
+        source.harness.harness,
+        'ses_one',
+      );
+      await expectLater(
+        source.read(ref).result,
+        throwsA(
+          isA<SessionCatalogException>().having(
+            (e) => e.failure,
+            'failure',
+            entry.value,
+          ),
+        ),
+      );
+    });
+  }
+
+  test('a list 404 stays unavailable, not a missing session', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    server.listen((request) async {
+      request.response.statusCode = 404;
+      await request.response.close();
+    });
+    final source = createSessionCatalogSource(
+      EndpointProfile(
+        id: 'profile_a',
+        label: 'Native',
+        endpoint: Uri.parse('http://127.0.0.1:${server.port}/'),
+      ),
+      EndpointCredential(
+        kind: EndpointAuthKind.password,
+        secret: 'fake-secret',
+      ),
+    );
+    addTearDown(source.close);
+    await expectLater(
+      source.list(SessionQuery()).result,
+      throwsA(
+        isA<SessionCatalogException>().having(
+          (e) => e.failure,
+          'failure',
+          SessionCatalogFailure.unavailable,
+        ),
+      ),
+    );
+  });
+
   test('unsupported source opens no transport', () async {
     final source = stub.createSessionCatalogSource(
       EndpointProfile(

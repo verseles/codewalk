@@ -1639,5 +1639,17 @@
   "workspaceSelectSession": "Choose a session in the list to open it here.",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "This link points to a server that is not saved on this device.",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "This session no longer exists on its server.",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "Could not open this session. Retry.",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

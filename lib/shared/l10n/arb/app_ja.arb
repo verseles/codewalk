@@ -1107,5 +1107,17 @@
   "workspaceSelectSession": "ここで開くには、一覧からセッションを選んでください。",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "このリンクは、この端末に保存されていないサーバーを指しています。",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "このセッションはサーバー上にもう存在しません。",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "このセッションを開けませんでした。再試行してください。",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

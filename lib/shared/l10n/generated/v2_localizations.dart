@@ -2540,6 +2540,24 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Choose a session in the list to open it here.'**
   String get workspaceSelectSession;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This link points to a server that is not saved on this device.'**
+  String get sessionLinkUnknownServer;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'This session no longer exists on its server.'**
+  String get sessionLinkNotFound;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this session. Retry.'**
+  String get sessionLinkUnreadable;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

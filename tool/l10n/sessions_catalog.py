@@ -49,6 +49,9 @@ NEW_KEYS = (
     "sessionsChildSession",
     "sessionsChildParentElsewhere",
     "workspaceSelectSession",
+    "sessionLinkUnknownServer",
+    "sessionLinkNotFound",
+    "sessionLinkUnreadable",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -178,6 +181,22 @@ WORKSPACE_COPY = {
     "ru": "Выберите сессию в списке, чтобы открыть её здесь.",
     "zh": "从列表中选择一个会话以在此打开。",
 }
+LINK_COPY = {
+    "en": ("This link points to a server that is not saved on this device.", "This session no longer exists on its server.", "Could not open this session. Retry."),
+    "pt": ("Este link aponta para um servidor que não está salvo neste dispositivo.", "Esta sessão não existe mais no servidor.", "Não foi possível abrir esta sessão. Tente novamente."),
+    "es": ("Este enlace apunta a un servidor que no está guardado en este dispositivo.", "Esta sesión ya no existe en su servidor.", "No se pudo abrir esta sesión. Reinténtalo."),
+    "fr": ("Ce lien pointe vers un serveur qui n’est pas enregistré sur cet appareil.", "Cette session n’existe plus sur son serveur.", "Impossible d’ouvrir cette session. Réessayez."),
+    "de": ("Dieser Link verweist auf einen Server, der auf diesem Gerät nicht gespeichert ist.", "Diese Sitzung existiert auf ihrem Server nicht mehr.", "Diese Sitzung konnte nicht geöffnet werden. Erneut versuchen."),
+    "it": ("Questo link punta a un server non salvato su questo dispositivo.", "Questa sessione non esiste più sul suo server.", "Impossibile aprire questa sessione. Riprova."),
+    "ar": ("يشير هذا الرابط إلى خادم غير محفوظ على هذا الجهاز.", "لم تعد هذه الجلسة موجودة على خادمها.", "تعذر فتح هذه الجلسة. أعد المحاولة."),
+    "ur": ("یہ لنک ایسے سرور کی طرف اشارہ کرتا ہے جو اس آلے پر محفوظ نہیں ہے۔", "یہ سیشن اب اپنے سرور پر موجود نہیں ہے۔", "یہ سیشن نہیں کھل سکا۔ دوبارہ کوشش کریں۔"),
+    "bn": ("এই লিঙ্কটি এমন একটি সার্ভারের দিকে নির্দেশ করে যা এই ডিভাইসে সংরক্ষিত নেই।", "এই সেশনটি তার সার্ভারে আর নেই।", "এই সেশনটি খোলা যায়নি। আবার চেষ্টা করুন।"),
+    "hi": ("यह लिंक ऐसे सर्वर की ओर इशारा करता है जो इस डिवाइस पर सहेजा नहीं गया है।", "यह सत्र अब अपने सर्वर पर मौजूद नहीं है।", "यह सत्र नहीं खुल सका। फिर से प्रयास करें।"),
+    "ja": ("このリンクは、この端末に保存されていないサーバーを指しています。", "このセッションはサーバー上にもう存在しません。", "このセッションを開けませんでした。再試行してください。"),
+    "ko": ("이 링크는 이 기기에 저장되지 않은 서버를 가리킵니다.", "이 세션은 서버에 더 이상 없습니다.", "이 세션을 열 수 없습니다. 다시 시도하세요."),
+    "ru": ("Эта ссылка ведёт на сервер, который не сохранён на этом устройстве.", "Этой сессии больше нет на её сервере.", "Не удалось открыть эту сессию. Повторите попытку."),
+    "zh": ("此链接指向未保存在此设备上的服务器。", "此会话已不在其服务器上。", "无法打开此会话。请重试。"),
+}
 COPY = {
     locale: values
     + (RATE_COPY[locale], PROJECT_COPY[locale])
@@ -186,5 +205,6 @@ COPY = {
     + CREATE_COPY[locale]
     + LINEAGE_COPY[locale]
     + (WORKSPACE_COPY[locale],)
+    + LINK_COPY[locale]
     for locale, values in COPY.items()
 }

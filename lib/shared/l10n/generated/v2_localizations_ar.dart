@@ -1321,4 +1321,14 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get workspaceSelectSession => 'اختر جلسة من القائمة لفتحها هنا.';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'يشير هذا الرابط إلى خادم غير محفوظ على هذا الجهاز.';
+
+  @override
+  String get sessionLinkNotFound => 'لم تعد هذه الجلسة موجودة على خادمها.';
+
+  @override
+  String get sessionLinkUnreadable => 'تعذر فتح هذه الجلسة. أعد المحاولة.';
 }

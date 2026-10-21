@@ -191,7 +191,8 @@ void main() {
                 ? TextDirection.rtl
                 : TextDirection.ltr,
           );
-          await tester.tap(find.byType(BackButton));
+          // The system back returns to the list and releases the lease.
+          expect(await tester.binding.handlePopRoute(), isTrue);
           await tester.pumpAndSettle();
           expect(find.byType(SessionLivePage), findsNothing);
           expect(again.closes, 1);

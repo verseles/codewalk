@@ -1245,4 +1245,13 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get workspaceSelectSession => '从列表中选择一个会话以在此打开。';
+
+  @override
+  String get sessionLinkUnknownServer => '此链接指向未保存在此设备上的服务器。';
+
+  @override
+  String get sessionLinkNotFound => '此会话已不在其服务器上。';
+
+  @override
+  String get sessionLinkUnreadable => '无法打开此会话。请重试。';
 }

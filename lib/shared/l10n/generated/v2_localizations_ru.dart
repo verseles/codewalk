@@ -1343,4 +1343,15 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get workspaceSelectSession =>
       'Выберите сессию в списке, чтобы открыть её здесь.';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'Эта ссылка ведёт на сервер, который не сохранён на этом устройстве.';
+
+  @override
+  String get sessionLinkNotFound => 'Этой сессии больше нет на её сервере.';
+
+  @override
+  String get sessionLinkUnreadable =>
+      'Не удалось открыть эту сессию. Повторите попытку.';
 }

@@ -38,6 +38,15 @@ class CatalogTask implements SessionCatalogTask {
   void cancel() => cancelled = true;
 }
 
+class ReadTask implements SessionReadTask {
+  final completion = Completer<SessionSummary>();
+  bool cancelled = false;
+  @override
+  Future<SessionSummary> get result => completion.future;
+  @override
+  void cancel() => cancelled = true;
+}
+
 class CatalogSource implements SessionCatalogSource {
   CatalogSource(EndpointProfile profile)
     : harness = HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id));
@@ -45,6 +54,7 @@ class CatalogSource implements SessionCatalogSource {
   final HarnessRef harness;
   final tasks = <CatalogTask>[];
   final queries = <SessionQuery>[];
+  final reads = <(SessionRef, ReadTask)>[];
   int closes = 0;
   @override
   CatalogTask list(SessionQuery query) {
@@ -82,6 +92,13 @@ class CatalogSource implements SessionCatalogSource {
     ),
     updatedAt: DateTime.utc(2026, 10, 12),
   );
+
+  @override
+  ReadTask read(SessionRef ref) {
+    final task = ReadTask();
+    reads.add((ref, task));
+    return task;
+  }
 
   void respond(List<SessionSummary> rows, {String? next}) =>
       tasks.last.completion.complete(Page(items: rows, nextCursor: next));

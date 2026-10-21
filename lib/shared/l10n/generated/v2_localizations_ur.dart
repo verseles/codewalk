@@ -1329,4 +1329,14 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get workspaceSelectSession =>
       'اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'یہ لنک ایسے سرور کی طرف اشارہ کرتا ہے جو اس آلے پر محفوظ نہیں ہے۔';
+
+  @override
+  String get sessionLinkNotFound => 'یہ سیشن اب اپنے سرور پر موجود نہیں ہے۔';
+
+  @override
+  String get sessionLinkUnreadable => 'یہ سیشن نہیں کھل سکا۔ دوبارہ کوشش کریں۔';
 }

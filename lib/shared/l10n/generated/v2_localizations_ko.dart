@@ -1272,4 +1272,13 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get workspaceSelectSession => '여기에서 열려면 목록에서 세션을 선택하세요.';
+
+  @override
+  String get sessionLinkUnknownServer => '이 링크는 이 기기에 저장되지 않은 서버를 가리킵니다.';
+
+  @override
+  String get sessionLinkNotFound => '이 세션은 서버에 더 이상 없습니다.';
+
+  @override
+  String get sessionLinkUnreadable => '이 세션을 열 수 없습니다. 다시 시도하세요.';
 }

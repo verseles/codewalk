@@ -14,12 +14,23 @@ final class _UnsupportedSource implements SessionCatalogSource {
   @override
   SessionCatalogTask list(SessionQuery query) => _UnsupportedTask();
   @override
+  SessionReadTask read(SessionRef ref) => _UnsupportedRead();
+  @override
   void close() {}
 }
 
 final class _UnsupportedTask implements SessionCatalogTask {
   @override
   Future<Page<SessionSummary>> get result => Future.error(
+    const SessionCatalogException(SessionCatalogFailure.unsupportedPlatform),
+  );
+  @override
+  void cancel() {}
+}
+
+final class _UnsupportedRead implements SessionReadTask {
+  @override
+  Future<SessionSummary> get result => Future.error(
     const SessionCatalogException(SessionCatalogFailure.unsupportedPlatform),
   );
   @override

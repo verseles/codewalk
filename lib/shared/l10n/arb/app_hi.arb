@@ -1107,5 +1107,17 @@
   "workspaceSelectSession": "इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "यह लिंक ऐसे सर्वर की ओर इशारा करता है जो इस डिवाइस पर सहेजा नहीं गया है।",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "यह सत्र अब अपने सर्वर पर मौजूद नहीं है।",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "यह सत्र नहीं खुल सका। फिर से प्रयास करें।",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

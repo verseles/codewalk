@@ -1323,4 +1323,15 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get workspaceSelectSession =>
       'এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'এই লিঙ্কটি এমন একটি সার্ভারের দিকে নির্দেশ করে যা এই ডিভাইসে সংরক্ষিত নেই।';
+
+  @override
+  String get sessionLinkNotFound => 'এই সেশনটি তার সার্ভারে আর নেই।';
+
+  @override
+  String get sessionLinkUnreadable =>
+      'এই সেশনটি খোলা যায়নি। আবার চেষ্টা করুন।';
 }

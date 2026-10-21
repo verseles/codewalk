@@ -1332,4 +1332,15 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get workspaceSelectSession =>
       'इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'यह लिंक ऐसे सर्वर की ओर इशारा करता है जो इस डिवाइस पर सहेजा नहीं गया है।';
+
+  @override
+  String get sessionLinkNotFound => 'यह सत्र अब अपने सर्वर पर मौजूद नहीं है।';
+
+  @override
+  String get sessionLinkUnreadable =>
+      'यह सत्र नहीं खुल सका। फिर से प्रयास करें।';
 }

@@ -1107,5 +1107,17 @@
   "workspaceSelectSession": "从列表中选择一个会话以在此打开。",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "此链接指向未保存在此设备上的服务器。",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "此会话已不在其服务器上。",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "无法打开此会话。请重试。",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

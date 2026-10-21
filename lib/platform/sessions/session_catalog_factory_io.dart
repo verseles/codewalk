@@ -29,6 +29,8 @@ final class _NativeSource implements SessionCatalogSource {
   @override
   SessionCatalogTask list(SessionQuery query) => _NativeTask(_reader, query);
   @override
+  SessionReadTask read(SessionRef ref) => _NativeRead(_reader, ref);
+  @override
   void close() {
     if (_closed) return;
     _closed = true;
@@ -51,28 +53,7 @@ final class _NativeTask implements SessionCatalogTask {
     try {
       return await reader.listSessions(query, cancellation: _cancellation);
     } on OpenCodeSessionReadException catch (error) {
-      throw SessionCatalogException(switch (error.failure) {
-        OpenCodeSessionReadFailure.authenticationRequired =>
-          SessionCatalogFailure.authenticationRequired,
-        OpenCodeSessionReadFailure.rateLimited =>
-          SessionCatalogFailure.rateLimited,
-        OpenCodeSessionReadFailure.timeout => SessionCatalogFailure.timeout,
-        OpenCodeSessionReadFailure.invalidCursor =>
-          SessionCatalogFailure.invalidCursor,
-        OpenCodeSessionReadFailure.cancelled ||
-        OpenCodeSessionReadFailure.closed => SessionCatalogFailure.cancelled,
-        OpenCodeSessionReadFailure.notFound ||
-        OpenCodeSessionReadFailure.unavailable =>
-          SessionCatalogFailure.unavailable,
-        OpenCodeSessionReadFailure.unsupportedQuery ||
-        OpenCodeSessionReadFailure.invalidScope ||
-        OpenCodeSessionReadFailure.invalidRequest ||
-        OpenCodeSessionReadFailure.incompatibleResponse ||
-        OpenCodeSessionReadFailure.bodyTooLarge =>
-          SessionCatalogFailure.incompatibleResponse,
-        OpenCodeSessionReadFailure.connection =>
-          SessionCatalogFailure.connection,
-      });
+      throw SessionCatalogException(_failure(error.failure));
     } on Object {
       throw const SessionCatalogException(SessionCatalogFailure.connection);
     }
@@ -81,3 +62,52 @@ final class _NativeTask implements SessionCatalogTask {
   @override
   void cancel() => _cancellation.cancel();
 }
+
+final class _NativeRead implements SessionReadTask {
+  _NativeRead(OpenCodeSessionReader reader, SessionRef ref) {
+    result = _read(reader, ref);
+  }
+  final _cancellation = RequestCancellation();
+  @override
+  late final Future<SessionSummary> result;
+  Future<SessionSummary> _read(
+    OpenCodeSessionReader reader,
+    SessionRef ref,
+  ) async {
+    try {
+      return await reader.readSession(ref, cancellation: _cancellation);
+    } on OpenCodeSessionReadException catch (error) {
+      throw SessionCatalogException(_failure(error.failure, read: true));
+    } on Object {
+      throw const SessionCatalogException(SessionCatalogFailure.connection);
+    }
+  }
+
+  @override
+  void cancel() => _cancellation.cancel();
+}
+
+SessionCatalogFailure _failure(
+  OpenCodeSessionReadFailure failure, {
+  bool read = false,
+}) => switch (failure) {
+  OpenCodeSessionReadFailure.authenticationRequired =>
+    SessionCatalogFailure.authenticationRequired,
+  OpenCodeSessionReadFailure.rateLimited => SessionCatalogFailure.rateLimited,
+  OpenCodeSessionReadFailure.timeout => SessionCatalogFailure.timeout,
+  OpenCodeSessionReadFailure.invalidCursor =>
+    SessionCatalogFailure.invalidCursor,
+  OpenCodeSessionReadFailure.cancelled ||
+  OpenCodeSessionReadFailure.closed => SessionCatalogFailure.cancelled,
+  // A list has no single session to miss; a read names one.
+  OpenCodeSessionReadFailure.notFound =>
+    read ? SessionCatalogFailure.notFound : SessionCatalogFailure.unavailable,
+  OpenCodeSessionReadFailure.unavailable => SessionCatalogFailure.unavailable,
+  OpenCodeSessionReadFailure.unsupportedQuery ||
+  OpenCodeSessionReadFailure.invalidScope ||
+  OpenCodeSessionReadFailure.invalidRequest ||
+  OpenCodeSessionReadFailure.incompatibleResponse ||
+  OpenCodeSessionReadFailure.bodyTooLarge =>
+    SessionCatalogFailure.incompatibleResponse,
+  OpenCodeSessionReadFailure.connection => SessionCatalogFailure.connection,
+};

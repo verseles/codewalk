@@ -1354,4 +1354,16 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get workspaceSelectSession =>
       'Choisissez une session dans la liste pour l’ouvrir ici.';
+
+  @override
+  String get sessionLinkUnknownServer =>
+      'Ce lien pointe vers un serveur qui n’est pas enregistré sur cet appareil.';
+
+  @override
+  String get sessionLinkNotFound =>
+      'Cette session n’existe plus sur son serveur.';
+
+  @override
+  String get sessionLinkUnreadable =>
+      'Impossible d’ouvrir cette session. Réessayez.';
 }

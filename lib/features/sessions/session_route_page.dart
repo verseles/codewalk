@@ -1,0 +1,370 @@
+import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/permission_mode.dart';
+import '../../shared/sessions/session_catalog_source.dart';
+import '../../shared/sessions/session_live_source.dart';
+import 'session_live_controller.dart';
+import 'session_live_page.dart';
+import 'sessions_controller.dart';
+
+/// The open session of the workspace, named by `/s/<server>/<session>`.
+///
+/// A row tap and an external link land here alike. The server is the saved
+/// profile with that id; the session is the loaded row with the same
+/// identity, or else one direct read of that server. A link never invents a
+/// session the server did not return.
+class SessionRoutePage extends StatefulWidget {
+  const SessionRoutePage({
+    super.key,
+    required this.host,
+    required this.session,
+  });
+
+  final String host;
+  final String session;
+
+  @override
+  State<SessionRoutePage> createState() => _SessionRoutePageState();
+}
+
+enum _Read { idle, reading, notFound, login, failed }
+
+class _SessionRoutePageState extends State<SessionRoutePage> {
+  SessionSummary? _summary;
+  SessionReadTask? _task;
+
+  /// The live view of the open session, made once; its page disposes it.
+  SessionLiveController? _live;
+  _Read _read = _Read.idle;
+  bool _selecting = false;
+
+  /// The list has shown the server of this session; a later change of
+  /// server in the list leaves the session.
+  bool _followed = false;
+  bool _leaving = false;
+
+  /// The saved servers have been read once; before that no server is
+  /// unknown yet.
+  bool _ready = false;
+  SessionsController? _catalog;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final catalog = context.watch<SessionsController?>();
+    if (identical(catalog, _catalog)) return;
+    _catalog = catalog;
+    _ready = false;
+    if (catalog == null) return;
+    // A compact window may open here without ever building the list.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !identical(catalog, _catalog)) return;
+      catalog.initialize().whenComplete(() {
+        if (mounted && identical(catalog, _catalog)) {
+          setState(() => _ready = true);
+        }
+      });
+    });
+  }
+
+  SessionRef get _ref => SessionRef(
+    HostId(widget.host),
+    HarnessInstanceId(widget.host),
+    widget.session,
+  );
+
+  @override
+  void didUpdateWidget(SessionRoutePage old) {
+    super.didUpdateWidget(old);
+    if (old.host != widget.host || old.session != widget.session) {
+      _task?.cancel();
+      _task = null;
+      _summary = null;
+      _live = null;
+      _read = _Read.idle;
+      _selecting = false;
+      _followed = false;
+      _leaving = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _task?.cancel();
+    super.dispose();
+  }
+
+  /// Reads the session once from its server. A late answer for another
+  /// session or a disposed page is dropped.
+  void _start(SessionsController catalog) {
+    final task = catalog.read(_ref);
+    if (task == null) {
+      _read = _Read.failed;
+      return;
+    }
+    _task = task;
+    _read = _Read.reading;
+    final ref = _ref;
+    task.result.then(
+      (summary) {
+        if (!mounted || !identical(_task, task)) return;
+        setState(() {
+          _task = null;
+          // An answer for another session is never opened in its place.
+          if (summary.info.ref == ref) {
+            _summary = summary;
+          } else {
+            _read = _Read.failed;
+          }
+        });
+      },
+      onError: (Object error) {
+        if (!mounted || !identical(_task, task)) return;
+        setState(() {
+          _task = null;
+          _read = switch (error) {
+            SessionCatalogException(failure: SessionCatalogFailure.notFound) =>
+              _Read.notFound,
+            SessionCatalogException(
+              failure: SessionCatalogFailure.authenticationRequired,
+            ) =>
+              _Read.login,
+            _ => _Read.failed,
+          };
+        });
+      },
+    );
+  }
+
+  /// Selects the server of this session in the list. A selection the list
+  /// refused, as it does while the saved servers reload, is tried again on
+  /// the next build.
+  void _select(SessionsController catalog) {
+    catalog.selectProfile(widget.host).whenComplete(() {
+      if (mounted && catalog.selectedProfile?.id != widget.host) {
+        setState(() => _selecting = false);
+      }
+    }).ignore();
+  }
+
+  void _retry() => setState(() {
+    _task?.cancel();
+    _task = null;
+    _read = _Read.idle;
+  });
+
+  /// A fixed login replaced the server's source, so the list reads again
+  /// before the session does.
+  void _retryLogin() {
+    final catalog = _catalog;
+    if (catalog == null) return;
+    setState(() => _read = _Read.reading);
+    catalog.refresh().whenComplete(() {
+      if (mounted && _read == _Read.reading && _task == null) _retry();
+    });
+  }
+
+  /// Opens the list drawer of a compact window, the only window whose
+  /// workspace has one.
+  Widget? _leading(BuildContext context) {
+    final shell = Scaffold.maybeOf(context);
+    if (shell == null || !shell.hasDrawer) return null;
+    return IconButton(
+      key: const ValueKey('workspace-drawer'),
+      icon: const Icon(Icons.menu),
+      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      onPressed: shell.openDrawer,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final page = _resolve(context, _leading(context));
+    // A live page that leaves the tree disposes its controller, so a later
+    // return makes a new one.
+    if (page is! SessionLivePage) _live = null;
+    return page;
+  }
+
+  Widget _resolve(BuildContext context, Widget? leading) {
+    final l10n = context.v2L10n;
+    final catalog = context.watch<SessionsController?>();
+    final directory = context.read<SessionLiveDirectory?>();
+    if (catalog == null || directory == null) {
+      return _Notice(message: l10n.chatAddServerToStart, leading: leading);
+    }
+    final hosts = catalog.hosts;
+    final selected = catalog.selectedProfile;
+    final live = _live;
+    // An open session outlasts a reload of the saved servers; it closes
+    // only when its server is removed or another one is chosen.
+    if (live != null &&
+        (hosts.loading || hosts.profiles.any((p) => p.id == widget.host)) &&
+        (selected == null || selected.id == widget.host)) {
+      // The list holds this server again, so a later reload may reselect.
+      if (selected != null) _selecting = false;
+      if (selected == null &&
+          !hosts.loading &&
+          !hosts.storageError &&
+          !_selecting) {
+        // The list lost its choice in the reload; it follows the session.
+        _selecting = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _select(catalog);
+        });
+      }
+      return SessionLivePage(
+        key: ObjectKey(live),
+        controller: live,
+        leading: leading,
+      );
+    }
+    if (!_ready || hosts.loading) return _Notice(leading: leading);
+    if (hosts.storageError) {
+      return _Notice(
+        message: l10n.hostsProfileStorageError,
+        leading: leading,
+        onRetry: hosts.load,
+      );
+    }
+    final profile = hosts.profiles
+        .where((p) => p.id == widget.host)
+        .firstOrNull;
+    if (profile == null) {
+      return _Notice(message: l10n.sessionLinkUnknownServer, leading: leading);
+    }
+    if (selected?.id != profile.id) {
+      if (_followed && selected != null) {
+        // The user chose another server in the list: its sessions replace
+        // this one.
+        if (!_leaving) {
+          _leaving = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) context.go('/sessions');
+          });
+        }
+        return _Notice(leading: leading);
+      }
+      // The list follows the server of the open session.
+      if (!_selecting) {
+        _selecting = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _select(catalog);
+        });
+      }
+      return _Notice(leading: leading);
+    }
+    _followed = true;
+    // A reload that clears the choice selects this server again.
+    _selecting = false;
+    final ref = _ref;
+    // Once found, the session stays open whatever the list later shows.
+    final summary = _summary ??= catalog.sessions
+        .where((row) => row.info.ref == ref)
+        .firstOrNull;
+    if (summary != null) {
+      final live = _live ??= SessionLiveController(
+        hosts: hosts,
+        profile: profile,
+        summary: summary,
+        directory: directory,
+        permissionModes: _permissionPolicy(context),
+      );
+      return SessionLivePage(
+        key: ObjectKey(live),
+        controller: live,
+        leading: leading,
+      );
+    }
+    if (catalog.failure == SessionCatalogFailure.authenticationRequired) {
+      return _Notice(
+        message: l10n.hostsAuthRequired,
+        leading: leading,
+        onRetry: _retryLogin,
+      );
+    }
+    // Waits for the first list, which may already hold the session. A list
+    // cleared by a change of the server can be read again from here.
+    if (!catalog.loaded && catalog.failure == null) {
+      return _Notice(
+        leading: leading,
+        onRetry: catalog.loading ? null : catalog.refresh,
+      );
+    }
+    if (_read == _Read.idle) _start(catalog);
+    return switch (_read) {
+      _Read.notFound => _Notice(
+        message: l10n.sessionLinkNotFound,
+        leading: leading,
+      ),
+      // A fixed login reads again from the retry.
+      _Read.login => _Notice(
+        message: l10n.hostsAuthRequired,
+        leading: leading,
+        onRetry: _retryLogin,
+      ),
+      _Read.failed => _Notice(
+        message: l10n.sessionLinkUnreadable,
+        leading: leading,
+        onRetry: _retry,
+      ),
+      _Read.idle || _Read.reading => _Notice(leading: leading),
+    };
+  }
+
+  EditablePermissionModePolicy? _permissionPolicy(BuildContext context) {
+    try {
+      return context.read<EditablePermissionModePolicy>();
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
+}
+
+/// A session that is not open yet: progress without [message], otherwise
+/// why it cannot open.
+class _Notice extends StatelessWidget {
+  const _Notice({this.message, this.leading, this.onRetry});
+
+  final String? message;
+  final Widget? leading;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      leading: leading,
+      title: Text(context.v2L10n.chatConversation),
+    ),
+    body: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (message == null)
+              const CircularProgressIndicator(key: ValueKey('session-opening'))
+            else
+              Text(
+                message!,
+                key: const ValueKey('session-notice'),
+                textAlign: TextAlign.center,
+              ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              FilledButton(
+                key: const ValueKey('session-retry'),
+                onPressed: onRetry,
+                child: Text(context.v2L10n.chatRetry),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}

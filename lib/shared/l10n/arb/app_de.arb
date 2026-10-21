@@ -1107,5 +1107,17 @@
   "workspaceSelectSession": "Wähle eine Sitzung in der Liste, um sie hier zu öffnen.",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "Dieser Link verweist auf einen Server, der auf diesem Gerät nicht gespeichert ist.",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "Diese Sitzung existiert auf ihrem Server nicht mehr.",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "Diese Sitzung konnte nicht geöffnet werden. Erneut versuchen.",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

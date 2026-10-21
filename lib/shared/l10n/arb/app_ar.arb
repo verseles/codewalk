@@ -1106,5 +1106,17 @@
   "workspaceSelectSession": "اختر جلسة من القائمة لفتحها هنا.",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "يشير هذا الرابط إلى خادم غير محفوظ على هذا الجهاز.",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "لم تعد هذه الجلسة موجودة على خادمها.",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "تعذر فتح هذه الجلسة. أعد المحاولة.",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

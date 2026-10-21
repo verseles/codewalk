@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
@@ -16,8 +15,6 @@ import 'session_create_dialog.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
-import 'session_live_controller.dart';
-import 'session_live_page.dart';
 import 'session_ownership.dart';
 import 'sessions_controller.dart';
 
@@ -35,7 +32,6 @@ class SessionsPage extends StatefulWidget {
 class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
   bool _openingHistory = false;
-  bool _openingLive = false;
 
   /// The popup of each row, so the row's own gestures open the same menu.
   final _menuKeys = <String, GlobalKey<PopupMenuButtonState>>{};
@@ -603,9 +599,7 @@ class _SessionsPageState extends State<SessionsPage> {
                                 'live-open-${row.info.ref.storageKey}',
                               ),
                               onPressed:
-                                  _openingLive ||
-                                      controller.loading ||
-                                      !available
+                                  controller.loading || !available
                                   ? null
                                   : () => _openLive(context, controller, row),
                               child: Text(l10n.liveOpen),
@@ -660,43 +654,23 @@ class _SessionsPageState extends State<SessionsPage> {
     }
   }
 
-  EditablePermissionModePolicy? _permissionPolicy(BuildContext context) {
-    try {
-      return context.read<EditablePermissionModePolicy>();
-    } on ProviderNotFoundException {
-      return null;
-    }
-  }
 
-  Future<void> _openLive(
+  /// Opens the session in the workspace, through the same route a link
+  /// takes; a compact window closes the list drawer first.
+  void _openLive(
     BuildContext context,
     SessionsController catalog,
     SessionSummary row,
-  ) async {
+  ) {
     final profile = catalog.selectedProfile;
-    final directory = context.read<SessionLiveDirectory?>();
-    if (_openingLive ||
-        profile == null ||
-        directory == null ||
+    if (profile == null ||
         !catalog.sessions.any((s) => s.info.ref == row.info.ref)) {
       return;
     }
-    setState(() => _openingLive = true);
-    final live = SessionLiveController(
-      hosts: catalog.hosts,
-      profile: profile,
-      summary: row,
-      directory: directory,
-      permissionModes: _permissionPolicy(context),
+    Scaffold.maybeOf(context)?.closeDrawer();
+    context.go(
+      Uri(pathSegments: ['', 's', profile.id, row.info.ref.nativeId]).toString(),
     );
-    try {
-      await Navigator.of(context, rootNavigator: true).push<void>(
-        MaterialPageRoute(builder: (_) => SessionLivePage(controller: live)),
-      );
-    } finally {
-      live.dispose();
-      if (mounted) setState(() => _openingLive = false);
-    }
   }
 
   String _failure(V2Localizations l10n, SessionCatalogFailure failure) =>
@@ -709,6 +683,7 @@ class _SessionsPageState extends State<SessionsPage> {
         SessionCatalogFailure.unavailable ||
         SessionCatalogFailure.incompatibleResponse ||
         SessionCatalogFailure.cancelled ||
+        SessionCatalogFailure.notFound ||
         SessionCatalogFailure.connection => l10n.sessionsReadFailed,
       };
 }

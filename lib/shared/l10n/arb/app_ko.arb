@@ -1107,5 +1107,17 @@
   "workspaceSelectSession": "여기에서 열려면 목록에서 세션을 선택하세요.",
   "@workspaceSelectSession": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnknownServer": "이 링크는 이 기기에 저장되지 않은 서버를 가리킵니다.",
+  "@sessionLinkUnknownServer": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkNotFound": "이 세션은 서버에 더 이상 없습니다.",
+  "@sessionLinkNotFound": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionLinkUnreadable": "이 세션을 열 수 없습니다. 다시 시도하세요.",
+  "@sessionLinkUnreadable": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

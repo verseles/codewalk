@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_page.dart';
 import '../features/pairing/pairing_page.dart';
+import '../features/sessions/session_route_page.dart';
 import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
@@ -52,9 +53,9 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: '/s/:host/:session',
-            builder: (context, state) => _Placeholder(
-              title: context.v2L10n.chatConversation,
-              message: context.v2L10n.chatAddServerToStart,
+            builder: (context, state) => SessionRoutePage(
+              host: state.pathParameters['host']!,
+              session: state.pathParameters['session']!,
             ),
           ),
           GoRoute(
@@ -72,10 +73,9 @@ Widget _sessions(BuildContext context, GoRouterState state) =>
     const WorkspaceHome();
 
 class _Placeholder extends StatelessWidget {
-  const _Placeholder({required this.title, this.message});
+  const _Placeholder({required this.title});
 
   final String title;
-  final String? message;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -85,10 +85,6 @@ class _Placeholder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(title, style: Theme.of(context).textTheme.headlineSmall),
-          if (message != null) ...[
-            const SizedBox(height: 16),
-            Text(message!, textAlign: TextAlign.center),
-          ],
         ],
       ),
     ),

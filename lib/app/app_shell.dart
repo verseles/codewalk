@@ -63,9 +63,16 @@ class AppShell extends StatelessWidget {
             final width = constraints.maxWidth;
             final size = WindowSizeClass.fromWidth(width);
             if (size.isCompact) {
+              if (home) {
+                return Scaffold(
+                  appBar: AppBar(title: const Text('CodeWalk')),
+                  body: const SessionsPage(),
+                );
+              }
+              // The open session takes the window; the list is a drawer.
               return Scaffold(
-                appBar: AppBar(title: const Text('CodeWalk')),
-                body: home ? const SessionsPage() : child,
+                drawer: const Drawer(child: SafeArea(child: SessionsPage())),
+                body: _BackToList(child: child),
               );
             }
             final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
@@ -79,7 +86,7 @@ class AppShell extends StatelessWidget {
                     child: const SessionsPage(),
                   ),
                   const VerticalDivider(width: 1),
-                  Expanded(child: child),
+                  Expanded(child: home ? child : _BackToList(child: child)),
                 ],
               ),
             );
@@ -105,6 +112,29 @@ class AppShell extends StatelessWidget {
       builder: (context) => SessionCreateDialog(controller: controller),
     );
   }
+}
+
+/// The system back from an open session: it closes the list drawer when
+/// open, otherwise returns to the list instead of leaving the app.
+class _BackToList extends StatelessWidget {
+  const _BackToList({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (didPop, _) {
+      if (didPop) return;
+      final shell = Scaffold.maybeOf(context);
+      if (shell != null && shell.isDrawerOpen) {
+        shell.closeDrawer();
+      } else {
+        context.go('/sessions');
+      }
+    },
+    child: child,
+  );
 }
 
 /// The detail of the workspace when no session is open.

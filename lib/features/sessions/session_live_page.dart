@@ -27,8 +27,12 @@ const double _composerFloor = 56;
 /// Live view of one session: it observes the server and sends prompts only
 /// through the composer's outbox. Stop is explicit; it never answers or reverts.
 class SessionLivePage extends StatefulWidget {
-  const SessionLivePage({super.key, required this.controller});
+  const SessionLivePage({super.key, required this.controller, this.leading});
   final SessionLiveController controller;
+
+  /// The control before the title, such as the list drawer button of a
+  /// compact window.
+  final Widget? leading;
   @override
   State<SessionLivePage> createState() => _SessionLivePageState();
 }
@@ -269,6 +273,7 @@ class _SessionLivePageState extends State<SessionLivePage> {
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
         appBar: AppBar(
+          leading: widget.leading,
           actions: [
             if (c.permissionModes != null)
               Padding(

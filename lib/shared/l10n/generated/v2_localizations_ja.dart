@@ -1270,4 +1270,13 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get workspaceSelectSession => 'ここで開くには、一覧からセッションを選んでください。';
+
+  @override
+  String get sessionLinkUnknownServer => 'このリンクは、この端末に保存されていないサーバーを指しています。';
+
+  @override
+  String get sessionLinkNotFound => 'このセッションはサーバー上にもう存在しません。';
+
+  @override
+  String get sessionLinkUnreadable => 'このセッションを開けませんでした。再試行してください。';
 }

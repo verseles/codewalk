@@ -465,7 +465,9 @@ class SessionLiveController extends ChangeNotifier {
       : SessionLiveFailure.authenticationRequired;
 
   void _hostsChanged() {
-    if (_disposed) return;
+    // A reload of the saved servers is not a change of credential; the
+    // session is checked against them once they are read again.
+    if (_disposed || hosts.loading) return;
     final credential = _currentCredential();
     if (credential == null || _credential?.matches(credential) != true) {
       _detach();
