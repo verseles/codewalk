@@ -41,8 +41,9 @@ void main() {
 
   test('observed captures: lifecycle frames project like the HTTP records', () {
     // Every session-event 2.0.22 capture; the configured-origin browser
-    // capture records browser operations, not session events, so it must not
-    // shift these exact totals.
+    // capture is out of scope here — its session.renamed rows are wrapped in
+    // browser-attempt records, so it contributes no native event list and
+    // must not shift these exact totals.
     final files =
         fixtures.root
             .listSync(recursive: true)
