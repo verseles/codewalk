@@ -194,7 +194,7 @@ def smoke(archive_path, evidence):
                 click(window, "Pair")
             else:
                 run(["xdotool", "key", "--clearmodifiers", "Tab", "Tab", "Return"])
-            expect(window, ["Pairing link", "Open QR image"], "03-pairing")
+            expect(window, ["Pair a server", "Pairing link", "Confirm and pair"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])
             expect(window, ["Appearance", "Shortcuts"], "04-settings-wide")
             click(window, "Light")
