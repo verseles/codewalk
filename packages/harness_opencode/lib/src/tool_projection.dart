@@ -447,9 +447,12 @@ final class _SelectedBudget {
   }
 }
 
-bool _credentialKey(String key) => _credentials.contains(
-  key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), ''),
-);
+/// A credential key: a named one, or any whose normalized name ends with
+/// `authorization` (`Proxy-Authorization`, `HTTP_AUTHORIZATION`).
+bool _credentialKey(String key) {
+  final name = key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
+  return _credentials.contains(name) || name.endsWith('authorization');
+}
 
 Map<String, Object?> _object(Object? value) {
   if (value is! Map<String, Object?>) {

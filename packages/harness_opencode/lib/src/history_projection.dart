@@ -41,6 +41,14 @@ List<TimelineItem> projectOpenCodeHistory(
     'providerstate',
     'providerresultstate',
   };
+
+  /// A credential key: a named one, or any whose normalized name ends with
+  /// `authorization` (`Proxy-Authorization`, `HTTP_AUTHORIZATION`).
+  bool credentialKey(String key) {
+    final name = key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
+    return credentials.contains(name) || name.endsWith('authorization');
+  }
+
   Never malformed() =>
       throw const FormatException('Malformed history content.');
   void node() {
@@ -156,11 +164,7 @@ List<TimelineItem> projectOpenCodeHistory(
           final before = fieldBytes;
           measure(entry.value, depth + 1);
           // Short values expand to the JSON string "[redacted]" (12 bytes).
-          if (redact &&
-              credentials.contains(
-                entry.key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), ''),
-              ) &&
-              fieldBytes - before < 12) {
+          if (redact && credentialKey(entry.key) && fieldBytes - before < 12) {
             fieldBytes += 12 - (fieldBytes - before);
           }
         }
@@ -177,11 +181,7 @@ List<TimelineItem> projectOpenCodeHistory(
       if (v is Map<String, Object?>) {
         return <String, Object?>{
           for (final e in v.entries)
-            e.key:
-                redact &&
-                    credentials.contains(
-                      e.key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), ''),
-                    )
+            e.key: redact && credentialKey(e.key)
                 ? (() {
                     onRedacted();
                     return '[redacted]';

@@ -335,13 +335,21 @@ void main() {
         projectTool(
               toolFrame(
                 'called',
-                input: {'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMIK7MDENG'},
+                input: {
+                  'AWS_SECRET_ACCESS_KEY': 'wJalrXUtnFEMIK7MDENG',
+                  'Proxy-Authorization': 'Negotiate abc',
+                  'HTTP_AUTHORIZATION': 'Basic dTpw',
+                },
               ),
               current: startedTool(),
             )!
             as ItemUpserted;
     final item = event.item as ToolCall;
-    expect(item.input!.value, {'AWS_SECRET_ACCESS_KEY': '[redacted]'});
+    expect(item.input!.value, {
+      'AWS_SECRET_ACCESS_KEY': '[redacted]',
+      'Proxy-Authorization': '[redacted]',
+      'HTTP_AUTHORIZATION': '[redacted]',
+    });
     expect(item.source.extra!.value, containsPair('inputRedacted', true));
   });
 
