@@ -27,10 +27,18 @@ String _keepLabel(Match m) => '${m[1]}$credentialRedaction';
 const _names =
     r'(?:password|passwd|secret|client[_-]?secret|api[_-]?key|x-api-key|'
     r'access[_-]?token|refresh[_-]?token|auth[_-]?token|id[_-]?token|token|'
-    r'private[_-]?key|authorization)';
+    r'secret[_-]?access[_-]?key|private[_-]?key)';
+
+/// A quoted value, escapes included, through its closing quote or the end of
+/// the text.
+const _double = r'"(?:[^"\\]|\\.)*(?:"|$)';
+const _single = r"'(?:[^'\\]|\\.)*(?:'|$)";
 
 /// A value: double-quoted, single-quoted, or up to a separator.
-const _value = r"""("[^"]*"|'[^']*'|[^\s,;&]+)""";
+const _value = '($_double|$_single|[^\\s,;&]+)';
+
+/// The schemes of an authorization header.
+const _schemes = '(?:bearer|basic|token|digest|negotiate)';
 
 /// Not a value this rule already replaced.
 const _fresh = r'(?!\[redacted\])';
@@ -44,9 +52,23 @@ final _rules = <_Rule>[
     ),
     (_) => credentialRedaction,
   ),
-  // An authorization scheme and its credential.
+  // An authorization header: its scheme stays, its credential goes, whatever
+  // its length or case.
   _Rule(
-    RegExp('\\b((?:Bearer|Basic|Token)\\s+)$_fresh[A-Za-z0-9._~+/=-]{8,}'),
+    RegExp(
+      '(\\b(?:proxy-)?authorization\\s*[:=]\\s*"?)'
+      '(?!(?:$_schemes\\s+)?\\[redacted\\])'
+      '((?:$_schemes\\s+)?)[^\\s"\',;]+',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]}${m[2]}$credentialRedaction',
+  ),
+  // An authorization scheme and its credential in other text.
+  _Rule(
+    RegExp(
+      '\\b((?:bearer|basic)\\s+)$_fresh[A-Za-z0-9._~+/=-]{8,}',
+      caseSensitive: false,
+    ),
     _keepLabel,
   ),
   // A command flag that carries a credential: `--token value`, `--token=value`.
@@ -60,7 +82,10 @@ final _rules = <_Rule>[
   ),
   // A quoted JSON property: `"password": "value"`.
   _Rule(
-    RegExp('("$_names"\\s*:\\s*)"$_fresh[^"]*"', caseSensitive: false),
+    RegExp(
+      '("(?:[A-Za-z0-9]+[_-])*(?:$_names|(?:proxy-)?authorization)"\\s*:\\s*)"$_fresh(?:[^"\\\\]|\\\\.)*"',
+      caseSensitive: false,
+    ),
     (m) => '${m[1]}"$credentialRedaction"',
   ),
   // An assignment: `password=value`, `API_KEY: value`, `export TOKEN=value`.

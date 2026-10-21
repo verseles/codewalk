@@ -113,6 +113,9 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// The center sliver's key, which the scroll view anchors to.
   final _centerKey = UniqueKey();
 
+  /// What each row keeps while it is not built, such as an opened tool.
+  final _rowState = PageStorageBucket();
+
   /// Whether reaching the top may ask for an older page: armed once the
   /// reader is far from the top, so a list that stays near the top asks once.
   bool _olderArmed = false;
@@ -405,63 +408,72 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               onNotification: _onMetrics,
               child: NotificationListener<ScrollNotification>(
                 onNotification: _onScroll,
-                child: CustomScrollView(
-                  controller: widget.scroll.controller,
-                  center: _centerKey,
-                  slivers: [
-                    if (widget.topBuilder case final top? when _olderCount > 0)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                          child: top(context),
+                // Rows keep what the reader opened while they leave the
+                // lazily built list and come back.
+                child: PageStorage(
+                  bucket: _rowState,
+                  child: CustomScrollView(
+                    controller: widget.scroll.controller,
+                    center: _centerKey,
+                    slivers: [
+                      if (widget.topBuilder case final top?
+                          when _olderCount > 0)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            child: top(context),
+                          ),
                         ),
-                      ),
-                    // Older history, built from the center outwards: index
-                    // 0 is the row right above the center.
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) =>
-                              _row(items, _olderCount - 1 - index, answerIndex),
-                          childCount: _olderCount,
-                          findChildIndexCallback: (key) {
-                            final at = _indexOf(items, key);
-                            return at == null || at >= _olderCount
-                                ? null
-                                : _olderCount - 1 - at;
-                          },
-                        ),
-                      ),
-                    ),
-                    SliverPadding(
-                      key: _centerKey,
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index < lead) {
-                              return index == 0 && topInCenter
-                                  ? widget.topBuilder!(context)
-                                  : widget.headerBuilder(context);
-                            }
-                            return _row(
+                      // Older history, built from the center outwards: index
+                      // 0 is the row right above the center.
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) => _row(
                               items,
-                              _olderCount + index - lead,
+                              _olderCount - 1 - index,
                               answerIndex,
-                            );
-                          },
-                          childCount: items.length - _olderCount + lead,
-                          findChildIndexCallback: (key) {
-                            final at = _indexOf(items, key);
-                            return at == null || at < _olderCount
-                                ? null
-                                : at - _olderCount + lead;
-                          },
+                            ),
+                            childCount: _olderCount,
+                            findChildIndexCallback: (key) {
+                              final at = _indexOf(items, key);
+                              return at == null || at >= _olderCount
+                                  ? null
+                                  : _olderCount - 1 - at;
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      SliverPadding(
+                        key: _centerKey,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              if (index < lead) {
+                                return index == 0 && topInCenter
+                                    ? widget.topBuilder!(context)
+                                    : widget.headerBuilder(context);
+                              }
+                              return _row(
+                                items,
+                                _olderCount + index - lead,
+                                answerIndex,
+                              );
+                            },
+                            childCount: items.length - _olderCount + lead,
+                            findChildIndexCallback: (key) {
+                              final at = _indexOf(items, key);
+                              return at == null || at < _olderCount
+                                  ? null
+                                  : at - _olderCount + lead;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -588,6 +600,7 @@ typedef _ItemSignature = ({
   String? text,
   OutcomeKind? outcome,
   int? exitCode,
+  Object? payload,
 });
 
 /// The signature of every resident item, so a change in any of them — not
@@ -622,6 +635,12 @@ _ItemSignature _itemSignature(TimelineItem item) => (
   },
   exitCode: switch (item) {
     ShellRun(:final exitCode) => exitCode,
+    _ => null,
+  },
+  // A tool's input and output, compared by value: a re-read that brings the
+  // same values back is not an arrival.
+  payload: switch (item) {
+    ToolCall(:final input, :final output) => (input, output),
     _ => null,
   },
 );

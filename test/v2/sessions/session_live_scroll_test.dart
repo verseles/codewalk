@@ -311,6 +311,64 @@ void main() {
       rig.rig.dispose();
     });
 
+    testWidgets('a tool input that arrives under a reader marks the control', (
+      tester,
+    ) async {
+      ToolCall tool(SessionRef ref, Object? input) => ToolCall(
+        meta: ItemMeta(
+          id: const ItemId('tool-1'),
+          generation: 'live',
+          status: const OpenValue.known(ItemStatus.streaming),
+          source: SourceProvenance(
+            harness: ref.harnessRef,
+            version: '2.0.22',
+            nativeType: 'live',
+          ),
+        ),
+        kind: const OpenValue.known(ToolKind.other),
+        rawName: 'bash',
+        input: input == null ? null : CanonicalValue(input),
+      );
+      final rig = await _openLive(
+        tester,
+        (ref) => [..._answers(ref, 40), tool(ref, null)],
+        settled: false,
+      );
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      final scheme = Theme.of(
+        tester.element(find.byKey(const ValueKey('live-jump-latest'))),
+      ).colorScheme;
+      Color? mark() => tester
+          .widget<FloatingActionButton>(
+            find.byKey(const ValueKey('live-jump-latest')),
+          )
+          .backgroundColor;
+      void emit(Object? input) => rig.handle.emit(
+        SessionLiveView(
+          session: rig.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            rig.ref,
+            items: [..._answers(rig.ref, 40), tool(rig.ref, input)],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      // The same values read again are not an arrival.
+      emit(null);
+      await tester.pumpAndSettle();
+      expect(mark(), isNot(scheme.primary));
+      // The input that arrives while the row keeps streaming is one.
+      emit({'command': 'ls'});
+      await tester.pumpAndSettle();
+      expect(mark(), scheme.primary);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.rig.dispose();
+    });
+
     testWidgets('a wheel scroll keeps priority like a drag', (tester) async {
       final rig = await _openLive(
         tester,

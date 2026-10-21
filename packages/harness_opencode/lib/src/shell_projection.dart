@@ -56,9 +56,9 @@ OpenValue<ItemStatus> openCodeShellItemStatus(ShellStatus status, int? exit) =>
       ShellStatus.killed => const OpenValue.known(ItemStatus.interrupted),
     };
 
-/// A native exit: a finite integral code, or the exact token of a value an
-/// integer cannot hold. History encodes non-finite numbers as `Infinity`,
-/// `-Infinity` or `NaN`; a finite non-integral number keeps its text.
+/// A native exit: a finite integral code, or the exact token of a non-finite
+/// value. History encodes non-finite numbers as `Infinity`, `-Infinity` or
+/// `NaN`; any other finite value that is not a safe integer reports neither.
 ({int? code, String? token}) openCodeShellExit(Object? value) {
   if (value == null) return (code: null, token: null);
   if (value is String) {
@@ -77,7 +77,9 @@ OpenValue<ItemStatus> openCodeShellItemStatus(ShellStatus status, int? exit) =>
   if (value == value.truncateToDouble() && value.abs() <= _safeInteger) {
     return (code: value.toInt(), token: null);
   }
-  return (code: null, token: value.toString());
+  // A finite exit that is not a safe integer has no canonical form: it is
+  // kept as no reported code, so the outcome stays unknown.
+  return (code: null, token: null);
 }
 
 /// The native shell status, or null for a value the contract does not name.
@@ -102,6 +104,24 @@ ShellStatus? openCodeShellStatus(Object? value) => switch (value) {
     if (pair) i++;
   }
   return (text: text, cut: false);
+}
+
+/// The redacted leading part of [text] within [limit] UTF-8 bytes. A slice
+/// with some margin is redacted first, so a credential that crosses the limit
+/// is still recognized whole, and the redacted text is cut again, so the
+/// replacement never takes the value past the limit.
+({String text, bool cut, bool redacted}) openCodeRedactedText(
+  String text,
+  int limit,
+) {
+  final slice = openCodeBoundedText(text, limit + 4096);
+  final clean = redactCredentialText(slice.text);
+  final bounded = openCodeBoundedText(clean, limit);
+  return (
+    text: bounded.text,
+    cut: slice.cut || bounded.cut,
+    redacted: clean != slice.text,
+  );
 }
 
 /// Projects the durable 2.0.22 `session.shell.started` and
@@ -209,14 +229,13 @@ List<SessionEvent> projectOpenCodeShellEvent(
     final size = _integer(output['size']);
     final truncated = output['truncated'];
     if (truncated is! bool) _fail(OpenCodeShellProjectionFailure.malformed);
-    final bounded = openCodeBoundedText(text, openCodeShellOutputLimit);
-    final clean = redactCredentialText(bounded.text);
-    redacted = clean != bounded.text;
-    outputText = clean;
+    final kept = openCodeRedactedText(text, openCodeShellOutputLimit);
+    redacted = kept.redacted;
+    outputText = kept.text;
     outputRef = OutputRef(
       id: shellId,
       sizeBytes: size,
-      truncated: truncated || cursor < size || bounded.cut,
+      truncated: truncated || cursor < size || kept.cut,
     );
   }
   final cleanCommand = redactCredentialText(command);

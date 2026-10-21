@@ -12,6 +12,9 @@ class SessionHistoryPage extends StatefulWidget {
 }
 
 class _SessionHistoryPageState extends State<SessionHistoryPage> {
+  /// What each row keeps while it is not built, such as an opened tool.
+  final _rowState = PageStorageBucket();
+
   @override
   void initState() {
     super.initState();
@@ -59,64 +62,69 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                 if (c.loading)
                   LinearProgressIndicator(semanticsLabel: l10n.sessionsLoading),
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: c.items.length + 2,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              l10n.historyReadOnly,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            Text(
-                              c.profile.label,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(l10n.historyUnverified),
-                            if (failure != null) Text(failure),
-                            if (c.stale) Text(l10n.sessionsPreviousResults),
-                            if (c.limited) Text(l10n.historyLimit),
-                            if (c.loaded && c.items.isEmpty && failure == null)
-                              Text(l10n.historyEmpty),
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton(
-                                key: const ValueKey('history-refresh'),
-                                onPressed: c.loading ? null : c.refresh,
-                                child: Text(l10n.chatRefresh),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                      if (index == c.items.length + 1) {
-                        return Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  child: PageStorage(
+                    bucket: _rowState,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: c.items.length + 2,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              Text(
+                                l10n.historyReadOnly,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                c.profile.label,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(l10n.historyUnverified),
+                              if (failure != null) Text(failure),
+                              if (c.stale) Text(l10n.sessionsPreviousResults),
                               if (c.limited) Text(l10n.historyLimit),
-                              TextButton(
-                                key: const ValueKey('history-more'),
-                                onPressed: c.hasMore && !c.loading
-                                    ? c.loadMore
-                                    : null,
-                                child: Text(l10n.chatLoadMore),
+                              if (c.loaded &&
+                                  c.items.isEmpty &&
+                                  failure == null)
+                                Text(l10n.historyEmpty),
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton(
+                                  key: const ValueKey('history-refresh'),
+                                  onPressed: c.loading ? null : c.refresh,
+                                  child: Text(l10n.chatRefresh),
+                                ),
                               ),
                             ],
-                          ),
+                          );
+                        }
+                        if (index == c.items.length + 1) {
+                          return Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (c.limited) Text(l10n.historyLimit),
+                                TextButton(
+                                  key: const ValueKey('history-more'),
+                                  onPressed: c.hasMore && !c.loading
+                                      ? c.loadMore
+                                      : null,
+                                  child: Text(l10n.chatLoadMore),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        final item = c.items[index - 1];
+                        return SessionTimelineTile(
+                          key: ValueKey(item.id),
+                          item: item,
                         );
-                      }
-                      final item = c.items[index - 1];
-                      return SessionTimelineTile(
-                        key: ValueKey(item.id),
-                        item: item,
-                      );
-                    },
+                      },
+                    ),
                   ),
                 ),
                 SafeArea(

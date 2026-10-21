@@ -196,6 +196,62 @@ void main() {
     expect(find.text(l10n.liveShellOutputPartial), findsOneWidget);
   });
 
+  testWidgets('an exit without a code is not called a failure', (
+    tester,
+  ) async {
+    final l10n = await _pump(tester, [
+      _shell('none', ShellStatus.exited),
+      _shell('nan', ShellStatus.exited, token: 'NaN'),
+    ]);
+    expect(find.byKey(const ValueKey('tool-status-none')), findsNothing);
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('tool-status-nan'))).data,
+      '${l10n.liveShellExitCode} NaN',
+    );
+    expect(find.textContaining(l10n.statusFailed), findsNothing);
+  });
+
+  testWidgets('an opened row stays open when it comes back into view', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final items = [
+      _shell('first', ShellStatus.exited, exit: 0, output: 'kept open'),
+      for (var i = 0; i < 40; i++)
+        _shell('n$i', ShellStatus.exited, exit: 0, output: 'x'),
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: PageStorage(
+            bucket: PageStorageBucket(),
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) => SessionTimelineTile(
+                key: ValueKey(items[index].id),
+                item: items[index],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _expand(tester, 'first');
+    expect(find.text('kept open'), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0, -6000));
+    await tester.pumpAndSettle();
+    expect(find.text('kept open'), findsNothing);
+    await tester.drag(find.byType(ListView), const Offset(0, 8000));
+    await tester.pumpAndSettle();
+    expect(find.text('kept open'), findsOneWidget);
+  });
+
   testWidgets('a long value shows its first part and the rest on demand', (
     tester,
   ) async {

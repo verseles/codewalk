@@ -190,9 +190,9 @@ SessionEvent? projectOpenCodeToolEvent(
     var message = '';
     if (rawError.containsKey('message')) {
       final raw = _text(rawError['message'], cap: _textLimit);
-      final bounded = openCodeBoundedText(raw, 8 * 1024);
-      message = redactCredentialText(bounded.text);
-      errorRedacted = message != bounded.text;
+      final kept = openCodeRedactedText(raw, 8 * 1024);
+      message = kept.text;
+      errorRedacted = kept.redacted;
     }
     error = ErrorInfo(
       kind: const OpenValue.known(ErrorKind.toolFailure),
@@ -363,8 +363,11 @@ final class _SelectedBudget {
         _fail(OpenCodeToolProjectionFailure.limitExceeded);
       }
       if (v is String) {
-        fieldBytes += _bytes(v, _fieldLimit) + 2;
-        for (final unit in v.codeUnits) {
+        // A redacted value is measured as it will be kept.
+        final kept = redact ? redactCredentialText(v) : v;
+        _bytes(v, _fieldLimit);
+        fieldBytes += _bytes(kept, _fieldLimit) + 2;
+        for (final unit in kept.codeUnits) {
           if (unit == 0x22 ||
               unit == 0x5c ||
               unit == 8 ||

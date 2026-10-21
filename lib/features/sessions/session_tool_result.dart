@@ -124,9 +124,16 @@ class _SessionToolResultState extends State<SessionToolResult> {
     );
   }
 
-  bool _failed(TimelineItem item) => switch (item.status.known) {
-    ItemStatus.failed || ItemStatus.interrupted => true,
-    _ => false,
+  bool _failed(TimelineItem item) => switch (item) {
+    ShellRun(shellStatus: OpenValue(known: final status?)) => switch (status) {
+      ShellStatus.timeout || ShellStatus.killed => true,
+      ShellStatus.exited => item.exitCode != null && item.exitCode != 0,
+      ShellStatus.running => false,
+    },
+    _ => switch (item.status.known) {
+      ItemStatus.failed || ItemStatus.interrupted => true,
+      _ => false,
+    },
   };
 
   String? _status(TimelineItem item, V2Localizations l10n) {
@@ -136,7 +143,13 @@ class _SessionToolResultState extends State<SessionToolResult> {
       return switch (shellStatus.known) {
         ShellStatus.running => l10n.toolRunning,
         ShellStatus.exited when item.exitCode == 0 => l10n.liveToolDone,
-        ShellStatus.exited => '${l10n.statusFailed}$code',
+        // Only a reported nonzero code is a failure; without one the outcome
+        // is unknown and only the token, if any, is shown.
+        ShellStatus.exited when item.exitCode != null =>
+          '${l10n.statusFailed}$code',
+        ShellStatus.exited when exit != null =>
+          '${l10n.liveShellExitCode} $exit',
+        ShellStatus.exited => null,
         ShellStatus.timeout => '${l10n.liveShellTimedOut}$code',
         ShellStatus.killed => '${l10n.liveShellKilled}$code',
         null => null,

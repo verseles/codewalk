@@ -9,7 +9,20 @@ void main() {
       'export GITHUB_TOKEN=ghx_notatoken': 'export GITHUB_TOKEN=[redacted]',
       '{"client_secret": "s3cr3t-value"}': '{"client_secret": "[redacted]"}',
       'curl -H "Authorization: Bearer abcdefgh12345678"':
-          'curl -H "Authorization: [redacted] [redacted]"',
+          'curl -H "Authorization: Bearer [redacted]"',
+      'authorization: bearer abcdefgh12345678':
+          'authorization: bearer [redacted]',
+      'Authorization: Basic dTpw': 'Authorization: Basic [redacted]',
+      'Proxy-Authorization: Negotiate abc':
+          'Proxy-Authorization: Negotiate [redacted]',
+      '{"Authorization": "Basic dTpw"}': '{"Authorization": "[redacted]"}',
+      r'{"password":"ab\"cdefgh"}': '{"password":"[redacted]"}',
+      r"secret='ab\'cdef' next": 'secret=[redacted] next',
+      'AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMIK7MDENG':
+          'AWS_SECRET_ACCESS_KEY=[redacted]',
+      '"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI"':
+          '"AWS_SECRET_ACCESS_KEY": "[redacted]"',
+      'password="unterminated value': 'password=[redacted]',
       'Bearer abcdefgh12345678': 'Bearer [redacted]',
       'mysql --password=hunter2 db': 'mysql --password=[redacted] db',
       'tool --token "quoted value"': 'tool --token [redacted]',
@@ -52,7 +65,9 @@ void main() {
   });
 
   test('is idempotent', () {
-    const text = 'password=abc Bearer abcdefgh12345678 https://u:p@h/x';
+    const text =
+        'password=abc Bearer abcdefgh12345678 https://u:p@h/x '
+        'Authorization: Basic dTpw {"token": "a\\"b"}';
     final once = redactCredentialText(text);
     expect(once, isNot(contains('abcdefgh12345678')));
     expect(redactCredentialText(once), once);

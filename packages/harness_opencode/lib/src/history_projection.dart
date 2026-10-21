@@ -118,8 +118,11 @@ List<TimelineItem> projectOpenCodeHistory(
       node();
       if (depth > 16) malformed();
       if (v is String) {
-        fieldBytes += stringBytes(v) + 2;
-        for (final unit in v.codeUnits) {
+        // A redacted value is measured as it will be kept.
+        final kept = redact ? redactCredentialText(v) : v;
+        stringBytes(v);
+        fieldBytes += stringBytes(kept) + 2;
+        for (final unit in kept.codeUnits) {
           if (unit == 0x22 ||
               unit == 0x5c ||
               unit == 8 ||
@@ -444,9 +447,9 @@ List<TimelineItem> projectOpenCodeHistory(
                 var message = '';
                 if (rawError.containsKey('message')) {
                   final raw = text(rawError['message'], charge: false);
-                  final bounded = openCodeBoundedText(raw, 8 * 1024);
-                  message = redactCredentialText(bounded.text);
-                  if (message != bounded.text) extra['errorRedacted'] = true;
+                  final kept = openCodeRedactedText(raw, 8 * 1024);
+                  message = kept.text;
+                  if (kept.redacted) extra['errorRedacted'] = true;
                 }
                 error = ErrorInfo(
                   kind: const OpenValue.known(ErrorKind.toolFailure),
@@ -541,10 +544,20 @@ List<TimelineItem> projectOpenCodeHistory(
       case 'shell':
         final shellId = text(message['shellID'], cap: 4096, nonempty: true);
         if (!shellId.startsWith('sh_')) malformed();
-        final status = openCodeShellStatus(
-          text(message['status'], cap: 4096, nonempty: true, charge: false),
+        final rawStatus = text(
+          message['status'],
+          cap: 4096,
+          nonempty: true,
+          charge: false,
         );
-        if (status == null) malformed();
+        final status = openCodeShellStatus(rawStatus);
+        if (status == null) {
+          unknown('shell-status', rawStatus, shellId, {
+            'type': rawStatus,
+            'reason': 'unsupportedShellStatus',
+          });
+          break;
+        }
         node();
         final ({int? code, String? token}) exit;
         try {
@@ -559,7 +572,11 @@ List<TimelineItem> projectOpenCodeHistory(
         var outputRedacted = false;
         if (message.containsKey('output')) {
           final output = map(message['output']);
-          final raw = text(output['output'], charge: false);
+          node();
+          // A capture larger than one text field is bounded, not rejected:
+          // only the kept prefix is validated and charged to the page.
+          final raw = output['output'];
+          if (raw is! String) malformed();
           int count(Object? value) {
             node();
             if (value is! num ||
@@ -577,13 +594,13 @@ List<TimelineItem> projectOpenCodeHistory(
           node();
           final truncated = output['truncated'];
           if (truncated is! bool) malformed();
-          final bounded = openCodeBoundedText(raw, openCodeShellOutputLimit);
-          outputText = redactCredentialText(bounded.text);
-          outputRedacted = outputText != bounded.text;
+          final kept = openCodeRedactedText(raw, openCodeShellOutputLimit);
+          outputText = text(kept.text);
+          outputRedacted = kept.redacted;
           outputRef = OutputRef(
             id: shellId,
             sizeBytes: size,
-            truncated: truncated || cursor < size || bounded.cut,
+            truncated: truncated || cursor < size || kept.cut,
           );
         }
         add(

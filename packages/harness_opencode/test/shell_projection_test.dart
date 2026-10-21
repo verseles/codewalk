@@ -122,6 +122,13 @@ void main() {
     expect(done.outputText, 'total 0\n');
     expect(done.output!.sizeBytes, 8);
     expect(done.output!.truncated, isFalse);
+    // The end updates the resident row in place.
+    final after = reduce(state, ended.single).state;
+    final row = after.timeline.whereType<ShellRun>().single;
+    expect(row.id, running.id);
+    expect(row.status.known, ItemStatus.completed);
+    expect(row.exitCode, 0);
+    expect(row.outputText, 'total 0\n');
     final extra = ended.single.meta.source.extra!.value! as Map;
     expect(extra['nativeMessageId'], 'msg_shellstart');
     expect(extra['nativeShellId'], 'sh_one');
@@ -256,6 +263,100 @@ void main() {
     });
     expect(big.outputText!.length, openCodeShellOutputLimit);
     expect(big.output!.truncated, isTrue);
+  });
+
+  test('a large capture is bounded, not rejected, and charged', () {
+    final row = history({
+      'shellID': 'sh_f',
+      'command': 'cat huge',
+      'status': 'exited',
+      'exit': 0,
+      'output': {
+        'output': 'y' * (512 * 1024),
+        'cursor': 512 * 1024,
+        'size': 512 * 1024,
+        'truncated': false,
+      },
+      'time': {'created': 1000, 'completed': 2000},
+    });
+    expect(row.outputText!.length, openCodeShellOutputLimit);
+    expect(row.output!.truncated, isTrue);
+    // Kept prefixes still count against the page's selected-content budget.
+    expect(
+      () => projectOpenCodeHistory(
+        [
+          for (var i = 0; i < 20; i++)
+            {
+              ...message('big$i', 'shell'),
+              'shellID': 'sh_$i',
+              'command': 'cat',
+              'status': 'exited',
+              'exit': 0,
+              'output': {
+                'output': 'z' * (128 * 1024),
+                'cursor': 1,
+                'size': 1,
+                'truncated': false,
+              },
+            },
+        ],
+        historyRef,
+        sourceVersion: '2.0.22',
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('redaction never takes the output past its bound', () {
+    final row = history({
+      'shellID': 'sh_g',
+      'command': 'env',
+      'status': 'exited',
+      'exit': 0,
+      'output': {
+        'output': 'token=a ' * (openCodeShellOutputLimit ~/ 8),
+        'cursor': 1,
+        'size': 1,
+        'truncated': false,
+      },
+      'time': {'created': 1000, 'completed': 2000},
+    });
+    expect(row.outputText!.length, lessThanOrEqualTo(openCodeShellOutputLimit));
+    expect(row.outputText, isNot(contains('token=a ')));
+    expect(row.output!.truncated, isTrue);
+  });
+
+  test('an exit with no canonical form reports no code', () {
+    for (final exit in [1.5, 1e300]) {
+      final row = history({
+        'shellID': 'sh_h',
+        'command': 'odd',
+        'status': 'exited',
+        'exit': exit,
+        'time': {'created': 1000, 'completed': 2000},
+      });
+      expect(row.exitCode, isNull);
+      expect(row.exitToken, isNull);
+      expect(row.status.isKnown, isFalse);
+    }
+  });
+
+  test('an unknown shell status is one unknown row, not a lost page', () {
+    final items = projectOpenCodeHistory(
+      [
+        {
+          ...message('odd', 'shell'),
+          'shellID': 'sh_i',
+          'command': 'x',
+          'status': 'suspended',
+        },
+        message('after', 'user', {'text': 'still here'}),
+      ],
+      historyRef,
+      sourceVersion: '2.0.22',
+    );
+    expect(items.first, isA<UnknownItem>());
+    expect(items.last, isA<UserInput>());
   });
 
   test('a shell row never keeps a credential', () {
