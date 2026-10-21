@@ -186,6 +186,14 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     final controller = widget.scroll.controller;
     if (!controller.hasClients) return;
+    if (controller.position.isScrollingNotifier.value) {
+      // A scroll is in progress: it is the reader's, and the follow does not
+      // cancel it. A scroll that reports no direction of its own - a page
+      // key, a click on the scrollbar track - has not moved the viewport
+      // yet, so the offset cannot tell it apart from the follow's own.
+      widget.scroll.markUserIntent();
+      return;
+    }
     final target = controller.position.maxScrollExtent;
     if ((target - controller.position.pixels).abs() < 0.5) {
       _settled();
@@ -331,10 +339,19 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   }
 }
 
-/// A bounded signature of one item: its identity, its known status, the size
-/// of the content that can grow and the outcome it carries, when it has one.
-/// A change means content arrived.
-typedef _ItemSignature = (ItemId, ItemStatus?, int, int?);
+/// A bounded signature of one item: its identity, its known status, the
+/// content it carries that can change and the outcome it carries, when it has
+/// one. A change means content arrived.
+///
+/// The content is the value itself, not its size: a replacement of the same
+/// size is a change too, and the reader has to be told about it.
+typedef _ItemSignature = ({
+  ItemId id,
+  ItemStatus? status,
+  String? text,
+  OutcomeKind? outcome,
+  int? exitCode,
+});
 
 /// The signature of every resident item, so a change in any of them — not
 /// only in the last — is an arrival.
@@ -347,18 +364,23 @@ List<_ItemSignature> _contentSignature(List<TimelineItem> items) =>
 /// generation without any new content, and the reader must not be told that
 /// something arrived.
 _ItemSignature _itemSignature(TimelineItem item) => (
-  item.id,
-  item.status.known,
-  switch (item) {
-    AssistantText(:final text) => text.length,
-    Reasoning(:final text) => text.length,
-    UserInput(:final text) => text.length,
-    Notice(:final text) => text.length,
-    TurnOutcome(:final reason) => reason?.length ?? 0,
-    UnknownItem(:final fallbackText) => fallbackText?.length ?? 0,
-    _ => 0,
+  id: item.id,
+  status: item.status.known,
+  text: switch (item) {
+    AssistantText(:final text) => text,
+    Reasoning(:final text) => text,
+    UserInput(:final text) => text,
+    Notice(:final text) => text,
+    TurnOutcome(:final reason) => reason,
+    UnknownItem(:final fallbackText) => fallbackText,
+    _ => null,
   },
-  switch (item) {
+  // The outcome the row shows, which the reason behind it does not replace.
+  outcome: switch (item) {
+    TurnOutcome(:final kind) => kind.known,
+    _ => null,
+  },
+  exitCode: switch (item) {
     ShellRun(:final exitCode) => exitCode,
     _ => null,
   },

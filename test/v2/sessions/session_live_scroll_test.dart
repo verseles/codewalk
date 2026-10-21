@@ -1029,7 +1029,11 @@ void main() {
                 text: 'final answer ${'body ' * 400}',
                 complete: true,
               ),
-              ..._answers(live.ref, 2).skip(1),
+              AssistantText(
+                meta: liveMeta(live.ref, 'followup'),
+                text: 'follow-up',
+                complete: true,
+              ),
             ],
             execution: const ExecutionState(
               kind: OpenValue.known(ExecutionKind.idle),
@@ -1041,6 +1045,162 @@ void main() {
       // Content arrived under the revealed answer: the reader has to come
       // back to the newest content, so the control is offered.
       expect(jumpControl(), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a replacement of the same size is an arrival', (
+      tester,
+    ) async {
+      Future<void> expectMarked(
+        List<TimelineItem> Function(SessionRef ref) before,
+        List<TimelineItem> Function(SessionRef ref) after,
+      ) async {
+        final live = await _openLive(tester, before, settled: false);
+        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.pumpAndSettle();
+        final plain = controlColor(tester);
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: after(live.ref),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(controlColor(tester), isNot(plain));
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      }
+
+      // The same text, one letter different.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          Notice(
+            meta: liveMeta(ref, 'n1'),
+            kind: const OpenValue.known(NoticeKind.continuation),
+            text: 'working',
+          ),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          Notice(
+            meta: liveMeta(ref, 'n1'),
+            kind: const OpenValue.known(NoticeKind.continuation),
+            text: 'blocked',
+          ),
+        ],
+      );
+      // The same reason, one letter different.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          TurnOutcome(
+            meta: liveMeta(ref, 'o1'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+            reason: 'the turn ended',
+          ),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          TurnOutcome(
+            meta: liveMeta(ref, 'o1'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+            reason: 'the turn stopped',
+          ),
+        ],
+      );
+    });
+
+    testWidgets('the outcome the row shows is an arrival', (tester) async {
+      final live = await _openLive(
+        tester,
+        (ref) => [
+          ..._answers(ref, 39),
+          TurnOutcome(
+            meta: liveMeta(ref, 'o1'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+          ),
+        ],
+        settled: false,
+      );
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      final plain = controlColor(tester);
+      // The outcome the row shows changes: the turn did not succeed.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              ..._answers(live.ref, 39),
+              TurnOutcome(
+                meta: liveMeta(live.ref, 'o1'),
+                kind: const OpenValue.known(OutcomeKind.failed),
+              ),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controlColor(tester), isNot(plain));
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a pending follow does not cancel the reader\'s scroll', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      // Content arrives and schedules the follow for the next frame.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 41),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      // The extent grows and the follow waits for the frame that knows it.
+      await tester.pump();
+      // The reader starts a page-key scroll before the follow's frame: the
+      // animation has not moved the viewport yet.
+      unawaited(
+        controller.position.moveTo(
+          controller.position.pixels - 200,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      // The reader's scroll survives: the viewport is where the reader put
+      // it, and the follow did not pull it to the tail.
+      expect(controller.offset, lessThan(controller.position.maxScrollExtent));
+      expect(controller.position.userScrollDirection, ScrollDirection.idle);
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });
