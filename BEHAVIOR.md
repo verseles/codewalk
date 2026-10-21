@@ -113,6 +113,17 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the control sits at the end edge in both directions
 - **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the control
 
+### V2 readable tool and shell results
+
+- **Given** a v2 live or history timeline shows a tool call or a shell command the harness reported
+- **When** the row is shown
+- **Then** it is collapsed: the tool name, or the shell command after a `$`, and a status line - running, done, failed, interrupted; for a shell, timed out or killed, with the exit code when one was reported; an exit without a code is never called a failure, and a non-finite exit (`Infinity`, `-Infinity`, `NaN`) is shown as reported
+- **Then** a Details control shows the tool's input, output and error text, or the shell's command and captured output; each value shows its first 4,000 characters or 40 lines and a Show more control for the rest, inside a scroll area of at most 300 logical pixels or 40% of the screen; an output the server or the client cut says so
+- **Then** a file in a tool's output is named by its type only and never fetched; a shell's captured output is the part the harness sent (at most 64 KiB), never read from the shell output route
+- **Then** credential-looking values - assignments, JSON properties and command flags named like a password, secret, token or key, authorization headers and variables, URL user info, private-key blocks and well-known token shapes - are replaced by `[redacted]` before a value is kept and again before it is shown; the rule is finite and best-effort
+- **Then** an opened row stays open while it leaves the lazily built list and comes back; a change in a tool's input or output, or in a shell's output or exit, is content that arrived, and an unchanged re-read is not
+- **Then** an unknown shell status in history is one minimized unknown row; the rest of the page still shows
+
 ### V2 live session older history
 
 - **Given** the v2 live session screen shows a session with more history than the newest page it opened with
@@ -131,7 +142,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** native reads use the current profile-bound credential and preserve the endpoint port and proxy prefix; an authenticated info probe observes the actual server version before every history page, and version drift invalidates the continuation until manual refresh
 - **Then** server order and complete session/item identity are retained; each request reads at most 50 native messages, permits at most 500 projected items and retains at most 500 items or ten accepted pages, with an explicit local-limit notice beside pagination
 - **Then** refresh and pagination remain manual; cancelled, superseded, expired-credential, reloaded-profile or disposed work cannot publish late history, and authentication rejection clears previous content
-- **Then** plain text previews are limited to 2,000 Unicode code points and 16 lines; tool names and unsupported shell/outcome/unknown entries are minimized markers, without rendering raw metadata, fetching content references or executing actions
+- **Then** plain text previews are limited to 2,000 Unicode code points and 16 lines; tool and shell rows follow the readable-results rules below; outcome and unknown entries stay minimized markers, without rendering raw metadata, fetching content references or executing actions
 - **Then** live state and delivery remain explicitly unverified and the composer slot is inactive; this reader does not enable live events, sending, lifecycle mutations or approval responses
 - **Then** compact/wide and localized layouts are technical coverage only; the final appearance/navigation parity with v1, full timeline and installed/MVP acceptance remain separate requirements
 
@@ -191,7 +202,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** a v2 history or live timeline item with canonical text (`UserInput`, `AssistantText`, `Reasoning`, `Notice`)
 - **When** the shared `SessionTimelineTile` builds its body
 - **Then** `AssistantText` renders GFM Markdown with basic HTML (`b`, `i`, `u`, `br`, `sub`, `sup`, `progress`), LaTeX math (`$...$`, `$$...$$`), fenced code with syntax highlighting and a Mermaid diagram card with raw-source fallback; `UserInput`/`Reasoning`/`Notice` render the same Markdown/math/code without raw HTML (unsupported tags stay safe and never execute)
-- **Then** images remain text without network or file I/O; links and file paths emit callbacks without navigation; `ToolCall`, `ShellRun`, `TurnOutcome` and `UnknownItem` stay minimized markers without exposing `input`/`output`/`raw`
+- **Then** images remain text without network or file I/O; links and file paths emit callbacks without navigation; `TurnOutcome` and `UnknownItem` stay minimized markers without exposing `raw` or fallback text; `ToolCall` and `ShellRun` follow the readable-results rules below
 - **Then** sources above 64,000 runes fall back to plain truncated text with a localized notice; code blocks above 8,000 chars render as plain monospace; malformed math/Mermaid degrade to selectable raw source without crashing
 - **Then** streaming re-parses are throttled (120 ms desktop, 48 ms mobile) and settle on completion; the 2,000-item history builds lazily without exception
 - **Then** compact/wide, 14 locales with RTL, SelectionArea, semantics headers, 200% text scaling, reduced-motion static progress and VM goldens (mobile/desktop light/dark + ar RTL) are covered by widget tests; keyboard focus on overflowing code remains pending and is not claimed as passing

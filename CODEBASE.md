@@ -175,9 +175,10 @@ native, provider or I/O path; it makes no G1/G2/G3/G5 acceptance claim. The
 OpenCode session and `harness_host` adapters remain unimplemented.
 
 The separate CHP artifact defines canonical payloads and transport envelopes at
-the explicitly provisional `cw-canonical-1-provisional.2` and
-`chp-1-provisional.2` revisions, pinned to the unchanged canonical model commit
-`df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e`. `CanonicalPromptIntent` retains the
+the explicitly provisional `cw-canonical-1-provisional.3` and
+`chp-1-provisional.3` revisions, pinned to the canonical model commit
+`ff6a3902e5a4c1f1d9ecccbf47af8bb146b68dc6` (V2-044D added the optional
+`ShellRun` `exitToken`, `shellStatus` and `outputText`). `CanonicalPromptIntent` retains the
 original draft and optional open delivery; hand-authored examples cover omitted
 default, `queue` and `steer`, while focused tests guard the shape. The local
 Draft 7 schema, example manifest, definition map and `SHA256SUMS` integrity test
@@ -2336,6 +2337,27 @@ center sliver and the older rows in the sliver before it, built from the
 center outwards, so a page added on top never moves a visible row; a plain
 list loses that anchor. The fallback block tops the older rows, or opens the
 center when there are none so a short list still shows it.
+
+
+## V2-044D readable tool and shell results (#400)
+
+```text
+packages/codewalk_core/lib/src/credential_text.dart # redactCredentialText: the finite, idempotent credential redaction shared by the adapter and the screens
+packages/codewalk_core/lib/src/timeline.dart # ShellRun (exitCode, exitToken, shellStatus, output, outputText) and ShellStatus
+packages/harness_opencode/lib/src/shell_projection.dart # session.shell.started/ended into ShellRun; shared exit, status, bounded and redacted-text helpers
+packages/harness_opencode/lib/src/history_projection.dart # History shell messages; redacted tool input leaves, output text and error message
+packages/harness_opencode/lib/src/tool_projection.dart # Live tool input leaves, output text and error message redacted and bounded
+lib/features/sessions/session_tool_result.dart # The collapsed tool/shell row, its sections, show-more and PageStorage-kept expansion
+test/v2/sessions/session_tool_result_test.dart # Tool and shell states, truncation, redaction, layouts and kept expansion
+packages/harness_opencode/test/shell_projection_test.dart # Synthetic shell inputs with provenance, lifecycle, bounds and the no-capture guard
+packages/codewalk_core/test/credential_text_test.dart # The redaction table: removals, kept text and idempotence
+```
+
+The shell schemas are byte-identical at OpenCode 2.0.22 to the pinned source;
+no recorded 2.0.22 capture holds a shell message or event, so the shell tests
+use labelled synthetic inputs and a guard test keeps that gap visible. The
+adapter redacts before it keeps a value (with a margin before the final cut),
+and the row redacts again before it shows one.
 
 ## V2-043D grouped session catalog (#392)
 
