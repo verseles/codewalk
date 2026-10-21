@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:codewalk:chp:1:provisional:2",
+  "$id": "urn:codewalk:chp:1:provisional:3",
   "title": "CodeWalk Host Protocol v1 — provisional app-facing revision",
   "description": "Hand-authored canonical contract projection and separate CHP envelopes. Not a G1/G2/final G5 pass, Host implementation, or mutation authorization.",
   "$ref": "#/definitions/ChpFrame",
@@ -997,6 +997,40 @@
           "anyOf": [
             {
               "$ref": "#/definitions/CanonicalOutputRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exitToken": {
+          "anyOf": [
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shellStatus": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpenEnum"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputText": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -4675,7 +4709,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "protocol": {
           "const": "codewalk-host/1"
@@ -4708,7 +4742,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "event": {
           "$ref": "#/definitions/CanonicalSessionEvent"
@@ -4742,7 +4776,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4777,7 +4811,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4805,7 +4839,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "nonce": {
           "type": "string",
@@ -4830,7 +4864,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "nonce": {
           "type": "string",
@@ -4855,7 +4889,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "receipt": {
           "$ref": "#/definitions/CanonicalCommandReceipt"
@@ -4879,7 +4913,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "snapshot": {
           "$ref": "#/definitions/CanonicalSessionSnapshot"
@@ -4903,7 +4937,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "capabilities": {
           "$ref": "#/definitions/CanonicalCapabilitySet"
@@ -4927,7 +4961,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "page": {
           "$ref": "#/definitions/CanonicalSessionPage"
@@ -4951,7 +4985,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "result": {
           "$ref": "#/definitions/CanonicalCreateResult"
@@ -4975,7 +5009,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.2"
+          "const": "cw-canonical-1-provisional.3"
         },
         "command": {
           "$ref": "#/definitions/CanonicalOriginalCommand"

@@ -84,7 +84,26 @@ Map<String, Object?> projectTimelineItem(TimelineItem item) => switch (item) {
     'raw': item.raw.toJson(),
     if (item.fallbackText != null) 'fallbackText': item.fallbackText,
   },
-  _ => throw UnsupportedError('This test projection covers three item kinds'),
+  ShellRun() => {
+    'type': 'shellRun',
+    'meta': projectItemMeta(item.meta),
+    'command': item.command,
+    'exitCode': item.exitCode,
+    'exitToken': item.exitToken,
+    'output': item.output == null
+        ? null
+        : {
+            'id': item.output!.id,
+            if (item.output!.mimeType != null)
+              'mimeType': item.output!.mimeType,
+            if (item.output!.sizeBytes != null)
+              'sizeBytes': item.output!.sizeBytes,
+            'truncated': item.output!.truncated,
+          },
+    'shellStatus': item.shellStatus?.toJson(),
+    'outputText': item.outputText,
+  },
+  _ => throw UnsupportedError('This test projection covers four item kinds'),
 };
 
 Map<String, Object?> projectBoundary(SnapshotBoundary boundary) => {

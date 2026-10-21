@@ -413,6 +413,33 @@ void main() {
       },
     );
 
+    test('a shell run keeps its status, exact exit and bounded output', () {
+      for (final item in [
+        ShellRun(
+          meta: _itemMeta('shell finished'),
+          command: 'make test',
+          exitCode: 2,
+          shellStatus: const OpenValue.known(ShellStatus.exited),
+          output: OutputRef(id: 'sh_one', sizeBytes: 6, truncated: false),
+          outputText: 'error\n',
+        ),
+        ShellRun(
+          meta: _itemMeta('shell timed out'),
+          command: 'sleep 99',
+          exitToken: 'NaN',
+          shellStatus: OpenValue.unknown('futureShellStatus'),
+          output: OutputRef(id: 'sh_two', sizeBytes: 4096, truncated: true),
+        ),
+        ShellRun(meta: _itemMeta('shell bare'), command: 'ls'),
+      ]) {
+        _expectDefinition('CanonicalTimelineItem', projectTimelineItem(item));
+      }
+      final invalid = projectTimelineItem(
+        ShellRun(meta: _itemMeta('shell bad'), command: 'ls', exitToken: '1e9'),
+      );
+      expect(isValidDefinition('CanonicalTimelineItem', invalid), isFalse);
+    });
+
     test(
       'unknown and unavailable support remain valid unavailable observations',
       () {

@@ -1,7 +1,7 @@
 {
   "type": "resync",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "canonicalRevision": "cw-canonical-1-provisional.3",
   "session": {
     "version": 1,
     "host": "host-α",
