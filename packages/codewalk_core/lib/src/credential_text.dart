@@ -31,8 +31,8 @@ const _names =
 
 /// A quoted value, escapes included, through its closing quote or the end of
 /// the text.
-const _double = r'"(?:[^"\\]|\\.)*(?:"|$)';
-const _single = r"'(?:[^'\\]|\\.)*(?:'|$)";
+const _double = r'"(?:[^"\\]|\\.)*(?:"|\\?$)';
+const _single = r"'(?:[^'\\]|\\.)*(?:'|\\?$)";
 
 /// A value: double-quoted, single-quoted, or up to a separator.
 const _value = '($_double|$_single|[^\\s,;&]+)';
