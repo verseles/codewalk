@@ -254,14 +254,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     final target = controller.position.maxScrollExtent;
     if ((target - controller.position.pixels).abs() < 0.5) {
-      // The viewport is already at the content, so the arrival it may carry
-      // is accounted for.
-      _arrivalPending = false;
       _settled();
       return;
     }
     widget.scroll.runProgrammatic(() => controller.jumpTo(target));
-    _arrivalPending = false;
     if (++_followPasses >= _maxFollowPasses) {
       _settled();
       return;
@@ -273,6 +269,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   /// The follow reached the tail: a pending finished answer is revealed.
   void _settled() {
+    // The follow reached the content, so the arrival it may carry is
+    // accounted for, whether the viewport was already there or the follow
+    // jumped to it.
+    _arrivalPending = false;
     if (!_revealPending || !widget.settled) return;
     _revealPending = false;
     _revealAnswer();
