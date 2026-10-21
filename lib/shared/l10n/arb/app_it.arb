@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "Il server ha conservato più output di quello mostrato qui.",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "Scegli una sessione nell’elenco per aprirla qui.",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

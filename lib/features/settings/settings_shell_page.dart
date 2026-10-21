@@ -230,7 +230,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             leading: const Icon(Icons.dns_outlined),
             title: Text(l.settingsServersTitle),
             subtitle: Text(l.chatAddServerToStart),
-            onTap: () => context.go('/hosts'),
+            onTap: () => context.push('/hosts'),
           ),
         ],
         if (appearance) ...[

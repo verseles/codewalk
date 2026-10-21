@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "서버에 여기 표시된 것보다 많은 출력이 있습니다.",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "여기에서 열려면 목록에서 세션을 선택하세요.",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

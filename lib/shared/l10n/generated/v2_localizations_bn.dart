@@ -1319,4 +1319,8 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'সার্ভার এখানে দেখানোর চেয়ে বেশি আউটপুট রেখেছে।';
+
+  @override
+  String get workspaceSelectSession =>
+      'এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।';
 }

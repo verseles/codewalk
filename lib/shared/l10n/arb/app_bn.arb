@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "সার্ভার এখানে দেখানোর চেয়ে বেশি আউটপুট রেখেছে।",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

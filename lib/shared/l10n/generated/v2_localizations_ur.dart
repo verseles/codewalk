@@ -1325,4 +1325,8 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'سرور نے یہاں دکھائے گئے سے زیادہ آؤٹ پٹ رکھا ہے۔';
+
+  @override
+  String get workspaceSelectSession =>
+      'اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔';
 }

@@ -1318,4 +1318,7 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'احتفظ الخادم بمخرجات أكثر مما يظهر هنا.';
+
+  @override
+  String get workspaceSelectSession => 'اختر جلسة من القائمة لفتحها هنا.';
 }

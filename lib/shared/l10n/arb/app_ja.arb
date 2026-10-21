@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "サーバーにはここに表示されているより多くの出力があります。",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "ここで開くには、一覧からセッションを選んでください。",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

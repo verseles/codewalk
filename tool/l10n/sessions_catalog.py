@@ -48,6 +48,7 @@ NEW_KEYS = (
     "sessionsCreateDirectoryTooLong",
     "sessionsChildSession",
     "sessionsChildParentElsewhere",
+    "workspaceSelectSession",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -161,6 +162,22 @@ LINEAGE_COPY = {
     "ru": ("Дочерняя сессия", "Дочерняя сессия · родительская сессия здесь не показана"),
     "zh": ("子会话", "子会话 · 父会话未在此显示"),
 }
+WORKSPACE_COPY = {
+    "en": "Choose a session in the list to open it here.",
+    "pt": "Escolha uma sessão na lista para abri-la aqui.",
+    "es": "Elige una sesión de la lista para abrirla aquí.",
+    "fr": "Choisissez une session dans la liste pour l’ouvrir ici.",
+    "de": "Wähle eine Sitzung in der Liste, um sie hier zu öffnen.",
+    "it": "Scegli una sessione nell’elenco per aprirla qui.",
+    "ar": "اختر جلسة من القائمة لفتحها هنا.",
+    "ur": "اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔",
+    "bn": "এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।",
+    "hi": "इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।",
+    "ja": "ここで開くには、一覧からセッションを選んでください。",
+    "ko": "여기에서 열려면 목록에서 세션을 선택하세요.",
+    "ru": "Выберите сессию в списке, чтобы открыть её здесь.",
+    "zh": "从列表中选择一个会话以在此打开。",
+}
 COPY = {
     locale: values
     + (RATE_COPY[locale], PROJECT_COPY[locale])
@@ -168,5 +185,6 @@ COPY = {
     + ACTION_COPY[locale]
     + CREATE_COPY[locale]
     + LINEAGE_COPY[locale]
+    + (WORKSPACE_COPY[locale],)
     for locale, values in COPY.items()
 }

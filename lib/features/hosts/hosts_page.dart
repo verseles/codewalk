@@ -61,7 +61,7 @@ class _HostsPageState extends State<HostsPage> {
                 OutlinedButton.icon(
                   onPressed: () {
                     context.read<PairingController>().empty();
-                    context.go('/pair');
+                    context.push('/pair');
                   },
                   icon: const Icon(Icons.qr_code),
                   label: Text(l.pairingTitle),
@@ -143,7 +143,7 @@ class _HostsPageState extends State<HostsPage> {
                               context.read<PairingController>().empty(
                                 profile: profile,
                               );
-                              context.go('/pair');
+                              context.push('/pair');
                             },
                             child: Text(l.pairingAgain),
                           ),
@@ -155,7 +155,7 @@ class _HostsPageState extends State<HostsPage> {
                               onPressed: () {
                                 final pairing = context
                                     .read<PairingController>();
-                                context.go('/pair');
+                                context.push('/pair');
                                 pairing.renew(profile);
                               },
                               child: Text(l.pairingRenew),

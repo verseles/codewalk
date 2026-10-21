@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_page.dart';
 import '../features/pairing/pairing_page.dart';
-import '../features/sessions/sessions_page.dart';
 import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
@@ -70,7 +69,7 @@ GoRouter createAppRouter({
 }
 
 Widget _sessions(BuildContext context, GoRouterState state) =>
-    const SessionsPage();
+    const WorkspaceHome();
 
 class _Placeholder extends StatelessWidget {
   const _Placeholder({required this.title, this.message});

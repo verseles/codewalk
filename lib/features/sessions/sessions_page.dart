@@ -79,7 +79,8 @@ class _SessionsPageState extends State<SessionsPage> {
     // The list is grouped by the project the server attributed each session
     // to; the groups follow the rows the server returned, and inside a group
     // a child is drawn under the parent its record names.
-    final items = sessionListItems(controller.sessions);
+    final open = controller.selectedProject;
+    final items = sessionListItems(controller.sessions, open: open);
     final createReason =
         controller.selectedProfile != null &&
             controller.createReason != SessionActionReason.none &&
@@ -180,7 +181,9 @@ class _SessionsPageState extends State<SessionsPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(_filterLabel(l10n, controller.filter)),
+                            Flexible(
+                              child: Text(_filterLabel(l10n, controller.filter)),
+                            ),
                             const Icon(Icons.arrow_drop_down),
                           ],
                         ),
@@ -215,9 +218,15 @@ class _SessionsPageState extends State<SessionsPage> {
                           onPressed: hosts.loading ? null : hosts.load,
                           child: Text(l10n.chatRetry),
                         ),
+                      IconButton(
+                        key: const ValueKey('sessions-settings'),
+                        tooltip: l10n.settingsTitle,
+                        onPressed: () => context.push('/settings'),
+                        icon: const Icon(Icons.settings_outlined),
+                      ),
                       TextButton(
                         key: const ValueKey('sessions-hosts'),
-                        onPressed: () => context.go('/hosts'),
+                        onPressed: () => context.push('/hosts'),
                         child: Text(l10n.onboardingConnectRunningServer),
                       ),
                     ],
@@ -248,7 +257,12 @@ class _SessionsPageState extends State<SessionsPage> {
             }
             final item = items[index - 1];
             return switch (item) {
-              SessionGroupHeader(:final group) => _groupHeader(context, group),
+              SessionGroupHeader(:final group) => _groupHeader(
+                context,
+                controller,
+                group,
+                selected: open?.project == group.project,
+              ),
               SessionRow(
                 :final session,
                 :final depth,
@@ -278,48 +292,64 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   /// The header of one project group: the directory the server reported, with
-  /// its last segment as the title. The path is always left-to-right, so the
-  /// separators do not reorder in a right-to-left locale.
-  Widget _groupHeader(BuildContext context, SessionGroup group) {
+  /// its last segment as the title. Choosing it shows its sessions, as the
+  /// project list of the legacy workspace does. The path is always
+  /// left-to-right, so the separators do not reorder in a right-to-left
+  /// locale.
+  Widget _groupHeader(
+    BuildContext context,
+    SessionsController controller,
+    SessionGroup group, {
+    required bool selected,
+  }) {
     final l10n = context.v2L10n;
+    final theme = Theme.of(context);
     final directory = group.project?.canonicalDirectory;
-    if (directory == null) {
-      return Semantics(
-        header: true,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Text(
-            l10n.sessionsUnknownProject,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
-      );
-    }
-    final segments = directory
+    final segments = (directory ?? '')
         .split(RegExp(r'[/\\]'))
         .where((segment) => segment.isNotEmpty);
-    final title = segments.isEmpty ? directory : segments.last;
+    final title = directory == null
+        ? l10n.sessionsUnknownProject
+        : segments.isEmpty
+        ? directory
+        : segments.last;
     return Semantics(
       header: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            Text(
-              directory,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textDirection: TextDirection.ltr,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+      selected: selected,
+      child: InkWell(
+        key: ValueKey('session-project-${directory ?? ''}'),
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => controller.selectProject(group.project),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: selected ? theme.colorScheme.primary : null,
+                      ),
+                    ),
+                    if (directory != null)
+                      Text(
+                        directory,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textDirection: TextDirection.ltr,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+              ),
+              Icon(selected ? Icons.expand_less : Icons.expand_more),
+            ],
+          ),
         ),
       ),
     );
@@ -375,11 +405,14 @@ class _SessionsPageState extends State<SessionsPage> {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 4),
-          Text(
-            l10n.sessionsActionUnread,
-            key: ValueKey('session-unread-${row.info.ref.storageKey}'),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // The label wraps in the narrow pane instead of overflowing it.
+          Flexible(
+            child: Text(
+              l10n.sessionsActionUnread,
+              key: ValueKey('session-unread-${row.info.ref.storageKey}'),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

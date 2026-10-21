@@ -1269,4 +1269,7 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveShellOutputPartial => '서버에 여기 표시된 것보다 많은 출력이 있습니다.';
+
+  @override
+  String get workspaceSelectSession => '여기에서 열려면 목록에서 세션을 선택하세요.';
 }

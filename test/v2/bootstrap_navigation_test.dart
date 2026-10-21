@@ -18,23 +18,20 @@ void main() {
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
       await tester.pumpAndSettle();
 
+      // The workspace has no destination bar: the list is the page on a
+      // compact window and a pane beside the detail on a wider one.
+      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(NavigationRail), findsNothing);
       expect(
-        find.byType(NavigationBar),
-        size.width < 840 ? findsOneWidget : findsNothing,
-      );
-      expect(
-        find.byType(NavigationRail),
-        size.width >= 840 ? findsOneWidget : findsNothing,
+        find.byKey(const ValueKey('workspace-sidebar')),
+        size.width < 600 ? findsNothing : findsOneWidget,
       );
       expect(find.text('CodeWalk'), findsOneWidget);
       expect(dependencies.router.routeInformationProvider.value.uri.path, '/');
 
-      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await tester.tap(find.byKey(const ValueKey('sessions-settings')));
       await tester.pumpAndSettle();
-      expect(
-        dependencies.router.routeInformationProvider.value.uri.path,
-        '/settings',
-      );
+      expect(dependencies.router.state.uri.path, '/settings');
       expect(find.text('Settings'), findsWidgets);
 
       dependencies.preferences.setThemeMode(ThemeMode.dark);

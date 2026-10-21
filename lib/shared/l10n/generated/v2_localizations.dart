@@ -2534,6 +2534,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'The server kept more output than shown here.'**
   String get liveShellOutputPartial;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a session in the list to open it here.'**
+  String get workspaceSelectSession;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

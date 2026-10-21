@@ -1350,4 +1350,8 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'Le serveur a conservé plus de sortie que celle affichée ici.';
+
+  @override
+  String get workspaceSelectSession =>
+      'Choisissez une session dans la liste pour l’ouvrir ici.';
 }

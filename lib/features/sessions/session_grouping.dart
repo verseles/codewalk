@@ -143,10 +143,15 @@ List<SessionRow> nestSessionRows(List<SessionSummary> groupRows) {
 }
 
 /// The grouped list as the page renders it: a header per group, then its
-/// rows nested under their parents.
-List<SessionListItem> sessionListItems(List<SessionSummary> sessions) => [
+/// rows nested under their parents. With [open], only that group shows its
+/// rows; the other groups show their header alone.
+List<SessionListItem> sessionListItems(
+  List<SessionSummary> sessions, {
+  ({ProjectRef? project})? open,
+}) => [
   for (final group in groupSessionsByProject(sessions)) ...[
     SessionGroupHeader(group),
-    ...nestSessionRows(group.sessions),
+    if (open == null || open.project == group.project)
+      ...nestSessionRows(group.sessions),
   ],
 ];

@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "Der Server hat mehr Ausgabe gespeichert, als hier angezeigt wird.",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "Wähle eine Sitzung in der Liste, um sie hier zu öffnen.",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

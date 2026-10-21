@@ -66,11 +66,23 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text(l10n.historyReadOnly), findsOneWidget);
           expect(
-            dependencies.router.routeInformationProvider.value.uri.path,
+            dependencies.router.state.uri.path,
             '/sessions',
           );
           final more = find.byKey(const ValueKey('sessions-more'));
-          await tester.ensureVisible(more);
+          // The list is built lazily, so it scrolls until the control is
+          // built and shown.
+          await tester.scrollUntilVisible(
+            more,
+            200,
+            scrollable: find
+                .ancestor(
+                  of: find.byKey(const ValueKey('sessions-profile')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
+          await tester.pumpAndSettle();
           await tester.tap(more);
           await tester.pump();
           source.respond([source.row('second')]);
@@ -113,7 +125,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('sessions-hosts')));
       await tester.pumpAndSettle();
       expect(
-        dependencies.router.routeInformationProvider.value.uri.path,
+        dependencies.router.state.uri.path,
         '/hosts',
       );
       await rig.save('a');
@@ -564,7 +576,7 @@ void main() {
     expect(find.text('/work/alpha'), findsOneWidget);
     expect(find.text('/work/beta'), findsOneWidget);
     expect(find.text('One'), findsOneWidget);
-    expect(find.text('Two'), findsOneWidget);
+    expect(find.text('Two'), findsNothing);
     expect(find.text('Three'), findsOneWidget);
     // The sessions the server did not attribute share one marked group.
     expect(find.text(l10n.sessionsUnknownProject), findsNothing);
@@ -583,12 +595,19 @@ void main() {
     expect(find.text('One'), findsOneWidget);
     // The order is the projected order: the alpha group keeps its rows
     // together, the beta group follows it, and the row the later page added
-    // stays inside the alpha group.
+    // stays inside the alpha group. Only the first group shows its rows.
     double topOf(String text) => tester.getTopLeft(find.text(text)).dy;
     expect(topOf('alpha'), lessThan(topOf('One')));
     expect(topOf('One'), lessThan(topOf('Three')));
     expect(topOf('Three'), lessThan(topOf('Four')));
     expect(topOf('Four'), lessThan(topOf('beta')));
+    expect(find.text('Two'), findsNothing);
+
+    // Choosing the other project shows its sessions instead.
+    await tester.tap(find.byKey(const ValueKey('session-project-/work/beta')));
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsNothing);
+    expect(topOf('alpha'), lessThan(topOf('beta')));
     expect(topOf('beta'), lessThan(topOf('Two')));
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -669,7 +688,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('alpha'), findsOneWidget);
       expect(find.text(l10n.sessionsUnknownProject), findsOneWidget);
+      expect(find.text('Two'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('session-project-')));
+      await tester.pumpAndSettle();
       expect(find.text('Two'), findsOneWidget);
+      expect(find.text('One'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       rig.dispose();

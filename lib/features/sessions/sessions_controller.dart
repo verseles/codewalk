@@ -181,6 +181,33 @@ class SessionsController extends ChangeNotifier {
   /// Whether the row is hidden in CodeWalk.
   bool isHidden(SessionSummary row) => _actions?.isHidden(row) ?? false;
   SessionSummary? get selectedSession => _selectedSession;
+
+  /// The project group the user chose, held as a record so the group of the
+  /// sessions the server attributed to no project can be chosen too. It
+  /// lasts until the list is cleared.
+  ({ProjectRef? project})? _chosenProject;
+
+  /// The project group whose sessions the list shows: the chosen one while
+  /// the shown rows still hold it, otherwise the first group the server
+  /// returned. Null when no row is shown.
+  ({ProjectRef? project})? get selectedProject {
+    final rows = sessions;
+    final chosen = _chosenProject;
+    if (chosen != null &&
+        rows.any((row) => row.info.project == chosen.project)) {
+      return chosen;
+    }
+    return rows.isEmpty ? null : (project: rows.first.info.project);
+  }
+
+  /// Shows the sessions of [project]. Choosing the shown fallback records it,
+  /// so a chosen group that returns later does not take its place again.
+  void selectProject(ProjectRef? project) {
+    if (_disposed || _chosenProject == (project: project)) return;
+    _chosenProject = (project: project);
+    _notify();
+  }
+
   SessionCatalogFailure? failure;
   bool loading = false;
   bool hasMore = false;
@@ -230,6 +257,7 @@ class SessionsController extends ChangeNotifier {
     _ownershipTimer = null;
     _sessions = const [];
     _selectedSession = null;
+    _chosenProject = null;
     _cursor = null;
     _received.clear();
     _requested.clear();
@@ -675,10 +703,7 @@ class SessionsController extends ChangeNotifier {
       _actions?.childCount(row);
 
   /// Hides the row in CodeWalk, or shows it again.
-  Future<bool> setHidden(
-    SessionSummary row, {
-    required bool hidden,
-  }) async {
+  Future<bool> setHidden(SessionSummary row, {required bool hidden}) async {
     final source = _actions;
     if (source == null) return false;
     final written = await source.setHidden(row, hidden: hidden);
@@ -946,7 +971,9 @@ class SessionsController extends ChangeNotifier {
         return rows;
       }
       if (!cursors.add(next)) {
-        throw const SessionCatalogException(SessionCatalogFailure.invalidCursor);
+        throw const SessionCatalogException(
+          SessionCatalogFailure.invalidCursor,
+        );
       }
       cursor = next;
     }

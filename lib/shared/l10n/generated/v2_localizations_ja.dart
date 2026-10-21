@@ -1267,4 +1267,7 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveShellOutputPartial => 'サーバーにはここに表示されているより多くの出力があります。';
+
+  @override
+  String get workspaceSelectSession => 'ここで開くには、一覧からセッションを選んでください。';
 }

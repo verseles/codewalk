@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "सर्वर ने यहाँ दिखाए गए से अधिक आउटपुट रखा है।",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

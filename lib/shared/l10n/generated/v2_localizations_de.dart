@@ -1356,4 +1356,8 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'Der Server hat mehr Ausgabe gespeichert, als hier angezeigt wird.';
+
+  @override
+  String get workspaceSelectSession =>
+      'Wähle eine Sitzung in der Liste, um sie hier zu öffnen.';
 }

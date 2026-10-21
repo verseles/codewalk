@@ -1,80 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../features/sessions/session_create_dialog.dart';
+import '../features/sessions/sessions_controller.dart';
+import '../features/sessions/sessions_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
+import '../shared/sessions/session_actions.dart';
+import '../shared/shortcuts/shortcut_action.dart';
+import 'app_keyboard_shortcuts.dart';
 
+/// The workspace of the legacy client: the projects and their sessions on the
+/// start side, the open session beside them.
+///
+/// A compact window shows the list on its own; from 600 dp the list stays
+/// beside the detail in a fixed pane, 260 dp wide below 840 dp and 300 dp
+/// from there, which leaves the detail at least 339 dp. Servers, settings and
+/// pairing are secondary pages with a way back to the workspace.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.location, required this.child});
 
   final String location;
   final Widget child;
 
+  static bool isWorkspace(String location) =>
+      location == '/' || location == '/sessions' || location.startsWith('/s/');
+
   @override
   Widget build(BuildContext context) {
-    final labels = [
-      context.v2L10n.chatConversations,
-      context.v2L10n.settingsServersTitle,
-      context.v2L10n.settingsTitle,
-    ];
-    const routes = ['/sessions', '/hosts', '/settings'];
-    final selected = location == '/settings'
-        ? 2
-        : location == '/hosts' || location == '/pair'
-        ? 1
-        : 0;
-    final wide = context.windowSizeClass.isAtLeastExpanded;
-    void navigate(int index) => context.go(routes[index]);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('CodeWalk')),
-      body: Row(
-        children: [
-          if (wide) ...[
-            NavigationRail(
-              selectedIndex: selected,
-              labelType: NavigationRailLabelType.all,
-              onDestinationSelected: navigate,
-              destinations: [
-                NavigationRailDestination(
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  label: Text(labels[0]),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.dns_outlined),
-                  label: Text(labels[1]),
-                ),
-                NavigationRailDestination(
-                  icon: const Icon(Icons.settings_outlined),
-                  label: Text(labels[2]),
-                ),
-              ],
-            ),
-            const VerticalDivider(width: 1),
-          ],
-          Expanded(child: child),
-        ],
+    final l10n = context.v2L10n;
+    if (!isWorkspace(location)) {
+      final title = switch (location) {
+        '/settings' => l10n.settingsTitle,
+        '/hosts' || '/pair' => l10n.settingsServersTitle,
+        _ => 'CodeWalk',
+      };
+      return Scaffold(
+        appBar: AppBar(
+          // A page opened from the list returns to it; one opened by a link
+          // has nothing under it and goes to the list.
+          leading: BackButton(
+            key: const ValueKey('workspace-back'),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/sessions'),
+          ),
+          title: Text(title),
+        ),
+        body: child,
+      );
+    }
+    final home = location == '/' || location == '/sessions';
+    return KeyboardActionScope(
+      handlers: {ShortcutAction.newChat: () => _create(context)},
+      // Keeps the keyboard inside the workspace when nothing in it has the
+      // focus, so its shortcuts reach this scope.
+      child: Focus(
+        autofocus: true,
+        skipTraversal: true,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final size = WindowSizeClass.fromWidth(width);
+            if (size.isCompact) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('CodeWalk')),
+                body: home ? const SessionsPage() : child,
+              );
+            }
+            final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
+            return Scaffold(
+              appBar: AppBar(title: const Text('CodeWalk')),
+              body: Row(
+                children: [
+                  SizedBox(
+                    key: const ValueKey('workspace-sidebar'),
+                    width: pane,
+                    child: const SessionsPage(),
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(child: child),
+                ],
+              ),
+            );
+          },
+        ),
       ),
-      bottomNavigationBar: wide
-          ? null
-          : NavigationBar(
-              selectedIndex: selected,
-              onDestinationSelected: navigate,
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  label: labels[0],
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.dns_outlined),
-                  label: labels[1],
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.settings_outlined),
-                  label: labels[2],
-                ),
-              ],
-            ),
     );
   }
+
+  /// Opens the create of the list, when the list offers it.
+  void _create(BuildContext context) {
+    final controller = context.read<SessionsController?>();
+    if (controller == null ||
+        controller.hosts.loading ||
+        controller.hosts.storageError ||
+        controller.selectedProfile == null ||
+        controller.creating ||
+        controller.createReason != SessionActionReason.none) {
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder: (context) => SessionCreateDialog(controller: controller),
+    );
+  }
+}
+
+/// The detail of the workspace when no session is open.
+class WorkspaceHome extends StatelessWidget {
+  const WorkspaceHome({super.key});
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(
+        context.v2L10n.workspaceSelectSession,
+        key: const ValueKey('workspace-empty'),
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
 }

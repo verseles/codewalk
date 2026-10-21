@@ -1103,5 +1103,9 @@
   "liveShellOutputPartial": "سرور نے یہاں دکھائے گئے سے زیادہ آؤٹ پٹ رکھا ہے۔",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

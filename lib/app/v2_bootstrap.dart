@@ -122,7 +122,14 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
                 ),
                 child: AppKeyboardShortcuts(
                   preferences: preferences,
-                  openSettings: () => dependencies.router.go('/settings'),
+                  // Opened over the current page, like the gear, so the
+                  // system back returns to it; never twice in a row.
+                  openSettings: () {
+                    final router = dependencies.router;
+                    if (router.state.uri.path != '/settings') {
+                      router.push('/settings');
+                    }
+                  },
                   child: child ?? const SizedBox.shrink(),
                 ),
               );

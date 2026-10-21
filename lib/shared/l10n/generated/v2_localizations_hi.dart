@@ -1328,4 +1328,8 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get liveShellOutputPartial =>
       'सर्वर ने यहाँ दिखाए गए से अधिक आउटपुट रखा है।';
+
+  @override
+  String get workspaceSelectSession =>
+      'इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।';
 }

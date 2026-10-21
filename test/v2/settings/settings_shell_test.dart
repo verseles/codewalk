@@ -197,9 +197,9 @@ void main() {
     (tester) async {
       final graph = await mount(tester, route: '/hosts');
       await chord(tester, LogicalKeyboardKey.keyN);
-      expect(graph.router.routeInformationProvider.value.uri.path, '/hosts');
+      expect(graph.router.state.uri.path, '/hosts');
       await chord(tester, LogicalKeyboardKey.comma);
-      expect(graph.router.routeInformationProvider.value.uri.path, '/settings');
+      expect(graph.router.state.uri.path, '/settings');
     },
   );
 
@@ -213,7 +213,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     await chord(tester, LogicalKeyboardKey.comma);
-    expect(graph.router.routeInformationProvider.value.uri.path, '/hosts');
+    expect(graph.router.state.uri.path, '/hosts');
     expect(find.byType(AlertDialog), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
@@ -354,7 +354,7 @@ void main() {
     graph.router.go('/hosts');
     await tester.pumpAndSettle();
     await chord(tester, LogicalKeyboardKey.comma);
-    expect(graph.router.routeInformationProvider.value.uri.path, '/settings');
+    expect(graph.router.state.uri.path, '/settings');
   });
 
   settingsTest('bare Escape is captured without dismissing its editor', (

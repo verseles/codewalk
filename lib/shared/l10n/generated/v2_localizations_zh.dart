@@ -1242,4 +1242,7 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveShellOutputPartial => '服务器保存的输出比此处显示的更多。';
+
+  @override
+  String get workspaceSelectSession => '从列表中选择一个会话以在此打开。';
 }

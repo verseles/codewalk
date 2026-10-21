@@ -1102,5 +1102,9 @@
   "liveShellOutputPartial": "احتفظ الخادم بمخرجات أكثر مما يظهر هنا.",
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
+  },
+  "workspaceSelectSession": "اختر جلسة من القائمة لفتحها هنا.",
+  "@workspaceSelectSession": {
+    "description": "V2 bounded read-only session catalog"
   }
 }
