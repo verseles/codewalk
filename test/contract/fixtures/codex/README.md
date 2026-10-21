@@ -1,9 +1,11 @@
 # Codex observed captures
 
 Immutable native captures of the Codex app-server, versioned by Codex version
-(`<codex-version>/<capture-name>/`). They are the evidence artifacts of the
-G1 gate: [#245](https://github.com/verseles/codewalk/issues/245) (V2-006) and
-[#246](https://github.com/verseles/codewalk/issues/246) (V2-007).
+(`<codex-version>/<capture-name>/`). They are the Codex side of the G1 gate,
+tracked by [#245](https://github.com/verseles/codewalk/issues/245) (V2-006).
+The Claude Code side of G1 is a different work item
+([#246](https://github.com/verseles/codewalk/issues/246), V2-007) and has no
+capture in this directory.
 
 **Boundary.** A capture here is *partial* evidence of one topology and one
 server version. It never satisfies G1 on its own: G1 needs the full
