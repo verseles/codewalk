@@ -1063,5 +1063,9 @@
     "description": "V2 bounded read-only session catalog"
   },
   "chatGoToLatest": "최신 메시지로 이동",
-  "chatGoToFirst": "첫 메시지로 이동"
+  "chatGoToFirst": "첫 메시지로 이동",
+  "liveOlderLoading": "이전 메시지를 불러오는 중…",
+  "@liveOlderLoading": {
+    "description": "V2 live read-only session view"
+  }
 }

@@ -2,14 +2,18 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import 'session_composer.dart';
 import 'session_composer_controller.dart';
 import 'session_form_card.dart';
+import 'session_history_controller.dart';
+import 'session_history_page.dart';
 import 'session_live_controller.dart';
 import 'session_live_scroll.dart';
 import 'session_live_timeline.dart';
@@ -110,7 +114,6 @@ class _SessionLivePageState extends State<SessionLivePage> {
         ),
       if (needsYou && execution != l10n.liveNeedsYou)
         Text(l10n.liveNeedsYou, key: const ValueKey('live-needs-you')),
-      if (c.state?.hasMoreHistory ?? false) Text(l10n.historyLimit),
       if (c.canRetry)
         Align(
           alignment: AlignmentDirectional.centerStart,
@@ -123,6 +126,68 @@ class _SessionLivePageState extends State<SessionLivePage> {
       const SizedBox(height: 8),
     ],
   );
+
+  /// The top of the list, above the older rows: the way back once the window
+  /// holds all it can, and the retry of a failed older page. Null when there
+  /// is nothing to offer there.
+  WidgetBuilder? _top(SessionLiveController c, V2Localizations l10n) {
+    final beyond = c.olderHistoryBeyondWindow;
+    final failed = c.olderHistory.failure != null && c.canLoadOlderHistory;
+    if (!beyond && !failed) return null;
+    return (context) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // The window cannot page in more: the history viewer is the way back.
+        if (beyond) ...[
+          Text(l10n.historyLimit, key: const ValueKey('live-history-limit')),
+          if (context.watch<SessionHistoryFactory?>() != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                key: const ValueKey('live-open-history'),
+                onPressed: _openingHistory ? null : () => _openHistory(c),
+                child: Text(l10n.historyOpen),
+              ),
+            ),
+        ],
+        if (failed)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              key: const ValueKey('live-older-retry'),
+              onPressed: c.loadOlderHistory,
+              child: Text(l10n.liveRetry),
+            ),
+          ),
+      ],
+    );
+  }
+
+  bool _openingHistory = false;
+
+  /// Opens the read-only history viewer of this session, the fallback once
+  /// the live window holds all it can.
+  Future<void> _openHistory(SessionLiveController c) async {
+    final factory = context.read<SessionHistoryFactory?>();
+    if (_openingHistory || factory == null) return;
+    setState(() => _openingHistory = true);
+    final history = SessionHistoryController(
+      hosts: c.hosts,
+      profile: c.profile,
+      summary: c.summary,
+      sourceFactory: factory,
+    );
+    try {
+      await Navigator.of(context, rootNavigator: true).push<void>(
+        MaterialPageRoute(
+          builder: (_) => SessionHistoryPage(controller: history),
+        ),
+      );
+    } finally {
+      history.dispose();
+      if (mounted) setState(() => _openingHistory = false);
+    }
+  }
 
   String? _failure(V2Localizations l10n, SessionLiveFailure? failure) =>
       switch (failure) {
@@ -281,6 +346,11 @@ class _SessionLivePageState extends State<SessionLivePage> {
                         items: items,
                         scroll: _scroll,
                         settled: settled,
+                        olderLoading: c.olderHistory.loading,
+                        topBuilder: _top(c, l10n),
+                        onLoadOlder: c.canLoadOlderHistory
+                            ? c.loadOlderHistory
+                            : null,
                         headerBuilder: (context) => _header(
                           context,
                           c,

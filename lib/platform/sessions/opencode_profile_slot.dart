@@ -13,6 +13,7 @@ import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
+import 'opencode_live_handle.dart';
 import 'prompt_outbox_store.dart';
 import 'unrestricted_ownership_store.dart';
 
@@ -68,6 +69,7 @@ final class OpenCodeProfileSlot {
   OpenCodeFormReplyClient? _forms;
   OpenCodeSessionRulesClient? _rules;
   final _stops = <SessionRef, _StopRequest>{};
+  final _older = <SessionRef, SessionOlderHistoryState>{};
   final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
   // Keyed by session and native id: one slot multiplexes several sessions, and
   // ids are only unique inside their own session.
@@ -333,6 +335,61 @@ final class OpenCodeProfileSlot {
       });
     }
     _publish(ref, view(ref));
+  }
+
+  SessionOlderHistoryState olderHistory(SessionRef ref) {
+    final local = _older[ref];
+    return SessionOlderHistoryState(
+      loading: local?.loading ?? false,
+      failure: local?.failure,
+      trimmed: _owner?.olderHistoryTrimmed(ref) ?? false,
+    );
+  }
+
+  bool canLoadOlderHistory(SessionRef ref) {
+    final current = view(ref);
+    return !isClosed &&
+        _older[ref]?.loading != true &&
+        current.phase == SessionLivePhase.live &&
+        !current.stale &&
+        (_owner?.canLoadOlderHistory(ref) ?? false);
+  }
+
+  /// One older page through the stream owner; its window update reaches the
+  /// leases as any other session update. A failure keeps the window.
+  Future<void> loadOlderHistory(SessionRef ref) async {
+    final owner = _owner;
+    if (owner == null || !canLoadOlderHistory(ref)) return;
+    _older[ref] = const SessionOlderHistoryState(loading: true);
+    _publish(ref, view(ref));
+    // Any other error is a defect: it still ends the read, as unavailable,
+    // so the pill never spins forever, and it is not swallowed.
+    SessionLiveFailure? failure = SessionLiveFailure.unavailable;
+    try {
+      await owner.loadOlderHistory(ref);
+      failure = null;
+    } on OpenCodeSessionReadException catch (error) {
+      failure = switch (error.failure) {
+        OpenCodeSessionReadFailure.authenticationRequired =>
+          SessionLiveFailure.authenticationRequired,
+        OpenCodeSessionReadFailure.notFound => SessionLiveFailure.notFound,
+        OpenCodeSessionReadFailure.rateLimited =>
+          SessionLiveFailure.rateLimited,
+        OpenCodeSessionReadFailure.timeout => SessionLiveFailure.timeout,
+        OpenCodeSessionReadFailure.connection => SessionLiveFailure.connection,
+        OpenCodeSessionReadFailure.unavailable =>
+          SessionLiveFailure.unavailable,
+        OpenCodeSessionReadFailure.cancelled ||
+        OpenCodeSessionReadFailure.closed => SessionLiveFailure.cancelled,
+        _ => SessionLiveFailure.incompatibleResponse,
+      };
+    } finally {
+      // The last lease of this session may have closed during the read.
+      if (!isClosed && _views.containsKey(ref)) {
+        _older[ref] = SessionOlderHistoryState(failure: failure);
+        _publish(ref, view(ref));
+      }
+    }
   }
 
   /// Unrestricted is the session's own server rule (ADR-059 §7), separate
@@ -1150,6 +1207,7 @@ final class OpenCodeProfileSlot {
       _owner?.unwatch(handle.session);
       _views.remove(handle.session);
       _stops.remove(handle.session)?.dispose();
+      _older.remove(handle.session);
       _unrestricted.remove(handle.session)?.dispose();
       _replyStates.removeWhere((_, reply) {
         if (reply.session != handle.session) return false;
@@ -1179,6 +1237,7 @@ final class OpenCodeProfileSlot {
       stop.dispose();
     }
     _stops.clear();
+    _older.clear();
     for (final entry in _unrestricted.values) {
       entry.dispose();
     }
@@ -1299,169 +1358,5 @@ final class _CatalogLease implements SessionCatalogChanges {
     unawaited(_connection.cancel());
     unawaited(_controller.close());
     _slot._releaseCatalog(this);
-  }
-}
-
-final class OpenCodeLiveHandle implements SessionLiveHandle {
-  OpenCodeLiveHandle(this._slot, this.session);
-  final OpenCodeProfileSlot _slot;
-  @override
-  final SessionRef session;
-  final _controller = StreamController<SessionLiveView>.broadcast();
-  bool _closed = false;
-
-  @override
-  SessionLiveView get current => _closed
-      ? SessionLiveView(session: session, phase: SessionLivePhase.closed)
-      : _slot.view(session);
-
-  @override
-  Stream<SessionLiveView> get updates => Stream.multi((listener) {
-    listener.add(current);
-    final subscription = _controller.stream.listen(
-      listener.add,
-      onDone: listener.close,
-    );
-    listener.onCancel = subscription.cancel;
-  });
-
-  @override
-  PromptOutbox? get outbox => _closed ? null : _slot.outbox;
-
-  @override
-  SessionStopState get stopState =>
-      _closed ? const SessionStopState() : _slot.stopState(session);
-
-  @override
-  bool get canStop => !_closed && _slot.canStop(session);
-
-  @override
-  Future<void> stop({required CommandId id}) async {
-    if (!_closed) await _slot.stop(session, id);
-  }
-
-  @override
-  bool get supportsUnrestricted => !_closed && _slot.supportsUnrestricted;
-
-  @override
-  SessionUnrestrictedState get unrestrictedState => _closed
-      ? const SessionUnrestrictedState()
-      : _slot.unrestrictedState(session);
-
-  @override
-  bool get canEnableUnrestricted =>
-      !_closed && _slot.canEnableUnrestricted(session);
-
-  @override
-  bool get canDisableUnrestricted =>
-      !_closed && _slot.canDisableUnrestricted(session);
-
-  @override
-  bool get canRefreshUnrestricted =>
-      !_closed && _slot.canRefreshUnrestricted(session);
-
-  @override
-  Future<void> enableUnrestricted({required CommandId id}) async {
-    if (!_closed) await _slot.enableUnrestricted(session, id);
-  }
-
-  @override
-  Future<void> disableUnrestricted({required CommandId id}) async {
-    if (!_closed) await _slot.disableUnrestricted(session, id);
-  }
-
-  @override
-  Future<void> refreshUnrestricted() async {
-    if (!_closed && _slot.canRefreshUnrestricted(session)) {
-      await _slot.refreshUnrestricted(session);
-    }
-  }
-
-  @override
-  bool get supportsReplies => !_closed && _slot.supportsReplies;
-
-  @override
-  SessionPermissionReplyState replyState(
-    InteractionId id, {
-    SessionRef? owner,
-  }) => _closed
-      ? const SessionPermissionReplyState()
-      : _slot.replyState(session, id, owner: owner);
-
-  @override
-  bool canReply(InteractionRequest request) =>
-      !_closed && _slot.canReply(session, request);
-
-  @override
-  Future<void> reply({
-    required InteractionRequest request,
-    required ApprovalResponse response,
-    required CommandId id,
-  }) async {
-    if (!_closed) {
-      await _slot.reply(
-        ref: session,
-        request: request,
-        response: response,
-        id: id,
-      );
-    }
-  }
-
-  @override
-  bool canReplyForm(InteractionRequest request) =>
-      !_closed && _slot.canReplyForm(session, request);
-
-  @override
-  Future<void> replyForm({
-    required InteractionRequest request,
-    required FormResponse response,
-    required CommandId id,
-  }) async {
-    if (!_closed) {
-      await _slot.replyForm(
-        ref: session,
-        request: request,
-        response: response,
-        id: id,
-      );
-    }
-  }
-
-  @override
-  Future<void> dismissForm({
-    required InteractionRequest request,
-    required CommandId id,
-  }) async {
-    if (!_closed) {
-      await _slot.dismissForm(
-        ref: session,
-        request: request,
-        id: id,
-      );
-    }
-  }
-
-  @override
-  String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
-
-  void emit(SessionLiveView view) {
-    if (!_closed) _controller.add(view);
-  }
-
-  void detach() {
-    if (_closed) return;
-    _controller.add(
-      SessionLiveView(session: session, phase: SessionLivePhase.closed),
-    );
-    _closed = true;
-    unawaited(_controller.close());
-  }
-
-  @override
-  void close() {
-    if (_closed) return;
-    _slot.release(this);
-    detach();
   }
 }

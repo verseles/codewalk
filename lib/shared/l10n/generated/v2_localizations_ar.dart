@@ -1268,4 +1268,7 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get chatGoToFirst => 'الانتقال إلى الرسالة الأولى';
+
+  @override
+  String get liveOlderLoading => 'جارٍ تحميل الرسائل السابقة…';
 }

@@ -1289,4 +1289,7 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get chatGoToFirst => 'Перейти к первому сообщению';
+
+  @override
+  String get liveOlderLoading => 'Загрузка более ранних сообщений…';
 }

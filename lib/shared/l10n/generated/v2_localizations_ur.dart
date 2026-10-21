@@ -1275,4 +1275,7 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get chatGoToFirst => 'پہلے پیغام پر جائیں۔';
+
+  @override
+  String get liveOlderLoading => 'پرانے پیغامات لوڈ ہو رہے ہیں…';
 }

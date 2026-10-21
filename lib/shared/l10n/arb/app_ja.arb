@@ -1063,5 +1063,9 @@
     "description": "V2 bounded read-only session catalog"
   },
   "chatGoToLatest": "最新のメッセージへ移動",
-  "chatGoToFirst": "最初のメッセージへ移動"
+  "chatGoToFirst": "最初のメッセージへ移動",
+  "liveOlderLoading": "以前のメッセージを読み込み中…",
+  "@liveOlderLoading": {
+    "description": "V2 live read-only session view"
+  }
 }

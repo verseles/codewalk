@@ -1219,4 +1219,7 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get chatGoToFirst => '最初のメッセージへ移動';
+
+  @override
+  String get liveOlderLoading => '以前のメッセージを読み込み中…';
 }

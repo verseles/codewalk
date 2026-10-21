@@ -1062,5 +1062,9 @@
     "description": "V2 bounded read-only session catalog"
   },
   "chatGoToLatest": "الانتقال إلى أحدث رسالة",
-  "chatGoToFirst": "الانتقال إلى الرسالة الأولى"
+  "chatGoToFirst": "الانتقال إلى الرسالة الأولى",
+  "liveOlderLoading": "جارٍ تحميل الرسائل السابقة…",
+  "@liveOlderLoading": {
+    "description": "V2 live read-only session view"
+  }
 }

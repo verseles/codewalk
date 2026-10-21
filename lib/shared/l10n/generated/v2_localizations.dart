@@ -2438,6 +2438,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Go to first message'**
   String get chatGoToFirst;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Loading older messages…'**
+  String get liveOlderLoading;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

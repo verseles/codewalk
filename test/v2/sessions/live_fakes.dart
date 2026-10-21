@@ -43,6 +43,32 @@ class LiveHandle implements SessionLiveHandle {
     if (closes == 0) emit(current);
   }
 
+  /// Older paging: off unless a test supplies [olderAction], which returns
+  /// the failure of that read (null on success) and may emit a new view.
+  Future<SessionLiveFailure?> Function()? olderAction;
+  int olderLoads = 0;
+  @override
+  SessionOlderHistoryState olderHistory = const SessionOlderHistoryState();
+  @override
+  bool get canLoadOlderHistory =>
+      olderAction != null &&
+      closes == 0 &&
+      !olderHistory.loading &&
+      current.phase == SessionLivePhase.live &&
+      !current.stale &&
+      current.state?.nextHistoryCursor != null &&
+      current.state!.timeline.length < current.state!.limits.maxItems;
+  @override
+  Future<void> loadOlderHistory() async {
+    if (!canLoadOlderHistory) return;
+    olderLoads++;
+    olderHistory = const SessionOlderHistoryState(loading: true);
+    emit(current);
+    final failure = await olderAction!();
+    olderHistory = SessionOlderHistoryState(failure: failure);
+    if (closes == 0) emit(current);
+  }
+
   @override
   String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
   final _controller = StreamController<SessionLiveView>.broadcast();
@@ -344,6 +370,7 @@ SessionState liveState(
   List<InteractionRequest> interactions = const [],
   List<PendingInput> pending = const [],
   bool hasMore = false,
+  String? cursor,
 }) {
   final start = beginHydration(
     SessionState(
@@ -371,7 +398,8 @@ SessionState liveState(
         values: interactions,
         boundary: _boundary(ref),
       ),
-      hasMoreHistory: hasMore,
+      nextHistoryCursor: cursor == null ? null : HistoryCursor(cursor),
+      hasMoreHistory: hasMore || cursor != null,
     ),
   ).state;
 }

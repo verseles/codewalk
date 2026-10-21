@@ -62,6 +62,22 @@ final class SessionLiveView {
   final SessionState? state;
 }
 
+/// The paging of older history into the live window: local action state only;
+/// the window itself is the live snapshot. [failure] is the last read's.
+final class SessionOlderHistoryState {
+  const SessionOlderHistoryState({
+    this.loading = false,
+    this.failure,
+    this.trimmed = false,
+  });
+  final bool loading;
+  final SessionLiveFailure? failure;
+
+  /// The window lost rows in front of the oldest one paged in: they exist
+  /// and are no longer resident, so only the history viewer reaches them.
+  final bool trimmed;
+}
+
 /// One screen's lease on a live session. Closing it never mutates the server.
 abstract interface class SessionLiveHandle {
   SessionRef get session;
@@ -121,6 +137,15 @@ abstract interface class SessionLiveHandle {
   Future<void> enableUnrestricted({required CommandId id});
   Future<void> disableUnrestricted({required CommandId id});
   Future<void> refreshUnrestricted();
+
+  /// Older history, one page at a time, prepended to the resident window.
+  /// The state and the single-flight fence are shared by the session's open
+  /// leases. Loading is refused when no older page exists, when the window is
+  /// full, or when the window lost rows in front; the history viewer is the
+  /// fallback then.
+  SessionOlderHistoryState get olderHistory;
+  bool get canLoadOlderHistory;
+  Future<void> loadOlderHistory();
 
   /// The native message id [id] was projected from, so a pending row can be
   /// matched to an outbox entry; null for any other item.

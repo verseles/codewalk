@@ -134,6 +134,51 @@ class SessionLiveController extends ChangeNotifier {
     _notify();
   }
 
+  /// Older history pages into the window one page at a time; once the window
+  /// cannot take more, the history viewer is the way back.
+  SessionOlderHistoryState get olderHistory =>
+      _handle?.olderHistory ?? const SessionOlderHistoryState();
+  bool get canLoadOlderHistory =>
+      !_disposed &&
+      !opening &&
+      _credential?.matches(_currentCredential()) == true &&
+      phase == SessionLivePhase.live &&
+      !(view?.stale ?? true) &&
+      (_handle?.canLoadOlderHistory ?? false);
+
+  /// More history exists than the window can page in: the window is full or
+  /// lost rows in front, or a live, current window cannot page right now. A window that loaded its
+  /// whole history, or one paused while not live, offers nothing here; a
+  /// partial page keeps [SessionState.hasMoreHistory] set, so it alone does
+  /// not tell.
+  bool get olderHistoryBeyondWindow {
+    final state = this.state;
+    if (state == null || !state.hasMoreHistory || olderHistory.loading) {
+      return false;
+    }
+    if (state.timeline.length >= state.limits.maxItems ||
+        olderHistory.trimmed) {
+      return true;
+    }
+    return state.nextHistoryCursor != null &&
+        phase == SessionLivePhase.live &&
+        !(view?.stale ?? true) &&
+        !canLoadOlderHistory;
+  }
+
+  Future<void> loadOlderHistory() async {
+    final handle = _handle;
+    if (!canLoadOlderHistory || handle == null) return;
+    final generation = _generation;
+    final loading = handle.loadOlderHistory();
+    _notify();
+    await loading;
+    if (_disposed || generation != _generation || !identical(handle, _handle)) {
+      return;
+    }
+    _notify();
+  }
+
   /// Unrestricted is the session's own server rule (ADR-059 §7), separate
   /// from [permissionModeState]; it changes only after explicit confirmation.
   bool get supportsUnrestricted =>

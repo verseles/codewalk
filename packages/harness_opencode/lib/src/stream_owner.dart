@@ -88,6 +88,18 @@ final class _Watch {
   int repairs = 0;
   RequestCancellation? cancellation;
 
+  /// The older-history read in flight; one per watched session.
+  RequestCancellation? olderCancellation;
+
+  /// The oldest row a read put in the window. Once the window's first row is
+  /// another one, the window was trimmed in front and the cursor now skips
+  /// rows that are no longer resident, so older paging stops.
+  ItemId? oldestCovered;
+
+  /// Once the window lost rows in front, it stays known until a fresh
+  /// hydration covers it again, even if later removals empty the window.
+  bool trimmed = false;
+
   /// Frames kept until the first snapshot; a child frame names its child.
   final held = <(int, Map<String, Object?>, SessionRef?)>[];
 }
@@ -193,6 +205,120 @@ final class OpenCodeStreamOwner {
   /// because someone else answered first.
   void refresh(SessionRef ref) => _repair(ref);
 
+  /// The page size of hydration and of every older page: the history cursor
+  /// encodes it, so a continuation must use the same one.
+  static const historyPageLimit = 200;
+
+  /// Whether [loadOlderHistory] would read: the session is current, an older
+  /// cursor exists, the window has room and was never trimmed in front.
+  bool canLoadOlderHistory(SessionRef ref) {
+    final watch = _watched[ref];
+    if (_closed ||
+        _generation == null ||
+        !_released ||
+        watch == null ||
+        !watch.ready ||
+        watch.stalled ||
+        watch.hydrating ||
+        watch.olderCancellation != null) {
+      return false;
+    }
+    final state = store.read(ref);
+    if (state == null || state.nextHistoryCursor == null) return false;
+    return state.timeline.length < state.limits.maxItems &&
+        !olderHistoryTrimmed(ref);
+  }
+
+  /// Whether the window of [ref] lost rows in front of the oldest one a read
+  /// put in it: those rows are known to exist and are no longer resident,
+  /// whatever the cursor says.
+  bool olderHistoryTrimmed(SessionRef ref) {
+    final watch = _watched[ref];
+    if (watch == null) return false;
+    _noteTrim(ref, watch);
+    return watch.trimmed;
+  }
+
+  void _noteTrim(SessionRef ref, _Watch watch) {
+    if (watch.trimmed) return;
+    final covered = watch.oldestCovered;
+    final first = store.read(ref)?.timeline.firstOrNull;
+    if (covered != null && first != null && first.id != covered) {
+      watch.trimmed = true;
+    }
+  }
+
+  /// Reads the next older page of [ref] and prepends it to the window as a
+  /// partial timeline snapshot, so live frames and history share the
+  /// reducer's ordering. True when a page was applied; false when nothing was
+  /// read or the result was dropped because the session moved on. A read
+  /// failure is rethrown; it never changes the window or the cursor.
+  Future<bool> loadOlderHistory(SessionRef ref) async {
+    if (!canLoadOlderHistory(ref)) return false;
+    final watch = _watched[ref]!;
+    final generation = _generation!;
+    final cursor = store.read(ref)!.nextHistoryCursor!;
+    final cancellation = RequestCancellation();
+    watch.olderCancellation = cancellation;
+    try {
+      final readStart = _position(_seq);
+      final started = _now();
+      final page = await reader.readHistory(
+        ref,
+        sourceVersion: sourceVersion,
+        limit: historyPageLimit,
+        cursor: cursor.value,
+        cancellation: cancellation,
+      );
+      final completed = _now();
+      if (!_current(ref, watch, generation) || cancellation.isCancelled) {
+        return false;
+      }
+      final next = page.nextCursor;
+      final result = store.applySnapshot(
+        ref,
+        SessionSnapshot(
+          ref: ref,
+          hydrationGeneration: '$generation',
+          timeline: SnapshotCollection(
+            values: page.items,
+            boundary: SnapshotBoundary(
+              owner: SessionOwner(ref),
+              hydrationGeneration: '$generation',
+              readStart: readStart,
+              readStartedAt: started,
+              readCompletedAt: completed,
+              source: SourceProvenance(
+                harness: harness,
+                version: sourceVersion,
+                nativeType: 'session.message.list',
+              ),
+              authority: const OpenValue.known(SnapshotAuthority.authoritative),
+            ),
+            complete: false,
+          ),
+          nextHistoryCursor: next == null ? null : HistoryCursor(next),
+          hasMoreHistory: next != null,
+        ),
+      );
+      if (page.items.isNotEmpty) watch.oldestCovered = page.items.first.id;
+      _noteTrim(ref, watch);
+      _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
+      _handle(ref, result.effects);
+      return true;
+    } on OpenCodeSessionReadException catch (error) {
+      if (!_current(ref, watch, generation) ||
+          error.failure == OpenCodeSessionReadFailure.cancelled) {
+        return false;
+      }
+      rethrow;
+    } finally {
+      if (identical(watch.olderCancellation, cancellation)) {
+        watch.olderCancellation = null;
+      }
+    }
+  }
+
   void _adopt(SessionRef parent, Iterable<SessionRef> children) {
     final known = _children.putIfAbsent(parent, () => <SessionRef>{});
     for (final child in children) {
@@ -249,6 +375,7 @@ final class OpenCodeStreamOwner {
     if (watch == null) return;
     _children.remove(ref);
     watch.cancellation?.cancel();
+    watch.olderCancellation?.cancel();
     store.close(ref);
   }
 
@@ -257,6 +384,7 @@ final class OpenCodeStreamOwner {
     _closed = true;
     for (final watch in _watched.values) {
       watch.cancellation?.cancel();
+      watch.olderCancellation?.cancel();
     }
     await _subscription?.cancel();
     await _updates.close();
@@ -339,6 +467,7 @@ final class OpenCodeStreamOwner {
   Future<void> _onConnected(int generation, SseFrame? first) async {
     for (final watch in _watched.values) {
       watch.cancellation?.cancel();
+      watch.olderCancellation?.cancel();
     }
     if (first == null || !openCodeServerConnected(first)) {
       _generation = null;
@@ -388,6 +517,9 @@ final class OpenCodeStreamOwner {
     final generation = _generation;
     if (watch == null || generation == null || watch.hydrating) return;
     watch.hydrating = true;
+    // A re-hydration replaces the window; an older page read before it
+    // would land on the new one.
+    watch.olderCancellation?.cancel();
     try {
       for (var attempt = 1; ; attempt++) {
         final cancellation = RequestCancellation();
@@ -416,7 +548,7 @@ final class OpenCodeStreamOwner {
             hydrationGeneration: '$generation',
             readStart: readStart,
             sourceVersion: sourceVersion,
-            historyLimit: 200,
+            historyLimit: historyPageLimit,
             now: _now,
             cancellation: cancellation,
             children: observeChildren
@@ -437,7 +569,10 @@ final class OpenCodeStreamOwner {
           _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
           watch
             ..ready = true
-            ..stalled = false;
+            ..stalled = false
+            ..oldestCovered = snapshot.timeline?.values.firstOrNull?.id
+            ..trimmed = false;
+          _noteTrim(ref, watch);
           final held = List.of(watch.held);
           watch.held.clear();
           for (final (seq, value, child) in held) {
@@ -483,6 +618,7 @@ final class OpenCodeStreamOwner {
 
   void _setAside(SessionRef ref, _Watch watch) {
     watch.cancellation?.cancel();
+    watch.olderCancellation?.cancel();
     watch
       ..ready = false
       ..stalled = true
@@ -502,6 +638,7 @@ final class OpenCodeStreamOwner {
     _children.remove(ref);
     final watch = _watched.remove(ref);
     watch?.cancellation?.cancel();
+    watch?.olderCancellation?.cancel();
     store.close(ref);
     _emit(OpenCodeSessionEvicted(ref));
   }
@@ -700,6 +837,9 @@ final class OpenCodeStreamOwner {
     }
     for (final event in events) {
       final result = store.apply(ref, event);
+      // Before the update is seen, so a removal that empties a trimmed
+      // window cannot hide the trim.
+      if (_watched[ref] case final watch?) _noteTrim(ref, watch);
       _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
       _handle(ref, result.effects);
     }
@@ -734,6 +874,7 @@ final class OpenCodeStreamOwner {
     for (final MapEntry(key: ref, value: watch) in _watched.entries) {
       watch
         ..cancellation?.cancel()
+        ..olderCancellation?.cancel()
         ..ready = false
         ..held.clear();
       final state = store.disconnected(ref);

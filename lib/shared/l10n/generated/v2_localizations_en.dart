@@ -1275,4 +1275,7 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get chatGoToFirst => 'Go to first message';
+
+  @override
+  String get liveOlderLoading => 'Loading older messages…';
 }

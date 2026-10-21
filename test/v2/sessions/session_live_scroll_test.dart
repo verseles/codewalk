@@ -39,7 +39,7 @@ ItemMeta _rehydrated(SessionRef ref, String id) => ItemMeta(
 );
 
 ScrollController _controller(WidgetTester tester) =>
-    tester.widget<ListView>(find.byType(ListView)).controller!;
+    tester.widget<CustomScrollView>(find.byType(CustomScrollView)).controller!;
 
 /// Opens the live screen with [items] and returns the lease, so a test can
 /// push a live update.
@@ -117,7 +117,7 @@ void main() {
   group('the live timeline', () {
     testWidgets('the list opens on the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 2));
-      final list = tester.widget<ListView>(find.byType(ListView));
+      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
       final controller = list.controller!;
       expect(controller.offset, controller.position.maxScrollExtent);
       expect(find.text('row 1'), findsOneWidget);
@@ -128,7 +128,7 @@ void main() {
 
     testWidgets('a live update follows the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 1));
-      final list = tester.widget<ListView>(find.byType(ListView));
+      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
       final controller = list.controller!;
       expect(controller.offset, controller.position.maxScrollExtent);
       live.handle.emit(
@@ -155,14 +155,14 @@ void main() {
       tester,
     ) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 40));
-      final list = tester.widget<ListView>(find.byType(ListView));
+      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
       final controller = list.controller!;
       final bottom = controller.position.maxScrollExtent;
       expect(bottom, greaterThan(0));
 
       // The reader scrolls up by a drag: the timeline stays where the reader
       // put it and the control appears.
-      await tester.drag(find.byType(ListView), const Offset(0, 120));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
       await tester.pumpAndSettle();
       expect(controller.offset, lessThan(bottom));
       expect(find.byKey(const ValueKey('live-jump-latest')), findsOneWidget);
@@ -189,9 +189,9 @@ void main() {
 
     testWidgets('the control returns to the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 40));
-      final list = tester.widget<ListView>(find.byType(ListView));
+      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
       final controller = list.controller!;
-      await tester.drag(find.byType(ListView), const Offset(0, 120));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
       await tester.pumpAndSettle();
       final control = find.byKey(const ValueKey('live-jump-latest'));
       expect(control, findsOneWidget);
@@ -211,7 +211,7 @@ void main() {
         (ref) => _answers(ref, 40),
         locale: const Locale('ar'),
       );
-      await tester.drag(find.byType(ListView), const Offset(0, 120));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
       await tester.pumpAndSettle();
       final control = find.byKey(const ValueKey('live-jump-latest'));
       expect(control, findsOneWidget);
@@ -234,7 +234,7 @@ void main() {
           ),
         ],
       );
-      final list = tester.widget<ListView>(find.byType(ListView));
+      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
       final controller = list.controller!;
       // The answer starts at the top of the viewport, not at its end.
       expect(controller.offset, lessThan(controller.position.maxScrollExtent));
@@ -282,7 +282,7 @@ void main() {
     testWidgets('content under a reader marks the control', (tester) async {
       final rig = await _openLive(tester, (ref) => _answers(ref, 40));
       final controller = _controller(tester);
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       final before = controller.offset;
       rig.handle.emit(
@@ -319,7 +319,7 @@ void main() {
       );
       final controller = _controller(tester);
       final bottom = controller.position.maxScrollExtent;
-      final center = tester.getCenter(find.byType(ListView));
+      final center = tester.getCenter(find.byType(CustomScrollView));
       final pointer = TestPointer(1, PointerDeviceKind.mouse);
       await tester.sendEventToBinding(pointer.hover(center));
       await tester.sendEventToBinding(pointer.scroll(const Offset(0, -200)));
@@ -335,7 +335,7 @@ void main() {
     ) async {
       final rig = await _openLive(tester, (ref) => _answers(ref, 40));
       // Dragging up at the tail cannot move past it.
-      await tester.drag(find.byType(ListView), const Offset(0, -200));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -200));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('live-jump-latest')), findsNothing);
       await tester.pumpWidget(const SizedBox.shrink());
@@ -432,12 +432,12 @@ void main() {
         locale: const Locale('ar'),
         textScale: 2,
       );
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       final control = find.byKey(const ValueKey('live-jump-latest'));
       expect(control, findsOneWidget);
       // The control sits at the end edge, which is the left in Arabic.
-      final list = tester.getRect(find.byType(ListView));
+      final list = tester.getRect(find.byType(CustomScrollView));
       expect(tester.getCenter(control).dx, lessThan(list.center.dx));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
@@ -560,7 +560,7 @@ void main() {
       );
       final controller = _controller(tester);
       final gesture = await tester.startGesture(
-        tester.getCenter(find.byType(ListView)),
+        tester.getCenter(find.byType(CustomScrollView)),
       );
       // The first move stays within the bottom epsilon, then the drag goes
       // farther in the same direction, which reports no new direction.
@@ -615,7 +615,7 @@ void main() {
       final live = await _openLive(tester, turn, settled: false);
       final controller = _controller(tester);
       // The reader moves away while the turn runs, then the turn settles.
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       live.handle.emit(
         SessionLiveView(
@@ -633,7 +633,7 @@ void main() {
       await tester.pumpAndSettle();
       // The reader drags back to the tail, then content arrives: the old
       // answer is not revealed on top of the tail the reader came back to.
-      await tester.drag(find.byType(ListView), const Offset(0, -20000));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -20000));
       await tester.pumpAndSettle();
       expect(controller.offset, controller.position.maxScrollExtent);
       live.handle.emit(
@@ -675,7 +675,7 @@ void main() {
         final live = await _openLive(tester, turn, settled: false);
         final controller = _controller(tester);
         // The reader moves away while the turn runs, then the turn settles.
-        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
         await tester.pumpAndSettle();
         live.handle.emit(
           SessionLiveView(
@@ -727,7 +727,7 @@ void main() {
       await tester.pumpAndSettle();
       // The drag marks the reader's priority; the reader is now far above
       // the tail, outside the list's cache.
-      await tester.drag(find.byType(ListView), const Offset(0, 50));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 50));
       await tester.pumpAndSettle();
       live.handle.emit(
         SessionLiveView(
@@ -768,7 +768,7 @@ void main() {
         (ref) => _answers(ref, 40),
         settled: false,
       );
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       Color? background() => tester
           .widget<FloatingActionButton>(
@@ -817,7 +817,7 @@ void main() {
         settled: false,
       );
       // The reader moves away, so the content that arrives is marked.
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       expect(jumpControl(), findsOneWidget);
       final plain = controlColor(tester);
@@ -903,7 +903,7 @@ void main() {
         List<TimelineItem> Function(SessionRef ref) after,
       ) async {
         final live = await _openLive(tester, before, settled: false);
-        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
         await tester.pumpAndSettle();
         final plain = controlColor(tester);
         live.handle.emit(
@@ -1057,7 +1057,7 @@ void main() {
         List<TimelineItem> Function(SessionRef ref) after,
       ) async {
         final live = await _openLive(tester, before, settled: false);
-        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
         await tester.pumpAndSettle();
         final plain = controlColor(tester);
         live.handle.emit(
@@ -1131,7 +1131,7 @@ void main() {
         ],
         settled: false,
       );
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       final plain = controlColor(tester);
       // The outcome the row shows changes: the turn did not succeed.
@@ -1217,7 +1217,7 @@ void main() {
       // The reader holds the list at the bottom: the finger is down and the
       // drag has not moved the list.
       final gesture = await tester.startGesture(
-        tester.getCenter(find.byType(ListView)),
+        tester.getCenter(find.byType(CustomScrollView)),
       );
       await tester.pump();
       // The reader pulls the list up at the tail: the drag is a real one and
@@ -1260,7 +1260,7 @@ void main() {
         settled: false,
       );
       final controller = _controller(tester);
-      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
       // The content arrives and the reader starts a page-key scroll before
       // the follow's frame.
       live.handle.emit(
@@ -1375,7 +1375,7 @@ void main() {
         (ref) => _answers(ref, 40),
         settled: false,
       );
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       expect(jumpControl(), findsOneWidget);
       final plain = controlColor(tester);
@@ -1413,9 +1413,9 @@ void main() {
         (ref) => _answers(ref, 40),
         settled: false,
       );
-      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
       // The reader moves away, so the control is offered.
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       expect(jumpControl(), findsOneWidget);
       expect(controlColor(tester), scheme.surfaceContainerHigh);
@@ -1451,7 +1451,7 @@ void main() {
         ),
       ];
       final live = await _openLive(tester, items, settled: false);
-      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
       // The item changes with the same size, so the extent does not move and
       // the reader, at the bottom, has already seen it.
       live.handle.emit(
@@ -1469,7 +1469,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       // The reader moves away: the control is offered, unmarked.
-      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       expect(jumpControl(), findsOneWidget);
       expect(controlColor(tester), scheme.surfaceContainerHigh);

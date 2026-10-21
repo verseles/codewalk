@@ -891,7 +891,10 @@ final class _Draft {
         } else {
           merged.add(current);
         }
-        if (admissions.contains(current.id)) {
+        // Only a read that may replace the timeline proves an admission is
+        // missing; a partial older page simply does not cover the tail.
+        if (admissions.contains(current.id) &&
+            canReplace(collection.boundary, collection.complete)) {
           refetch(SessionCollection.timeline, 'admissionMissingFromHistory');
         }
       }

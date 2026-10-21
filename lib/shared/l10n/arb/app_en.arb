@@ -1571,5 +1571,9 @@
   "chatGoToFirst": "Go to first message",
   "@chatGoToFirst": {
     "description": "CodeWalk UI string — chatGoToFirst"
+  },
+  "liveOlderLoading": "Loading older messages…",
+  "@liveOlderLoading": {
+    "description": "V2 live read-only session view"
   }
 }

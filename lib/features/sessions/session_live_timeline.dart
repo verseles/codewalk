@@ -13,6 +13,11 @@ import 'session_timeline_tile.dart';
 /// The list is chronological and forward, like the retained reference: the
 /// header is the first row and the items follow it, so a live update appends
 /// below the reader and the newest content is at the end.
+///
+/// Older history pages in above the rows the timeline first showed. Those
+/// rows open a center sliver: what comes before it grows upwards and what
+/// comes after it grows downwards, so a page added on top never moves the row
+/// the reader is reading, whatever the heights of the rows it adds.
 class SessionLiveTimeline extends StatefulWidget {
   const SessionLiveTimeline({
     super.key,
@@ -20,6 +25,9 @@ class SessionLiveTimeline extends StatefulWidget {
     required this.headerBuilder,
     required this.scroll,
     required this.settled,
+    this.olderLoading = false,
+    this.onLoadOlder,
+    this.topBuilder,
   });
 
   /// The resident items, in the server's order.
@@ -33,6 +41,16 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// Whether the session is settled, so its finished answer can be revealed.
   final bool settled;
+
+  /// Whether an older page is being read, shown by a pill at the top.
+  final bool olderLoading;
+
+  /// The block at the very top, above the older rows; null for none.
+  final WidgetBuilder? topBuilder;
+
+  /// Reads the next older page; null when none can be read now. The reader
+  /// asks for it by reaching the top of the list.
+  final VoidCallback? onLoadOlder;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -83,6 +101,27 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   /// The context of the last assistant answer, while the list builds it.
   BuildContext? _answerContext;
+
+  /// The first row of the center sliver; every row before it is older
+  /// history that paged in above. It changes only when that row leaves the
+  /// window, and then the center restarts at the window's first row.
+  ItemId? _pivot;
+
+  /// The rows read above the center so far, in chronological order.
+  int _olderCount = 0;
+
+  /// The center sliver's key, which the scroll view anchors to.
+  final _centerKey = UniqueKey();
+
+  /// Whether reaching the top may ask for an older page: armed once the
+  /// reader is far from the top, so a list that stays near the top asks once.
+  bool _olderArmed = false;
+
+  /// The distance from the top within which the reader reached the top, and
+  /// the distance that arms it again, in logical pixels; the retained
+  /// reference's values.
+  static const double _topReach = 72;
+  static const double _topRearm = 220;
 
   @override
   void initState() {
@@ -154,7 +193,26 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     } else if (notification is ScrollEndNotification) {
       widget.scroll.onViewportChanged();
     }
+    if (notification is ScrollUpdateNotification &&
+        !widget.scroll.programmatic) {
+      _considerOlder(notification.metrics);
+    }
     return false;
+  }
+
+  /// The reader reached the top: one older page is asked for, and the next
+  /// one only after the reader went far enough from the top again. The
+  /// timeline's own jumps never ask.
+  void _considerOlder(ScrollMetrics metrics) {
+    final fromTop = metrics.pixels - metrics.minScrollExtent;
+    if (fromTop > _topRearm) {
+      _olderArmed = true;
+      return;
+    }
+    final load = widget.onLoadOlder;
+    if (!_olderArmed || fromTop > _topReach || load == null) return;
+    _olderArmed = false;
+    load();
   }
 
   /// Whether the list can still move in the direction of the gesture.
@@ -309,23 +367,35 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   Widget build(BuildContext context) {
     final items = widget.items;
     final signature = _contentSignature(items);
+    // Rows that paged in above the rows the previous build saw are history,
+    // not an arrival: only what follows them is compared.
+    final previous = _lastSignature;
+    final kept = previous == null || previous.isEmpty
+        ? 0
+        : signature.indexWhere((s) => s.id == previous.first.id);
+    final compared = kept > 0 ? signature.sublist(kept) : signature;
     if (!_landed) {
       // The first build lands on the newest content.
       _landed = true;
       _requestFollow();
-    } else if (items.length > _lastItemCount ||
-        (items.length == _lastItemCount &&
-            !listEquals(signature, _lastSignature))) {
+    } else if (compared.length > _lastItemCount ||
+        (compared.length == _lastItemCount &&
+            !listEquals(compared, previous))) {
       // Content arrived, even if the row that changed is not laid out. A
       // removal is not an arrival.
       _arrivalPending = true;
       _afterNextFrame(_contentArrived);
     }
-    _lastItemCount = items.length;
+    _lastItemCount = signature.length;
     _lastSignature = signature;
+    _placePivot(items);
     // The answer row sets its context again when the list lays it out.
     _answerContext = null;
     final answerIndex = _lastAnswerIndex(items);
+    // With no older rows above, the top block opens the center, so a list
+    // that fits the screen still shows it; otherwise it tops the older rows.
+    final topInCenter = widget.topBuilder != null && _olderCount == 0;
+    final lead = topInCenter ? 2 : 1;
     return ListenableBuilder(
       listenable: widget.scroll,
       builder: (context, _) => Stack(
@@ -335,30 +405,74 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               onNotification: _onMetrics,
               child: NotificationListener<ScrollNotification>(
                 onNotification: _onScroll,
-                child: ListView.builder(
+                child: CustomScrollView(
                   controller: widget.scroll.controller,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: items.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) return widget.headerBuilder(context);
-                    final item = items[index - 1];
-                    final isAnswer = index - 1 == answerIndex;
-                    // Every row has the same shape, so a row keeps its
-                    // element when the last answer moves; the answer row
-                    // keeps its context, so it can be measured and
-                    // aligned.
-                    return Builder(
-                      key: ValueKey(item.id),
-                      builder: (context) {
-                        if (isAnswer) _answerContext = context;
-                        return SessionTimelineTile(item: item);
-                      },
-                    );
-                  },
+                  center: _centerKey,
+                  slivers: [
+                    if (widget.topBuilder case final top? when _olderCount > 0)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                          child: top(context),
+                        ),
+                      ),
+                    // Older history, built from the center outwards: index
+                    // 0 is the row right above the center.
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) =>
+                              _row(items, _olderCount - 1 - index, answerIndex),
+                          childCount: _olderCount,
+                          findChildIndexCallback: (key) {
+                            final at = _indexOf(items, key);
+                            return at == null || at >= _olderCount
+                                ? null
+                                : _olderCount - 1 - at;
+                          },
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      key: _centerKey,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index < lead) {
+                              return index == 0 && topInCenter
+                                  ? widget.topBuilder!(context)
+                                  : widget.headerBuilder(context);
+                            }
+                            return _row(
+                              items,
+                              _olderCount + index - lead,
+                              answerIndex,
+                            );
+                          },
+                          childCount: items.length - _olderCount + lead,
+                          findChildIndexCallback: (key) {
+                            final at = _indexOf(items, key);
+                            return at == null || at < _olderCount
+                                ? null
+                                : at - _olderCount + lead;
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
+          if (widget.olderLoading)
+            PositionedDirectional(
+              top: 12,
+              start: 0,
+              end: 0,
+              child: Center(child: _olderPill(context)),
+            ),
           if (_showJumpControl)
             PositionedDirectional(
               end: 16,
@@ -366,6 +480,64 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               child: _jumpToLatest(context),
             ),
         ],
+      ),
+    );
+  }
+
+  /// Places the center: on the first rows the timeline shows, and again on
+  /// the window's first row when the center row left the window.
+  void _placePivot(List<TimelineItem> items) {
+    final pivot = _pivot;
+    final at = pivot == null
+        ? -1
+        : items.indexWhere((item) => item.id == pivot);
+    if (at >= 0) {
+      _olderCount = at;
+      return;
+    }
+    _pivot = items.firstOrNull?.id;
+    _olderCount = 0;
+  }
+
+  int? _indexOf(List<TimelineItem> items, Key key) {
+    if (key is! ValueKey<ItemId>) return null;
+    final at = items.indexWhere((item) => item.id == key.value);
+    return at < 0 ? null : at;
+  }
+
+  /// One row. Every row has the same shape, so a row keeps its element when
+  /// the last answer moves; the answer row keeps its context, so it can be
+  /// measured and aligned.
+  Widget _row(List<TimelineItem> items, int index, int? answerIndex) {
+    final item = items[index];
+    final isAnswer = index == answerIndex;
+    return Builder(
+      key: ValueKey(item.id),
+      builder: (context) {
+        if (isAnswer) _answerContext = context;
+        return SessionTimelineTile(item: item);
+      },
+    );
+  }
+
+  /// The pill shown while an older page is read, like the retained
+  /// reference's.
+  Widget _olderPill(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      key: const ValueKey('live-older-loading'),
+      color: scheme.surfaceContainerHigh,
+      shape: const StadiumBorder(),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: SizedBox.square(
+          dimension: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            semanticsLabel: context.v2L10n.liveOlderLoading,
+          ),
+        ),
       ),
     );
   }

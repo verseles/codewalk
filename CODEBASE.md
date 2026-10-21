@@ -2255,6 +2255,7 @@ recorded claim plus the pinned digests — and never contacts a server.
 lib/shared/sessions/session_catalog_changes.dart # The catalog's port: a payload-free lifecycle feed plus the transport state, and the factory that acquires it
 lib/shared/sessions/session_live_source.dart # `SessionLiveDirectory.catalogChanges(...)`: the endpoint's single event stream, shared with the live sessions
 lib/platform/sessions/opencode_profile_slot.dart # The per-profile runtime: the authenticated transport, the session reader, the one event stream, the owner, the live handles and the catalog lease
+lib/platform/sessions/opencode_live_handle.dart # One live session's lease on the slot; it only delegates, and lives apart so the slot stays below the file-size limit
 lib/platform/sessions/session_live_factory_io.dart # The live directory: the per-profile slots, the catalog lease and the credential fence
 packages/harness_opencode/lib/src/stream_owner.dart # The owner emits the payload-free catalog signal for session.created/forked/renamed/deleted/moved before every filter, and exposes its connection kind
 lib/features/sessions/sessions_controller.dart # The catalog: the quiet authoritative re-read, the debounce and the cooldown, the behind and suspended states
@@ -2308,6 +2309,33 @@ turn never mark it. Each follow asks for its own frame. A settled
 answer that does not fit the viewport is offered from its start once the
 follow reaches the tail, counts as read, and gives the tail back when the next
 turn starts.
+
+
+## V2-044C2 live session older history (#279)
+
+```text
+packages/harness_opencode/lib/src/stream_owner.dart # loadOlderHistory / canLoadOlderHistory / olderHistoryTrimmed: one older page per session through the hydration cursor at historyPageLimit (200), applied as a partial timeline snapshot
+packages/codewalk_core/lib/src/reducer/session_reducer.dart # A partial page never doubts a tail admission (admissionMissingFromHistory only on a replacing read)
+lib/shared/sessions/session_live_source.dart # SessionOlderHistoryState (loading, failure, trimmed) and the lease's older-history methods
+lib/platform/sessions/opencode_profile_slot.dart # The slot's older-history state per session, its failure mapping and its publish
+lib/features/sessions/session_live_controller.dart # canLoadOlderHistory, loadOlderHistory and olderHistoryBeyondWindow (when the history viewer is the way back)
+lib/features/sessions/session_live_timeline.dart # The center-sliver list: rows first shown open the center, older rows grow above it; the top trigger, the pill and the top block
+lib/features/sessions/session_live_page.dart # The top block: the local-limit notice, the history viewer and the retry of a failed page
+packages/harness_opencode/test/stream_owner_history_test.dart # The 2,000-message case, single flight, stale pages, failures, the end of history and the front trim
+test/v2/sessions/session_live_pagination_test.dart # The trigger, the anchor, the arrival, the 2,000/500 structural case and the fallback
+test/v2/sessions/session_live_timeline_golden_test.dart # Goldens of the top of a full window and of the landing (goldens/README.md)
+```
+
+The stream owner owns the older read: it refuses without a cursor, at the
+500-row cap, while another read or a hydration runs, and once the window lost
+rows in front of the oldest row a read put in it (a latch that only a fresh
+hydration clears). The page is a timeline-only snapshot that cannot replace
+the window, so live frames and history share the reducer's ordering; a later
+re-hydration rejects it. The timeline keeps the rows it first showed in a
+center sliver and the older rows in the sliver before it, built from the
+center outwards, so a page added on top never moves a visible row; a plain
+list loses that anchor. The fallback block tops the older rows, or opens the
+center when there are none so a short list still shows it.
 
 ## V2-043D grouped session catalog (#392)
 

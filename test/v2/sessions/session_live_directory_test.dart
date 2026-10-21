@@ -40,6 +40,12 @@ final class _Server {
   final permissions = <Object?>[];
   int replyStatus = 204;
 
+  /// The older-history cursor the newest page offers; null for none.
+  String? olderCursor;
+
+  /// Holds a continuation read until completed.
+  Completer<void>? holdOlder;
+
   /// Session rules by session id; absent means never set.
   final sessionRules = <String, List<Object?>>{};
   final patches = <String>[];
@@ -169,6 +175,9 @@ final class _Server {
         return;
       }
     }
+    if (tail == 'message' && r.uri.queryParameters.containsKey('cursor')) {
+      await holdOlder?.future;
+    }
     r.response.write(
       jsonEncode(switch (tail) {
         'info' => {
@@ -189,6 +198,17 @@ final class _Server {
               if ((permission! as Map)['sessionID'] == session) permission,
           ],
         },
+        'message' when r.uri.queryParameters.containsKey('cursor') => {
+          'data': [
+            {
+              'id': 'msg_old',
+              'type': 'user',
+              'time': {'created': 100},
+              'text': 'older',
+            },
+          ],
+          'cursor': {'previous': null, 'next': null},
+        },
         'message' => {
           'data': [
             {
@@ -205,7 +225,7 @@ final class _Server {
                 'outcome': 'succeeded',
               },
           ],
-          'cursor': {'previous': null, 'next': null},
+          'cursor': {'previous': null, 'next': olderCursor},
         },
         _ => {
           'data': {
@@ -373,6 +393,43 @@ void main() {
       expect(a.stopState.busy, isFalse);
       expect(a.canStop, isTrue);
       expect(server.interrupts, hasLength(1));
+    },
+  );
+
+  test(
+    'an older page read when its last lease closed leaves no closed view',
+    () async {
+      server.olderCursor = 'older-1';
+      server.holdOlder = Completer();
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      // Another session keeps the profile's stream open.
+      final keep = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final lease = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_two'),
+      );
+      await until(lease, (_) => lease.canLoadOlderHistory);
+      final reading = lease.loadOlderHistory();
+      expect(lease.olderHistory.loading, isTrue);
+      lease.close();
+      server.holdOlder!.complete();
+      await reading;
+      final reopened = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_two'),
+      );
+      expect(reopened.current.phase, isNot(SessionLivePhase.closed));
+      expect(reopened.olderHistory.loading, isFalse);
+      expect(reopened.olderHistory.failure, isNull);
+      reopened.close();
+      keep.close();
     },
   );
 

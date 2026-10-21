@@ -67,6 +67,8 @@ void main() {
               state: liveState(
                 ref,
                 hasMore: true,
+                // More history the lease cannot page in: the limit shows.
+                cursor: 'older',
                 execution: const ExecutionState(
                   kind: OpenValue.known(ExecutionKind.interruptedPendingResume),
                   lastOutcome: ExecutionOutcome(

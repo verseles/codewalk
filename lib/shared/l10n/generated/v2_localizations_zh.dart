@@ -1194,4 +1194,7 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get chatGoToFirst => '转到第一条消息';
+
+  @override
+  String get liveOlderLoading => '正在加载更早的消息…';
 }

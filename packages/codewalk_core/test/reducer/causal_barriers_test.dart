@@ -45,6 +45,29 @@ void main() {
         );
       },
     );
+
+    test('a partial older page prepends without doubting the admission', () {
+      final state = synthetic.upsert(
+        synthetic.initial(),
+        synthetic.user('accepted'),
+        5,
+      );
+      // An older page covers only rows before the tail, so it cannot prove
+      // the accepted input is missing from the server's history.
+      final result = hydrate(
+        synthetic.hydrating(state, seq: 10),
+        synthetic.history(
+          [synthetic.user('older', delivery: DeliveryState.delivered)],
+          10,
+          complete: false,
+        ),
+      );
+      expect(
+        [for (final item in result.state.timeline) item.id.value],
+        ['older', 'accepted'],
+      );
+      expect(result.effects.whereType<Refetch>(), isEmpty);
+    });
   });
 
   group('synthetic hydration read-start barriers', () {

@@ -1221,4 +1221,7 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get chatGoToFirst => '첫 메시지로 이동';
+
+  @override
+  String get liveOlderLoading => '이전 메시지를 불러오는 중…';
 }

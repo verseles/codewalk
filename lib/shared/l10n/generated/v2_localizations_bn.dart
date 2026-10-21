@@ -1269,4 +1269,7 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get chatGoToFirst => 'প্রথম মেসেজে যান';
+
+  @override
+  String get liveOlderLoading => 'আগের বার্তা লোড হচ্ছে…';
 }

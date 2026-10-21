@@ -156,6 +156,14 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
 
   ScriptedPromptOutbox? _outbox;
 
+  // The scripted harness has no history continuation: nothing older pages in.
+  @override
+  SessionOlderHistoryState get olderHistory => const SessionOlderHistoryState();
+  @override
+  bool get canLoadOlderHistory => false;
+  @override
+  Future<void> loadOlderHistory() async {}
+
   @override
   String? nativeMessageOf(ItemId id) => openCodeMessageIdOf(id, session);
 

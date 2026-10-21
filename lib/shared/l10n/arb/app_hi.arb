@@ -1063,5 +1063,9 @@
     "description": "V2 bounded read-only session catalog"
   },
   "chatGoToLatest": "नवीनतम संदेश पर जाएं",
-  "chatGoToFirst": "पहले संदेश पर जाएं"
+  "chatGoToFirst": "पहले संदेश पर जाएं",
+  "liveOlderLoading": "पुराने संदेश लोड हो रहे हैं…",
+  "@liveOlderLoading": {
+    "description": "V2 live read-only session view"
+  }
 }

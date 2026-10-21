@@ -113,6 +113,16 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the control sits at the end edge in both directions
 - **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the control
 
+### V2 live session older history
+
+- **Given** the v2 live session screen shows a session with more history than the newest page it opened with
+- **When** the reader scrolls up to the top of the list (within 72 logical pixels, armed again only after moving more than 220 pixels away)
+- **Then** one older page is read, 200 native messages at a time through the same continuation the opening read returned, and a pill shows at the top while it is read; the timeline's own jumps never ask for a page, and a second request while one is read does nothing
+- **Then** the older rows appear above the rows the reader was reading, and the row the reader was reading keeps its place on the screen; an older page is history, not new content, so it never marks the control that returns to the newest content and never resumes the follow, while a live row that lands at the same time still does
+- **Then** the window keeps at most 500 rows and never drops the newest to make room: a page that would pass the cap loses its own oldest rows, and paging stops there; it also stops once the window lost rows in front, because the next page would skip them
+- **Then** when the window cannot page in more - it is full, it lost rows in front, or a live and current window is refused another page - the top of the list says that the local history limit was reached and offers the read-only history viewer; a window that loaded its whole history, or one paused while not live, offers nothing there
+- **Then** a failed page keeps the rows and the place, and offers a retry at the top of the list; closing the screen while a page is read never leaves a closed or failed state behind for the next screen
+
 ### V2 auxiliary read-only history
 
 - **Given** a loaded session row is expanded in the v2 catalog
