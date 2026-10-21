@@ -1450,7 +1450,7 @@ void main() {
           text: blocked ? 'blocked' : 'working',
         ),
       ];
-      final live = await _openLive(tester, (ref) => items(ref), settled: false);
+      final live = await _openLive(tester, items, settled: false);
       final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
       // The item changes with the same size, so the extent does not move and
       // the reader, at the bottom, has already seen it.
