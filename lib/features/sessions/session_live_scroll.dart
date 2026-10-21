@@ -26,6 +26,10 @@ final class SessionLiveScroll extends ChangeNotifier {
   bool _revealed = false;
   bool _programmatic = false;
 
+  /// The offset the viewport was at the last time it was observed, so a move
+  /// that the timeline did not start is known.
+  double? _lastPixels;
+
   /// Whether the timeline follows the newest content.
   bool get following => _following;
 
@@ -79,6 +83,12 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// the mark of unseen content is cleared. A gesture still in progress keeps
   /// its priority even while it is within the bottom epsilon.
   void onViewportChanged() {
+    if (_takeReaderMove()) {
+      // The reader moved the list and the viewport is no longer at the
+      // bottom: the follow stops, so a live update never pulls the content
+      // away from the reader.
+      markUserIntent();
+    }
     if (!atBottom || userScrolling) return;
     if (_following && !_unreadBelow && !_revealed) return;
     _following = true;
@@ -87,11 +97,35 @@ final class SessionLiveScroll extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Records the offset of the viewport and reports whether the reader moved
+  /// it.
+  ///
+  /// A page key and a click on the scrollbar track move the list with
+  /// `moveTo`, which reports no scroll direction of its own, so the direction
+  /// alone cannot tell the reader's scroll from the timeline's own. The
+  /// offset can: a move the timeline did not start, that leaves the viewport
+  /// away from the bottom, is the reader's. A removal that clamps the
+  /// viewport leaves it at the bottom, and the content that arrives below
+  /// does not move the offset at all.
+  bool _takeReaderMove() {
+    if (!controller.hasClients) return false;
+    final pixels = controller.position.pixels;
+    final last = _lastPixels;
+    _lastPixels = pixels;
+    if (last == null || pixels == last) return false;
+    return !_programmatic && !atBottom;
+  }
+
   /// Records that content arrived while the reader was away from the bottom,
   /// so the control that returns to it is marked.
+  ///
+  /// A revealed answer is no longer the reader's place: the content that
+  /// arrived under it is what the reader has to come back to, so the control
+  /// is offered again.
   void onContentArrivedAway() {
     if (_following || _unreadBelow) return;
     _unreadBelow = true;
+    _revealed = false;
     notifyListeners();
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_scroll.dart';
@@ -5,6 +7,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
@@ -21,6 +24,19 @@ List<TimelineItem> _answers(
 ];
 
 const _delivered = OpenValue<DeliveryState>.known(DeliveryState.delivered);
+
+/// An item meta of a rehydration: the same row, read again, with the
+/// generation the new read gives it.
+ItemMeta _rehydrated(SessionRef ref, String id) => ItemMeta(
+  id: ItemId(id),
+  generation: 'rehydrated',
+  status: const OpenValue.known(ItemStatus.completed),
+  source: SourceProvenance(
+    harness: ref.harnessRef,
+    version: '2.0.22',
+    nativeType: 'live',
+  ),
+);
 
 ScrollController _controller(WidgetTester tester) =>
     tester.widget<ListView>(find.byType(ListView)).controller!;
@@ -780,6 +796,291 @@ void main() {
       tester.view.physicalSize = const Size(390, 600);
       await tester.pumpAndSettle();
       expect(background(), plain);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+  });
+
+  group('the second review corrections', () {
+    /// The control that returns to the newest content, and the color that
+    /// marks the content that arrived below the reader.
+    Finder jumpControl() => find.byKey(const ValueKey('live-jump-latest'));
+
+    Color? controlColor(WidgetTester tester) => tester
+        .widget<FloatingActionButton>(jumpControl())
+        .backgroundColor;
+
+    testWidgets('a row that is not the last one is an arrival', (tester) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      // The reader moves away, so the content that arrives is marked.
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      expect(jumpControl(), findsOneWidget);
+      final plain = controlColor(tester);
+      // A row in the middle grows: the tail is untouched, but content
+      // arrived under the reader.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              for (var i = 0; i < 40; i++)
+                AssistantText(
+                  meta: liveMeta(live.ref, 'a$i'),
+                  text: i == 10 ? 'row 10 ${'more ' * 40}' : 'row $i',
+                  complete: true,
+                ),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controlColor(tester), isNot(plain));
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a scroll with no direction of its own keeps the reader', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        size: const Size(1280, 800),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      // A page key and a click on the scrollbar track move the list with
+      // `moveTo`, which reports no scroll direction of its own.
+      unawaited(
+        controller.position.moveTo(
+          controller.position.pixels - 200,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.position.userScrollDirection, ScrollDirection.idle);
+      expect(jumpControl(), findsOneWidget);
+      final held = controller.offset;
+      expect(held, lessThan(controller.position.maxScrollExtent));
+      // Content arrives: the reader's place is kept.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 41),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.offset, held);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('the notice, the outcome and the unknown row are arrivals', (
+      tester,
+    ) async {
+      // The same row before and after: only the field under test changes, so
+      // the arrival can only come from that field.
+      Future<void> expectMarked(
+        List<TimelineItem> Function(SessionRef ref) before,
+        List<TimelineItem> Function(SessionRef ref) after,
+      ) async {
+        final live = await _openLive(tester, before, settled: false);
+        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.pumpAndSettle();
+        final plain = controlColor(tester);
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: after(live.ref),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(controlColor(tester), isNot(plain));
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      }
+
+      // The tail is a notice whose text arrives.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          Notice(
+            meta: liveMeta(ref, 'n1'),
+            kind: const OpenValue.known(NoticeKind.continuation),
+            text: '',
+          ),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          Notice(
+            meta: liveMeta(ref, 'n1'),
+            kind: const OpenValue.known(NoticeKind.continuation),
+            text: 'the turn continues',
+          ),
+        ],
+      );
+      // The tail is an outcome whose reason arrives.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          TurnOutcome(
+            meta: liveMeta(ref, 'o1'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+          ),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          TurnOutcome(
+            meta: liveMeta(ref, 'o1'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+            reason: 'the turn ended',
+          ),
+        ],
+      );
+      // The tail is an unknown row whose fallback text arrives.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          UnknownItem(
+            meta: liveMeta(ref, 'u1'),
+            rawType: 'custom',
+            raw: CanonicalValue('payload'),
+          ),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          UnknownItem(
+            meta: liveMeta(ref, 'u1'),
+            rawType: 'custom',
+            raw: CanonicalValue('payload'),
+            fallbackText: 'a part this client does not know',
+          ),
+        ],
+      );
+      // The tail is a shell run whose exit code arrives.
+      await expectMarked(
+        (ref) => [
+          ..._answers(ref, 39),
+          ShellRun(meta: liveMeta(ref, 's1'), command: 'echo done'),
+        ],
+        (ref) => [
+          ..._answers(ref, 39),
+          ShellRun(
+            meta: liveMeta(ref, 's1'),
+            command: 'echo done',
+            exitCode: 0,
+          ),
+        ],
+      );
+    });
+
+    testWidgets('content under a revealed answer offers the control', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => [
+          ..._answers(ref, 10),
+          AssistantText(
+            meta: liveMeta(ref, 'final'),
+            text: 'final answer ${'body ' * 400}',
+            complete: true,
+          ),
+        ],
+      );
+      // The settled answer is revealed from its start, so the control stays
+      // hidden: the reader is at the answer, not away from the newest.
+      expect(jumpControl(), findsNothing);
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              ..._answers(live.ref, 10),
+              AssistantText(
+                meta: liveMeta(live.ref, 'final'),
+                text: 'final answer ${'body ' * 400}',
+                complete: true,
+              ),
+              ..._answers(live.ref, 2).skip(1),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Content arrived under the revealed answer: the reader has to come
+      // back to the newest content, so the control is offered.
+      expect(jumpControl(), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a rehydration that changes no content is not an arrival', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      expect(jumpControl(), findsOneWidget);
+      final plain = controlColor(tester);
+      // The same content, read again: the rows carry a new generation, but
+      // nothing arrived.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              for (var i = 0; i < 40; i++)
+                AssistantText(
+                  meta: _rehydrated(live.ref, 'a$i'),
+                  text: 'row $i',
+                  complete: true,
+                ),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controlColor(tester), plain);
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });

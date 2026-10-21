@@ -1,4 +1,5 @@
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -49,11 +50,11 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// whatever made it: a new item or a longer one.
   double? _lastMaxScrollExtent;
 
-  /// The number of items and the signature of the last one the previous
-  /// build saw, so the arrival of content is known from the items
+  /// The number of items and the signature of every one of them the
+  /// previous build saw, so the arrival of content is known from the items
   /// themselves, even when the row that changed is not laid out.
   int _lastItemCount = 0;
-  _TailSignature? _lastTail;
+  List<_ItemSignature>? _lastSignature;
 
   /// Whether the timeline already landed on the newest content.
   bool _landed = false;
@@ -111,6 +112,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// direction, and so does a wheel; the timeline's jumps never do. A scroll
   /// that ends at the bottom, even one that could not move, gives the bottom
   /// back to the follow.
+  ///
+  /// A scroll that reports no direction of its own — a page key, a click on
+  /// the scrollbar track — is the reader's too, and the scroll rules know it
+  /// from the offset it moved.
   bool _onScroll(ScrollNotification notification) {
     if (!_ownList(notification, notification.metrics.axis)) return false;
     if (notification is UserScrollNotification) {
@@ -233,19 +238,20 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
-    final tail = items.isEmpty ? null : _tailSignature(items.last);
+    final signature = _contentSignature(items);
     if (!_landed) {
       // The first build lands on the newest content.
       _landed = true;
       _requestFollow();
     } else if (items.length > _lastItemCount ||
-        (items.length == _lastItemCount && tail != _lastTail)) {
+        (items.length == _lastItemCount &&
+            !listEquals(signature, _lastSignature))) {
       // Content arrived, even if the row that changed is not laid out. A
       // removal is not an arrival.
       _afterNextFrame(_contentArrived);
     }
     _lastItemCount = items.length;
-    _lastTail = tail;
+    _lastSignature = signature;
     // The answer row sets its context again when the list lays it out.
     _answerContext = null;
     final answerIndex = _lastAnswerIndex(items);
@@ -325,18 +331,35 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   }
 }
 
-/// A bounded signature of the last item: its identity, generation, status
-/// and text length. A change means content arrived at the tail.
-typedef _TailSignature = (ItemId, String, ItemStatus?, int);
+/// A bounded signature of one item: its identity, its known status, the size
+/// of the content that can grow and the outcome it carries, when it has one.
+/// A change means content arrived.
+typedef _ItemSignature = (ItemId, ItemStatus?, int, int?);
 
-_TailSignature _tailSignature(TimelineItem item) => (
+/// The signature of every resident item, so a change in any of them — not
+/// only in the last — is an arrival.
+List<_ItemSignature> _contentSignature(List<TimelineItem> items) =>
+    items.map(_itemSignature).toList(growable: false);
+
+/// The signature of one item.
+///
+/// The generation is not part of it: a rehydration gives the item a new
+/// generation without any new content, and the reader must not be told that
+/// something arrived.
+_ItemSignature _itemSignature(TimelineItem item) => (
   item.id,
-  item.generation,
   item.status.known,
   switch (item) {
     AssistantText(:final text) => text.length,
     Reasoning(:final text) => text.length,
     UserInput(:final text) => text.length,
+    Notice(:final text) => text.length,
+    TurnOutcome(:final reason) => reason?.length ?? 0,
+    UnknownItem(:final fallbackText) => fallbackText?.length ?? 0,
     _ => 0,
+  },
+  switch (item) {
+    ShellRun(:final exitCode) => exitCode,
+    _ => null,
   },
 );
