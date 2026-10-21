@@ -24,6 +24,13 @@ sessions. Each capture states its own limits in its `README.md`.
   checks. They are not fixtures of a passing test: a test that reads them must
   assert the observation they record, not a generic shape.
 
+**Publication.** These captures are versioned in this repository since
+2026-10-21 (`250443e7`, `3981fb2b`). Their `publication` field and their
+present-tense sentences describe the state at capture time, when the recording
+was indeed local and uncommitted; the capture bytes are hash-pinned in the
+acceptance record of #245 and are never edited after publication. See
+`test/contract/fixtures/README.md` for the rule and the current state.
+
 **Current captures.**
 
 | Capture | Codex | Host | Feeds |

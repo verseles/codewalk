@@ -40,8 +40,9 @@ void main() {
   final fixtures = OpenCodeFixtures();
 
   test('observed captures: lifecycle frames project like the HTTP records', () {
-    // Every tracked 2.0.22 capture; the untracked configured-origin evidence
-    // must not shift these exact totals.
+    // Every session-event 2.0.22 capture; the configured-origin browser
+    // capture records browser operations, not session events, so it must not
+    // shift these exact totals.
     final files =
         fixtures.root
             .listSync(recursive: true)
