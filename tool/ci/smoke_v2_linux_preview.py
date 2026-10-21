@@ -193,7 +193,9 @@ def smoke(archive_path, evidence):
             if locate(capture(window, snapshot), "Pair a server") is not None:
                 click(window, "Pair")
             else:
-                run(["xdotool", "key", "--clearmodifiers", "Tab", "Tab", "Return"])
+                run(["xdotool", "key", "--clearmodifiers", "--delay", "300", "Tab", "Tab"])
+                time.sleep(0.5)
+                run(["xdotool", "key", "--clearmodifiers", "Return"])
             expect(window, ["Pair a server", "Pairing link", "Confirm and pair"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])
             expect(window, ["Appearance", "Shortcuts"], "04-settings-wide")
