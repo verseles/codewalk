@@ -1113,7 +1113,7 @@ void main() {
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
             kind: const OpenValue.known(OutcomeKind.succeeded),
-            reason: 'the turn stopped',
+            reason: 'the turn failed',
           ),
         ],
       );
@@ -1201,6 +1201,164 @@ void main() {
       // it, and the follow did not pull it to the tail.
       expect(controller.offset, lessThan(controller.position.maxScrollExtent));
       expect(controller.position.userScrollDirection, ScrollDirection.idle);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('a drag that cannot leave the bottom does not stop the follow', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      // The reader holds the list at the bottom: the finger is down and the
+      // drag has not moved the list.
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(ListView)),
+      );
+      await tester.pump();
+      // The content grows while the drag is held.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 41),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      // The follow still reached the newest content: the reader's hold did
+      // not stop it, and the control was never offered.
+      expect(controller.offset, controller.position.maxScrollExtent);
+      expect(jumpControl(), findsNothing);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('content that arrives under a reader is marked when the follow yields', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      final controller = _controller(tester);
+      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      // The content arrives and the reader starts a page-key scroll before
+      // the follow's frame.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 41),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.running),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      unawaited(
+        controller.position.moveTo(
+          controller.position.pixels - 200,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      // The control that returns to the newest content is marked: content
+      // landed below the reader.
+      final control = tester.widget<FloatingActionButton>(jumpControl());
+      expect(control.backgroundColor, scheme.primary);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets('an answer that settled while the reader scrolled stays put', (
+      tester,
+    ) async {
+      List<TimelineItem> turn(SessionRef ref, {int extra = 0}) => [
+        ..._answers(ref, 10),
+        AssistantText(
+          meta: liveMeta(ref, 'final'),
+          text: 'final answer ${'body ' * 400}',
+          complete: true,
+        ),
+        // Content that is not an answer, so the settled answer stays the
+        // last one a reveal could pull into view.
+        for (var i = 0; i < extra; i++)
+          TurnOutcome(
+            meta: liveMeta(ref, 'late$i'),
+            kind: const OpenValue.known(OutcomeKind.succeeded),
+          ),
+      ];
+      final live = await _openLive(tester, turn, settled: false);
+      final controller = _controller(tester);
+      // The reader scrolls away with a scroll that reports no direction of
+      // its own, so the follow yields to it.
+      unawaited(
+        controller.position.moveTo(
+          controller.position.pixels - 200,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeInOut,
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      // The turn settles while the reader is away: the answer is not offered
+      // later, when it would pull the reader away from the tail.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: turn(live.ref),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      // The reader comes back to the tail.
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.maxScrollExtent);
+      // Another item arrives: the old answer is not revealed on top of the
+      // tail the reader came back to.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: turn(live.ref, extra: 1),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.maxScrollExtent);
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });

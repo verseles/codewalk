@@ -43,8 +43,21 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// successive frames.
   static const int _maxFollowPasses = 3;
 
+  /// The deferrals one follow may take, for a scroll that is in progress
+  /// when the follow would jump and reports no direction of its own.
+  static const int _maxDeferrals = 3;
+
   int _followPasses = 0;
+  int _deferrals = 0;
   bool _followScheduled = false;
+
+  /// Whether the scroll in progress is the reader's drag.
+  ///
+  /// A drag reports the gesture that started it. A scroll that reports no
+  /// direction of its own - a page key, a click on the scrollbar track -
+  /// does not, and neither does the framework's own start, which it
+  /// dispatches on every change of the content size.
+  bool _readerDrag = false;
 
   /// The largest content extent the viewport reported, so a growth is known
   /// whatever made it: a new item or a longer one.
@@ -124,6 +137,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       } else {
         widget.scroll.onViewportChanged();
       }
+    } else if (notification is ScrollStartNotification) {
+      _readerDrag = notification.dragDetails != null;
     } else if (notification is ScrollEndNotification) {
       widget.scroll.onViewportChanged();
     }
@@ -157,6 +172,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// Asks for one follow, coalesced to the next frame.
   void _requestFollow() {
     _followPasses = 0;
+    _deferrals = 0;
     if (_followScheduled) return;
     _followScheduled = true;
     _afterNextFrame(() {
@@ -180,19 +196,27 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   void _follow() {
     if (!widget.scroll.mayFollow) {
       // The reader is elsewhere: an answer that settled meanwhile is not
-      // offered later, when it would pull the reader away from the tail.
+      // offered later, when it would pull the reader away from the tail,
+      // and the content that arrived is under the reader now.
       _revealPending = false;
+      if (!widget.scroll.revealed) {
+        // The content that arrived is under the reader now. A revealed
+        // answer is the reader's place, so it is not marked.
+        widget.scroll.onContentArrivedAway();
+      }
       return;
     }
     final controller = widget.scroll.controller;
     if (!controller.hasClients) return;
-    if (controller.position.isScrollingNotifier.value) {
-      // A scroll is in progress: it is the reader's, and the follow does not
-      // cancel it. A scroll that reports no direction of its own - a page
-      // key, a click on the scrollbar track - has not moved the viewport
-      // yet, so the offset cannot tell it apart from the follow's own.
-      widget.scroll.markUserIntent();
-      return;
+    if (controller.position.isScrollingNotifier.value && !_readerDrag) {
+      // A scroll that reports no direction of its own - a page key, a click
+      // on the scrollbar track - has not moved the viewport yet, so the
+      // offset cannot tell it apart from the follow's own. The follow waits
+      // for it instead of cancelling it.
+      if (++_deferrals < _maxDeferrals) {
+        _afterNextFrame(_follow);
+        return;
+      }
     }
     final target = controller.position.maxScrollExtent;
     if ((target - controller.position.pixels).abs() < 0.5) {
@@ -339,12 +363,14 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   }
 }
 
-/// A bounded signature of one item: its identity, its known status, the
-/// content it carries that can change and the outcome it carries, when it has
-/// one. A change means content arrived.
+/// A signature of one item: its identity, its known status, the content it
+/// carries that can change and the outcome it carries, when it has one. A
+/// change means content arrived.
 ///
 /// The content is the value itself, not its size: a replacement of the same
-/// size is a change too, and the reader has to be told about it.
+/// size is a change too, and the reader has to be told about it. The
+/// comparison costs the size of the content when the items are rebuilt, as
+/// a rehydration does; the rows that did not change keep the same string.
 typedef _ItemSignature = ({
   ItemId id,
   ItemStatus? status,
