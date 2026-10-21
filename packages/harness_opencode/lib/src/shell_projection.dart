@@ -117,10 +117,12 @@ ShellStatus? openCodeShellStatus(Object? value) => switch (value) {
   final slice = openCodeBoundedText(text, limit + 4096);
   final clean = redactCredentialText(slice.text);
   final bounded = openCodeBoundedText(clean, limit);
+  // Whether what is kept differs from the same prefix unredacted: a
+  // credential that only appeared past the limit was not shown anyway.
   return (
     text: bounded.text,
     cut: slice.cut || bounded.cut,
-    redacted: clean != slice.text,
+    redacted: bounded.text != openCodeBoundedText(text, limit).text,
   );
 }
 

@@ -52,16 +52,22 @@ final _rules = <_Rule>[
     ),
     (_) => credentialRedaction,
   ),
-  // An authorization header: its scheme stays, its credential goes, whatever
-  // its length or case.
+  // An authorization header or variable: its scheme stays and its credential
+  // goes, whatever its length or case. A Digest credential is a list of
+  // parameters, so the rest of its line goes; a quoted one goes whole.
   _Rule(
     RegExp(
-      '(\\b(?:proxy-)?authorization\\s*[:=]\\s*"?)'
-      '(?!(?:$_schemes\\s+)?\\[redacted\\])'
-      '((?:$_schemes\\s+)?)[^\\s"\',;]+',
+      '(\\b(?:[A-Za-z0-9]+[_-])*authorization\\s*[:=]\\s*)'
+      '(?!(?:$_schemes\\s+)?\\[redacted\\]|"\\[redacted\\]")'
+      '(?:(digest\\s+)[^\\r\\n]*|'
+      '((?:$_schemes\\s+)?)($_double|$_single|[^\\s"\',;]+))',
       caseSensitive: false,
     ),
-    (m) => '${m[1]}${m[2]}$credentialRedaction',
+    (m) => m[2] != null
+        ? '${m[1]}${m[2]}$credentialRedaction'
+        : m[4]!.startsWith('"')
+        ? '${m[1]}${m[3]}"$credentialRedaction"'
+        : '${m[1]}${m[3]}$credentialRedaction',
   ),
   // An authorization scheme and its credential in other text.
   _Rule(
@@ -83,7 +89,8 @@ final _rules = <_Rule>[
   // A quoted JSON property: `"password": "value"`.
   _Rule(
     RegExp(
-      '("(?:[A-Za-z0-9]+[_-])*(?:$_names|(?:proxy-)?authorization)"\\s*:\\s*)"$_fresh(?:[^"\\\\]|\\\\.)*"',
+      '("(?:[A-Za-z0-9]+[_-])*(?:$_names|(?:proxy-)?authorization)"\\s*:\\s*)'
+      '"$_fresh(?:[^"\\\\]|\\\\.)*(?:"|\\\\?\$)',
       caseSensitive: false,
     ),
     (m) => '${m[1]}"$credentialRedaction"',

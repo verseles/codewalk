@@ -358,13 +358,13 @@ final class _SelectedBudget {
     void Function()? onRedacted,
   }) {
     var fieldBytes = 0;
-    void measure(Object? v, int depth) {
+    void measure(Object? v, int depth, {bool key = false}) {
       if (++nodes > 16384 || depth > 16) {
         _fail(OpenCodeToolProjectionFailure.limitExceeded);
       }
       if (v is String) {
         // A redacted value is measured as it will be kept.
-        final kept = redact ? redactCredentialText(v) : v;
+        final kept = redact && !key ? redactCredentialText(v) : v;
         _bytes(v, _fieldLimit);
         fieldBytes += _bytes(kept, _fieldLimit) + 2;
         for (final unit in kept.codeUnits) {
@@ -399,7 +399,7 @@ final class _SelectedBudget {
           _fail(OpenCodeToolProjectionFailure.limitExceeded);
         }
         for (final entry in v.entries) {
-          measure(entry.key, depth + 1);
+          measure(entry.key, depth + 1, key: true);
           final before = fieldBytes;
           measure(entry.value, depth + 1);
           // Short values expand to the JSON string "[redacted]" (12 bytes).

@@ -23,6 +23,13 @@ void main() {
       '"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI"':
           '"AWS_SECRET_ACCESS_KEY": "[redacted]"',
       'password="unterminated value': 'password=[redacted]',
+      '{"password":"hunter2 cut': '{"password":"[redacted]"',
+      r'{"token":"abc\': '{"token":"[redacted]"',
+      'Authorization: Digest username="alice", response="deadbeef"':
+          'Authorization: Digest [redacted]',
+      'authorization="secret value" next': 'authorization="[redacted]" next',
+      'HTTP_AUTHORIZATION=s3cr3t': 'HTTP_AUTHORIZATION=[redacted]',
+      'PROXY_AUTHORIZATION: Basic dTpw': 'PROXY_AUTHORIZATION: Basic [redacted]',
       'Bearer abcdefgh12345678': 'Bearer [redacted]',
       'mysql --password=hunter2 db': 'mysql --password=[redacted] db',
       'tool --token "quoted value"': 'tool --token [redacted]',
@@ -67,7 +74,9 @@ void main() {
   test('is idempotent', () {
     const text =
         'password=abc Bearer abcdefgh12345678 https://u:p@h/x '
-        'Authorization: Basic dTpw {"token": "a\\"b"}';
+        'Authorization: Basic dTpw {"token": "a\\"b"} '
+        'Authorization: Digest username="u", response="r"\n'
+        'authorization="two words"';
     final once = redactCredentialText(text);
     expect(once, isNot(contains('abcdefgh12345678')));
     expect(redactCredentialText(once), once);

@@ -114,12 +114,12 @@ List<TimelineItem> projectOpenCodeHistory(
     required void Function() onRedacted,
   }) {
     var fieldBytes = 0;
-    void measure(Object? v, int depth) {
+    void measure(Object? v, int depth, {bool key = false}) {
       node();
       if (depth > 16) malformed();
       if (v is String) {
         // A redacted value is measured as it will be kept.
-        final kept = redact ? redactCredentialText(v) : v;
+        final kept = redact && !key ? redactCredentialText(v) : v;
         stringBytes(v);
         fieldBytes += stringBytes(kept) + 2;
         for (final unit in kept.codeUnits) {
@@ -150,7 +150,7 @@ List<TimelineItem> projectOpenCodeHistory(
         fieldBytes += 2 + v.length * 2;
         if (fieldBytes > 65536) malformed();
         for (final entry in v.entries) {
-          measure(entry.key, depth + 1);
+          measure(entry.key, depth + 1, key: true);
           measure(entry.value, depth + 1);
         }
       } else {

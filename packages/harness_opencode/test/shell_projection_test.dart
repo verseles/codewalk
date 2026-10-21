@@ -326,6 +326,25 @@ void main() {
     expect(row.output!.truncated, isTrue);
   });
 
+  test('a credential past the bound is cut, not flagged', () {
+    final row = history({
+      'shellID': 'sh_j',
+      'command': 'env',
+      'status': 'exited',
+      'exit': 0,
+      'output': {
+        'output': '${'x' * openCodeShellOutputLimit}\npassword=hunter2',
+        'cursor': 1,
+        'size': 1,
+        'truncated': false,
+      },
+      'time': {'created': 1000, 'completed': 2000},
+    });
+    expect(row.outputText, isNot(contains('hunter2')));
+    final extra = row.meta.source.extra!.value! as Map;
+    expect(extra.containsKey('outputRedacted'), isFalse);
+  });
+
   test('an exit with no canonical form reports no code', () {
     for (final exit in [1.5, 1e300]) {
       final row = history({

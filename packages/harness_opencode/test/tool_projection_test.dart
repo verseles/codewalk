@@ -330,6 +330,22 @@ void main() {
     },
   );
 
+  test('keys are measured as kept, not as redacted', () {
+    // Keys keep their text: one that reads like a credential assignment must
+    // still count at its full size.
+    final input = <String, Object?>{
+      'token=${'a' * 40000}': 1,
+      'token=${'b' * 40000}': 2,
+    };
+    expect(
+      () => projectTool(
+        toolFrame('called', input: input),
+        current: startedTool(),
+      ),
+      fails(OpenCodeToolProjectionFailure.limitExceeded),
+    );
+  });
+
   test('redaction expansion is bounded before canonical copy', () {
     final state = startedTool();
     final dense = <String, Object?>{
