@@ -29,6 +29,11 @@ class HostsController extends ChangeNotifier {
   Timer? _retryTimer;
   bool loading = false;
   bool storageError = false;
+
+  /// The saved servers were read at least once, so [profiles] is the list
+  /// and not the empty one before the first read.
+  bool get loaded => _loaded;
+  bool _loaded = false;
   bool _disposed = false;
   int _generation = 0;
   EndpointProbeTask? _task;
@@ -66,6 +71,7 @@ class HostsController extends ChangeNotifier {
       final loaded = await repository.load();
       if (_disposed || revision != _catalogRevision) return;
       _profiles = loaded;
+      _loaded = true;
       _credentials.clear();
       _credentialErrors.clear();
       _notify();

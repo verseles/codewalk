@@ -191,17 +191,19 @@ void main() {
                 ? TextDirection.rtl
                 : TextDirection.ltr,
           );
-          // The system back returns to the list and releases the lease.
+          // The system back returns to the list; the open tab keeps the
+          // lease until the tab or the app closes.
           expect(await tester.binding.handlePopRoute(), isTrue);
           await tester.pumpAndSettle();
           expect(find.byType(SessionLivePage), findsNothing);
-          expect(again.closes, 1);
+          expect(again.closes, 0);
           expect(
             dependencies.router.routeInformationProvider.value.uri.path,
             '/sessions',
           );
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox.shrink());
+          expect(again.closes, 1);
           expect(directory.closes, 1);
           rig.dispose();
         },

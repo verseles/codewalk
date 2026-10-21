@@ -6,6 +6,8 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
@@ -305,6 +307,104 @@ void main() {
     expect(tester.state(find.byType(SessionLivePage)), same(state));
     expect(app.directory.opens, hasLength(1));
     expect(app.directory.handles.single.closes, 0);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('switching tabs keeps each open session live', (tester) async {
+    final platform = SharedPreferencesAsyncPlatform.instance;
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    addTearDown(() => SharedPreferencesAsyncPlatform.instance = platform);
+    final app = await _open(tester, '/s/profile_a/ses_one');
+    final source = app.rig.sources.single;
+    source.respond([source.row('one'), source.row('two')]);
+    await _settle(tester);
+    final one = source.row('one').info.ref;
+    final two = source.row('two').info.ref;
+    final first = app.directory.grant(one);
+    await tester.pump();
+
+    app.dependencies.router.go('/s/profile_a/ses_two');
+    await _settle(tester);
+    app.directory.grant(two);
+    await tester.pump();
+    app.dependencies.router.go('/s/profile_a/ses_one');
+    await _settle(tester);
+    // The first session kept its lease; nothing opened it again.
+    expect(app.directory.opens, hasLength(2));
+    expect(first.closes, 0);
+    final tabs = app.dependencies.sessionTabs!;
+    expect([for (final tab in tabs.tabs) tab.ref], [one, two]);
+    expect(tabs.selectedFor(one.host), one);
+    await tester.pumpWidget(const SizedBox.shrink());
+    // Closing the app closes every lease.
+    expect(first.closes, 1);
+  });
+
+  testWidgets('the shown session deleted on its server closes its view', (
+    tester,
+  ) async {
+    final platform = SharedPreferencesAsyncPlatform.instance;
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    addTearDown(() => SharedPreferencesAsyncPlatform.instance = platform);
+    final app = await _open(tester, '/s/profile_a/ses_one');
+    final source = app.rig.sources.single;
+    source.respond([source.row('one', title: 'One')]);
+    await _settle(tester);
+    final handle = app.directory.grant(source.row('one').info.ref);
+    await tester.pump();
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    // A refresh no longer lists it, and the server says it is gone.
+    app.dependencies.sessions!.refresh().ignore();
+    await tester.pump();
+    source.respond(const []);
+    await _settle(tester);
+    source.reads.single.$2.completion.completeError(
+      const SessionCatalogException(SessionCatalogFailure.notFound),
+    );
+    await _settle(tester);
+    expect(find.byType(SessionLivePage), findsNothing);
+    expect(find.text(app.l10n.sessionLinkNotFound), findsOneWidget);
+    expect(handle.closes, 1);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a kept session shows its new title', (tester) async {
+    final app = await _open(tester, '/s/profile_a/ses_one');
+    final source = app.rig.sources.single;
+    source.respond([source.row('one', title: 'Old')]);
+    await _settle(tester);
+    app.directory.grant(source.row('one').info.ref);
+    await tester.pump();
+    app.dependencies.router.go('/sessions');
+    await _settle(tester);
+    app.dependencies.sessions!.refresh().ignore();
+    await tester.pump();
+    source.respond([source.row('one', title: 'Renamed')]);
+    await _settle(tester);
+    app.dependencies.router.go('/s/profile_a/ses_one');
+    await _settle(tester);
+    expect(app.directory.opens, hasLength(1));
+    final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
+    expect(page.controller.summary.info.title, 'Renamed');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a rename reaches the session on screen', (tester) async {
+    final app = await _open(tester, '/s/profile_a/ses_one');
+    final source = app.rig.sources.single;
+    source.respond([source.row('one', title: 'Old')]);
+    await _settle(tester);
+    app.directory.grant(source.row('one').info.ref);
+    await tester.pump();
+    app.dependencies.sessions!.refresh().ignore();
+    await tester.pump();
+    source.respond([source.row('one', title: 'Renamed')]);
+    await _settle(tester);
+    final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
+    expect(page.controller.summary.info.title, 'Renamed');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 }

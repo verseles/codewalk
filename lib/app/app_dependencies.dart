@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
@@ -34,6 +35,7 @@ class AppDependencies {
     this.permissionModes,
     this.unrestrictedOwnership,
     this.hiddenSessions,
+    this.sessionTabs,
   });
 
   final AppPreferencesController preferences;
@@ -54,6 +56,9 @@ class AppDependencies {
 
   /// The sessions hidden in CodeWalk, a local state the endpoint never sees.
   final HiddenSessionStore? hiddenSessions;
+
+  /// The open session tabs and the live views they keep open.
+  final SessionTabsController? sessionTabs;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -71,6 +76,8 @@ class AppDependencies {
     router.dispose();
     pairing?.dispose();
     navigation.dispose();
+    // The tabs close their live views before the list and the directory.
+    sessionTabs?.dispose();
     sessions?.dispose();
     unawaited(liveDirectory?.close());
     hosts.dispose();

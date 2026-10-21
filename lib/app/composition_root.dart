@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/endpoints/pairing_factory.dart';
@@ -19,6 +20,7 @@ import '../platform/sessions/session_action_source.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
+import '../platform/sessions/session_tabs_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
@@ -54,6 +56,7 @@ AppDependencies createAppDependencies({
   PermissionModeStore? permissionModeStore,
   SessionActionFactory? sessionActionFactory,
   HiddenSessionStore? hiddenStore,
+  SessionTabsStore? tabsStore,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -132,6 +135,12 @@ AppDependencies createAppDependencies({
             ),
     ),
   );
+  // The open session tabs follow the list, which checks their sessions.
+  final sessionTabs = SessionTabsController(
+    store: tabsStore ?? SessionTabsStore(store: metadata),
+    catalog: locator<SessionsController>(),
+    now: sessionClock,
+  );
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
   locator.registerSingleton(
@@ -164,6 +173,7 @@ AppDependencies createAppDependencies({
     liveDirectory: liveDirectory,
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
+    sessionTabs: sessionTabs,
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
@@ -189,6 +199,7 @@ Future<AppDependencies> loadAppDependencies({
   await dependencies.permissionModes?.initialize();
   await dependencies.unrestrictedOwnership?.initialize();
   await dependencies.hiddenSessions?.initialize();
+  await dependencies.sessionTabs?.initialize();
   if (listenNativeLinks) {
     final links = dependencies.links = NativePairingLinks((uri) {
       if (dependencies.isDisposed) return;

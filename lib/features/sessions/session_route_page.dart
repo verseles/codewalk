@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import 'session_live_controller.dart';
 import 'session_live_page.dart';
+import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 
 /// The open session of the workspace, named by `/s/<server>/<session>`.
@@ -37,8 +40,16 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
   SessionSummary? _summary;
   SessionReadTask? _task;
 
-  /// The live view of the open session, made once; its page disposes it.
+  /// The live view of the open session, made once. Its tab keeps it open
+  /// while other tabs are shown; without tabs its page disposes it.
   SessionLiveController? _live;
+
+  /// The session whose tab this page opened, so it is opened once.
+  SessionRef? _opened;
+
+  /// The tab of this session was seen saved; its later absence means it
+  /// was dropped or closed.
+  bool _tabbed = false;
   _Read _read = _Read.idle;
   bool _selecting = false;
 
@@ -85,6 +96,8 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       _task = null;
       _summary = null;
       _live = null;
+      _opened = null;
+      _tabbed = false;
       _read = _Read.idle;
       _selecting = false;
       _followed = false;
@@ -199,7 +212,32 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     }
     final hosts = catalog.hosts;
     final selected = catalog.selectedProfile;
+    final tabs = context.watch<SessionTabsController?>();
+    if (tabs != null) {
+      final open = tabs.tabs.any((tab) => tab.ref == _ref);
+      if (open) {
+        _tabbed = true;
+      } else if (_tabbed) {
+        // The tab is gone: its server said the session no longer exists.
+        // The view it kept is released, so it is never shown again.
+        _tabbed = false;
+        _live = null;
+        _summary = null;
+        _read = _Read.notFound;
+      }
+    }
+    if (_live?.disposed ?? false) _live = null;
     final live = _live;
+    final row = catalog.sessions
+        .where((row) => row.info.ref == _ref)
+        .firstOrNull;
+    // A kept view shows the newest row, a rename say, even while it stays
+    // on screen.
+    if (live != null && row != null && !identical(live.summary, row)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) live.updateSummary(row);
+      });
+    }
     // An open session outlasts a reload of the saved servers; it closes
     // only when its server is removed or another one is chosen.
     if (live != null &&
@@ -221,6 +259,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         key: ObjectKey(live),
         controller: live,
         leading: leading,
+        ownsController: context.read<SessionTabsController?>() == null,
       );
     }
     if (!_ready || hosts.loading) return _Notice(leading: leading);
@@ -263,21 +302,36 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     _selecting = false;
     final ref = _ref;
     // Once found, the session stays open whatever the list later shows.
-    final summary = _summary ??= catalog.sessions
-        .where((row) => row.info.ref == ref)
-        .firstOrNull;
+    if (_read == _Read.notFound) {
+      return _Notice(message: l10n.sessionLinkNotFound, leading: leading);
+    }
+    final summary = _summary ??= row;
     if (summary != null) {
-      final live = _live ??= SessionLiveController(
+      SessionLiveController create() => SessionLiveController(
         hosts: hosts,
         profile: profile,
         summary: summary,
         directory: directory,
         permissionModes: _permissionPolicy(context),
       );
+      final live = _live ??= tabs == null ? create() : tabs.live(ref, create);
+      if (row != null && !identical(live.summary, row)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) live.updateSummary(row);
+        });
+      }
+      if (tabs != null && _opened != ref) {
+        // Opening the session adds its tab or focuses it.
+        _opened = ref;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(tabs.open(summary));
+        });
+      }
       return SessionLivePage(
         key: ObjectKey(live),
         controller: live,
         leading: leading,
+        ownsController: tabs == null,
       );
     }
     if (catalog.failure == SessionCatalogFailure.authenticationRequired) {

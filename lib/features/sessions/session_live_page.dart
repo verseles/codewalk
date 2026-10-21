@@ -27,8 +27,17 @@ const double _composerFloor = 56;
 /// Live view of one session: it observes the server and sends prompts only
 /// through the composer's outbox. Stop is explicit; it never answers or reverts.
 class SessionLivePage extends StatefulWidget {
-  const SessionLivePage({super.key, required this.controller, this.leading});
+  const SessionLivePage({
+    super.key,
+    required this.controller,
+    this.leading,
+    this.ownsController = true,
+  });
   final SessionLiveController controller;
+
+  /// Whether the page disposes [controller] with itself. A session tab keeps
+  /// its view open while other tabs are shown, so its page does not.
+  final bool ownsController;
 
   /// The control before the title, such as the list drawer button of a
   /// compact window.
@@ -50,7 +59,7 @@ class _SessionLivePageState extends State<SessionLivePage> {
     super.initState();
     _composer = SessionComposerController(live: widget.controller);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.controller.start();
+      if (mounted && !widget.controller.started) widget.controller.start();
     });
   }
 
@@ -59,7 +68,7 @@ class _SessionLivePageState extends State<SessionLivePage> {
     _composer.dispose();
     _draft.dispose();
     _scroll.dispose();
-    widget.controller.dispose();
+    if (widget.ownsController) widget.controller.dispose();
     super.dispose();
   }
 

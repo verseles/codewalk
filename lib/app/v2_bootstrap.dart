@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
@@ -66,6 +67,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
           ),
         if (dependencies.sessions case final sessions?)
           ChangeNotifierProvider<SessionsController>.value(value: sessions),
+        if (dependencies.sessionTabs case final tabs?)
+          ChangeNotifierProvider<SessionTabsController>.value(value: tabs),
         if (dependencies.diagnostics case final diagnostics?)
           ChangeNotifierProvider<DiagnosticsController>.value(
             value: diagnostics,

@@ -16,19 +16,36 @@ class SessionLiveController extends ChangeNotifier {
   SessionLiveController({
     required this.hosts,
     required this.profile,
-    required this.summary,
+    required SessionSummary summary,
     required this.directory,
     this.permissionModes,
     DateTime Function()? now,
     CommandId Function()? commandIds,
-  }) : _now = now ?? DateTime.now,
+  }) : _summary = summary,
+       _now = now ?? DateTime.now,
        _commandIds = commandIds ?? mintCommandId {
     hosts.addListener(_hostsChanged);
     permissionModes?.addListener(_policyChanged);
   }
   final HostsController hosts;
   final EndpointProfile profile;
-  final SessionSummary summary;
+  SessionSummary _summary;
+
+  /// The listed session. A session tab keeps this view open, so a later row
+  /// of the same session, renamed say, replaces it.
+  SessionSummary get summary => _summary;
+
+  /// Takes the newer row of the same session; another session is ignored.
+  void updateSummary(SessionSummary next) {
+    if (_disposed || next.info.ref != session || identical(next, _summary)) {
+      return;
+    }
+    _summary = next;
+    _notify();
+  }
+
+  /// True once disposed; a disposed view is never shown again.
+  bool get disposed => _disposed;
   final SessionLiveDirectory directory;
 
   /// The acknowledged permission policy for this session, when the app graph
@@ -50,6 +67,10 @@ class SessionLiveController extends ChangeNotifier {
   SessionLiveFailure? failure;
   bool opening = false;
   bool _savingPermissionMode = false;
+
+  /// The lease is open or opening, so a page shown again keeps it instead of
+  /// opening another.
+  bool get started => opening || _handle != null;
 
   /// The acknowledged effective mode, never a requested-in-flight value.
   SessionPermissionModeState get permissionModeState =>
