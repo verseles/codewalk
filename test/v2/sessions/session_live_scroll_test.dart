@@ -1098,22 +1098,22 @@ void main() {
           ),
         ],
       );
-      // The same reason, one letter different.
+      // The same reason, one word of the same length different.
       await expectMarked(
         (ref) => [
           ..._answers(ref, 39),
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
-            reason: 'the turn ended',
+            kind: const OpenValue.known(OutcomeKind.failed),
+            reason: 'the turn failed',
           ),
         ],
         (ref) => [
           ..._answers(ref, 39),
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
-            reason: 'the turn failed',
+            kind: const OpenValue.known(OutcomeKind.failed),
+            reason: 'the turn halted',
           ),
         ],
       );
@@ -1219,6 +1219,10 @@ void main() {
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(ListView)),
       );
+      await tester.pump();
+      // The reader pulls the list up at the tail: the drag is a real one and
+      // the physics clamp it, so the list cannot move.
+      await gesture.moveBy(const Offset(0, -60));
       await tester.pump();
       // The content grows while the drag is held.
       live.handle.emit(
@@ -1402,6 +1406,39 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });
+
+    testWidgets('a settled turn does not mark the control', (tester) async {
+      final live = await _openLive(
+        tester,
+        (ref) => _answers(ref, 40),
+        settled: false,
+      );
+      final scheme = Theme.of(tester.element(find.byType(ListView))).colorScheme;
+      // The reader moves away, so the control is offered.
+      await tester.drag(find.byType(ListView), const Offset(0, 300));
+      await tester.pumpAndSettle();
+      expect(jumpControl(), findsOneWidget);
+      expect(controlColor(tester), scheme.surfaceContainerHigh);
+      // The turn settles: no content arrived, so the control stays unmarked.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: _answers(live.ref, 40),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controlColor(tester), scheme.surfaceContainerHigh);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
   });
 
   group('the scroll rules', () {

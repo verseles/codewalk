@@ -55,8 +55,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   ///
   /// A drag reports the gesture that started it. A scroll that reports no
   /// direction of its own - a page key, a click on the scrollbar track -
-  /// does not, and neither does the framework's own start, which it
-  /// dispatches on every change of the content size.
+  /// does not, and the framework's own start carries no gesture either.
   bool _readerDrag = false;
 
   /// The largest content extent the viewport reported, so a growth is known
@@ -74,6 +73,13 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   /// Whether a finished answer waits to be revealed once the follow settles.
   bool _revealPending = false;
+
+  /// Whether content arrived and the follow has not accounted for it yet.
+  ///
+  /// The follow is also requested by a growth of the extent that carries no
+  /// new content, such as a taller header or a smaller viewport, so the
+  /// arrival is known apart from the follow that would carry it.
+  bool _arrivalPending = false;
 
   /// The context of the last assistant answer, while the list builds it.
   BuildContext? _answerContext;
@@ -126,16 +132,22 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// that ends at the bottom, even one that could not move, gives the bottom
   /// back to the follow.
   ///
+  /// The direction is the evidence only when the list can still move in it: a
+  /// gesture against the boundary reports its direction even when the physics
+  /// clamp the offset, and a reader who holds the list at the tail has not
+  /// asked for anything.
+  ///
   /// A scroll that reports no direction of its own — a page key, a click on
   /// the scrollbar track — is the reader's too, and the scroll rules know it
   /// from the offset it moved.
   bool _onScroll(ScrollNotification notification) {
     if (!_ownList(notification, notification.metrics.axis)) return false;
     if (notification is UserScrollNotification) {
-      if (notification.direction != ScrollDirection.idle) {
-        widget.scroll.markUserIntent();
-      } else {
+      final direction = notification.direction;
+      if (direction == ScrollDirection.idle) {
         widget.scroll.onViewportChanged();
+      } else if (_canMove(direction)) {
+        widget.scroll.markUserIntent();
       }
     } else if (notification is ScrollStartNotification) {
       _readerDrag = notification.dragDetails != null;
@@ -143,6 +155,25 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       widget.scroll.onViewportChanged();
     }
     return false;
+  }
+
+  /// Whether the list can still move in the direction of the gesture.
+  ///
+  /// A drag against the boundary reports its direction even when the physics
+  /// clamp the offset, so the direction alone is not the reader's intent: a
+  /// reader who pulls at the tail cannot move the list, and the follow must
+  /// go on. A gesture that can move the list is the reader's.
+  bool _canMove(ScrollDirection direction) {
+    final controller = widget.scroll.controller;
+    if (!controller.hasClients) return false;
+    final position = controller.position;
+    return switch (direction) {
+      // The reverse direction moves the offset up, the forward direction
+      // moves it down.
+      ScrollDirection.reverse => position.pixels < position.maxScrollExtent,
+      ScrollDirection.forward => position.pixels > position.minScrollExtent,
+      ScrollDirection.idle => false,
+    };
   }
 
   /// The content dimensions changed. A growth is followed while the reader
@@ -165,6 +196,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     if (widget.scroll.following) {
       _requestFollow();
     } else {
+      _arrivalPending = false;
       widget.scroll.onContentArrivedAway();
     }
   }
@@ -199,9 +231,11 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       // offered later, when it would pull the reader away from the tail,
       // and the content that arrived is under the reader now.
       _revealPending = false;
-      if (!widget.scroll.revealed) {
+      if (_arrivalPending && !widget.scroll.revealed) {
         // The content that arrived is under the reader now. A revealed
-        // answer is the reader's place, so it is not marked.
+        // answer is the reader's place, so it is not marked. A follow that
+        // only a growth of the extent requested carries no arrival.
+        _arrivalPending = false;
         widget.scroll.onContentArrivedAway();
       }
       return;
@@ -224,6 +258,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       return;
     }
     widget.scroll.runProgrammatic(() => controller.jumpTo(target));
+    _arrivalPending = false;
     if (++_followPasses >= _maxFollowPasses) {
       _settled();
       return;
@@ -280,6 +315,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             !listEquals(signature, _lastSignature))) {
       // Content arrived, even if the row that changed is not laid out. A
       // removal is not an arrival.
+      _arrivalPending = true;
       _afterNextFrame(_contentArrived);
     }
     _lastItemCount = items.length;
