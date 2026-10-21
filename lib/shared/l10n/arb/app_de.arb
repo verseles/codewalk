@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "Ältere Nachrichten werden geladen…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "Details",
+  "chatMessageShowLess": "Weniger anzeigen",
+  "chatMessageShowMore": "Mehr anzeigen",
+  "chatMessageToolCommand": "Befehl",
+  "chatMessageToolInput": "Eingabe",
+  "chatMessageToolOutputTruncated": "Große Ausgabe aus Stabilitätsgründen gekürzt.",
+  "statusFailed": "Fehlgeschlagen",
+  "toolRunning": "Wird ausgeführt",
+  "liveToolOutput": "Ausgabe",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "Fertig",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "Unterbrochen",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "Exit-Code",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "Zeitüberschreitung",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "Beendet",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "Der Server hat mehr Ausgabe gespeichert, als hier angezeigt wird.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

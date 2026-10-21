@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "Cargando mensajes anteriores…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "Detalles",
+  "chatMessageShowLess": "Mostrar menos",
+  "chatMessageShowMore": "Mostrar más",
+  "chatMessageToolCommand": "Comando",
+  "chatMessageToolInput": "Entrada",
+  "chatMessageToolOutputTruncated": "Vista previa truncada por estabilidad.",
+  "statusFailed": "Falló",
+  "toolRunning": "Ejecutando",
+  "liveToolOutput": "Salida",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "Listo",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "Interrumpido",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "Código de salida",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "Tiempo agotado",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "Terminado",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "El servidor guardó más salida de la que se muestra aquí.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

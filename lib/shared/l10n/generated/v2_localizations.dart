@@ -2444,6 +2444,96 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Loading older messages…'**
   String get liveOlderLoading;
+
+  /// CodeWalk UI string — chatMessageDetails
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get chatMessageDetails;
+
+  /// CodeWalk UI string — chatMessageShowLess
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get chatMessageShowLess;
+
+  /// CodeWalk UI string — chatMessageShowMore
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get chatMessageShowMore;
+
+  /// CodeWalk UI string — chatMessageToolCommand
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get chatMessageToolCommand;
+
+  /// CodeWalk UI string — chatMessageToolInput
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get chatMessageToolInput;
+
+  /// CodeWalk UI string — chatMessageToolOutputTruncated
+  ///
+  /// In en, this message translates to:
+  /// **'Large tool output preview truncated for app stability.'**
+  String get chatMessageToolOutputTruncated;
+
+  /// CodeWalk UI string — statusFailed
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get statusFailed;
+
+  /// CodeWalk UI string — toolRunning
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get toolRunning;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get liveToolOutput;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get liveToolDone;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupted'**
+  String get liveToolInterrupted;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Exit code'**
+  String get liveShellExitCode;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Timed out'**
+  String get liveShellTimedOut;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Killed'**
+  String get liveShellKilled;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'The server kept more output than shown here.'**
+  String get liveShellOutputPartial;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

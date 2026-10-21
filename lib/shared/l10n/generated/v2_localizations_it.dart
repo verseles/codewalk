@@ -1304,4 +1304,51 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'Caricamento dei messaggi precedenti…';
+
+  @override
+  String get chatMessageDetails => 'Dettagli';
+
+  @override
+  String get chatMessageShowLess => 'Mostra meno';
+
+  @override
+  String get chatMessageShowMore => 'Mostra più';
+
+  @override
+  String get chatMessageToolCommand => 'Comando';
+
+  @override
+  String get chatMessageToolInput => 'Input';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'Anteprima troncata per stabilità.';
+
+  @override
+  String get statusFailed => 'Fallito';
+
+  @override
+  String get toolRunning => 'In esecuzione';
+
+  @override
+  String get liveToolOutput => 'Output';
+
+  @override
+  String get liveToolDone => 'Fatto';
+
+  @override
+  String get liveToolInterrupted => 'Interrotto';
+
+  @override
+  String get liveShellExitCode => 'Codice di uscita';
+
+  @override
+  String get liveShellTimedOut => 'Tempo scaduto';
+
+  @override
+  String get liveShellKilled => 'Terminato';
+
+  @override
+  String get liveShellOutputPartial =>
+      'Il server ha conservato più output di quello mostrato qui.';
 }

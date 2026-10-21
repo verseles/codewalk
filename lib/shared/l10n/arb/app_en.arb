@@ -1575,5 +1575,65 @@
   "liveOlderLoading": "Loading older messages…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "Details",
+  "@chatMessageDetails": {
+    "description": "CodeWalk UI string — chatMessageDetails"
+  },
+  "chatMessageShowLess": "Show less",
+  "@chatMessageShowLess": {
+    "description": "CodeWalk UI string — chatMessageShowLess"
+  },
+  "chatMessageShowMore": "Show more",
+  "@chatMessageShowMore": {
+    "description": "CodeWalk UI string — chatMessageShowMore"
+  },
+  "chatMessageToolCommand": "Command",
+  "@chatMessageToolCommand": {
+    "description": "CodeWalk UI string — chatMessageToolCommand"
+  },
+  "chatMessageToolInput": "Input",
+  "@chatMessageToolInput": {
+    "description": "CodeWalk UI string — chatMessageToolInput"
+  },
+  "chatMessageToolOutputTruncated": "Large tool output preview truncated for app stability.",
+  "@chatMessageToolOutputTruncated": {
+    "description": "CodeWalk UI string — chatMessageToolOutputTruncated"
+  },
+  "statusFailed": "Failed",
+  "@statusFailed": {
+    "description": "CodeWalk UI string — statusFailed"
+  },
+  "toolRunning": "Running",
+  "@toolRunning": {
+    "description": "CodeWalk UI string — toolRunning"
+  },
+  "liveToolOutput": "Output",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "Done",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "Interrupted",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "Exit code",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "Timed out",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "Killed",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "The server kept more output than shown here.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

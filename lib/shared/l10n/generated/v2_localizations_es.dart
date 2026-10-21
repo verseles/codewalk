@@ -1298,4 +1298,51 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'Cargando mensajes anteriores…';
+
+  @override
+  String get chatMessageDetails => 'Detalles';
+
+  @override
+  String get chatMessageShowLess => 'Mostrar menos';
+
+  @override
+  String get chatMessageShowMore => 'Mostrar más';
+
+  @override
+  String get chatMessageToolCommand => 'Comando';
+
+  @override
+  String get chatMessageToolInput => 'Entrada';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'Vista previa truncada por estabilidad.';
+
+  @override
+  String get statusFailed => 'Falló';
+
+  @override
+  String get toolRunning => 'Ejecutando';
+
+  @override
+  String get liveToolOutput => 'Salida';
+
+  @override
+  String get liveToolDone => 'Listo';
+
+  @override
+  String get liveToolInterrupted => 'Interrumpido';
+
+  @override
+  String get liveShellExitCode => 'Código de salida';
+
+  @override
+  String get liveShellTimedOut => 'Tiempo agotado';
+
+  @override
+  String get liveShellKilled => 'Terminado';
+
+  @override
+  String get liveShellOutputPartial =>
+      'El servidor guardó más salida de la que se muestra aquí.';
 }

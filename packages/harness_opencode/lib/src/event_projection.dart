@@ -8,6 +8,7 @@ import 'revert_projection.dart';
 import 'session_lifecycle_projection.dart';
 import 'session_projection.dart';
 import 'session_rules.dart';
+import 'shell_projection.dart';
 import 'step_usage_projection.dart';
 import 'text_reasoning_projection.dart';
 import 'tool_projection.dart';
@@ -179,6 +180,8 @@ final Map<String, _Producer> _routes = {
     'session.synthetic',
   ])
     type: projectOpenCodeNoticeEvent,
+  for (final type in const ['session.shell.started', 'session.shell.ended'])
+    type: projectOpenCodeShellEvent,
 };
 
 /// Official 2.0.22 session types that no producer projects yet; they stay
@@ -191,8 +194,6 @@ const _unprojected = {
   'session.viewed',
   'session.forked',
   'session.skill.activated',
-  'session.shell.started',
-  'session.shell.ended',
   'session.retry.scheduled',
   'session.compaction.started',
   'session.compaction.ended',

@@ -44,6 +44,9 @@ enum NoticeKind {
 
 enum OutcomeKind { succeeded, failed, interrupted }
 
+/// The lifecycle a harness reports for a shell command run in a session.
+enum ShellStatus { running, exited, timeout, killed }
+
 enum MentionKind { file, agent, skill, session, item }
 
 /// Opaque reference to adapter-managed content, not an executable native path.
@@ -214,12 +217,29 @@ final class ShellRun extends TimelineItem {
     required super.meta,
     required this.command,
     this.exitCode,
+    this.exitToken,
     this.output,
+    this.shellStatus,
+    this.outputText,
   });
 
   final String command;
+
+  /// A finite integral exit; null when none was reported or it was not one.
   final int? exitCode;
+
+  /// A reported exit that is not a finite number, kept exactly: `Infinity`,
+  /// `-Infinity` or `NaN`. Never coerced into [exitCode].
+  final String? exitToken;
+
+  /// The captured output's identity, size and completeness, when reported.
   final OutputRef? output;
+
+  final OpenValue<ShellStatus>? shellStatus;
+
+  /// A bounded, redacted prefix of the captured output; the adapter never
+  /// stores more than its own bound here.
+  final String? outputText;
 }
 
 /// A related child's notice belongs to this item's owner, not that child.

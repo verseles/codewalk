@@ -1281,4 +1281,51 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'पुराने संदेश लोड हो रहे हैं…';
+
+  @override
+  String get chatMessageDetails => 'विवरण';
+
+  @override
+  String get chatMessageShowLess => 'कम दिखाएं';
+
+  @override
+  String get chatMessageShowMore => 'और दिखाएं';
+
+  @override
+  String get chatMessageToolCommand => 'कमांड';
+
+  @override
+  String get chatMessageToolInput => 'इनपुट';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'बड़े आउटपुट का पूर्वावलोकन स्थिरता के लिए छोटा किया गया।';
+
+  @override
+  String get statusFailed => 'विफल';
+
+  @override
+  String get toolRunning => 'चल रहा है';
+
+  @override
+  String get liveToolOutput => 'आउटपुट';
+
+  @override
+  String get liveToolDone => 'पूरा';
+
+  @override
+  String get liveToolInterrupted => 'बाधित';
+
+  @override
+  String get liveShellExitCode => 'एग्ज़िट कोड';
+
+  @override
+  String get liveShellTimedOut => 'समय समाप्त';
+
+  @override
+  String get liveShellKilled => 'बंद किया गया';
+
+  @override
+  String get liveShellOutputPartial =>
+      'सर्वर ने यहाँ दिखाए गए से अधिक आउटपुट रखा है।';
 }

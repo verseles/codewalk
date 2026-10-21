@@ -1272,4 +1272,51 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'আগের বার্তা লোড হচ্ছে…';
+
+  @override
+  String get chatMessageDetails => 'বিবরণ';
+
+  @override
+  String get chatMessageShowLess => 'কম দেখান';
+
+  @override
+  String get chatMessageShowMore => 'আরও দেখান';
+
+  @override
+  String get chatMessageToolCommand => 'কমান্ড';
+
+  @override
+  String get chatMessageToolInput => 'ইনপুট';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'বড় টুল আউটপুট প্রিভিউ অ্যাপ স্থিতিশীলতার জন্য ছাঁটা হয়েছে।';
+
+  @override
+  String get statusFailed => 'ব্যর্থ';
+
+  @override
+  String get toolRunning => 'চলমান';
+
+  @override
+  String get liveToolOutput => 'আউটপুট';
+
+  @override
+  String get liveToolDone => 'সম্পন্ন';
+
+  @override
+  String get liveToolInterrupted => 'বাধাগ্রস্ত';
+
+  @override
+  String get liveShellExitCode => 'এক্সিট কোড';
+
+  @override
+  String get liveShellTimedOut => 'সময় শেষ';
+
+  @override
+  String get liveShellKilled => 'বন্ধ করা হয়েছে';
+
+  @override
+  String get liveShellOutputPartial =>
+      'সার্ভার এখানে দেখানোর চেয়ে বেশি আউটপুট রেখেছে।';
 }

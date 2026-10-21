@@ -420,7 +420,8 @@ void main() {
       final item = failed.item as ToolCall;
       expect(item.status.known, ItemStatus.interrupted);
       expect(item.output, isNull);
-      expect(item.error!.rawMessage, '');
+      // The message is shown, redacted and bounded (V2-044D).
+      expect(item.error!.rawMessage, 'Tool execution interrupted');
       expect(item.error!.rawType, 'aborted');
       expect(item.error!.retryable, isFalse);
       expect(item.error!.action, isNull);
@@ -471,11 +472,11 @@ void main() {
       data['error'] = PrivateToolFields(
         {
           'type': 'aborted',
-          'message': 'fake-private',
+          'message': 'failed with token=fake-private-secret',
           'status': 500,
           'response': 'fake-private',
         },
-        {'message', 'status', 'response'},
+        {'status', 'response'},
       );
       data['content'] = [
         PrivateToolFields(
@@ -516,6 +517,9 @@ void main() {
         containsPair('outputContentOmitted', true),
       );
       expect(item.source.extra!.value, containsPair('truncated', false));
+      // The selected error message is shown only after redaction.
+      expect(item.error!.rawMessage, 'failed with token=[redacted]');
+      expect(item.source.extra!.value, containsPair('errorRedacted', true));
       expect(toolManifest(event), isNot(contains('fake-private')));
       expect(event.meta.rawRef, isNull);
       expect(event.meta.source.nativeCursor, isNull);

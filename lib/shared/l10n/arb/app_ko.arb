@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "이전 메시지를 불러오는 중…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "세부 정보",
+  "chatMessageShowLess": "덜 보기",
+  "chatMessageShowMore": "더 보기",
+  "chatMessageToolCommand": "명령어",
+  "chatMessageToolInput": "입력",
+  "chatMessageToolOutputTruncated": "앱 안정성을 위해 큰 도구 출력이 잘렸습니다.",
+  "statusFailed": "실패",
+  "toolRunning": "실행 중",
+  "liveToolOutput": "출력",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "완료",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "중단됨",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "종료 코드",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "시간 초과",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "종료됨",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "서버에 여기 표시된 것보다 많은 출력이 있습니다.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

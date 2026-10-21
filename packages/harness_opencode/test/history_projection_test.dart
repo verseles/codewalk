@@ -205,7 +205,7 @@ void main() {
         (t) => t.error?.rawType == 'aborted',
       );
       expect(tool.status.known, ItemStatus.interrupted);
-      expect(tool.error!.rawMessage, isEmpty);
+      expect(tool.error!.rawMessage, 'Tool execution interrupted');
       expect(
         interrupted.whereType<TurnOutcome>().any(
           (i) => i.kind.known == OutcomeKind.interrupted,

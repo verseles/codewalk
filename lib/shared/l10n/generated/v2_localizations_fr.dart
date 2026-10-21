@@ -1303,4 +1303,51 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'Chargement des messages précédents…';
+
+  @override
+  String get chatMessageDetails => 'Détails';
+
+  @override
+  String get chatMessageShowLess => 'Afficher moins';
+
+  @override
+  String get chatMessageShowMore => 'Afficher plus';
+
+  @override
+  String get chatMessageToolCommand => 'Commande';
+
+  @override
+  String get chatMessageToolInput => 'Entrée';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'Aperçu tronqué pour la stabilité.';
+
+  @override
+  String get statusFailed => 'Échec';
+
+  @override
+  String get toolRunning => 'Exécution en cours';
+
+  @override
+  String get liveToolOutput => 'Sortie';
+
+  @override
+  String get liveToolDone => 'Terminé';
+
+  @override
+  String get liveToolInterrupted => 'Interrompu';
+
+  @override
+  String get liveShellExitCode => 'Code de sortie';
+
+  @override
+  String get liveShellTimedOut => 'Délai dépassé';
+
+  @override
+  String get liveShellKilled => 'Arrêté';
+
+  @override
+  String get liveShellOutputPartial =>
+      'Le serveur a conservé plus de sortie que celle affichée ici.';
 }

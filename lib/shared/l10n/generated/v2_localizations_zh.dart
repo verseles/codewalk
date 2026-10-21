@@ -1197,4 +1197,49 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveOlderLoading => '正在加载更早的消息…';
+
+  @override
+  String get chatMessageDetails => '详情';
+
+  @override
+  String get chatMessageShowLess => '显示较少';
+
+  @override
+  String get chatMessageShowMore => '显示更多';
+
+  @override
+  String get chatMessageToolCommand => '命令';
+
+  @override
+  String get chatMessageToolInput => '输入';
+
+  @override
+  String get chatMessageToolOutputTruncated => '大型工具输出预览已截断以保持应用稳定性。';
+
+  @override
+  String get statusFailed => '失败';
+
+  @override
+  String get toolRunning => '运行中';
+
+  @override
+  String get liveToolOutput => '输出';
+
+  @override
+  String get liveToolDone => '完成';
+
+  @override
+  String get liveToolInterrupted => '已中断';
+
+  @override
+  String get liveShellExitCode => '退出代码';
+
+  @override
+  String get liveShellTimedOut => '已超时';
+
+  @override
+  String get liveShellKilled => '已终止';
+
+  @override
+  String get liveShellOutputPartial => '服务器保存的输出比此处显示的更多。';
 }

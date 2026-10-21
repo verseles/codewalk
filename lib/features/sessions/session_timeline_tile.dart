@@ -2,13 +2,16 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
+import 'session_tool_result.dart';
 
 /// One read-only timeline item, shared by the history and live views.
 ///
 /// V2-071A: text-bearing canonical items render rich Markdown/math/HTML/
 /// Mermaid/code via [CanonicalMessageBody] bound to canonical fields only.
-/// Tool/shell/outcome/unknown items keep minimized, payload-redacted markers
-/// and never expose `input`/`output`/`raw`. No legacy imports (G4).
+/// V2-044D: tool and shell items show what ran and how it ended, collapsed,
+/// with their bounded, redacted input, output and error on demand
+/// ([SessionToolResult]). Outcome and unknown items keep minimized markers
+/// and never expose `raw` or fallback text. No legacy imports (G4).
 class SessionTimelineTile extends StatelessWidget {
   const SessionTimelineTile({
     super.key,
@@ -121,19 +124,8 @@ class SessionTimelineTile extends StatelessWidget {
             onCopyCode: onCopyCode,
           ),
         );
-      case ToolCall(:final rawName):
-        return Text(
-          String.fromCharCodes(rawName.runes.take(2000)),
-          maxLines: 16,
-          overflow: TextOverflow.ellipsis,
-        );
-      case ShellRun():
-        // Minimized marker: never render raw command (redaction contract).
-        return Text(
-          l10n.chatMessageMessagePartUnavailable as String,
-          maxLines: 16,
-          overflow: TextOverflow.ellipsis,
-        );
+      case ToolCall() || ShellRun():
+        return SessionToolResult(item: item);
       case TurnOutcome(:final kind):
         final text = switch (kind.known) {
           OutcomeKind.succeeded => l10n.liveOutcomeSucceeded as String,

@@ -1224,4 +1224,49 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveOlderLoading => '이전 메시지를 불러오는 중…';
+
+  @override
+  String get chatMessageDetails => '세부 정보';
+
+  @override
+  String get chatMessageShowLess => '덜 보기';
+
+  @override
+  String get chatMessageShowMore => '더 보기';
+
+  @override
+  String get chatMessageToolCommand => '명령어';
+
+  @override
+  String get chatMessageToolInput => '입력';
+
+  @override
+  String get chatMessageToolOutputTruncated => '앱 안정성을 위해 큰 도구 출력이 잘렸습니다.';
+
+  @override
+  String get statusFailed => '실패';
+
+  @override
+  String get toolRunning => '실행 중';
+
+  @override
+  String get liveToolOutput => '출력';
+
+  @override
+  String get liveToolDone => '완료';
+
+  @override
+  String get liveToolInterrupted => '중단됨';
+
+  @override
+  String get liveShellExitCode => '종료 코드';
+
+  @override
+  String get liveShellTimedOut => '시간 초과';
+
+  @override
+  String get liveShellKilled => '종료됨';
+
+  @override
+  String get liveShellOutputPartial => '서버에 여기 표시된 것보다 많은 출력이 있습니다.';
 }

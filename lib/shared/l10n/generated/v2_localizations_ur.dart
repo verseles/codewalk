@@ -1278,4 +1278,51 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'پرانے پیغامات لوڈ ہو رہے ہیں…';
+
+  @override
+  String get chatMessageDetails => 'تفصیلات';
+
+  @override
+  String get chatMessageShowLess => 'کم دکھائیں';
+
+  @override
+  String get chatMessageShowMore => 'مزید دکھائیں';
+
+  @override
+  String get chatMessageToolCommand => 'کمانڈ';
+
+  @override
+  String get chatMessageToolInput => 'ان پٹ';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'بڑے آؤٹ پٹ کا پیش نظارہ استحکام کے لیے مختصر کیا گیا۔';
+
+  @override
+  String get statusFailed => 'ناکام';
+
+  @override
+  String get toolRunning => 'چل رہا ہے۔';
+
+  @override
+  String get liveToolOutput => 'آؤٹ پٹ';
+
+  @override
+  String get liveToolDone => 'مکمل';
+
+  @override
+  String get liveToolInterrupted => 'روک دیا گیا';
+
+  @override
+  String get liveShellExitCode => 'ایگزٹ کوڈ';
+
+  @override
+  String get liveShellTimedOut => 'وقت ختم';
+
+  @override
+  String get liveShellKilled => 'بند کر دیا گیا';
+
+  @override
+  String get liveShellOutputPartial =>
+      'سرور نے یہاں دکھائے گئے سے زیادہ آؤٹ پٹ رکھا ہے۔';
 }

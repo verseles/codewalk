@@ -610,7 +610,10 @@ _ItemSignature _itemSignature(TimelineItem item) => (
     Notice(:final text) => text,
     TurnOutcome(:final reason) => reason,
     UnknownItem(:final fallbackText) => fallbackText,
-    _ => null,
+    // The rows show these on demand, so a change in them is content too.
+    ShellRun(:final outputText, :final exitToken) =>
+      exitToken == null ? outputText : '$exitToken\n$outputText',
+    ToolCall(:final error) => error?.rawMessage,
   },
   // The outcome the row shows, which the reason behind it does not replace.
   outcome: switch (item) {

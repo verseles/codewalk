@@ -188,7 +188,7 @@ void main() {
         if (name == 'interrupt-resume') {
           expect(tool.status.known, ItemStatus.interrupted);
           expect(tool.error!.rawType, 'aborted');
-          expect(tool.error!.rawMessage, '');
+          expect(tool.error!.rawMessage, 'Tool execution interrupted');
           expect(tool.output, isNull);
         } else {
           expect(tool.status.known, ItemStatus.completed);

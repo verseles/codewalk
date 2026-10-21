@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "正在加载更早的消息…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "详情",
+  "chatMessageShowLess": "显示较少",
+  "chatMessageShowMore": "显示更多",
+  "chatMessageToolCommand": "命令",
+  "chatMessageToolInput": "输入",
+  "chatMessageToolOutputTruncated": "大型工具输出预览已截断以保持应用稳定性。",
+  "statusFailed": "失败",
+  "toolRunning": "运行中",
+  "liveToolOutput": "输出",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "完成",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "已中断",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "退出代码",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "已超时",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "已终止",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "服务器保存的输出比此处显示的更多。",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

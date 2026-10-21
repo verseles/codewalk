@@ -1066,5 +1066,41 @@
   "liveOlderLoading": "جارٍ تحميل الرسائل السابقة…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "تفاصيل",
+  "chatMessageShowLess": "عرض أقل",
+  "chatMessageShowMore": "عرض المزيد",
+  "chatMessageToolCommand": "أمر",
+  "chatMessageToolInput": "الإدخال",
+  "chatMessageToolOutputTruncated": "تم اقتطاع معاينة إخراج الأداة الكبيرة لاستقرار التطبيق.",
+  "statusFailed": "فشل",
+  "toolRunning": "جاري التشغيل",
+  "liveToolOutput": "المخرجات",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "تم",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "تمت المقاطعة",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "رمز الخروج",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "انتهت المهلة",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "أُنهي",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "احتفظ الخادم بمخرجات أكثر مما يظهر هنا.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

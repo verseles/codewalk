@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "پرانے پیغامات لوڈ ہو رہے ہیں…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "تفصیلات",
+  "chatMessageShowLess": "کم دکھائیں",
+  "chatMessageShowMore": "مزید دکھائیں",
+  "chatMessageToolCommand": "کمانڈ",
+  "chatMessageToolInput": "ان پٹ",
+  "chatMessageToolOutputTruncated": "بڑے آؤٹ پٹ کا پیش نظارہ استحکام کے لیے مختصر کیا گیا۔",
+  "statusFailed": "ناکام",
+  "toolRunning": "چل رہا ہے۔",
+  "liveToolOutput": "آؤٹ پٹ",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "مکمل",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "روک دیا گیا",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "ایگزٹ کوڈ",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "وقت ختم",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "بند کر دیا گیا",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "سرور نے یہاں دکھائے گئے سے زیادہ آؤٹ پٹ رکھا ہے۔",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

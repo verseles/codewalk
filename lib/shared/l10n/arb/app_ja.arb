@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "以前のメッセージを読み込み中…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "詳細",
+  "chatMessageShowLess": "表示を減らす",
+  "chatMessageShowMore": "もっと表示",
+  "chatMessageToolCommand": "コマンド",
+  "chatMessageToolInput": "入力",
+  "chatMessageToolOutputTruncated": "アプリ安定性のため大きな出力を切り詰めました。",
+  "statusFailed": "失敗",
+  "toolRunning": "実行中",
+  "liveToolOutput": "出力",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "完了",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "中断",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "終了コード",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "タイムアウト",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "強制終了",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "サーバーにはここに表示されているより多くの出力があります。",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

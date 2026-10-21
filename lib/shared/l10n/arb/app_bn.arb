@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "আগের বার্তা লোড হচ্ছে…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "বিবরণ",
+  "chatMessageShowLess": "কম দেখান",
+  "chatMessageShowMore": "আরও দেখান",
+  "chatMessageToolCommand": "কমান্ড",
+  "chatMessageToolInput": "ইনপুট",
+  "chatMessageToolOutputTruncated": "বড় টুল আউটপুট প্রিভিউ অ্যাপ স্থিতিশীলতার জন্য ছাঁটা হয়েছে।",
+  "statusFailed": "ব্যর্থ",
+  "toolRunning": "চলমান",
+  "liveToolOutput": "আউটপুট",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "সম্পন্ন",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "বাধাগ্রস্ত",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "এক্সিট কোড",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "সময় শেষ",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "বন্ধ করা হয়েছে",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "সার্ভার এখানে দেখানোর চেয়ে বেশি আউটপুট রেখেছে।",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

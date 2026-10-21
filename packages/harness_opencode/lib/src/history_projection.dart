@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'shell_projection.dart';
+
 /// Atomic, flat HTTP history projection. These are selected-content limits,
 /// not OS memory limits: 128 blocks/message, 2000 items/page, depth 16,
 /// 16384 nodes/page, 256 KiB/text, 64 KiB/structured field, 1 MiB/page.
@@ -172,6 +174,11 @@ List<TimelineItem> projectOpenCodeHistory(
                   })()
                 : copy(e.value),
         };
+      }
+      if (redact && v is String) {
+        final clean = redactCredentialText(v);
+        if (clean != v) onRedacted();
+        return clean;
       }
       return v;
     }
@@ -393,10 +400,10 @@ List<TimelineItem> projectOpenCodeHistory(
                     charge: false,
                   );
                   if (kind == 'text') {
-                    selected.add({
-                      'type': 'text',
-                      'text': text(part['text'], charge: false),
-                    });
+                    final raw = text(part['text'], charge: false);
+                    final clean = redactCredentialText(raw);
+                    if (clean != raw) extra['outputRedacted'] = true;
+                    selected.add({'type': 'text', 'text': clean});
                   } else if (kind == 'file') {
                     selected.add({
                       'type': 'file',
@@ -432,10 +439,19 @@ List<TimelineItem> projectOpenCodeHistory(
                       ? ItemStatus.interrupted
                       : ItemStatus.failed,
                 );
+                // The message is shown, so it is redacted and bounded; the
+                // response body is never copied.
+                var message = '';
+                if (rawError.containsKey('message')) {
+                  final raw = text(rawError['message'], charge: false);
+                  final bounded = openCodeBoundedText(raw, 8 * 1024);
+                  message = redactCredentialText(bounded.text);
+                  if (message != bounded.text) extra['errorRedacted'] = true;
+                }
                 error = ErrorInfo(
                   kind: const OpenValue.known(ErrorKind.toolFailure),
                   rawType: errorType,
-                  rawMessage: '',
+                  rawMessage: message,
                 );
               }
               if (redacted) extra['inputRedacted'] = true;
@@ -520,6 +536,74 @@ List<TimelineItem> projectOpenCodeHistory(
               text(message['outcome'], cap: 4096, nonempty: true),
               OutcomeKind.values,
             ),
+          ),
+        );
+      case 'shell':
+        final shellId = text(message['shellID'], cap: 4096, nonempty: true);
+        if (!shellId.startsWith('sh_')) malformed();
+        final status = openCodeShellStatus(
+          text(message['status'], cap: 4096, nonempty: true, charge: false),
+        );
+        if (status == null) malformed();
+        node();
+        final ({int? code, String? token}) exit;
+        try {
+          exit = openCodeShellExit(message['exit']);
+        } on FormatException {
+          malformed();
+        }
+        final command = text(message['command'], cap: 64 * 1024);
+        final cleanCommand = redactCredentialText(command);
+        String? outputText;
+        var outputRef = OutputRef(id: shellId);
+        var outputRedacted = false;
+        if (message.containsKey('output')) {
+          final output = map(message['output']);
+          final raw = text(output['output'], charge: false);
+          int count(Object? value) {
+            node();
+            if (value is! num ||
+                !value.isFinite ||
+                value < 0 ||
+                value != value.truncateToDouble() ||
+                value > 9007199254740991) {
+              malformed();
+            }
+            return value.toInt();
+          }
+
+          final cursor = count(output['cursor']);
+          final size = count(output['size']);
+          node();
+          final truncated = output['truncated'];
+          if (truncated is! bool) malformed();
+          final bounded = openCodeBoundedText(raw, openCodeShellOutputLimit);
+          outputText = redactCredentialText(bounded.text);
+          outputRedacted = outputText != bounded.text;
+          outputRef = OutputRef(
+            id: shellId,
+            sizeBytes: size,
+            truncated: truncated || cursor < size || bounded.cut,
+          );
+        }
+        add(
+          ShellRun(
+            meta: meta(
+              'shell',
+              shellId,
+              status: openCodeShellItemStatus(status, exit.code),
+              extra: {
+                'nativeShellId': shellId,
+                if (cleanCommand != command) 'commandRedacted': true,
+                if (outputRedacted) 'outputRedacted': true,
+              },
+            ),
+            command: cleanCommand,
+            exitCode: exit.code,
+            exitToken: exit.token,
+            output: outputRef,
+            shellStatus: OpenValue.known(status),
+            outputText: outputText,
           ),
         );
       default:

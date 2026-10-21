@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "Загрузка более ранних сообщений…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "Детали",
+  "chatMessageShowLess": "Показать меньше",
+  "chatMessageShowMore": "Показать больше",
+  "chatMessageToolCommand": "Команда",
+  "chatMessageToolInput": "Ввод",
+  "chatMessageToolOutputTruncated": "Предварительный просмотр вывода инструмента обрезан для стабильности приложения.",
+  "statusFailed": "Сбой",
+  "toolRunning": "Выполняется",
+  "liveToolOutput": "Вывод",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "Готово",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "Прервано",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "Код выхода",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "Время истекло",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "Остановлено",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "Сервер сохранил больше вывода, чем показано здесь.",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

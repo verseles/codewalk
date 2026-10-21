@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'shell_projection.dart';
 import 'version_policy.dart';
 
 enum OpenCodeToolProjectionFailure {
@@ -154,13 +155,18 @@ SessionEvent? projectOpenCodeToolEvent(
   bool? executed;
   bool? truncated;
   var outputOmitted = false;
+  var outputRedacted = false;
+  var errorRedacted = false;
   var status = ItemStatus.streaming;
   if (called || terminal) {
     executed = _boolean(data['executed']);
   }
   if (called) input = selectedInput(data['input']);
   if (success || (failed && data.containsKey('content'))) {
-    (output, outputOmitted) = _content(data['content'], budget);
+    (output, outputOmitted, outputRedacted) = _content(
+      data['content'],
+      budget,
+    );
   }
   if (terminal && data.containsKey('metadata')) {
     final metadata = _object(data['metadata']);
@@ -179,10 +185,19 @@ SessionEvent? projectOpenCodeToolEvent(
     status = errorType == 'aborted'
         ? ItemStatus.interrupted
         : ItemStatus.failed;
+    // The message is shown, so it is redacted and bounded; the response body
+    // is never copied.
+    var message = '';
+    if (rawError.containsKey('message')) {
+      final raw = _text(rawError['message'], cap: _textLimit);
+      final bounded = openCodeBoundedText(raw, 8 * 1024);
+      message = redactCredentialText(bounded.text);
+      errorRedacted = message != bounded.text;
+    }
     error = ErrorInfo(
       kind: const OpenValue.known(ErrorKind.toolFailure),
       rawType: errorType,
-      rawMessage: '',
+      rawMessage: message,
     );
   }
 
@@ -216,6 +231,8 @@ SessionEvent? projectOpenCodeToolEvent(
         'rawInputNotProjected': true,
         if (input == null) 'inputNotProjected': true,
         if (inputRedacted) 'inputRedacted': true,
+        if (outputRedacted) 'outputRedacted': true,
+        if (errorRedacted) 'errorRedacted': true,
         if (outputOmitted) 'outputContentOmitted': true,
         'executed': ?executed,
         'truncated': ?truncated,
@@ -298,21 +315,25 @@ bool _settled(ToolCall item) => const {
   ItemStatus.interrupted,
 }.contains(item.status.known);
 
-(CanonicalValue, bool) _content(Object? value, _SelectedBudget budget) {
+(CanonicalValue, bool, bool) _content(
+  Object? value,
+  _SelectedBudget budget,
+) {
   if (value is! List<Object?> || value.isEmpty) {
     _fail(OpenCodeToolProjectionFailure.malformed);
   }
   if (value.length > 128) _fail(OpenCodeToolProjectionFailure.limitExceeded);
   var omitted = false;
+  var redacted = false;
   final selected = <Object?>[];
   for (final raw in value) {
     final part = _object(raw);
     final type = _text(part['type'], cap: _idLimit, nonempty: true);
     if (type == 'text') {
-      selected.add({
-        'type': 'text',
-        'text': _text(part['text'], cap: _textLimit),
-      });
+      final raw = _text(part['text'], cap: _textLimit);
+      final clean = redactCredentialText(raw);
+      redacted = redacted || clean != raw;
+      selected.add({'type': 'text', 'text': clean});
     } else if (type == 'file') {
       selected.add({
         'type': 'file',
@@ -324,7 +345,7 @@ bool _settled(ToolCall item) => const {
       _fail(OpenCodeToolProjectionFailure.malformed);
     }
   }
-  return (budget.structured(selected), omitted);
+  return (budget.structured(selected), omitted, redacted);
 }
 
 final class _SelectedBudget {
@@ -408,6 +429,11 @@ final class _SelectedBudget {
                   })()
                 : copy(entry.value),
         };
+      }
+      if (redact && v is String) {
+        final clean = redactCredentialText(v);
+        if (clean != v) onRedacted?.call();
+        return clean;
       }
       return v;
     }

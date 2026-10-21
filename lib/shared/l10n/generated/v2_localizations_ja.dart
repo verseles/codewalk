@@ -1222,4 +1222,49 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveOlderLoading => '以前のメッセージを読み込み中…';
+
+  @override
+  String get chatMessageDetails => '詳細';
+
+  @override
+  String get chatMessageShowLess => '表示を減らす';
+
+  @override
+  String get chatMessageShowMore => 'もっと表示';
+
+  @override
+  String get chatMessageToolCommand => 'コマンド';
+
+  @override
+  String get chatMessageToolInput => '入力';
+
+  @override
+  String get chatMessageToolOutputTruncated => 'アプリ安定性のため大きな出力を切り詰めました。';
+
+  @override
+  String get statusFailed => '失敗';
+
+  @override
+  String get toolRunning => '実行中';
+
+  @override
+  String get liveToolOutput => '出力';
+
+  @override
+  String get liveToolDone => '完了';
+
+  @override
+  String get liveToolInterrupted => '中断';
+
+  @override
+  String get liveShellExitCode => '終了コード';
+
+  @override
+  String get liveShellTimedOut => 'タイムアウト';
+
+  @override
+  String get liveShellKilled => '強制終了';
+
+  @override
+  String get liveShellOutputPartial => 'サーバーにはここに表示されているより多くの出力があります。';
 }

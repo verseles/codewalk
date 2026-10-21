@@ -1271,4 +1271,51 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'جارٍ تحميل الرسائل السابقة…';
+
+  @override
+  String get chatMessageDetails => 'تفاصيل';
+
+  @override
+  String get chatMessageShowLess => 'عرض أقل';
+
+  @override
+  String get chatMessageShowMore => 'عرض المزيد';
+
+  @override
+  String get chatMessageToolCommand => 'أمر';
+
+  @override
+  String get chatMessageToolInput => 'الإدخال';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'تم اقتطاع معاينة إخراج الأداة الكبيرة لاستقرار التطبيق.';
+
+  @override
+  String get statusFailed => 'فشل';
+
+  @override
+  String get toolRunning => 'جاري التشغيل';
+
+  @override
+  String get liveToolOutput => 'المخرجات';
+
+  @override
+  String get liveToolDone => 'تم';
+
+  @override
+  String get liveToolInterrupted => 'تمت المقاطعة';
+
+  @override
+  String get liveShellExitCode => 'رمز الخروج';
+
+  @override
+  String get liveShellTimedOut => 'انتهت المهلة';
+
+  @override
+  String get liveShellKilled => 'أُنهي';
+
+  @override
+  String get liveShellOutputPartial =>
+      'احتفظ الخادم بمخرجات أكثر مما يظهر هنا.';
 }

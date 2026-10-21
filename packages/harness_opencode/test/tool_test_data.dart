@@ -36,7 +36,10 @@ Map<String, Object?> toolFrame(
       'metadata': <String, Object?>{'shellID': 'fake-private'},
     if (phase == 'success') 'content': content,
     if (phase == 'failed')
-      'error': <String, Object?>{'type': 'aborted', 'message': 'fake-private'},
+      'error': <String, Object?>{
+        'type': 'aborted',
+        'message': 'Tool execution interrupted',
+      },
   },
   if (!['input.delta', 'progress'].contains(phase))
     'durable': <String, Object?>{

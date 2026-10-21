@@ -1067,5 +1067,41 @@
   "liveOlderLoading": "पुराने संदेश लोड हो रहे हैं…",
   "@liveOlderLoading": {
     "description": "V2 live read-only session view"
+  },
+  "chatMessageDetails": "विवरण",
+  "chatMessageShowLess": "कम दिखाएं",
+  "chatMessageShowMore": "और दिखाएं",
+  "chatMessageToolCommand": "कमांड",
+  "chatMessageToolInput": "इनपुट",
+  "chatMessageToolOutputTruncated": "बड़े आउटपुट का पूर्वावलोकन स्थिरता के लिए छोटा किया गया।",
+  "statusFailed": "विफल",
+  "toolRunning": "चल रहा है",
+  "liveToolOutput": "आउटपुट",
+  "@liveToolOutput": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolDone": "पूरा",
+  "@liveToolDone": {
+    "description": "V2 live read-only session view"
+  },
+  "liveToolInterrupted": "बाधित",
+  "@liveToolInterrupted": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellExitCode": "एग्ज़िट कोड",
+  "@liveShellExitCode": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellTimedOut": "समय समाप्त",
+  "@liveShellTimedOut": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellKilled": "बंद किया गया",
+  "@liveShellKilled": {
+    "description": "V2 live read-only session view"
+  },
+  "liveShellOutputPartial": "सर्वर ने यहाँ दिखाए गए से अधिक आउटपुट रखा है।",
+  "@liveShellOutputPartial": {
+    "description": "V2 live read-only session view"
   }
 }

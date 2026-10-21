@@ -1292,4 +1292,51 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveOlderLoading => 'Загрузка более ранних сообщений…';
+
+  @override
+  String get chatMessageDetails => 'Детали';
+
+  @override
+  String get chatMessageShowLess => 'Показать меньше';
+
+  @override
+  String get chatMessageShowMore => 'Показать больше';
+
+  @override
+  String get chatMessageToolCommand => 'Команда';
+
+  @override
+  String get chatMessageToolInput => 'Ввод';
+
+  @override
+  String get chatMessageToolOutputTruncated =>
+      'Предварительный просмотр вывода инструмента обрезан для стабильности приложения.';
+
+  @override
+  String get statusFailed => 'Сбой';
+
+  @override
+  String get toolRunning => 'Выполняется';
+
+  @override
+  String get liveToolOutput => 'Вывод';
+
+  @override
+  String get liveToolDone => 'Готово';
+
+  @override
+  String get liveToolInterrupted => 'Прервано';
+
+  @override
+  String get liveShellExitCode => 'Код выхода';
+
+  @override
+  String get liveShellTimedOut => 'Время истекло';
+
+  @override
+  String get liveShellKilled => 'Остановлено';
+
+  @override
+  String get liveShellOutputPartial =>
+      'Сервер сохранил больше вывода, чем показано здесь.';
 }
