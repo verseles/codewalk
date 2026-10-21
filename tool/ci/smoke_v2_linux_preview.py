@@ -183,8 +183,9 @@ def smoke(archive_path, evidence):
 
         try:
             window = start()
-            expect(window, ["CodeWalk", "Settings"], "01-initial")
-            click(window, "Servers")
+            # The app opens into the workspace: the list beside an empty detail.
+            expect(window, ["CodeWalk", "Conversations", "Choose a session"], "01-initial")
+            click(window, "Connect to a running server")
             expect(window, ["No servers found", "Pair a server"], "02-hosts")
             click(window, "Pair")
             expect(window, ["Pairing link", "Open QR image"], "03-pairing")
