@@ -2285,18 +2285,26 @@ lib/features/sessions/session_live_scroll.dart # The viewport rules: the follow,
 lib/features/sessions/session_live_timeline.dart # The timeline: the forward list with the header, the follow of the newest content, the reveal of a finished answer and the control that returns to the tail
 lib/features/sessions/session_live_page.dart # The live screen renders the timeline and keeps the footer, the cards and the composer outside it
 tool/l10n/session_live_catalog.py # The scoped catalog with the jump controls' copy, ported from the retained reference
+test/v2/sessions/session_live_scroll_test.dart # The viewport rules and the follow: the reader's priority, the arrival, the control and the reveal
 ```
 
 The viewport is a projection of the resident items, never a second list: the
 items keep the server's order and the header scrolls with them. The follow
 moves the viewport to the newest content whenever the content grows - a new
 item or a longer one - while the reader is at the bottom. A drag, a fling or a
-wheel on the timeline's own list stops it; the public scroll direction is the
-evidence, so the timeline's own jumps and a scrollable inside a row never
-count. The follow resumes when the reader's gesture ends at the bottom or the
-reader uses the control that returns to the tail. The control is marked from
-the items themselves (a new item or a changed last item), not from the
-layout. Each follow asks for its own frame. A settled
+wheel on the timeline's own list stops it, and the public scroll direction is
+the evidence only when the list can still move in that direction: a gesture
+against the boundary reports its direction even when the physics keep the
+offset where it is, and a reader who holds the list at the tail has not asked
+for anything. A scroll that reports no direction of its own - a page key, a
+click on the scrollbar track - is the reader's too, and the offset is the
+evidence for it, so the timeline's own jumps and a scrollable inside a row
+never count. The follow waits for such a scroll instead of cancelling it. The
+follow resumes when the reader's gesture ends at the bottom or the reader
+uses the control that returns to the tail. The control is marked from the
+items themselves (a change in any resident item), not from the layout, so a
+growth of the extent without new content, the landing and the settle of a
+turn never mark it. Each follow asks for its own frame. A settled
 answer that does not fit the viewport is offered from its start once the
 follow reaches the tail, counts as read, and gives the tail back when the next
 turn starts.
