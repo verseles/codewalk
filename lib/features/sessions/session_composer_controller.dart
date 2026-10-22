@@ -194,7 +194,15 @@ class SessionComposerController extends ChangeNotifier {
         draft: PromptDraft(text: text),
         delivery: as,
       );
-      if (_disposed) return false;
+      if (_disposed) {
+        // The session closed meanwhile: a prompt the outbox took must not
+        // come back as its draft.
+        if (result.entry case final entry?
+            when entry.state != SubmissionKind.rejected) {
+          live.forgetDraft(text);
+        }
+        return false;
+      }
       final entry = result.entry;
       // A lease reopened meanwhile shares the ledger: a recorded prompt was
       // still sent, so its text must leave the field.
@@ -212,7 +220,7 @@ class SessionComposerController extends ChangeNotifier {
         if (current) await _refresh();
         return false;
       }
-      if (!current) return _sent(fromChoice, as);
+      if (!current) return _sent(text, fromChoice, as);
       if (entry.state == SubmissionKind.uncertain) {
         notice = ComposerNotice.unconfirmed;
         await _refresh();
@@ -224,10 +232,10 @@ class SessionComposerController extends ChangeNotifier {
           await _refresh();
           return false;
         }
-        return _sent(fromChoice, as);
+        return _sent(text, fromChoice, as);
       }
       await _refresh();
-      return _sent(fromChoice, as);
+      return _sent(text, fromChoice, as);
     } finally {
       sending = false;
       _notify();
@@ -236,9 +244,13 @@ class SessionComposerController extends ChangeNotifier {
 
   /// A choice changed while this send was in flight is the next one's; a
   /// send that did not go keeps it for the retry.
-  bool _sent(bool fromChoice, Delivery as) {
-    // A screen closed meanwhile has disposed the draft this would clear.
-    if (_disposed) return false;
+  bool _sent(String text, bool fromChoice, Delivery as) {
+    // A session closed meanwhile has disposed the draft this would clear;
+    // the prompt it sent must not come back as its saved draft.
+    if (_disposed) {
+      live.forgetDraft(text);
+      return false;
+    }
     if (fromChoice && delivery == as) delivery = Delivery.steer;
     return true;
   }

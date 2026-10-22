@@ -10,7 +10,6 @@ import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import 'session_composer.dart';
-import 'session_composer_controller.dart';
 import 'session_form_card.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
@@ -46,13 +45,9 @@ class SessionLivePage extends StatefulWidget {
 }
 
 class _SessionLivePageState extends State<SessionLivePage> {
-  late final SessionComposerController _composer;
-  final _draft = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-    _composer = SessionComposerController(live: widget.controller);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !widget.controller.started) widget.controller.start();
     });
@@ -60,8 +55,6 @@ class _SessionLivePageState extends State<SessionLivePage> {
 
   @override
   void dispose() {
-    _composer.dispose();
-    _draft.dispose();
     if (widget.ownsController) widget.controller.dispose();
     super.dispose();
   }
@@ -420,8 +413,8 @@ class _SessionLivePageState extends State<SessionLivePage> {
                                     ],
                                   )
                                 : SessionComposer(
-                                    controller: _composer,
-                                    text: _draft,
+                                    controller: widget.controller.composer,
+                                    text: widget.controller.draft,
                                     // Most of the body stays the timeline's; with
                                     // the keyboard over a short body the field
                                     // wins instead (the 4 is the progress bar).

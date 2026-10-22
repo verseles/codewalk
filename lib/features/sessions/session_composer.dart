@@ -11,9 +11,9 @@ import 'session_composer_controller.dart';
 import 'session_stop_button.dart';
 
 /// The live screen's composer: pending inbox chips, entries that still need
-/// the user, the steer/queue choice and the text field. It edits the page's
-/// draft, so typing never rebuilds the timeline and a reopened lease keeps
-/// the text.
+/// the user, the steer/queue choice and the text field. It edits the
+/// session's draft, so typing never rebuilds the timeline, and a reopened
+/// lease or a tab shown again keeps the text.
 class SessionComposer extends StatefulWidget {
   const SessionComposer({
     super.key,
@@ -23,7 +23,8 @@ class SessionComposer extends StatefulWidget {
   });
   final SessionComposerController controller;
 
-  /// Owned by the page, so a draft outlives a reopened lease.
+  /// Owned by the session's live controller, so a draft outlives a reopened
+  /// lease and the page.
   final TextEditingController text;
 
   /// The most the composer may take of the page body, which already
@@ -81,8 +82,8 @@ class _SessionComposerState extends State<SessionComposer> {
     super.dispose();
   }
 
-  // The draft belongs to the page and outlives this widget across a
-  // reopened lease, so a finished send still updates it after an unmount.
+  // The draft belongs to the session and outlives this widget, so a
+  // finished send still updates it after an unmount.
   Future<void> _sendAgain(CommandId id) async {
     final draft = _text;
     final text = await widget.controller.sendAgain(id);

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
@@ -330,6 +331,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         summary: summary,
         directory: directory,
         permissionModes: _permissionPolicy(context),
+        drafts: context.read<SessionDraftStore?>(),
       );
       final live = _live ??= tabs == null ? create() : tabs.live(ref, create);
       if (row != null && !identical(live.summary, row)) {

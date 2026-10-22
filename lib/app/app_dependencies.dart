@@ -10,6 +10,7 @@ import '../features/settings/release_history_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
+import '../platform/sessions/session_draft_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
@@ -36,6 +37,7 @@ class AppDependencies {
     this.unrestrictedOwnership,
     this.hiddenSessions,
     this.sessionTabs,
+    this.sessionDrafts,
   });
 
   final AppPreferencesController preferences;
@@ -59,6 +61,9 @@ class AppDependencies {
 
   /// The open session tabs and the live views they keep open.
   final SessionTabsController? sessionTabs;
+
+  /// The unsent prompt of each session, saved on this device.
+  final SessionDraftStore? sessionDrafts;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -78,6 +83,8 @@ class AppDependencies {
     navigation.dispose();
     // The tabs close their live views before the list and the directory.
     sessionTabs?.dispose();
+    // What was typed and not yet written is written now.
+    unawaited(sessionDrafts?.flush());
     sessions?.dispose();
     unawaited(liveDirectory?.close());
     hosts.dispose();

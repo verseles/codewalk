@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,6 +7,7 @@ import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
+import '../platform/sessions/session_draft_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
@@ -32,7 +35,23 @@ class CodeWalkV2Bootstrap extends StatefulWidget {
   State<CodeWalkV2Bootstrap> createState() => _CodeWalkV2BootstrapState();
 }
 
-class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
+class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The app may be killed once it leaves the foreground: what was typed
+    // and not yet written is written now.
+    if (state != AppLifecycleState.resumed) {
+      unawaited(widget.dependencies.sessionDrafts?.flush());
+    }
+  }
+
   @override
   void didUpdateWidget(CodeWalkV2Bootstrap oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -43,6 +62,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     widget.dependencies.dispose();
     super.dispose();
   }
@@ -61,6 +81,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap> {
         Provider<SessionLiveDirectory?>.value(
           value: dependencies.liveDirectory,
         ),
+        Provider<SessionDraftStore?>.value(value: dependencies.sessionDrafts),
         if (dependencies.permissionModes case final modes?)
           ChangeNotifierProvider<EditablePermissionModePolicy>.value(
             value: modes,

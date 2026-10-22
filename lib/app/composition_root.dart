@@ -18,6 +18,7 @@ import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/session_action_source.dart';
 import '../platform/sessions/session_catalog_factory.dart';
+import '../platform/sessions/session_draft_store.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
 import '../platform/sessions/session_tabs_store.dart';
@@ -57,6 +58,7 @@ AppDependencies createAppDependencies({
   SessionActionFactory? sessionActionFactory,
   HiddenSessionStore? hiddenStore,
   SessionTabsStore? tabsStore,
+  SessionDraftStore? draftStore,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -111,13 +113,16 @@ AppDependencies createAppDependencies({
       diagnostics: locator<DiagnosticsController>(),
     ),
   );
+  // One payload store for the outbox and the drafts, which use their own
+  // keys.
+  final payloads = createV2PayloadStore(metadata);
   // The live directory owns the endpoint's single event stream; the session
   // catalog listens to the same one, so the directory is created first and
   // the catalog borrows its feed.
   final liveDirectory =
       (sessionLiveDirectory ??
       () => createSessionLiveDirectory(
-        payloads: createV2PayloadStore(metadata),
+        payloads: payloads,
         permissionModes: permissionModes,
         unrestrictedOwnership: unrestrictedOwnership,
       ))();
@@ -174,6 +179,8 @@ AppDependencies createAppDependencies({
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
+    sessionDrafts:
+        draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),

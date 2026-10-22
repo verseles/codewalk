@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart'
+    show TextEditingController, TextEditingValue, TextSelection;
+import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
@@ -9,6 +12,7 @@ import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/hosts_controller.dart';
+import 'session_composer_controller.dart';
 import 'session_live_scroll.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
@@ -20,6 +24,7 @@ class SessionLiveController extends ChangeNotifier {
     required SessionSummary summary,
     required this.directory,
     this.permissionModes,
+    this.drafts,
     DateTime Function()? now,
     CommandId Function()? commandIds,
   }) : _summary = summary,
@@ -27,6 +32,9 @@ class SessionLiveController extends ChangeNotifier {
        _commandIds = commandIds ?? mintCommandId {
     hosts.addListener(_hostsChanged);
     permissionModes?.addListener(_policyChanged);
+    draft.addListener(_draftChanged);
+    drafts?.attach(session, _draftForgotten);
+    unawaited(_restoreDraft());
   }
   final HostsController hosts;
   final EndpointProfile profile;
@@ -48,6 +56,61 @@ class SessionLiveController extends ChangeNotifier {
   /// The timeline's place and follow state, kept with the session so a view
   /// shown again resumes where the reader left it.
   final scroll = SessionLiveScroll();
+
+  /// The unsent prompt, kept with the session so switching tabs keeps it,
+  /// and saved on this device through [drafts] so a relaunch restores it.
+  final draft = TextEditingController();
+
+  /// Where the session's draft is saved, when the app graph provides it.
+  final SessionDraftStore? drafts;
+  String _draftText = '';
+  bool _draftEdited = false;
+  bool _applyingDraft = false;
+
+  /// The composer's state, kept with the session so a send that ends after
+  /// its screen closed still clears the prompt it sent.
+  SessionComposerController get composer =>
+      _composer ??= SessionComposerController(live: this);
+  SessionComposerController? _composer;
+
+  /// The stored draft is shown once it is read, unless the user has typed
+  /// meanwhile: what they typed is theirs, and is saved from the first key.
+  Future<void> _restoreDraft() async {
+    final drafts = this.drafts;
+    if (drafts == null) return;
+    final text = await drafts.read(session);
+    if (_disposed || _draftEdited) return;
+    if (text != null && draft.text.isEmpty) {
+      _applyingDraft = true;
+      draft.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+      _applyingDraft = false;
+    }
+  }
+
+  void _draftChanged() {
+    final text = draft.text;
+    // A caret or selection move is not an edit.
+    if (text == _draftText) return;
+    _draftText = text;
+    if (_applyingDraft) return;
+    _draftEdited = true;
+    // Saved before the stored draft is read too: the store reads first and
+    // never writes over a record it could not read.
+    drafts?.save(session, text);
+  }
+
+  /// A prompt sent after an earlier screen of this session closed was shown
+  /// here again from the saved draft: it leaves the field unless edited.
+  void _draftForgotten(String text) {
+    if (!_disposed && draft.text == text) draft.clear();
+  }
+
+  /// A prompt the outbox took after the session's screen closed must not
+  /// come back as its draft.
+  void forgetDraft(String text) => drafts?.forget(session, text);
 
   /// True once disposed; a disposed view is never shown again.
   bool get disposed => _disposed;
@@ -575,6 +638,11 @@ class SessionLiveController extends ChangeNotifier {
     permissionModes?.removeListener(_policyChanged);
     _detach();
     scroll.dispose();
+    _composer?.dispose();
+    draft.removeListener(_draftChanged);
+    drafts?.detach(session, _draftForgotten);
+    unawaited(drafts?.flush());
+    draft.dispose();
     super.dispose();
   }
 }
