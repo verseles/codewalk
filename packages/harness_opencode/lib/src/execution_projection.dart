@@ -163,10 +163,11 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
 /// retrying until the next `session.step.started` or the execution's end,
 /// which the step and execution producers observe.
 ///
-/// `at` is the next attempt on the server's clock. The server's own delay
-/// (`at - created`) is counted from [receivedAt], so a device clock that
-/// differs from the server's does not move the deadline; a late delivery
-/// keeps the earlier `at`, and a deadline already past becomes [receivedAt]
+/// `at` is the next attempt on the server's clock. The deadline is the
+/// earlier of `at` and the server's own delay (`at - created`) counted from
+/// [receivedAt]: a device clock behind the server's keeps that delay, while a
+/// late delivery or a device clock ahead keeps `at`, which can shorten the
+/// wait but never lengthen it. A deadline already past becomes [receivedAt]
 /// so no wait is shown. The native values stay in the provenance.
 ///
 /// Error `message`, `status` and `response` are never read; the error kind

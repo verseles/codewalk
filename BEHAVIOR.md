@@ -214,9 +214,20 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** once the saved draft was read, Up shows the session's previous sent prompt (its own, trimmed, newest 100) and Down the next one; on a recalled prompt the first Up moves the caret to its start, and Down past the newest gives back what was being written
 - **Then** a recalled prompt is not saved as the draft; editing it ends the browsing and makes it the draft; a phone has no recall gesture, as in v1
 
+### V2 live session execution state
+
+- **Given** an open native v2 session on verified OpenCode 2.0.22
+- **When** the header shows the session's execution
+- **Then** running, retrying, stopping, resuming after a restart, needing input and idle each have their own label; the last outcome stays beside it
+- **When** the server schedules a retry of the current step
+- **Then** the label reads "Retrying in m:ss" (hours as h:mm:ss), counted down from the deadline the server reported and never longer than the server's own delay counted from arrival; a deadline already past, or one unknown after a reconnect, reads "Retrying" or the hydrated running state
+- **Then** the count ticks once per second only while the screen is shown and the app is in the foreground, and catches up when it returns; the retry's error type is kept, its message is never shown
+- **Then** the next step start of that execution returns it to running, and any execution end clears the wait
+- **Then** technical coverage is contract-derived (no natural 2.0.22 retry capture) and includes the 2x-text labels in Arabic and Portuguese; installed native/MVP acceptance remains separate
+
 ### V2 live session Stop
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22 with a live, current, known-running execution
+- **Given** an open native v2 session on verified OpenCode 2.0.22 with a live, current, known-running or retrying execution
 - **When** the composer draft is empty
 - **Then** its trailing Send action becomes Stop; typing keeps Send with steer/queue, and Stop never clears the draft or partial output
 - **Then** two unmodified Escape presses within 500 milliseconds while the input is focused also request Stop; the first shows a hint, and composing text, repeated keys and modifiers do not trigger it
@@ -225,10 +236,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the shared session lease fences duplicate requests across screens and temporarily disables competing composer mutations; Stop remains available without prompt-ledger storage
 - **Then** an accepted `interrupted:true` means only that interruption was requested, while `false` is a confirmed idle no-op; neither response changes canonical execution state
 - **Then** missing, malformed or lost responses show finite unconfirmed copy and never replay automatically; a later deliberate Stop is a new action against whatever execution is current
-- **Then** the HTTP attempt is bounded to 20 seconds and the post-accept wait to 30 seconds; only an authoritative live, non-stale non-running observation settles the wait, including after an unconfirmed result
+- **Then** the HTTP attempt is bounded to 20 seconds and the post-accept wait to 30 seconds; only an authoritative live, non-stale idle observation settles the wait, including after an unconfirmed result; a retry wait or a pending resume keeps it waiting
 - **Then** reconnect hydration that merely reconstructs an earlier outcome does not settle a still-running request; a missed terminal followed by a running successor keeps the conservative bounded wait
 - **Then** idle/refused notices describe that request, and stream/hydration remain the only source of execution and turn outcomes; closing, credential changes and lease release never initiate a remote Stop
-- **Then** technical coverage includes compact/landscape/wide composers in 14 locales and storage-less compact/wide Stop; installed native/MVP acceptance, child controls and retry countdown remain separate
+- **Then** technical coverage includes compact/landscape/wide composers in 14 locales and storage-less compact/wide Stop; installed native/MVP acceptance and child controls remain separate
 
 ### V2 manual permission replies
 

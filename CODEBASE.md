@@ -2542,3 +2542,21 @@ emulator. Only after that launch does it keep the owner's arm64 APK with its
 checksum, build record and launch evidence. The delivered arm64 split itself
 is inspected, not launched. `ci.yml` does not run this workflow, and nothing is
 tagged, released or deployed.
+
+## V2-046B retry wait (#405)
+
+```text
+packages/harness_opencode/lib/src/execution_projection.dart # projectOpenCodeRetryEvent: session.retry.scheduled -> RetryScheduled with a bounded deadline
+packages/harness_opencode/lib/src/step_usage_projection.dart # A step start during a retry wait returns the execution to running
+packages/harness_opencode/lib/src/event_projection.dart # Routes session.retry.scheduled; session.status and session.idle stay unprojected
+lib/features/sessions/session_live_page.dart # Execution chip labels per state; _RetryLabel counts the wait down while shown and in the foreground
+lib/features/sessions/session_live_controller.dart # canStop while running or retrying; clock for the countdown
+lib/platform/sessions/opencode_profile_slot.dart # A Stop settles only on an observed idle
+tool/l10n/session_live_catalog.py # liveRetrying and liveRetryingIn in 14 locales
+packages/harness_opencode/test/retry_projection_test.dart # Contract-derived retry mapping, deadline bounds, clearing and failures
+test/v2/sessions/session_live_execution_test.dart # Chip labels, countdown, pause, 2x text in Arabic and Portuguese
+```
+
+The wait is uncorrelated with its step: the reducer's position order drops a
+stale frame, and the next `session.step.started` or any execution end clears
+it. No 2.0.22 capture holds a retry frame, so the inputs are contract-derived.

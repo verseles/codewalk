@@ -382,6 +382,7 @@ execution state and the timeline. Reduce the events in order against the latest
 | `session.execution.started` | `ExecutionChanged(running)`, previous `lastOutcome` kept |
 | `succeeded`, `failed`, `interrupted` (`user`, `superseded`, `inactivity`) | `ExecutionChanged(idle, lastOutcome)`, then `ItemUpserted(TurnOutcome)` |
 | `interrupted` (`shutdown`) | `ExecutionChanged(interruptedPendingResume)` only, previous `lastOutcome` kept |
+| `session.retry.scheduled` | `RetryScheduled`: `retrying` with the wait's deadline and error type, previous `lastOutcome` kept |
 
 - The outcome item uses the official `evt_` → `msg_` message ID, so its ID,
   completed status and outcome kind equal the history `idle` row. Its generation
@@ -389,6 +390,17 @@ execution state and the timeline. Reduce the events in order against the latest
   outcome, not on the item, so live and history items remain identical.
 - A shutdown records no idle marker because the server keeps the execution claim
   and resumes the same turn; no outcome is invented.
+- [V2-046B / #405](https://github.com/verseles/codewalk/issues/405): a retry
+  wait lasts until the next `session.step.started`, which returns the execution
+  to `running` with its previous outcome, or until any execution frame above.
+  `projectOpenCodeRetryEvent` sets the deadline to the earlier of `at` and the
+  server's own delay (`at - created`) counted from arrival, never before
+  arrival, so a device clock can shorten the wait but never lengthen it. The
+  wait is not correlated with its step: the reducer's position order already
+  drops a stale frame. `attempt`, `at`, `created` and the message ID stay in the
+  provenance, and the error keeps only its type, as for a failure. A message ID
+  without `msg_`, an attempt below 1, or `at`/`created` outside the epoch range
+  is malformed.
 - Failures keep only `error.type` as `rawType`, with kind `unknown`, an empty raw
   message and no retry inference. `message`, `status` and `response` are never
   read. An empty type is unsupported because Core requires a nonempty `rawType`.
@@ -398,7 +410,8 @@ execution state and the timeline. Reduce the events in order against the latest
   `OpenCodeExecutionProjectionException` categories, atomically.
 - The reference client's refetch triggers (tool parts still open at a terminal,
   session info not yet loaded) are not projected; the stream owner handles them.
-  `session.retry.scheduled` is not projected.
+  `session.status` and `session.idle` have no 2.0.22 publisher and stay
+  unprojected; the active map is the hydrated running signal.
 
 Replays cover offline A with the text and tool producers, and every execution
 frame in the B–E captures: 36 terminal outcomes match their recorded `idle` rows,
@@ -477,7 +490,8 @@ an unmodifiable `List<SessionEvent>` to reduce in order against the latest
 
 | Native event | Canonical result |
 |---|---|
-| `session.step.started`, `session.step.streamed` | Validated, nothing emitted |
+| `session.step.started` | Validated; ends a retry wait with `ExecutionChanged(running)`, otherwise nothing emitted |
+| `session.step.streamed` | Validated, nothing emitted |
 | `session.step.ended` | One step `UsageObserved` |
 | `session.step.failed` | History-identical `assistantErrorNotProjected` marker, plus step usage only when both cost and tokens are present |
 | `session.usage.updated` (ephemeral) | One cumulative session `UsageObserved` |
@@ -701,8 +715,10 @@ dart test test/notice_projection_test.dart
 receivedAt: ...)`, the single seam the stream owner (#274) calls for every
 2.0.22 frame. It is synchronous and pure and returns an unmodifiable list.
 
-- An exact type table routes 39 native types to the nine producers above; the
-  producer's result and its finite exception pass through unchanged.
+- An exact type table routes 42 native types to eleven producers: the nine
+  above, the retry projection of the execution section and the shell
+  projection; the producer's result and its finite exception pass through
+  unchanged.
 - Any other frame is a no-op unless its `data.sessionID` names this session:
   session-free frames such as `server.connected`, other sessions, plugin
   `rpc.*` and UI `tui.*` commands, and unprojected `*.delta` content streams
@@ -710,7 +726,7 @@ receivedAt: ...)`, the single seam the stream owner (#274) calls for every
 - The remaining frames become one `UnknownEvent` whose raw value is only
   `{disposition: unprojected | unrecognized}`; provenance keeps the native type
   and a valid `evt_` ID. Known types without a producer yet — agent/model
-  selection, retry scheduling, compaction, shell, skill, move, fork, metadata,
+  selection, compaction, skill, move, fork, metadata,
   permissions, views, durable-log-only records — stay `unprojected` instead of
   being half-mapped.
 - Own failures are `OpenCodeEventProjectionException` (`malformed`,
