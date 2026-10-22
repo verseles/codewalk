@@ -1404,4 +1404,9 @@ class V2LocalizationsIt extends V2Localizations {
   String liveRetryingIn(Object time) {
     return 'Nuovo tentativo tra $time';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'Sotto-agenti in esecuzione: $count';
+  }
 }

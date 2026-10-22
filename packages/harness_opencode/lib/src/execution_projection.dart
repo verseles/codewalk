@@ -54,7 +54,7 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
   required StreamPosition position,
   required DateTime receivedAt,
 }) {
-  final header = _header(value, current, _types, sourceVersion, position);
+  final header = _header(value, current.ref, _types, sourceVersion, position);
   if (header == null) return const [];
   final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
       header;
@@ -179,7 +179,7 @@ List<SessionEvent> projectOpenCodeRetryEvent(
   required StreamPosition position,
   required DateTime receivedAt,
 }) {
-  final header = _header(value, current, {_retry}, sourceVersion, position);
+  final header = _header(value, current.ref, {_retry}, sourceVersion, position);
   if (header == null) return const [];
   final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
       header;
@@ -231,8 +231,82 @@ List<SessionEvent> projectOpenCodeRetryEvent(
   ]);
 }
 
-/// The validated durable v1 frame of one of [types] for this session, or
-/// null for another type or session.
+/// The parent's record of a direct [child] the server shows running. A
+/// parent's own execution says nothing about its children (it goes idle
+/// while they run), so they are counted on the parent instead.
+WorkItem openCodeRunningChild(
+  SessionRef child,
+  SessionRef parent, {
+  SourceProvenance? source,
+}) => WorkItem(
+  id: WorkId(jsonEncode(['child', child.storageKey])),
+  owner: SessionOwner(child, origin: parent),
+  child: child,
+  parent: parent,
+  status: const OpenValue.known(WorkStatus.running),
+  completionScope: const OpenValue.known(CompletionScope.child),
+  source: source,
+);
+
+/// Projects one 2.0.22 execution lifecycle event of a direct [child] onto
+/// the work of the [current] parent, without owning a stream or clock.
+///
+/// `started` adds the child's running record and every end removes it,
+/// a shutdown too: the child is not running, and a resumed child starts
+/// again. The parent's own execution is never touched. Returns null for
+/// other types and sessions, or when the record already matches.
+WorkChanged? projectOpenCodeChildExecutionEvent(
+  Object? value,
+  SessionState current, {
+  required SessionRef child,
+  required String sourceVersion,
+  required StreamPosition position,
+  required DateTime receivedAt,
+}) {
+  final header = _header(value, child, _types, sourceVersion, position);
+  if (header == null) return null;
+  final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
+      header;
+  if (type == _failed) _error(data['error']);
+  if (type == _interrupted &&
+      !_reasons.contains(_text(data['reason'], cap: _idLimit))) {
+    _fail(OpenCodeExecutionProjectionFailure.unsupportedValue);
+  }
+  final running = type == _started;
+  final others = [
+    for (final item in current.work)
+      if (item.child != child) item,
+  ];
+  if (running == (others.length != current.work.length)) return null;
+  final source = SourceProvenance(
+    harness: current.ref.harnessRef,
+    version: sourceVersion,
+    nativeType: type,
+    nativeEventId: nativeId,
+    aggregateId: aggregateId,
+    aggregateSeq: aggregateSeq,
+    durability: const OpenValue.known(Durability.durable),
+    extra: CanonicalValue({
+      'nativeCreated': created,
+      'nativeDurableVersion': 1,
+    }),
+  );
+  return WorkChanged(
+    meta: EventMeta(
+      owner: SessionOwner(current.ref),
+      position: position,
+      receivedAt: receivedAt,
+      source: source,
+    ),
+    items: [
+      ...others,
+      if (running) openCodeRunningChild(child, current.ref, source: source),
+    ],
+  );
+}
+
+/// The validated durable v1 frame of one of [types] for [ref], or null for
+/// another type or session.
 ({
   String type,
   Map<String, Object?> data,
@@ -243,7 +317,7 @@ List<SessionEvent> projectOpenCodeRetryEvent(
 })?
 _header(
   Object? value,
-  SessionState current,
+  SessionRef ref,
   Set<String> types,
   String sourceVersion,
   StreamPosition position,
@@ -254,14 +328,14 @@ _header(
   if (!types.contains(type)) return null;
   final data = _object(frame['data']);
   final sessionId = _id(data['sessionID'], 'ses');
-  if (sessionId != current.ref.nativeId) return null;
+  if (sessionId != ref.nativeId) return null;
   if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
     _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
   }
   for (final part in [
-    current.ref.host.value,
-    current.ref.harness.value,
-    current.ref.nativeId,
+    ref.host.value,
+    ref.harness.value,
+    ref.nativeId,
     position.id,
     position.epoch,
   ]) {

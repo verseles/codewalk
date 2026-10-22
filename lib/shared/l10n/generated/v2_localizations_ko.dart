@@ -1315,4 +1315,9 @@ class V2LocalizationsKo extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time 후 다시 시도';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return '실행 중인 하위 에이전트: $count';
+  }
 }

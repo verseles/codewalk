@@ -603,6 +603,32 @@ void main() {
     expect(server.interrupts.single.path, endsWith('/ses_child/interrupt'));
   });
 
+  test('running children are counted on their idle parent', () async {
+    server.children['ses_one'] = ['ses_child'];
+    server.running.add('ses_child');
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final parent = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    List<SessionRef?> running(SessionLiveView v) => [
+      for (final w in v.state?.work ?? const <WorkItem>[]) w.child,
+    ];
+    await until(
+      parent,
+      (v) => v.phase == SessionLivePhase.live && running(v).length == 1,
+    );
+    expect(running(parent.current), [ref('ses_child')]);
+    expect(parent.current.state!.execution!.kind.known, ExecutionKind.idle);
+    await server.execution('ses_child', 'succeeded');
+    await until(parent, (v) => running(v).isEmpty);
+    await server.execution('ses_child', 'started');
+    await until(parent, (v) => running(v).length == 1);
+    expect(parent.current.state!.execution!.kind.known, ExecutionKind.idle);
+  });
+
   test(
     'accepted request waiting state is bounded; never sends another POST',
     () async {

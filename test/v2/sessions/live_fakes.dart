@@ -372,6 +372,7 @@ SessionState liveState(
   ExecutionState? execution,
   List<InteractionRequest> interactions = const [],
   List<PendingInput> pending = const [],
+  List<WorkItem> work = const [],
   bool hasMore = false,
   String? cursor,
 }) {
@@ -401,6 +402,7 @@ SessionState liveState(
         values: interactions,
         boundary: _boundary(ref),
       ),
+      work: SnapshotCollection(values: work, boundary: _boundary(ref)),
       nextHistoryCursor: cursor == null ? null : HistoryCursor(cursor),
       hasMoreHistory: hasMore || cursor != null,
     ),

@@ -196,6 +196,58 @@ void main() {
     expect(chip(tester), l10n.liveRetryingIn('0:24'));
   });
 
+  testWidgets('an idle parent shows how many of its sub-agents run', (
+    tester,
+  ) async {
+    final handle = await mount(tester);
+    final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    WorkItem child(String id, WorkStatus status) {
+      final session = SessionRef(ref.host, ref.harness, id);
+      return WorkItem(
+        id: WorkId(id),
+        owner: SessionOwner(session, origin: ref),
+        child: session,
+        parent: ref,
+        status: OpenValue.known(status),
+        completionScope: const OpenValue.known(CompletionScope.child),
+      );
+    }
+
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          ref,
+          execution: const ExecutionState(
+            kind: OpenValue.known(ExecutionKind.idle),
+          ),
+          work: [
+            child('ses_c1', WorkStatus.running),
+            child('ses_c2', WorkStatus.running),
+            child('ses_c3', WorkStatus.completed),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(chip(tester), l10n.liveIdle);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('live-children')),
+        matching: find.text(l10n.liveChildrenRunning(2)),
+      ),
+      findsOneWidget,
+    );
+    await show(
+      tester,
+      handle,
+      const ExecutionState(kind: OpenValue.known(ExecutionKind.idle)),
+    );
+    expect(find.byKey(const ValueKey('live-children')), findsNothing);
+  });
+
   for (final locale in const [Locale('ar'), Locale('pt')]) {
     testWidgets('the wait reads in ${locale.languageCode} at 2x text', (
       tester,

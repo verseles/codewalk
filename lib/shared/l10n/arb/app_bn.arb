@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "{time} পরে আবার চেষ্টা",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "চলমান সাব-এজেন্ট: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

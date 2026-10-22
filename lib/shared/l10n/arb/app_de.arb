@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "Neuer Versuch in {time}",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "Laufende Sub-Agenten: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

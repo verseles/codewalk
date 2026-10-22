@@ -1367,4 +1367,9 @@ class V2LocalizationsAr extends V2Localizations {
   String liveRetryingIn(Object time) {
     return 'إعادة المحاولة خلال $time';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'الوكلاء الفرعيون قيد التشغيل: $count';
+  }
 }

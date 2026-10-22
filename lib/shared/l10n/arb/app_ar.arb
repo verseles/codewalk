@@ -1146,5 +1146,9 @@
   "liveRetryingIn": "إعادة المحاولة خلال {time}",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "الوكلاء الفرعيون قيد التشغيل: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

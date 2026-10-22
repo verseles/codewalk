@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
+import 'execution_projection.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
 import 'interaction_projection.dart';
@@ -526,7 +527,8 @@ final class OpenCodeSessionReader {
   /// snapshot; a successful empty list is an authoritative empty collection.
   ///
   /// A session absent from the active map is idle, with the last outcome of
-  /// the history page. Inbox rows, permissions and forms map exactly like the
+  /// the history page; each of [children] the map shows running becomes a
+  /// running child record of the work. Inbox rows, permissions and forms map exactly like the
   /// live producers; an inbox entry whose message is already in the history
   /// page is settled there and is neither pending nor admitted again. The
   /// timeline is complete only when the page has no older continuation.
@@ -612,10 +614,11 @@ final class OpenCodeSessionReader {
       return rows.cast<Object?>();
     }
 
-    final (running, activeStart, activeEnd) = await timed(
+    final (active, activeStart, activeEnd) = await timed(
       _activePath,
-      (value) => _activeSessions(value).contains(ref.nativeId),
+      _activeSessions,
     );
+    final running = active.contains(ref.nativeId);
     final (record, infoStart, infoEnd) = await timed(
       Uri(pathSegments: ['api', 'session', ref.nativeId]).toString(),
       (value) {
@@ -770,6 +773,17 @@ final class OpenCodeSessionReader {
           lastOutcome: lastOutcome,
         ),
         boundary: boundary('session.active', activeStart, activeEnd),
+      ),
+      // The given children the active map shows running; the parent's own
+      // entry says nothing about them.
+      work: SnapshotCollection(
+        values: [
+          for (final child in childRefs)
+            if (active.contains(child.nativeId))
+              openCodeRunningChild(child, ref),
+        ],
+        boundary: boundary('session.active', activeStart, activeEnd),
+        complete: true,
       ),
       timeline: SnapshotCollection(
         values: [...page.items, ...admissions],

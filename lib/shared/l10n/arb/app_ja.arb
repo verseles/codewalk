@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "{time} 後に再試行",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "実行中のサブエージェント: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

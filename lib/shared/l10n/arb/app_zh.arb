@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "{time} 后重试",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "运行中的子代理：{count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

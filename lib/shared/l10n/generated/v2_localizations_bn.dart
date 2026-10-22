@@ -1371,4 +1371,9 @@ class V2LocalizationsBn extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time পরে আবার চেষ্টা';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'চলমান সাব-এজেন্ট: $count';
+  }
 }

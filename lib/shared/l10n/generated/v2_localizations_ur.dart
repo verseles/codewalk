@@ -1376,4 +1376,9 @@ class V2LocalizationsUr extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time میں دوبارہ کوشش';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'چل رہے ذیلی ایجنٹ: $count';
+  }
 }

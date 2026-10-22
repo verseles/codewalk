@@ -111,6 +111,7 @@ class _SessionLivePageState extends State<SessionLivePage>
     required String? failure,
     required String? execution,
     required DateTime? retryAt,
+    required int children,
     required String? outcome,
     required bool needsYou,
     required SessionLiveView? view,
@@ -138,7 +139,7 @@ class _SessionLivePageState extends State<SessionLivePage>
       // Outside the live region: it changes on every event.
       if (view?.lastSyncedAt case final synced?)
         Text('${l10n.liveLastSynced}: ${_time(context, synced)}'),
-      if (execution != null || outcome != null)
+      if (execution != null || outcome != null || children > 0)
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Wrap(
@@ -153,6 +154,11 @@ class _SessionLivePageState extends State<SessionLivePage>
                       : _RetryLabel(at: retryAt, now: c.clock),
                 ),
               if (outcome != null) Chip(label: Text(outcome)),
+              if (children > 0)
+                Chip(
+                  key: const ValueKey('live-children'),
+                  label: Text(l10n.liveChildrenRunning(children)),
+                ),
             ],
           ),
         ),
@@ -302,6 +308,14 @@ class _SessionLivePageState extends State<SessionLivePage>
           ? state?.execution?.retryAt
           : null;
       final outcome = _outcome(l10n, state?.execution?.lastOutcome);
+      // A parent stays idle while its sub-agents run; they are counted here.
+      final children =
+          state?.work
+              .where(
+                (w) => w.child != null && w.status.known == WorkStatus.running,
+              )
+              .length ??
+          0;
       final needsYou = state?.interactions.isNotEmpty ?? false;
       // A settled session has no turn in flight, so a finished answer can be
       // offered to the reader from its start.
@@ -410,6 +424,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                           failure: failure,
                           execution: execution,
                           retryAt: retryAt,
+                          children: children,
                           outcome: outcome,
                           needsYou: needsYou,
                           view: view,

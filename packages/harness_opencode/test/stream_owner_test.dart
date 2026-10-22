@@ -8,6 +8,7 @@ import 'package:harness_opencode/harness_opencode.dart';
 import 'package:test/test.dart';
 
 import 'execution_replay_test.dart' show refOf;
+import 'execution_test_data.dart' show executionFrame;
 import 'history_test_data.dart';
 import 'session_reader_test.dart' show TestTransport, response;
 import 'support/fixture_replay.dart';
@@ -78,10 +79,36 @@ final class Reads {
   final paths = <String>[];
   Completer<void>? gate;
 
+  /// The direct children the listing returns.
+  List<String> children = const [];
+
+  /// Holds the active-map answer already read until completed.
+  Completer<void>? activeGate;
+
   late final transport = TestTransport((request, _) async {
     paths.add(request.path);
     if (gate != null) await gate!.future;
-    final tail = Uri.parse(request.path).pathSegments.last;
+    final uri = Uri.parse(request.path);
+    final tail = uri.pathSegments.last;
+    if (uri.queryParameters.containsKey('parentID')) {
+      return response({
+        'data': [
+          for (final child in children)
+            {
+              'id': child,
+              'parentID': session,
+              'title': 'Child',
+              'projectID': 'global',
+              'time': {'created': 1, 'updated': 1},
+            },
+        ],
+      });
+    }
+    if (tail == 'active' && activeGate != null) {
+      final body = active;
+      await activeGate!.future;
+      return response(body);
+    }
     if (tail == session && sessionStatus != null) {
       return response({'error': 'x'}, status: sessionStatus!);
     }
@@ -109,7 +136,9 @@ final class Reads {
 }
 
 final class Harness {
-  Harness(String session) : ref = refOf(session), reads = Reads(session) {
+  Harness(String session, {bool observeChildren = false})
+    : ref = refOf(session),
+      reads = Reads(session) {
     owner = OpenCodeStreamOwner(
       connection: connection,
       reader: OpenCodeSessionReader(reads.transport, harness: historyHarness),
@@ -118,6 +147,7 @@ final class Harness {
       sourceVersion: '2.0.22',
       now: () => DateTime.utc(2026, 10, 14),
       delay: (_) async {},
+      observeChildren: observeChildren,
     )..start();
     owner.updates.listen(updates.add);
   }
@@ -698,6 +728,116 @@ void main() {
       expect(updates, hasLength(1));
       expect(updates.first.rules.recognized, isFalse);
       expect(h.reads.paths.length, equals(initialPathCount));
+    });
+  });
+
+  group('running children', () {
+    const running = {'type': 'running'};
+    List<SessionRef?> children(Harness h) => [
+      for (final w in h.state.work) w.child,
+    ];
+    const deleted = {
+      'id': 'evt_del',
+      'type': 'session.deleted',
+      'created': 1000,
+      'data': {'sessionID': 'ses_c'},
+      'durable': {'aggregateID': 'ses_c', 'seq': 1, 'version': 2},
+    };
+
+    test('a deleted running child leaves its live parent', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.reads
+        ..children = ['ses_c']
+        ..active = const {
+          'data': {'ses_c': running},
+        };
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      expect(children(h), [refOf('ses_c')]);
+      // No end frame precedes the deletion.
+      h.reads
+        ..children = const []
+        ..active = const {'data': <String, Object?>{}};
+      await h.send([deleted]);
+      expect(h.state.connection.kind.known, ConnectionKind.live);
+      expect(children(h), isEmpty);
+    });
+
+    test('a child deleted mid-hydration is not left running', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      await h.connect(1);
+      // Watched once live, so its frames arrive while it hydrates.
+      h.reads
+        ..children = ['ses_c']
+        ..active = const {
+          'data': {'ses_c': running},
+        }
+        ..activeGate = Completer();
+      h.owner.watch(h.ref);
+      await h.settle();
+      // The listing followed the child and the active map, already read,
+      // still shows it running when the server deletes it.
+      h.reads
+        ..children = const []
+        ..active = const {'data': <String, Object?>{}};
+      await h.send([deleted]);
+      final gate = h.reads.activeGate!;
+      h.reads.activeGate = null;
+      gate.complete();
+      await h.settle();
+      expect(h.state.connection.kind.known, ConnectionKind.live);
+      expect(children(h), isEmpty);
+    });
+
+    test('a child deleted during a repair is not left running', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      // A rejected frame starts a repair whose listing now reaches the child.
+      h.reads
+        ..children = ['ses_c']
+        ..active = const {
+          'data': {'ses_c': running},
+        }
+        ..activeGate = Completer();
+      await h.send([
+        {
+          'id': 'evt_bad',
+          'type': 'session.permissions',
+          'data': {'sessionID': 'ses_a', 'permissions': 'not_a_list'},
+        },
+      ]);
+      h.reads
+        ..children = const []
+        ..active = const {'data': <String, Object?>{}};
+      await h.send([deleted]);
+      final gate = h.reads.activeGate!;
+      h.reads.activeGate = null;
+      gate.complete();
+      await h.settle();
+      expect(h.state.connection.kind.known, ConnectionKind.live);
+      expect(children(h), isEmpty);
+    });
+
+    test('a followed running child outlives a listing that omits it', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.reads
+        ..children = ['ses_c']
+        ..active = const {
+          'data': {'ses_c': running},
+        };
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      expect(children(h), [refOf('ses_c')]);
+      // Newer children push it past the listed page; it still runs.
+      h.reads.children = const [];
+      h.connection.drop();
+      await h.settle();
+      await h.connect(2);
+      expect(children(h), [refOf('ses_c')]);
+      // Still followed: its end reaches the parent.
+      await h.send([executionFrame('succeeded', session: 'ses_c')]);
+      expect(children(h), isEmpty);
     });
   });
 }

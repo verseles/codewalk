@@ -1396,4 +1396,9 @@ class V2LocalizationsPt extends V2Localizations {
   String liveRetryingIn(Object time) {
     return 'Nova tentativa em $time';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'Subagentes em execução: $count';
+  }
 }

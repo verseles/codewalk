@@ -155,6 +155,7 @@ Future<SessionSnapshot> hydrate(
   int limit = 50,
   String generation = 'gen-1',
   int readStart = 10,
+  Iterable<SessionRef> children = const [],
 }) {
   final reader = OpenCodeSessionReader(
     server.transport,
@@ -168,6 +169,7 @@ Future<SessionSnapshot> hydrate(
     sourceVersion: version,
     historyLimit: limit,
     now: () => DateTime.utc(2026, 10, 14, 0, 0, tick++),
+    children: children,
   );
 }
 
@@ -449,6 +451,43 @@ void main() {
           .map((u) => messageOf(u.id)),
       ['msg_z1', 'msg_q1'],
     );
+  });
+
+  test('the active map counts running children on an idle parent', () async {
+    SessionRef child(String id) =>
+        SessionRef(historyRef.host, historyRef.harness, id);
+    final snapshot = await hydrate(
+      Server(
+        active: {
+          'data': {
+            'ses_child': {'type': 'running'},
+            'ses_stranger': {'type': 'running'},
+          },
+        },
+      ),
+      children: [child('ses_child'), child('ses_done')],
+    );
+    expect(snapshot.execution!.value.kind.known, ExecutionKind.idle);
+    final work = snapshot.work!;
+    expect(work.complete, isTrue);
+    expect(work.boundary.source!.nativeType, 'session.active');
+    final item = work.values.single;
+    expect(item.child, child('ses_child'));
+    expect(item.parent, historyRef);
+    expect(item.status.known, WorkStatus.running);
+    expect(item.completionScope.known, CompletionScope.child);
+    // Applied, the record survives the reducer's scope check.
+    final store = SessionStore(maxSessions: 4)..open(historyRef);
+    store.startHydration(
+      historyRef,
+      generation: 'gen-1',
+      readStart: observedPosition(10),
+    );
+    final state = store.applySnapshot(historyRef, snapshot).state;
+    expect(state.work.single.child, child('ses_child'));
+    expect(state.execution!.kind.known, ExecutionKind.idle);
+    // Without children, the work is an authoritative empty list.
+    expect((await hydrate(Server())).work!.values, isEmpty);
   });
 
   test(

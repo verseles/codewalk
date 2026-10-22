@@ -1380,4 +1380,9 @@ class V2LocalizationsHi extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time में फिर से प्रयास';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return 'चल रहे सब-एजेंट: $count';
+  }
 }

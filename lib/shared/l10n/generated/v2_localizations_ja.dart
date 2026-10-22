@@ -1313,4 +1313,9 @@ class V2LocalizationsJa extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time 後に再試行';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return '実行中のサブエージェント: $count';
+  }
 }

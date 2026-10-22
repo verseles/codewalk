@@ -5,6 +5,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
 import 'event_projection.dart';
+import 'execution_projection.dart';
 import 'interaction_projection.dart';
 import 'session_projection.dart';
 import 'session_reader.dart';
@@ -167,7 +168,8 @@ final class OpenCodeStreamOwner {
 
   /// Projects the permission requests of each watched session's direct
   /// children (sub-agents) into that session, owned by the child with the
-  /// parent as origin (ADR-059 §6). Children are never watched for this.
+  /// parent as origin (ADR-059 §6), and counts the running ones as its work.
+  /// Children are never watched for this.
   final bool observeChildren;
 
   /// Children followed per watched parent; later ones are ignored.
@@ -334,12 +336,17 @@ final class OpenCodeStreamOwner {
 
   void _reconcileChildren(SessionRef parent, Iterable<SessionRef> listed) {
     final active = store.read(parent);
+    // A child the parent already holds a request or a running record for
+    // stays followed even when the listed page no longer reaches it.
     final residentChildren = {
       if (active != null)
         for (final r in active.interactions)
           if (r.owner is SessionOwner &&
               (r.owner as SessionOwner).origin == parent)
             (r.owner as SessionOwner).session,
+      if (active != null)
+        for (final w in active.work)
+          if (w.parent == parent && w.child != null) w.child!,
     };
     final next = <SessionRef>{};
     for (final child in residentChildren) {
@@ -758,19 +765,31 @@ final class OpenCodeStreamOwner {
       return;
     }
     if (type == 'session.deleted') {
-      for (final MapEntry(key: parent, value: known) in _children.entries) {
+      for (final MapEntry(key: parent, value: known)
+          in _children.entries.toList()) {
         if (!known.remove(ref)) continue;
         final state = store.read(parent);
-        final owned = state?.interactions.any(
-          (r) =>
-              r.owner is SessionOwner &&
-              (r.owner as SessionOwner).session == ref,
-        );
-        if (owned ?? false) _repair(parent);
+        final owned =
+            state != null &&
+            (state.interactions.any(
+                  (r) =>
+                      r.owner is SessionOwner &&
+                      (r.owner as SessionOwner).session == ref,
+                ) ||
+                state.work.any((w) => w.child == ref));
+        // A snapshot still in flight, first or repair, may have read the
+        // child as running.
+        final watch = _watched[parent];
+        final reading = watch != null && (!watch.ready || watch.hydrating);
+        if (owned || reading) _repair(parent);
       }
       return;
     }
-    if (type != 'permission.asked' && type != 'permission.replied') return;
+    if (type != 'permission.asked' &&
+        type != 'permission.replied' &&
+        !(type is String && type.startsWith('session.execution.'))) {
+      return;
+    }
     for (final MapEntry(key: parent, value: known)
         in _children.entries.toList()) {
       if (!known.contains(ref)) continue;
@@ -794,14 +813,24 @@ final class OpenCodeStreamOwner {
     }
     final SessionEvent? event;
     try {
-      event = projectOpenCodeInteractionEvent(
-        value,
-        state,
-        sourceVersion: sourceVersion,
-        position: _position(seq),
-        receivedAt: _now(),
-        child: child,
-      );
+      final type = value['type'];
+      event = type is String && type.startsWith('session.execution.')
+          ? projectOpenCodeChildExecutionEvent(
+              value,
+              state,
+              child: child,
+              sourceVersion: sourceVersion,
+              position: _position(seq),
+              receivedAt: _now(),
+            )
+          : projectOpenCodeInteractionEvent(
+              value,
+              state,
+              sourceVersion: sourceVersion,
+              position: _position(seq),
+              receivedAt: _now(),
+              child: child,
+            );
     } on Exception {
       _repair(parent);
       return;

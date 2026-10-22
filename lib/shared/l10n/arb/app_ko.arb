@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "{time} 후 다시 시도",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "실행 중인 하위 에이전트: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

@@ -1147,5 +1147,9 @@
   "liveRetryingIn": "{time} में फिर से प्रयास",
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
+  },
+  "liveChildrenRunning": "चल रहे सब-एजेंट: {count}",
+  "@liveChildrenRunning": {
+    "description": "V2 live read-only session view"
   }
 }

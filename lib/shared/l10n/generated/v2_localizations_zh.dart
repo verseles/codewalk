@@ -1288,4 +1288,9 @@ class V2LocalizationsZh extends V2Localizations {
   String liveRetryingIn(Object time) {
     return '$time 后重试';
   }
+
+  @override
+  String liveChildrenRunning(Object count) {
+    return '运行中的子代理：$count';
+  }
 }

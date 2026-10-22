@@ -2618,6 +2618,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Retrying in {time}'**
   String liveRetryingIn(Object time);
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-agents running: {count}'**
+  String liveChildrenRunning(Object count);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {
