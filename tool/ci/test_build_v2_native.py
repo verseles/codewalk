@@ -26,6 +26,7 @@ class NativeBuildTests(unittest.TestCase):
         self.kernel = b"compiled fixture"
         self.package = native.PREVIEW_APPLICATION_ID
         self.signer = "C=US, O=Android, CN=Android Debug"
+        self.signer_lines = "Signer #1 certificate DN: {signer}\n"
         self.jit_kernel = False
         self.authorities = f"{native.PREVIEW_APPLICATION_ID}.fileprovider;{native.PREVIEW_APPLICATION_ID}.androidx-startup"
         self.permission = f"{native.PREVIEW_APPLICATION_ID}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
@@ -60,7 +61,7 @@ class NativeBuildTests(unittest.TestCase):
                 "        A: http://schemas.android.com/apk/res/android:authorities(0x01010018)="
                 f'"{self.authorities}" (Raw: "{self.authorities}")\n'))
         if command[:2] == ["apksigner", "verify"]:
-            return subprocess.CompletedProcess(command, 0, stdout=f"Signer #1 certificate DN: {self.signer}\n")
+            return subprocess.CompletedProcess(command, 0, stdout=self.signer_lines.format(signer=self.signer))
         if command == ["git", "rev-parse", "HEAD"]:
             return subprocess.CompletedProcess(command, 0, stdout="a" * 40)
         if command == ["git", "status", "--porcelain"]:
@@ -130,6 +131,30 @@ class NativeBuildTests(unittest.TestCase):
         self.assertIn("build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk", result["artifacts_sha256"])
         self.assertEqual(json.loads((self.root / "build/native-evidence/android-preview.json").read_text()), result)
 
+    def test_android_preview_reads_each_apksigner_signer_format(self):
+        debug = "C=US, O=Android, CN=Android Debug"
+        cases = (("V1 Signer: certificate DN: {signer}\nV2 Signer: certificate DN: {signer}\n", None),
+                 ("Signer (minSdkVersion=24, maxSdkVersion=2147483647) certificate DN: {signer}\n", None),
+                 ("V2 Signer: certificate DN: {signer}\nV3 Signer: certificate DN: CN=CodeWalk Release\n",
+                  "debug key"),
+                 ("Verifies\n", "debug key"))
+        for lines, refused in cases:
+            with self.subTest(lines=lines), tempfile.TemporaryDirectory() as directory:
+                old_root = self.root
+                self.root = Path(directory)
+                try:
+                    (self.root / "lib").mkdir()
+                    (self.root / native.ENTRY_POINT).write_text("fixture", encoding="utf-8")
+                    self.signer_lines = lines
+                    if refused:
+                        with self.assertRaisesRegex(RuntimeError, refused):
+                            self.build("android-preview")
+                    else:
+                        self.assertEqual(self.build("android-preview")["identity"]["arm64-v8a"]["signer"], debug)
+                finally:
+                    self.root = old_root
+                    self.reset_preview()
+
     def test_android_preview_refuses_a_jit_kernel_or_another_identity(self):
         cases = (("jit_kernel", True, "not a profile build"),
                  ("package", "com.verseles.codewalk", "identity"),
@@ -156,6 +181,7 @@ class NativeBuildTests(unittest.TestCase):
     def reset_preview(self):
         self.package = native.PREVIEW_APPLICATION_ID
         self.signer = "C=US, O=Android, CN=Android Debug"
+        self.signer_lines = "Signer #1 certificate DN: {signer}\n"
         self.jit_kernel = False
         self.authorities = f"{native.PREVIEW_APPLICATION_ID}.fileprovider;{native.PREVIEW_APPLICATION_ID}.androidx-startup"
         self.permission = f"{native.PREVIEW_APPLICATION_ID}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"

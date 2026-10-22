@@ -129,12 +129,15 @@ def preview_identity(apk, runner):
     identity["provider_authorities"], identity["declared_permissions"] = authorities, permissions
     certificates = runner([android_tool("apksigner"), "verify", "--print-certs", str(apk)],
                           check=True, text=True, capture_output=True).stdout
-    signer = badging_value(certificates, r"^Signer #1 certificate DN: (.*)$")
-    if signer is None or "CN=Android Debug" not in signer:
+    # apksigner names its signers differently across build-tools versions
+    # ("Signer #1", "V2 Signer:", "Signer (minSdkVersion=…)"); every one must
+    # be the debug key.
+    signers = re.findall(r"^.*Signer.*certificate DN: (.*)$", certificates, re.MULTILINE)
+    if not signers or any("CN=Android Debug" not in signer for signer in signers):
         # The certificate lines are public and show which key was found.
-        found = [line for line in certificates.splitlines() if "certificate" in line][:4]
+        found = [line for line in certificates.splitlines() if "certificate DN" in line][:4]
         raise RuntimeError(f"Preview APK must be signed with the debug key, never the release key: {found}")
-    identity["signer"] = signer
+    identity["signer"] = signers[0]
     return identity
 
 
