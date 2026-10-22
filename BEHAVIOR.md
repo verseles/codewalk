@@ -188,8 +188,20 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the field clears only once the prompt is recorded as admitted or not confirmed; refusals and rejections keep the text with finite localized copy and never show raw server reasons
 - **Then** a send whose response was lost is checked once automatically under the same id; entries restored from an earlier run are checked only by the user (Check again); "Send again (may duplicate)" forgets the old command first and hands the text back if the new send does not go
 - **Then** pending inbox rows appear as chips: this device's admitted prompts offer cancel and a steer/queue switch, other clients' rows are read-only, and a cancel that lost to delivery says so instead of claiming cancellation
-- **Then** an unsent draft survives a reopened lease; an unreadable ledger disables sending with a re-read action; without storage, a verified version or on Web the screen explains that prompt sending is unavailable, without claiming the view is read-only while permission cards can still reply
+- **Then** an unsent draft survives a reopened lease (and tabs and relaunches, see V2 session drafts and input history); an unreadable ledger disables sending with a re-read action; without storage, a verified version or on Web the screen explains that prompt sending is unavailable, without claiming the view is read-only while permission cards can still reply
 - **Then** compact, landscape and wide layouts in all 14 locales (RTL for Arabic/Urdu) are technical widget coverage; installed native acceptance remains separate
+
+### V2 session drafts and input history
+
+- **Given** a v2 session open in the workspace on a device with storage
+- **When** the user types in a session's composer
+- **Then** the text is that session's draft, keyed by its full identity (server, harness instance, session): switching tabs, closing and reopening its tab (Undo included) and killing and relaunching the app bring it back; another session, or the same session id on another server, has its own
+- **Then** the draft is saved within 0.5 s of typing and at once when the app leaves the foreground or the session's view closes; text typed before the saved draft was read wins over it
+- **Then** an accepted send clears the field and the saved draft, also when the send ends after its tab closed, and a reopened tab still showing that prompt drops it; a refused or rejected send keeps both
+- **Then** at most 32 drafts are kept, the one saved longest ago removed first; a draft above 128 KiB stays in the field and the last saved one is kept; a saved draft this version cannot read is never written over, and drafts recovered from v1 are left untouched
+- **When** the user presses Up on the field's first line, or Down on its last, with a desktop keyboard and no modifier, selection or composition
+- **Then** once the saved draft was read, Up shows the session's previous sent prompt (its own, trimmed, newest 100) and Down the next one; on a recalled prompt the first Up moves the caret to its start, and Down past the newest gives back what was being written
+- **Then** a recalled prompt is not saved as the draft; editing it ends the browsing and makes it the draft; a phone has no recall gesture, as in v1
 
 ### V2 live session Stop
 

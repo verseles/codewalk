@@ -1616,11 +1616,24 @@ lib/platform/sessions/session_tabs_store.dart # SessionTab/SessionTabsState and 
 lib/features/sessions/session_tabs_controller.dart # SessionTabsController: tabs keyed by full SessionRef, per-host selection, host+project visible set, MRU order, close/reopen, launch tab; warm registry of up to 8 SessionLiveControllers (LRU); drops a tab only on an authoritative notFound read
 lib/features/sessions/session_tab_strip.dart # SessionTabsFrame (strip, recent sheet, Ctrl+Tab switcher, mod+W close with Undo) and SessionTabsWatcher (removed-tabs notice, one-time return to the last used tab)
 lib/features/sessions/session_route_page.dart # Takes the live controller from the tabs registry, opens the tab, wraps the live page in SessionTabsFrame
-lib/features/sessions/session_live_controller.dart # Owns the timeline's SessionLiveScroll so a re-shown tab keeps the reader's place
+lib/features/sessions/session_live_controller.dart # Owns the timeline's SessionLiveScroll so a re-shown tab keeps the reader's place (and, since V2-070C, the draft and composer)
 lib/app/app_shell.dart # Mounts SessionTabsWatcher around the workspace
 lib/app/{composition_root,app_dependencies,v2_bootstrap}.dart # SessionTabsController composition, initialization and Provider injection
 test/v2/sessions/session_tabs_test.dart # Store/controller: idempotent restore, cross-host keys, caps, close/reopen races, notFound validation
 test/v2/sessions/session_tab_strip_test.dart # Strip, close/undo, switcher keys and lifecycle, recent sheet, restart return, scroll retention, RTL/2x
+```
+
+## V2-070C session drafts and input history
+
+```text
+lib/platform/sessions/session_draft_store.dart # SessionDraftStore: per-SessionRef draft in the payload store (`cw2.drafts.v1.<sha256>`) plus a `cw2.sessions.drafts` index (max 32, oldest evicted, 128 KiB per draft); throttled writes and flush; unreadable records never written over; owner notice when a sent prompt is forgotten
+lib/features/sessions/session_input_history.dart # sessionInputHistory (the session's own sent prompts, newest 100) and SessionInputRecall (Up/Down browsing with stash, v1 parity)
+lib/features/sessions/session_live_controller.dart # Owns the draft field, the composer controller and the recall state; restores and saves the draft
+lib/features/sessions/session_composer.dart # Desktop Up/Down recall on the field's first/last line
+lib/app/{composition_root,app_dependencies,v2_bootstrap}.dart # Draft store composition (shared payload store), flush on dispose and when the app leaves the foreground, Provider injection
+test/v2/sessions/session_draft_store_test.dart # Store: relaunch, native file round-trip, throttle, eviction races, unreadable/failed reads, owner notice
+test/v2/sessions/session_drafts_test.dart # App flows: kill/relaunch, tab switch/close/reopen, send outcomes, early typing, desktop recall
+test/v2/sessions/session_input_history_test.dart # History derivation and the recall state machine
 ```
 
 ## V2-044A2 native text and reasoning event projection (#368)
