@@ -314,7 +314,28 @@ List<FixtureRoute> sessionRoutes({
   final ses = (sessionRow['id'] as String?) ?? bSessionId;
   final desc = messageRows.reversed.toList();
   final descFn = descRows;
+  final directory = (sessionRow['location'] as Map?)?['directory'] as String?;
+  // The sidebar reads who waits for the user in the open group's directory.
+  FixtureRoute pending(String path) => FixtureRoute(
+    _exchange(
+      method: 'GET',
+      path: Uri(
+        path: path,
+        queryParameters: {'location[directory]': directory},
+      ).toString(),
+      status: 200,
+      response: {
+        'location': {'directory': directory},
+        'data': <Object?>[],
+      },
+    ),
+    times: times,
+  );
   return [
+    if (directory != null) ...[
+      pending('/api/permission/request'),
+      pending('/api/form'),
+    ],
     FixtureRoute(
       _exchange(
         method: 'GET',

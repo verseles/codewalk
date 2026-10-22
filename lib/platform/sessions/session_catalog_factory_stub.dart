@@ -1,4 +1,5 @@
 import 'package:codewalk_core/codewalk_core.dart';
+import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 
 SessionCatalogSource createSessionCatalogSource(
@@ -15,6 +16,9 @@ final class _UnsupportedSource implements SessionCatalogSource {
   SessionCatalogTask list(SessionQuery query) => _UnsupportedTask();
   @override
   SessionReadTask read(SessionRef ref) => _UnsupportedRead();
+  @override
+  Future<SessionActivity> activity({String? directory}) async =>
+      const SessionActivity();
   @override
   void close() {}
 }

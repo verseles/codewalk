@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codewalk/features/hosts/hosts_controller.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/sessions/session_activity.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -71,6 +72,7 @@ class CatalogSource implements SessionCatalogSource {
     String? upstream,
     OwnershipInfo? ownership,
     String? parent,
+    SessionViewMarker? view,
   }) => SessionSummary(
     info: SessionInfo(
       ref: SessionRef(harness.host, harness.harness, 'ses_$id'),
@@ -91,6 +93,7 @@ class CatalogSource implements SessionCatalogSource {
             ),
     ),
     updatedAt: DateTime.utc(2026, 10, 12),
+    view: view,
   );
 
   @override
@@ -98,6 +101,22 @@ class CatalogSource implements SessionCatalogSource {
     final task = ReadTask();
     reads.add((ref, task));
     return task;
+  }
+
+  /// What the activity reads answer, the directories they asked for and a
+  /// gate that holds them.
+  SessionActivity activityAnswer = const SessionActivity();
+  Completer<void>? activityGate;
+  final activityRequests = <String?>[];
+  @override
+  Future<SessionActivity> activity({String? directory}) async {
+    activityRequests.add(directory);
+    await activityGate?.future;
+    return SessionActivity(
+      running: activityAnswer.running,
+      directory: directory,
+      waiting: activityAnswer.waiting,
+    );
   }
 
   void respond(List<SessionSummary> rows, {String? next}) =>
@@ -114,12 +133,14 @@ class CatalogRig {
     Duration liveDebounce = Duration.zero,
     Duration liveMinInterval = Duration.zero,
     bool withFeed = true,
+    SessionActionSource? actions,
   }) {
     hosts = HostsController(repository: repository, prober: FakeProber());
     sessions = SessionsController(
       hosts: hosts,
       sourceFactory: create,
       changesFactory: withFeed ? (_, _) => _openFeed() : null,
+      actionFactory: actions == null ? null : (_, _) => actions,
       now: now,
       liveDebounce: liveDebounce,
       liveMinInterval: liveMinInterval,
@@ -217,6 +238,9 @@ final class FakeActionSource implements SessionActionSource {
   /// The titles the renames carried.
   final titles = <String>[];
 
+  /// The rows marked as viewed, with the idle transition each one carried.
+  final viewed = <(String, DateTime?)>[];
+
   /// The sessions hidden in CodeWalk, by their storage key.
   final hidden = <String>{};
 
@@ -286,6 +310,7 @@ final class FakeActionSource implements SessionActionSource {
   @override
   Future<SessionActionOutcome> markViewed(SessionSummary row) async {
     calls.add('markViewed');
+    viewed.add((row.info.ref.storageKey, row.view?.idleAt));
     return outcomes['markViewed'] ?? SessionActionOutcome.accepted;
   }
 

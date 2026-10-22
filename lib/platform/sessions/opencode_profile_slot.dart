@@ -1305,7 +1305,13 @@ final class _ReplyRequest {
 /// catalog needs it.
 final class _CatalogLease implements SessionCatalogChanges {
   _CatalogLease(this._slot, this._owner) {
-    _changes = _owner.catalogChanges.listen((_) => _add(const SessionCatalogChanged()));
+    _changes = _owner.catalogChanges.listen(
+      (change) => _add(switch (change) {
+        OpenCodeCatalogChange.started ||
+        OpenCodeCatalogChange.waiting => const SessionActivityChanged(),
+        _ => const SessionCatalogChanged(),
+      }),
+    );
     // Only a stream-level update describes the endpoint's stream: a
     // per-session degradation leaves the stream live.
     _connection = _owner.updates

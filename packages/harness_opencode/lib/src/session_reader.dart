@@ -81,6 +81,58 @@ final class OpenCodePromptIncomplete extends OpenCodePromptLocation {
 /// Continuation tokens belong to this reader and are not durable credentials.
 const _hydrationListLimit = 4096;
 
+final _activePath = Uri(pathSegments: ['api', 'session', 'active']).toString();
+
+/// The ids of the active map: every entry is a running drain.
+Set<String> _activeSessions(Object? value) {
+  if (value is! Map<String, Object?> ||
+      value['data'] is! Map<String, Object?>) {
+    throw const FormatException('Malformed active map.');
+  }
+  final active = value['data']! as Map<String, Object?>;
+  for (final MapEntry(:key, :value) in active.entries) {
+    if (!key.startsWith('ses') ||
+        value is! Map<String, Object?> ||
+        value['type'] != 'running') {
+      throw const FormatException('Malformed active entry.');
+    }
+  }
+  return active.keys.toSet();
+}
+
+/// The owners of one location's pending permission requests or forms. The
+/// answer names its location, which must be the one asked for. A form may be
+/// owned by the endpoint's `global` sentinel, which is not a session.
+Set<String> _pendingOwners(
+  Object? value,
+  String directory, {
+  bool form = false,
+}) {
+  if (value is! Map<String, Object?> ||
+      value['location'] is! Map<String, Object?> ||
+      value['data'] is! List) {
+    throw const FormatException('Malformed pending list.');
+  }
+  final location = value['location']! as Map<String, Object?>;
+  if (location['directory'] != directory) {
+    throw const FormatException('Pending list of another location.');
+  }
+  final rows = value['data']! as List;
+  if (rows.length > _hydrationListLimit) {
+    throw const FormatException('List limit.');
+  }
+  final owners = <String>{};
+  for (final row in rows) {
+    if (row is! Map<String, Object?>) {
+      throw const FormatException('Malformed pending row.');
+    }
+    final session = row['sessionID'];
+    if (form && session == 'global') continue;
+    owners.add(openCodeSessionId(session));
+  }
+  return owners;
+}
+
 final class OpenCodeSessionReader {
   OpenCodeSessionReader(
     this.transport, {
@@ -192,6 +244,40 @@ final class OpenCodeSessionReader {
       }
       return result;
     }, cancellation);
+  }
+
+  /// The sessions the endpoint runs now: the foreground drains its process
+  /// owns. A session absent from the answer is not running.
+  Future<Set<String>> readActiveSessions({RequestCancellation? cancellation}) {
+    _checkOpen();
+    return _read(_activePath, _activeSessions, cancellation);
+  }
+
+  /// The sessions that wait for the user at one location: the owners of its
+  /// pending permission requests and forms. Both lists must answer for that
+  /// same location. A form the endpoint owns itself names no session.
+  Future<Set<String>> readPendingSessions(
+    String directory, {
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (directory.isEmpty || utf8.encode(directory).length > 4096) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final query = {'location[directory]': directory};
+    final permissions = await _read(
+      Uri(path: 'api/permission/request', queryParameters: query).toString(),
+      (value) => _pendingOwners(value, directory),
+      cancellation,
+    );
+    final forms = await _read(
+      Uri(path: 'api/form', queryParameters: query).toString(),
+      (value) => _pendingOwners(value, directory, form: true),
+      cancellation,
+    );
+    return {...permissions, ...forms};
   }
 
   /// Direct children of [parent] (sub-agent sessions), newest first page only.
@@ -527,22 +613,8 @@ final class OpenCodeSessionReader {
     }
 
     final (running, activeStart, activeEnd) = await timed(
-      Uri(pathSegments: ['api', 'session', 'active']).toString(),
-      (value) {
-        if (value is! Map<String, Object?> ||
-            value['data'] is! Map<String, Object?>) {
-          throw const FormatException('Malformed active map.');
-        }
-        final active = value['data']! as Map<String, Object?>;
-        for (final MapEntry(:key, :value) in active.entries) {
-          if (!key.startsWith('ses') ||
-              value is! Map<String, Object?> ||
-              value['type'] != 'running') {
-            throw const FormatException('Malformed active entry.');
-          }
-        }
-        return active.containsKey(ref.nativeId);
-      },
+      _activePath,
+      (value) => _activeSessions(value).contains(ref.nativeId),
     );
     final (record, infoStart, infoEnd) = await timed(
       Uri(pathSegments: ['api', 'session', ref.nativeId]).toString(),

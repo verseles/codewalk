@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
@@ -386,31 +387,71 @@ class _SessionsPageState extends State<SessionsPage> {
         SessionActionFilter.all => l10n.sessionsFilterAll,
       };
 
-  /// The endpoint's own unread marker: the session went idle and that
-  /// transition was not seen yet.
-  Widget _unreadMark(BuildContext context, SessionSummary row) {
+  /// The row's marks, each from its own observed source: a pending
+  /// permission request or form, the endpoint's active map and its unread
+  /// marker (the session went idle and that transition was not seen yet).
+  /// They wrap in the narrow pane instead of overflowing it, and the label is
+  /// what a screen reader announces.
+  Widget _activityMarks(
+    BuildContext context,
+    SessionSummary row,
+    List<SessionActivityMark> marks,
+  ) {
     final l10n = context.v2L10n;
+    final scheme = Theme.of(context).colorScheme;
+    final key = row.info.ref.storageKey;
+    Widget mark(
+      IconData icon,
+      double size,
+      Color color,
+      String text,
+      String id,
+    ) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: size, color: color),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            key: ValueKey('$id-$key'),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 4,
         children: [
-          Icon(
-            Icons.circle,
-            size: 10,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 4),
-          // The label wraps in the narrow pane instead of overflowing it.
-          Flexible(
-            child: Text(
-              l10n.sessionsActionUnread,
-              key: ValueKey('session-unread-${row.info.ref.storageKey}'),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+          for (final kind in marks)
+            switch (kind) {
+              SessionActivityMark.needsYou => mark(
+                Icons.help_outline,
+                14,
+                scheme.tertiary,
+                l10n.liveNeedsYou,
+                'session-needs-you',
               ),
-            ),
-          ),
+              SessionActivityMark.running => mark(
+                Icons.sync,
+                14,
+                scheme.secondary,
+                l10n.liveRunning,
+                'session-running',
+              ),
+              SessionActivityMark.unread => mark(
+                Icons.circle,
+                10,
+                scheme.primary,
+                l10n.sessionsActionUnread,
+                'session-unread',
+              ),
+            },
         ],
       ),
     );
@@ -549,9 +590,9 @@ class _SessionsPageState extends State<SessionsPage> {
                                 ),
                                 if (lineage != null)
                                   _lineage(context, row, lineage),
-                                if (controller.viewState(row) ==
-                                    SessionViewState.unread)
-                                  _unreadMark(context, row),
+                                if (controller.activityMarks(row)
+                                    case final marks when marks.isNotEmpty)
+                                  _activityMarks(context, row, marks),
                               ],
                             ),
                           ),

@@ -605,4 +605,120 @@ void main() {
       }
     },
   );
+
+  group('activity reads', () {
+    test('the active map names the running sessions', () async {
+      final transport = TestTransport((request, _) {
+        expect(request.path, 'api/session/active');
+        return response({
+          'data': {
+            'ses_a': {'type': 'running'},
+            'ses_b': {'type': 'running'},
+          },
+        });
+      });
+      final reader = OpenCodeSessionReader(transport, harness: harness);
+      expect(await reader.readActiveSessions(), {'ses_a', 'ses_b'});
+      reader.dispose();
+    });
+
+    test('an active entry that is not a running drain is refused', () async {
+      for (final body in [
+        {
+          'data': {
+            'ses_a': {'type': 'idle'},
+          },
+        },
+        {
+          'data': {
+            'msg_a': {'type': 'running'},
+          },
+        },
+        {'data': []},
+      ]) {
+        final reader = OpenCodeSessionReader(
+          TestTransport((_, _) => response(body)),
+          harness: harness,
+        );
+        await expectLater(
+          reader.readActiveSessions(),
+          throwsA(failure(OpenCodeSessionReadFailure.incompatibleResponse)),
+        );
+        reader.dispose();
+      }
+    });
+
+    test('the pending owners of one location, permissions and forms', () async {
+      final paths = <String>[];
+      final transport = TestTransport((request, _) {
+        paths.add(request.path);
+        final uri = Uri.parse(request.path);
+        expect(uri.queryParameters, {'location[directory]': '/work/app'});
+        final location = {'directory': '/work/app'};
+        return response(switch (uri.path) {
+          'api/permission/request' => {
+            'location': location,
+            'data': [
+              {'id': 'per_1', 'sessionID': 'ses_a', 'action': 'bash'},
+              {'id': 'per_2', 'sessionID': 'ses_child', 'action': 'edit'},
+            ],
+          },
+          _ => {
+            'location': location,
+            'data': [
+              {'id': 'frm_1', 'sessionID': 'ses_b', 'title': 'Q'},
+              // The endpoint's own form names no session.
+              {'id': 'frm_2', 'sessionID': 'global', 'title': 'MCP'},
+            ],
+          },
+        });
+      });
+      final reader = OpenCodeSessionReader(transport, harness: harness);
+      expect(await reader.readPendingSessions('/work/app'), {
+        'ses_a',
+        'ses_child',
+        'ses_b',
+      });
+      expect(paths.map((path) => Uri.parse(path).path), [
+        'api/permission/request',
+        'api/form',
+      ]);
+      reader.dispose();
+    });
+
+    test('a pending list of another location or shape is refused', () async {
+      for (final body in [
+        {
+          'location': {'directory': '/elsewhere'},
+          'data': <Object?>[],
+        },
+        {'data': <Object?>[]},
+        {
+          'location': {'directory': '/work/app'},
+          'data': [
+            {'id': 'per_1', 'sessionID': 'global'},
+          ],
+        },
+      ]) {
+        final reader = OpenCodeSessionReader(
+          TestTransport((_, _) => response(body)),
+          harness: harness,
+        );
+        await expectLater(
+          reader.readPendingSessions('/work/app'),
+          throwsA(failure(OpenCodeSessionReadFailure.incompatibleResponse)),
+        );
+        reader.dispose();
+      }
+      final reader = OpenCodeSessionReader(
+        TestTransport((_, _) => fail('an empty location is never sent')),
+        harness: harness,
+      );
+      await expectLater(
+        reader.readPendingSessions(''),
+        throwsA(failure(OpenCodeSessionReadFailure.invalidRequest)),
+      );
+      reader.dispose();
+    });
+  });
 }

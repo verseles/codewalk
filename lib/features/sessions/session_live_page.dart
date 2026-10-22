@@ -18,6 +18,7 @@ import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
 import 'session_stop_button.dart';
+import 'sessions_controller.dart';
 
 /// Minimum height the prompt composer keeps beside a resident permission card.
 const double _composerFloor = 56;
@@ -44,17 +45,56 @@ class SessionLivePage extends StatefulWidget {
   State<SessionLivePage> createState() => _SessionLivePageState();
 }
 
-class _SessionLivePageState extends State<SessionLivePage> {
+class _SessionLivePageState extends State<SessionLivePage>
+    with WidgetsBindingObserver {
+  /// The list told which session this page shows, so the endpoint's unread
+  /// mark of that session is cleared while the user sees it.
+  SessionsController? _catalog;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !widget.controller.started) widget.controller.start();
+      if (!mounted) return;
+      if (!widget.controller.started) widget.controller.start();
+      _catalog = context.read<SessionsController?>();
+      if (_foreground(WidgetsBinding.instance.lifecycleState)) _show();
     });
+  }
+
+  /// The page is seen unless the app is hidden or in the background.
+  static bool _foreground(AppLifecycleState? state) => switch (state) {
+    AppLifecycleState.hidden ||
+    AppLifecycleState.paused ||
+    AppLifecycleState.detached => false,
+    _ => true,
+  };
+
+  void _show() => _catalog?.showing(widget.controller.session);
+
+  @override
+  void didUpdateWidget(SessionLivePage old) {
+    super.didUpdateWidget(old);
+    final session = widget.controller.session;
+    if (old.controller.session == session) return;
+    _catalog?.leave(old.controller.session);
+    if (_foreground(WidgetsBinding.instance.lifecycleState)) _show();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_foreground(state)) {
+      _show();
+    } else {
+      _catalog?.leave(widget.controller.session);
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _catalog?.leave(widget.controller.session);
     if (widget.ownsController) widget.controller.dispose();
     super.dispose();
   }

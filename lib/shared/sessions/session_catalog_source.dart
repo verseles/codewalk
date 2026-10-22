@@ -1,5 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'session_activity.dart';
+
 typedef SessionCatalogFactory =
     SessionCatalogSource Function(
       EndpointProfile profile,
@@ -35,6 +37,10 @@ abstract interface class SessionCatalogSource {
   /// Reads one session of this server, for a link to a session outside the
   /// loaded rows.
   SessionReadTask read(SessionRef ref);
+
+  /// Reads which sessions run now and, for [directory], which wait for the
+  /// user. It never throws: a part that could not be read is unknown.
+  Future<SessionActivity> activity({String? directory});
   void close();
 }
 

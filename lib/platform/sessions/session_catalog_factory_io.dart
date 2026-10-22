@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
+import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 
 SessionCatalogSource createSessionCatalogSource(
@@ -30,6 +31,37 @@ final class _NativeSource implements SessionCatalogSource {
   SessionCatalogTask list(SessionQuery query) => _NativeTask(_reader, query);
   @override
   SessionReadTask read(SessionRef ref) => _NativeRead(_reader, ref);
+
+  /// The active map, and the pending lists of [directory]. A part whose read
+  /// fails is left unknown; the other part still counts.
+  @override
+  Future<SessionActivity> activity({String? directory}) async {
+    Set<SessionRef> refs(Set<String> ids) => {
+      for (final id in ids) SessionRef(harness.host, harness.harness, id),
+    };
+    Set<SessionRef>? running;
+    Set<SessionRef>? waiting;
+    if (!_closed) {
+      try {
+        running = refs(await _reader.readActiveSessions());
+      } on Object {
+        running = null;
+      }
+    }
+    if (!_closed && directory != null) {
+      try {
+        waiting = refs(await _reader.readPendingSessions(directory));
+      } on Object {
+        waiting = null;
+      }
+    }
+    return SessionActivity(
+      running: running,
+      directory: directory,
+      waiting: waiting,
+    );
+  }
+
   @override
   void close() {
     if (_closed) return;

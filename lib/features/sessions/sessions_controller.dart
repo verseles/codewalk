@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
@@ -66,6 +67,17 @@ class SessionsController extends ChangeNotifier {
   // read the clock on its own.
   Timer? _ownershipTimer;
   bool _livePending = false;
+  // The activity the endpoint last reported: which sessions run and which of
+  // the open project group wait for the user. It is read after the rows and
+  // on the feed's activity signal, one read at a time.
+  SessionActivity _activity = const SessionActivity();
+  bool _activityPending = false;
+  bool _activityReading = false;
+  bool _activityAgain = false;
+  // The session the live pane shows in the foreground, and the last idle
+  // transition sent as viewed for it.
+  SessionRef? _showing;
+  (SessionRef, DateTime)? _viewSent;
   bool _liveConnected = false;
   bool _liveSuspended = false;
   bool _behind = false;
@@ -172,6 +184,71 @@ class SessionsController extends ChangeNotifier {
   SessionViewState viewState(SessionSummary row) =>
       _actions?.viewState(row) ?? SessionViewState.unknown;
 
+  /// The marks of a row, each from its own observed source: the pending
+  /// lists of the row's own location, the endpoint's active map and its
+  /// unread marker. A part that was not observed adds no mark, and a list
+  /// that is not the endpoint's current answer claims no activity.
+  List<SessionActivityMark> activityMarks(SessionSummary row) {
+    final ref = row.info.ref;
+    final current = !stale && !behind;
+    final directory = row.info.project?.canonicalDirectory;
+    return [
+      if (current &&
+          directory != null &&
+          directory == _activity.directory &&
+          (_activity.waiting?.contains(ref) ?? false))
+        SessionActivityMark.needsYou,
+      if (current && (_activity.running?.contains(ref) ?? false))
+        SessionActivityMark.running,
+      if (viewState(row) == SessionViewState.unread) SessionActivityMark.unread,
+    ];
+  }
+
+  /// The live pane shows [ref] while the app is in the foreground: its
+  /// unread mark is cleared through the endpoint's own view command.
+  void showing(SessionRef ref) {
+    if (_disposed || _showing == ref) return;
+    _showing = ref;
+    _viewShown();
+  }
+
+  /// The live pane no longer shows [ref].
+  void leave(SessionRef ref) {
+    if (_showing == ref) _showing = null;
+  }
+
+  /// Marks the shown session's idle transition as viewed when the endpoint
+  /// reports it unread, once per transition. The user did not ask for it, so
+  /// a refusal leaves the mark and the list says nothing; the row action
+  /// stays the way to retry.
+  void _viewShown() {
+    final ref = _showing;
+    if (_disposed || ref == null) return;
+    SessionSummary? row;
+    for (final candidate in _sessions) {
+      if (candidate.info.ref == ref) row = candidate;
+    }
+    final idle = row?.view?.idleAt;
+    if (row == null ||
+        idle == null ||
+        viewState(row) != SessionViewState.unread ||
+        _viewSent == (ref, idle) ||
+        _actionSupport.reason != SessionActionReason.none ||
+        _pendingActions.contains(ref) ||
+        stale ||
+        behind ||
+        _livePending) {
+      return;
+    }
+    final shown = row;
+    unawaited(
+      _run(shown, (source) {
+        _viewSent = (ref, idle);
+        return source.markViewed(shown);
+      }, quiet: true),
+    );
+  }
+
   /// Whether the local hide can be read and written.
   bool get hideAvailable => _actions?.hideAvailable ?? false;
 
@@ -206,6 +283,8 @@ class SessionsController extends ChangeNotifier {
     if (_disposed || _chosenProject == (project: project)) return;
     _chosenProject = (project: project);
     _notify();
+    // The pending lists belong to the shown group's location.
+    unawaited(_syncActivity());
   }
 
   /// Reads one session of the selected server directly, for a link to a
@@ -257,6 +336,11 @@ class SessionsController extends ChangeNotifier {
         SessionActionReason.versionUnverified,
       );
       _closeChanges();
+      _activity = const SessionActivity();
+      _activityPending = false;
+      // Only a request of the new endpoint outlives a read of this one.
+      _activityAgain = false;
+      _viewSent = null;
     }
   }
 
@@ -266,6 +350,7 @@ class SessionsController extends ChangeNotifier {
     _ownershipTimer?.cancel();
     _ownershipTimer = null;
     _sessions = const [];
+    _activity = const SessionActivity();
     _selectedSession = null;
     _chosenProject = null;
     _cursor = null;
@@ -511,12 +596,16 @@ class SessionsController extends ChangeNotifier {
           if (refresh) {
             // A head read reconciles the whole list; a page append does not.
             _behind = false;
+            unawaited(_syncActivity());
           }
           unawaited(_ensureChanges());
+          _viewShown();
         }
         if (_livePending && failure == null) {
           // A change that arrived during the read becomes one final read.
           _markLiveChange();
+        } else if (_activityPending && failure == null) {
+          _markLiveChange(rows: false);
         }
         _notify();
       }
@@ -591,6 +680,7 @@ class SessionsController extends ChangeNotifier {
     _liveTimer?.cancel();
     _liveTimer = null;
     _livePending = false;
+    _activityPending = false;
     _liveConnected = false;
     _quietRefreshing = false;
     _liveFailures = 0;
@@ -618,6 +708,8 @@ class SessionsController extends ChangeNotifier {
     switch (signal) {
       case SessionCatalogChanged():
         _markLiveChange();
+      case SessionActivityChanged():
+        _markLiveChange(rows: false);
       case SessionCatalogConnection(:final connected):
         if (connected == _liveConnected) break;
         _liveConnected = connected;
@@ -640,6 +732,7 @@ class SessionsController extends ChangeNotifier {
     if (_disposed || !identical(source, _actions)) return;
     _actionSupport = support;
     _notify();
+    _viewShown();
   }
 
   /// Creates a session at the given canonical directory.
@@ -735,10 +828,13 @@ class SessionsController extends ChangeNotifier {
   /// The row is never patched: the effect is observed by the quiet
   /// authoritative re-read, and a refused or uncertain command leaves the
   /// rows exactly as the endpoint last answered.
+  /// Runs one command on [row]. A [quiet] command was not asked for by the
+  /// user, so a refusal or a failure leaves no notice.
   Future<SessionActionOutcome> _run(
     SessionSummary row,
-    Future<SessionActionOutcome> Function(SessionActionSource source) command,
-  ) async {
+    Future<SessionActionOutcome> Function(SessionActionSource source) command, {
+    bool quiet = false,
+  }) async {
     final source = _actions;
     if (source == null) return SessionActionOutcome.unavailable;
     if (_pendingActions.contains(row.info.ref)) {
@@ -755,12 +851,14 @@ class SessionsController extends ChangeNotifier {
         !_sessions.any((current) => current.info.ref == row.info.ref)) {
       // The intent is no longer authorized, and the user asked for it: the
       // list says so instead of closing the interaction silently.
-      _actionFailure = SessionActionOutcome.unavailable;
-      _notify();
+      if (!quiet) {
+        _actionFailure = SessionActionOutcome.unavailable;
+        _notify();
+      }
       return SessionActionOutcome.unavailable;
     }
     _pendingActions.add(row.info.ref);
-    _actionFailure = null;
+    if (!quiet) _actionFailure = null;
     _notify();
     try {
       final outcome = await command(source);
@@ -775,6 +873,7 @@ class SessionsController extends ChangeNotifier {
         // command is reconciled there, never replayed.
         _markLiveChange();
       }
+      if (quiet) return outcome;
       if (outcome == SessionActionOutcome.rejected ||
           outcome == SessionActionOutcome.unavailable) {
         _actionFailure = outcome;
@@ -786,7 +885,7 @@ class SessionsController extends ChangeNotifier {
       return outcome;
     } on ArgumentError {
       // A local refusal, such as a title over the bound.
-      _actionFailure = SessionActionOutcome.unavailable;
+      if (!quiet) _actionFailure = SessionActionOutcome.unavailable;
       return SessionActionOutcome.unavailable;
     } finally {
       _pendingActions.remove(row.info.ref);
@@ -798,9 +897,16 @@ class SessionsController extends ChangeNotifier {
   ///
   /// The debounce is not reset by a later change: a burst collapses into one
   /// read, and the pending latch keeps at most one more.
-  void _markLiveChange() {
+  ///
+  /// A change of the list re-reads the rows and then the activity; a change
+  /// of the activity alone re-reads only the activity.
+  void _markLiveChange({bool rows = true}) {
     if (_disposed || _liveSuspended) return;
-    _livePending = true;
+    if (rows) {
+      _livePending = true;
+    } else {
+      _activityPending = true;
+    }
     if (_liveTimer != null) return;
     _liveTimer = Timer(liveDebounce, _runLive);
   }
@@ -824,13 +930,56 @@ class SessionsController extends ChangeNotifier {
     final earliest = _liveEarliestStart;
     if (earliest != null && now.isBefore(earliest)) {
       // The cooldown still runs: keep the latch and wait for it.
-      _livePending = true;
+      if (!_activityPending) _livePending = true;
       _liveTimer = Timer(earliest.difference(now), _runLive);
       return;
     }
-    if (!_livePending) return;
-    _livePending = false;
-    await _syncLive();
+    if (_livePending) {
+      // The rows re-read reads the activity after them.
+      _livePending = false;
+      _activityPending = false;
+      await _syncLive();
+      return;
+    }
+    if (!_activityPending) return;
+    _activityPending = false;
+    _liveEarliestStart = now.add(liveMinInterval);
+    await _syncActivity();
+    if (!_disposed && (_livePending || _activityPending)) {
+      _markLiveChange(rows: _livePending);
+    }
+  }
+
+  /// Reads the activity of the selected profile: the running sessions and
+  /// the sessions of the shown project group that wait for the user. One read
+  /// runs at a time; a request during it becomes one more read. A read of a
+  /// profile that was left is dropped, a request the new profile made during
+  /// it still runs, and a failure leaves its part unknown without touching
+  /// the rows.
+  Future<void> _syncActivity() async {
+    final source = _source;
+    if (_disposed || source == null) return;
+    if (_activityReading) {
+      _activityAgain = true;
+      return;
+    }
+    _activityReading = true;
+    try {
+      do {
+        _activityAgain = false;
+        final directory = selectedProject?.project?.canonicalDirectory;
+        final activity = await source.activity(directory: directory);
+        if (_disposed || !identical(source, _source)) return;
+        _activity = activity;
+        _notify();
+      } while (_activityAgain);
+    } finally {
+      _activityReading = false;
+      if (_activityAgain && !identical(source, _source)) {
+        _activityAgain = false;
+        unawaited(_syncActivity());
+      }
+    }
   }
 
   /// The authoritative re-read: from the head to the depth already loaded,
@@ -891,6 +1040,10 @@ class SessionsController extends ChangeNotifier {
       stale = false;
       _liveFailures = 0;
       _behind = false;
+      _viewShown();
+      // The activity is read after the rows it marks, which are shown
+      // without waiting for it.
+      unawaited(_syncActivity());
     } on Object catch (error) {
       if (!_quietCurrent(generation, epoch, source)) return;
       if (error is SessionCatalogException &&
@@ -921,6 +1074,8 @@ class SessionsController extends ChangeNotifier {
         if (_livePending) {
           // A change that arrived during the read becomes one final read.
           _markLiveChange();
+        } else if (_activityPending) {
+          _markLiveChange(rows: false);
         }
       } else if (identical(source, _source)) {
         // A manual page superseded this read on the same profile: the flag is

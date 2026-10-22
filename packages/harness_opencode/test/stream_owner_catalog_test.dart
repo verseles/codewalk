@@ -57,6 +57,35 @@ void main() {
     ]);
   });
 
+  test('the activity of an unwatched session is reported by kind', () async {
+    final harness = Harness('ses_a');
+    final changes = <OpenCodeCatalogChange>[];
+    harness.owner.catalogChanges.listen(changes.add);
+    await harness.connect(1);
+    for (final (type, data) in [
+      ('session.execution.started', {'sessionID': 'ses_b'}),
+      ('permission.asked', {'id': 'per_1', 'sessionID': 'ses_b'}),
+      ('permission.replied', {'sessionID': 'ses_b', 'requestID': 'per_1'}),
+      (
+        'form.created',
+        {
+          'form': {'id': 'frm_1', 'sessionID': 'ses_b'},
+        },
+      ),
+      ('form.replied', {'id': 'frm_1', 'sessionID': 'ses_b'}),
+      // The endpoint's own form still changes what waits for the user.
+      ('form.cancelled', {'id': 'frm_2', 'sessionID': 'global'}),
+    ]) {
+      await harness.send([
+        {'id': 'evt_$type', 'created': 1, 'type': type, 'data': data},
+      ]);
+    }
+    expect(changes, [
+      OpenCodeCatalogChange.started,
+      for (var i = 0; i < 5; i++) OpenCodeCatalogChange.waiting,
+    ]);
+  });
+
   test('a moved session reaches the catalog', () async {
     final harness = Harness('ses_a');
     final changes = <OpenCodeCatalogChange>[];
@@ -88,7 +117,7 @@ void main() {
       {
         'id': 'evt_2',
         'created': 1,
-        'type': 'permission.asked',
+        'type': 'session.compaction.started',
         'data': {'sessionID': 'ses_a'},
       },
       {

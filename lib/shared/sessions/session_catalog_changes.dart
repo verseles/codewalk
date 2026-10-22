@@ -27,6 +27,13 @@ final class SessionCatalogChanged extends SessionCatalogSignal {
   const SessionCatalogChanged();
 }
 
+/// A change of what the endpoint reports about the sessions' activity: a
+/// session started running, or a permission request or form was asked or
+/// answered. The list itself did not change, so only the activity is re-read.
+final class SessionActivityChanged extends SessionCatalogSignal {
+  const SessionActivityChanged();
+}
+
 /// The feed's transport state: the endpoint's stream is connected, or it is
 /// not. A reconnect is not continuity: the catalog re-reads the list.
 final class SessionCatalogConnection extends SessionCatalogSignal {
