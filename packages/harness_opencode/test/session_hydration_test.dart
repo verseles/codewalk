@@ -79,6 +79,8 @@ final class Server {
     List<Object?>? forms,
     this.failPath,
     this.revert,
+    this.model,
+    this.agent,
   }) : inbox =
            inbox ??
            [
@@ -114,6 +116,8 @@ final class Server {
   final List<Object?> forms;
   final String? failPath;
   final Object? revert;
+  final Object? model;
+  final Object? agent;
   final paths = <String>[];
 
   late final transport = TestTransport((request, _) {
@@ -143,6 +147,8 @@ final class Server {
           'location': {'directory': '/workspace'},
           'time': {'created': 1, 'updated': 2},
           'revert': ?revert,
+          'model': ?model,
+          'agent': ?agent,
         },
       },
     });
@@ -450,6 +456,40 @@ void main() {
           .where((u) => u.delivery.known == DeliveryState.delivered)
           .map((u) => messageOf(u.id)),
       ['msg_z1', 'msg_q1'],
+    );
+  });
+
+  test('the session record is the selection authority', () async {
+    final snapshot = await hydrate(
+      Server(
+        model: {'id': 'model-a', 'providerID': 'provider-a', 'variant': 'low'},
+        agent: 'build',
+      ),
+    );
+    final selection = snapshot.selection!;
+    expect(selection.boundary.source!.nativeType, 'session.get');
+    expect(selection.value.modelId, 'model-a');
+    expect(selection.value.modelProviderId, 'provider-a');
+    expect(selection.value.modelVariant, 'low');
+    expect(selection.value.agentId, 'build');
+    // Absent fields leave the server's default in force; nothing is invented.
+    final plain = (await hydrate(Server())).selection!.value;
+    expect([
+      plain.modelId,
+      plain.modelProviderId,
+      plain.modelVariant,
+      plain.agentId,
+    ], everyElement(isNull));
+    // A malformed reference fails the whole snapshot.
+    await expectLater(
+      hydrate(Server(model: {'id': 'model-a'})),
+      throwsA(
+        isA<OpenCodeSessionReadException>().having(
+          (e) => e.failure,
+          'failure',
+          OpenCodeSessionReadFailure.incompatibleResponse,
+        ),
+      ),
     );
   });
 

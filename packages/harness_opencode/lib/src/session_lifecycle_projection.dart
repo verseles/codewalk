@@ -27,10 +27,18 @@ const _maxEpochMillis = 8640000000000000;
 const _created = 'session.created';
 const _renamed = 'session.renamed';
 const _deleted = 'session.deleted';
-const _durableVersions = {_created: 1, _renamed: 1, _deleted: 2};
+const _agentSelected = 'session.agent.selected';
+const _modelSelected = 'session.model.selected';
+const _durableVersions = {
+  _created: 1,
+  _renamed: 1,
+  _deleted: 2,
+  _agentSelected: 1,
+  _modelSelected: 1,
+};
 
-/// Projects the three durable 2.0.22 session lifecycle events without owning
-/// a stream or clock.
+/// Projects the durable 2.0.22 session lifecycle and selection events without
+/// owning a stream or clock.
 ///
 /// Returns an unmodifiable list to reduce in order against the latest
 /// [current] state, empty for unrelated types and other sessions — including a
@@ -45,6 +53,11 @@ const _durableVersions = {_created: 1, _renamed: 1, _deleted: 2};
 /// and a [ResyncRequired] asks for a fresh read. `deleted` requests a resync
 /// too: Core has no removal event, and the read that follows observes the
 /// deleted session authoritatively. The frame location is never read.
+///
+/// `agent.selected` and `model.selected` change one half of the session's
+/// selection, so each yields the resident selection with only that half
+/// replaced: the agent id, or the whole model reference (a reference without
+/// a variant clears the variant). `previous` is validated and not copied.
 List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   Object? value,
   SessionState current, {
@@ -93,7 +106,9 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   final aggregateSeq = BigInt.from(_integer(durable['seq']));
 
   SessionInfo? info;
+  Selection? selection;
   String? resync;
+  final resident = current.selection;
   switch (type) {
     case _created:
       final projectId = _text(data['projectID'], nonempty: true);
@@ -158,6 +173,30 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
       }
     case _deleted:
       resync = 'sessionDeleted';
+    case _agentSelected:
+      final agent = _text(data['agent'], nonempty: true);
+      if (data['previous'] != null) _text(data['previous'], nonempty: true);
+      selection = Selection(
+        modelId: resident?.modelId,
+        modelProviderId: resident?.modelProviderId,
+        modelVariant: resident?.modelVariant,
+        agentId: agent,
+        effort: resident?.effort,
+        permissionMode: resident?.permissionMode,
+        metadata: resident?.metadata,
+      );
+    case _modelSelected:
+      final model = _modelRef(data['model']);
+      if (data['previous'] != null) _modelRef(data['previous']);
+      selection = Selection(
+        modelId: model.id,
+        modelProviderId: model.providerId,
+        modelVariant: model.variant,
+        agentId: resident?.agentId,
+        effort: resident?.effort,
+        permissionMode: resident?.permissionMode,
+        metadata: resident?.metadata,
+      );
   }
 
   final meta = EventMeta(
@@ -180,8 +219,18 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   );
   return List.unmodifiable([
     if (info != null) SessionInfoChanged(meta: meta, info: info),
+    if (selection != null) SelectionChanged(meta: meta, selection: selection),
     if (resync != null) ResyncRequired(meta: meta, reason: resync),
   ]);
+}
+
+({String id, String providerId, String? variant}) _modelRef(Object? value) {
+  final model = _object(value);
+  return (
+    id: _text(model['id'], nonempty: true),
+    providerId: _text(model['providerID'], nonempty: true),
+    variant: model['variant'] == null ? null : _text(model['variant']),
+  );
 }
 
 String _title(Object? value) {

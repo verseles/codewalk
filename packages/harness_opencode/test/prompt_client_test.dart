@@ -361,6 +361,26 @@ void main() {
       return (result, transport);
     }
 
+    test('a draft never carries the selection', () async {
+      // The session's own record holds the model and agent; a switch is its
+      // own command, so a prompt never sends one.
+      final (attempt, transport) = await refuse(
+        draft: PromptDraft(
+          text: 'x',
+          selection: const Selection(
+            modelId: 'model',
+            modelProviderId: 'provider',
+            modelVariant: 'high',
+            agentId: 'build',
+          ),
+        ),
+      );
+      expect(attempt.receipt.state.known, ReceiptState.unavailable);
+      expect(attempt.receipt.reason, 'unsupportedDraft');
+      expect(attempt.posted, isFalse);
+      expect(transport.requests, isEmpty);
+    });
+
     test('for unverified versions and unsupported drafts', () async {
       final cancelled = RequestCancellation()..cancel();
       final cases = {

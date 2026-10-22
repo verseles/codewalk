@@ -54,9 +54,9 @@ bool _boundedText(String value, int bytes) =>
     utf8.encode(value).length <= bytes &&
     utf8.decode(utf8.encode(value)) == value;
 
-/// Sends the official 2.0.22 session lifecycle commands.
+/// Sends the official 2.0.22 session lifecycle and selection commands.
 ///
-/// The five commands share the transport, the connected version, the deadline,
+/// The commands share the transport, the connected version, the deadline,
 /// the body bound, the ownership assertion, the command and receipt
 /// construction and one status vocabulary, so they share one client. The
 /// client never retries, replays, persists or updates the catalog, and it
@@ -248,6 +248,80 @@ final class OpenCodeSessionLifecycleClient {
     session: session,
     cancellation: cancellation,
   );
+
+  /// Switches the model of the session's next provider turns: the whole
+  /// reference, so a reference without a variant clears it.
+  ///
+  /// The endpoint emits `session.model.selected`. The receipt never proves the
+  /// selection, and an uncertain one must not be repeated: the session's
+  /// record decides it, because another switch may have landed since.
+  Future<OpenCodeSessionLifecycleAttempt> selectModel({
+    required SessionRef session,
+    required CommandId id,
+    required String modelId,
+    required String providerId,
+    String? variant,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkSelection(session, [modelId, providerId]);
+    if (variant != null && !_boundedText(variant, _idLimit)) {
+      throw ArgumentError('The model reference carries a bounded variant');
+    }
+    final model = <String, Object?>{
+      'id': modelId,
+      'providerID': providerId,
+      'variant': ?variant,
+    };
+    return _send(
+      id: id,
+      operation: MutationOperation.selection,
+      owner: SessionOwner(session),
+      intent: CanonicalValue({'sessionID': session.nativeId, 'model': model}),
+      method: 'POST',
+      pathSegments: ['api', 'session', session.nativeId, 'model'],
+      body: {'model': model},
+      expectedStatus: 204,
+      session: session,
+      cancellation: cancellation,
+    );
+  }
+
+  /// Switches the agent of the session's next provider turns.
+  ///
+  /// The endpoint emits `session.agent.selected`; an uncertain receipt is
+  /// settled by the session's record, never by repeating the switch.
+  Future<OpenCodeSessionLifecycleAttempt> selectAgent({
+    required SessionRef session,
+    required CommandId id,
+    required String agentId,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkSelection(session, [agentId]);
+    return _send(
+      id: id,
+      operation: MutationOperation.selection,
+      owner: SessionOwner(session),
+      intent: CanonicalValue({'sessionID': session.nativeId, 'agent': agentId}),
+      method: 'POST',
+      pathSegments: ['api', 'session', session.nativeId, 'agent'],
+      body: {'agent': agentId},
+      expectedStatus: 204,
+      session: session,
+      cancellation: cancellation,
+    );
+  }
+
+  /// A selection names one session of this harness and nonempty bounded ids.
+  void _checkSelection(SessionRef session, List<String> ids) {
+    if (session.harnessRef != harness) {
+      throw ArgumentError('Session belongs to another harness.');
+    }
+    for (final id in ids) {
+      if (id.isEmpty || !_boundedText(id, _idLimit)) {
+        throw ArgumentError('The selection carries bounded ids');
+      }
+    }
+  }
 
   Future<OpenCodeSessionLifecycleAttempt> _send({
     required CommandId id,

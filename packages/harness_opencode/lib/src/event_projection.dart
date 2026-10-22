@@ -174,6 +174,8 @@ final Map<String, _Producer> _routes = {
     'session.created',
     'session.renamed',
     'session.deleted',
+    'session.agent.selected',
+    'session.model.selected',
   ])
     type: projectOpenCodeSessionLifecycleEvent,
   for (final type in const [
@@ -188,8 +190,6 @@ final Map<String, _Producer> _routes = {
 /// Official 2.0.22 session types that no producer projects yet; they stay
 /// visible as observations instead of half-mapped state.
 const _unprojected = {
-  'session.agent.selected',
-  'session.model.selected',
   'session.moved',
   'session.metadata.updated',
   'session.viewed',

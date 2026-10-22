@@ -142,6 +142,7 @@ final class OpenCodeSessionReader {
     this.maxBodyBytes = 1024 * 1024,
     this.maxPageItems = 200,
     this.maxHistoryItems = 2000,
+    this.maxCatalogBytes = 8 * 1024 * 1024,
   }) : _endpoint = transport.endpoint,
        _cursorScope = List.generate(
          4,
@@ -151,6 +152,7 @@ final class OpenCodeSessionReader {
         maxBodyBytes <= 0 ||
         maxPageItems <= 0 ||
         maxHistoryItems <= 0 ||
+        maxCatalogBytes <= 0 ||
         harness.host.value.isEmpty ||
         harness.harness.value.isEmpty) {
       throw ArgumentError('Session read limits must be positive.');
@@ -163,6 +165,11 @@ final class OpenCodeSessionReader {
   final int maxBodyBytes;
   final int maxPageItems;
   final int maxHistoryItems;
+
+  /// A location's model list carries every model of every configured
+  /// provider: an observed 2.0.22 list of 185 models took 178 KB, so the
+  /// catalogs have their own bound.
+  final int maxCatalogBytes;
   final Uri _endpoint;
   final String _cursorScope;
   final _active = <_ReadOperation>{};
@@ -245,6 +252,155 @@ final class OpenCodeSessionReader {
       }
       return result;
     }, cancellation);
+  }
+
+  /// The session's current model and agent, as its record carries them.
+  Future<Selection> readSelection(
+    SessionRef ref, {
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    if (ref.harnessRef != harness) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    try {
+      openCodeSessionId(ref.nativeId);
+    } on FormatException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final path = Uri(pathSegments: ['api', 'session', ref.nativeId]).toString();
+    return _read(path, (value) {
+      if (value is! Map<String, Object?>) {
+        throw const FormatException('Malformed OpenCode session response.');
+      }
+      if (projectOpenCodeSession(value['data'], harness).info.ref != ref) {
+        throw const FormatException('Session response has another identity.');
+      }
+      return projectOpenCodeSelection(value['data']);
+    }, cancellation);
+  }
+
+  /// The models one location offers: enabled ones only, each with its
+  /// variant ids. Nothing else of a variant is copied, because its settings
+  /// may carry provider credentials.
+  Future<List<ModelEntry>> readModels(
+    String directory, {
+    RequestCancellation? cancellation,
+  }) => _readCatalog(
+    directory,
+    'model',
+    (row) {
+      final model = _catalogObject(row);
+      if (model['enabled'] is! bool) {
+        throw const FormatException('Malformed model.');
+      }
+      if (model['enabled'] != true) return null;
+      final limit = _catalogObject(model['limit']);
+      final variants = model['variants'];
+      if (variants is! List) throw const FormatException('Malformed model.');
+      return ModelEntry(
+        id: _catalogText(model['id']),
+        providerId: _catalogText(model['providerID']),
+        label: _catalogText(model['name'], empty: true),
+        contextLimit: _catalogCount(limit['context']),
+        outputLimit: _catalogCount(limit['output']),
+        // An empty id cannot be named (`provider/model#variant`), so that
+        // variant is not offered; the rest of the catalog still is.
+        variants: [
+          for (final variant in variants)
+            _catalogText(_catalogObject(variant)['id'], empty: true),
+        ].where((id) => id.isNotEmpty),
+      );
+    },
+    (model) => '${model.providerId}/${model.id}',
+    cancellation,
+  );
+
+  /// The agents a user may pick at one location: primary ones, not hidden.
+  /// The others stay out of the list rather than being offered.
+  Future<List<CatalogEntry>> readAgents(
+    String directory, {
+    RequestCancellation? cancellation,
+  }) => _readCatalog(
+    directory,
+    'agent',
+    (row) {
+      final agent = _catalogObject(row);
+      final mode = agent['mode'];
+      final hidden = agent['hidden'];
+      final description = agent['description'];
+      if (mode is! String || hidden is! bool) {
+        throw const FormatException('Malformed agent.');
+      }
+      // An agent that is not offered is not projected either.
+      if (hidden || (mode != 'primary' && mode != 'all')) return null;
+      return CatalogEntry(
+        id: _catalogText(agent['id']),
+        kind: const OpenValue.known(CatalogKind.agent),
+        label: _catalogText(agent['name'], empty: true),
+        description: description == null
+            ? null
+            : _catalogText(description, empty: true),
+      );
+    },
+    (agent) => agent.id,
+    cancellation,
+  );
+
+  /// One location's catalog list. The answer names its location, which must
+  /// be the one asked for; a row the [project] function skips is not offered.
+  Future<List<T>> _readCatalog<T>(
+    String directory,
+    String route,
+    T? Function(Object? row) project,
+    String Function(T entry) key,
+    RequestCancellation? cancellation,
+  ) async {
+    _checkOpen();
+    if (directory.isEmpty || utf8.encode(directory).length > 4096) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final path = Uri(
+      path: 'api/$route',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _read(
+      path,
+      (value) {
+        if (value is! Map<String, Object?> ||
+            value['location'] is! Map<String, Object?> ||
+            value['data'] is! List) {
+          throw const FormatException('Malformed catalog.');
+        }
+        final location = value['location']! as Map<String, Object?>;
+        if (location['directory'] != directory) {
+          throw const FormatException('Catalog of another location.');
+        }
+        final rows = value['data']! as List;
+        if (rows.length > _hydrationListLimit) {
+          throw const FormatException('List limit.');
+        }
+        final entries = <T>[];
+        final ids = <String>{};
+        for (final row in rows) {
+          final entry = project(row);
+          if (entry == null) continue;
+          if (!ids.add(key(entry))) {
+            throw const FormatException('Duplicate catalog entry.');
+          }
+          entries.add(entry);
+        }
+        return List<T>.unmodifiable(entries);
+      },
+      cancellation,
+      maxBytes: maxCatalogBytes,
+    );
   }
 
   /// The sessions the endpoint runs now: the foreground drains its process
@@ -630,10 +786,14 @@ final class OpenCodeSessionReader {
           throw const FormatException('Session response has another identity.');
         }
         // The staged revert is projected once the history page is known.
-        return (result, (value['data']! as Map)['revert']);
+        return (
+          result,
+          (value['data']! as Map)['revert'],
+          projectOpenCodeSelection(value['data']),
+        );
       },
     );
-    final (summary, revert) = record;
+    final (summary, revert, selection) = record;
     final generation = jsonEncode([
       'hydration',
       ref.storageKey,
@@ -763,6 +923,12 @@ final class OpenCodeSessionReader {
       hydrationGeneration: hydrationGeneration,
       info: SnapshotValue(
         value: summary.info,
+        boundary: boundary('session.get', infoStart, infoEnd),
+      ),
+      // The record is the selection's authority; an absent field is the
+      // server's default, not an unknown.
+      selection: SnapshotValue(
+        value: selection,
         boundary: boundary('session.get', infoStart, infoEnd),
       ),
       execution: SnapshotValue(
@@ -965,8 +1131,9 @@ final class OpenCodeSessionReader {
   Future<T> _read<T>(
     String path,
     T Function(Object?) project,
-    RequestCancellation? parent,
-  ) async {
+    RequestCancellation? parent, {
+    int? maxBytes,
+  }) async {
     if (parent?.isCancelled ?? false) {
       throw const OpenCodeSessionReadException(
         OpenCodeSessionReadFailure.cancelled,
@@ -980,7 +1147,7 @@ final class OpenCodeSessionReader {
     T result;
     try {
       result = await Future.any([
-        _collect(path, project, operation),
+        _collect(path, project, operation, maxBytes ?? maxBodyBytes),
         operation.stopped.future.then<T>((_) => throw operation.failure!),
       ]);
     } on OpenCodeSessionReadException {
@@ -1023,6 +1190,7 @@ final class OpenCodeSessionReader {
     String path,
     T Function(Object?) project,
     _ReadOperation operation,
+    int maxBytes,
   ) async {
     final response = await transport.send(
       TransportRequest(
@@ -1054,7 +1222,7 @@ final class OpenCodeSessionReader {
       );
     }
     final bytes = await response.readBytes(
-      maxBytes: maxBodyBytes,
+      maxBytes: maxBytes,
       inactivityTimeout: deadline,
     );
     if (operation.failure != null) throw operation.failure!;
@@ -1138,6 +1306,30 @@ final class _ReadOperation {
       cleanupFailed = true;
     }
   }
+}
+
+Map<String, Object?> _catalogObject(Object? value) {
+  if (value is! Map<String, Object?>) {
+    throw const FormatException('Malformed catalog row.');
+  }
+  return value;
+}
+
+String _catalogText(Object? value, {bool empty = false}) {
+  if (value is! String ||
+      (value.isEmpty && !empty) ||
+      utf8.encode(value).length > 4096 ||
+      utf8.decode(utf8.encode(value)) != value) {
+    throw const FormatException('Malformed catalog text.');
+  }
+  return value;
+}
+
+int _catalogCount(Object? value) {
+  if (value is! int || value < 0) {
+    throw const FormatException('Malformed catalog limit.');
+  }
+  return value;
 }
 
 OpenCodeSessionReadException _statusError(int status) =>

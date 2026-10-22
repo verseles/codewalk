@@ -82,15 +82,34 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
   );
 }
 
+/// The selection a session record carries: its model reference and agent.
+///
+/// An absent field stays null, which leaves the server's default in force.
+/// A variant is any string, as the native reference allows; the model and
+/// provider ids must be present.
+Selection projectOpenCodeSelection(Object? value) {
+  final data = _object(value);
+  final model = data['model'];
+  final ref = model == null ? null : _object(model);
+  final variant = ref?['variant'];
+  final agent = data['agent'];
+  return Selection(
+    modelId: ref == null ? null : _text(ref['id']),
+    modelProviderId: ref == null ? null : _text(ref['providerID']),
+    modelVariant: variant == null ? null : _text(variant, empty: true),
+    agentId: agent == null ? null : _text(agent),
+  );
+}
+
 String openCodeSessionId(Object? value) {
   final id = _text(value);
   if (!id.startsWith('ses')) _malformed();
   return id;
 }
 
-String _text(Object? value) {
+String _text(Object? value, {bool empty = false}) {
   if (value is! String ||
-      value.isEmpty ||
+      (value.isEmpty && !empty) ||
       utf8.encode(value).length > 4096 ||
       utf8.decode(utf8.encode(value)) != value) {
     _malformed();

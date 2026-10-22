@@ -149,7 +149,7 @@ void main() {
       },
       frame('session.retry.scheduled', session: 'ses_b'),
       frame('session.future.fact', session: 'ses_b'),
-      {'type': 'session.agent.selected'},
+      {'type': 'session.moved'},
     ]) {
       expect(project(input, version: 'x'), isEmpty, reason: '$input');
     }
@@ -176,7 +176,7 @@ void main() {
       // Execution truth never comes from the legacy status pair.
       ('session.status', 'unprojected'),
       ('session.idle', 'unprojected'),
-      ('session.agent.selected', 'unprojected'),
+      ('session.moved', 'unprojected'),
       ('session.compaction.started', 'unprojected'),
       ('session.future.fact', 'unrecognized'),
     ]) {
