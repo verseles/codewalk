@@ -194,7 +194,8 @@ abstract interface class SessionLiveDirectory {
   /// Reconnects every open profile stream now instead of waiting for its
   /// retry delay or stall watchdog: the app came back from the background or
   /// the network changed. The new stream hydrates from authoritative reads;
-  /// nothing is sent, replayed or created.
+  /// the wake itself sends, replays or creates nothing, and the reconnected
+  /// stream keeps the policies of any other reconnect.
   void wake();
 
   Future<void> close();

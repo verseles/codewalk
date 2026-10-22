@@ -53,7 +53,6 @@ void main() {
     ) async {
       var wakes = 0;
       final network = StreamController<Object?>();
-    addTearDown(network.close);
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
         wake: () => wakes++,
@@ -82,7 +81,6 @@ void main() {
     ) async {
       var wakes = 0;
       final network = StreamController<Object?>();
-    addTearDown(network.close);
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
         wake: () => wakes++,
@@ -109,7 +107,6 @@ void main() {
     testWidgets('a failed network feed keeps the resume wake', (tester) async {
       var wakes = 0;
       final network = StreamController<Object?>();
-    addTearDown(network.close);
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
         wake: () => wakes++,
@@ -129,7 +126,6 @@ void main() {
     testWidgets('dispose drops a pending wake and the feed', (tester) async {
       var wakes = 0;
       final network = StreamController<Object?>();
-    addTearDown(network.close);
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
         wake: () => wakes++,
