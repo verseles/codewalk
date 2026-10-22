@@ -1388,4 +1388,12 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get sessionTabsFull =>
       'Há abas demais abertas. Feche uma para abrir outra.';
+
+  @override
+  String get liveRetrying => 'Tentando novamente';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return 'Nova tentativa em $time';
+  }
 }

@@ -2606,6 +2606,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Too many open tabs. Close one to open another.'**
   String get sessionTabsFull;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying'**
+  String get liveRetrying;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying in {time}'**
+  String liveRetryingIn(Object time);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

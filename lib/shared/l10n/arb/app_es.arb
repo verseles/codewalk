@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "Hay demasiadas pestañas abiertas. Cierra una para abrir otra.",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "Reintentando",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "Reintento en {time}",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

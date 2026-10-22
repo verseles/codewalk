@@ -37,7 +37,7 @@ void main() {
   });
 
   test(
-    'Stop requires live current known running state, never resumes shutdown',
+    'Stop requires live current running or retrying, never resumes shutdown',
     () async {
       final opening = controller.start();
       final handle = directory.grant(ref)..stopAvailable = true;
@@ -56,7 +56,7 @@ void main() {
         await pumpEventQueue();
         expect(
           controller.canStop,
-          kind == ExecutionKind.running,
+          kind == ExecutionKind.running || kind == ExecutionKind.retrying,
           reason: kind.name,
         );
       }

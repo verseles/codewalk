@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "बहुत अधिक टैब खुले हैं। दूसरा खोलने के लिए एक बंद करें।",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "फिर से प्रयास हो रहा है",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "{time} में फिर से प्रयास",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

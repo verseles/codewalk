@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "打开的标签页太多。请关闭一个再打开另一个。",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "正在重试",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "{time} 后重试",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

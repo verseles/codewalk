@@ -1359,4 +1359,12 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get sessionTabsFull =>
       'علامات التبويب المفتوحة كثيرة جدًا. أغلق واحدة لفتح أخرى.';
+
+  @override
+  String get liveRetrying => 'جارٍ إعادة المحاولة';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return 'إعادة المحاولة خلال $time';
+  }
 }

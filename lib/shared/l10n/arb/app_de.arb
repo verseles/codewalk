@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "Zu viele offene Tabs. Schließe einen, um einen anderen zu öffnen.",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "Neuer Versuch",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "Neuer Versuch in {time}",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

@@ -139,6 +139,9 @@ class SessionLiveController extends ChangeNotifier {
   /// provides one. The controller never owns or disposes it.
   final EditablePermissionModePolicy? permissionModes;
   final DateTime Function() _now;
+
+  /// The clock a reported wait, such as a retry's, is counted down with.
+  DateTime Function() get clock => _now;
   final CommandId Function() _commandIds;
   SessionRef get session => summary.info.ref;
   EndpointCredential? _credential;
@@ -226,7 +229,11 @@ class SessionLiveController extends ChangeNotifier {
       _credential?.matches(_currentCredential()) == true &&
       phase == SessionLivePhase.live &&
       !(view?.stale ?? true) &&
-      state?.execution?.kind.known == ExecutionKind.running &&
+      // A retry wait is still the same execution, so it can be stopped too.
+      switch (state?.execution?.kind.known) {
+        ExecutionKind.running || ExecutionKind.retrying => true,
+        _ => false,
+      } &&
       (_handle?.canStop ?? false);
 
   Future<void> stopCurrentTurn() async {

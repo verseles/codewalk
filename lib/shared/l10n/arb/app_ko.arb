@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "열린 탭이 너무 많습니다. 다른 탭을 열려면 하나를 닫으세요.",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "다시 시도 중",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "{time} 후 다시 시도",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

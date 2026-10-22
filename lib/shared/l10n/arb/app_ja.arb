@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "開いているタブが多すぎます。別のタブを開くには 1 つ閉じてください。",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "再試行中",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "{time} 後に再試行",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

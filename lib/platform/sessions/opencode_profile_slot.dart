@@ -261,13 +261,14 @@ final class OpenCodeProfileSlot {
         execution != null &&
         view.phase == SessionLivePhase.live &&
         !view.stale) {
-      if (execution.kind.known != ExecutionKind.running) {
+      if (execution.kind.known == ExecutionKind.idle) {
         stop.settled = true;
       }
     }
     // Hydration reconstructs lastOutcome objects even for the same running
-    // execution. Only an observed non-running state proves settlement. Latch
-    // it if it beats HTTP, and clear an uncertain wait too when it arrives late.
+    // execution, and a retry wait or a pending resume is still that execution.
+    // Only an observed idle state proves settlement. Latch it if it beats
+    // HTTP, and clear an uncertain wait too when it arrives late.
     if (stop != null &&
         stop.settled &&
         !stop.inFlight &&
@@ -294,7 +295,10 @@ final class OpenCodeProfileSlot {
         _stops[ref]?.inFlight != true &&
         current.phase == SessionLivePhase.live &&
         !current.stale &&
-        current.state?.execution?.kind.known == ExecutionKind.running;
+        switch (current.state?.execution?.kind.known) {
+          ExecutionKind.running || ExecutionKind.retrying => true,
+          _ => false,
+        };
   }
 
   Future<void> stop(SessionRef ref, CommandId id) async {

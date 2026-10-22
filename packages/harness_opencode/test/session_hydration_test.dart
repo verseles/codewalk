@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'execution_replay_test.dart' show eventLists, refOf;
 import 'history_test_data.dart';
+import 'execution_test_data.dart' show executionFrame, retryFrame;
 import 'session_reader_test.dart' show TestTransport, response, failure;
 import 'support/fixture_replay.dart';
 import 'text_reasoning_test_data.dart' show observedPosition;
@@ -152,6 +153,8 @@ Future<SessionSnapshot> hydrate(
   Server server, {
   String version = '2.0.22',
   int limit = 50,
+  String generation = 'gen-1',
+  int readStart = 10,
 }) {
   final reader = OpenCodeSessionReader(
     server.transport,
@@ -160,8 +163,8 @@ Future<SessionSnapshot> hydrate(
   var tick = 0;
   return reader.hydrateSession(
     historyRef,
-    hydrationGeneration: 'gen-1',
-    readStart: observedPosition(10),
+    hydrationGeneration: generation,
+    readStart: observedPosition(readStart),
     sourceVersion: version,
     historyLimit: limit,
     now: () => DateTime.utc(2026, 10, 14, 0, 0, tick++),
@@ -447,6 +450,70 @@ void main() {
       ['msg_z1', 'msg_q1'],
     );
   });
+
+  test(
+    'a rehydration replaces a live retry or pending resume with the active map',
+    () async {
+      const absent = {'data': <String, Object?>{}};
+      for (final (frame, active, kind) in [
+        (retryFrame(), null, ExecutionKind.running),
+        (retryFrame(), absent, ExecutionKind.idle),
+        (
+          executionFrame('interrupted', reason: 'shutdown'),
+          null,
+          ExecutionKind.running,
+        ),
+        (
+          executionFrame('interrupted', reason: 'shutdown'),
+          absent,
+          ExecutionKind.idle,
+        ),
+        // A missed end never leaves the session stuck running.
+        (executionFrame('started'), absent, ExecutionKind.idle),
+      ]) {
+        final store = SessionStore(maxSessions: 4)..open(historyRef);
+        store.startHydration(
+          historyRef,
+          generation: 'gen-1',
+          readStart: observedPosition(10),
+        );
+        var state = store
+            .applySnapshot(historyRef, await hydrate(Server()))
+            .state;
+        for (final event in projectOpenCodeEvent(
+          frame,
+          state,
+          sourceVersion: '2.0.22',
+          position: observedPosition(11),
+          receivedAt: DateTime.utc(2026, 10, 14),
+        )) {
+          state = store.apply(historyRef, event).state;
+        }
+        expect(state.execution!.kind.known, isNot(kind));
+        store.startHydration(
+          historyRef,
+          generation: 'gen-2',
+          readStart: observedPosition(20),
+        );
+        final snapshot = await hydrate(
+          active == null ? Server() : Server(active: active),
+          generation: 'gen-2',
+          readStart: 20,
+        );
+        final reduction = store.applySnapshot(historyRef, snapshot);
+        expect(reduction.effects.whereType<Rehydrate>(), isEmpty);
+        final execution = reduction.state.execution!;
+        expect(execution.kind.known, kind, reason: '${frame['type']}');
+        expect(execution.retryAt, isNull);
+        expect(execution.error, isNull);
+        // The newest history outcome survives either way.
+        expect(
+          execution.lastOutcome!.kind.known,
+          ExecutionOutcomeKind.succeeded,
+        );
+      }
+    },
+  );
 
   test(
     'observed B: recorded reads hydrate, then the stream adds no duplicates',

@@ -47,7 +47,9 @@ const _finishes = {
 /// Returns an unmodifiable list to reduce in order against the latest
 /// [current] state; unrelated types and foreign sessions return an empty list.
 /// `started` and `streamed` are validated and emit nothing: Core has no step
-/// state and execution lifecycle belongs to the execution producer.
+/// state and execution lifecycle belongs to the execution producer. The one
+/// exception is a retry wait, which the contract clears on the next step
+/// start: `started` while the execution is retrying emits running.
 ///
 /// `ended` emits a per-step [UsageObserved] (turn scope, partial, identified
 /// and keyed by the assistant message). `failed` emits the history-identical
@@ -120,6 +122,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
   String? finish;
   String? errorType;
   _Usage? usage;
+  var resumes = false;
   switch (type) {
     case _started:
       _text(data['agent']);
@@ -129,6 +132,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
       if (model.containsKey('variant')) _text(model['variant']);
       _optionalText(data, 'snapshot');
       _integer(data['started']);
+      resumes = current.execution?.kind.known == ExecutionKind.retrying;
     case _streamed:
       break;
     case _ended:
@@ -179,7 +183,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
       }
     }
   }
-  if (usage == null && markerId == null) return const [];
+  if (usage == null && markerId == null && !resumes) return const [];
 
   final source = SourceProvenance(
     harness: ref.harnessRef,
@@ -206,6 +210,14 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
     source: source,
   );
   return List.unmodifiable(<SessionEvent>[
+    if (resumes)
+      ExecutionChanged(
+        meta: eventMeta,
+        state: ExecutionState(
+          kind: const OpenValue.known(ExecutionKind.running),
+          lastOutcome: current.execution?.lastOutcome,
+        ),
+      ),
     if (markerId != null)
       ItemUpserted(
         meta: eventMeta,

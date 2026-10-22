@@ -1280,4 +1280,12 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionTabsFull => '打开的标签页太多。请关闭一个再打开另一个。';
+
+  @override
+  String get liveRetrying => '正在重试';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return '$time 后重试';
+  }
 }

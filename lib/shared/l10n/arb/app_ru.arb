@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "Слишком много открытых вкладок. Закройте одну, чтобы открыть другую.",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "Повторная попытка",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "Повторная попытка через {time}",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

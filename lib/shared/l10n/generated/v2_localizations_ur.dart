@@ -1368,4 +1368,12 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get sessionTabsFull =>
       'بہت زیادہ ٹیب کھلے ہیں۔ دوسرا کھولنے کے لیے ایک بند کریں۔';
+
+  @override
+  String get liveRetrying => 'دوبارہ کوشش ہو رہی ہے';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return '$time میں دوبارہ کوشش';
+  }
 }

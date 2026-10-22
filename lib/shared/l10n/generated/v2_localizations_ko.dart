@@ -1307,4 +1307,12 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionTabsFull => '열린 탭이 너무 많습니다. 다른 탭을 열려면 하나를 닫으세요.';
+
+  @override
+  String get liveRetrying => '다시 시도 중';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return '$time 후 다시 시도';
+  }
 }

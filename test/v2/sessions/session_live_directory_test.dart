@@ -279,6 +279,28 @@ final class _Server {
     }
   }
 
+  /// A contract-derived retry wait (no 2.0.22 capture holds one, #243).
+  Future<void> retry(String session) async {
+    final seq = ++_seq;
+    final frame = {
+      'id': 'evt_$seq',
+      'type': 'session.retry.scheduled',
+      'created': 1000 + seq,
+      'durable': {'aggregateID': session, 'version': 1, 'seq': seq},
+      'data': {
+        'sessionID': session,
+        'assistantMessageID': 'msg_retry',
+        'attempt': 1,
+        'at': 31000 + seq,
+        'error': {'type': 'provider.rate-limit', 'message': 'private'},
+      },
+    };
+    for (final stream in streams) {
+      stream.write('data: ${jsonEncode(frame)}\n\n');
+      await stream.flush();
+    }
+  }
+
   Future<void> close() async {
     for (final stream in streams) {
       unawaited(stream.close().catchError((_) {}));
@@ -463,6 +485,31 @@ void main() {
     expect(a.stopState.phase, SessionStopPhase.requested);
     expect(a.canStop, isFalse);
     await a.stop(id: const CommandId('must-not-send'));
+    expect(server.interrupts, hasLength(1));
+    await server.execution('ses_one', 'interrupted', reason: 'user');
+    await until(a, (_) => !a.stopState.busy);
+    expect(a.stopState.phase, SessionStopPhase.ready);
+  });
+
+  test('a retry wait can be stopped; only idle settles the Stop', () async {
+    server.running.add('ses_one');
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final a = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    await until(a, (_) => a.canStop);
+    await server.retry('ses_one');
+    await until(
+      a,
+      (v) => v.state?.execution?.kind.known == ExecutionKind.retrying,
+    );
+    expect(a.canStop, isTrue);
+    await a.stop(id: const CommandId('first'));
+    // The wait is still the same execution, so it settles nothing.
+    expect(a.stopState.phase, SessionStopPhase.requested);
     expect(server.interrupts, hasLength(1));
     await server.execution('ses_one', 'interrupted', reason: 'user');
     await until(a, (_) => !a.stopState.busy);

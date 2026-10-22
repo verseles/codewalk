@@ -233,8 +233,10 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
       _phase == SessionLivePhase.live &&
       !_stale &&
       _nextInterrupt < bridge.interruptIds.length &&
-      bridge.store.peek(session)?.execution?.kind.known ==
-          ExecutionKind.running;
+      switch (bridge.store.peek(session)?.execution?.kind.known) {
+        ExecutionKind.running || ExecutionKind.retrying => true,
+        _ => false,
+      };
 
   @override
   Future<void> stop({required CommandId id}) async {

@@ -28,7 +28,10 @@ class LiveHandle implements SessionLiveHandle {
       !stopState.busy &&
       current.phase == SessionLivePhase.live &&
       !current.stale &&
-      current.state?.execution?.kind.known == ExecutionKind.running;
+      switch (current.state?.execution?.kind.known) {
+        ExecutionKind.running || ExecutionKind.retrying => true,
+        _ => false,
+      };
   @override
   Future<void> stop({required CommandId id}) async {
     if (!canStop) return;

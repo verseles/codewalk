@@ -23,6 +23,7 @@ const producers = <String, Producer>{
   'text': projectOpenCodeTextReasoningEvent,
   'tool': projectOpenCodeToolEvent,
   'execution': projectOpenCodeExecutionEvent,
+  'retry': projectOpenCodeRetryEvent,
   'inbox': projectOpenCodeInboxEvent,
   'step': projectOpenCodeStepUsageEvent,
   'interaction': projectOpenCodeInteractionEvent,
@@ -49,6 +50,7 @@ const owned = {
   'session.execution.succeeded': 'execution',
   'session.execution.failed': 'execution',
   'session.execution.interrupted': 'execution',
+  'session.retry.scheduled': 'retry',
   'session.inbox.enqueued': 'inbox',
   'session.inbox.delivered': 'inbox',
   'session.inbox.cancelled': 'inbox',
@@ -171,7 +173,9 @@ void main() {
 
   test('unprojected and unrecognized session frames are explicit unknowns', () {
     for (final (type, disposition) in [
-      ('session.retry.scheduled', 'unprojected'),
+      // Execution truth never comes from the legacy status pair.
+      ('session.status', 'unprojected'),
+      ('session.idle', 'unprojected'),
       ('session.agent.selected', 'unprojected'),
       ('session.compaction.started', 'unprojected'),
       ('session.future.fact', 'unrecognized'),

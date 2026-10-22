@@ -140,6 +140,7 @@ final Map<String, _Producer> _routes = {
     'session.execution.interrupted',
   ])
     type: projectOpenCodeExecutionEvent,
+  'session.retry.scheduled': projectOpenCodeRetryEvent,
   for (final type in const [
     'session.inbox.enqueued',
     'session.inbox.delivered',
@@ -194,7 +195,6 @@ const _unprojected = {
   'session.viewed',
   'session.forked',
   'session.skill.activated',
-  'session.retry.scheduled',
   'session.compaction.started',
   'session.compaction.ended',
   'session.compaction.failed',

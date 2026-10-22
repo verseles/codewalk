@@ -1139,5 +1139,13 @@
   "sessionTabsFull": "Trop d’onglets ouverts. Fermez-en un pour en ouvrir un autre.",
   "@sessionTabsFull": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "liveRetrying": "Nouvelle tentative",
+  "@liveRetrying": {
+    "description": "V2 live read-only session view"
+  },
+  "liveRetryingIn": "Nouvelle tentative dans {time}",
+  "@liveRetryingIn": {
+    "description": "V2 live read-only session view"
   }
 }

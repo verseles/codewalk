@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
@@ -28,7 +29,9 @@ const _started = 'session.execution.started';
 const _succeeded = 'session.execution.succeeded';
 const _failed = 'session.execution.failed';
 const _interrupted = 'session.execution.interrupted';
+const _retry = 'session.retry.scheduled';
 const _types = {_started, _succeeded, _failed, _interrupted};
+const _maxEpochMillis = 8640000000000000;
 const _reasons = {'user', 'shutdown', 'superseded', 'inactivity'};
 
 /// Projects the four 2.0.22 execution lifecycle events without owning a stream
@@ -51,55 +54,14 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
   required StreamPosition position,
   required DateTime receivedAt,
 }) {
-  final frame = _object(value);
-  final type = frame['type'];
-  if (type is! String) _fail(OpenCodeExecutionProjectionFailure.malformed);
-  if (!_types.contains(type)) return const [];
-  final data = _object(frame['data']);
-  final sessionId = _id(data['sessionID'], 'ses');
-  if (sessionId != current.ref.nativeId) return const [];
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
-    _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
-  }
-  for (final part in [
-    current.ref.host.value,
-    current.ref.harness.value,
-    current.ref.nativeId,
-    position.id,
-    position.epoch,
-  ]) {
-    _text(part, cap: _idLimit, nonempty: true);
-  }
-  final nativeId = _id(frame['id'], 'evt_');
-  final created = frame['created'];
-  if (created is! num || !created.isFinite) {
-    _fail(OpenCodeExecutionProjectionFailure.malformed);
-  }
-  final durable = _object(frame['durable']);
-  final aggregateId = _id(durable['aggregateID'], 'ses');
-  if (aggregateId != sessionId) {
-    _fail(OpenCodeExecutionProjectionFailure.malformed);
-  }
-  if (_integer(durable['version']) != 1) {
-    _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
-  }
-  final aggregateSeq = BigInt.from(_integer(durable['seq']));
+  final header = _header(value, current, _types, sourceVersion, position);
+  if (header == null) return const [];
+  final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
+      header;
 
   ErrorInfo? error;
   String? reason;
-  if (type == _failed) {
-    final rawError = _object(data['error']);
-    final errorType = _text(rawError['type'], cap: _idLimit);
-    // Schema.String allows empty; Core ErrorInfo requires a nonempty rawType.
-    if (errorType.isEmpty) {
-      _fail(OpenCodeExecutionProjectionFailure.unsupportedValue);
-    }
-    error = ErrorInfo(
-      kind: const OpenValue.known(ErrorKind.unknown),
-      rawType: errorType,
-      rawMessage: '',
-    );
-  }
+  if (type == _failed) error = _error(data['error']);
   if (type == _interrupted) {
     reason = _text(data['reason'], cap: _idLimit);
     if (!_reasons.contains(reason)) {
@@ -194,6 +156,150 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
       ),
     ),
   ]);
+}
+
+/// Projects the 2.0.22 `session.retry.scheduled` event without owning a
+/// stream or clock: one [RetryScheduled] that holds the execution in
+/// retrying until the next `session.step.started` or the execution's end,
+/// which the step and execution producers observe.
+///
+/// `at` is the next attempt on the server's clock. The server's own delay
+/// (`at - created`) is counted from [receivedAt], so a device clock that
+/// differs from the server's does not move the deadline; a late delivery
+/// keeps the earlier `at`, and a deadline already past becomes [receivedAt]
+/// so no wait is shown. The native values stay in the provenance.
+///
+/// Error `message`, `status` and `response` are never read; the error kind
+/// stays unknown.
+List<SessionEvent> projectOpenCodeRetryEvent(
+  Object? value,
+  SessionState current, {
+  required String sourceVersion,
+  required StreamPosition position,
+  required DateTime receivedAt,
+}) {
+  final header = _header(value, current, {_retry}, sourceVersion, position);
+  if (header == null) return const [];
+  final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
+      header;
+  final messageId = _id(data['assistantMessageID'], 'msg_');
+  final attempt = _integer(data['attempt']);
+  // The reference client counts attempts from one, like the history row.
+  if (attempt < 1) _fail(OpenCodeExecutionProjectionFailure.malformed);
+  final at = data['at'];
+  if (at is! num || !at.isFinite || at < 0 || at > _maxEpochMillis) {
+    _fail(OpenCodeExecutionProjectionFailure.malformed);
+  }
+  if (created < 0 || created > _maxEpochMillis) {
+    _fail(OpenCodeExecutionProjectionFailure.malformed);
+  }
+  final error = _error(data['error']);
+  final received = receivedAt.millisecondsSinceEpoch;
+  final deadline = max(received, min(at, received + (at - created)));
+  final retryAt = DateTime.fromMillisecondsSinceEpoch(
+    deadline.round(),
+    isUtc: true,
+  );
+  return List.unmodifiable([
+    RetryScheduled(
+      meta: EventMeta(
+        owner: SessionOwner(current.ref),
+        position: position,
+        receivedAt: receivedAt,
+        source: SourceProvenance(
+          harness: current.ref.harnessRef,
+          version: sourceVersion,
+          nativeType: type,
+          nativeEventId: nativeId,
+          aggregateId: aggregateId,
+          aggregateSeq: aggregateSeq,
+          durability: const OpenValue.known(Durability.durable),
+          extra: CanonicalValue({
+            'nativeCreated': created,
+            'nativeDurableVersion': 1,
+            'nativeMessageId': messageId,
+            'nativeRetryAt': at,
+            'errorContentNotProjected': true,
+          }),
+        ),
+      ),
+      attempt: attempt,
+      at: retryAt,
+      error: error,
+    ),
+  ]);
+}
+
+/// The validated durable v1 frame of one of [types] for this session, or
+/// null for another type or session.
+({
+  String type,
+  Map<String, Object?> data,
+  String nativeId,
+  num created,
+  String aggregateId,
+  BigInt aggregateSeq,
+})?
+_header(
+  Object? value,
+  SessionState current,
+  Set<String> types,
+  String sourceVersion,
+  StreamPosition position,
+) {
+  final frame = _object(value);
+  final type = frame['type'];
+  if (type is! String) _fail(OpenCodeExecutionProjectionFailure.malformed);
+  if (!types.contains(type)) return null;
+  final data = _object(frame['data']);
+  final sessionId = _id(data['sessionID'], 'ses');
+  if (sessionId != current.ref.nativeId) return null;
+  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+    _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
+  }
+  for (final part in [
+    current.ref.host.value,
+    current.ref.harness.value,
+    current.ref.nativeId,
+    position.id,
+    position.epoch,
+  ]) {
+    _text(part, cap: _idLimit, nonempty: true);
+  }
+  final nativeId = _id(frame['id'], 'evt_');
+  final created = frame['created'];
+  if (created is! num || !created.isFinite) {
+    _fail(OpenCodeExecutionProjectionFailure.malformed);
+  }
+  final durable = _object(frame['durable']);
+  final aggregateId = _id(durable['aggregateID'], 'ses');
+  if (aggregateId != sessionId) {
+    _fail(OpenCodeExecutionProjectionFailure.malformed);
+  }
+  if (_integer(durable['version']) != 1) {
+    _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
+  }
+  return (
+    type: type,
+    data: data,
+    nativeId: nativeId,
+    created: created,
+    aggregateId: aggregateId,
+    aggregateSeq: BigInt.from(_integer(durable['seq'])),
+  );
+}
+
+ErrorInfo _error(Object? value) {
+  final errorType = _text(_object(value)['type'], cap: _idLimit);
+  // Schema.String allows empty; Core ErrorInfo requires a nonempty rawType.
+  if (errorType.isEmpty) {
+    _fail(OpenCodeExecutionProjectionFailure.unsupportedValue);
+  }
+  return ErrorInfo(
+    kind: const OpenValue.known(ErrorKind.unknown),
+    rawType: errorType,
+    rawMessage: '',
+  );
 }
 
 Map<String, Object?> _object(Object? value) {

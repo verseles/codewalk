@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
@@ -109,6 +110,7 @@ class _SessionLivePageState extends State<SessionLivePage>
     TextTheme textTheme, {
     required String? failure,
     required String? execution,
+    required DateTime? retryAt,
     required String? outcome,
     required bool needsYou,
     required SessionLiveView? view,
@@ -146,7 +148,9 @@ class _SessionLivePageState extends State<SessionLivePage>
               if (execution != null)
                 Chip(
                   key: const ValueKey('live-execution'),
-                  label: Text(execution),
+                  label: retryAt == null
+                      ? Text(execution)
+                      : _RetryLabel(at: retryAt, now: c.clock),
                 ),
               if (outcome != null) Chip(label: Text(outcome)),
             ],
@@ -261,8 +265,10 @@ class _SessionLivePageState extends State<SessionLivePage>
         ExecutionKind.idle => l10n.liveIdle,
         ExecutionKind.waitingForApproval ||
         ExecutionKind.waitingForInput => l10n.liveNeedsYou,
+        ExecutionKind.retrying => l10n.liveRetrying,
+        ExecutionKind.interrupting => l10n.liveStopping,
         ExecutionKind.interruptedPendingResume => l10n.liveResuming,
-        _ => l10n.liveRunning,
+        ExecutionKind.running => l10n.liveRunning,
       };
 
   String? _outcome(V2Localizations l10n, ExecutionOutcome? outcome) =>
@@ -291,6 +297,10 @@ class _SessionLivePageState extends State<SessionLivePage>
       // An opened view speaks through its phase; this is an open failure.
       final failure = _failure(l10n, c.failure);
       final execution = _execution(l10n, state?.execution);
+      // Only a wait the harness reported is counted down.
+      final retryAt = state?.execution?.kind.known == ExecutionKind.retrying
+          ? state?.execution?.retryAt
+          : null;
       final outcome = _outcome(l10n, state?.execution?.lastOutcome);
       final needsYou = state?.interactions.isNotEmpty ?? false;
       // A settled session has no turn in flight, so a finished answer can be
@@ -399,6 +409,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                           textTheme,
                           failure: failure,
                           execution: execution,
+                          retryAt: retryAt,
                           outcome: outcome,
                           needsYou: needsYou,
                           view: view,
@@ -473,4 +484,91 @@ class _SessionLivePageState extends State<SessionLivePage>
       );
     },
   );
+}
+
+/// The retry chip's label: the wait the harness reported, counted down each
+/// second while it lasts, then just "Retrying". The count pauses while the
+/// page does not tick (a hidden tab) or the app is hidden.
+class _RetryLabel extends StatefulWidget {
+  const _RetryLabel({required this.at, required this.now});
+  final DateTime at;
+  final DateTime Function() now;
+
+  @override
+  State<_RetryLabel> createState() => _RetryLabelState();
+}
+
+class _RetryLabelState extends State<_RetryLabel> {
+  Timer? _timer;
+  var _ticking = false;
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(
+      onStateChange: (_) => setState(_schedule),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ticking = TickerMode.valuesOf(context).enabled;
+    _schedule();
+  }
+
+  @override
+  void didUpdateWidget(_RetryLabel old) {
+    super.didUpdateWidget(old);
+    if (old.at != widget.at || old.now != widget.now) _schedule();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  Duration get _left => widget.at.difference(widget.now());
+
+  /// Wakes at the next whole second of the wait, only while it is shown.
+  void _schedule() {
+    _timer?.cancel();
+    _timer = null;
+    final left = _left;
+    final shown = switch (WidgetsBinding.instance.lifecycleState) {
+      AppLifecycleState.hidden ||
+      AppLifecycleState.paused ||
+      AppLifecycleState.detached => false,
+      _ => true,
+    };
+    if (!_ticking || !shown || left <= Duration.zero) return;
+    final part = left.inMicroseconds % Duration.microsecondsPerSecond;
+    _timer = Timer(
+      Duration(microseconds: part == 0 ? Duration.microsecondsPerSecond : part),
+      () {
+        if (mounted) setState(_schedule);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.v2L10n;
+    final left = _left;
+    if (left <= Duration.zero) return Text(l10n.liveRetrying);
+    // Whole seconds, rounded up, so the count never shows a passed second.
+    final seconds =
+        (left.inMicroseconds + Duration.microsecondsPerSecond - 1) ~/
+        Duration.microsecondsPerSecond;
+    final hours = seconds ~/ 3600;
+    final minutes = seconds ~/ 60 % 60;
+    final rest = (seconds % 60).toString().padLeft(2, '0');
+    final time = hours > 0
+        ? '$hours:${minutes.toString().padLeft(2, '0')}:$rest'
+        : '$minutes:$rest';
+    return Text(l10n.liveRetryingIn(time));
+  }
 }

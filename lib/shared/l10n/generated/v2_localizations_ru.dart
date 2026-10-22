@@ -1383,4 +1383,12 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get sessionTabsFull =>
       'Слишком много открытых вкладок. Закройте одну, чтобы открыть другую.';
+
+  @override
+  String get liveRetrying => 'Повторная попытка';
+
+  @override
+  String liveRetryingIn(Object time) {
+    return 'Повторная попытка через $time';
+  }
 }
