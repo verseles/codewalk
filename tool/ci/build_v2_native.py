@@ -131,7 +131,9 @@ def preview_identity(apk, runner):
                           check=True, text=True, capture_output=True).stdout
     signer = badging_value(certificates, r"^Signer #1 certificate DN: (.*)$")
     if signer is None or "CN=Android Debug" not in signer:
-        raise RuntimeError("Preview APK must be signed with the debug key, never the release key.")
+        # The certificate lines are public and show which key was found.
+        found = [line for line in certificates.splitlines() if "certificate" in line][:4]
+        raise RuntimeError(f"Preview APK must be signed with the debug key, never the release key: {found}")
     identity["signer"] = signer
     return identity
 
