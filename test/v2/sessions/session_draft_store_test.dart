@@ -72,13 +72,17 @@ void main() {
     final ref = _ref('s1');
     final first = store();
     expect(await first.read(ref), isNull);
+    // Real file I/O has no bounded duration, so the test waits for the write
+    // itself rather than a fixed delay (which could see the temporary file).
     first.save(ref, '旧🙂 half a prompt');
-    await _settle();
+    await first.flush();
     expect(await directory.list().length, 1);
 
     expect(await store().read(ref), '旧🙂 half a prompt');
     first.save(ref, '');
-    await _settle();
+    for (var i = 0; i < 500 && !await directory.list().isEmpty; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
     expect(await directory.list().length, 0);
     expect(await store().read(ref), isNull);
 
@@ -92,7 +96,7 @@ void main() {
     final next = store();
     expect(await next.read(ref), isNull);
     next.save(ref, 'after the corrupt one');
-    await _settle();
+    await next.flush();
     expect(await store().read(ref), 'after the corrupt one');
   });
 
