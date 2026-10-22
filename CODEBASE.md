@@ -1453,11 +1453,11 @@ criteria remain pending.
 ## V2-020D isolated Linux preview map
 
 ```text
-tool/preview/preview_linux.py             # Verifies compiler inventory and packages/launches the Linux x64 preview
+tool/preview/preview_linux.py             # Verifies compiler inventory and packages/launches the Linux x64 or ARM64 preview
 tool/preview/PREVIEW.txt                   # Extraction, opening, data-isolation, and limitation instructions
 tool/ci/smoke_v2_linux_preview.py           # Safely extracts and visually smokes the exact archive under Xvfb
 tool/ci/test_v2_linux_preview.py            # Packaging, integrity, isolation, and smoke-helper regressions
-Makefile                                   # v2-linux-preview-package and v2-linux-preview-smoke targets
+Makefile                                   # v2-linux-preview-package and v2-linux-preview-smoke targets (V2_LINUX_ARCH from the host)
 .github/workflows/ci.yml                   # Packages, smokes, then uploads preview artifact only on success
 ```
 
@@ -2517,3 +2517,28 @@ lib/features/sessions/session_live_page.dart # Reports the shown session to the 
 lib/features/sessions/sessions_page.dart # The row's activity marks (icon and label, wrapped)
 test/v2/sessions/session_activity_test.dart # Controller sources, unknown, coalescing, profile switch, behind; view once per idle; sidebar labels, layouts, open and background flows
 ```
+
+## CP1 owner preview builds (Seq 2.5, #398)
+
+```text
+.github/workflows/v2-owner-preview.yml    # Dispatch-only, read-only, artifact-only owner previews from one commit
+tool/ci/build_v2_native.py                # android-preview target: profile split APKs, ABI/AOT, identity, signer, device-wide names
+tool/ci/smoke_v2_android_preview.py       # Installs and launches the recorded x86_64 split on a booted emulator
+tool/ci/test_v2_android_preview.py        # Same-build, scoped crash, front-activity and blank-screen regressions
+tool/preview/preview_linux.py             # Architecture from the compiler record + ELF; launch refuses another host arch
+android/app/build.gradle.kts              # -PcodewalkPreview=true: .v2preview id suffix and preview label; refused for release
+Makefile                                  # v2-android-preview target (x64 host)
+```
+
+`v2-owner-preview.yml` builds Linux x64 (`ubuntu-24.04`) and Linux ARM64
+(`ubuntu-24.04-arm`, Flutter cloned at the pinned tag) natively, then packages
+and smokes the exact archive before keeping it. Every build first checks the
+Flutter SDK's version and commit (`FLUTTER_VERSION`, `FLUTTER_REVISION`).
+The Android job builds a profile APK split per ABI under the preview identity
+(`com.verseles.codewalk.v2preview`, "CodeWalk v2 Preview", debug signer). It
+passes the build to `android_launch` through an internal run-scoped artifact.
+That job installs and launches the same build's x86_64 split on an API 36
+emulator. Only after that launch does it keep the owner's arm64 APK with its
+checksum, build record and launch evidence. The delivered arm64 split itself
+is inspected, not launched. `ci.yml` does not run this workflow, and nothing is
+tagged, released or deployed.

@@ -220,8 +220,9 @@ those exact archive bytes under Xvfb before offering a verified-preview artifact
 Screenshots, the completed smoke report and the archive checksum accompany a
 successful result. Compiler success alone is not this visual verification.
 
-On a compatible Ubuntu 24.04 x64 desktop with X11/XWayland, extract the verified
-archive and run `./Open-preview.sh`. No Flutter SDK or compilation is needed.
+On a compatible Ubuntu 24.04 desktop with X11/XWayland, extract the verified
+archive for that machine's architecture and run `./Open-preview.sh`; a preview
+refuses to open on a host of another architecture. No Flutter SDK or compilation is needed.
 The launcher requires the ordinary desktop runtime, Python 3, D-Bus and GNOME
 Keyring; it reports a missing prerequisite without falling back to the host's
 credential session. `PREVIEW.txt` in the package contains opening/removal steps.
@@ -231,13 +232,25 @@ supervised encrypted temporary keyring. Nonsecret preferences persist; credentia
 are cleared when the launcher session closes. This is normal-storage isolation,
 not an OS sandbox, GPU/Wayland acceptance, an updater or a public beta. The app
 does not register a new desktop/URI handler or replace the installed v1 app.
-Conversations remain placeholders; the smoke report names the exercised screens
-and untested server/device paths.
+The smoke report names the exercised screens and untested server/device paths.
 
 ```bash
-make v2-linux-preview-package # requires the fresh verified Linux x64 build
+make v2-linux-preview-package # requires the fresh verified build for this host (x64 or arm64)
 make v2-linux-preview-smoke   # requires an existing Xvfb/X11 visual QA runtime
+make v2-android-preview       # Linux x64 build host; profile APK under the preview identity
 ```
+
+#### Owner previews (CP1)
+
+The manual **V2 owner preview** workflow (`v2-owner-preview.yml`) builds every
+preview from the dispatched commit and keeps only previews it launched: Linux
+x64 and ARM64 archives (each built on its own architecture and smoked under
+Xvfb) and an Android arm64 APK. The APK installs beside CodeWalk v1 as
+**CodeWalk v2 Preview** (`com.verseles.codewalk.v2preview`, debug-signed
+profile build) and never replaces it or its data. CI launches the same build's
+x86_64 split on an Android 16 emulator; the arm64 APK itself is first launched on
+the owner's device. The workflow only produces artifacts: it publishes, tags
+and deploys nothing.
 
 ### Web Deploy: Cloudflare Pages or Static Hosting
 
