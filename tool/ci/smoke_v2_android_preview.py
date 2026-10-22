@@ -8,6 +8,7 @@ sibling from the same build is launched instead, and the report says so.
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
@@ -17,8 +18,10 @@ from tool.ci import build_v2_native as native
 
 SPLIT = "build/app/outputs/flutter-apk/" + native.PREVIEW_APKS["x86_64"]
 # A blank or single-colour frame has almost no spread; a drawn screen has text,
-# icons and surfaces.
+# icons and surfaces. Only the middle of the screen is measured, so the system
+# bars cannot pass for the app's own drawing.
 MIN_SPREAD = 0.02
+APP_REGION = "100%x80%+0+0"
 
 
 def run(command, *, timeout=60):
@@ -36,14 +39,25 @@ def same_build(apk, evidence):
 
 
 def crash_lines(logcat, package):
-    """Lines that show the app crashed or Flutter reported an unhandled error."""
+    """Lines that show the app crashed or Flutter reported an unhandled error.
+
+    A crash of another process on the emulator is not the preview's: a Java
+    crash names the process on its `AndroidRuntime: Process:` line, a native
+    one in its `>>> package <<<` tombstone header.
+    """
     lines = []
     for line in logcat.splitlines():
-        if "FATAL EXCEPTION" in line or ("AndroidRuntime" in line and package in line):
+        if ("AndroidRuntime" in line and package in line) or f">>> {package} <<<" in line:
             lines.append(line)
         elif "flutter" in line and "Unhandled Exception" in line:
             lines.append(line)
     return lines
+
+
+def in_front(activities, package):
+    """The preview is the resumed activity (`mResumedActivity` before Android
+    10, `topResumedActivity` since)."""
+    return re.search(rf"ResumedActivity.*\b{re.escape(package)}/", activities) is not None
 
 
 def rendered(spread):
@@ -75,10 +89,14 @@ def smoke(apk, evidence_json, evidence, wait_seconds=20):
             raise RuntimeError("The preview process is not running after launch.")
         report["pid"] = pid
         report["checks"].append("process-alive")
+        if not in_front(run(["adb", "shell", "dumpsys", "activity", "activities"]), package):
+            raise RuntimeError("The preview is not the activity in front.")
+        report["checks"].append("activity-in-front")
         screen = evidence / "screen.png"
         screen.write_bytes(subprocess.run(["adb", "exec-out", "screencap", "-p"], check=True,
                                           capture_output=True, timeout=60).stdout)
-        spread = float(run(["convert", str(screen), "-colorspace", "Gray", "-format",
+        spread = float(run(["convert", str(screen), "-gravity", "center", "-crop", APP_REGION,
+                            "+repage", "-colorspace", "Gray", "-format",
                             "%[fx:standard_deviation]", "info:"]))
         report["screen_spread"] = spread
         rendered(spread)

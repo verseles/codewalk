@@ -11,6 +11,8 @@ permissions:
 
 env:
   FLUTTER_VERSION: "3.44.1"
+  # The commit of the FLUTTER_VERSION tag; a moved tag fails the SDK check.
+  FLUTTER_REVISION: "924134a44c189315be2148659913dda1671cbe99"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,10 +46,22 @@ jobs:
         run: |
           test "$(uname -m)" = aarch64
           git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
-          "$RUNNER_TEMP/flutter/bin/flutter" --version --machine > "$RUNNER_TEMP/flutter-version.json"
-          python3 -c 'import json, os, sys; version = json.load(open(os.environ["RUNNER_TEMP"] + "/flutter-version.json"))["frameworkVersion"]; sys.exit(0 if version == os.environ["FLUTTER_VERSION"] else f"Flutter {version} is not the pinned version")'
+          # The first run downloads the Dart SDK and prints its progress, so
+          # it is kept apart from the machine-readable check below.
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
           "$RUNNER_TEMP/flutter/bin/flutter" precache --linux
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Verify the pinned Flutter SDK
+        run: |
+          flutter --version
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25"
@@ -108,6 +122,17 @@ jobs:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+      - name: Verify the pinned Flutter SDK
+        run: |
+          flutter --version
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25"
@@ -130,26 +155,20 @@ jobs:
           make v2-android-preview 2>&1 | tee build/native-evidence/compiler.log
           cd build/app/outputs/flutter-apk
           sha256sum app-arm64-v8a-profile.apk > app-arm64-v8a-profile.apk.sha256
-      - name: Keep the delivered arm64 APK
+      # Named by run only, so re-running a failed launch finds this build.
+      - name: Hand the build to the launch check
         uses: actions/upload-artifact@v4
         with:
-          name: codewalk-v2-preview-android-arm64-${{ github.run_id }}-${{ github.run_attempt }}
+          name: v2-preview-android-build-${{ github.run_id }}
           path: |
             build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk
             build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk.sha256
+            build/app/outputs/flutter-apk/app-x86_64-profile.apk
             build/native-evidence/android-preview.json
             build/native-evidence/source-commit.txt
           if-no-files-found: error
-          retention-days: 7
-      - name: Keep the x86_64 split for the launch check
-        uses: actions/upload-artifact@v4
-        with:
-          name: v2-preview-android-launch-split-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            build/app/outputs/flutter-apk/app-x86_64-profile.apk
-            build/native-evidence/android-preview.json
-          if-no-files-found: error
-          retention-days: 7
+          overwrite: true
+          retention-days: 1
       - name: Retain diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -169,7 +188,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: v2-preview-android-launch-split-${{ github.run_id }}-${{ github.run_attempt }}
+          name: v2-preview-android-build-${{ github.run_id }}
           path: launch
       - name: Enable KVM group permissions
         run: |
@@ -189,12 +208,24 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
           pre-emulator-launch-script: timeout --kill-after=10s 30s adb start-server
-          script: python3 tool/ci/smoke_v2_android_preview.py --apk launch/app/outputs/flutter-apk/app-x86_64-profile.apk --build-evidence launch/native-evidence/android-preview.json --evidence build/native-evidence/android-launch
-      - name: Keep the launch evidence
-        if: always()
+          script: python3 tool/ci/smoke_v2_android_preview.py --apk launch/app/outputs/flutter-apk/app-x86_64-profile.apk --build-evidence launch/native-evidence/android-preview.json --evidence launch/native-evidence/android-launch
+      - name: Keep the delivered arm64 APK, only after its build launched
         uses: actions/upload-artifact@v4
         with:
-          name: codewalk-v2-preview-android-launch-${{ github.run_id }}-${{ github.run_attempt }}
-          path: build/native-evidence/android-launch/
+          name: codewalk-v2-preview-android-arm64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            launch/app/outputs/flutter-apk/app-arm64-v8a-profile.apk
+            launch/app/outputs/flutter-apk/app-arm64-v8a-profile.apk.sha256
+            launch/native-evidence/android-preview.json
+            launch/native-evidence/source-commit.txt
+            launch/native-evidence/android-launch/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Retain launch diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-preview-android-launch-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: launch/native-evidence/android-launch/
           if-no-files-found: ignore
           retention-days: 7

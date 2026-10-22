@@ -80,21 +80,39 @@ class V2CiAlignmentTests(unittest.TestCase):
         # No published Linux ARM64 SDK archive exists, so arm64 pins the tag.
         self.assertRegex(linux, r"if: matrix.arch == 'x64'\n        uses: subosito/flutter-action@v2")
         self.assertIn('git clone --depth 1 --branch "$FLUTTER_VERSION"', linux)
-        self.assertIn('["frameworkVersion"]', linux)
+        # The first run bootstraps Dart and prints progress, so the parsed
+        # machine output comes from a later call.
+        self.assertLess(linux.index('"$RUNNER_TEMP/flutter/bin/flutter" --version\n'),
+                        linux.index("flutter --version --machine"))
         for step in ("make v2-linux-debug", "make v2-linux-preview-package", "make v2-linux-preview-smoke"):
             self.assertIn(step, linux)
         self.assertIn("codewalk-v2-preview-linux-${{ matrix.arch }}.tar.gz", linux)
 
+    def test_owner_preview_pins_the_sdk_commit_on_every_build(self):
+        self.assertRegex(section(self.preview, "env", ""), r'FLUTTER_REVISION: "[0-9a-f]{40}"')
+        for job in ("linux", "android"):
+            with self.subTest(job=job):
+                block = section(self.preview, job, "  ")
+                self.assertIn("- name: Verify the pinned Flutter SDK", block)
+                self.assertIn('os.environ["FLUTTER_REVISION"]', block)
+
     def test_owner_preview_launches_the_same_android_build_before_handoff(self):
         android = section(self.preview, "android", "  ")
         self.assertIn("make v2-android-preview", android)
-        self.assertIn("app-arm64-v8a-profile.apk", android)
+        # A re-run of a failed launch alone must still find this build.
+        self.assertIn("name: v2-preview-android-build-${{ github.run_id }}\n", android)
+        self.assertIn("overwrite: true", android)
+        self.assertNotIn("codewalk-v2-preview-android", android)
         launch = section(self.preview, "android_launch", "  ")
         self.assertRegex(launch, r"(?m)^    needs: android$")
+        self.assertIn("name: v2-preview-android-build-${{ github.run_id }}\n", launch)
         self.assertIn("api-level: 36", launch)
         self.assertIn("arch: x86_64", launch)
-        self.assertIn("python3 tool/ci/smoke_v2_android_preview.py", launch)
         self.assertIn("--build-evidence launch/native-evidence/android-preview.json", launch)
+        # The owner's APK is kept only once its build launched.
+        self.assertLess(launch.index("python3 tool/ci/smoke_v2_android_preview.py"),
+                        launch.index("name: codewalk-v2-preview-android-arm64-"))
+        self.assertIn("launch/app/outputs/flutter-apk/app-arm64-v8a-profile.apk\n", launch)
 
     def test_owner_preview_leaves_the_automatic_pipeline_alone(self):
         self.assertNotIn("v2-android-preview", self.ci)
