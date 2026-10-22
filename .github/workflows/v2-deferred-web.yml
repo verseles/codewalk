@@ -18,7 +18,8 @@ concurrency:
 jobs:
   v2_full_foundations:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The architecture guard alone takes over 14 min (#422).
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
