@@ -7,8 +7,8 @@ It implements no Host, adapter, server, authorization boundary or production
 connection.
 
 `revision.json` pins canonical model commit
-`faa256724d551e1b9099c3aa7b01b1fb5bf7878e` and the provisional app-facing revision
-`cw-canonical-1-provisional.4` (`chp-1-provisional.4` schema revision).
+`97dfeb6b975eb5abdc5d8aa9bb436cb094c490c2` and the provisional app-facing revision
+`cw-canonical-1-provisional.5` (`chp-1-provisional.5` schema revision).
 **Final G5 remains pending:** real Codex/Claude recordings, their G2 mappings
 and reducer assertions must validate against the
 same final revision, and the artifacts must meet the merge criterion. Synthetic

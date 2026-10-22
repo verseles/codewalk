@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:codewalk:chp:1:provisional:4",
+  "$id": "urn:codewalk:chp:1:provisional:5",
   "title": "CodeWalk Host Protocol v1 — provisional app-facing revision",
   "description": "Hand-authored canonical contract projection and separate CHP envelopes. Not a G1/G2/final G5 pass, Host implementation, or mutation authorization.",
   "$ref": "#/definitions/ChpFrame",
@@ -4736,7 +4736,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "protocol": {
           "const": "codewalk-host/1"
@@ -4769,7 +4769,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "event": {
           "$ref": "#/definitions/CanonicalSessionEvent"
@@ -4803,7 +4803,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4838,7 +4838,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4866,7 +4866,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "nonce": {
           "type": "string",
@@ -4891,7 +4891,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "nonce": {
           "type": "string",
@@ -4916,7 +4916,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "receipt": {
           "$ref": "#/definitions/CanonicalCommandReceipt"
@@ -4940,7 +4940,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "snapshot": {
           "$ref": "#/definitions/CanonicalSessionSnapshot"
@@ -4964,7 +4964,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "capabilities": {
           "$ref": "#/definitions/CanonicalCapabilitySet"
@@ -4988,7 +4988,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "page": {
           "$ref": "#/definitions/CanonicalSessionPage"
@@ -5012,7 +5012,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "result": {
           "$ref": "#/definitions/CanonicalCreateResult"
@@ -5036,7 +5036,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.4"
+          "const": "cw-canonical-1-provisional.5"
         },
         "command": {
           "$ref": "#/definitions/CanonicalOriginalCommand"

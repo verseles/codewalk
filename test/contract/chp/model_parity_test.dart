@@ -413,6 +413,37 @@ void main() {
       },
     );
 
+    test('a failed outcome carries its typed error, provider included', () {
+      for (final kind in ErrorKind.values) {
+        final item = TurnOutcome(
+          meta: _itemMeta('outcome ${kind.name}'),
+          kind: const OpenValue.known(OutcomeKind.failed),
+          error: ErrorInfo(
+            kind: OpenValue.known(kind),
+            rawType: 'provider.invalid-output',
+            rawMessage: 'OpenAI Chat tool call delta is missing id or name',
+            action: const OpenValue.known(ErrorAction.changeModel),
+            details: CanonicalValue({'messageTruncated': true}),
+          ),
+        );
+        final projected = projectTimelineItem(item);
+        _expectDefinition('CanonicalTimelineItem', projected);
+        expect((projected['error']! as Map)['kind'], kind.name);
+      }
+      // The plain marker and a future outcome stay valid without an error.
+      for (final kind in [
+        const OpenValue<OutcomeKind>.known(OutcomeKind.failed),
+        OpenValue<OutcomeKind>.unknown('futureOutcome'),
+      ]) {
+        _expectDefinition(
+          'CanonicalTimelineItem',
+          projectTimelineItem(
+            TurnOutcome(meta: _itemMeta('plain ${kind.value}'), kind: kind),
+          ),
+        );
+      }
+    });
+
     test('a shell run keeps its status, exact exit and bounded output', () {
       for (final item in [
         ShellRun(

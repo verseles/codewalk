@@ -103,7 +103,14 @@ Map<String, Object?> projectTimelineItem(TimelineItem item) => switch (item) {
     'shellStatus': item.shellStatus?.toJson(),
     'outputText': item.outputText,
   },
-  _ => throw UnsupportedError('This test projection covers four item kinds'),
+  TurnOutcome() => {
+    'type': 'turnOutcome',
+    'meta': projectItemMeta(item.meta),
+    'kind': item.kind.toJson(),
+    if (item.error != null) 'error': projectError(item.error!),
+    if (item.reason != null) 'reason': item.reason,
+  },
+  _ => throw UnsupportedError('This test projection covers five item kinds'),
 };
 
 Map<String, Object?> projectBoundary(SnapshotBoundary boundary) => {

@@ -1,7 +1,7 @@
 {
   "type": "receipt",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.4",
+  "canonicalRevision": "cw-canonical-1-provisional.5",
   "receipt": {
     "id": "command-2",
     "owner": {
