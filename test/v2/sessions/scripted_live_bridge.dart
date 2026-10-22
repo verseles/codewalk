@@ -82,6 +82,10 @@ final class ScriptedLiveBridge implements SessionLiveDirectory {
     return opened;
   }
 
+  /// The scripted scenarios drive reconnects through their own generations.
+  @override
+  void wake() {}
+
   @override
   Future<void> close() async => closes++;
 }

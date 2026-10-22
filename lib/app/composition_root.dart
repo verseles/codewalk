@@ -8,6 +8,7 @@ import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
+import '../platform/connectivity/network_changes.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
 import '../platform/pairing/native_pairing_links.dart';
@@ -38,6 +39,7 @@ import 'app_dependencies.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'app_router.dart';
+import 'live_wake.dart';
 
 /// Resolve the private graph before mounting widgets; never use the v1 locator.
 AppDependencies createAppDependencies({
@@ -59,6 +61,7 @@ AppDependencies createAppDependencies({
   HiddenSessionStore? hiddenStore,
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
+  Stream<Object?>? networkChanges,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -126,6 +129,11 @@ AppDependencies createAppDependencies({
         permissionModes: permissionModes,
         unrestrictedOwnership: unrestrictedOwnership,
       ))();
+  // Reconnects every open endpoint stream on a return from the background
+  // or a network change.
+  final liveWake = liveDirectory == null
+      ? null
+      : LiveWakeCoordinator(wake: liveDirectory.wake, network: networkChanges);
   locator.registerSingleton(
     SessionsController(
       hosts: locator<HostsController>(),
@@ -176,6 +184,7 @@ AppDependencies createAppDependencies({
     sessions: locator<SessionsController>(),
     historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
     liveDirectory: liveDirectory,
+    liveWake: liveWake,
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
@@ -193,11 +202,13 @@ Future<AppDependencies> loadAppDependencies({
   Uri? initialLink,
   V2MetadataStore? metadataStore,
   bool listenNativeLinks = false,
+  bool listenNetwork = false,
 }) async {
   final dependencies = createAppDependencies(
     initialLink: initialLink,
     metadataStore:
         metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend()),
+    networkChanges: listenNetwork ? platformNetworkChanges() : null,
   );
   await dependencies.preferences.initialize();
   // A cold read grants no approval authority: the policy is loaded before any

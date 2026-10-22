@@ -45,6 +45,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    widget.dependencies.liveWake?.lifecycle(state);
     // The app may be killed once it leaves the foreground: what was typed
     // and not yet written is written now.
     if (state != AppLifecycleState.resumed) {

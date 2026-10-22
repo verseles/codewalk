@@ -304,6 +304,27 @@ void main() {
     expect(transport.requests.length, 2);
   });
 
+  test('wake skips a pending retry delay and reconnects now', () async {
+    final transport = ControlledTransport();
+    final recovery = connection(
+      transport,
+      policy: const SseRecoveryPolicy(initialBackoff: Duration(seconds: 20)),
+    );
+    final updates = <SseRecoveryUpdate>[];
+    final sub = recovery.updates.listen(updates.add);
+    addTearDown(sub.cancel);
+    await waitFor(() => updates.whereType<SseConnected>().isNotEmpty);
+    await transport.bodies.single.close();
+    await waitFor(() => updates.whereType<SseDisconnected>().isNotEmpty);
+    expect(updates.whereType<SseDisconnected>().single.terminal, isFalse);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(transport.requests, hasLength(1));
+    recovery.wake();
+    await waitFor(() => updates.whereType<SseConnected>().length == 2);
+    expect(transport.requests, hasLength(2));
+    expect(transport.requests.every((r) => r.method == 'GET'), isTrue);
+  });
+
   test(
     'raw comment heartbeats keep watchdog alive then silence reconnects',
     () async {

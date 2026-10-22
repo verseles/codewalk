@@ -21,6 +21,7 @@ Future<void> main([List<String> args = const []]) async {
       dependencies: await loadAppDependencies(
         initialLink: link,
         listenNativeLinks: true,
+        listenNetwork: true,
       ),
     ),
   );

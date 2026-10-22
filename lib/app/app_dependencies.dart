@@ -18,6 +18,7 @@ import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
+import 'live_wake.dart';
 
 /// Explicit graph passed to the app, with one owner for its lifetime.
 class AppDependencies {
@@ -33,6 +34,7 @@ class AppDependencies {
     this.sessions,
     this.historyFactory,
     this.liveDirectory,
+    this.liveWake,
     this.permissionModes,
     this.unrestrictedOwnership,
     this.hiddenSessions,
@@ -48,6 +50,10 @@ class AppDependencies {
   final SessionsController? sessions;
   final SessionHistoryFactory? historyFactory;
   final SessionLiveDirectory? liveDirectory;
+
+  /// Reconnects [liveDirectory] on a return from the background or a network
+  /// change.
+  final LiveWakeCoordinator? liveWake;
 
   /// CodeWalk's permission policy (ADR-059). The session chip and its settings
   /// surface belong to V2-047B; the live slot consults it already.
@@ -77,6 +83,8 @@ class AppDependencies {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    // No wake may reach a directory that is closing.
+    liveWake?.dispose();
     links?.dispose();
     router.dispose();
     pairing?.dispose();

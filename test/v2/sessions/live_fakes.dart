@@ -354,6 +354,7 @@ class LiveDirectory implements SessionLiveDirectory {
   final handles = <LiveHandle>[];
   final feeds = <LiveCatalogChanges>[];
   int closes = 0;
+  int wakes = 0;
   @override
   Future<SessionLiveHandle> open({
     required EndpointProfile profile,
@@ -385,6 +386,9 @@ class LiveDirectory implements SessionLiveDirectory {
     feeds.add(feed);
     return feed;
   }
+
+  @override
+  void wake() => wakes++;
 
   @override
   Future<void> close() async => closes++;

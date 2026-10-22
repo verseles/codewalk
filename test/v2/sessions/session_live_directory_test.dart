@@ -888,6 +888,85 @@ void main() {
     },
   );
 
+  group('wake', () {
+    Future<void> settle(bool Function() test) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!test() && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(test(), isTrue);
+    }
+
+    bool live(SessionLiveHandle handle) =>
+        handle.current.phase == SessionLivePhase.live;
+
+    test('reconnects each open profile stream once and sends nothing', () async {
+      final directory = createSessionLiveDirectory()!;
+      final second = EndpointProfile(
+        id: 'profile_two',
+        label: 'Two',
+        endpoint: p.endpoint,
+      );
+      final opening = directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      // A profile still probing has no stream to wake yet.
+      directory.wake();
+      final a = await opening;
+      final b = await directory.open(
+        profile: second,
+        credential: credential,
+        session: SessionRef(
+          HostId(second.id),
+          HarnessInstanceId(second.id),
+          'ses_one',
+        ),
+      );
+      await settle(() => live(a) && live(b));
+      expect(server.events, 2);
+      final ids = a.current.state!.timeline.map((i) => i.meta.id).toList();
+      directory.wake();
+      await settle(() => server.events == 4 && live(a) && live(b));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(server.events, 4, reason: 'one new stream per profile');
+      expect(server.methods, {'GET'});
+      expect(server.prompts, isEmpty);
+      expect(server.interrupts, isEmpty);
+      expect(
+        a.current.state!.timeline.map((i) => i.meta.id).toList(),
+        ids,
+        reason: 'hydration replaces the timeline without duplicates',
+      );
+      await directory.close();
+      directory.wake();
+      expect(server.events, 4);
+    });
+
+    test('leaves a stream stopped for authentication stopped', () async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await settle(() => live(a));
+      server.eventStatus = 401;
+      for (final stream in server.streams) {
+        await stream.close();
+      }
+      await settle(() => a.current.phase == SessionLivePhase.authRequired);
+      server.eventStatus = null;
+      final events = server.events;
+      directory.wake();
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.events, events);
+      expect(a.current.phase, SessionLivePhase.authRequired);
+    });
+  });
+
   test('an unverified server version fails closed before streaming', () async {
     server.version = '2.0.23';
     final directory = createSessionLiveDirectory()!;

@@ -191,5 +191,11 @@ abstract interface class SessionLiveDirectory {
     required EndpointCredential credential,
   });
 
+  /// Reconnects every open profile stream now instead of waiting for its
+  /// retry delay or stall watchdog: the app came back from the background or
+  /// the network changed. The new stream hydrates from authoritative reads;
+  /// nothing is sent, replayed or created.
+  void wake();
+
   Future<void> close();
 }

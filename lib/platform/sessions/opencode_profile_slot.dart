@@ -192,6 +192,17 @@ final class OpenCodeProfileSlot {
     owner.start();
   }
 
+  /// Reconnects the stream now; one still probing has nothing to wake, and a
+  /// terminal stream stays stopped until the user retries.
+  void wake() {
+    if (isClosed ||
+        _phase == SessionLivePhase.authRequired ||
+        _phase == SessionLivePhase.incompatible) {
+      return;
+    }
+    _connection?.wake();
+  }
+
   /// A feed of the session lifecycle of every session of this profile.
   ///
   /// The endpoint keeps exactly one stream: the feed only listens to the

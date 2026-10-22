@@ -63,6 +63,8 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^10.3.1
   connectivity_plus: ^6.1.5
+  # The Linux primary connection, which connectivity_plus does not report.
+  nm: ^0.5.0
 
   # Markdown rendering
 

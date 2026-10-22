@@ -181,6 +181,17 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     }
   }
 
+  /// Terminal slots are left out: they were released from [_slots], and
+  /// waking one would restart a stream stopped for authentication or
+  /// compatibility.
+  @override
+  void wake() {
+    if (_closed) return;
+    for (final slot in _slots.values.toList()) {
+      slot.wake();
+    }
+  }
+
   @override
   Future<void> close() async {
     if (_closed) return;
