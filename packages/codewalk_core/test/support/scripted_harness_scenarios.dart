@@ -298,7 +298,30 @@ SessionInfo scriptedInfo(SessionRef ref) => SessionInfo(
       : const SessionLineage(),
 );
 
+List<ModelEntry> scriptedModels() => [
+  ModelEntry(
+    id: 'model-alpha',
+    providerId: 'synthetic-provider',
+    label: 'Synthetic Alpha',
+    inputModalities: {
+      'text/plain': true,
+      'image/png': true,
+      'application/pdf': null,
+      'image/avif': null,
+    },
+    metadata: CanonicalValue({'unknownModality': 'future-media-v9'}),
+  ),
+  ModelEntry(
+    id: 'model-beta',
+    providerId: 'synthetic-provider',
+    label: 'Synthetic Beta',
+    inputModalities: {'text/plain': true},
+    variants: ['fast', 'deep'],
+  ),
+];
+
 ScriptedHarnessAdapter scriptedAdapter({
+  Iterable<ModelEntry>? models,
   Iterable<ScriptedStep> steps = const [],
   Iterable<ScriptedRead> reads = const [],
   Iterable<ScriptedOutcome> outcomes = const [],
@@ -332,27 +355,7 @@ ScriptedHarnessAdapter scriptedAdapter({
   sessions: [
     for (final ref in [ownedRef, childRef, externalRef]) scriptedInfo(ref),
   ],
-  models: [
-    ModelEntry(
-      id: 'model-alpha',
-      providerId: 'synthetic-provider',
-      label: 'Synthetic Alpha',
-      inputModalities: {
-        'text/plain': true,
-        'image/png': true,
-        'application/pdf': null,
-        'image/avif': null,
-      },
-      metadata: CanonicalValue({'unknownModality': 'future-media-v9'}),
-    ),
-    ModelEntry(
-      id: 'model-beta',
-      providerId: 'synthetic-provider',
-      label: 'Synthetic Beta',
-      inputModalities: {'text/plain': true},
-      variants: ['fast', 'deep'],
-    ),
-  ],
+  models: models ?? scriptedModels(),
   steps: steps,
   reads: reads,
   outcomes: outcomes,

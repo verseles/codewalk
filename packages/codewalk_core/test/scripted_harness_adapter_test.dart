@@ -918,6 +918,56 @@ void main() {
       },
     );
 
+    test('a model id offered by two providers selects either one', () async {
+      const second = Selection(
+        modelId: 'model-beta',
+        modelProviderId: 'second-provider',
+        modelVariant: 'max',
+      );
+      final adapter = keep(
+        scriptedAdapter(
+          models: [
+            ...scriptedModels(),
+            ModelEntry(
+              id: 'model-beta',
+              providerId: 'second-provider',
+              label: 'Second Beta',
+              variants: ['max'],
+            ),
+          ],
+          outcomes: [
+            acceptedOutcome(
+              selectId,
+              const SessionOwner(ownedRef),
+              MutationOperation.selection,
+              CanonicalValue(selectionIntent(second)),
+            ),
+          ],
+        ),
+      );
+      final handle = await adapter.open(ownedRef, OpenIntent.attachLive);
+      // The variant belongs to the second provider's entry only.
+      expectUnavailable(
+        await handle.select(
+          const SelectionChange(
+            selection: Selection(
+              modelId: 'model-beta',
+              modelProviderId: 'synthetic-provider',
+              modelVariant: 'max',
+            ),
+          ),
+          id: selectId,
+        ),
+        reason: 'selectionNotOffered',
+      );
+      final selected = await handle.select(
+        const SelectionChange(selection: second),
+        id: selectId,
+      );
+      expect(selected.state.known, ReceiptState.accepted);
+      expect(adapter.remainingOutcomes, 0);
+    });
+
     test(
       'unsupported deliveries, modalities and selections do not consume outcomes',
       () async {

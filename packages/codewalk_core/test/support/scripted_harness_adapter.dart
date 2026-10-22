@@ -406,12 +406,15 @@ final class ScriptedHarnessAdapter implements HarnessAdapter {
     final modelId = selection.modelId;
     final provider = selection.modelProviderId;
     final variant = selection.modelVariant;
-    final offered = _models.where((model) => model.id == modelId).firstOrNull;
+    // One model id may be offered by several providers.
     final modelOffered = modelId == null
         ? provider == null && variant == null
-        : offered != null &&
-              (provider == null || provider == offered.providerId) &&
-              (variant == null || offered.variants.contains(variant));
+        : _models.any(
+            (model) =>
+                model.id == modelId &&
+                (provider == null || provider == model.providerId) &&
+                (variant == null || model.variants.contains(variant)),
+          );
     if (!modelOffered ||
         selection.agentId != null ||
         selection.effort != null ||
