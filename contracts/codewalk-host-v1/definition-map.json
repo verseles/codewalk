@@ -1,6 +1,6 @@
 {
-  "canonicalRevision": "cw-canonical-1-provisional.3",
-  "canonicalModelCommit": "ff6a3902e5a4c1f1d9ecccbf47af8bb146b68dc6",
+  "canonicalRevision": "cw-canonical-1-provisional.4",
+  "canonicalModelCommit": "faa256724d551e1b9099c3aa7b01b1fb5bf7878e",
   "definitions": {
     "CanonicalValue": {
       "category": "canonical",

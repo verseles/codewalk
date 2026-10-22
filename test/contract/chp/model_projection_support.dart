@@ -149,6 +149,27 @@ Map<String, Object?> projectInfo(SessionInfo info) => {
   if (info.metadata != null) 'metadata': info.metadata!.toJson(),
 };
 
+Map<String, Object?> projectSelection(Selection selection) => {
+  'modelId': selection.modelId,
+  'modelProviderId': selection.modelProviderId,
+  'modelVariant': selection.modelVariant,
+  'agentId': selection.agentId,
+  'effort': selection.effort,
+  'permissionMode': selection.permissionMode,
+  if (selection.metadata != null) 'metadata': selection.metadata!.toJson(),
+};
+
+Map<String, Object?> projectModelEntry(ModelEntry model) => {
+  'id': model.id,
+  'providerId': model.providerId,
+  'label': model.label,
+  'inputModalities': model.inputModalities,
+  'contextLimit': model.contextLimit,
+  'outputLimit': model.outputLimit,
+  'variants': model.variants,
+  if (model.metadata != null) 'metadata': model.metadata!.toJson(),
+};
+
 // The parity fixtures contain only info, timeline and pending observations.
 Map<String, Object?> projectSnapshot(SessionSnapshot snapshot) => {
   'ref': snapshot.ref.toJson(),

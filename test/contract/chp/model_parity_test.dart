@@ -440,6 +440,33 @@ void main() {
       expect(isValidDefinition('CanonicalTimelineItem', invalid), isFalse);
     });
 
+    test('a selection and a model entry keep provider and variants', () {
+      for (final selection in const [
+        Selection(
+          modelId: 'model',
+          modelProviderId: 'provider',
+          modelVariant: 'high',
+          agentId: 'build',
+        ),
+        Selection(),
+      ]) {
+        _expectDefinition('CanonicalSelection', projectSelection(selection));
+      }
+      final model = ModelEntry(
+        id: 'model',
+        providerId: 'provider',
+        label: 'Model',
+        variants: ['low', 'high'],
+      );
+      _expectDefinition('CanonicalModelEntry', projectModelEntry(model));
+      expect(projectModelEntry(model)['variants'], ['low', 'high']);
+      final invalid = {
+        ...projectModelEntry(model),
+        'variants': [''],
+      };
+      expect(isValidDefinition('CanonicalModelEntry', invalid), isFalse);
+    });
+
     test(
       'unknown and unavailable support remain valid unavailable observations',
       () {

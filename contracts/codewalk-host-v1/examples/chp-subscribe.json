@@ -1,7 +1,7 @@
 {
   "type": "subscribe",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.3",
+  "canonicalRevision": "cw-canonical-1-provisional.4",
   "session": {
     "version": 1,
     "host": "host-α",

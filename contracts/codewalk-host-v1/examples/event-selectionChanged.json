@@ -31,6 +31,8 @@
     }
   },
   "selection": {
-    "modelId": "synthetic-model"
+    "modelId": "synthetic-model",
+    "modelProviderId": "synthetic-provider",
+    "modelVariant": "synthetic-variant"
   }
 }

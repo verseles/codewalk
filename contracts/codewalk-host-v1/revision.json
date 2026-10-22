@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.3",
-  "schemaRevision": "chp-1-provisional.3",
+  "canonicalRevision": "cw-canonical-1-provisional.4",
+  "schemaRevision": "chp-1-provisional.4",
   "status": "provisional",
   "protocol": "codewalk-host/1",
   "dialect": "http://json-schema.org/draft-07/schema#",
-  "canonicalModelCommit": "ff6a3902e5a4c1f1d9ecccbf47af8bb146b68dc6",
+  "canonicalModelCommit": "faa256724d551e1b9099c3aa7b01b1fb5bf7878e",
   "gate": {
     "g1": "pending real Codex/Claude recordings",
     "g2": "pending real frame mappings and reducer fit",
@@ -52,6 +52,6 @@
     "terminalResize": "CanonicalTerminalResizeIntent",
     "terminalClose": "CanonicalTerminalCloseIntent"
   },
-  "schemaSha256": "2af9e4f5b3c2473123abd6b1724f3b9c9c39e41f4c4c37facfbbac71e23e7e50",
-  "examplesManifestSha256": "9c2c360ce6849cf0797ae508802c5d2e0bcab3c89edccc588f098ad205282f12"
+  "schemaSha256": "58ab274b7706b28de8747a436bfc992424134a20dc51cf0b59e8eaaaf31bc94e",
+  "examplesManifestSha256": "a2b7298d12b2c99a623af085a3cc6b8f5280a2207307b65c4c719ff2c274fced"
 }

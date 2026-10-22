@@ -1,7 +1,7 @@
 {
   "type": "command",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.3",
+  "canonicalRevision": "cw-canonical-1-provisional.4",
   "command": {
     "id": "command-create",
     "harness": {
