@@ -15,7 +15,6 @@ import 'session_form_card.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
 import 'session_live_controller.dart';
-import 'session_live_scroll.dart';
 import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
@@ -50,10 +49,6 @@ class _SessionLivePageState extends State<SessionLivePage> {
   late final SessionComposerController _composer;
   final _draft = TextEditingController();
 
-  /// The scroll and viewport rules of the timeline: the list follows the
-  /// newest content while the user stays at the bottom.
-  final _scroll = SessionLiveScroll();
-
   @override
   void initState() {
     super.initState();
@@ -67,7 +62,6 @@ class _SessionLivePageState extends State<SessionLivePage> {
   void dispose() {
     _composer.dispose();
     _draft.dispose();
-    _scroll.dispose();
     if (widget.ownsController) widget.controller.dispose();
     super.dispose();
   }
@@ -358,7 +352,7 @@ class _SessionLivePageState extends State<SessionLivePage> {
                     Expanded(
                       child: SessionLiveTimeline(
                         items: items,
-                        scroll: _scroll,
+                        scroll: widget.controller.scroll,
                         settled: settled,
                         olderLoading: c.olderHistory.loading,
                         topBuilder: _top(c, l10n),

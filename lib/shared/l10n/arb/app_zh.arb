@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "无法打开此会话。请重试。",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "关闭",
+  "chatSessionTabsToggle": "会话标签页",
+  "sessionTabClosedMessage": "标签页“{title}”已关闭",
+  "sessionTabSwitcherHint": "松开 Ctrl 切换，Esc 取消",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "切换标签页",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "撤销",
+  "sessionTabsRemoved": "已关闭不再存在的会话的标签页。",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "打开的标签页太多。请关闭一个再打开另一个。",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "یہ سیشن نہیں کھل سکا۔ دوبارہ کوشش کریں۔",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "بند",
+  "chatSessionTabsToggle": "سیشن ٹیبز",
+  "sessionTabClosedMessage": "ٹیب \"{title}\" بند ہو گیا",
+  "sessionTabSwitcherHint": "سوئچ کے لیے Ctrl چھوڑیں، منسوخ کے لیے Esc",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "ٹیب تبدیل کریں",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "واپس کریں",
+  "sessionTabsRemoved": "ان سیشنز کے ٹیب بند کر دیے گئے جو اب موجود نہیں ہیں۔",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "بہت زیادہ ٹیب کھلے ہیں۔ دوسرا کھولنے کے لیے ایک بند کریں۔",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

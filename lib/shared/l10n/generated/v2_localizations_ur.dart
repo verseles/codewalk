@@ -1339,4 +1339,33 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionLinkUnreadable => 'یہ سیشن نہیں کھل سکا۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String get chatClose => 'بند';
+
+  @override
+  String get chatSessionTabsToggle => 'سیشن ٹیبز';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'ٹیب \"$title\" بند ہو گیا';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'سوئچ کے لیے Ctrl چھوڑیں، منسوخ کے لیے Esc';
+
+  @override
+  String get sessionTabSwitcherTitle => 'ٹیب تبدیل کریں';
+
+  @override
+  String get sessionTabUndo => 'واپس کریں';
+
+  @override
+  String get sessionTabsRemoved =>
+      'ان سیشنز کے ٹیب بند کر دیے گئے جو اب موجود نہیں ہیں۔';
+
+  @override
+  String get sessionTabsFull =>
+      'بہت زیادہ ٹیب کھلے ہیں۔ دوسرا کھولنے کے لیے ایک بند کریں۔';
 }

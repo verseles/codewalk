@@ -148,10 +148,10 @@ void main() {
     await tabs.open(_row('a', 'ses_2', directory: '/p'));
     const host = HostId('a');
     // The next tab of the project first, then the previous one.
-    expect((await tabs.close(tabs.selectedFor(host)!))?.nativeId, 'ses_3');
+    expect((await tabs.close(tabs.selectedFor(host)!)).next?.nativeId, 'ses_3');
     expect(tabs.selectedFor(host)?.nativeId, 'ses_3');
-    expect((await tabs.close(tabs.selectedFor(host)!))?.nativeId, 'ses_1');
-    expect(await tabs.close(tabs.selectedFor(host)!), isNull);
+    expect((await tabs.close(tabs.selectedFor(host)!)).next?.nativeId, 'ses_1');
+    expect((await tabs.close(tabs.selectedFor(host)!)).next, isNull);
     expect(tabs.selectedFor(host), isNull);
     expect(tabs.tabs, isEmpty);
     tabs.dispose();
@@ -167,7 +167,7 @@ void main() {
       tabs.close(tabs.selectedFor(const HostId('a'))!),
       tabs.close(tabs.selectedFor(const HostId('b'))!),
     ]);
-    expect([for (final ref in results) ref?.nativeId], ['a1', 'b1']);
+    expect([for (final result in results) result.next?.nativeId], ['a1', 'b1']);
     tabs.dispose();
   });
 
@@ -175,10 +175,61 @@ void main() {
     final tabs = _tabs(_MemoryBackend());
     await tabs.open(_row('a', 'ses_1'));
     await tabs.open(_row('a', 'ses_2'));
-    expect(await tabs.close(tabs.tabs.first.ref), isNull);
+    expect((await tabs.close(tabs.tabs.first.ref)).next, isNull);
     expect(tabs.selectedFor(const HostId('a'))?.nativeId, 'ses_2');
     expect(tabs.tabs.single.ref.nativeId, 'ses_2');
     tabs.dispose();
+  });
+
+  test('undo puts a closed tab back in its place, selected', () async {
+    final tabs = _tabs(_MemoryBackend());
+    for (final id in ['ses_1', 'ses_2', 'ses_3']) {
+      await tabs.open(_row('a', id));
+    }
+    final closed = tabs.tabs[1];
+    await tabs.close(closed.ref);
+    expect(await tabs.reopen(closed, index: 1, select: true), isTrue);
+    expect(
+      [for (final tab in tabs.tabs) tab.ref.nativeId],
+      ['ses_1', 'ses_2', 'ses_3'],
+    );
+    expect(tabs.selectedFor(const HostId('a')), closed.ref);
+    // Already open again: nothing changes.
+    expect(await tabs.reopen(closed, index: 0, select: true), isFalse);
+    expect(tabs.tabs, hasLength(3));
+  });
+
+  test('a second close of the same tab removes nothing', () async {
+    final tabs = _tabs(_MemoryBackend());
+    await tabs.open(_row('a', 'ses_1'));
+    await tabs.open(_row('a', 'ses_2'));
+    final ref = tabs.selectedFor(const HostId('a'))!;
+    final results = await Future.wait([tabs.close(ref), tabs.close(ref)]);
+    expect([for (final result in results) result.removed], [true, false]);
+    expect(results.first.next?.nativeId, 'ses_1');
+    tabs.dispose();
+  });
+
+  test('undo of a background tab keeps the selection', () async {
+    final tabs = _tabs(_MemoryBackend());
+    await tabs.open(_row('a', 'ses_1'));
+    await tabs.open(_row('a', 'ses_2'));
+    final closed = tabs.tabs.first;
+    await tabs.close(closed.ref);
+    expect(await tabs.reopen(closed, index: 0, select: false), isTrue);
+    expect(tabs.tabs.first.ref, closed.ref);
+    expect(tabs.selectedFor(const HostId('a'))?.nativeId, 'ses_2');
+    tabs.dispose();
+  });
+
+  test('only the first launch returns to the last used tab', () async {
+    final tabs = _tabs(_MemoryBackend());
+    await tabs.open(_row('a', 'ses_1'));
+    await tabs.open(_row('b', 'ses_2'));
+    await tabs.open(_row('a', 'ses_3'));
+    expect(tabs.takeLaunchTab()?.nativeId, 'ses_3');
+    expect(tabs.takeLaunchTab(), isNull);
+    expect(_tabs(_MemoryBackend()).takeLaunchTab(), isNull);
   });
 
   test('the recent order puts the selected tab first', () async {
@@ -315,6 +366,31 @@ void main() {
       return tabs;
     }
 
+    test('a tab reopened while its read is out is still dropped', () async {
+      final source = await selectA();
+      final tabs = await restore([source.row('gone', title: 'Gone')]);
+      source.respond(const []);
+      await pumpEventQueue();
+      final (_, task) = source.reads.single;
+      // Closed and put back while the server has not answered yet.
+      final tab = tabs.tabs.single;
+      await tabs.close(tab.ref);
+      await tabs.reopen(tab, index: 0, select: true);
+      rig.sessions.refresh().ignore();
+      await pumpEventQueue();
+      source.respond(const []);
+      await pumpEventQueue();
+      // The read in flight answers for the reopened tab; no second read.
+      expect(source.reads, hasLength(1));
+      task.completion.completeError(
+        const SessionCatalogException(SessionCatalogFailure.notFound),
+      );
+      await pumpEventQueue();
+      expect(tabs.tabs, isEmpty);
+      expect(tabs.takeRemoved(), ['Gone']);
+      tabs.dispose();
+    });
+
     test(
       'a tab whose session is gone is dropped once, with a notice',
       () async {
@@ -416,11 +492,11 @@ void main() {
       final long = 'x' * (SessionTabsStore.maxTitleChars + 50);
       final row = SessionSummary(
         info: SessionInfo(
-          ref: SessionRef(const HostId('a'), const HarnessInstanceId('a'), 's'),
+          ref: const SessionRef(HostId('a'), HarnessInstanceId('a'), 's'),
           lineage: const SessionLineage(),
           title: long,
           ownership: const OwnershipInfo.unknown(reason: 'not observed'),
-          project: ProjectRef(const HostId('b'), '/p'),
+          project: const ProjectRef(HostId('b'), '/p'),
         ),
       );
       await tabs.open(row);

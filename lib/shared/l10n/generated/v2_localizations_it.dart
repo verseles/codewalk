@@ -1367,4 +1367,33 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'Impossibile aprire questa sessione. Riprova.';
+
+  @override
+  String get chatClose => 'Chiudi';
+
+  @override
+  String get chatSessionTabsToggle => 'Schede delle sessioni';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'Scheda \"$title\" chiusa';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'Rilascia Ctrl per cambiare, Esc per annullare';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Cambia scheda';
+
+  @override
+  String get sessionTabUndo => 'Annulla';
+
+  @override
+  String get sessionTabsRemoved =>
+      'Le schede delle sessioni che non esistono più sono state chiuse.';
+
+  @override
+  String get sessionTabsFull =>
+      'Troppe schede aperte. Chiudine una per aprirne un’altra.';
 }

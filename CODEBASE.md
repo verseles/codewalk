@@ -1609,6 +1609,20 @@ Widget coverage spans all 14 locales at compact 390×844 and wide 1280×800 size
 
 Focused Flutter analysis/tests and native/full checks passed; four R1 fixes were incorporated and R2 returned eight approvals, including Sol. Final v1 visual parity, installed-device acceptance, and MVP acceptance remain unaccepted; no push was made.
 
+## V2-070B session tabs
+
+```text
+lib/platform/sessions/session_tabs_store.dart # SessionTab/SessionTabsState and SessionTabsStore: one versioned `cw2.sessions.tabs` record (all servers, max 32 tabs, bounded titles); serialized update, read never writes, unreadable record never overwritten
+lib/features/sessions/session_tabs_controller.dart # SessionTabsController: tabs keyed by full SessionRef, per-host selection, host+project visible set, MRU order, close/reopen, launch tab; warm registry of up to 8 SessionLiveControllers (LRU); drops a tab only on an authoritative notFound read
+lib/features/sessions/session_tab_strip.dart # SessionTabsFrame (strip, recent sheet, Ctrl+Tab switcher, mod+W close with Undo) and SessionTabsWatcher (removed-tabs notice, one-time return to the last used tab)
+lib/features/sessions/session_route_page.dart # Takes the live controller from the tabs registry, opens the tab, wraps the live page in SessionTabsFrame
+lib/features/sessions/session_live_controller.dart # Owns the timeline's SessionLiveScroll so a re-shown tab keeps the reader's place
+lib/app/app_shell.dart # Mounts SessionTabsWatcher around the workspace
+lib/app/{composition_root,app_dependencies,v2_bootstrap}.dart # SessionTabsController composition, initialization and Provider injection
+test/v2/sessions/session_tabs_test.dart # Store/controller: idempotent restore, cross-host keys, caps, close/reopen races, notFound validation
+test/v2/sessions/session_tab_strip_test.dart # Strip, close/undo, switcher keys and lifecycle, recent sheet, restart return, scroll retention, RTL/2x
+```
+
 ## V2-044A2 native text and reasoning event projection (#368)
 
 ```text

@@ -130,7 +130,17 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   void initState() {
     super.initState();
     widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
-    _revealPending = widget.settled;
+    if (widget.scroll.timelineMemory case final _Memory memory) {
+      // The session is shown again: the rows open around the same center, so
+      // the kept offset is the reader's place, and what changed while it was
+      // hidden is told as it would have been while it was shown.
+      _pivot = memory.pivot;
+      _lastSignature = memory.signature;
+      _lastItemCount = memory.signature?.length ?? 0;
+      if (memory.settled != widget.settled) _settledChanged();
+    } else {
+      _revealPending = widget.settled;
+    }
   }
 
   @override
@@ -140,7 +150,11 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       old.scroll.controller.removeListener(old.scroll.onViewportChanged);
       widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
     }
-    if (old.settled == widget.settled) return;
+    if (old.settled != widget.settled) _settledChanged();
+  }
+
+  /// The session settled, or a new turn started.
+  void _settledChanged() {
     if (widget.settled) {
       // The turn ended: its finished answer is offered from its start once
       // the follow reaches the tail, unless the reader is elsewhere.
@@ -161,6 +175,11 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   @override
   void dispose() {
     widget.scroll.controller.removeListener(widget.scroll.onViewportChanged);
+    widget.scroll.timelineMemory = (
+      pivot: _pivot,
+      signature: _lastSignature,
+      settled: widget.settled,
+    );
     super.dispose();
   }
 
@@ -377,17 +396,22 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
         ? 0
         : signature.indexWhere((s) => s.id == previous.first.id);
     final compared = kept > 0 ? signature.sublist(kept) : signature;
+    if (previous != null &&
+        (compared.length > _lastItemCount ||
+            (compared.length == _lastItemCount &&
+                !listEquals(compared, previous)))) {
+      // Content arrived, even if the row that changed is not laid out. A
+      // removal is not an arrival.
+      _arrivalPending = true;
+      // A turn that ran and ended while the session was hidden is offered
+      // like one that settled in view, once the follow reaches it.
+      if (!_landed && widget.settled) _revealPending = true;
+      _afterNextFrame(_contentArrived);
+    }
     if (!_landed) {
       // The first build lands on the newest content.
       _landed = true;
       _requestFollow();
-    } else if (compared.length > _lastItemCount ||
-        (compared.length == _lastItemCount &&
-            !listEquals(compared, previous))) {
-      // Content arrived, even if the row that changed is not laid out. A
-      // removal is not an arrival.
-      _arrivalPending = true;
-      _afterNextFrame(_contentArrived);
     }
     _lastItemCount = signature.length;
     _lastSignature = signature;
@@ -585,6 +609,15 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     );
   }
 }
+
+/// What the timeline keeps with its scroll while it is not shown: the center
+/// row, the signature of the rows it last saw and whether the session was
+/// settled then.
+typedef _Memory = ({
+  ItemId? pivot,
+  List<_ItemSignature>? signature,
+  bool settled,
+});
 
 /// A signature of one item: its identity, its known status, the content it
 /// carries that can change and the outcome it carries, when it has one. A

@@ -1343,4 +1343,33 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'यह सत्र नहीं खुल सका। फिर से प्रयास करें।';
+
+  @override
+  String get chatClose => 'बंद करें';
+
+  @override
+  String get chatSessionTabsToggle => 'सत्र टैब';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'टैब \"$title\" बंद हुआ';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'स्विच करने के लिए Ctrl छोड़ें, रद्द करने के लिए Esc';
+
+  @override
+  String get sessionTabSwitcherTitle => 'टैब बदलें';
+
+  @override
+  String get sessionTabUndo => 'पूर्ववत करें';
+
+  @override
+  String get sessionTabsRemoved =>
+      'जो सत्र अब मौजूद नहीं हैं उनके टैब बंद कर दिए गए।';
+
+  @override
+  String get sessionTabsFull =>
+      'बहुत अधिक टैब खुले हैं। दूसरा खोलने के लिए एक बंद करें।';
 }

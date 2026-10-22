@@ -300,6 +300,17 @@ void main() {
     // Composer sends through the fixture server with the client-minted id.
     await tester.enterText(find.byType(TextField), 'Ping from fixture');
     await tester.pump();
+    await pumpSpin(
+      tester,
+      () =>
+          tester
+              .widget<IconButton>(
+                find.byKey(const ValueKey('live-composer-send')),
+              )
+              .onPressed !=
+          null,
+      reason: 'send enabled',
+    );
     await tester.tap(find.byKey(const ValueKey('live-composer-send')));
     await pumpSpin(
       tester,

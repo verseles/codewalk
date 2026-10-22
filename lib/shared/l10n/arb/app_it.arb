@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "Impossibile aprire questa sessione. Riprova.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "Chiudi",
+  "chatSessionTabsToggle": "Schede delle sessioni",
+  "sessionTabClosedMessage": "Scheda \"{title}\" chiusa",
+  "sessionTabSwitcherHint": "Rilascia Ctrl per cambiare, Esc per annullare",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "Cambia scheda",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "Annulla",
+  "sessionTabsRemoved": "Le schede delle sessioni che non esistono più sono state chiuse.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "Troppe schede aperte. Chiudine una per aprirne un’altra.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

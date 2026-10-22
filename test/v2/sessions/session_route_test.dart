@@ -366,6 +366,8 @@ void main() {
     await _settle(tester);
     expect(find.byType(SessionLivePage), findsNothing);
     expect(find.text(app.l10n.sessionLinkNotFound), findsOneWidget);
+    // Its tab is gone too, and the workspace says why.
+    expect(find.text(app.l10n.sessionTabsRemoved), findsOneWidget);
     expect(handle.closes, 1);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());

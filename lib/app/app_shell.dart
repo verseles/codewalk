@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../features/sessions/session_create_dialog.dart';
+import '../features/sessions/session_tab_strip.dart';
+import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/sessions_page.dart';
 import '../shared/l10n/l10n_context.dart';
@@ -31,6 +33,9 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     if (!isWorkspace(location)) {
+      // A launch on another page spends the return to the last tab, so a
+      // later visit to the list stays there.
+      context.read<SessionTabsController?>()?.takeLaunchTab();
       final title = switch (location) {
         '/settings' => l10n.settingsTitle,
         '/hosts' || '/pair' => l10n.settingsServersTitle,
@@ -51,7 +56,8 @@ class AppShell extends StatelessWidget {
       );
     }
     final home = location == '/' || location == '/sessions';
-    return KeyboardActionScope(
+    final tabs = context.read<SessionTabsController?>();
+    final workspace = KeyboardActionScope(
       handlers: {ShortcutAction.newChat: () => _create(context)},
       // Keeps the keyboard inside the workspace when nothing in it has the
       // focus, so its shortcuts reach this scope.
@@ -93,6 +99,13 @@ class AppShell extends StatelessWidget {
           },
         ),
       ),
+    );
+    if (tabs == null) return workspace;
+    return SessionTabsWatcher(
+      tabs: tabs,
+      catalog: context.read<SessionsController?>(),
+      home: home,
+      child: workspace,
     );
   }
 

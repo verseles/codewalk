@@ -1254,4 +1254,30 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionLinkUnreadable => '无法打开此会话。请重试。';
+
+  @override
+  String get chatClose => '关闭';
+
+  @override
+  String get chatSessionTabsToggle => '会话标签页';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return '标签页“$title”已关闭';
+  }
+
+  @override
+  String get sessionTabSwitcherHint => '松开 Ctrl 切换，Esc 取消';
+
+  @override
+  String get sessionTabSwitcherTitle => '切换标签页';
+
+  @override
+  String get sessionTabUndo => '撤销';
+
+  @override
+  String get sessionTabsRemoved => '已关闭不再存在的会话的标签页。';
+
+  @override
+  String get sessionTabsFull => '打开的标签页太多。请关闭一个再打开另一个。';
 }

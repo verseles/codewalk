@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "No se pudo abrir esta sesión. Reinténtalo.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "Cerrar",
+  "chatSessionTabsToggle": "Pestañas de sesión",
+  "sessionTabClosedMessage": "Pestaña \"{title}\" cerrada",
+  "sessionTabSwitcherHint": "Suelte Ctrl para cambiar, Esc para cancelar",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "Cambiar pestaña",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "Deshacer",
+  "sessionTabsRemoved": "Se cerraron las pestañas de sesiones que ya no existen.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "Hay demasiadas pestañas abiertas. Cierra una para abrir otra.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

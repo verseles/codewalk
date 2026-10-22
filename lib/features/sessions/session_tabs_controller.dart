@@ -44,6 +44,7 @@ class SessionTabsController extends ChangeNotifier {
   final _reads = <SessionRef, SessionReadTask>{};
   final _removed = <String>[];
   bool _disposed = false;
+  bool _launched = false;
 
   Future<void> initialize() => _store.initialize();
 
@@ -83,6 +84,22 @@ class SessionTabsController extends ChangeNotifier {
       return recency != 0 ? recency : order[a.ref]!.compareTo(order[b.ref]!);
     });
     return [?current, ...rest];
+  }
+
+  /// The tab to show when the app opens on the list: the selected tab of the
+  /// server whose tab was opened last. Only the first call of a launch gets
+  /// it, so returning to the list later stays there.
+  SessionRef? takeLaunchTab() {
+    if (_launched) return null;
+    _launched = true;
+    final latest = tabs.fold<SessionTab?>(
+      null,
+      (latest, tab) =>
+          latest == null || tab.lastOpenedAtMs > latest.lastOpenedAtMs
+          ? tab
+          : latest,
+    );
+    return latest == null ? null : selectedFor(latest.ref.host);
   }
 
   /// The titles of the tabs dropped because their session no longer exists,
@@ -126,6 +143,7 @@ class SessionTabsController extends ChangeNotifier {
       );
     });
     if (!saved && result != SessionTabOpen.full) return SessionTabOpen.unsaved;
+    if (result == SessionTabOpen.opened) _checked.remove(ref);
     return result;
   }
 
@@ -141,14 +159,44 @@ class SessionTabsController extends ChangeNotifier {
     return now > latest ? now : latest + 1;
   }
 
-  /// Closes the tab of [ref] and its live view. When it was the selected tab
-  /// of its server, the next tab of its project is selected, else the
-  /// previous one, and returned; null when there is none or it was not
-  /// selected.
-  Future<SessionRef?> close(SessionRef ref) async {
-    if (_disposed) return null;
+  /// Closes the tab of [ref] and its live view. [removed] is false when this
+  /// call removed nothing, the tab being gone already or the change unsaved.
+  /// When the tab was the selected tab of its server, the next tab of its
+  /// project is selected, else the previous one, and returned as [next].
+  Future<({bool removed, SessionRef? next})> close(SessionRef ref) async {
+    if (_disposed) return (removed: false, next: null);
     final (:removed, :selectedAfter) = await _remove({ref});
-    return removed.isEmpty ? null : selectedAfter[ref];
+    return (removed: removed.isNotEmpty, next: selectedAfter[ref]);
+  }
+
+  /// Puts the closed [tab] back at [index] of the strip; [select] makes it
+  /// the selected tab of its server again. False when it is open again
+  /// already, the tabs are full or nothing was saved.
+  Future<bool> reopen(
+    SessionTab tab, {
+    required int index,
+    required bool select,
+  }) async {
+    if (_disposed) return false;
+    final saved = await _store.update((state) {
+      if (state.tabs.any((other) => other.ref == tab.ref)) return null;
+      if (state.tabs.length >= SessionTabsStore.maxTabs) return null;
+      final next = [...state.tabs];
+      next.insert(index.clamp(0, next.length), tab);
+      return SessionTabsState(
+        tabs: next,
+        selected: select
+            ? {...state.selected, tab.ref.host: tab.ref}
+            : state.selected,
+      );
+    });
+    // A tab back in the strip is checked against its server again, now: an
+    // answer that came while it was closed dropped nothing.
+    if (saved) {
+      _checked.remove(tab.ref);
+      _validate();
+    }
+    return saved;
   }
 
   /// The tab a server selects after its selected tab [ref] closed: the next
@@ -292,6 +340,8 @@ class SessionTabsController extends ChangeNotifier {
     }
     for (final tab in tabs) {
       if (tab.ref.host != host || rows.containsKey(tab.ref)) continue;
+      // A read still in flight answers for a tab closed and reopened since.
+      if (_reads.containsKey(tab.ref)) continue;
       if (!_checked.add(tab.ref)) continue;
       final task = catalog.read(tab.ref);
       if (task == null) {
@@ -299,10 +349,19 @@ class SessionTabsController extends ChangeNotifier {
         continue;
       }
       _reads[tab.ref] = task;
+      // Only the read still registered for its tab may settle it.
+      bool settle() {
+        if (!identical(_reads[tab.ref], task)) return false;
+        _reads.remove(tab.ref);
+        return true;
+      }
+
       task.result.then(
-        (_) => _reads.remove(tab.ref),
+        (_) {
+          settle();
+        },
         onError: (Object error) {
-          if (!identical(_reads.remove(tab.ref), task) || _disposed) return;
+          if (!settle() || _disposed) return;
           if (error case SessionCatalogException(
             failure: SessionCatalogFailure.notFound,
           )) {

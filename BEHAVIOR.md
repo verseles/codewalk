@@ -40,6 +40,24 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
 
+### V2 session tabs
+
+- **Given** the user opens sessions in the v2 workspace
+- **When** a session opens from the list, a link or a tab
+- **Then** it adds a tab, or focuses its tab, keyed by its full identity (server, harness instance, session), so two servers with the same session id keep two tabs; the tab becomes the selected tab of its server
+- **Then** a strip above the open session shows the tabs of its server and project in the order they were opened, keeps the shown tab in view, and switches on a tap; another project shows its own tabs
+- **Then** switching tabs keeps each session's live connection and the reader's place in its timeline, including older history it paged in; content that arrived while a tab was hidden is marked on the jump control, and a turn that ended meanwhile is revealed from its start when the reader was at the bottom: up to 8 views stay open, the least recently shown closes first and reopens when shown again, and showing a tab of another server closes the views of the previous one
+- **When** the user closes a tab with its button or `mod+W`
+- **Then** a shown tab hands over to the next tab of its project, else the previous one, else the list; navigating elsewhere before the close is saved wins
+- **Then** a 3 s Undo puts the tab back in its place; a shown tab is shown again only while the reader is still where its close took them, otherwise it comes back like a background tab, without taking the selection
+- **When** the user wants a recent tab
+- **Then** the strip's trailing button lists every tab of the server, the selected one first, then the most recently opened
+- **Then** on desktop, holding Ctrl with Tab (Shift+Tab backwards, a held Tab keeps cycling) shows the same list and opens the highlighted tab when Ctrl is released; Escape, a tap on the strip or sheet, another session or the app leaving the foreground cancels it
+- **When** the app restarts
+- **Then** the tabs, their order and each server's selection come back the same however often they are read; opening on the list returns once to the selected tab of the server whose tab was used last, while a link or a launch on another page stays where it is
+- **Then** a tab is dropped only when its server answers that the session no longer exists, with a notice; tabs whose sessions are merely absent from the loaded rows, hidden, unreadable or behind a login stay, and tabs of a removed server are removed with it
+- **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
+
 ### V2 grouped session catalog
 
 - **Given** the v2 session catalog has loaded sessions

@@ -1279,4 +1279,30 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionLinkUnreadable => 'このセッションを開けませんでした。再試行してください。';
+
+  @override
+  String get chatClose => '閉じる';
+
+  @override
+  String get chatSessionTabsToggle => 'セッションタブ';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'タブ「$title」を閉じました';
+  }
+
+  @override
+  String get sessionTabSwitcherHint => 'Ctrlを離して切り替え、Escでキャンセル';
+
+  @override
+  String get sessionTabSwitcherTitle => 'タブを切り替え';
+
+  @override
+  String get sessionTabUndo => '元に戻す';
+
+  @override
+  String get sessionTabsRemoved => '存在しなくなったセッションのタブを閉じました。';
+
+  @override
+  String get sessionTabsFull => '開いているタブが多すぎます。別のタブを開くには 1 つ閉じてください。';
 }

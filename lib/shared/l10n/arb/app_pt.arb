@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "Não foi possível abrir esta sessão. Tente novamente.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "Fechar",
+  "chatSessionTabsToggle": "Abas de sessões",
+  "sessionTabClosedMessage": "Aba \"{title}\" fechada",
+  "sessionTabSwitcherHint": "Solte Ctrl para trocar, Esc para cancelar",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "Trocar aba",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "Desfazer",
+  "sessionTabsRemoved": "As abas de sessões que não existem mais foram fechadas.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "Há abas demais abertas. Feche uma para abrir outra.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

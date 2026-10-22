@@ -1281,4 +1281,30 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionLinkUnreadable => '이 세션을 열 수 없습니다. 다시 시도하세요.';
+
+  @override
+  String get chatClose => '닫기';
+
+  @override
+  String get chatSessionTabsToggle => '세션 탭';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return '탭 \"$title\"이(가) 닫혔습니다';
+  }
+
+  @override
+  String get sessionTabSwitcherHint => 'Ctrl을 놓으면 전환, Esc로 취소';
+
+  @override
+  String get sessionTabSwitcherTitle => '탭 전환';
+
+  @override
+  String get sessionTabUndo => '실행 취소';
+
+  @override
+  String get sessionTabsRemoved => '더 이상 존재하지 않는 세션의 탭을 닫았습니다.';
+
+  @override
+  String get sessionTabsFull => '열린 탭이 너무 많습니다. 다른 탭을 열려면 하나를 닫으세요.';
 }

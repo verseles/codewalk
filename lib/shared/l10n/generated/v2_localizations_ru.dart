@@ -1354,4 +1354,33 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'Не удалось открыть эту сессию. Повторите попытку.';
+
+  @override
+  String get chatClose => 'Закрыть';
+
+  @override
+  String get chatSessionTabsToggle => 'Вкладки сессий';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'Вкладка \"$title\" закрыта';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'Отпустите Ctrl для переключения, Esc для отмены';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Переключить вкладку';
+
+  @override
+  String get sessionTabUndo => 'Отменить';
+
+  @override
+  String get sessionTabsRemoved =>
+      'Вкладки сессий, которых больше нет, закрыты.';
+
+  @override
+  String get sessionTabsFull =>
+      'Слишком много открытых вкладок. Закройте одну, чтобы открыть другую.';
 }

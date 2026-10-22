@@ -11,6 +11,7 @@ import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import 'session_live_controller.dart';
 import 'session_live_page.dart';
+import 'session_tab_strip.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 
@@ -194,13 +195,29 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     );
   }
 
+  Future<void> _open(SessionTabsController tabs, SessionSummary summary) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final full = context.v2L10n.sessionTabsFull;
+    if (await tabs.open(summary) == SessionTabOpen.full) {
+      messenger?.showSnackBar(SnackBar(content: Text(full)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final page = _resolve(context, _leading(context));
     // A live page that leaves the tree disposes its controller, so a later
     // return makes a new one.
     if (page is! SessionLivePage) _live = null;
-    return page;
+    final tabs = context.read<SessionTabsController?>();
+    final live = _live;
+    if (tabs == null || live == null || page is! SessionLivePage) return page;
+    return SessionTabsFrame(
+      tabs: tabs,
+      current: _ref,
+      project: live.summary.info.project,
+      child: page,
+    );
   }
 
   Widget _resolve(BuildContext context, Widget? leading) {
@@ -324,7 +341,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         // Opening the session adds its tab or focuses it.
         _opened = ref;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) unawaited(tabs.open(summary));
+          if (mounted) unawaited(_open(tabs, summary));
         });
       }
       return SessionLivePage(

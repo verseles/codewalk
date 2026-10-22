@@ -1118,5 +1118,25 @@
   "sessionLinkUnreadable": "تعذر فتح هذه الجلسة. أعد المحاولة.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "إغلاق",
+  "chatSessionTabsToggle": "علامات تبويب الجلسات",
+  "sessionTabClosedMessage": "تم إغلاق التبويب \"{title}\"",
+  "sessionTabSwitcherHint": "أفلت Ctrl للتبديل، Esc للإلغاء",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "تبديل علامة التبويب",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "تراجع",
+  "sessionTabsRemoved": "أُغلقت علامات تبويب الجلسات التي لم تعد موجودة.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "علامات التبويب المفتوحة كثيرة جدًا. أغلق واحدة لفتح أخرى.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

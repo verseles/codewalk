@@ -1651,5 +1651,42 @@
   "sessionLinkUnreadable": "Could not open this session. Retry.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "Close",
+  "@chatClose": {
+    "description": "CodeWalk UI string — chatClose"
+  },
+  "chatSessionTabsToggle": "Session tabs",
+  "@chatSessionTabsToggle": {
+    "description": "CodeWalk UI string — chatSessionTabsToggle"
+  },
+  "sessionTabClosedMessage": "Tab \"{title}\" closed",
+  "@sessionTabClosedMessage": {
+    "description": "Snackbar shown after closing a session tab",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string — sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string — sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "Undo",
+  "@sessionTabUndo": {
+    "description": "Snackbar action that restores a closed session tab"
+  },
+  "sessionTabsRemoved": "Tabs of sessions that no longer exist were closed.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "Too many open tabs. Close one to open another.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

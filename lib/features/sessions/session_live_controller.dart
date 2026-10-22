@@ -9,6 +9,7 @@ import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/hosts_controller.dart';
+import 'session_live_scroll.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
 /// observing, reconnecting and closing never mutate the server.
@@ -43,6 +44,10 @@ class SessionLiveController extends ChangeNotifier {
     _summary = next;
     _notify();
   }
+
+  /// The timeline's place and follow state, kept with the session so a view
+  /// shown again resumes where the reader left it.
+  final scroll = SessionLiveScroll();
 
   /// True once disposed; a disposed view is never shown again.
   bool get disposed => _disposed;
@@ -569,6 +574,7 @@ class SessionLiveController extends ChangeNotifier {
     hosts.removeListener(_hostsChanged);
     permissionModes?.removeListener(_policyChanged);
     _detach();
+    scroll.dispose();
     super.dispose();
   }
 }

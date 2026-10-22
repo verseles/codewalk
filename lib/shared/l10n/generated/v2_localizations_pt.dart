@@ -1359,4 +1359,33 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'Não foi possível abrir esta sessão. Tente novamente.';
+
+  @override
+  String get chatClose => 'Fechar';
+
+  @override
+  String get chatSessionTabsToggle => 'Abas de sessões';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'Aba \"$title\" fechada';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'Solte Ctrl para trocar, Esc para cancelar';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Trocar aba';
+
+  @override
+  String get sessionTabUndo => 'Desfazer';
+
+  @override
+  String get sessionTabsRemoved =>
+      'As abas de sessões que não existem mais foram fechadas.';
+
+  @override
+  String get sessionTabsFull =>
+      'Há abas demais abertas. Feche uma para abrir outra.';
 }

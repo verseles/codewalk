@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "このセッションを開けませんでした。再試行してください。",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "閉じる",
+  "chatSessionTabsToggle": "セッションタブ",
+  "sessionTabClosedMessage": "タブ「{title}」を閉じました",
+  "sessionTabSwitcherHint": "Ctrlを離して切り替え、Escでキャンセル",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "タブを切り替え",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "元に戻す",
+  "sessionTabsRemoved": "存在しなくなったセッションのタブを閉じました。",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "開いているタブが多すぎます。別のタブを開くには 1 つ閉じてください。",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

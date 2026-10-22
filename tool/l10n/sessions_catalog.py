@@ -1,5 +1,9 @@
 """Bounded, read-only session catalog copy."""
-PORT_KEYS = {"chatRefresh", "chatLoadMore", "sessionExportUntitled"}
+PORT_KEYS = {
+    "chatRefresh", "chatLoadMore", "sessionExportUntitled",
+    "chatClose", "chatSessionTabsToggle", "sessionTabClosedMessage",
+    "sessionTabUndo", "sessionTabSwitcherTitle", "sessionTabSwitcherHint",
+}
 NEW_KEYS = (
     "sessionsSelectProfile", "sessionsEmpty", "sessionsLoading",
     "sessionsPreviousResults", "sessionsLimit", "sessionsHistoryUnavailable",
@@ -52,6 +56,8 @@ NEW_KEYS = (
     "sessionLinkUnknownServer",
     "sessionLinkNotFound",
     "sessionLinkUnreadable",
+    "sessionTabsRemoved",
+    "sessionTabsFull",
 )
 COPY = {
     "en": ("Select a saved profile", "No sessions in the loaded results.", "Loading sessions…", "Previous results; refresh has not succeeded yet.", "Local limit reached (200 sessions or 10 pages). These results may be incomplete.", "Read-only details. Conversation history is unavailable in this preview.", "Session reading is unavailable on this platform.", "Could not read sessions. Refresh or retry loading the next page manually.", "Session reading timed out. Retry manually.", "Invalid continuation. Refresh to start a new list."),
@@ -197,6 +203,22 @@ LINK_COPY = {
     "ru": ("Эта ссылка ведёт на сервер, который не сохранён на этом устройстве.", "Этой сессии больше нет на её сервере.", "Не удалось открыть эту сессию. Повторите попытку."),
     "zh": ("此链接指向未保存在此设备上的服务器。", "此会话已不在其服务器上。", "无法打开此会话。请重试。"),
 }
+TAB_COPY = {
+    "en": ("Tabs of sessions that no longer exist were closed.", "Too many open tabs. Close one to open another."),
+    "pt": ("As abas de sessões que não existem mais foram fechadas.", "Há abas demais abertas. Feche uma para abrir outra."),
+    "es": ("Se cerraron las pestañas de sesiones que ya no existen.", "Hay demasiadas pestañas abiertas. Cierra una para abrir otra."),
+    "fr": ("Les onglets des sessions qui n’existent plus ont été fermés.", "Trop d’onglets ouverts. Fermez-en un pour en ouvrir un autre."),
+    "de": ("Tabs von Sitzungen, die nicht mehr existieren, wurden geschlossen.", "Zu viele offene Tabs. Schließe einen, um einen anderen zu öffnen."),
+    "it": ("Le schede delle sessioni che non esistono più sono state chiuse.", "Troppe schede aperte. Chiudine una per aprirne un’altra."),
+    "ar": ("أُغلقت علامات تبويب الجلسات التي لم تعد موجودة.", "علامات التبويب المفتوحة كثيرة جدًا. أغلق واحدة لفتح أخرى."),
+    "ur": ("ان سیشنز کے ٹیب بند کر دیے گئے جو اب موجود نہیں ہیں۔", "بہت زیادہ ٹیب کھلے ہیں۔ دوسرا کھولنے کے لیے ایک بند کریں۔"),
+    "bn": ("যে সেশনগুলো আর নেই সেগুলোর ট্যাব বন্ধ করা হয়েছে।", "অনেক বেশি ট্যাব খোলা। আরেকটি খুলতে একটি বন্ধ করুন।"),
+    "hi": ("जो सत्र अब मौजूद नहीं हैं उनके टैब बंद कर दिए गए।", "बहुत अधिक टैब खुले हैं। दूसरा खोलने के लिए एक बंद करें।"),
+    "ja": ("存在しなくなったセッションのタブを閉じました。", "開いているタブが多すぎます。別のタブを開くには 1 つ閉じてください。"),
+    "ko": ("더 이상 존재하지 않는 세션의 탭을 닫았습니다.", "열린 탭이 너무 많습니다. 다른 탭을 열려면 하나를 닫으세요."),
+    "ru": ("Вкладки сессий, которых больше нет, закрыты.", "Слишком много открытых вкладок. Закройте одну, чтобы открыть другую."),
+    "zh": ("已关闭不再存在的会话的标签页。", "打开的标签页太多。请关闭一个再打开另一个。"),
+}
 COPY = {
     locale: values
     + (RATE_COPY[locale], PROJECT_COPY[locale])
@@ -206,5 +228,6 @@ COPY = {
     + LINEAGE_COPY[locale]
     + (WORKSPACE_COPY[locale],)
     + LINK_COPY[locale]
+    + TAB_COPY[locale]
     for locale, values in COPY.items()
 }

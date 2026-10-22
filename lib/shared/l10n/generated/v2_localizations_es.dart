@@ -1360,4 +1360,33 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'No se pudo abrir esta sesión. Reinténtalo.';
+
+  @override
+  String get chatClose => 'Cerrar';
+
+  @override
+  String get chatSessionTabsToggle => 'Pestañas de sesión';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'Pestaña \"$title\" cerrada';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'Suelte Ctrl para cambiar, Esc para cancelar';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Cambiar pestaña';
+
+  @override
+  String get sessionTabUndo => 'Deshacer';
+
+  @override
+  String get sessionTabsRemoved =>
+      'Se cerraron las pestañas de sesiones que ya no existen.';
+
+  @override
+  String get sessionTabsFull =>
+      'Hay demasiadas pestañas abiertas. Cierra una para abrir otra.';
 }

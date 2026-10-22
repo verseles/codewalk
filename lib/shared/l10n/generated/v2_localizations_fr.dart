@@ -1366,4 +1366,33 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get sessionLinkUnreadable =>
       'Impossible d’ouvrir cette session. Réessayez.';
+
+  @override
+  String get chatClose => 'Fermer';
+
+  @override
+  String get chatSessionTabsToggle => 'Onglets de session';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'Onglet \"$title\" fermé';
+  }
+
+  @override
+  String get sessionTabSwitcherHint =>
+      'Relâchez Ctrl pour changer, Échap pour annuler';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Changer d\'onglet';
+
+  @override
+  String get sessionTabUndo => 'Annuler';
+
+  @override
+  String get sessionTabsRemoved =>
+      'Les onglets des sessions qui n’existent plus ont été fermés.';
+
+  @override
+  String get sessionTabsFull =>
+      'Trop d’onglets ouverts. Fermez-en un pour en ouvrir un autre.';
 }

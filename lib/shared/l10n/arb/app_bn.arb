@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "এই সেশনটি খোলা যায়নি। আবার চেষ্টা করুন।",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "বন্ধ",
+  "chatSessionTabsToggle": "সেশন ট্যাব",
+  "sessionTabClosedMessage": "ট্যাব \"{title}\" বন্ধ হয়েছে",
+  "sessionTabSwitcherHint": "Ctrl ছেড়ে পরিবর্তন করুন, Esc দিয়ে বাতিল",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "ট্যাব পরিবর্তন",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "পূর্বাবস্থায় ফেরান",
+  "sessionTabsRemoved": "যে সেশনগুলো আর নেই সেগুলোর ট্যাব বন্ধ করা হয়েছে।",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "অনেক বেশি ট্যাব খোলা। আরেকটি খুলতে একটি বন্ধ করুন।",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }

@@ -2558,6 +2558,54 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Could not open this session. Retry.'**
   String get sessionLinkUnreadable;
+
+  /// CodeWalk UI string — chatClose
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get chatClose;
+
+  /// CodeWalk UI string — chatSessionTabsToggle
+  ///
+  /// In en, this message translates to:
+  /// **'Session tabs'**
+  String get chatSessionTabsToggle;
+
+  /// Snackbar shown after closing a session tab
+  ///
+  /// In en, this message translates to:
+  /// **'Tab \"{title}\" closed'**
+  String sessionTabClosedMessage(String title);
+
+  /// CodeWalk UI string — sessionTabSwitcherHint
+  ///
+  /// In en, this message translates to:
+  /// **'Release Ctrl to switch, Esc to cancel'**
+  String get sessionTabSwitcherHint;
+
+  /// CodeWalk UI string — sessionTabSwitcherTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Switch tab'**
+  String get sessionTabSwitcherTitle;
+
+  /// Snackbar action that restores a closed session tab
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get sessionTabUndo;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs of sessions that no longer exist were closed.'**
+  String get sessionTabsRemoved;
+
+  /// V2 bounded read-only session catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Too many open tabs. Close one to open another.'**
+  String get sessionTabsFull;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

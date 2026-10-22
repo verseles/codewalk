@@ -1331,4 +1331,32 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionLinkUnreadable => 'تعذر فتح هذه الجلسة. أعد المحاولة.';
+
+  @override
+  String get chatClose => 'إغلاق';
+
+  @override
+  String get chatSessionTabsToggle => 'علامات تبويب الجلسات';
+
+  @override
+  String sessionTabClosedMessage(String title) {
+    return 'تم إغلاق التبويب \"$title\"';
+  }
+
+  @override
+  String get sessionTabSwitcherHint => 'أفلت Ctrl للتبديل، Esc للإلغاء';
+
+  @override
+  String get sessionTabSwitcherTitle => 'تبديل علامة التبويب';
+
+  @override
+  String get sessionTabUndo => 'تراجع';
+
+  @override
+  String get sessionTabsRemoved =>
+      'أُغلقت علامات تبويب الجلسات التي لم تعد موجودة.';
+
+  @override
+  String get sessionTabsFull =>
+      'علامات التبويب المفتوحة كثيرة جدًا. أغلق واحدة لفتح أخرى.';
 }

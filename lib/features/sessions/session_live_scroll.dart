@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 /// locale need no separate rule.
 final class SessionLiveScroll extends ChangeNotifier {
   SessionLiveScroll({ScrollController? controller})
-    : controller = controller ?? ScrollController();
+    : controller = controller ?? _KeptScrollController();
 
   /// The distance from the bottom within which the viewport counts as the
   /// bottom. One logical pixel, like the retained reference.
@@ -29,6 +29,11 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// The offset the viewport was at the last time it was observed, so a move
   /// that the timeline did not start is known.
   double? _lastPixels;
+
+  /// What the timeline saw when it was last shown, kept while it is not, so
+  /// a session shown again lays out the same rows under the kept offset and
+  /// is told what changed meanwhile. Only the timeline reads and writes it.
+  Object? timelineMemory;
 
   /// Whether the timeline follows the newest content.
   bool get following => _following;
@@ -171,5 +176,20 @@ final class SessionLiveScroll extends ChangeNotifier {
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+}
+
+/// A scroll controller whose next list starts where the last one stopped,
+/// so a session shown again opens at the reader's place.
+final class _KeptScrollController extends ScrollController {
+  double? _kept;
+
+  @override
+  double get initialScrollOffset => _kept ?? super.initialScrollOffset;
+
+  @override
+  void detach(ScrollPosition position) {
+    if (position.hasPixels) _kept = position.pixels;
+    super.detach(position);
   }
 }

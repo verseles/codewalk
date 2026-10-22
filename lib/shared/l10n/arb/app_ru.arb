@@ -1119,5 +1119,25 @@
   "sessionLinkUnreadable": "Не удалось открыть эту сессию. Повторите попытку.",
   "@sessionLinkUnreadable": {
     "description": "V2 bounded read-only session catalog"
+  },
+  "chatClose": "Закрыть",
+  "chatSessionTabsToggle": "Вкладки сессий",
+  "sessionTabClosedMessage": "Вкладка \"{title}\" закрыта",
+  "sessionTabSwitcherHint": "Отпустите Ctrl для переключения, Esc для отмены",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "sessionTabSwitcherTitle": "Переключить вкладку",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabUndo": "Отменить",
+  "sessionTabsRemoved": "Вкладки сессий, которых больше нет, закрыты.",
+  "@sessionTabsRemoved": {
+    "description": "V2 bounded read-only session catalog"
+  },
+  "sessionTabsFull": "Слишком много открытых вкладок. Закройте одну, чтобы открыть другую.",
+  "@sessionTabsFull": {
+    "description": "V2 bounded read-only session catalog"
   }
 }
