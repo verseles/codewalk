@@ -32,6 +32,8 @@ RESULTS = {"pending", "pass", "fail", "inconclusive"}
 # Seconds from the end of the disturbance (network back, app in front, server
 # ready, session created) to the view being live again or the row listed.
 BOUNDS = {"drop": 10, "handover": 10, "background": 10, "restart": 30, "tui": 10}
+# A disturbed stream passes only with the reconnect the server saw for it.
+RECONNECTS = ("drop", "handover", "background", "restart")
 # Emulator and loopback aliases are not personal addresses.
 ALLOWED_ADDRESSES = {"10.0.2.2", "127.0.0.1"}
 ADDRESS = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
@@ -116,6 +118,8 @@ def problems(matrix: dict, final: bool = False) -> list[str]:
             found.append(f"{name}: pass needs stuck_running false")
         if key[1] == "handover" and not cell.get("transport_proof"):
             found.append(f"{name}: pass needs the transport change it observed")
+        if key[1] in RECONNECTS and not cell.get("reconnect_proof"):
+            found.append(f"{name}: pass needs the stream reconnect the server recorded")
         if not cell.get("evidence"):
             found.append(f"{name}: pass without evidence")
     for target in TARGETS:
@@ -130,11 +134,17 @@ def sums(folder: Path) -> list[str]:
     if not path.is_file():
         return []
     found = []
-    for line in path.read_text().splitlines():
-        digest, name = line.split(maxsplit=1)
-        target = folder / name.strip()
+    for number, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        parts = line.split(maxsplit=1)
+        if len(parts) != 2 or not re.fullmatch(r"[0-9a-f]{64}", parts[0]):
+            found.append(f"SHA256SUMS line {number} is malformed")
+            continue
+        digest, name = parts[0], parts[1].strip().lstrip("*")
+        target = folder / name
         if not target.is_file() or hashlib.sha256(target.read_bytes()).hexdigest() != digest:
-            found.append(f"SHA256SUMS mismatch: {name.strip()}")
+            found.append(f"SHA256SUMS mismatch: {name}")
     return found
 
 

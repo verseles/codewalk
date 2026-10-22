@@ -27,8 +27,8 @@ The control port also accepts, with a JSON body:
             mode, Wi-Fi off with mobile data on, or Home then relaunch, each
             for body.seconds, with the device's transports captured before
             and after
-Prompts containing CW-SLOW make the stub answer for 30 s, so a scenario can
-disturb a running turn. Any other prompt is answered at once.
+Prompts containing CW-SLOW make the stub answer for 30 s (CW-SLOW90 for 90 s),
+so a scenario can disturb a running turn. Any other prompt is answered at once.
 
 Usage:
   python3 tool/ci/v2_device_server.py serve --root /tmp/x [--bind ADDR]
@@ -89,7 +89,8 @@ PINS = {
 }
 RESERVED_PORTS = {49374, 4096}
 STUB_REQUEST_CAP = 2000
-SLOW_MARKER = "CW-SLOW"
+# "CW-SLOW" answers for 30 s; "CW-SLOW90" for 90 s (at most 120).
+SLOW_MARKER = re.compile(r"CW-SLOW(\d+)?")
 HOP_HEADERS = {
     "connection",
     "keep-alive",
@@ -195,8 +196,10 @@ class StubHandler(BaseHTTPRequestHandler):
                     )
                 prompt = content if isinstance(content, str) else ""
                 break
-        slow = SLOW_MARKER in prompt
-        parts = [f"tick {i} " for i in range(1, 31)] if slow else ["CW-OK"]
+        match = SLOW_MARKER.search(prompt)
+        slow = match is not None
+        seconds = min(int(match.group(1) or 30), 120) if match else 0
+        parts = [f"tick {i} " for i in range(1, seconds + 1)] if slow else ["CW-OK"]
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
@@ -301,6 +304,22 @@ def free_port() -> int:
             return port
 
 
+def read_body(handler: BaseHTTPRequestHandler) -> bytes | None:
+    """The request body, framed by Content-Length or chunked; never dropped."""
+    if "chunked" in (handler.headers.get("Transfer-Encoding") or "").lower():
+        data = b""
+        while True:
+            size = int(handler.rfile.readline().split(b";", 1)[0].strip() or b"0", 16)
+            if size == 0:
+                while handler.rfile.readline() not in (b"\r\n", b"\n", b""):
+                    pass
+                return data
+            data += handler.rfile.read(size)
+            handler.rfile.readline()
+    length = int(handler.headers.get("Content-Length", "0") or 0)
+    return handler.rfile.read(length) if length > 0 else None
+
+
 def route(path: str) -> str:
     """The path with native ids templated and the query dropped."""
     segments = path.split("?", 1)[0].split("/")
@@ -348,8 +367,7 @@ class RelayHandler(BaseHTTPRequestHandler):
         device = self.server.device  # type: ignore[attr-defined]
         log: Log = device.log
         client = log.alias(self.client_address[0])
-        length = int(self.headers.get("Content-Length", "0") or 0)
-        body = self.rfile.read(length) if length > 0 else None
+        body = read_body(self)
         headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
         templated = route(self.path)
         meta = {
@@ -427,7 +445,10 @@ class DeviceServer:
         self.log = Log(root / "requests.jsonl")
         self.process: subprocess.Popen | None = None
         self.upstream_port = 0
-        self.lock = threading.Lock()
+        # Restart, stop and close take the same lock, so a restart racing
+        # quit cannot start a server after close returned.
+        self.lock = threading.RLock()
+        self.closed = False
         self.restarts: list[dict] = []
 
     # The isolated tree survives restarts: the restarted server recovers the
@@ -481,6 +502,12 @@ class DeviceServer:
         )
 
     def start(self) -> None:
+        with self.lock:
+            if self.closed:
+                die("the server is closed")
+            self._start()
+
+    def _start(self) -> None:
         self.upstream_port = free_port()
         log = (self.root / "server.log").open("ab")
         self.process = subprocess.Popen(
@@ -494,6 +521,7 @@ class DeviceServer:
         deadline = time.time() + 60
         while time.time() < deadline:
             if self.process.poll() is not None:
+                self.stop()
                 die("the server exited during boot; see server.log")
             try:
                 status, body = self.api("GET", "/api/info")
@@ -502,10 +530,15 @@ class DeviceServer:
             except OSError:
                 pass
             time.sleep(0.5)
+        self.stop()
         die("the server never answered /api/info")
 
     def stop(self) -> float:
         """Graceful SIGTERM; the owned group is killed only after 30 s."""
+        with self.lock:
+            return self._stop()
+
+    def _stop(self) -> float:
         process = self.process
         if process is None or process.poll() is not None:
             return 0.0
@@ -520,10 +553,12 @@ class DeviceServer:
 
     def restart(self) -> dict:
         with self.lock:
+            if self.closed:
+                return {"error": "the server is closed"}
             record = {"requested": now()}
-            record["stop_seconds"] = round(self.stop(), 3)
+            record["stop_seconds"] = round(self._stop(), 3)
             record["stopped"] = now()
-            self.start()
+            self._start()
             record["ready"] = now()
             self.restarts.append(record)
             self.log.write(kind="restart", **record)
@@ -582,7 +617,8 @@ class DeviceServer:
                 counts[text] = counts.get(text, 0) + 1
             sessions[session] = {
                 "user_prompts": len(texts),
-                "duplicates": sorted(t[:80] for t, n in counts.items() if n > 1),
+                # Extra copies only: the prompt text never leaves memory.
+                "duplicates": sum(n - 1 for n in counts.values()),
                 "prompt_posts": sum(
                     1
                     for r in records
@@ -656,8 +692,12 @@ class DeviceServer:
         return {"error": f"unknown command {name!r}"}
 
     def close(self) -> None:
-        self.stop()
-        self.stub.stop()
+        with self.lock:
+            self.closed = True
+            self._stop()
+        stub = getattr(self, "stub", None)
+        if stub is not None:
+            stub.stop()
 
 
 class HostActions:
@@ -670,12 +710,21 @@ class HostActions:
         self.log = log
 
     def adb(self, *args: str) -> str:
-        return subprocess.run(
-            ["adb", "-s", self.serial, "shell", *args],
-            capture_output=True,
-            text=True,
-            timeout=120,
-        ).stdout
+        return self.shell(*args)[1]
+
+    def shell(self, *args: str) -> tuple[bool, str]:
+        """Runs one adb shell command; ok is False on a non-zero exit, an
+        error on stderr or adb itself failing."""
+        try:
+            done = subprocess.run(
+                ["adb", "-s", self.serial, "shell", *args],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return False, ""
+        return done.returncode == 0 and not done.stderr.strip(), done.stdout
 
     def transports(self) -> str:
         """The default network's transports, as Android reports them."""
@@ -704,39 +753,52 @@ class HostActions:
         threading.Thread(target=action, args=(seconds,), daemon=True).start()
         return {"scheduled": name, "seconds": seconds}
 
+    # Each record says whether every command applied and whether the default
+    # transport actually changed; a cell without both is not a disturbance.
     def _drop(self, seconds: int) -> None:
         time.sleep(1)
         before = self.transports()
-        self.adb("cmd", "connectivity", "airplane-mode", "enable")
+        off_ok, _ = self.shell("cmd", "connectivity", "airplane-mode", "enable")
         off = now()
-        time.sleep(seconds)
-        self.adb("cmd", "connectivity", "airplane-mode", "disable")
+        time.sleep(3)
+        during = self.transports()
+        time.sleep(max(seconds - 3, 1))
+        on_ok, _ = self.shell("cmd", "connectivity", "airplane-mode", "disable")
         restored = now()
         time.sleep(5)
         self.log.write(kind="host-action", action="drop", off=off, restored=restored,
-                       before=before, after=self.transports())
+                       applied=off_ok and on_ok, before=before, during=during,
+                       after=self.transports(), changed=during != before)
 
     def _handover(self, seconds: int) -> None:
         time.sleep(1)
+        data_ok, _ = self.shell("svc", "data", "enable")
+        _, mobile = self.shell("settings", "get", "global", "mobile_data")
         before = self.transports()
-        self.adb("svc", "wifi", "disable")
+        off_ok, _ = self.shell("svc", "wifi", "disable")
         cellular = now()
         time.sleep(3)
         during = self.transports()
         time.sleep(max(seconds - 3, 1))
-        self.adb("svc", "wifi", "enable")
+        on_ok, _ = self.shell("svc", "wifi", "enable")
         wifi = now()
         time.sleep(5)
         self.log.write(kind="host-action", action="handover", cellular=cellular,
-                       wifi=wifi, before=before, during=during, after=self.transports())
+                       wifi=wifi, applied=data_ok and off_ok and on_ok,
+                       mobile_data=mobile.strip(), before=before, during=during,
+                       after=self.transports(),
+                       changed=during not in (before, "none"))
 
     def _background(self, seconds: int) -> None:
         time.sleep(1)
-        self.adb("input", "keyevent", "KEYCODE_HOME")
+        home_ok, _ = self.shell("input", "keyevent", "KEYCODE_HOME")
         home = now()
         time.sleep(seconds)
-        self.adb("monkey", "-p", self.package, "-c", "android.intent.category.LAUNCHER", "1")
-        self.log.write(kind="host-action", action="background", home=home, relaunched=now())
+        back_ok, _ = self.shell(
+            "monkey", "-p", self.package, "-c", "android.intent.category.LAUNCHER", "1"
+        )
+        self.log.write(kind="host-action", action="background", home=home,
+                       relaunched=now(), applied=home_ok and back_ok)
 
 
 class ControlHandler(BaseHTTPRequestHandler):
@@ -748,13 +810,15 @@ class ControlHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         device: DeviceServer = self.server.device  # type: ignore[attr-defined]
         name = self.path.strip("/")
-        length = int(self.headers.get("Content-Length", "0") or 0)
         try:
-            body = json.loads(self.rfile.read(length).decode() or "{}") if length else {}
+            body = json.loads((read_body(self) or b"{}").decode())
         except (ValueError, UnicodeDecodeError):
-            body = {}
+            body = None
         if not isinstance(body, dict):
-            body = {}
+            self.send_response(400)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if name == "quit":
             result = {"quit": True}
         elif name.startswith("host/"):
@@ -782,57 +846,66 @@ def serve(args: argparse.Namespace) -> int:
     if args.port in RESERVED_PORTS:
         die("refusing a reserved port")
     device = DeviceServer(root, args.bind, args.port)
-    device.prepare()
-    device.start()
-    relay = ThreadingHTTPServer((args.bind, args.port), RelayHandler)
-    relay.daemon_threads = True
-    relay.device = device  # type: ignore[attr-defined]
-    device.port = int(relay.server_address[1])
-    threading.Thread(target=relay.serve_forever, daemon=True).start()
-    stopping = threading.Event()
-    control = None
-    if args.control_port is not None:
-        control = ThreadingHTTPServer(("127.0.0.1", args.control_port), ControlHandler)
-        control.daemon_threads = True
-        control.device = device  # type: ignore[attr-defined]
-        control.stopping = stopping  # type: ignore[attr-defined]
-        control.actions = (  # type: ignore[attr-defined]
-            HostActions(args.adb_serial, args.app_package, device.log)
-            if args.adb_serial
-            else None
-        )
-        threading.Thread(target=control.serve_forever, daemon=True).start()
     secret = root / "password"
-    secret.write_text(device.password + "\n")
-    secret.chmod(0o600)
-    print(json.dumps({**device.status(), "control_port": control and control.server_address[1]}))
-    print(f"device-server: password in {secret} (pair with user opencode)", flush=True)
-
-    def console() -> None:
-        for line in sys.stdin:
-            name = line.strip()
-            if name == "quit":
-                break
-            if name:
-                print(json.dumps(device.command(name), indent=2), flush=True)
-        stopping.set()
-
-    if args.console:
-        threading.Thread(target=console, daemon=True).start()
-    signal.signal(signal.SIGTERM, lambda *_: stopping.set())
+    servers: list[ThreadingHTTPServer] = []
+    # Whatever fails, the owned server stops and the password file goes.
     try:
-        while not stopping.wait(0.5):
+        device.prepare()
+        device.start()
+        relay = ThreadingHTTPServer((args.bind, args.port), RelayHandler)
+        servers.append(relay)
+        relay.daemon_threads = True
+        relay.device = device  # type: ignore[attr-defined]
+        device.port = int(relay.server_address[1])
+        threading.Thread(target=relay.serve_forever, daemon=True).start()
+        stopping = threading.Event()
+        control = None
+        if args.control_port is not None:
+            control = ThreadingHTTPServer(("127.0.0.1", args.control_port), ControlHandler)
+            servers.append(control)
+            control.daemon_threads = True
+            control.device = device  # type: ignore[attr-defined]
+            control.stopping = stopping  # type: ignore[attr-defined]
+            control.actions = (  # type: ignore[attr-defined]
+                HostActions(args.adb_serial, args.app_package, device.log)
+                if args.adb_serial
+                else None
+            )
+            threading.Thread(target=control.serve_forever, daemon=True).start()
+        # Created owner-only, never readable by others even for a moment.
+        fd = os.open(secret, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(device.password + "\n")
+        print(json.dumps({**device.status(), "control_port": control and control.server_address[1]}))
+        print(f"device-server: password in {secret} (pair with user opencode)", flush=True)
+
+        def console() -> None:
+            for line in sys.stdin:
+                name = line.strip()
+                if name == "quit":
+                    break
+                if name:
+                    print(json.dumps(device.command(name), indent=2), flush=True)
+            stopping.set()
+
+        if args.console:
+            threading.Thread(target=console, daemon=True).start()
+        signal.signal(signal.SIGTERM, lambda *_: stopping.set())
+        try:
+            while not stopping.wait(0.5):
+                pass
+        except KeyboardInterrupt:
             pass
-    except KeyboardInterrupt:
-        pass
-    (root / "report.json").write_text(json.dumps(device.report(), indent=2) + "\n")
-    relay.shutdown()
-    relay.server_close()
-    if control is not None:
-        control.shutdown()
-        control.server_close()
-    device.close()
-    secret.unlink(missing_ok=True)
+        try:
+            (root / "report.json").write_text(json.dumps(device.report(), indent=2) + "\n")
+        except (OSError, ValueError) as error:
+            print(f"device-server: no report: {error}", file=sys.stderr)
+    finally:
+        for server in servers:
+            server.shutdown()
+            server.server_close()
+        device.close()
+        secret.unlink(missing_ok=True)
     print(f"device-server: stopped; report in {root / 'report.json'}", flush=True)
     return 0
 

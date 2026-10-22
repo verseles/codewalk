@@ -1,6 +1,8 @@
 import copy
+import hashlib
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,6 +26,7 @@ def _passing(cell):
         duplicates=0,
         stuck_running=False,
         transport_proof="WIFI -> CELLULAR -> WIFI",
+        reconnect_proof="event stream reopened 2.1 s after the network returned",
         evidence=["device-report.json"],
     )
     return cell
@@ -58,6 +61,35 @@ class MatrixTests(unittest.TestCase):
         cell = next(c for c in data["cells"] if c["scenario"] == "handover")
         _passing(cell)["transport_proof"] = None
         self.assertIn("pass needs the transport change", " ".join(matrix.problems(data)))
+
+    def test_a_disturbed_stream_passes_only_with_its_reconnect(self):
+        data = _committed()
+        for scenario in ("drop", "handover", "background", "restart"):
+            with self.subTest(scenario=scenario):
+                broken = copy.deepcopy(data)
+                cell = next(c for c in broken["cells"] if c["scenario"] == scenario)
+                _passing(cell)["reconnect_proof"] = None
+                self.assertIn("pass needs the stream reconnect", " ".join(matrix.problems(broken)))
+        cell = next(c for c in data["cells"] if c["scenario"] == "tui")
+        _passing(cell)["reconnect_proof"] = None
+        self.assertEqual(matrix.problems(data), [])
+
+    def test_the_committed_checksums_match(self):
+        self.assertEqual(matrix.sums(matrix.DEFAULT.parent), [])
+        self.assertTrue((matrix.DEFAULT.parent / "SHA256SUMS").is_file())
+
+    def test_checksums_skip_blank_lines_and_report_malformed_ones(self):
+        with tempfile.TemporaryDirectory() as raw:
+            folder = Path(raw)
+            (folder / "a.json").write_text("{}\n")
+            digest = hashlib.sha256(b"{}\n").hexdigest()
+            (folder / "SHA256SUMS").write_text(f"\n{digest}  a.json\n\n")
+            self.assertEqual(matrix.sums(folder), [])
+            (folder / "SHA256SUMS").write_text(f"{digest}  a.json\nnot-a-digest\n{'0' * 64}  a.json\n")
+            self.assertEqual(
+                matrix.sums(folder),
+                ["SHA256SUMS line 2 is malformed", "SHA256SUMS mismatch: a.json"],
+            )
 
     def test_inconclusive_and_fail_need_a_reason(self):
         data = _committed()

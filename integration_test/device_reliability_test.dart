@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,7 +33,10 @@ void main() {
     try {
       final request = await client.postUrl(Uri.parse('$_control/$command'));
       request.headers.contentType = ContentType.json;
-      request.write(jsonEncode(body));
+      // A sized body: the control port does not read a chunked one.
+      final bytes = utf8.encode(jsonEncode(body));
+      request.contentLength = bytes.length;
+      request.add(bytes);
       final response = await request.close();
       final text = await response.transform(utf8.decoder).join();
       return (jsonDecode(text) as Map).cast<String, Object?>();
@@ -74,7 +78,15 @@ void main() {
     bool live() => status().startsWith(l10n.liveLive);
     bool running() =>
         find.byKey(const ValueKey('live-stop')).evaluate().isNotEmpty;
-    int count(String marker) => find.textContaining(marker).evaluate().length;
+    // The timeline only: the composer's outbox row repeats a pending prompt.
+    int count(String marker) => find
+        .descendant(
+          of: find.byType(SessionTimelineTile),
+          matching: find.textContaining(marker),
+        )
+        .evaluate()
+        .length;
+    final unsettled = <String>[];
 
     final endpoint = Uri.parse(_endpoint);
     final hosts = dependencies.hosts;
@@ -94,13 +106,13 @@ void main() {
       String scenario,
       Map<String, Object?> action, {
       required Duration disturbance,
+      String slow = 'CW-SLOW',
     }) async {
       final created = await control('create');
       final session = created['session']! as String;
       dependencies.router.go('/s/${profile.id}/$session');
       final opened = await until(live, timeout: const Duration(seconds: 60));
-      final marker =
-          'CW-SLOW $scenario ${DateTime.now().millisecondsSinceEpoch}';
+      final marker = '$slow $scenario ${DateTime.now().millisecondsSinceEpoch}';
       await tester.enterText(
         find.byKey(const ValueKey('live-composer-input')),
         marker,
@@ -131,6 +143,7 @@ void main() {
         'stuck_running': running(),
       };
       await control('result', record);
+      if (!settled || count(marker) != 1 || running()) unsettled.add(scenario);
     }
 
     await cell('drop', {
@@ -141,10 +154,12 @@ void main() {
       'command': 'host/handover',
       'seconds': 15,
     }, disturbance: const Duration(seconds: 18));
-    await cell('background', {
-      'command': 'host/background',
-      'seconds': 60,
-    }, disturbance: const Duration(seconds: 63));
+    await cell(
+      'background',
+      {'command': 'host/background', 'seconds': 60},
+      disturbance: const Duration(seconds: 63),
+      slow: 'CW-SLOW90',
+    );
     await cell('restart', {
       'command': 'restart',
     }, disturbance: const Duration(seconds: 2));
@@ -168,7 +183,11 @@ void main() {
       'listed': listed,
       'listed_at': DateTime.now().toUtc().toIso8601String(),
     });
+    if (!listed) unsettled.add('tui-equivalent');
     await tester.pumpWidget(const SizedBox.shrink());
     expect(dependencies.isDisposed, isTrue);
+    // Every record is already with the host; a red run marks the cells that
+    // did not settle so a green workflow means they all did.
+    expect(unsettled, isEmpty, reason: 'cells that did not settle');
   });
 }

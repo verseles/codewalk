@@ -1,4 +1,5 @@
 import http.client
+import io
 import json
 import sys
 import tempfile
@@ -177,6 +178,59 @@ class RelayTests(unittest.TestCase):
         self.upstream.server_close()
         status, _ = self._get("/api/info")
         self.assertEqual(status, 502)
+
+
+class ReadBodyTests(unittest.TestCase):
+    def _handler(self, headers, raw):
+        return SimpleNamespace(headers=headers, rfile=io.BytesIO(raw))
+
+    def test_chunked_and_sized_bodies_are_read_whole(self):
+        chunked = self._handler(
+            {"Transfer-Encoding": "chunked"},
+            b'4\r\n{"a"\r\n3;ext=1\r\n:1}\r\n0\r\n\r\n',
+        )
+        self.assertEqual(device.read_body(chunked), b'{"a":1}')
+        sized = self._handler({"Content-Length": "7"}, b'{"a":1}rest')
+        self.assertEqual(device.read_body(sized), b'{"a":1}')
+        self.assertIsNone(device.read_body(self._handler({}, b"")))
+
+
+class DeviceServerTests(unittest.TestCase):
+    def setUp(self):
+        self.server = device.DeviceServer(Path(tempfile.mkdtemp()), "127.0.0.1", 0)
+
+    def test_the_report_counts_extra_copies_and_never_the_prompt(self):
+        self.server.log.write(
+            kind="request", session="ses_a1", method="POST", route="/api/session/{id}/prompt"
+        )
+        history = {
+            "data": [
+                {"type": "user", "text": "CW-7 private words"},
+                {"type": "user", "text": "CW-7 private words"},
+                {"type": "user", "text": "CW-8"},
+                {"type": "assistant", "text": "CW-OK"},
+            ]
+        }
+
+        def api(method, path, body=None):
+            if path == "/api/session/active":
+                return 200, json.dumps({"data": [{"id": "ses_a1"}]})
+            return 200, json.dumps(history)
+
+        with mock.patch.object(self.server, "api", side_effect=api):
+            report = self.server.report()
+        self.assertEqual(
+            report["sessions"]["ses_a1"],
+            {"user_prompts": 3, "duplicates": 1, "prompt_posts": 1, "active": True},
+        )
+        self.assertNotIn("private words", json.dumps(report))
+
+    def test_a_closed_server_never_starts_again(self):
+        self.server.close()
+        self.assertEqual(self.server.restart(), {"error": "the server is closed"})
+        with mock.patch.object(self.server, "_start") as start, self.assertRaises(SystemExit):
+            self.server.start()
+        start.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -91,12 +91,37 @@ def main(argv: list[str]) -> int:
         text=True,
         cwd=str(REPO_ROOT),
     )
+    try:
+        return run(args, root, out, server, control_port)
+    finally:
+        stop(server, control_port)
+
+
+def stop(server: subprocess.Popen, control_port: int) -> None:
+    """Asks the server to quit, then SIGTERM: either way it runs its own
+    cleanup and stops the OpenCode process it owns. SIGKILL is the last
+    resort only."""
+    if server.poll() is not None:
+        return
+    try:
+        control(control_port, "quit")
+        server.wait(timeout=120)
+        return
+    except Exception:  # noqa: BLE001 - fall through to the signal
+        pass
+    server.terminate()
+    try:
+        server.wait(timeout=60)
+    except subprocess.TimeoutExpired:
+        server.kill()
+
+
+def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int) -> int:
     first = server.stdout.readline() if server.stdout else ""
     try:
         status = json.loads(first)
     except ValueError:
-        server.kill()
-        print(first + (server.stdout.read() if server.stdout else ""), file=sys.stderr)
+        print(first, file=sys.stderr)
         return 2
     port = int(status["endpoint"].rsplit(":", 1)[1].strip("/"))
     password = (root / "password").read_text().strip()
@@ -132,11 +157,7 @@ def main(argv: list[str]) -> int:
         ) + f"\nflutter test timed out after {args.timeout} s\n"
     log = output.replace(password, "[REDACTED]")
     (out / "flutter-test.log").write_text(log)
-    try:
-        control(control_port, "quit")
-        server.wait(timeout=120)
-    except Exception:  # noqa: BLE001 - the evidence still records the run
-        server.kill()
+    stop(server, control_port)
     records = jsonl(root / "requests.jsonl")
     report = json.loads((root / "report.json").read_text()) if (root / "report.json").is_file() else {}
     evidence = {

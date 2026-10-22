@@ -20,17 +20,25 @@ Each cell runs one fresh session and one unique prompt marker on one target.
 |---|---|
 | `drop` | No network for 15 s (airplane mode, or `nmcli networking off`), then the same network returns |
 | `handover` | Wi-Fi off with mobile data on, then Wi-Fi back; on Linux, Wi-Fi to the phone's USB tether and back |
-| `background` | The app in the background for 60 s (Home and screen off on a phone; minimized on Linux) |
+| `background` | The app in the background for 60 s (Home and screen off on a phone; minimized on Linux), with a `CW-SLOW90` prompt so the turn is still running when the app returns |
 | `restart` | `restart` on the server console: SIGTERM of the owned `serve`, started again on the same state |
 | `tui` | With the catalog open, the official TUI (or, on the emulator, another HTTP client) starts a session |
 
 ## Pass, fail, inconclusive
 
-A cell passes when the prompt shows exactly once, the server records no
-duplicate, nothing stays running after the server settles, the view is live
-again within the bound below, and evidence is referenced. A handover also
-needs the observed transport change (Android `dumpsys connectivity`, Linux
-`nmcli` and `ip route get`); without it the cell is inconclusive.
+A cell passes when the prompt shows exactly once in the timeline, the server
+records no duplicate, nothing stays running after the server settles, the view
+is live again within the bound below, and evidence is referenced. Every cell
+but `tui` also needs `reconnect_proof`: the event-stream reconnect the server
+recorded for that client after the disturbance. A handover also needs the
+observed transport change (Android `dumpsys connectivity`, Linux `nmcli` and
+`ip route get`); without it the cell is inconclusive.
+
+On the emulator the server applies the disturbance through `adb` and records
+each host action with `applied` (every command succeeded) and, for a
+handover, the transport before, during and after plus `changed`. A host action
+that was not applied, or a handover whose transport did not change, makes the
+cell inconclusive, never a pass.
 
 | Scenario | Bound, from the end of the disturbance |
 |---|---|
@@ -67,8 +75,9 @@ only `log.synced` (`../e/README.md`), so every reconnect hydrates instead.
 
 `matrix.json` holds the 20 cells. A cell records the build commit, the steps,
 UTC start and end, `recovery_seconds`, `prompt_shown`, `duplicates`,
-`stuck_running`, the handover `transport_proof`, the reason when not passed
-and the evidence files. The emulator cells come from
+`stuck_running`, the handover `transport_proof`, the `reconnect_proof`, the
+reason when not passed and the evidence files. `SHA256SUMS` covers this
+folder and is regenerated with every matrix change. The emulator cells come from
 `.github/workflows/v2-device-reliability.yml`
 (`tool/ci/device_reliability_android.py`); the owner's cells from the runbook
 on #408, transcribed without changing the owner's verdicts. Addresses,
