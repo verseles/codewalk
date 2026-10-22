@@ -403,8 +403,16 @@ final class ScriptedHarnessAdapter implements HarnessAdapter {
 
   void _validateSelection(Selection? selection) {
     if (selection == null) return;
-    if ((selection.modelId != null &&
-            !_models.any((model) => model.id == selection.modelId)) ||
+    final modelId = selection.modelId;
+    final provider = selection.modelProviderId;
+    final variant = selection.modelVariant;
+    final offered = _models.where((model) => model.id == modelId).firstOrNull;
+    final modelOffered = modelId == null
+        ? provider == null && variant == null
+        : offered != null &&
+              (provider == null || provider == offered.providerId) &&
+              (variant == null || offered.variants.contains(variant));
+    if (!modelOffered ||
         selection.agentId != null ||
         selection.effort != null ||
         selection.permissionMode != null) {
@@ -883,6 +891,8 @@ Map<String, Object?>? selectionIntent(Selection? selection) => selection == null
     ? null
     : {
         'modelId': selection.modelId,
+        'modelProviderId': selection.modelProviderId,
+        'modelVariant': selection.modelVariant,
         'agentId': selection.agentId,
         'effort': selection.effort,
         'permissionMode': selection.permissionMode,

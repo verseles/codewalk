@@ -626,9 +626,9 @@ final class ObservedA {
 
   Selection _selection(Map<String, Object?> model, String agent) => Selection(
     modelId: model['id']! as String,
+    modelProviderId: model['providerID']! as String,
+    modelVariant: model['variant'] as String?,
     agentId: agent,
-    effort: model['variant'] as String?,
-    metadata: CanonicalValue({'providerID': model['providerID']}),
   );
 }
 

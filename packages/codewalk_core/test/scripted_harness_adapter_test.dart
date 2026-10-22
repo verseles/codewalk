@@ -971,6 +971,21 @@ void main() {
           ),
           reason: 'selectionNotOffered',
         );
+        for (final selection in const [
+          Selection(modelId: 'model-beta', modelVariant: 'max'),
+          Selection(modelId: 'model-alpha', modelVariant: 'fast'),
+          Selection(modelId: 'model-beta', modelProviderId: 'other'),
+          Selection(modelVariant: 'fast'),
+          Selection(modelProviderId: 'synthetic-provider'),
+        ]) {
+          expectUnavailable(
+            await handle.select(
+              SelectionChange(selection: selection),
+              id: selectId,
+            ),
+            reason: 'selectionNotOffered',
+          );
+        }
         expectUnavailable(
           await handle.select(
             const SelectionChange(

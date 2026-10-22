@@ -51,10 +51,12 @@ final class ModelEntry {
     Map<String, bool?> inputModalities = const {},
     this.contextLimit,
     this.outputLimit,
+    Iterable<String> variants = const [],
     this.metadata,
   }) : id = requireText(id),
        providerId = requireText(providerId),
-       inputModalities = immutableMap(inputModalities) {
+       inputModalities = immutableMap(inputModalities),
+       variants = immutableList(variants.map(requireText)) {
     if ((contextLimit != null && contextLimit! < 0) ||
         (outputLimit != null && outputLimit! < 0)) {
       throw ArgumentError('Model limits must not be negative');
@@ -66,6 +68,9 @@ final class ModelEntry {
   final Map<String, bool?> inputModalities;
   final int? contextLimit;
   final int? outputLimit;
+
+  /// Variant ids in catalog order; the variant settings are never copied.
+  final List<String> variants;
   final CanonicalValue? metadata;
 }
 

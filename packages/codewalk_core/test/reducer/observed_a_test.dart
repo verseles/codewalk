@@ -415,6 +415,8 @@ Map<String, Object?> _semanticProjection(SessionState state) => {
       ? null
       : {
           'model': state.selection!.modelId,
+          'provider': state.selection!.modelProviderId,
+          'variant': state.selection!.modelVariant,
           'agent': state.selection!.agentId,
           'effort': state.selection!.effort,
           'permission': state.selection!.permissionMode,

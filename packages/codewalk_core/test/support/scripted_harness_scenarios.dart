@@ -350,6 +350,7 @@ ScriptedHarnessAdapter scriptedAdapter({
       providerId: 'synthetic-provider',
       label: 'Synthetic Beta',
       inputModalities: {'text/plain': true},
+      variants: ['fast', 'deep'],
     ),
   ],
   steps: steps,

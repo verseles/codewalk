@@ -135,15 +135,22 @@ final class SessionQuery {
 /// and carries its own command ID and uncertain receipt.
 enum OpenIntent { viewHistory, attachLive }
 
+/// The provider and variant belong to [modelId]: a harness that names a model
+/// by provider, or offers variants from its model catalog, carries them here
+/// instead of in [effort] or [metadata].
 final class Selection {
   const Selection({
     this.modelId,
+    this.modelProviderId,
+    this.modelVariant,
     this.agentId,
     this.effort,
     this.permissionMode,
     this.metadata,
   });
   final String? modelId;
+  final String? modelProviderId;
+  final String? modelVariant;
   final String? agentId;
   final String? effort;
   final String? permissionMode;

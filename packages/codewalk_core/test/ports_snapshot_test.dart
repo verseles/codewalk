@@ -656,5 +656,25 @@ void main() {
         );
       },
     );
+    test('a model keeps its variant ids in order and immutable', () async {
+      final model = ModelEntry(
+        id: 'model',
+        providerId: 'provider',
+        label: 'Model',
+        variants: ['low', 'high'],
+      );
+      expect(model.variants, ['low', 'high']);
+      expect(() => model.variants.add('max'), throwsUnsupportedError);
+      expect((await _Catalog().models()).single.variants, isEmpty);
+      expect(
+        () => ModelEntry(
+          id: 'model',
+          providerId: 'provider',
+          label: 'Model',
+          variants: [''],
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 }
