@@ -155,11 +155,12 @@ jobs:
           make v2-android-preview 2>&1 | tee build/native-evidence/compiler.log
           cd build/app/outputs/flutter-apk
           sha256sum app-arm64-v8a-profile.apk > app-arm64-v8a-profile.apk.sha256
+      # Internal: not the owner's handoff, which only the launch job keeps.
       # Named by run only, so re-running a failed launch finds this build.
       - name: Hand the build to the launch check
         uses: actions/upload-artifact@v4
         with:
-          name: v2-preview-android-build-${{ github.run_id }}
+          name: internal-v2-preview-android-build-${{ github.run_id }}
           path: |
             build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk
             build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk.sha256
@@ -188,7 +189,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: v2-preview-android-build-${{ github.run_id }}
+          name: internal-v2-preview-android-build-${{ github.run_id }}
           path: launch
       - name: Enable KVM group permissions
         run: |
