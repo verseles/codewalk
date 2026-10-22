@@ -1,6 +1,8 @@
 import http.client
 import io
 import json
+import os
+import signal
 import sys
 import tempfile
 import threading
@@ -231,6 +233,81 @@ class DeviceServerTests(unittest.TestCase):
         with mock.patch.object(self.server, "_start") as start, self.assertRaises(SystemExit):
             self.server.start()
         start.assert_not_called()
+
+
+class ServeTests(unittest.TestCase):
+    def test_a_sigterm_while_booting_still_cleans_up(self):
+        previous = signal.getsignal(signal.SIGTERM)
+        self.addCleanup(signal.signal, signal.SIGTERM, previous)
+        root = Path(tempfile.mkdtemp())
+        args = SimpleNamespace(
+            root=str(root), bind="127.0.0.1", port=0, control_port=None,
+            console=False, adb_serial=None, app_package="com.verseles.codewalk",
+        )
+
+        def booting(_self):
+            (root / "password").write_text("left over\n")
+            os.kill(os.getpid(), signal.SIGTERM)
+            time.sleep(1)
+
+        with mock.patch.object(device.DeviceServer, "prepare", booting), \
+                mock.patch.object(device.DeviceServer, "start") as start, \
+                mock.patch.object(device.DeviceServer, "close") as close:
+            self.assertEqual(device.serve(args), 130)
+        start.assert_not_called()
+        close.assert_called_once()
+        self.assertFalse((root / "password").exists())
+
+
+class HostActionTests(unittest.TestCase):
+    def setUp(self):
+        self.actions = device.HostActions(
+            "emulator-5554", "com.verseles.codewalk", device.Log(Path(tempfile.mkdtemp()) / "r.jsonl")
+        )
+
+    def test_an_unparsed_transport_is_never_a_change(self):
+        changed = device.HostActions.changed
+        self.assertTrue(changed("WIFI", "CELLULAR"))
+        self.assertFalse(changed("WIFI", "WIFI"))
+        self.assertFalse(changed("WIFI", "none"))
+        self.assertFalse(changed("network 100: transports not reported", "CELLULAR"))
+        self.assertFalse(changed("WIFI", "network 101: transports not reported"))
+
+    def test_bad_seconds_are_refused_without_running(self):
+        for seconds in ("ten", None, 0, 301):
+            with self.subTest(seconds=seconds):
+                self.assertEqual(
+                    self.actions.run("drop", {"seconds": seconds}),
+                    {"error": "seconds must be 1..300"},
+                )
+
+    def test_a_warning_on_stderr_still_applies(self):
+        done = SimpleNamespace(returncode=0, stdout="ok\n", stderr="warning: slow\n")
+        with mock.patch.object(device.subprocess, "run", return_value=done):
+            self.assertEqual(self.actions.shell("svc", "wifi", "enable"), (True, "ok\n"))
+        done.returncode = 1
+        with mock.patch.object(device.subprocess, "run", return_value=done):
+            self.assertEqual(self.actions.shell("svc", "wifi", "enable")[0], False)
+
+
+class ControlTests(unittest.TestCase):
+    def test_a_non_object_body_gets_a_json_error(self):
+        control = _serve(device.ControlHandler)
+        self.addCleanup(control.server_close)
+        self.addCleanup(control.shutdown)
+        control.device = mock.Mock()
+        control.stopping = threading.Event()
+        control.actions = None
+        connection = http.client.HTTPConnection("127.0.0.1", control.server_address[1], timeout=10)
+        try:
+            connection.request("POST", "/quit", body="[1]", headers={"Content-Length": "3"})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 400)
+            self.assertEqual(json.loads(response.read()), {"error": "the body must be a JSON object"})
+        finally:
+            connection.close()
+        self.assertFalse(control.stopping.is_set())
+        control.device.command.assert_not_called()
 
 
 if __name__ == "__main__":

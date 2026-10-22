@@ -143,7 +143,10 @@ void main() {
         'stuck_running': running(),
       };
       await control('result', record);
-      if (!settled || count(marker) != 1 || running()) unsettled.add(scenario);
+      // A turn that never ran was not disturbed: the cell proves nothing.
+      if (!started || !settled || count(marker) != 1 || running()) {
+        unsettled.add(scenario);
+      }
     }
 
     await cell('drop', {

@@ -16,7 +16,7 @@ Commands, typed on stdin or POSTed to the loopback --control-port:
   restart   stop the server gracefully (SIGTERM) and start it again on the
             same state; the relay endpoint does not change
   tui       the command that attaches the official TUI through the relay
-  report    the per-session user prompts (duplicates, execution state) and
+  report    the per-session user prompts (duplicates, active state) and
             the event-stream reconnect gaps per client, as JSON
   quit      stop everything and clean the owned processes
 The control port also accepts, with a JSON body:
@@ -713,8 +713,8 @@ class HostActions:
         return self.shell(*args)[1]
 
     def shell(self, *args: str) -> tuple[bool, str]:
-        """Runs one adb shell command; ok is False on a non-zero exit, an
-        error on stderr or adb itself failing."""
+        """Runs one adb shell command; ok is False on a non-zero exit or adb
+        itself failing. A warning on stderr alone is not a failure."""
         try:
             done = subprocess.run(
                 ["adb", "-s", self.serial, "shell", *args],
@@ -724,7 +724,7 @@ class HostActions:
             )
         except (OSError, subprocess.TimeoutExpired):
             return False, ""
-        return done.returncode == 0 and not done.stderr.strip(), done.stdout
+        return done.returncode == 0, done.stdout
 
     def transports(self) -> str:
         """The default network's transports, as Android reports them."""
@@ -739,8 +739,22 @@ class HostActions:
                     return found.group(1)
         return f"network {match.group(1)}: transports not reported"
 
+    @staticmethod
+    def parsed(transport: str) -> bool:
+        """A default network whose transports were read."""
+        return transport != "none" and not transport.startswith("network ")
+
+    @classmethod
+    def changed(cls, before: str, during: str) -> bool:
+        """Whether one read transport became another; an unparsed value
+        never counts as a change."""
+        return cls.parsed(before) and cls.parsed(during) and during != before
+
     def run(self, name: str, body: dict) -> dict:
-        seconds = int(body.get("seconds", 10))
+        try:
+            seconds = int(body.get("seconds", 10))
+        except (TypeError, ValueError):
+            seconds = 0
         if not 1 <= seconds <= 300:
             return {"error": "seconds must be 1..300"}
         action = {
@@ -768,13 +782,15 @@ class HostActions:
         time.sleep(5)
         self.log.write(kind="host-action", action="drop", off=off, restored=restored,
                        applied=off_ok and on_ok, before=before, during=during,
-                       after=self.transports(), changed=during != before)
+                       after=self.transports(),
+                       changed=self.parsed(before) and during == "none")
 
     def _handover(self, seconds: int) -> None:
         time.sleep(1)
+        # The baseline is Wi-Fi's, taken before mobile data is switched on.
+        before = self.transports()
         data_ok, _ = self.shell("svc", "data", "enable")
         _, mobile = self.shell("settings", "get", "global", "mobile_data")
-        before = self.transports()
         off_ok, _ = self.shell("svc", "wifi", "disable")
         cellular = now()
         time.sleep(3)
@@ -787,7 +803,7 @@ class HostActions:
                        wifi=wifi, applied=data_ok and off_ok and on_ok,
                        mobile_data=mobile.strip(), before=before, during=during,
                        after=self.transports(),
-                       changed=during not in (before, "none"))
+                       changed=self.changed(before, during))
 
     def _background(self, seconds: int) -> None:
         time.sleep(1)
@@ -815,11 +831,9 @@ class ControlHandler(BaseHTTPRequestHandler):
         except (ValueError, UnicodeDecodeError):
             body = None
         if not isinstance(body, dict):
-            self.send_response(400)
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
-        if name == "quit":
+            name, body = "", {}
+            result = {"error": "the body must be a JSON object"}
+        elif name == "quit":
             result = {"quit": True}
         elif name.startswith("host/"):
             actions = self.server.actions  # type: ignore[attr-defined]
@@ -848,6 +862,17 @@ def serve(args: argparse.Namespace) -> int:
     device = DeviceServer(root, args.bind, args.port)
     secret = root / "password"
     servers: list[ThreadingHTTPServer] = []
+    stopping = threading.Event()
+    serving = threading.Event()
+
+    # Installed before anything is owned: a SIGTERM while booting unwinds
+    # through the cleanup below; once serving, it ends the run with a report.
+    def terminate(*_) -> None:
+        stopping.set()
+        if not serving.is_set():
+            raise KeyboardInterrupt
+
+    signal.signal(signal.SIGTERM, terminate)
     # Whatever fails, the owned server stops and the password file goes.
     try:
         device.prepare()
@@ -858,7 +883,6 @@ def serve(args: argparse.Namespace) -> int:
         relay.device = device  # type: ignore[attr-defined]
         device.port = int(relay.server_address[1])
         threading.Thread(target=relay.serve_forever, daemon=True).start()
-        stopping = threading.Event()
         control = None
         if args.control_port is not None:
             control = ThreadingHTTPServer(("127.0.0.1", args.control_port), ControlHandler)
@@ -874,6 +898,7 @@ def serve(args: argparse.Namespace) -> int:
             threading.Thread(target=control.serve_forever, daemon=True).start()
         # Created owner-only, never readable by others even for a moment.
         fd = os.open(secret, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        os.fchmod(fd, 0o600)  # a file left by an earlier run keeps no wider mode
         with os.fdopen(fd, "w") as f:
             f.write(device.password + "\n")
         print(json.dumps({**device.status(), "control_port": control and control.server_address[1]}))
@@ -890,7 +915,7 @@ def serve(args: argparse.Namespace) -> int:
 
         if args.console:
             threading.Thread(target=console, daemon=True).start()
-        signal.signal(signal.SIGTERM, lambda *_: stopping.set())
+        serving.set()
         try:
             while not stopping.wait(0.5):
                 pass
@@ -900,6 +925,9 @@ def serve(args: argparse.Namespace) -> int:
             (root / "report.json").write_text(json.dumps(device.report(), indent=2) + "\n")
         except (OSError, ValueError) as error:
             print(f"device-server: no report: {error}", file=sys.stderr)
+    except KeyboardInterrupt:
+        print("device-server: interrupted", file=sys.stderr)
+        return 130
     finally:
         for server in servers:
             server.shutdown()

@@ -22,6 +22,7 @@ import json
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 from pathlib import Path
@@ -116,6 +117,13 @@ def stop(server: subprocess.Popen, control_port: int) -> None:
         server.kill()
 
 
+def drain(stream) -> None:
+    """The server's own lines (status, errors, tracebacks; never the
+    password) go to the CI log, and its pipe never fills."""
+    for line in stream:
+        print(f"[server] {line}", end="", file=sys.stderr)
+
+
 def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int) -> int:
     first = server.stdout.readline() if server.stdout else ""
     try:
@@ -123,6 +131,7 @@ def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int
     except ValueError:
         print(first, file=sys.stderr)
         return 2
+    threading.Thread(target=drain, args=(server.stdout,), daemon=True).start()
     port = int(status["endpoint"].rsplit(":", 1)[1].strip("/"))
     password = (root / "password").read_text().strip()
     device = {
@@ -159,7 +168,11 @@ def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int
     (out / "flutter-test.log").write_text(log)
     stop(server, control_port)
     records = jsonl(root / "requests.jsonl")
-    report = json.loads((root / "report.json").read_text()) if (root / "report.json").is_file() else {}
+    try:
+        report = json.loads((root / "report.json").read_text())
+    except (OSError, ValueError) as error:
+        # The rest of the evidence still lands; the gap is recorded.
+        report = {"error": f"no report: {type(error).__name__}"}
     evidence = {
         "device": device,
         "server_version": report.get("version"),
@@ -167,6 +180,7 @@ def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int
         "duration_seconds": round(time.time() - started),
         "results": jsonl(root / "results.jsonl"),
         "host_actions": [r for r in records if r.get("kind") == "host-action"],
+        "report_error": report.get("error"),
         "restarts": report.get("restarts", []),
         "sessions": report.get("sessions", {}),
         "event_streams": report.get("event_streams", {}),
@@ -179,6 +193,18 @@ def run(args, root: Path, out: Path, server: subprocess.Popen, control_port: int
     if (root / "requests.jsonl").is_file():
         shutil.copy(root / "requests.jsonl", out / "requests.jsonl")
     print(json.dumps({k: evidence[k] for k in ("device", "flutter_test_rc", "results")}, indent=2))
+    # The app view alone is not the verdict: a copy the server recorded, or
+    # a history it could not read, fails the run too.
+    sessions = evidence["sessions"]
+    flawed = sorted(
+        session
+        for session, entry in sessions.items()
+        if not isinstance(entry, dict) or entry.get("error") or entry.get("duplicates", 0) > 0
+    )
+    if rc == 0 and (flawed or report.get("error") or not sessions):
+        print(f"server evidence fails the run: {flawed or report.get('error') or 'no sessions'}",
+              file=sys.stderr)
+        return 1
     return rc
 
 

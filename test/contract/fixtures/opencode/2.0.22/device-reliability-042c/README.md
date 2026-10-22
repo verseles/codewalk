@@ -40,6 +40,13 @@ handover, the transport before, during and after plus `changed`. A host action
 that was not applied, or a handover whose transport did not change, makes the
 cell inconclusive, never a pass.
 
+On the emulator, `recovery_seconds` runs from the end of the host action
+(`restored`, `wifi` or `relaunched`; for a restart, the record's `ready`) to
+the relay's next `stream-open` for that client, both on the host clock; that
+stream-open is the `reconnect_proof`. The app's `live_and_idle_at` only
+corroborates it, because it also waits for the turn to end. On the owner's
+devices it is the stopwatch reading of the runbook.
+
 | Scenario | Bound, from the end of the disturbance |
 |---|---|
 | `drop`, `handover`, `background` | live again within 10 s |
