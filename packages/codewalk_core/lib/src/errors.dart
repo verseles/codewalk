@@ -11,6 +11,9 @@ enum ErrorKind {
   toolFailure,
   versionUnsupported,
   protocol,
+
+  /// A recognized provider failure without a more specific category.
+  provider,
   unknown,
 }
 

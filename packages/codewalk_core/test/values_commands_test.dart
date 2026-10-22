@@ -359,6 +359,11 @@ void main() {
         );
       },
     );
+    test('a provider error kind is a known value', () {
+      final kind = OpenValue.parse('provider', ErrorKind.values);
+      expect(kind.known, ErrorKind.provider);
+      expect(kind.toJson(), 'provider');
+    });
     test('a retryable error confers no replay permission', () {
       final error = ErrorInfo(
         kind: const OpenValue.known(ErrorKind.network),
