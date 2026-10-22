@@ -20,6 +20,7 @@ export 'src/session_rules.dart';
 export 'src/shell_projection.dart';
 export 'src/stream_owner.dart';
 export 'src/event_projection.dart';
+export 'src/error_projection.dart';
 export 'src/execution_projection.dart';
 export 'src/inbox_projection.dart' hide openCodeInboxRow;
 export 'src/interaction_projection.dart'

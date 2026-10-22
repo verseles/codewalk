@@ -163,9 +163,10 @@ void main() {
     expect(usage.tokens?.cacheWrite, 0);
   });
 
-  test('a failed step emits the history error marker', () {
-    final events = projectStepUsage(stepFrame('failed'));
-    final marker = (events.single as ItemUpserted).item as UnknownItem;
+  test('a failed step without usage emits nothing', () {
+    // The error reaches the timeline on the failed turn's outcome, from
+    // `session.execution.failed`, as the history does from the message.
+    expect(projectStepUsage(stepFrame('failed')), isEmpty);
     final history = projectOpenCodeHistory(
       [
         assistant(
@@ -178,19 +179,8 @@ void main() {
       ],
       historyRef,
       sourceVersion: '2.0.22',
-    ).whereType<UnknownItem>().single;
-    expect(marker.id, history.id);
-    expect(marker.rawType, history.rawType);
-    expect(marker.raw.value, history.raw.value);
-    expect(marker.status, history.status);
-    expect(marker.generation, isNot(history.generation));
-    // History adds an `empty` marker for content-free rows; live frames carry
-    // no content evidence, so only the error marker is projected.
-    expect(events, hasLength(1));
-    expect(
-      events.single.meta.source.extra?.value,
-      containsPair('errorContentNotProjected', true),
     );
+    expect(history.single, isA<AssistantText>());
   });
 
   test('failed-step usage requires both cost and tokens', () {
@@ -204,19 +194,24 @@ void main() {
         },
       ),
     );
-    expect(both.map((e) => e.runtimeType), [ItemUpserted, UsageObserved]);
-    expect(usageOf(both.last).aggregationKey, 'step:msg_step');
+    final usage = both.single;
+    expect(usageOf(usage).aggregationKey, 'step:msg_step');
+    expect(
+      usage.meta.source.extra?.value,
+      containsPair('errorContentNotProjected', true),
+    );
     for (final fields in [
       {'cost': 0},
       {'tokens': tokenJson},
+      {'finish': 'content-filter'},
     ]) {
-      expect(
-        projectStepUsage(stepFrame('failed', fields: fields)).single,
-        isA<ItemUpserted>(),
-      );
+      expect(projectStepUsage(stepFrame('failed', fields: fields)), isEmpty);
     }
     final filtered = projectStepUsage(
-      stepFrame('failed', fields: {'finish': 'content-filter'}),
+      stepFrame(
+        'failed',
+        fields: {'finish': 'content-filter', 'cost': 0, 'tokens': tokenJson},
+      ),
     );
     expect(
       filtered.single.meta.source.extra?.value,
@@ -426,7 +421,7 @@ void main() {
           },
         ),
       ),
-      hasLength(1),
+      isEmpty,
     );
     expect(
       () => projectStepUsage(
@@ -442,45 +437,6 @@ void main() {
     expect(
       () => projectStepUsage(stepFrame('started', fields: {'agent': '\ud800'})),
       failsWith(OpenCodeStepUsageProjectionFailure.malformed),
-    );
-  });
-
-  test('a resident item of another kind under the marker ID is rejected', () {
-    final markerId =
-        (projectStepUsage(stepFrame('failed')).single as ItemUpserted).item.id;
-    final source = SourceProvenance(
-      harness: historyRef.harnessRef,
-      version: '2.0.22',
-      nativeType: 'seed',
-    );
-    final state = reduce(
-      empty,
-      ItemUpserted(
-        meta: EventMeta(
-          owner: SessionOwner(historyRef),
-          position: StreamPosition(
-            id: 'observer-a',
-            epoch: 'epoch-a',
-            seq: BigInt.zero,
-          ),
-          receivedAt: DateTime.utc(2026, 10, 14),
-          source: source,
-        ),
-        item: Notice(
-          meta: ItemMeta(
-            id: markerId,
-            generation: 'seed',
-            status: const OpenValue.known(ItemStatus.completed),
-            source: source,
-          ),
-          kind: const OpenValue.known(NoticeKind.system),
-          text: 'x',
-        ),
-      ),
-    ).state;
-    expect(
-      () => projectStepUsage(stepFrame('failed'), current: state),
-      failsWith(OpenCodeStepUsageProjectionFailure.itemKindMismatch),
     );
   });
 }

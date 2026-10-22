@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'error_projection.dart';
 import 'version_policy.dart';
 
 enum OpenCodeExecutionProjectionFailure {
@@ -44,9 +45,10 @@ const _reasons = {'user', 'shutdown', 'superseded', 'inactivity'};
 /// matches the history `idle` row. A shutdown keeps the server's execution
 /// claim for resumption, so it records no outcome and keeps the previous one.
 ///
-/// Failure `message`, `status` and `response` are never read; the error kind
-/// stays unknown and no retry is inferred. Reference-client refetches (open
-/// tool parts, missing session info) belong to the stream owner.
+/// A failure's type picks its category and its message is kept redacted and
+/// bounded ([openCodeErrorInfo]); `status` and `response` are never read and
+/// no retry is inferred. Reference-client refetches (open tool parts, missing
+/// session info) belong to the stream owner.
 List<SessionEvent> projectOpenCodeExecutionEvent(
   Object? value,
   SessionState current, {
@@ -61,7 +63,7 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
 
   ErrorInfo? error;
   String? reason;
-  if (type == _failed) error = _error(data['error']);
+  if (type == _failed) error = _error(data['error'], typed: true);
   if (type == _interrupted) {
     reason = _text(data['reason'], cap: _idLimit);
     if (!_reasons.contains(reason)) {
@@ -88,7 +90,6 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
         'nativeDurableVersion': 1,
         'nativeMessageId': ?messageId,
         'interruptReason': ?reason,
-        if (error != null) 'errorContentNotProjected': true,
       }),
     ),
   );
@@ -137,8 +138,9 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
     ),
     ItemUpserted(
       meta: eventMeta,
-      // History idle rows carry only the outcome; error and reason stay on
-      // the execution state so live and history items remain identical.
+      // The history idle row carries the same error from the failed turn's
+      // last assistant message; the reason stays on the execution state so
+      // live and history items remain identical.
       item: TurnOutcome(
         meta: ItemMeta(
           id: id,
@@ -153,6 +155,9 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
           source: eventMeta.source,
         ),
         kind: OpenValue.known(outcomeKind),
+        error: error != null && openCodeErrorHasCard(error.rawType)
+            ? error
+            : null,
       ),
     ),
   ]);
@@ -364,11 +369,21 @@ _header(
   );
 }
 
-ErrorInfo _error(Object? value) {
-  final errorType = _text(_object(value)['type'], cap: _idLimit);
+/// The error's type; [typed] also reads its category and message, otherwise
+/// the kind stays unknown and the message unread.
+ErrorInfo _error(Object? value, {bool typed = false}) {
+  final error = _object(value);
+  final errorType = _text(error['type'], cap: _idLimit);
   // Schema.String allows empty; Core ErrorInfo requires a nonempty rawType.
   if (errorType.isEmpty) {
     _fail(OpenCodeExecutionProjectionFailure.unsupportedValue);
+  }
+  if (typed) {
+    final message = error['message'];
+    if (error.containsKey('message') && message is! String) {
+      _fail(OpenCodeExecutionProjectionFailure.malformed);
+    }
+    return openCodeErrorInfo(errorType, message as String?);
   }
   return ErrorInfo(
     kind: const OpenValue.known(ErrorKind.unknown),

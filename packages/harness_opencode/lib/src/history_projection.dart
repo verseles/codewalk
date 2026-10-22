@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'error_projection.dart';
 import 'shell_projection.dart';
 
 /// Atomic, flat HTTP history projection. These are selected-content limits,
@@ -9,6 +10,11 @@ import 'shell_projection.dart';
 /// 16384 nodes/page, 256 KiB/text, 64 KiB/structured field, 1 MiB/page.
 /// Generations are deterministic, full-session/message-scoped history identities;
 /// they are not live-stream generations or turn/completion evidence.
+///
+/// A failed `idle` row carries the error of the turn's last assistant message
+/// ([openCodeErrorInfo]), which `session.execution.failed` reports live; a
+/// user row or any other outcome clears it. Known limit: when that message is
+/// on an older page than its `idle` row, the outcome carries no error.
 List<TimelineItem> projectOpenCodeHistory(
   List<Object?> messages,
   SessionRef ref, {
@@ -203,6 +209,8 @@ List<TimelineItem> projectOpenCodeHistory(
   CanonicalValue manifest(Object? value) =>
       structured(value, redact: false, onRedacted: () {});
   text(sourceVersion, cap: 128, nonempty: true);
+  // The last assistant message's error since the previous user or idle row.
+  ErrorInfo? failure;
   for (final row in messages) {
     final message = map(row);
     // Trace manifests charge this identifier when retaining it; validation
@@ -253,6 +261,7 @@ List<TimelineItem> projectOpenCodeHistory(
     const completed = OpenValue.known(ItemStatus.completed);
     switch (type) {
       case 'user':
+        failure = null;
         add(
           UserInput(
             meta: meta('user', 0, status: completed),
@@ -488,12 +497,14 @@ List<TimelineItem> projectOpenCodeHistory(
               }, extra: extra);
           }
         }
-        if (blocks.isEmpty) {
+        // A message that failed before any content is shown by its error.
+        if (blocks.isEmpty && !message.containsKey('error')) {
           unknown('empty', 'assistant', 0, {
             'type': 'assistant',
             'reason': 'emptyAssistantContent',
           });
         }
+        failure = null;
         if (message.containsKey('error')) {
           final error = map(message['error']);
           final errorType = text(
@@ -502,10 +513,13 @@ List<TimelineItem> projectOpenCodeHistory(
             nonempty: true,
             charge: false,
           );
-          unknown('error', errorType, 0, {
-            'type': errorType,
-            'reason': 'assistantErrorNotProjected',
-          });
+          String? errorMessage;
+          if (error.containsKey('message')) {
+            errorMessage = text(error['message'], charge: false);
+          }
+          if (openCodeErrorHasCard(errorType)) {
+            failure = openCodeErrorInfo(errorType, errorMessage);
+          }
         }
         if (message.containsKey('retry')) {
           final retry = map(message['retry']);
@@ -543,15 +557,18 @@ List<TimelineItem> projectOpenCodeHistory(
           ),
         );
       case 'idle':
+        final outcome = OpenValue.parse(
+          text(message['outcome'], cap: 4096, nonempty: true),
+          OutcomeKind.values,
+        );
         add(
           TurnOutcome(
             meta: meta('outcome', 0, status: completed),
-            kind: OpenValue.parse(
-              text(message['outcome'], cap: 4096, nonempty: true),
-              OutcomeKind.values,
-            ),
+            kind: outcome,
+            error: outcome.known == OutcomeKind.failed ? failure : null,
           ),
         );
+        failure = null;
       case 'shell':
         final shellId = text(message['shellID'], cap: 4096, nonempty: true);
         if (!shellId.startsWith('sh_')) malformed();

@@ -98,18 +98,31 @@ void main() {
         expect(state.lastOutcome!.kind.value, kind);
         expect(state.lastOutcome!.reason, reason);
         final item = outcomeOf(events.last);
+        // The server reports a failed turn's error on its last assistant
+        // message too; the history attaches it to the idle row.
         final history = projectOpenCodeHistory(
           [
+            assistant(
+              'a1',
+              const [],
+              fields: {
+                'error': (executionFrame('failed')['data'] as Map)['error'],
+              },
+            ),
             message('turn1', 'idle', {'outcome': kind}),
           ],
           historyRef,
           sourceVersion: '2.0.22',
-        ).single;
+        ).whereType<TurnOutcome>().single;
         expect(item.id, history.id);
         expect(item.status, history.status);
-        expect(item.kind, (history as TurnOutcome).kind);
+        expect(item.kind, history.kind);
         expect(item.meta.ordinal, history.meta.ordinal);
-        expect(item.error, isNull);
+        expect(errorJson(item.error), errorJson(history.error));
+        expect(
+          item.error?.kind.known,
+          kind == 'failed' ? ErrorKind.auth : null,
+        );
         expect(item.reason, isNull);
         expect(item.turnId, isNull);
         expect(item.generation, isNot(history.generation));
@@ -155,42 +168,84 @@ void main() {
     expect(resumed.timeline.single, isA<TurnOutcome>());
   });
 
-  test('failure keeps only the error type and never reads private fields', () {
+  test('a failure is typed by its type and never reads status or body', () {
     final events = projectExecution(
       executionFrame(
         'failed',
         error: PrivateToolFields(
           {
             'type': 'provider.quota',
-            'message': 'fake-private-message',
+            'message':
+                'Monthly limit reached. Authorization: Bearer abc.def.ghi',
             'status': 429,
             'response': {'body': 'fake-private-body'},
           },
-          {'message', 'status', 'response'},
+          {'status', 'response'},
         ),
       ),
     );
     final outcome = stateOf(events.first).lastOutcome!;
-    expect(errorJson(outcome.error), {
-      'kind': 'unknown',
+    final typed = {
+      'kind': 'quota',
       'rawType': 'provider.quota',
-      'rawMessage': '',
+      'rawMessage': 'Monthly limit reached. Authorization: Bearer [redacted]',
       'retryable': false,
       'retryAt': null,
-      'action': null,
-      'details': null,
-    });
+      'action': 'changeModel',
+      'details': {'messageRedacted': true},
+    };
+    expect(errorJson(outcome.error), typed);
     expect(stateOf(events.first).error, isNull);
-    expect(outcomeOf(events.last).error, isNull);
+    // The card's host carries the same error as the execution state.
+    expect(errorJson(outcomeOf(events.last).error), typed);
     for (final event in events) {
       final manifest = executionManifest(event);
       expect(manifest, isNot(contains('fake-private')));
-      expect(manifest, contains('"errorContentNotProjected":true'));
+      expect(manifest, isNot(contains('abc.def.ghi')));
+      expect(manifest, isNot(contains('errorContentNotProjected')));
     }
     final unknown = projectExecution(
       executionFrame('failed', error: {'type': 'future.kind', 'message': ''}),
     );
-    expect(stateOf(unknown.first).lastOutcome!.error!.rawType, 'future.kind');
+    final future = outcomeOf(unknown.last).error!;
+    expect(future.kind.known, ErrorKind.unknown);
+    expect(future.rawType, 'future.kind');
+    expect(future.rawMessage, '');
+    expect(future.action!.known, ErrorAction.changeModel);
+  });
+
+  test('an aborted failure keeps the plain outcome marker', () {
+    final events = projectExecution(
+      executionFrame(
+        'failed',
+        error: {'type': 'aborted', 'message': 'Step interrupted'},
+      ),
+    );
+    final error = stateOf(events.first).lastOutcome!.error!;
+    expect(error.rawType, 'aborted');
+    expect(error.kind.known, ErrorKind.unknown);
+    expect(error.action, isNull);
+    expect(outcomeOf(events.last).kind.known, OutcomeKind.failed);
+    expect(outcomeOf(events.last).error, isNull);
+  });
+
+  test('a failure without a message keeps an empty one', () {
+    final events = projectExecution(
+      executionFrame('failed', error: {'type': 'provider.timeout'}),
+    );
+    final error = outcomeOf(events.last).error!;
+    expect(error.kind.known, ErrorKind.network);
+    expect(error.rawMessage, '');
+    expect(error.details, isNull);
+    expect(
+      () => projectExecution(
+        executionFrame(
+          'failed',
+          error: {'type': 'provider.timeout', 'message': 42},
+        ),
+      ),
+      failsWith(OpenCodeExecutionProjectionFailure.malformed),
+    );
   });
 
   test('provenance is identical for both events of one frame', () {

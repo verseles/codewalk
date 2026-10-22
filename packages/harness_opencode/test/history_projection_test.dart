@@ -5,8 +5,10 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/src/history_projection.dart';
 import 'package:test/test.dart';
 
+import 'execution_test_data.dart' show errorJson;
 import 'history_test_data.dart';
 import 'support/fixture_replay.dart';
+import 'tool_test_data.dart' show PrivateToolFields;
 
 List<TimelineItem> project(
   List<Object?> rows, {
@@ -399,7 +401,7 @@ void main() {
   );
 
   test(
-    'assistant empty/error/retry and unsupported native kinds preserve explicit markers, never invented outcomes',
+    'assistant retry and unsupported native kinds preserve explicit markers, never invented outcomes',
     () {
       final items = project([
         assistant(
@@ -427,7 +429,9 @@ void main() {
         }),
         message('e', 'system', {'text': 'native system'}),
       ]);
-      expect(items.whereType<UnknownItem>(), hasLength(5));
+      // The failed message is shown by its turn's outcome, not by empty or
+      // error markers; without an idle row no outcome is invented.
+      expect(items.whereType<UnknownItem>(), hasLength(3));
       expect(items.whereType<TurnOutcome>(), isEmpty);
       expect(items.whereType<Notice>().map((i) => i.kind.known), [
         NoticeKind.continuation,
@@ -439,9 +443,148 @@ void main() {
       );
       final encoded = jsonEncode(items.map(semanticItem).toList());
       expect(encoded, isNot(contains('private')));
-      expect((items[2] as UnknownItem).raw.value, containsPair('attempt', 1));
+      expect((items[0] as UnknownItem).raw.value, containsPair('attempt', 1));
+      expect(
+        project([assistant('a', [])]).whereType<UnknownItem>().single.raw.value,
+        containsPair('reason', 'emptyAssistantContent'),
+      );
     },
   );
+
+  group('turn errors (V2-055A)', () {
+    Map<String, Object?> failed(Object? error, {List<Object?>? blocks}) =>
+        assistant('a', blocks ?? const [], fields: {'error': error});
+    final idle = message('i', 'idle', {'outcome': 'failed'});
+
+    test('a failed idle row carries the last assistant error, typed', () {
+      final items = project([
+        message('u', 'user', {'text': 'hi'}),
+        failed(
+          PrivateToolFields(
+            {
+              'type': 'provider.auth',
+              'message': 'Denied. Authorization: Bearer abc.def.ghi',
+              'status': 403,
+              'response': {'body': 'fake-private-body'},
+            },
+            {'status', 'response'},
+          ),
+          blocks: [textBlock('partial answer')],
+        ),
+        idle,
+      ]);
+      expect(items.map((i) => i.runtimeType), [
+        UserInput,
+        AssistantText,
+        TurnOutcome,
+      ]);
+      final outcome = items.last as TurnOutcome;
+      expect(outcome.kind.known, OutcomeKind.failed);
+      expect(errorJson(outcome.error), {
+        'kind': 'auth',
+        'rawType': 'provider.auth',
+        'rawMessage': 'Denied. Authorization: Bearer [redacted]',
+        'retryable': false,
+        'retryAt': null,
+        'action': 'changeModel',
+        'details': {'messageRedacted': true},
+      });
+    });
+
+    test('the message is bounded and an unknown type stays unknown', () {
+      final long =
+          project([
+                failed({
+                  'type': 'provider.invalid-output',
+                  'message': 'é' * 5000,
+                }),
+                idle,
+              ]).single
+              as TurnOutcome;
+      expect(long.error!.kind.known, ErrorKind.provider);
+      expect(utf8.encode(long.error!.rawMessage), hasLength(8 * 1024));
+      expect(long.error!.details!.value, {'messageTruncated': true});
+      final future =
+          project([
+                failed({'type': 'future.kind', 'message': 'Something new'}),
+                idle,
+              ]).single
+              as TurnOutcome;
+      expect(future.error!.kind.known, ErrorKind.unknown);
+      expect(future.error!.rawType, 'future.kind');
+      expect(future.error!.rawMessage, 'Something new');
+      final silent =
+          project([
+                failed({'type': 'provider.timeout'}),
+                idle,
+              ]).single
+              as TurnOutcome;
+      expect(silent.error!.kind.known, ErrorKind.network);
+      expect(silent.error!.rawMessage, '');
+    });
+
+    test('only a failed outcome of the same turn carries the error', () {
+      const auth = {'type': 'provider.auth', 'message': 'denied'};
+      TurnOutcome outcome(List<Map<String, Object?>> rows) =>
+          project(rows).whereType<TurnOutcome>().last;
+      // A later outcome other than failed, a user row or a later assistant
+      // message without an error clears it.
+      for (final rows in [
+        [
+          failed(auth),
+          message('i', 'idle', {'outcome': 'succeeded'}),
+        ],
+        [
+          failed(auth),
+          message('i', 'idle', {'outcome': 'interrupted'}),
+        ],
+        [
+          failed(auth),
+          message('u', 'user', {'text': 'again'}),
+          idle,
+        ],
+        [
+          failed(auth),
+          assistant('b', [textBlock('ok')]),
+          idle,
+        ],
+        [
+          failed(auth),
+          message('s', 'idle', {'outcome': 'succeeded'}),
+          idle,
+        ],
+      ]) {
+        expect(outcome(rows).error, isNull);
+      }
+      // An interruption is not an error.
+      expect(
+        outcome([
+          failed({'type': 'aborted', 'message': 'Step interrupted'}),
+          idle,
+        ]).error,
+        isNull,
+      );
+      // A notice between the message and the idle row keeps it.
+      expect(
+        outcome([
+          failed(auth),
+          message('n', 'system', {'text': 'note'}),
+          idle,
+        ]).error!.kind.known,
+        ErrorKind.auth,
+      );
+    });
+
+    test('a message that is not text fails the page', () {
+      expect(
+        () => project([
+          failed({'type': 'provider.auth', 'message': 42}),
+          idle,
+        ]),
+        throwsFormatException,
+      );
+    });
+  });
 
   test(
     'future idle outcome stays unknown and no history row creates a turn identity',

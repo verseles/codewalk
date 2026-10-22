@@ -324,10 +324,11 @@ void main() {
     }
     // 917 frames reach the shared walker: every session type is owned, the
     // only unowned type is the session-free `server.connected`, and no
-    // tracked frame becomes a diagnostic.
+    // tracked frame becomes a diagnostic. The four failed steps without usage
+    // emit nothing: their error reaches the turn's outcome.
     expect(categories, {
-      'routed-events': 716,
-      'routed-empty': 175,
+      'routed-events': 712,
+      'routed-empty': 179,
       'noop:server.connected': 26,
     });
   });

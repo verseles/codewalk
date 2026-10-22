@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'version_policy.dart';
@@ -8,7 +6,6 @@ enum OpenCodeStepUsageProjectionFailure {
   malformed,
   unsupportedVersion,
   limitExceeded,
-  itemKindMismatch,
   unsupportedValue,
 }
 
@@ -52,21 +49,17 @@ const _finishes = {
 /// start: `started` while the execution is retrying emits running.
 ///
 /// `ended` emits a per-step [UsageObserved] (turn scope, partial, identified
-/// and keyed by the assistant message). `failed` emits the history-identical
-/// `assistantErrorNotProjected` marker, plus step usage only when the frame
-/// carries both cost and tokens. The ephemeral `usage.updated` emits the
-/// cumulative session total, which replaces earlier readings and must never be
-/// added to step observations. Observed zeros stay zeros; absent values stay
-/// absent.
+/// and keyed by the assistant message). `failed` emits step usage only when
+/// the frame carries both cost and tokens: its error reaches the timeline on
+/// the failed turn's outcome, from `session.execution.failed`, as the history
+/// does from the last assistant message. The ephemeral `usage.updated` emits
+/// the cumulative session total, which replaces earlier readings and must
+/// never be added to step observations. Observed zeros stay zeros; absent
+/// values stay absent.
 ///
 /// Error `message`, `status` and `response` and the frame location are never
 /// read; provider state, snapshots, file paths, model and agent are validated
 /// but never copied.
-///
-/// Known limit: Core has no single-item removal, so if a failed step restarts
-/// under the same assistant message ID its error marker stays until the next
-/// history read (the reference client clears it). No capture shows a restart
-/// after a failure.
 List<SessionEvent> projectOpenCodeStepUsageEvent(
   Object? value,
   SessionState current, {
@@ -145,7 +138,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
     case _failed:
       final error = _object(data['error']);
       errorType = _text(error['type']);
-      // Schema.String allows empty; the history marker requires a type.
+      // Schema.String allows empty; Core ErrorInfo requires a nonempty type.
       if (errorType.isEmpty) {
         _fail(OpenCodeStepUsageProjectionFailure.unsupportedValue);
       }
@@ -166,24 +159,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
       usage = _Usage(_amount(data['cost']), _tokens(data['tokens']));
   }
 
-  final markerId = errorType == null
-      ? null
-      : ItemId(
-          jsonEncode([
-            ref.storageKey,
-            messageId,
-            'unknown',
-            ['error', errorType, 0],
-          ]),
-        );
-  if (markerId != null) {
-    for (final item in current.timeline) {
-      if (item.id == markerId && item is! UnknownItem) {
-        _fail(OpenCodeStepUsageProjectionFailure.itemKindMismatch);
-      }
-    }
-  }
-  if (usage == null && markerId == null && !resumes) return const [];
+  if (usage == null && !resumes) return const [];
 
   final source = SourceProvenance(
     harness: ref.harnessRef,
@@ -216,29 +192,6 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
         state: ExecutionState(
           kind: const OpenValue.known(ExecutionKind.running),
           lastOutcome: current.execution?.lastOutcome,
-        ),
-      ),
-    if (markerId != null)
-      ItemUpserted(
-        meta: eventMeta,
-        item: UnknownItem(
-          meta: ItemMeta(
-            id: markerId,
-            generation: jsonEncode([
-              'live',
-              ref.storageKey,
-              messageId,
-              position.id,
-              position.epoch,
-            ]),
-            status: OpenValue<ItemStatus>.unknown('completionUnverified'),
-            source: source,
-          ),
-          rawType: errorType!,
-          raw: CanonicalValue({
-            'type': errorType,
-            'reason': 'assistantErrorNotProjected',
-          }),
         ),
       ),
     if (usage != null)

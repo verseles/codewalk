@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 
 import 'execution_test_data.dart';
 import 'history_test_data.dart';
+import 'inbox_replay_test.dart' show historyLists;
 import 'support/fixture_replay.dart';
 import 'text_reasoning_test_data.dart' show observedPosition;
 import 'tool_test_data.dart';
@@ -148,6 +149,7 @@ void main() {
       var outcomes = 0;
       var shutdowns = 0;
       var failures = 0;
+      var parity = 0;
       for (final file in files) {
         final capture = jsonDecode(file.readAsStringSync());
         final idle = idleRows(capture);
@@ -221,12 +223,47 @@ void main() {
               if (type == 'session.execution.failed') {
                 failures++;
                 final error = (frame['data']! as Map)['error']! as Map;
+                // The captured failures are typed and keep their message;
+                // the status and the response body are never read.
+                expect(
+                  errorJson(item.error),
+                  errorJson(
+                    openCodeErrorInfo(
+                      error['type']! as String,
+                      error['message'] as String?,
+                    ),
+                  ),
+                  reason: name,
+                );
+                expect(item.error!.kind.known, isNot(ErrorKind.unknown));
+                // The history carries the same error on its idle row, from
+                // the turn's last assistant message, in chronological order.
+                // Client and server message IDs differ in shape, so a page's
+                // order is told by its creation times.
+                num created(Map<String, Object?> row) =>
+                    (row['time']! as Map)['created']! as num;
+                final matches = [
+                  for (final list in historyLists(capture))
+                    if (list.any((r) => r['id'] == messageId))
+                      ...projectOpenCodeHistory(
+                        created(list.first) > created(list.last)
+                            ? list.reversed.toList()
+                            : list,
+                        refOf(session),
+                        sourceVersion: '2.0.22',
+                      ).whereType<TurnOutcome>().where((o) => o.id == item.id),
+                ];
+                expect(matches, isNotEmpty, reason: name);
+                for (final history in matches) {
+                  expect(
+                    errorJson(history.error),
+                    errorJson(item.error),
+                    reason: name,
+                  );
+                }
+                parity++;
                 for (final event in projected) {
                   final manifest = executionManifest(event);
-                  expect(
-                    manifest,
-                    isNot(contains(jsonEncode(error['message']))),
-                  );
                   final body = (error['response'] as Map?)?['body'];
                   if (body is String && body.isNotEmpty) {
                     expect(manifest, isNot(contains(jsonEncode(body))));
@@ -239,6 +276,7 @@ void main() {
       }
       expect(shutdowns, 3);
       expect(failures, 4);
+      expect(parity, 4);
       expect(outcomes, 36);
     },
   );

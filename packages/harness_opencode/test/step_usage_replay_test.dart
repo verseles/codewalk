@@ -34,7 +34,7 @@ void main() {
         'c/post-restart-question-recovery.json',
       };
       final phases = <String, int>{};
-      var markers = 0;
+      var failures = 0;
       var totals = 0;
       for (final file in files) {
         final capture = jsonDecode(file.readAsStringSync());
@@ -87,21 +87,23 @@ void main() {
             }
             states[session] = state;
             if (type == 'session.step.failed') {
-              final marker = projected.whereType<ItemUpserted>().single.item;
+              // The step emits no item: the turn's outcome carries the error,
+              // and the history row it matches shows no marker for it.
+              expect(projected.whereType<ItemUpserted>(), isEmpty);
               final row = rows[data['assistantMessageID']];
               expect(row, isNotNull, reason: name);
+              expect(
+                (row!['error']! as Map)['type'],
+                error!['type'],
+                reason: name,
+              );
               final history = projectOpenCodeHistory(
                 [row],
                 refOf(session),
                 sourceVersion: '2.0.22',
-              ).whereType<UnknownItem>().where((i) => i.id == marker.id);
-              expect(history, hasLength(1), reason: name);
-              expect(
-                (marker as UnknownItem).raw.value,
-                history.single.raw.value,
-                reason: name,
               );
-              markers++;
+              expect(history.whereType<UnknownItem>(), isEmpty, reason: name);
+              failures++;
             }
             if (type == 'session.usage.updated' &&
                 !partialLogs.contains(name)) {
@@ -131,9 +133,9 @@ void main() {
         'session.step.failed': 11,
         'session.usage.updated': 51,
       });
-      // Every failed step matches its history marker; four readings in the
+      // Every failed step matches its history row; four readings in the
       // restart captures follow steps that precede the recorded log.
-      expect((markers, totals), (11, 47));
+      expect((failures, totals), (11, 47));
     },
   );
 }
