@@ -10,6 +10,7 @@ import 'package:codewalk/platform/storage/preferences_backend.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -113,8 +114,14 @@ Future<void> _settle(WidgetTester tester) async {
 SessionRef _ref(_App app, String id) => app.rig.sources.single.row(id).info.ref;
 
 /// Opens each of [ids] in turn, granting a live lease with an outbox when
-/// the session's view opens one, and ends on the last.
-Future<void> _visit(WidgetTester tester, _App app, List<String> ids) async {
+/// the session's view opens one, and ends on the last. A session's view
+/// shows the items of [prompts] as its sent prompts.
+Future<void> _visit(
+  WidgetTester tester,
+  _App app,
+  List<String> ids, {
+  Map<String, List<String>> prompts = const {},
+}) async {
   for (final id in ids) {
     app.dependencies.router.go('/s/profile_a/ses_$id');
     await _settle(tester);
@@ -128,7 +135,17 @@ Future<void> _visit(WidgetTester tester, _App app, List<String> ids) async {
         SessionLiveView(
           session: ref,
           phase: SessionLivePhase.live,
-          state: liveState(ref),
+          state: liveState(
+            ref,
+            items: [
+              for (final (i, text) in (prompts[id] ?? const []).indexed)
+                UserInput(
+                  meta: liveMeta(ref, 'u$i'),
+                  text: text,
+                  delivery: const OpenValue.known(DeliveryState.delivered),
+                ),
+            ],
+          ),
         ),
       );
       await _settle(tester);
@@ -150,6 +167,11 @@ Future<void> _type(WidgetTester tester, String text) async {
 Future<void> _close(WidgetTester tester, SessionRef ref) async {
   await tester.tap(find.byKey(ValueKey('session-tab-close-${ref.storageKey}')));
   await _settle(tester);
+}
+
+Future<void> _press(WidgetTester tester, LogicalKeyboardKey key) async {
+  await tester.sendKeyEvent(key);
+  await tester.pump();
 }
 
 Future<void> _send(WidgetTester tester) async {
@@ -304,4 +326,145 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  final desktop = TargetPlatformVariant.only(TargetPlatform.linux);
+
+  testWidgets('Up and Down recall the session\'s prompts on a desktop', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, ['one']);
+    await _visit(
+      tester,
+      app,
+      ['one'],
+      prompts: {
+        'one': ['first', '  second  '],
+      },
+    );
+    final one = _ref(app, 'one');
+    await _type(tester, 'half');
+    await tester.tap(_field);
+    await tester.pump();
+
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'second');
+    // A recalled prompt is not saved as the draft.
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(await _device().read(one), 'half');
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'first');
+
+    // A recalled prompt has its caret at the end, so Down shows the newer.
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    expect(_text(tester), 'second');
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    expect(_text(tester), 'half');
+
+    // An edited prompt is the draft from then on.
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    await _type(tester, 'second, again');
+    expect(await _device().read(one), 'second, again');
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    expect(_text(tester), 'second, again');
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: desktop);
+
+  testWidgets('Up on a later line of the field moves the caret first', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, ['one']);
+    await _visit(
+      tester,
+      app,
+      ['one'],
+      prompts: {
+        'one': ['first'],
+      },
+    );
+    await _type(tester, 'line one\nline two');
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'line one\nline two');
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'first');
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: desktop);
+
+  testWidgets('Up waits until the saved draft was read', (tester) async {
+    _useMemoryPreferences();
+    late final _SlowPayloads slow;
+    final app = await _launch(
+      tester,
+      ['one', 'two'],
+      drafts: _device(payloads: (device) => slow = _SlowPayloads(device)),
+    );
+    final one = _ref(app, 'one');
+    final seed = _device();
+    await seed.read(one);
+    seed.save(one, 'saved draft');
+    await seed.flush();
+
+    await _visit(
+      tester,
+      app,
+      ['one', 'two', 'one'],
+      prompts: {
+        'one': ['first'],
+      },
+    );
+    await tester.tap(_field);
+    await tester.pump();
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), isEmpty);
+
+    slow.open.complete();
+    await _settle(tester);
+    expect(_text(tester), 'saved draft');
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'first');
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    expect(_text(tester), 'saved draft');
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: desktop);
+
+  testWidgets('each session recalls its own prompts', (tester) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, ['one', 'two']);
+    final prompts = {
+      'one': ['for one'],
+      'two': ['for two'],
+    };
+    await _visit(tester, app, ['one', 'two'], prompts: prompts);
+    await tester.tap(_field);
+    await tester.pump();
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'for two');
+
+    await _visit(tester, app, ['one']);
+    await tester.tap(_field);
+    await tester.pump();
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), 'for one');
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: desktop);
+
+  testWidgets('a phone has no recall gesture', (tester) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, ['one']);
+    await _visit(
+      tester,
+      app,
+      ['one'],
+      prompts: {
+        'one': ['first'],
+      },
+    );
+    await tester.tap(_field);
+    await tester.pump();
+    await _press(tester, LogicalKeyboardKey.arrowUp);
+    expect(_text(tester), isEmpty);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

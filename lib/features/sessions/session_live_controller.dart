@@ -13,6 +13,7 @@ import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/hosts_controller.dart';
 import 'session_composer_controller.dart';
+import 'session_input_history.dart';
 import 'session_live_scroll.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
@@ -65,7 +66,12 @@ class SessionLiveController extends ChangeNotifier {
   final SessionDraftStore? drafts;
   String _draftText = '';
   bool _draftEdited = false;
+  bool _draftRead = false;
   bool _applyingDraft = false;
+
+  /// Whether the saved draft was read, or there is none to read: recalling
+  /// a sent prompt before that would hide it.
+  bool get draftSettled => drafts == null || _draftRead;
 
   /// The composer's state, kept with the session so a send that ends after
   /// its screen closed still clears the prompt it sent.
@@ -79,6 +85,7 @@ class SessionLiveController extends ChangeNotifier {
     final drafts = this.drafts;
     if (drafts == null) return;
     final text = await drafts.read(session);
+    _draftRead = true;
     if (_disposed || _draftEdited) return;
     if (text != null && draft.text.isEmpty) {
       _applyingDraft = true;
@@ -95,6 +102,7 @@ class SessionLiveController extends ChangeNotifier {
     // A caret or selection move is not an edit.
     if (text == _draftText) return;
     _draftText = text;
+    recall.changed(text);
     if (_applyingDraft) return;
     _draftEdited = true;
     // Saved before the stored draft is read too: the store reads first and
@@ -111,6 +119,17 @@ class SessionLiveController extends ChangeNotifier {
   /// A prompt the outbox took after the session's screen closed must not
   /// come back as its draft.
   void forgetDraft(String text) => drafts?.forget(session, text);
+
+  /// Up and Down through the session's sent prompts, kept with the session
+  /// so a tab shown again is still where it was. A recalled prompt is not
+  /// saved as the draft: the saved draft stays what the user was writing.
+  late final recall = SessionInputRecall(
+    show: (value) {
+      _applyingDraft = true;
+      draft.value = value;
+      _applyingDraft = false;
+    },
+  );
 
   /// True once disposed; a disposed view is never shown again.
   bool get disposed => _disposed;

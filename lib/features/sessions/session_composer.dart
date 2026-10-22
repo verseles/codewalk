@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +9,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import 'session_composer_controller.dart';
+import 'session_input_history.dart';
 import 'session_stop_button.dart';
 
 /// The live screen's composer: pending inbox chips, entries that still need
@@ -38,8 +40,23 @@ class _SessionComposerState extends State<SessionComposer> {
   TextEditingController get _text => widget.text;
   DateTime? _escapeAt;
 
+  /// Up and Down recall the session's prompts on a desktop keyboard, as in
+  /// v1; a phone has no recall gesture.
+  static bool get _desktop =>
+      kIsWeb ||
+      const {
+        TargetPlatform.linux,
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }.contains(defaultTargetPlatform);
+
   KeyEventResult _key(FocusNode node, KeyEvent event) {
     final keyboard = HardwareKeyboard.instance;
+    if (event is! KeyUpEvent &&
+        (event.logicalKey == LogicalKeyboardKey.arrowUp ||
+            event.logicalKey == LogicalKeyboardKey.arrowDown)) {
+      return _arrow(up: event.logicalKey == LogicalKeyboardKey.arrowUp);
+    }
     if (event is! KeyDownEvent ||
         event.logicalKey != LogicalKeyboardKey.escape ||
         keyboard.isControlPressed ||
@@ -68,6 +85,53 @@ class _SessionComposerState extends State<SessionComposer> {
       );
     }
     return KeyEventResult.handled;
+  }
+
+  KeyEventResult _arrow({required bool up}) {
+    final keyboard = HardwareKeyboard.instance;
+    final value = _text.value;
+    if (!_desktop ||
+        keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isShiftPressed ||
+        !value.composing.isCollapsed ||
+        !value.selection.isCollapsed ||
+        widget.controller.sending ||
+        !widget.controller.live.draftSettled ||
+        !_onEdgeLine(up: up)) {
+      return KeyEventResult.ignored;
+    }
+    final recall = widget.controller.live.recall;
+    final handled = up
+        ? recall.up(
+            value,
+            () => sessionInputHistory(
+              widget.controller.live.state?.timeline ?? const [],
+            ),
+          )
+        : recall.down(value);
+    return handled ? KeyEventResult.handled : KeyEventResult.ignored;
+  }
+
+  /// Whether the caret is on the field's first line (or last, going down),
+  /// so the key would not move it within the text.
+  bool _onEdgeLine({required bool up}) {
+    final editable = FocusManager.instance.primaryFocus?.context
+        ?.findAncestorStateOfType<EditableTextState>()
+        ?.renderEditable;
+    final selection = _text.selection;
+    if (editable == null || !editable.hasSize || !selection.isValid) {
+      return true;
+    }
+    final position = TextPosition(
+      offset: selection.extentOffset.clamp(0, _text.text.length),
+      affinity: selection.affinity,
+    );
+    final next = up
+        ? editable.getTextPositionAbove(position)
+        : editable.getTextPositionBelow(position);
+    return editable.getLineAtOffset(position) == editable.getLineAtOffset(next);
   }
 
   @override
