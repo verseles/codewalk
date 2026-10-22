@@ -244,6 +244,21 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** idle/refused notices describe that request, and stream/hydration remain the only source of execution and turn outcomes; closing, credential changes and lease release never initiate a remote Stop
 - **Then** technical coverage includes compact/landscape/wide composers in 14 locales and storage-less compact/wide Stop; installed native/MVP acceptance and child controls remain separate
 
+### V2 live session model and agent
+
+- **Given** an open native v2 session on verified OpenCode 2.0.22
+- **When** its live page opens
+- **Then** the app bar shows a model-and-agent chip with the session's own selection (`model#variant · agent`, by the list's label when it names them; a missing half is the server default), icon-only below 600 dp with the selection and its status in the tooltip and semantics
+- **Then** the session record supplies the selection, and `session.model.selected` / `session.agent.selected` keep it current; the model reference keeps its provider and variant together
+- **Then** the location's models and agents are read once per live period with `GET /api/model` and `GET /api/agent` scoped to the session's directory, and again on an explicit refresh or when the pick opens; only enabled models, their variant ids (never their settings) and non-hidden primary or all-mode agents are offered, and a value the list does not hold stays visible as not offered here
+- **Then** a missing route, required authentication, an unreadable or oversized answer, a failed read, an empty list or a session without a location is reported per half; when neither half can be offered for a reason a retry would not change, the chip stays as a non-interactive affordance whose tooltip and semantics give the reason, and nothing is faked
+- **When** the user picks a model, a variant or an agent
+- **Then** the pick closes and sends exactly one `POST /api/session/<session>/model` or `/agent`; one switch per session is in flight, that session's sends wait for it, and other sessions stay independent; the prompt never carries a selection
+- **Then** an accepted switch shows at once and holds until the server reports a newer selection, and the next pick waits for that report; a refused switch changes nothing and says so; a switch reported and then replaced by another client, before or after its answer, says it was changed elsewhere
+- **Then** an uncertain answer is never resent: a switch the server already reported settles at once, otherwise one read of the session record settles it as applied or not applied; a failed read keeps it unconfirmed, and the session's sends wait until Check again, a newer server selection or a new pick settles it
+- **Then** closing or releasing the lease never switches anything
+- **Then** technical coverage includes contract-derived loopback race tests, the chip in 14 locales at compact and wide sizes, 2x text at 360 dp, and the bottom sheet and dialog; no live 2.0.22 switch capture exists yet (#425), switches are not shown in the timeline (#426), and installed native acceptance remains separate
+
 ### V2 manual permission replies
 
 - **Given** an open native v2 session on verified OpenCode 2.0.22 whose lease holds a reply port

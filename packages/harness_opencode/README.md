@@ -666,6 +666,8 @@ discovery belongs to the stream owner (#274).
 | `session.created` (v1) | `SessionInfoChanged` equal to the HTTP session record's info |
 | `session.renamed` (v1) | `SessionInfoChanged` with only the title replaced, or `ResyncRequired('sessionInfoUnproven')` without resident info |
 | `session.deleted` (v2) | `ResyncRequired('sessionDeleted')` |
+| `session.agent.selected` (v1) | `SelectionChanged` with only the agent replaced |
+| `session.model.selected` (v1) | `SelectionChanged` with only the model reference replaced |
 
 - `created` copies the title (`''` when absent), parent lineage, native project
   and directory, with unknown ownership — the same subset as
@@ -743,8 +745,8 @@ receivedAt: ...)`, the single seam the stream owner (#274) calls for every
   (which would flood the 32-entry diagnostics) return nothing.
 - The remaining frames become one `UnknownEvent` whose raw value is only
   `{disposition: unprojected | unrecognized}`; provenance keeps the native type
-  and a valid `evt_` ID. Known types without a producer yet — agent/model
-  selection, compaction, skill, move, fork, metadata,
+  and a valid `evt_` ID. Known types without a producer yet — compaction,
+  skill, move, fork, metadata,
   permissions, views, durable-log-only records — stay `unprojected` instead of
   being half-mapped.
 - Own failures are `OpenCodeEventProjectionException` (`malformed`,
@@ -964,6 +966,50 @@ Focused checks from this package:
 export PATH="$HOME/flutter/bin:$PATH"
 dart analyze --fatal-infos
 dart test test/session_lifecycle_client_test.dart
+```
+
+## Session model and agent selection
+
+[V2-054A / #406](https://github.com/verseles/codewalk/issues/406) reads,
+follows and switches the model and agent of one OpenCode 2.0.22 session. The
+session record is the authority; the location catalogs only say what can be
+picked.
+
+- `projectOpenCodeSelection` reads the record's `model` reference (`id`,
+  `providerID`, optional `variant`) and `agent`; hydration carries it, and
+  `OpenCodeSessionReader.readSelection(ref)` reads it alone with one
+  `GET /api/session/{id}`. An absent field stays null, leaving the server
+  default in force.
+- `readModels(directory)` and `readAgents(directory)` read
+  `GET /api/model` and `GET /api/agent` with `location[directory]`, and the
+  answer must name the same location. Only enabled models are offered, each
+  with its variant ids; a variant's settings are never copied, because they
+  may carry provider credentials. Only primary or all-mode agents that are not
+  hidden are offered. The catalogs have their own 8-MiB body bound (an
+  observed list of every provider model is about 178 KB); other reads keep the
+  1-MiB default.
+- `session.model.selected` and `session.agent.selected` (durable v1) become
+  `SelectionChanged` with only that half of the resident selection replaced; a
+  model reference without a variant clears the variant, and `previous` is
+  validated and not copied.
+- `OpenCodeSessionLifecycleClient.selectModel` and `selectAgent` send one
+  `POST /api/session/{id}/model` with `{model}` or `/agent` with `{agent}`.
+  `204` is accepted, `400`, `401`, `403`, `404` and `429` are refused from the
+  status alone, and anything else, a timeout or a lost connection is
+  uncertain. The client never retries; the app settles an uncertain switch by
+  one `readSelection`.
+- A prompt draft never carries a selection: the switch is a separate command
+  that the app settles before the next send.
+
+The switch routes and events are contract-derived: no 2.0.22 capture holds
+one yet ([#425](https://github.com/verseles/codewalk/issues/425)).
+
+Focused checks from this package:
+
+```sh
+export PATH="$HOME/flutter/bin:$PATH"
+dart analyze --fatal-infos
+dart test test/session_selection_test.dart test/session_hydration_test.dart
 ```
 
 ## Provenance and limits

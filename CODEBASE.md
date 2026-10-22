@@ -2567,3 +2567,42 @@ it. No 2.0.22 capture holds a retry frame, so the inputs are contract-derived.
 Running direct children are Core `WorkItem`s on the parent
 (`openCodeRunningChild` in `execution_projection.dart`); the header counts them
 while the parent's own execution stays idle.
+
+## V2-054A session model and agent selection (#406)
+
+```text
+packages/codewalk_core/lib/src/session.dart # Selection.modelProviderId and modelVariant beside modelId and agentId
+packages/codewalk_core/lib/src/catalog.dart # ModelEntry.variants (variant ids only)
+packages/codewalk_core/test/support/scripted_harness_adapter.dart # Scripted selection matched by model id, provider and variant
+contracts/codewalk-host-v1/schema.json # CHP provisional.4: selection provider/variant and model variants
+packages/harness_opencode/lib/src/session_projection.dart # projectOpenCodeSelection: the record's model reference and agent
+packages/harness_opencode/lib/src/session_reader.dart # readSelection; readModels/readAgents location catalogs with their own 8 MiB bound
+packages/harness_opencode/lib/src/session_lifecycle_projection.dart # session.agent/model.selected -> SelectionChanged
+packages/harness_opencode/lib/src/session_lifecycle_client.dart # selectModel/selectAgent: one POST, no retry
+packages/harness_opencode/test/session_selection_test.dart # Record, catalogs, selected events and switch status mapping
+lib/shared/sessions/session_selection.dart # SessionSelectionState: phase, notice and per-half unavailable reasons
+lib/shared/sessions/session_live_source.dart # SessionLiveHandle selection support, state and actions
+lib/platform/sessions/opencode_selection_lane.dart # Per-session catalog read, one switch in flight, settlement of uncertain and replaced switches
+lib/platform/sessions/opencode_profile_slot.dart # Creates the lane for a verified endpoint and feeds it every published view
+lib/platform/sessions/opencode_live_handle.dart # Delegates selection members to the lane
+lib/features/sessions/session_live_controller.dart # Selection delegation behind the live, current lease guard
+lib/features/sessions/session_composer_controller.dart # Holds sends while a switch is pending or unconfirmed
+lib/features/sessions/session_selection_chip.dart # AppBar chip; bottom sheet when compact, dialog when wide
+lib/features/sessions/session_live_page.dart # Sizes the AppBar chips by the page width, not the window's
+lib/features/sessions/session_permission_mode_chip.dart # Optional compact flag from the page
+tool/l10n/session_selection_catalog.py # 18 selection strings across the 14 locales
+test/v2/sessions/session_selection_chip_test.dart # Labels, compact and 2x text, picks, not-offered values, notices
+test/v2/sessions/session_live_directory_test.dart # Loopback selection race group (hold, echo, replacement, uncertain, refusal, two sessions)
+test/v2/sessions/session_live_page_test.dart # The chip in 14 locales and a narrow page beside the list
+```
+
+The session record is the selection authority; the location catalogs only
+list what can be picked. Switch routes and events are contract-derived until a
+2.0.22 capture exists (#425).
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/session_selection_chip_test.dart test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_live_page_test.dart
+# From packages/harness_opencode
+dart test test/session_selection_test.dart
+```
