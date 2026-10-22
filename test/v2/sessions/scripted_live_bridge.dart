@@ -4,6 +4,7 @@ import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
+import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -383,6 +384,33 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
 
   @override
   Future<void> refreshUnrestricted() async {}
+
+  @override
+  bool get supportsSelection => false;
+
+  @override
+  SessionSelectionState get selectionState =>
+      SessionSelectionState(selection: current.state?.selection);
+
+  @override
+  bool get canChangeSelection => false;
+
+  @override
+  Future<void> selectModel({
+    required String modelId,
+    required String providerId,
+    String? variant,
+    required CommandId id,
+  }) async {}
+
+  @override
+  Future<void> selectAgent({
+    required String agentId,
+    required CommandId id,
+  }) async {}
+
+  @override
+  Future<void> refreshSelection() async {}
 }
 
 /// Ledger for a bridged lease. UI sends are recorded with the UI's own

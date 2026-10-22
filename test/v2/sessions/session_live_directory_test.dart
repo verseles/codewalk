@@ -12,6 +12,7 @@ import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
+import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -67,6 +68,45 @@ final class _Server {
   Completer<void>? holdInterrupt;
   Object? interruptBody = const {'interrupted': true};
   int interruptStatus = 200;
+  /// The model reference and agent each session's record carries.
+  final sessionModel = <String, Map<String, Object?>>{};
+  final sessionAgent = <String, String>{};
+
+  /// The location catalogs; a variant's settings must never be copied.
+  List<Object?> modelCatalog = [
+    {
+      'id': 'alpha',
+      'providerID': 'prov',
+      'name': 'Alpha',
+      'enabled': true,
+      'limit': {'context': 1000, 'output': 100},
+      'variants': [
+        {'id': 'high', 'apiKey': '[REDACTED]'},
+      ],
+    },
+    {
+      'id': 'beta',
+      'providerID': 'prov',
+      'name': 'Beta',
+      'enabled': true,
+      'limit': {'context': 1000, 'output': 100},
+      'variants': <Object?>[],
+    },
+  ];
+  List<Object?> agentCatalog = [
+    {'id': 'build', 'name': 'Build', 'mode': 'primary', 'hidden': false},
+    {'id': 'plan', 'name': 'Plan', 'mode': 'all', 'hidden': false},
+  ];
+  int catalogStatus = 200;
+
+  /// Every model or agent switch, as `kind:body`.
+  final selects = <String>[];
+  int selectStatus = 204;
+
+  /// Whether a switch lands even when its status says otherwise.
+  bool? selectApplies;
+  Completer<void>? holdSelect;
+  final firstSelect = Completer<void>();
   int _seq = 0;
   int get port => _server.port;
   int get events => paths.where((p) => p == '/proxy/api/event').length;
@@ -123,6 +163,39 @@ final class _Server {
         sessionRules[segments[3]] = (decoded['permissions']! as List).toList();
       }
       r.response.statusCode = patchStatus;
+      await r.response.close();
+      return;
+    }
+    if (r.method == 'POST' &&
+        segments.length == 5 &&
+        (tail == 'model' || tail == 'agent')) {
+      final body = await utf8.decoder.bind(r).join();
+      selects.add('$tail:$body');
+      if (!firstSelect.isCompleted) firstSelect.complete();
+      await holdSelect?.future;
+      if (selectApplies ?? selectStatus == 204) {
+        final decoded = jsonDecode(body) as Map<String, Object?>;
+        if (tail == 'model') {
+          sessionModel[segments[3]] = decoded['model']! as Map<String, Object?>;
+        } else {
+          sessionAgent[segments[3]] = decoded['agent']! as String;
+        }
+      }
+      r.response.statusCode = selectStatus;
+      await r.response.close();
+      return;
+    }
+    if (r.method == 'GET' &&
+        segments.length == 3 &&
+        (tail == 'model' || tail == 'agent')) {
+      expect(r.uri.queryParameters['location[directory]'], '/workspace');
+      r.response.statusCode = catalogStatus;
+      r.response.write(
+        jsonEncode({
+          'location': {'directory': '/workspace'},
+          'data': tail == 'model' ? modelCatalog : agentCatalog,
+        }),
+      );
       await r.response.close();
       return;
     }
@@ -237,6 +310,8 @@ final class _Server {
             'location': {'directory': '/workspace'},
             'time': {'created': 1, 'updated': 2},
             'permissions': ?sessionRules[session],
+            'model': ?sessionModel[session],
+            'agent': ?sessionAgent[session],
           },
         },
       }),
@@ -294,6 +369,28 @@ final class _Server {
         'at': 31000 + seq,
         'error': {'type': 'provider.rate-limit', 'message': 'private'},
       },
+    };
+    for (final stream in streams) {
+      stream.write('data: ${jsonEncode(frame)}\n\n');
+      await stream.flush();
+    }
+  }
+
+  /// A contract-derived switch frame (no 2.0.22 capture holds one): [kind]
+  /// is `model` or `agent`, and the record follows it.
+  Future<void> selected(String session, String kind, Object value) async {
+    if (kind == 'model') {
+      sessionModel[session] = value as Map<String, Object?>;
+    } else {
+      sessionAgent[session] = value as String;
+    }
+    final seq = ++_seq;
+    final frame = {
+      'id': 'evt_$seq',
+      'type': 'session.$kind.selected',
+      'created': 1000 + seq,
+      'durable': {'aggregateID': session, 'version': 1, 'seq': seq},
+      'data': {'sessionID': session, kind: value},
     };
     for (final stream in streams) {
       stream.write('data: ${jsonEncode(frame)}\n\n');
@@ -2403,6 +2500,284 @@ void main() {
       );
       addTearDown(handle.close);
       await eventually(() => server.events == 2);
+    });
+  });
+
+  group('model and agent selection (V2-054A)', () {
+    setUp(() {
+      server.sessionModel['ses_one'] = {'id': 'alpha', 'providerID': 'prov'};
+      server.sessionAgent['ses_one'] = 'build';
+    });
+
+    Future<SessionLiveHandle> openLive([String id = 'ses_one']) async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref(id),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      return handle;
+    }
+
+    Future<SessionSelectionState> when(
+      SessionLiveHandle handle,
+      bool Function(SessionSelectionState) test,
+    ) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (DateTime.now().isBefore(deadline)) {
+        if (test(handle.selectionState)) return handle.selectionState;
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      fail('Selection never reached the expected state');
+    }
+
+    bool read(SessionSelectionState s) =>
+        s.models.isNotEmpty || s.modelUnavailable != null;
+    int records() =>
+        server.paths.where((p) => p == '/proxy/api/session/ses_one').length;
+
+    test('the record and the location catalog, read once per period', () async {
+      final handle = await openLive();
+      final state = await when(handle, read);
+      expect(handle.supportsSelection, isTrue);
+      expect(handle.canChangeSelection, isTrue);
+      expect(state.selection?.modelId, 'alpha');
+      expect(state.selection?.modelProviderId, 'prov');
+      expect(state.selection?.modelVariant, isNull);
+      expect(state.selection?.agentId, 'build');
+      expect([for (final m in state.models) m.id], ['alpha', 'beta']);
+      expect(state.models.first.variants, ['high']);
+      expect([for (final a in state.agents) a.id], ['build', 'plan']);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(server.paths.where((p) => p == '/proxy/api/model'), hasLength(1));
+      expect(server.paths.where((p) => p == '/proxy/api/agent'), hasLength(1));
+    });
+
+    test('a model switch holds sends until it is answered', () async {
+      server.holdSelect = Completer();
+      final handle = await openLive();
+      await when(handle, read);
+      final switching = handle.selectModel(
+        modelId: 'alpha',
+        providerId: 'prov',
+        variant: 'high',
+        id: const CommandId('cmd_model'),
+      );
+      await server.firstSelect.future.timeout(const Duration(seconds: 10));
+      expect(handle.selectionState.phase, SessionSelectionPhase.pending);
+      expect(handle.selectionState.holdsSend, isTrue);
+      expect(handle.canChangeSelection, isFalse);
+      server.holdSelect!.complete();
+      await switching;
+      final state = handle.selectionState;
+      expect(state.holdsSend, isFalse);
+      // The accepted switch shows before the server reports it, and the next
+      // pick waits for that report so it never hides this one.
+      expect(state.selection?.modelVariant, 'high');
+      expect(state.selection?.agentId, 'build');
+      expect(handle.canChangeSelection, isFalse);
+      expect(server.selects, [
+        'model:${jsonEncode({
+          'model': {'id': 'alpha', 'providerID': 'prov', 'variant': 'high'},
+        })}',
+      ]);
+      await server.selected('ses_one', 'model', {
+        'id': 'alpha',
+        'providerID': 'prov',
+        'variant': 'high',
+      });
+      await until(handle, (v) => v.state?.selection?.modelVariant == 'high');
+      expect(handle.selectionState.notice, SessionSelectionNotice.none);
+      expect(handle.selectionState.selection?.modelVariant, 'high');
+      expect(handle.canChangeSelection, isTrue);
+    });
+
+    test('the switch event can arrive before its answer', () async {
+      server.holdSelect = Completer();
+      final handle = await openLive();
+      await when(handle, read);
+      final switching = handle.selectAgent(
+        agentId: 'plan',
+        id: const CommandId('cmd_agent'),
+      );
+      await server.firstSelect.future.timeout(const Duration(seconds: 10));
+      await server.selected('ses_one', 'agent', 'plan');
+      await until(handle, (v) => v.state?.selection?.agentId == 'plan');
+      expect(handle.selectionState.holdsSend, isTrue);
+      server.holdSelect!.complete();
+      await switching;
+      final state = handle.selectionState;
+      expect(state.selection?.agentId, 'plan');
+      expect(state.notice, SessionSelectionNotice.none);
+      expect(state.holdsSend, isFalse);
+      expect(server.selects, ['agent:{"agent":"plan"}']);
+    });
+
+    test('a switch reported and replaced before its answer says so', () async {
+      server.holdSelect = Completer();
+      final handle = await openLive();
+      await when(handle, read);
+      final switching = handle.selectAgent(
+        agentId: 'plan',
+        id: const CommandId('cmd_agent'),
+      );
+      await server.firstSelect.future.timeout(const Duration(seconds: 10));
+      await server.selected('ses_one', 'agent', 'plan');
+      await until(handle, (v) => v.state?.selection?.agentId == 'plan');
+      // Another client picks again before this switch is answered.
+      await server.selected('ses_one', 'agent', 'build-2');
+      await until(handle, (v) => v.state?.selection?.agentId == 'build-2');
+      server.holdSelect!.complete();
+      await switching;
+      final state = handle.selectionState;
+      expect(state.notice, SessionSelectionNotice.changedElsewhere);
+      expect(state.selection?.agentId, 'build-2');
+      expect(state.holdsSend, isFalse);
+      expect(handle.canChangeSelection, isTrue);
+    });
+
+    test('an uncertain answer to a reported switch needs no read', () async {
+      server
+        ..selectStatus = 500
+        ..selectApplies = true
+        ..holdSelect = Completer();
+      final handle = await openLive();
+      await when(handle, read);
+      final before = records();
+      // Even a failing record read could not leave it unconfirmed.
+      server.failSessionReads.add(server.sessionReads + 1);
+      final switching = handle.selectAgent(
+        agentId: 'plan',
+        id: const CommandId('cmd_agent'),
+      );
+      await server.firstSelect.future.timeout(const Duration(seconds: 10));
+      await server.selected('ses_one', 'agent', 'plan');
+      await until(handle, (v) => v.state?.selection?.agentId == 'plan');
+      server.holdSelect!.complete();
+      await switching;
+      final state = handle.selectionState;
+      expect(state.phase, SessionSelectionPhase.idle);
+      expect(state.notice, SessionSelectionNotice.none);
+      expect(state.selection?.agentId, 'plan');
+      expect(records(), before);
+      expect(server.selects, hasLength(1));
+    });
+
+    test('an accepted switch replaced elsewhere says so', () async {
+      final handle = await openLive();
+      await when(handle, read);
+      await handle.selectAgent(agentId: 'plan', id: const CommandId('cmd_a'));
+      expect(handle.selectionState.selection?.agentId, 'plan');
+      // Another client picks again before this switch is reported.
+      await server.selected('ses_one', 'agent', 'build-2');
+      final state = await when(
+        handle,
+        (s) => s.notice != SessionSelectionNotice.none,
+      );
+      expect(state.notice, SessionSelectionNotice.changedElsewhere);
+      expect(state.selection?.agentId, 'build-2');
+    });
+
+    test('an uncertain switch is settled by one read, never resent', () async {
+      server
+        ..selectStatus = 500
+        ..selectApplies = true;
+      final handle = await openLive();
+      await when(handle, read);
+      final before = records();
+      await handle.selectModel(
+        modelId: 'beta',
+        providerId: 'prov',
+        id: const CommandId('cmd_model'),
+      );
+      final state = await when(handle, (s) => !s.holdsSend);
+      expect(state.selection?.modelId, 'beta');
+      expect(state.notice, SessionSelectionNotice.none);
+      expect(server.selects, hasLength(1));
+      expect(records(), before + 1);
+    });
+
+    test('an uncertain switch the record denies was not applied', () async {
+      server
+        ..selectStatus = 500
+        ..selectApplies = false;
+      final handle = await openLive();
+      await when(handle, read);
+      await handle.selectModel(
+        modelId: 'beta',
+        providerId: 'prov',
+        id: const CommandId('cmd_model'),
+      );
+      final state = await when(handle, (s) => !s.holdsSend);
+      expect(state.notice, SessionSelectionNotice.notApplied);
+      expect(state.selection?.modelId, 'alpha');
+      expect(server.selects, hasLength(1));
+    });
+
+    test('an unreadable record leaves the switch unconfirmed', () async {
+      server
+        ..selectStatus = 500
+        ..selectApplies = true;
+      final handle = await openLive();
+      await when(handle, read);
+      server.failSessionReads.add(server.sessionReads + 1);
+      await handle.selectAgent(agentId: 'plan', id: const CommandId('cmd_a'));
+      var state = handle.selectionState;
+      expect(state.phase, SessionSelectionPhase.unconfirmed);
+      expect(state.holdsSend, isTrue);
+      expect(handle.canChangeSelection, isTrue);
+      await handle.refreshSelection();
+      state = await when(handle, (s) => !s.holdsSend);
+      expect(state.selection?.agentId, 'plan');
+      expect(server.selects, hasLength(1));
+    });
+
+    test('a refused switch changes nothing', () async {
+      server.selectStatus = 400;
+      final handle = await openLive();
+      await when(handle, read);
+      await handle.selectAgent(agentId: 'plan', id: const CommandId('cmd_a'));
+      final state = handle.selectionState;
+      expect(state.notice, SessionSelectionNotice.refused);
+      expect(state.holdsSend, isFalse);
+      expect(state.selection?.agentId, 'build');
+      expect(state.receipt?.state.known, ReceiptState.rejected);
+    });
+
+    test('a missing or empty catalog is reported per half', () async {
+      server.agentCatalog = [];
+      final handle = await openLive();
+      final state = await when(handle, read);
+      expect(state.modelUnavailable, isNull);
+      expect(state.agentUnavailable, SessionSelectionUnavailable.emptyCatalog);
+      server.catalogStatus = 404;
+      await handle.refreshSelection();
+      final refused = handle.selectionState;
+      expect(refused.modelUnavailable, SessionSelectionUnavailable.routeAbsent);
+      expect(refused.agentUnavailable, SessionSelectionUnavailable.routeAbsent);
+      expect(refused.models, isEmpty);
+    });
+
+    test('two sessions keep their own fence', () async {
+      server.holdSelect = Completer();
+      final one = await openLive();
+      final two = await openLive('ses_two');
+      await when(one, read);
+      await when(two, read);
+      final switching = one.selectAgent(
+        agentId: 'plan',
+        id: const CommandId('cmd_one'),
+      );
+      await server.firstSelect.future.timeout(const Duration(seconds: 10));
+      expect(one.selectionState.holdsSend, isTrue);
+      expect(two.selectionState.holdsSend, isFalse);
+      expect(two.canChangeSelection, isTrue);
+      server.holdSelect!.complete();
+      await switching;
+      expect(server.selects, hasLength(1));
     });
   });
 }

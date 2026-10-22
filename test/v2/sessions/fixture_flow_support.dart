@@ -315,26 +315,33 @@ List<FixtureRoute> sessionRoutes({
   final desc = messageRows.reversed.toList();
   final descFn = descRows;
   final directory = (sessionRow['location'] as Map?)?['directory'] as String?;
-  // The sidebar reads who waits for the user in the open group's directory.
-  FixtureRoute pending(String path) => FixtureRoute(
-    _exchange(
-      method: 'GET',
-      path: Uri(
-        path: path,
-        queryParameters: {'location[directory]': directory},
-      ).toString(),
-      status: 200,
-      response: {
-        'location': {'directory': directory},
-        'data': <Object?>[],
-      },
-    ),
-    times: times,
-  );
+  // A location-scoped list: the sidebar reads who waits for the user in the
+  // open group's directory, and a live session reads its model and agent
+  // catalogs there.
+  FixtureRoute located(String path, [List<Object?> data = const []]) =>
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: Uri(
+            path: path,
+            queryParameters: {'location[directory]': directory},
+          ).toString(),
+          status: 200,
+          response: {
+            'location': {'directory': directory},
+            'data': data,
+          },
+        ),
+        times: times,
+      );
   return [
     if (directory != null) ...[
-      pending('/api/permission/request'),
-      pending('/api/form'),
+      located('/api/permission/request'),
+      located('/api/form'),
+      // The captured model row, its variant settings included; the captured
+      // agent list was empty.
+      located('/api/model', [_doc(OpenCodeFixtures(), 'model.json')]),
+      located('/api/agent'),
     ],
     FixtureRoute(
       _exchange(

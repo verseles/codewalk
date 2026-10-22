@@ -3,6 +3,7 @@ import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
+import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -299,6 +300,52 @@ class LiveHandle implements SessionLiveHandle {
   @override
   Future<void> refreshUnrestricted() =>
       _unrestricted('refresh', canRefreshUnrestricted);
+
+  /// Selection: off unless a test sets [selectionAvailable]; [selectionAction]
+  /// answers each switch or refresh with the state that follows it.
+  bool selectionAvailable = false;
+  @override
+  SessionSelectionState selectionState = const SessionSelectionState();
+  final selectionCalls = <String>[];
+  final selectionIds = <CommandId>[];
+  Future<SessionSelectionState> Function(String change)? selectionAction;
+
+  @override
+  bool get supportsSelection => selectionAvailable && closes == 0;
+  @override
+  bool get canChangeSelection =>
+      supportsSelection &&
+      selectionState.phase != SessionSelectionPhase.pending &&
+      current.phase == SessionLivePhase.live &&
+      !current.stale;
+
+  Future<void> _select(String change, CommandId? id, bool allowed) async {
+    if (!allowed) return;
+    selectionCalls.add(change);
+    if (id != null) selectionIds.add(id);
+    final action = selectionAction;
+    if (action == null) return emit(current);
+    selectionState = await action(change);
+    if (closes == 0) emit(current);
+  }
+
+  @override
+  Future<void> selectModel({
+    required String modelId,
+    required String providerId,
+    String? variant,
+    required CommandId id,
+  }) => _select(
+    'model:$providerId/$modelId${variant == null ? '' : ':$variant'}',
+    id,
+    canChangeSelection,
+  );
+  @override
+  Future<void> selectAgent({required String agentId, required CommandId id}) =>
+      _select('agent:$agentId', id, canChangeSelection);
+  @override
+  Future<void> refreshSelection() =>
+      _select('refresh', null, supportsSelection);
 }
 
 class LiveDirectory implements SessionLiveDirectory {

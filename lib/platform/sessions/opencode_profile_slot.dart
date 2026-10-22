@@ -14,6 +14,7 @@ import '../../shared/sessions/session_unrestricted.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
 import 'opencode_live_handle.dart';
+import 'opencode_selection_lane.dart';
 import 'prompt_outbox_store.dart';
 import 'unrestricted_ownership_store.dart';
 
@@ -68,6 +69,7 @@ final class OpenCodeProfileSlot {
   OpenCodePermissionReplyClient? _replies;
   OpenCodeFormReplyClient? _forms;
   OpenCodeSessionRulesClient? _rules;
+  OpenCodeSelectionLane? _selection;
   final _stops = <SessionRef, _StopRequest>{};
   final _older = <SessionRef, SessionOlderHistoryState>{};
   final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
@@ -145,6 +147,16 @@ final class OpenCodeProfileSlot {
       _transport,
       harness: harness,
       connectedVersion: observed,
+    );
+    _selection = OpenCodeSelectionLane(
+      reader: _reader,
+      client: OpenCodeSessionLifecycleClient(
+        _transport,
+        harness: harness,
+        connectedVersion: observed,
+      ),
+      view: view,
+      publish: (ref) => _publish(ref, view(ref)),
     );
     if (payloads case final store?) {
       outbox = OpenCodePromptOutbox(
@@ -239,10 +251,12 @@ final class OpenCodeProfileSlot {
     if (supportsUnrestricted) {
       _unrestricted.putIfAbsent(session, _UnrestrictedEntry.new);
     }
+    _selection?.open(session);
     final handle = OpenCodeLiveHandle(this, session);
     handles.add(handle);
-    // A session that is already live reads its rules now.
+    // A session that is already live reads its rules and catalog now.
     _considerUnrestrictedRead(session, view(session));
+    _selection?.consider(session, view(session));
     return handle;
   }
 
@@ -282,7 +296,12 @@ final class OpenCodeProfileSlot {
       if (handle.session == session) handle.emit(view);
     }
     _considerUnrestrictedRead(session, view);
+    _selection?.consider(session, view);
   }
+
+  /// The model and agent of the watched sessions; absent until the endpoint
+  /// is verified and after the profile closes.
+  OpenCodeSelectionLane? get selection => isClosed ? null : _selection;
 
   SessionStopState stopState(SessionRef ref) =>
       _stops[ref]?.state ?? const SessionStopState();
@@ -1213,6 +1232,7 @@ final class OpenCodeProfileSlot {
       _stops.remove(handle.session)?.dispose();
       _older.remove(handle.session);
       _unrestricted.remove(handle.session)?.dispose();
+      _selection?.release(handle.session);
       _replyStates.removeWhere((_, reply) {
         if (reply.session != handle.session) return false;
         reply.dispose();
@@ -1246,6 +1266,7 @@ final class OpenCodeProfileSlot {
       entry.dispose();
     }
     _unrestricted.clear();
+    _selection?.close();
     for (final reply in _replyStates.values) {
       reply.dispose();
     }

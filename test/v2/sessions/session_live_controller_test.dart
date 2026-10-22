@@ -315,6 +315,54 @@ void main() {
     });
   });
 
+  test('a selection change needs a live current lease', () async {
+    final opening = controller.start();
+    final handle = directory.grant(ref)..selectionAvailable = true;
+    await opening;
+    final model = ModelEntry(
+      id: 'alpha',
+      providerId: 'prov',
+      label: 'Alpha',
+      variants: ['high'],
+    );
+    final agent = CatalogEntry(
+      id: 'plan',
+      kind: const OpenValue.known(CatalogKind.agent),
+      label: 'Plan',
+    );
+    expect(controller.supportsSelection, isTrue);
+    expect(controller.canChangeSelection, isFalse, reason: 'not live yet');
+    await controller.selectModel(model, variant: 'high');
+    expect(handle.selectionCalls, isEmpty);
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(ref),
+      ),
+    );
+    await pumpEventQueue();
+    expect(controller.canChangeSelection, isTrue);
+    await controller.selectModel(model, variant: 'high');
+    await controller.selectAgent(agent);
+    expect(handle.selectionCalls, ['model:prov/alpha:high', 'agent:plan']);
+    // Each gesture takes its own command id.
+    expect(handle.selectionIds.toSet(), hasLength(2));
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        stale: true,
+        state: liveState(ref),
+      ),
+    );
+    await pumpEventQueue();
+    expect(controller.canChangeSelection, isFalse);
+    await controller.refreshSelection();
+    await controller.selectAgent(agent);
+    expect(handle.selectionCalls, hasLength(2));
+  });
+
   test('Unrestricted needs a live current lease and forwards once', () async {
     final opening = controller.start();
     final handle = directory.grant(ref)

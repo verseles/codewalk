@@ -3,6 +3,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'prompt_outbox.dart';
 import 'session_catalog_changes.dart';
 import 'session_permission_reply.dart';
+import 'session_selection.dart';
 import 'session_stop.dart';
 import 'session_unrestricted.dart';
 
@@ -137,6 +138,27 @@ abstract interface class SessionLiveHandle {
   Future<void> enableUnrestricted({required CommandId id});
   Future<void> disableUnrestricted({required CommandId id});
   Future<void> refreshUnrestricted();
+
+  /// The session's model and agent: absent when the lease cannot switch
+  /// them. The state and the single-flight fence are shared by its open
+  /// leases, and a pending or unconfirmed change holds this session's sends.
+  /// A switch is never repeated on its own; closing never switches.
+  bool get supportsSelection;
+  SessionSelectionState get selectionState;
+  bool get canChangeSelection;
+
+  /// Switches the whole model reference; a null [variant] clears it.
+  Future<void> selectModel({
+    required String modelId,
+    required String providerId,
+    String? variant,
+    required CommandId id,
+  });
+  Future<void> selectAgent({required String agentId, required CommandId id});
+
+  /// Reads the catalog again and, for an unconfirmed change, the session's
+  /// record, which settles it.
+  Future<void> refreshSelection();
 
   /// Older history, one page at a time, prepended to the resident window.
   /// The state and the single-flight fence are shared by the session's open

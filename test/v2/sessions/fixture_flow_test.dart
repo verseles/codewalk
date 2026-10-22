@@ -58,9 +58,13 @@ void main() {
     final deadline = DateTime.now().add(const Duration(seconds: 10));
     for (;;) {
       final view = live.view;
+      final selection = live.selectionState;
+      // The live period's catalog reads settle too, so a test that holds or
+      // counts the next exchange is not racing them.
       if (view != null &&
           view.phase == SessionLivePhase.live &&
-          view.state != null) {
+          view.state != null &&
+          (selection.models.isNotEmpty || selection.modelUnavailable != null)) {
         return view;
       }
       if (DateTime.now().isAfter(deadline)) {
@@ -836,6 +840,11 @@ void main() {
             v.state!.execution?.kind.known == ExecutionKind.running,
       );
       expect(handle.canStop, isTrue);
+      // The live period's catalog reads finish before the count is taken.
+      await until(
+        handle.updates,
+        (_) => handle.selectionState.models.isNotEmpty,
+      );
       final before = rig.server.completedExchanges;
       await handle.stop(id: const CommandId('stop_1'));
       expect(interrupts, 1);

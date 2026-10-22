@@ -5,6 +5,7 @@ import 'package:harness_opencode/harness_opencode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
+import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import 'opencode_profile_slot.dart';
@@ -98,6 +99,50 @@ final class OpenCodeLiveHandle implements SessionLiveHandle {
     if (!_closed && _slot.canRefreshUnrestricted(session)) {
       await _slot.refreshUnrestricted(session);
     }
+  }
+
+  @override
+  bool get supportsSelection => !_closed && _slot.selection != null;
+
+  @override
+  SessionSelectionState get selectionState => _closed
+      ? const SessionSelectionState()
+      : _slot.selection?.state(session) ??
+            SessionSelectionState(selection: current.state?.selection);
+
+  @override
+  bool get canChangeSelection =>
+      !_closed && (_slot.selection?.canChange(session) ?? false);
+
+  @override
+  Future<void> selectModel({
+    required String modelId,
+    required String providerId,
+    String? variant,
+    required CommandId id,
+  }) async {
+    if (_closed) return;
+    await _slot.selection?.selectModel(
+      session,
+      modelId: modelId,
+      providerId: providerId,
+      variant: variant,
+      id: id,
+    );
+  }
+
+  @override
+  Future<void> selectAgent({
+    required String agentId,
+    required CommandId id,
+  }) async {
+    if (_closed) return;
+    await _slot.selection?.selectAgent(session, agentId: agentId, id: id);
+  }
+
+  @override
+  Future<void> refreshSelection() async {
+    if (!_closed) await _slot.selection?.refresh(session);
   }
 
   @override

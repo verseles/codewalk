@@ -9,6 +9,7 @@ import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
+import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/hosts_controller.dart';
@@ -301,7 +302,7 @@ class SessionLiveController extends ChangeNotifier {
   SessionUnrestrictedState get unrestrictedState =>
       _handle?.unrestrictedState ?? const SessionUnrestrictedState();
 
-  bool get _unrestrictedCurrent =>
+  bool get _liveCurrent =>
       !_disposed &&
       !opening &&
       _credential?.matches(_currentCredential()) == true &&
@@ -309,28 +310,26 @@ class SessionLiveController extends ChangeNotifier {
       !(view?.stale ?? true);
 
   bool get canEnableUnrestricted =>
-      _unrestrictedCurrent && (_handle?.canEnableUnrestricted ?? false);
+      _liveCurrent && (_handle?.canEnableUnrestricted ?? false);
   bool get canDisableUnrestricted =>
-      _unrestrictedCurrent && (_handle?.canDisableUnrestricted ?? false);
+      _liveCurrent && (_handle?.canDisableUnrestricted ?? false);
   bool get canRefreshUnrestricted =>
-      _unrestrictedCurrent && (_handle?.canRefreshUnrestricted ?? false);
+      _liveCurrent && (_handle?.canRefreshUnrestricted ?? false);
 
-  Future<void> enableUnrestricted() => _changeUnrestricted(
+  Future<void> enableUnrestricted() => _act(
     canEnableUnrestricted,
     (handle) => handle.enableUnrestricted(id: _commandIds()),
   );
 
-  Future<void> disableUnrestricted() => _changeUnrestricted(
+  Future<void> disableUnrestricted() => _act(
     canDisableUnrestricted,
     (handle) => handle.disableUnrestricted(id: _commandIds()),
   );
 
-  Future<void> refreshUnrestricted() => _changeUnrestricted(
-    canRefreshUnrestricted,
-    (handle) => handle.refreshUnrestricted(),
-  );
+  Future<void> refreshUnrestricted() =>
+      _act(canRefreshUnrestricted, (handle) => handle.refreshUnrestricted());
 
-  Future<void> _changeUnrestricted(
+  Future<void> _act(
     bool allowed,
     Future<void> Function(SessionLiveHandle) action,
   ) async {
@@ -345,6 +344,37 @@ class SessionLiveController extends ChangeNotifier {
     }
     _notify();
   }
+
+  /// The session's model and agent. A pending or unconfirmed change holds
+  /// this session's sends; the prompt itself never carries a selection.
+  bool get supportsSelection =>
+      !_disposed && (_handle?.supportsSelection ?? false);
+  SessionSelectionState get selectionState =>
+      _handle?.selectionState ??
+      SessionSelectionState(selection: state?.selection);
+  bool get canChangeSelection =>
+      _liveCurrent && (_handle?.canChangeSelection ?? false);
+
+  /// The command id is taken with the gesture, for this lease's session.
+  Future<void> selectModel(ModelEntry model, {String? variant}) => _act(
+    canChangeSelection,
+    (handle) => handle.selectModel(
+      modelId: model.id,
+      providerId: model.providerId,
+      variant: variant,
+      id: _commandIds(),
+    ),
+  );
+
+  Future<void> selectAgent(CatalogEntry agent) => _act(
+    canChangeSelection,
+    (handle) => handle.selectAgent(agentId: agent.id, id: _commandIds()),
+  );
+
+  Future<void> refreshSelection() => _act(
+    _liveCurrent && supportsSelection,
+    (handle) => handle.refreshSelection(),
+  );
 
   /// [owner] is the owning session of a child's request shown here.
   SessionPermissionReplyState replyState(
