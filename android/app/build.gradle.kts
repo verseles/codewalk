@@ -20,6 +20,14 @@ val requiresReleaseSigning = requestedTasks.any {
     "release" in it || "bundle" in it || "publish" in it
 }
 
+// The owner's development preview (`-PcodewalkPreview=true`) installs beside
+// the production app under its own ID and label; without the property the
+// production identity is untouched, and a release never carries the preview.
+val codewalkPreview = providers.gradleProperty("codewalkPreview").orNull == "true"
+if (codewalkPreview && requiresReleaseSigning) {
+    throw GradleException("The development preview identity cannot be used for a release build.")
+}
+
 val releaseStoreFile = resolveSigningFile(
     keyProperties.getProperty("storeFile"),
 )
@@ -91,6 +99,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.verseles.codewalk"
+        if (codewalkPreview) applicationIdSuffix = ".v2preview"
+        manifestPlaceholders["appLabel"] = if (codewalkPreview) "CodeWalk v2 Preview" else "CodeWalk"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

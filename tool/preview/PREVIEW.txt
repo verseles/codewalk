@@ -1,6 +1,8 @@
-CODEWALK V2 — LINUX X64 DEVELOPMENT PREVIEW
+CODEWALK V2 — LINUX DEVELOPMENT PREVIEW
 
 This package is a preview, not a release or an update to the installed CodeWalk.
+Its architecture (x64 or ARM64) is named in the archive file name and in
+preview-manifest.json; it only opens on a machine of that architecture.
 Tested runtime: Ubuntu 24.04 desktop, X11/XWayland, software rendering.
 It needs ordinary desktop runtime libraries, Python 3, dbus-daemon,
 gnome-keyring-daemon and gdbus. It does not need Flutter, Dart or a build toolchain.
@@ -11,17 +13,21 @@ OPEN
    The launcher checks the runtime and reports a missing requirement clearly.
 
 WHAT TO LOOK AT
-Hosts, Pairing, Settings, Appearance, supported Shortcuts, App Logs and Release
-history. Conversations and session routes are placeholders; chat is not ready.
+Add or pair your OpenCode 2 server, then use the workspace: projects and their
+sessions in the sidebar, session tabs, the conversation, drafts and prompt recall
+(Up/Down), and the running, needs-you and unread marks on the session rows.
 Server-dependent operations require your deliberate input and an authorized
-OpenCode 2 endpoint. The packaged smoke checklist states exactly what was tested.
+OpenCode 2 endpoint. This is a debug build: the DEBUG ribbon in the corner is
+expected. The packaged smoke checklist states exactly what was tested.
 
 DATA
-Preferences are kept separately under your original data directory in
-codewalk-v2-preview/<source revision>. A private D-Bus and encrypted temporary
-keyring are created for each run. Credentials do NOT survive closing this preview:
-you must pair or enter them again in a later preview session. This is a declared
-preview limitation; installed CodeWalk credentials and data are not used.
+Preferences, tabs and drafts are kept separately under your original data
+directory in codewalk-v2-preview/<source revision>. A private D-Bus and encrypted
+temporary keyring are created for each run. Credentials do NOT survive closing
+this preview: after reopening it, use Pair again or Password on the same server
+card instead of adding the server again, so its tabs and drafts stay with it.
+This is a declared preview limitation; installed CodeWalk credentials and data
+are not used.
 The launcher does not install a desktop entry, URI handler, update or service.
 This is normal-storage isolation, not a security sandbox for untrusted software.
 
@@ -31,5 +37,6 @@ specific codewalk-v2-preview/<source revision> data folder after closing it.
 Do not delete the regular CodeWalk application or its data.
 
 The archive checksum, source/SDK provenance, screenshots and completed native
-smoke report are supplied alongside this package. X11/software verification does
-not establish GPU, Wayland, Android, ARM64, migration or full MVP acceptance.
+smoke report are supplied alongside this package. X11/software verification of
+one architecture does not establish GPU, Wayland, the other architecture,
+Android, migration or full MVP acceptance.

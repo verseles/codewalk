@@ -72,6 +72,52 @@ class LinuxPreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "x64"):
             preview.package(self.bundle, self.metadata, self.archive)
 
+    def use_arch(self, arch, machine):
+        (self.bundle / "codewalk").write_bytes(b"\x7fELF\x02\x01" + b"\0" * 12 + machine.to_bytes(2, "little"))
+        value = json.loads(self.metadata.read_text())
+        value["artifacts_sha256"] = {f"build/linux/{arch}/debug/bundle/{path.relative_to(self.bundle)}": preview.digest(path)
+                                     for path in preview.files_under(self.bundle)}
+        self.metadata.write_text(json.dumps(value))
+
+    def test_arm64_bundle_is_packaged_as_arm64(self):
+        self.use_arch("arm64", 183)
+        manifest = preview.verify_bundle(self.package())
+        self.assertEqual(manifest["architecture"], "arm64")
+
+    def test_arm64_receipt_with_an_x64_executable_is_rejected(self):
+        self.use_arch("arm64", 62)
+        with self.assertRaisesRegex(RuntimeError, "not Linux arm64"):
+            preview.package(self.bundle, self.metadata, self.archive)
+
+    def test_inventory_cannot_mix_architectures_or_name_an_unknown_one(self):
+        value = json.loads(self.metadata.read_text())
+        recorded = value["artifacts_sha256"]
+        name = next(iter(recorded))
+        for inventory in ({**recorded, name.replace("/x64/", "/arm64/"): recorded[name]},
+                          {name.replace("/x64/", "/riscv64/"): recorded[name]}):
+            with self.subTest(inventory=list(inventory)):
+                value["artifacts_sha256"] = inventory
+                self.metadata.write_text(json.dumps(value))
+                with self.assertRaisesRegex(RuntimeError, "Invalid compiler bundle inventory"):
+                    preview.package(self.bundle, self.metadata, self.archive)
+
+    def test_manifest_architecture_must_match_the_executable(self):
+        extracted = self.package()
+        manifest_file = extracted / "preview-manifest.json"
+        manifest = json.loads(manifest_file.read_text())
+        manifest["architecture"] = "arm64"
+        manifest_file.write_text(json.dumps(manifest))
+        with self.assertRaisesRegex(RuntimeError, "not Linux arm64"):
+            preview.verify_bundle(extracted)
+
+    def test_launch_refuses_a_host_of_another_architecture(self):
+        extracted = self.package()
+        with mock.patch.object(preview.platform, "system", return_value="Linux"), \
+                mock.patch.object(preview.platform, "machine", return_value="aarch64"):
+            with self.assertRaisesRegex(RuntimeError, "requires Linux x64"):
+                preview.launch(extracted, self.root / "profile")
+        self.assertFalse((self.root / "profile").exists())
+
     def test_manifest_cannot_omit_files_or_use_a_traversing_commit(self):
         extracted = self.package()
         manifest_file = extracted / "preview-manifest.json"

@@ -1,0 +1,200 @@
+name: V2 owner preview
+
+# Builds the owner's development previews from the dispatched commit and
+# launches each one before it is kept. Artifacts only: nothing is published,
+# tagged or deployed, and the installed CodeWalk is never replaced.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.44.1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  linux:
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Flutter
+        if: matrix.arch == 'x64'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Setup Flutter from its tag (no published Linux ARM64 archive)
+        if: matrix.arch == 'arm64'
+        run: |
+          test "$(uname -m)" = aarch64
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 -c 'import json, os, sys; version = json.load(open(os.environ["RUNNER_TEMP"] + "/flutter-version.json"))["frameworkVersion"]; sys.exit(0 if version == os.environ["FLUTTER_VERSION"] else f"Flutter {version} is not the pinned version")'
+          "$RUNNER_TEMP/flutter/bin/flutter" precache --linux
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - name: Install Linux development dependencies
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
+      - name: Install isolated native visual QA runtime
+        run: sudo apt-get install -y xvfb xauth xdotool imagemagick tesseract-ocr gnome-keyring libsecret-tools dbus-x11
+      - run: flutter pub get
+      - name: Record compiler environment
+        run: |
+          mkdir -p build/native-evidence
+          git rev-parse HEAD > build/native-evidence/source-commit.txt
+          flutter --version --machine > build/native-evidence/flutter.json
+          uname -a > build/native-evidence/host.txt
+      - name: Compile the explicit v2 debug target
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          make v2-linux-debug 2>&1 | tee build/native-evidence/compiler.log
+      - name: Package the isolated Linux development preview
+        run: make v2-linux-preview-package
+      - name: Launch and visually verify the exact packaged preview
+        timeout-minutes: 8
+        run: |
+          timeout --signal=TERM --kill-after=10s 420s xvfb-run --auto-servernum --server-args="-screen 0 1600x1000x24 -nolisten tcp" make v2-linux-preview-smoke
+      - name: Keep only a verified preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-v2-preview-linux-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/native-evidence/codewalk-v2-preview-linux-${{ matrix.arch }}.tar.gz
+            build/native-evidence/codewalk-v2-preview-linux-${{ matrix.arch }}.tar.gz.sha256
+            build/native-evidence/preview-smoke/
+            build/native-evidence/linux.json
+            build/native-evidence/source-commit.txt
+          if-no-files-found: error
+          retention-days: 7
+      - name: Retain diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-preview-linux-${{ matrix.arch }}-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/native-evidence/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install project-pinned Android NDK
+        run: bash tool/ci/install_android_ndk.sh
+      - run: flutter pub get
+      - name: Record compiler environment
+        run: |
+          mkdir -p build/native-evidence
+          git rev-parse HEAD > build/native-evidence/source-commit.txt
+          flutter --version --machine > build/native-evidence/flutter.json
+      - name: Build and inspect the owner preview APK
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          make v2-android-preview 2>&1 | tee build/native-evidence/compiler.log
+          cd build/app/outputs/flutter-apk
+          sha256sum app-arm64-v8a-profile.apk > app-arm64-v8a-profile.apk.sha256
+      - name: Keep the delivered arm64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-v2-preview-android-arm64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk.sha256
+            build/native-evidence/android-preview.json
+            build/native-evidence/source-commit.txt
+          if-no-files-found: error
+          retention-days: 7
+      - name: Keep the x86_64 split for the launch check
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-preview-android-launch-split-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/app/outputs/flutter-apk/app-x86_64-profile.apk
+            build/native-evidence/android-preview.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Retain diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-preview-android-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/native-evidence/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  android_launch:
+    needs: android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: v2-preview-android-launch-split-${{ github.run_id }}-${{ github.run_attempt }}
+          path: launch
+      - name: Enable KVM group permissions
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install the screenshot check
+        run: sudo apt-get install -y imagemagick
+      - name: Install and launch the same build on an Android 16 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          pre-emulator-launch-script: timeout --kill-after=10s 30s adb start-server
+          script: python3 tool/ci/smoke_v2_android_preview.py --apk launch/app/outputs/flutter-apk/app-x86_64-profile.apk --build-evidence launch/native-evidence/android-preview.json --evidence build/native-evidence/android-launch
+      - name: Keep the launch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-v2-preview-android-launch-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/native-evidence/android-launch/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -24,9 +24,43 @@ class NativeBuildTests(unittest.TestCase):
         self.failure = False
         self.wrong_arch = False
         self.kernel = b"compiled fixture"
+        self.package = native.PREVIEW_APPLICATION_ID
+        self.signer = "C=US, O=Android, CN=Android Debug"
+        self.jit_kernel = False
+        self.authorities = f"{native.PREVIEW_APPLICATION_ID}.fileprovider;{native.PREVIEW_APPLICATION_ID}.androidx-startup"
+        self.permission = f"{native.PREVIEW_APPLICATION_ID}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        tools = mock.patch.object(native, "android_tool", side_effect=lambda name: name)
+        tools.start()
+        self.addCleanup(tools.stop)
+
+    def preview_apks(self):
+        for abi, name in native.PREVIEW_APKS.items():
+            output = self.root / "build/app/outputs/flutter-apk" / name
+            output.parent.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(output, "w") as archive:
+                archive.writestr(f"lib/{abi}/libflutter.so", b"fixture")
+                archive.writestr(f"lib/{abi}/libapp.so", b"aot fixture")
+                if self.jit_kernel:
+                    archive.writestr("assets/flutter_assets/kernel_blob.bin", b"kernel")
 
     def runner(self, command, **kwargs):
         self.calls.append(command)
+        if command[:3] == ["aapt2", "dump", "badging"]:
+            return subprocess.CompletedProcess(command, 0, stdout=(
+                f"package: name='{self.package}' versionCode='2266' versionName='1.266.0'\n"
+                "sdkVersion:'24'\ntargetSdkVersion:'36'\n"
+                f"application-label:'{native.PREVIEW_LABEL}'\n"
+                f"launchable-activity: name='{native.PREVIEW_ACTIVITY}'  label='' icon=''\n"))
+        if command[:3] == ["aapt2", "dump", "xmltree"]:
+            return subprocess.CompletedProcess(command, 0, stdout=(
+                "    E: permission (line=12)\n"
+                f'      A: http://schemas.android.com/apk/res/android:name(0x01010003)="{self.permission}"\n'
+                "      E: provider (line=75)\n"
+                '        A: http://schemas.android.com/apk/res/android:name(0x01010003)="androidx.core.content.FileProvider"\n'
+                "        A: http://schemas.android.com/apk/res/android:authorities(0x01010018)="
+                f'"{self.authorities}" (Raw: "{self.authorities}")\n'))
+        if command[:2] == ["apksigner", "verify"]:
+            return subprocess.CompletedProcess(command, 0, stdout=f"Signer #1 certificate DN: {self.signer}\n")
         if command == ["git", "rev-parse", "HEAD"]:
             return subprocess.CompletedProcess(command, 0, stdout="a" * 40)
         if command == ["git", "status", "--porcelain"]:
@@ -36,7 +70,9 @@ class NativeBuildTests(unittest.TestCase):
         if self.failure:
             raise subprocess.CalledProcessError(7, command)
         if self.artifacts:
-            if "apk" in command:
+            if "--profile" in command:
+                self.preview_apks()
+            elif "apk" in command:
                 output = self.root / "build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk"
                 output.parent.mkdir(parents=True)
                 abi = "x86_64" if self.wrong_arch else "arm64-v8a"
@@ -73,6 +109,61 @@ class NativeBuildTests(unittest.TestCase):
         self.assertEqual(result["release_aot"], "not-tested")
         self.assertTrue(result["artifacts_sha256"])
         self.assertEqual(json.loads((self.root / "build/native-evidence/android.json").read_text()), result)
+
+    def test_android_preview_is_a_profile_build_beside_production(self):
+        result = self.build("android-preview")
+        self.assertEqual(result["command"], ["flutter", "build", "apk", "--profile", "--no-pub",
+                                           "--target", "lib/main_v2.dart", "--target-platform",
+                                           "android-arm64,android-x64", "--split-per-abi",
+                                           "--android-project-arg=codewalkPreview=true"])
+        self.assertEqual(result["mode"], "profile")
+        self.assertEqual(result["compiler"], "pass")
+        self.assertEqual(set(result["identity"]), {"arm64-v8a", "x86_64"})
+        delivered = result["identity"]["arm64-v8a"]
+        self.assertEqual(delivered["application_id"], "com.verseles.codewalk.v2preview")
+        self.assertEqual(delivered["label"], "CodeWalk v2 Preview")
+        self.assertIn("CN=Android Debug", delivered["signer"])
+        self.assertEqual(delivered["provider_authorities"], ["com.verseles.codewalk.v2preview.fileprovider",
+                                                             "com.verseles.codewalk.v2preview.androidx-startup"])
+        self.assertEqual(delivered["declared_permissions"],
+                         ["com.verseles.codewalk.v2preview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"])
+        self.assertIn("build/app/outputs/flutter-apk/app-arm64-v8a-profile.apk", result["artifacts_sha256"])
+        self.assertEqual(json.loads((self.root / "build/native-evidence/android-preview.json").read_text()), result)
+
+    def test_android_preview_refuses_a_jit_kernel_or_another_identity(self):
+        cases = (("jit_kernel", True, "not a profile build"),
+                 ("package", "com.verseles.codewalk", "identity"),
+                 ("signer", "CN=CodeWalk Release", "debug key"),
+                 ("authorities", "com.verseles.codewalk.v2preview.fileprovider;com.verseles.codewalk.fileprovider",
+                  "outside its own ID"),
+                 ("permission", "com.verseles.codewalk.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION", "outside its own ID"))
+        for field, value, message in cases:
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                old_root = self.root
+                self.root = Path(directory)
+                try:
+                    (self.root / "lib").mkdir()
+                    (self.root / native.ENTRY_POINT).write_text("fixture", encoding="utf-8")
+                    setattr(self, field, value)
+                    with self.assertRaisesRegex(RuntimeError, message):
+                        self.build("android-preview")
+                    evidence = json.loads((self.root / "build/native-evidence/android-preview.json").read_text())
+                    self.assertEqual(evidence["compiler"], "fail")
+                finally:
+                    self.root = old_root
+                    self.reset_preview()
+
+    def reset_preview(self):
+        self.package = native.PREVIEW_APPLICATION_ID
+        self.signer = "C=US, O=Android, CN=Android Debug"
+        self.jit_kernel = False
+        self.authorities = f"{native.PREVIEW_APPLICATION_ID}.fileprovider;{native.PREVIEW_APPLICATION_ID}.androidx-startup"
+        self.permission = f"{native.PREVIEW_APPLICATION_ID}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+
+    def test_android_preview_needs_an_x64_host(self):
+        with self.assertRaisesRegex(RuntimeError, "x64 host"):
+            self.build("android-preview", "aarch64")
+        self.assertEqual(self.calls, [])
 
     def test_linux_native_arm64_bundle_not_an_assumed_x64_path(self):
         result = self.build("linux", "aarch64")

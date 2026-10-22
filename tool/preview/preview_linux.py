@@ -28,6 +28,10 @@ KIND = "codewalk-native-development-preview"
 ARCHIVE_ROOT = "codewalk-v2-preview"
 PROFILE_MARKER = ".codewalk-preview.json"
 BASE_MARKER = ".codewalk-preview-root.json"
+# The ELF machine of each supported preview architecture, and the host names
+# that run it.
+ARCHITECTURES = {"x64": 62, "arm64": 183}
+HOST_ARCHITECTURES = {"x86_64": "x64", "amd64": "x64", "aarch64": "arm64", "arm64": "arm64"}
 
 
 def digest(path):
@@ -36,6 +40,14 @@ def digest(path):
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             value.update(chunk)
     return value.hexdigest()
+
+
+def elf_architecture(path):
+    header = path.read_bytes()[:20]
+    if len(header) < 20 or header[:6] != b"\x7fELF\x02\x01":
+        return None
+    machine = int.from_bytes(header[18:20], "little")
+    return next((arch for arch, value in ARCHITECTURES.items() if value == machine), None)
 
 
 def files_under(root):
@@ -50,8 +62,8 @@ def files_under(root):
 
 def verify_bundle(bundle):
     manifest = json.loads((bundle / "preview-manifest.json").read_text())
-    if manifest.get("kind") != KIND or manifest.get("architecture") != "x64":
-        raise RuntimeError("Not a Linux x64 development preview.")
+    if manifest.get("kind") != KIND or manifest.get("architecture") not in ARCHITECTURES:
+        raise RuntimeError("Not a Linux development preview.")
     require_commit(manifest.get("source_commit"))
     hashes = manifest.get("files_sha256")
     if not isinstance(hashes, dict) or not {"codewalk", "preview.py", "Open-preview.sh", "PREVIEW.txt"} <= hashes.keys():
@@ -65,6 +77,8 @@ def verify_bundle(bundle):
             raise RuntimeError("Unsafe manifest path.")
         if not path.is_file() or digest(path) != expected:
             raise RuntimeError(f"Preview file integrity check failed: {name}")
+    if elf_architecture(bundle / "codewalk") != manifest["architecture"]:
+        raise RuntimeError(f"Preview executable is not Linux {manifest['architecture']}.")
     return manifest
 
 
@@ -74,10 +88,16 @@ def require_commit(value):
 
 
 def compiler_inventory(metadata):
-    prefix = "build/linux/x64/debug/bundle/"
+    """The architecture the compiler built and its bundle files with hashes."""
     recorded = metadata.get("artifacts_sha256")
     if not isinstance(recorded, dict) or not recorded:
         raise RuntimeError("Compiler bundle hashes are required.")
+    name = next(iter(recorded))
+    first = re.match(r"build/linux/([a-z0-9]+)/debug/bundle/", name) if isinstance(name, str) else None
+    arch = first.group(1) if first else None
+    if arch not in ARCHITECTURES:
+        raise RuntimeError("Invalid compiler bundle inventory.")
+    prefix = f"build/linux/{arch}/debug/bundle/"
     expected = {}
     for name, checksum in recorded.items():
         if (not isinstance(name, str) or not name.startswith(prefix)
@@ -85,7 +105,7 @@ def compiler_inventory(metadata):
                 or re.fullmatch(r"[0-9a-f]{64}", checksum) is None):
             raise RuntimeError("Invalid compiler bundle inventory.")
         expected[name[len(prefix):]] = checksum
-    return expected
+    return arch, expected
 
 
 def verify_compiler_files(bundle, expected):
@@ -101,11 +121,10 @@ def package(bundle, metadata_path, output):
             or metadata.get("mode") != "debug" or metadata.get("entry_point") != "lib/main_v2.dart"):
         raise RuntimeError("A verified explicit v2 Linux debug build is required.")
     require_commit(metadata.get("source_commit"))
-    expected = compiler_inventory(metadata)
+    arch, expected = compiler_inventory(metadata)
     verify_compiler_files(bundle, expected)
-    header = (bundle / "codewalk").read_bytes()[:20]
-    if header[:6] != b"\x7fELF\x02\x01" or int.from_bytes(header[18:20], "little") != 62:
-        raise RuntimeError("Preview executable is not Linux x64.")
+    if elf_architecture(bundle / "codewalk") != arch:
+        raise RuntimeError(f"Preview executable is not Linux {arch}.")
     if output.exists() or output.is_symlink():
         raise RuntimeError("Refusing to overwrite an existing preview archive.")
     with tempfile.TemporaryDirectory(prefix="cw2-package-") as temporary:
@@ -121,7 +140,7 @@ def package(bundle, metadata_path, output):
         launcher.chmod(0o755)
         (root / "codewalk").chmod(0o755)
         manifest = {
-            "kind": KIND, "architecture": "x64", "runtime": "Ubuntu 24.04 X11/software",
+            "kind": KIND, "architecture": arch, "runtime": "Ubuntu 24.04 X11/software",
             "source_commit": metadata["source_commit"], "source_dirty": metadata["source_dirty"],
             "entry_point": metadata["entry_point"], "flutter": metadata["flutter"],
             "credentials": "encrypted ephemeral keyring; cleared after each launcher session",
@@ -287,15 +306,16 @@ def private_session(bundle, profile, runtime):
 
 
 def launch(bundle, profile=None):
-    if platform.system() != "Linux" or platform.machine().lower() not in ("x86_64", "amd64"):
-        raise RuntimeError("This prepared preview requires Linux x64.")
+    bundle = bundle.resolve()
+    manifest = verify_bundle(bundle)
+    host = HOST_ARCHITECTURES.get(platform.machine().lower())
+    if platform.system() != "Linux" or host != manifest["architecture"]:
+        raise RuntimeError(f"This prepared preview requires Linux {manifest['architecture']}.")
     if not os.environ.get("DISPLAY"):
         raise RuntimeError("This preview requires an available X11/XWayland display.")
     for program in ("dbus-daemon", "gnome-keyring-daemon", "gdbus"):
         if shutil.which(program) is None:
             raise RuntimeError(f"Required Ubuntu desktop runtime is missing: {program}")
-    bundle = bundle.resolve()
-    manifest = verify_bundle(bundle)
     if profile is None:
         data_home = Path(os.environ.get("XDG_DATA_HOME") or (Path.home() / ".local/share"))
         profile = default_profile(data_home, manifest["source_commit"])
