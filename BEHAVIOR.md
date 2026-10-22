@@ -143,6 +143,15 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the local-limit notice appears only when the server has more pages: a complete list of exactly 200 rows is not announced as truncated
 - **Then** the endpoint keeps exactly one event stream: the catalog borrows the live session's stream, and a platform without the live transport keeps the catalog pull-only
 
+### V2 live stream wake
+
+- **Given** the app holds one or more open endpoint event streams
+- **When** it returns to the foreground after being paused, hidden or detached, or the device's network route changes (a different Android transport set; on Linux a different NetworkManager primary connection or type)
+- **Then** every open stream reconnects at once instead of waiting for its retry delay or stall watchdog, and the new stream hydrates from the authoritative reads; the wake itself sends, replays or creates nothing, and the reconnected stream keeps the policies of any other reconnect
+- **Then** triggers within 300 ms collapse into one reconnect; becoming inactive (a notification shade, a focus change), the first route seen, an unchanged route and going offline never reconnect
+- **Then** a stream stopped for authentication or an incompatible server stays stopped until the user retries, and a profile still being probed is left to finish its probe
+- **Then** a platform without a network feed (iOS, macOS, Windows) reconnects only on a return from the background; a switch between two networks of the same Android transport may not be seen (#434), and the retry delay and the watchdog stay the floor
+
 ### V2 live session timeline viewport
 
 - **Given** the v2 live session screen shows the resident timeline items
