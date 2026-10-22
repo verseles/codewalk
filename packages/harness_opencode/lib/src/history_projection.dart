@@ -515,10 +515,16 @@ List<TimelineItem> projectOpenCodeHistory(
           );
           String? errorMessage;
           if (error.containsKey('message')) {
-            errorMessage = text(error['message'], charge: false);
+            node();
+            final raw = error['message'];
+            if (raw is! String) malformed();
+            errorMessage = raw;
           }
           if (openCodeErrorHasCard(errorType)) {
             failure = openCodeErrorInfo(errorType, errorMessage);
+            // A message larger than one text field is bounded like the live
+            // failure, not rejected: only the kept prefix is validated.
+            text(failure.rawMessage, charge: false);
           }
         }
         if (message.containsKey('retry')) {

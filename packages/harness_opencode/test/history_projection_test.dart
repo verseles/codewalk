@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:harness_opencode/src/error_projection.dart';
 import 'package:harness_opencode/src/history_projection.dart';
 import 'package:test/test.dart';
 
@@ -504,6 +505,19 @@ void main() {
       expect(long.error!.kind.known, ErrorKind.provider);
       expect(utf8.encode(long.error!.rawMessage), hasLength(8 * 1024));
       expect(long.error!.details!.value, {'messageTruncated': true});
+      // Larger than one text field: bounded like the live failure, never a
+      // rejected page.
+      final huge = 'x' * (300 * 1024);
+      final bounded =
+          project([
+                failed({'type': 'provider.error', 'message': huge}),
+                idle,
+              ]).single
+              as TurnOutcome;
+      expect(
+        errorJson(bounded.error),
+        errorJson(openCodeErrorInfo('provider.error', huge)),
+      );
       final future =
           project([
                 failed({'type': 'future.kind', 'message': 'Something new'}),
