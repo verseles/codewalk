@@ -160,6 +160,9 @@ dev_dependencies:
   shared_preferences_platform_interface: ^2.4.2
   flutter_test:
     sdk: flutter
+  # The V2-042C device reliability cells (integration_test/).
+  integration_test:
+    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

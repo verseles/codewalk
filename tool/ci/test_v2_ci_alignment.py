@@ -26,6 +26,9 @@ class V2CiAlignmentTests(unittest.TestCase):
         self.preview = (ROOT / ".github/workflows/v2-owner-preview.yml").read_text(
             encoding="utf-8"
         )
+        self.reliability = (
+            ROOT / ".github/workflows/v2-device-reliability.yml"
+        ).read_text(encoding="utf-8")
 
     def test_automatic_foundations_keep_strict_native_checks(self):
         for job in ("v2_foundations", "v2_native_checks"):
@@ -113,6 +116,27 @@ class V2CiAlignmentTests(unittest.TestCase):
         self.assertLess(launch.index("python3 tool/ci/smoke_v2_android_preview.py"),
                         launch.index("name: codewalk-v2-preview-android-arm64-"))
         self.assertIn("launch/app/outputs/flutter-apk/app-arm64-v8a-profile.apk\n", launch)
+
+    def test_device_reliability_is_manual_and_publishes_nothing(self):
+        trigger = section(self.reliability, "on", "")
+        self.assertEqual(trigger.strip(), "workflow_dispatch:")
+        self.assertEqual(section(self.reliability, "permissions", "").strip(), "contents: read")
+        self.assertNotIn("continue-on-error", self.reliability)
+        self.assertNotIn("secrets.", self.reliability)
+        self.assertNotRegex(
+            self.reliability,
+            r"(?:gh release|pages deploy|wrangler|make (?:release|web|android)\b|workflow_call|--release)",
+        )
+        self.assertEqual(self.reliability.count("persist-credentials: false"), 1)
+        job = section(self.reliability, "api31", "  ")
+        self.assertIn("- name: Verify the pinned Flutter SDK", job)
+        self.assertIn('os.environ["FLUTTER_REVISION"]', job)
+        self.assertRegex(section(self.reliability, "env", ""), r'FLUTTER_REVISION: "[0-9a-f]{40}"')
+        # The Android 12 reference floor, never the preview's launch image.
+        self.assertIn("api-level: 31\n", job)
+        self.assertIn("arch: x86_64", job)
+        self.assertIn("python3 tool/ci/device_reliability_android.py", job)
+        self.assertNotIn("v2-device-reliability", self.ci)
 
     def test_owner_preview_leaves_the_automatic_pipeline_alone(self):
         self.assertNotIn("v2-android-preview", self.ci)
