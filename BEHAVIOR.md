@@ -77,7 +77,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a nested row is indented from the start edge with a guide line and says it is a child session; the indent stops growing after three levels, while deeper rows still nest
 - **Then** a child whose parent is not drawn above it (not loaded yet, hidden, in another group, or a lineage that loops) stays a top-level row where the server put it and says its parent is not shown here; no parent, project or row is invented and no row is dropped or shown twice
 - **Then** the nesting follows the rows the server just returned: a page or a live re-read that brings the parent nests the child, and one that no longer returns it leaves the child where the server put it
-- **Then** a nested row keeps every row affordance: the expand gesture, the actions menu, the ownership label and the unread mark; there is no collapse toggle, and deleting a parent still warns with the endpoint's count of its direct children
+- **Then** a nested row keeps every row affordance: the expand gesture, the actions menu, the ownership label and the activity marks; there is no collapse toggle, and deleting a parent still warns with the endpoint's count of its direct children
 
 ### V2 session ownership label
 
@@ -88,6 +88,17 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the list wakes up at the end of a proof's freshness window, without any server traffic, so a label never outlives the proof that showed it
 - **Then** the label follows the rows the server just returned after a live re-read, and the expanded row keeps its label
 - **Then** no ownership is inferred from the endpoint address, the port, the profile or the server's title, and the label never authorizes an action
+
+### V2 session activity marks
+
+- **Given** the v2 session catalog shows a row
+- **When** the endpoint's own state proves an activity of that session
+- **Then** the row shows every proved mark as an icon with a label, in this order: needs you, running, unread; the marks wrap in a narrow pane, are read by screen readers and are localized in every layout, and there is no harness badge
+- **Then** running comes only from the endpoint's list of active sessions; needs you comes only from the pending permission and form lists of the open project group's directory, so a child's request marks the child row, never its parent, and a form addressed to no session marks none; unread is the endpoint's own idle marker
+- **Then** a mark that was not observed is not shown: a part that could not be read, a row of a group other than the open one, and a list that is stale or behind the endpoint show no running or needs-you mark
+- **Then** an execution start or a permission or form change re-reads only the activity, coalesced with the list's live re-read cadence; a re-read of the rows shows them at once and reads the activity after them, and a server switch during an activity read still reads the new server's activity
+- **Then** while the app is in the foreground and a session's live pane shows it, the endpoint's view command is sent once per idle transition of that session, so its unread mark clears without the row action; a refused or lost view keeps the mark, says nothing and is not retried for that transition, and the manual mark as viewed stays
+- **Then** a session whose pane is gone or whose app is in the background is not marked viewed; returning to the foreground with the pane still showing it sends the view
 
 ### V2 session row actions
 

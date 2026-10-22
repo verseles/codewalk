@@ -2501,3 +2501,19 @@ inferring topology, and the capability guard treats the ownership kinds as a
 mutation authority, so an unproven kind is never claimed. The OpenCode
 projection keeps reporting `OwnershipInfo.unknown`, so a directly connected
 OpenCode session shows the unknown label until an adapter supplies a proof.
+
+## V2-043J session activity marks (#404)
+
+```text
+lib/shared/sessions/session_activity.dart # SessionActivity (running sessions, the read directory and its waiting sessions; null = not observed) and SessionActivityMark (needs you, running, unread)
+lib/shared/sessions/session_catalog_source.dart # SessionCatalogSource.activity({directory}): never throws, an unread part stays unknown
+lib/shared/sessions/session_catalog_changes.dart # SessionActivityChanged: payload-free signal that re-reads only the activity
+lib/platform/sessions/session_catalog_factory_{io,stub}.dart # Native activity read (active map, then the directory's pending lists); the Web stub reports everything unknown
+lib/platform/sessions/opencode_profile_slot.dart # The catalog lease maps execution starts and permission/form changes to SessionActivityChanged
+packages/harness_opencode/lib/src/session_reader.dart # readActiveSessions (GET /api/session/active) and readPendingSessions (GET /api/permission/request and /api/form with location[directory])
+packages/harness_opencode/lib/src/stream_owner.dart # OpenCodeCatalogChange.started and .waiting
+lib/features/sessions/sessions_controller.dart # Activity state and activityMarks(row); single-flight activity reads; showing/leave and the quiet once-per-idle view of the shown session
+lib/features/sessions/session_live_page.dart # Reports the shown session to the list while mounted and in the foreground
+lib/features/sessions/sessions_page.dart # The row's activity marks (icon and label, wrapped)
+test/v2/sessions/session_activity_test.dart # Controller sources, unknown, coalescing, profile switch, behind; view once per idle; sidebar labels, layouts, open and background flows
+```
