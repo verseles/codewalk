@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "دوبارہ چیک کریں",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "فراہم کنندہ نے رسائی مسترد کر دی",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "فراہم کنندہ نے اس ماڈل کی اسناد یا پلان مسترد کر دیا۔",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "بہت زیادہ درخواستیں",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "فراہم کنندہ درخواستیں محدود کر رہا ہے۔ دوبارہ بھیجنے سے پہلے کچھ دیر انتظار کریں۔",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "استعمال کی حد پوری ہو گئی",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "فراہم کنندہ کا اکاؤنٹ استعمال کی حد تک پہنچ گیا ہے۔",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "گفتگو بہت طویل ہے",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "گفتگو کو ماڈل میں سمانے کے لیے مختصر نہیں کیا جا سکا۔",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "فراہم کنندہ کی خرابی",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "فراہم کنندہ درخواست مکمل نہیں کر سکا۔",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "فراہم کنندہ تک رسائی نہیں",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "سرور وقت پر فراہم کنندہ تک نہیں پہنچ سکا۔",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "مواد کی پالیسی کے تحت مسدود",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "فراہم کنندہ نے یہ درخواست مسدود کر دی۔",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "سرور کا ورژن معاون نہیں",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk سرور کے اس ورژن کو سپورٹ نہیں کرتا۔",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "غیر متوقع خرابی",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "یہ باری ایک خرابی کے ساتھ ختم ہوئی۔",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "کوئی تفصیل نہیں بتائی گئی۔",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "پیغام مختصر کر دیا گیا۔",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "دوسرا ماڈل منتخب کریں",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "سرور کھولیں",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

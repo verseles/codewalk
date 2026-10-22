@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "Проверить снова",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "Провайдер отказал в доступе",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "Провайдер отклонил учётные данные или тариф для этой модели.",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "Слишком много запросов",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "Провайдер ограничивает запросы. Подождите немного перед повторной отправкой.",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "Достигнут лимит использования",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "Аккаунт у провайдера достиг лимита использования.",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "Слишком длинный разговор",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "Не удалось сжать разговор, чтобы он поместился в модель.",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "Ошибка провайдера",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "Провайдер не смог выполнить запрос.",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "Провайдер недоступен",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "Сервер не смог вовремя связаться с провайдером.",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "Заблокировано политикой контента",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "Провайдер заблокировал этот запрос.",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "Версия сервера не поддерживается",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk не поддерживает эту версию сервера.",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "Непредвиденная ошибка",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "Ход завершился с ошибкой.",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "Подробности не сообщены.",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "Сообщение было сокращено.",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "Выбрать другую модель",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "Открыть серверы",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

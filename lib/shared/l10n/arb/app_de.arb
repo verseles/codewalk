@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "Erneut prüfen",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "Zugriff vom Anbieter verweigert",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "Der Anbieter hat die Zugangsdaten oder den Tarif für dieses Modell abgelehnt.",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "Zu viele Anfragen",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "Der Anbieter begrenzt die Anfragen. Bitte kurz warten, bevor erneut gesendet wird.",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "Nutzungslimit erreicht",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "Das Konto beim Anbieter hat sein Nutzungslimit erreicht.",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "Unterhaltung zu lang",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "Die Unterhaltung konnte nicht so verdichtet werden, dass sie in das Modell passt.",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "Anbieterfehler",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "Der Anbieter konnte die Anfrage nicht abschließen.",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "Anbieter nicht erreichbar",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "Der Server konnte den Anbieter nicht rechtzeitig erreichen.",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "Durch Inhaltsrichtlinie blockiert",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "Der Anbieter hat diese Anfrage blockiert.",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "Serverversion nicht unterstützt",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk unterstützt diese Serverversion nicht.",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "Unerwarteter Fehler",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "Der Durchlauf endete mit einem Fehler.",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "Es wurden keine Details gemeldet.",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "Die Nachricht wurde gekürzt.",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "Anderes Modell wählen",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "Server öffnen",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

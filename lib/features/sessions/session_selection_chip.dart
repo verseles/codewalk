@@ -162,6 +162,13 @@ ModelEntry? _offeredModel(SessionSelectionState state, Selection? selection) =>
         )
         .firstOrNull;
 
+/// Whether [showSessionSelection] can open for [live] now, by the AppBar
+/// chip's own rule.
+bool canShowSessionSelection(SessionLiveController live) =>
+    live.supportsSelection &&
+    live.canChangeSelection &&
+    SessionSelectionChip._openable(live.selectionState);
+
 /// Opens the pick: a bottom sheet on compact widths, a dialog otherwise. The
 /// lists are read again on open; a pick closes it and sends one switch.
 Future<void> showSessionSelection(

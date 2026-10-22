@@ -32,6 +32,7 @@ from session_permission_catalog import NEW_KEYS as PERMISSION_NEW_KEYS, COPY as 
 from session_stop_catalog import NEW_KEYS as STOP_NEW_KEYS, COPY as STOP_COPY
 from session_form_catalog import NEW_KEYS as FORM_NEW_KEYS, COPY as FORM_COPY
 from session_selection_catalog import NEW_KEYS as SELECTION_NEW_KEYS, COPY as SELECTION_COPY
+from session_error_catalog import NEW_KEYS as ERROR_NEW_KEYS, COPY as ERROR_COPY
 from rendering_catalog import (
     PORT_KEYS as RENDERING_KEYS,
     NEW_KEYS as RENDERING_NEW_KEYS,
@@ -134,6 +135,7 @@ KEYS |= set(PERMISSION_NEW_KEYS)
 KEYS |= set(STOP_NEW_KEYS)
 KEYS |= set(FORM_NEW_KEYS)
 KEYS |= set(SELECTION_NEW_KEYS)
+KEYS |= set(ERROR_NEW_KEYS)
 KEYS |= RENDERING_KEYS | set(RENDERING_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
@@ -360,6 +362,19 @@ def port_selection_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_error_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        for key, value in zip(ERROR_NEW_KEYS, ERROR_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 typed error cards"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def port_rendering_copy() -> None:
     ports = []
     for locale in LOCALES:
@@ -461,6 +476,7 @@ def main() -> int:
     parser.add_argument("--port-stop", action="store_true", help="Add scoped execution stop copy only.")
     parser.add_argument("--port-form", action="store_true", help="Add scoped interactive form card copy only.")
     parser.add_argument("--port-selection", action="store_true", help="Add scoped live model and agent selection copy only.")
+    parser.add_argument("--port-error", action="store_true", help="Add scoped typed error card copy only.")
     parser.add_argument("--port-rendering", action="store_true", help="Add scoped canonical rich rendering copy only.")
     args = parser.parse_args()
     try:
@@ -516,6 +532,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-selection cannot be combined with --check")
             port_selection_copy()
+        if args.port_error:
+            if args.check:
+                raise ValueError("--port-error cannot be combined with --check")
+            port_error_copy()
         if args.port_rendering:
             if args.check:
                 raise ValueError("--port-rendering cannot be combined with --check")

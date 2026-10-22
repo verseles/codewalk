@@ -1469,4 +1469,78 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'Controlla di nuovo';
+
+  @override
+  String get liveErrorAuth => 'Accesso negato dal provider';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'Il provider ha rifiutato le credenziali o il piano di questo modello.';
+
+  @override
+  String get liveErrorRateLimit => 'Troppe richieste';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'Il provider sta limitando le richieste. Attendi un momento prima di inviare di nuovo.';
+
+  @override
+  String get liveErrorQuota => 'Limite di utilizzo raggiunto';
+
+  @override
+  String get liveErrorQuotaDetail =>
+      'L’account del provider ha raggiunto il limite di utilizzo.';
+
+  @override
+  String get liveErrorContext => 'Conversazione troppo lunga';
+
+  @override
+  String get liveErrorContextDetail =>
+      'Non è stato possibile compattare la conversazione per adattarla al modello.';
+
+  @override
+  String get liveErrorProvider => 'Errore del provider';
+
+  @override
+  String get liveErrorProviderDetail =>
+      'Il provider non è riuscito a completare la richiesta.';
+
+  @override
+  String get liveErrorNetwork => 'Provider non raggiungibile';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'Il server non è riuscito a raggiungere il provider in tempo.';
+
+  @override
+  String get liveErrorContentFilter => 'Bloccato dalle norme sui contenuti';
+
+  @override
+  String get liveErrorContentFilterDetail =>
+      'Il provider ha bloccato questa richiesta.';
+
+  @override
+  String get liveErrorVersion => 'Versione del server non supportata';
+
+  @override
+  String get liveErrorVersionDetail =>
+      'CodeWalk non supporta questa versione del server.';
+
+  @override
+  String get liveErrorUnknown => 'Errore imprevisto';
+
+  @override
+  String get liveErrorUnknownDetail => 'Il turno è terminato con un errore.';
+
+  @override
+  String get liveErrorNoDetails => 'Nessun dettaglio è stato riportato.';
+
+  @override
+  String get liveErrorShortened => 'Il messaggio è stato accorciato.';
+
+  @override
+  String get liveErrorChooseModel => 'Scegli un altro modello';
+
+  @override
+  String get liveErrorOpenServers => 'Apri i server';
 }

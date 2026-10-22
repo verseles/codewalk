@@ -1222,5 +1222,93 @@
   "liveSelectionCheckAgain": "تحقّق مرة أخرى",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "رفض المزوّد الوصول",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "رفض المزوّد بيانات الاعتماد أو الخطة لهذا النموذج.",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "طلبات كثيرة جدًا",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "يحدّ المزوّد من الطلبات. انتظر قليلًا قبل الإرسال مجددًا.",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "تم بلوغ حد الاستخدام",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "بلغ حساب المزوّد حد الاستخدام.",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "المحادثة طويلة جدًا",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "تعذّر ضغط المحادثة لتناسب النموذج.",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "خطأ من المزوّد",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "تعذّر على المزوّد إكمال الطلب.",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "تعذّر الوصول إلى المزوّد",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "لم يتمكن الخادم من الوصول إلى المزوّد في الوقت المناسب.",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "محظور بسياسة المحتوى",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "حظر المزوّد هذا الطلب.",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "إصدار الخادم غير مدعوم",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "لا يدعم CodeWalk إصدار الخادم هذا.",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "خطأ غير متوقع",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "انتهى الدور بخطأ.",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "لم يُبلَّغ عن أي تفاصيل.",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "تم اختصار الرسالة.",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "اختر نموذجًا آخر",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "افتح الخوادم",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

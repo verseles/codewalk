@@ -107,9 +107,14 @@ same reader with `readHistory(SessionRef, sourceVersion: ..., limit: ..., cursor
   `streamed` or `completed` timestamps can end provider text without ending a
   running tool or a turn; `finish` and history presence alone cannot. Only the
   verified `read` tool name is classified; other names remain `ToolKind.other`.
-- Empty assistants, native assistant errors/retry metadata, future types and
-  currently unsupported selection/skill/shell/compaction records remain explicit
-  minimized `UnknownItem` markers. User file/context manifests and tool file
+- Empty assistants without an error, retry metadata, future types and currently
+  unsupported selection/skill/shell/compaction records remain explicit minimized
+  `UnknownItem` markers. [V2-055A / #407](https://github.com/verseles/codewalk/issues/407):
+  a native assistant error is typed like a live failure (see the execution
+  projection) and attaches to the next `idle {outcome: "failed"}` row as its
+  `TurnOutcome.error`. A user row, any other `idle` row, or a later assistant
+  message without an error clears it. Known limit: an error on an older page than
+  its `idle` row leaves that outcome with the generic failed marker. User file/context manifests and tool file
   outputs do not retain base64, URIs or names and cannot resolve content. Nothing
   fetches a referenced file or URL.
 - Structured tool arguments redact a finite credential-key set, including
@@ -397,8 +402,10 @@ execution state and the timeline. Reduce the events in order against the latest
 
 - The outcome item uses the official `evt_` → `msg_` message ID, so its ID,
   completed status and outcome kind equal the history `idle` row. Its generation
-  is live and stream-scoped. The error and interrupt reason stay on the execution
-  outcome, not on the item, so live and history items remain identical.
+  is live and stream-scoped. The interrupt reason stays on the execution outcome
+  only. A failure's typed error is on both the execution outcome and the item;
+  the history attaches the turn's assistant error to the same `idle` row, so
+  live and history items remain identical (all 4 captured failures).
 - A shutdown records no idle marker because the server keeps the execution claim
   and resumes the same turn; no outcome is invented.
 - `projectOpenCodeChildExecutionEvent(value, parent, child: ...)` projects a
@@ -416,12 +423,35 @@ execution state and the timeline. Reduce the events in order against the latest
   arrival, so a device clock can shorten the wait but never lengthen it. The
   wait is not correlated with its step: the reducer's position order already
   drops a stale frame. `attempt`, `at`, `created` and the message ID stay in the
-  provenance, and the error keeps only its type, as for a failure. A message ID
+  provenance, and the error keeps only its type, with kind `unknown` and an
+  empty message. A message ID
   without `msg_`, an attempt below 1, or `at`/`created` outside the epoch range
   is malformed.
-- Failures keep only `error.type` as `rawType`, with kind `unknown`, an empty raw
-  message and no retry inference. `message`, `status` and `response` are never
+- V2-055A: `openCodeErrorInfo(type, message)` types a failure by its exact
+  2.0.22 `Session.StructuredError.type`; text, `status` and provider never pick
+  the kind, and no retry is inferred. The message is read only when it is a
+  string, redacted and bounded to 8 KiB UTF-8 on a code point by
+  `openCodeRedactedText`; `details` carries `messageTruncated` or
+  `messageRedacted` only when they apply. `status` and `response` are never
   read. An empty type is unsupported because Core requires a nonempty `rawType`.
+
+  | 2.0.22 `type` | `ErrorKind` |
+  |---|---|
+  | `provider.auth` | `auth` |
+  | `provider.rate-limit` | `rateLimit` |
+  | `provider.quota` | `quota` |
+  | `provider.content-filter` | `contentFilter` |
+  | `provider.transport`, `provider.timeout` | `network` |
+  | other `provider.*` (`internal`, `invalid-output`, `invalid-request`, `unsupported-operation`, `no-route`, `unknown`, `error`) | `provider` |
+  | `compaction.failed`, `compaction.interrupted`, `compaction.unavailable` | `contextOverflow` |
+  | `permission.rejected` | `permissionRejected` |
+  | `tool.execution`, `tool.unknown`, `tool.input-json`, `tool.result-missing` | `toolFailure` |
+  | `unknown` and any unrecognized type | `unknown` |
+  | `aborted` | no error on the outcome item (an interruption, not an error) |
+
+  Every typed error offers the one action `changeModel`. Only `provider.auth`
+  and `provider.invalid-output` are captured; the other rows are
+  schema-derived.
 - Unrelated types and foreign sessions return an empty list. Malformed frames,
   unsupported versions, unknown interrupt reasons, IDs or error types over 4 KiB
   UTF-8, and a resident non-outcome item under the outcome ID raise finite
@@ -511,7 +541,7 @@ an unmodifiable `List<SessionEvent>` to reduce in order against the latest
 | `session.step.started` | Validated; ends a retry wait with `ExecutionChanged(running)`, otherwise nothing emitted |
 | `session.step.streamed` | Validated, nothing emitted |
 | `session.step.ended` | One step `UsageObserved` |
-| `session.step.failed` | History-identical `assistantErrorNotProjected` marker, plus step usage only when both cost and tokens are present |
+| `session.step.failed` | Step usage only when both cost and tokens are present; the error reaches the failed turn's outcome from `session.execution.failed` |
 | `session.usage.updated` (ephemeral) | One cumulative session `UsageObserved` |
 
 - Step usage follows Core's A convention: scope `turn`, partial, aggregation key
@@ -532,12 +562,10 @@ an unmodifiable `List<SessionEvent>` to reduce in order against the latest
   read; provider state, snapshots, file paths, `rawFinish`, model and agent are
   validated but never copied. No live `empty` marker is projected, because step frames
   carry no content evidence.
-- Known limit: Core has no single-item removal, so if a failed step restarts
-  under the same message ID its error marker stays until the next history read.
-  No capture shows a restart after a failure.
 
 Replays cover root A and units B–E (56 started, 51 streamed, 44 ended, 11
-failed, 51 usage updates): all 11 failures match their history error markers,
+failed, 51 usage updates): all 11 failed steps emit no item, and their history
+assistant rows carry the same error type and project no marker,
 and 47 cumulative readings equal the sum of the projected step usage; the other
 four belong to restart captures whose earlier steps precede the recorded log.
 Fixtures and the schema pin are unchanged; no new native or MVP acceptance is

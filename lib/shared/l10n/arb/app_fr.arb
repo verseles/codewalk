@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "Vérifier à nouveau",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "Accès refusé par le fournisseur",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "Le fournisseur a refusé les identifiants ou l’offre de ce modèle.",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "Trop de requêtes",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "Le fournisseur limite les requêtes. Patientez un moment avant de renvoyer.",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "Limite d’utilisation atteinte",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "Le compte du fournisseur a atteint sa limite d’utilisation.",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "Conversation trop longue",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "La conversation n’a pas pu être compactée pour tenir dans le modèle.",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "Erreur du fournisseur",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "Le fournisseur n’a pas pu terminer la requête.",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "Fournisseur injoignable",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "Le serveur n’a pas pu joindre le fournisseur à temps.",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "Bloqué par la politique de contenu",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "Le fournisseur a bloqué cette requête.",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "Version du serveur non prise en charge",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk ne prend pas en charge cette version du serveur.",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "Erreur inattendue",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "Le tour s’est terminé par une erreur.",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "Aucun détail n’a été fourni.",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "Le message a été raccourci.",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "Choisir un autre modèle",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "Ouvrir les serveurs",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

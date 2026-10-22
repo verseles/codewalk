@@ -1374,4 +1374,71 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => '다시 확인';
+
+  @override
+  String get liveErrorAuth => '공급자가 액세스를 거부함';
+
+  @override
+  String get liveErrorAuthDetail => '공급자가 이 모델의 자격 증명 또는 요금제를 거부했습니다.';
+
+  @override
+  String get liveErrorRateLimit => '요청이 너무 많음';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      '공급자가 요청을 제한하고 있습니다. 잠시 기다린 후 다시 보내세요.';
+
+  @override
+  String get liveErrorQuota => '사용 한도 도달';
+
+  @override
+  String get liveErrorQuotaDetail => '공급자 계정이 사용 한도에 도달했습니다.';
+
+  @override
+  String get liveErrorContext => '대화가 너무 김';
+
+  @override
+  String get liveErrorContextDetail => '모델에 맞도록 대화를 압축할 수 없었습니다.';
+
+  @override
+  String get liveErrorProvider => '공급자 오류';
+
+  @override
+  String get liveErrorProviderDetail => '공급자가 요청을 완료할 수 없었습니다.';
+
+  @override
+  String get liveErrorNetwork => '공급자에 연결할 수 없음';
+
+  @override
+  String get liveErrorNetworkDetail => '서버가 제시간에 공급자에 연결할 수 없었습니다.';
+
+  @override
+  String get liveErrorContentFilter => '콘텐츠 정책에 의해 차단됨';
+
+  @override
+  String get liveErrorContentFilterDetail => '공급자가 이 요청을 차단했습니다.';
+
+  @override
+  String get liveErrorVersion => '지원되지 않는 서버 버전';
+
+  @override
+  String get liveErrorVersionDetail => 'CodeWalk는 이 서버 버전을 지원하지 않습니다.';
+
+  @override
+  String get liveErrorUnknown => '예기치 않은 오류';
+
+  @override
+  String get liveErrorUnknownDetail => '턴이 오류로 종료되었습니다.';
+
+  @override
+  String get liveErrorNoDetails => '보고된 세부 정보가 없습니다.';
+
+  @override
+  String get liveErrorShortened => '메시지가 줄여졌습니다.';
+
+  @override
+  String get liveErrorChooseModel => '다른 모델 선택';
+
+  @override
+  String get liveErrorOpenServers => '서버 열기';
 }

@@ -259,6 +259,19 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** closing or releasing the lease never switches anything
 - **Then** technical coverage includes contract-derived loopback race tests, the chip in 14 locales at compact and wide sizes, 2x text at 360 dp, and the bottom sheet and dialog; no live 2.0.22 switch capture exists yet (#425), switches are not shown in the timeline (#426), and installed native acceptance remains separate
 
+### V2 typed turn error cards
+
+- **Given** a native v2 session on verified OpenCode 2.0.22 whose turn ended with `session.execution.failed`, live or in the read-only history
+- **When** the timeline shows that failed turn
+- **Then** its outcome row becomes one typed error card instead of the plain "Last turn failed" marker: authentication, rate limit, quota, context, provider, network, content filter, version or unknown, each with its own localized title, explanation and icon
+- **Then** the category comes only from the exact 2.0.22 error `type` (`provider.auth`, `provider.rate-limit`, `provider.quota`, `provider.content-filter`, `provider.transport`/`timeout`, the other `provider.*` types, `compaction.*`); permission, tool, unrecognized and future types use the unknown card; the HTTP status, the response body and the message text never pick a category and are never shown
+- **Then** the server's message, when it is text, is shown as plain selectable text in a bounded scroll area, redacted and kept within 8 KiB with a note when it was shortened; no message shows "No details were reported.", so an unknown error never reads as nothing, zero or success
+- **Then** an `aborted` end is an interruption, not an error: it keeps the plain failed marker without a card
+- **Then** the history attaches the error of the turn's last assistant message to the turn's failed `idle` row, so live and history show the same card; an error on an older page than its `idle` row keeps the plain marker, and a failed step no longer shows an unavailable-part marker
+- **When** the card offers its one recovery
+- **Then** a live card offers "Choose another model", which opens the model-and-agent sheet when that sheet can open now; a server-version card offers "Open servers" (that card is reserved for a canonical version error: no 2.0.22 error produces it); any other case, and every card in the read-only history, has no button; no recovery resends a prompt, signs in to a provider or retries on its own
+- **Then** technical coverage includes every 2.0.22 type, the 4 captured `provider.auth` failures replayed live and from history with the same card, the captured `provider.invalid-output` history error, and the card at compact and wide sizes, right to left and with 2x text; the other types are schema-derived, and installed native acceptance remains separate
+
 ### V2 manual permission replies
 
 - **Given** an open native v2 session on verified OpenCode 2.0.22 whose lease holds a reply port

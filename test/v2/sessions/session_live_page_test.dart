@@ -1,5 +1,6 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/hosts/hosts_page.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
@@ -66,6 +67,112 @@ void main() {
     expect(find.byKey(const ValueKey('live-selection')), findsOneWidget);
     // The page is narrow, so the chip is icon-only although the window is not.
     expect(find.text('a-long-model-name · build'), findsNothing);
+  });
+
+  testWidgets('a failed turn\'s error card opens its one recovery (V2-055A)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final directory = LiveDirectory();
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: () => directory,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final l10n = dependencies.localizations.current;
+    final read = dependencies.sessions!.selectProfile('profile_a');
+    final catalog = rig.sources.single;
+    final row = catalog.row('one');
+    catalog.respond([row]);
+    await read;
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey(row.info.ref)));
+    await tester.pumpAndSettle();
+    final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump();
+    final ref = row.info.ref;
+    final handle = directory.grant(ref)
+      ..selectionAvailable = true
+      ..selectionState = SessionSelectionState(
+        selection: const Selection(modelId: 'alpha', agentId: 'build'),
+        models: [ModelEntry(id: 'alpha', providerId: 'prov', label: 'Alpha')],
+        agents: [
+          CatalogEntry(
+            id: 'build',
+            kind: const OpenValue.known(CatalogKind.agent),
+            label: 'Build',
+          ),
+        ],
+      );
+    await tester.pump();
+    void failWith(ErrorKind kind, ErrorAction action) => handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          ref,
+          items: [
+            TurnOutcome(
+              meta: liveMeta(ref, 'o1'),
+              kind: const OpenValue.known(OutcomeKind.failed),
+              error: ErrorInfo(
+                kind: OpenValue.known(kind),
+                rawType: 'provider.auth',
+                rawMessage: 'Denied by the provider.',
+                action: OpenValue.known(action),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    failWith(ErrorKind.auth, ErrorAction.changeModel);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.liveErrorAuth), findsOneWidget);
+    expect(find.text('Denied by the provider.'), findsOneWidget);
+    final action = find.byKey(const ValueKey('live-error-action'));
+    expect(find.text(l10n.liveErrorChooseModel), findsOneWidget);
+    await tester.ensureVisible(action);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('live-selection-agent-build')),
+      findsOneWidget,
+    );
+    await tester.tapAt(const Offset(195, 20));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('live-selection-agent-build')),
+      findsNothing,
+    );
+    expect(handle.selectionCalls, ['refresh']);
+    // Without the model and agent sheet, the card keeps no button.
+    handle.selectionAvailable = false;
+    failWith(ErrorKind.auth, ErrorAction.changeModel);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.liveErrorAuth), findsOneWidget);
+    expect(action, findsNothing);
+    // An unsupported version opens the servers page.
+    failWith(ErrorKind.versionUnsupported, ErrorAction.upgrade);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.liveErrorOpenServers), findsOneWidget);
+    await tester.ensureVisible(action);
+    expect(find.byType(HostsPage), findsNothing);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+    expect(find.byType(HostsPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {

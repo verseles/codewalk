@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "আবার যাচাই করুন",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "প্রদানকারী প্রবেশাধিকার প্রত্যাখ্যান করেছে",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "প্রদানকারী এই মডেলের ক্রেডেনশিয়াল বা প্ল্যান প্রত্যাখ্যান করেছে।",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "অনেক বেশি অনুরোধ",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "প্রদানকারী অনুরোধ সীমিত করছে। আবার পাঠানোর আগে একটু অপেক্ষা করুন।",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "ব্যবহারের সীমা পূর্ণ হয়েছে",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "প্রদানকারীর অ্যাকাউন্ট ব্যবহারের সীমায় পৌঁছেছে।",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "কথোপকথন খুব দীর্ঘ",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "কথোপকথনটি মডেলে আঁটার মতো সংক্ষিপ্ত করা যায়নি।",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "প্রদানকারীর ত্রুটি",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "প্রদানকারী অনুরোধটি সম্পূর্ণ করতে পারেনি।",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "প্রদানকারীর সাথে যোগাযোগ করা যাচ্ছে না",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "সার্ভার সময়মতো প্রদানকারীর কাছে পৌঁছাতে পারেনি।",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "কনটেন্ট নীতির কারণে অবরুদ্ধ",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "প্রদানকারী এই অনুরোধটি অবরুদ্ধ করেছে।",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "সার্ভারের সংস্করণ সমর্থিত নয়",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk এই সার্ভার সংস্করণ সমর্থন করে না।",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "অপ্রত্যাশিত ত্রুটি",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "এই পালাটি একটি ত্রুটিসহ শেষ হয়েছে।",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "কোনো বিবরণ জানানো হয়নি।",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "বার্তাটি ছোট করা হয়েছে।",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "অন্য মডেল বেছে নিন",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "সার্ভার খুলুন",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

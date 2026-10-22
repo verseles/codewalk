@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
+import 'session_error_card.dart';
 import 'session_tool_result.dart';
 
 /// One read-only timeline item, shared by the history and live views.
@@ -10,8 +11,9 @@ import 'session_tool_result.dart';
 /// Mermaid/code via [CanonicalMessageBody] bound to canonical fields only.
 /// V2-044D: tool and shell items show what ran and how it ended, collapsed,
 /// with their bounded, redacted input, output and error on demand
-/// ([SessionToolResult]). Outcome and unknown items keep minimized markers
-/// and never expose `raw` or fallback text. No legacy imports (G4).
+/// ([SessionToolResult]). V2-055A: a failed turn that carries its typed error
+/// shows a [SessionErrorCard]. Other outcome and unknown items keep minimized
+/// markers and never expose `raw` or fallback text. No legacy imports (G4).
 class SessionTimelineTile extends StatelessWidget {
   const SessionTimelineTile({
     super.key,
@@ -19,16 +21,30 @@ class SessionTimelineTile extends StatelessWidget {
     this.onTapLink,
     this.onTapFilePath,
     this.onCopyCode,
+    this.errorRecovery,
   });
   final TimelineItem item;
   final void Function(String text, String href, String? title)? onTapLink;
   final void Function(String path, int? line, int? col)? onTapFilePath;
   final ValueChanged<String>? onCopyCode;
 
+  /// The recovery an error card offers here; null in the read-only history,
+  /// whose cards show no button.
+  final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final item = this.item;
+    if (item is TurnOutcome && item.kind.known == OutcomeKind.failed) {
+      final error = item.error;
+      if (error != null) {
+        return SessionErrorCard(
+          error: error,
+          recovery: errorRecovery?.call(error),
+        );
+      }
+    }
     final (label, icon) = switch (item) {
       UserInput() => (l10n.chatMessageYou, Icons.person_outline),
       AssistantText() => (l10n.historyAssistant, Icons.chat_bubble_outline),

@@ -1461,4 +1461,78 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'Verificar de novo';
+
+  @override
+  String get liveErrorAuth => 'Acesso negado pelo provedor';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'O provedor recusou as credenciais ou o plano deste modelo.';
+
+  @override
+  String get liveErrorRateLimit => 'Muitas solicitações';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'O provedor está limitando as solicitações. Aguarde um momento antes de enviar de novo.';
+
+  @override
+  String get liveErrorQuota => 'Limite de uso atingido';
+
+  @override
+  String get liveErrorQuotaDetail =>
+      'A conta do provedor atingiu o limite de uso.';
+
+  @override
+  String get liveErrorContext => 'Conversa longa demais';
+
+  @override
+  String get liveErrorContextDetail =>
+      'Não foi possível compactar a conversa para caber no modelo.';
+
+  @override
+  String get liveErrorProvider => 'Erro do provedor';
+
+  @override
+  String get liveErrorProviderDetail =>
+      'O provedor não conseguiu concluir a solicitação.';
+
+  @override
+  String get liveErrorNetwork => 'Provedor inacessível';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'O servidor não conseguiu alcançar o provedor a tempo.';
+
+  @override
+  String get liveErrorContentFilter => 'Bloqueado pela política de conteúdo';
+
+  @override
+  String get liveErrorContentFilterDetail =>
+      'O provedor bloqueou esta solicitação.';
+
+  @override
+  String get liveErrorVersion => 'Versão do servidor não suportada';
+
+  @override
+  String get liveErrorVersionDetail =>
+      'O CodeWalk não suporta esta versão do servidor.';
+
+  @override
+  String get liveErrorUnknown => 'Erro inesperado';
+
+  @override
+  String get liveErrorUnknownDetail => 'O turno terminou com um erro.';
+
+  @override
+  String get liveErrorNoDetails => 'Nenhum detalhe foi informado.';
+
+  @override
+  String get liveErrorShortened => 'A mensagem foi encurtada.';
+
+  @override
+  String get liveErrorChooseModel => 'Escolher outro modelo';
+
+  @override
+  String get liveErrorOpenServers => 'Abrir servidores';
 }

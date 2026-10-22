@@ -175,10 +175,10 @@ native, provider or I/O path; it makes no G1/G2/G3/G5 acceptance claim. The
 OpenCode session and `harness_host` adapters remain unimplemented.
 
 The separate CHP artifact defines canonical payloads and transport envelopes at
-the explicitly provisional `cw-canonical-1-provisional.3` and
-`chp-1-provisional.3` revisions, pinned to the canonical model commit
-`ff6a3902e5a4c1f1d9ecccbf47af8bb146b68dc6` (V2-044D added the optional
-`ShellRun` `exitToken`, `shellStatus` and `outputText`). `CanonicalPromptIntent` retains the
+the explicitly provisional `cw-canonical-1-provisional.5` and
+`chp-1-provisional.5` revisions, pinned to the canonical model commit
+`97dfeb6b975eb5abdc5d8aa9bb436cb094c490c2` (V2-055A added the `provider`
+error kind; provisional.4 added the V2-054A selection fields). `CanonicalPromptIntent` retains the
 original draft and optional open delivery; hand-authored examples cover omitted
 default, `queue` and `steer`, while focused tests guard the shape. The local
 Draft 7 schema, example manifest, definition map and `SHA256SUMS` integrity test
@@ -2605,4 +2605,36 @@ list what can be picked. Switch routes and events are contract-derived until a
 flutter test --no-pub test/v2/sessions/session_selection_chip_test.dart test/v2/sessions/session_live_directory_test.dart test/v2/sessions/session_live_page_test.dart
 # From packages/harness_opencode
 dart test test/session_selection_test.dart
+```
+
+## V2-055A typed turn error cards (#407)
+
+```text
+packages/codewalk_core/lib/src/errors.dart # ErrorKind.provider beside the other open error kinds
+contracts/codewalk-host-v1/schema.json # CHP provisional.5: the provider error kind, pinned to the Core commit
+packages/harness_opencode/lib/src/error_projection.dart # openCodeErrorInfo: 2.0.22 StructuredError type -> ErrorKind, one action, redacted 8 KiB message
+packages/harness_opencode/lib/src/execution_projection.dart # session.execution.failed -> typed TurnOutcome.error and ExecutionOutcome.error
+packages/harness_opencode/lib/src/history_projection.dart # The turn's assistant error attaches to its failed idle row
+packages/harness_opencode/lib/src/step_usage_projection.dart # session.step.failed emits usage only; no marker
+packages/harness_opencode/test/error_projection_test.dart # Every 2.0.22 type, unrecognized types, the byte bound and redaction
+packages/harness_opencode/test/execution_replay_test.dart # Captured failures typed live and equal to their history outcome
+lib/features/sessions/session_error_card.dart # SessionErrorCard and sessionErrorRecovery: category, bounded message, one existing recovery
+lib/features/sessions/session_timeline_tile.dart # A failed TurnOutcome with an error renders the card
+lib/features/sessions/session_live_timeline.dart # Forwards the recovery; the error is part of the row signature
+lib/features/sessions/session_live_page.dart # Choose another model opens the selection sheet; Open servers pushes /hosts
+lib/features/sessions/session_selection_chip.dart # canShowSessionSelection: the chip's own open rule
+tool/l10n/session_error_catalog.py # 22 error card strings across the 14 locales
+test/v2/sessions/session_error_card_test.dart # Categories, unknown, one recovery, shortened note, compact/wide/RTL/2x layouts, tile
+test/v2/sessions/session_live_page_test.dart # The card's recovery opens the sheet or the servers page
+test/contract/chp/model_parity_test.dart # A failed outcome carries its typed error, provider included
+```
+
+The category comes from the exact native error type only; the read-only history
+shows the same card without a button.
+
+```text
+# From the repository root
+flutter test --no-pub test/v2/sessions/session_error_card_test.dart test/v2/sessions/session_live_page_test.dart
+# From packages/harness_opencode
+dart test test/error_projection_test.dart test/execution_projection_test.dart test/history_projection_test.dart test/step_usage_projection_test.dart
 ```

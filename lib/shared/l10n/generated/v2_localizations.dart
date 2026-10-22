@@ -2732,6 +2732,138 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Check again'**
   String get liveSelectionCheckAgain;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Provider access denied'**
+  String get liveErrorAuth;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The provider refused the credentials or plan for this model.'**
+  String get liveErrorAuthDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests'**
+  String get liveErrorRateLimit;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The provider is limiting requests. Wait a moment before sending again.'**
+  String get liveErrorRateLimitDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Usage limit reached'**
+  String get liveErrorQuota;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The provider account has reached its usage limit.'**
+  String get liveErrorQuotaDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation too long'**
+  String get liveErrorContext;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The conversation could not be compacted to fit the model.'**
+  String get liveErrorContextDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Provider error'**
+  String get liveErrorProvider;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The provider could not complete the request.'**
+  String get liveErrorProviderDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Provider unreachable'**
+  String get liveErrorNetwork;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not reach the provider in time.'**
+  String get liveErrorNetworkDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by content policy'**
+  String get liveErrorContentFilter;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The provider blocked this request.'**
+  String get liveErrorContentFilterDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Server version not supported'**
+  String get liveErrorVersion;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk does not support this server version.'**
+  String get liveErrorVersionDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected error'**
+  String get liveErrorUnknown;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The turn ended with an error.'**
+  String get liveErrorUnknownDetail;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'No details were reported.'**
+  String get liveErrorNoDetails;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'The message was shortened.'**
+  String get liveErrorShortened;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another model'**
+  String get liveErrorChooseModel;
+
+  /// V2 typed error cards
+  ///
+  /// In en, this message translates to:
+  /// **'Open servers'**
+  String get liveErrorOpenServers;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

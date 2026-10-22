@@ -1430,4 +1430,73 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'تحقّق مرة أخرى';
+
+  @override
+  String get liveErrorAuth => 'رفض المزوّد الوصول';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'رفض المزوّد بيانات الاعتماد أو الخطة لهذا النموذج.';
+
+  @override
+  String get liveErrorRateLimit => 'طلبات كثيرة جدًا';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'يحدّ المزوّد من الطلبات. انتظر قليلًا قبل الإرسال مجددًا.';
+
+  @override
+  String get liveErrorQuota => 'تم بلوغ حد الاستخدام';
+
+  @override
+  String get liveErrorQuotaDetail => 'بلغ حساب المزوّد حد الاستخدام.';
+
+  @override
+  String get liveErrorContext => 'المحادثة طويلة جدًا';
+
+  @override
+  String get liveErrorContextDetail => 'تعذّر ضغط المحادثة لتناسب النموذج.';
+
+  @override
+  String get liveErrorProvider => 'خطأ من المزوّد';
+
+  @override
+  String get liveErrorProviderDetail => 'تعذّر على المزوّد إكمال الطلب.';
+
+  @override
+  String get liveErrorNetwork => 'تعذّر الوصول إلى المزوّد';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'لم يتمكن الخادم من الوصول إلى المزوّد في الوقت المناسب.';
+
+  @override
+  String get liveErrorContentFilter => 'محظور بسياسة المحتوى';
+
+  @override
+  String get liveErrorContentFilterDetail => 'حظر المزوّد هذا الطلب.';
+
+  @override
+  String get liveErrorVersion => 'إصدار الخادم غير مدعوم';
+
+  @override
+  String get liveErrorVersionDetail => 'لا يدعم CodeWalk إصدار الخادم هذا.';
+
+  @override
+  String get liveErrorUnknown => 'خطأ غير متوقع';
+
+  @override
+  String get liveErrorUnknownDetail => 'انتهى الدور بخطأ.';
+
+  @override
+  String get liveErrorNoDetails => 'لم يُبلَّغ عن أي تفاصيل.';
+
+  @override
+  String get liveErrorShortened => 'تم اختصار الرسالة.';
+
+  @override
+  String get liveErrorChooseModel => 'اختر نموذجًا آخر';
+
+  @override
+  String get liveErrorOpenServers => 'افتح الخوادم';
 }

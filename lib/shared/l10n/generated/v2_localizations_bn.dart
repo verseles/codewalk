@@ -1435,4 +1435,78 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'আবার যাচাই করুন';
+
+  @override
+  String get liveErrorAuth => 'প্রদানকারী প্রবেশাধিকার প্রত্যাখ্যান করেছে';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'প্রদানকারী এই মডেলের ক্রেডেনশিয়াল বা প্ল্যান প্রত্যাখ্যান করেছে।';
+
+  @override
+  String get liveErrorRateLimit => 'অনেক বেশি অনুরোধ';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'প্রদানকারী অনুরোধ সীমিত করছে। আবার পাঠানোর আগে একটু অপেক্ষা করুন।';
+
+  @override
+  String get liveErrorQuota => 'ব্যবহারের সীমা পূর্ণ হয়েছে';
+
+  @override
+  String get liveErrorQuotaDetail =>
+      'প্রদানকারীর অ্যাকাউন্ট ব্যবহারের সীমায় পৌঁছেছে।';
+
+  @override
+  String get liveErrorContext => 'কথোপকথন খুব দীর্ঘ';
+
+  @override
+  String get liveErrorContextDetail =>
+      'কথোপকথনটি মডেলে আঁটার মতো সংক্ষিপ্ত করা যায়নি।';
+
+  @override
+  String get liveErrorProvider => 'প্রদানকারীর ত্রুটি';
+
+  @override
+  String get liveErrorProviderDetail =>
+      'প্রদানকারী অনুরোধটি সম্পূর্ণ করতে পারেনি।';
+
+  @override
+  String get liveErrorNetwork => 'প্রদানকারীর সাথে যোগাযোগ করা যাচ্ছে না';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'সার্ভার সময়মতো প্রদানকারীর কাছে পৌঁছাতে পারেনি।';
+
+  @override
+  String get liveErrorContentFilter => 'কনটেন্ট নীতির কারণে অবরুদ্ধ';
+
+  @override
+  String get liveErrorContentFilterDetail =>
+      'প্রদানকারী এই অনুরোধটি অবরুদ্ধ করেছে।';
+
+  @override
+  String get liveErrorVersion => 'সার্ভারের সংস্করণ সমর্থিত নয়';
+
+  @override
+  String get liveErrorVersionDetail =>
+      'CodeWalk এই সার্ভার সংস্করণ সমর্থন করে না।';
+
+  @override
+  String get liveErrorUnknown => 'অপ্রত্যাশিত ত্রুটি';
+
+  @override
+  String get liveErrorUnknownDetail => 'এই পালাটি একটি ত্রুটিসহ শেষ হয়েছে।';
+
+  @override
+  String get liveErrorNoDetails => 'কোনো বিবরণ জানানো হয়নি।';
+
+  @override
+  String get liveErrorShortened => 'বার্তাটি ছোট করা হয়েছে।';
+
+  @override
+  String get liveErrorChooseModel => 'অন্য মডেল বেছে নিন';
+
+  @override
+  String get liveErrorOpenServers => 'সার্ভার খুলুন';
 }

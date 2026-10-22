@@ -1443,4 +1443,77 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'फिर से जाँचें';
+
+  @override
+  String get liveErrorAuth => 'प्रदाता ने पहुँच अस्वीकार की';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'प्रदाता ने इस मॉडल के क्रेडेंशियल या प्लान को अस्वीकार कर दिया।';
+
+  @override
+  String get liveErrorRateLimit => 'बहुत अधिक अनुरोध';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'प्रदाता अनुरोधों को सीमित कर रहा है। फिर से भेजने से पहले थोड़ा रुकें।';
+
+  @override
+  String get liveErrorQuota => 'उपयोग सीमा पूरी हुई';
+
+  @override
+  String get liveErrorQuotaDetail =>
+      'प्रदाता खाते की उपयोग सीमा पूरी हो गई है।';
+
+  @override
+  String get liveErrorContext => 'बातचीत बहुत लंबी है';
+
+  @override
+  String get liveErrorContextDetail =>
+      'बातचीत को मॉडल में समाने लायक संक्षिप्त नहीं किया जा सका।';
+
+  @override
+  String get liveErrorProvider => 'प्रदाता त्रुटि';
+
+  @override
+  String get liveErrorProviderDetail => 'प्रदाता अनुरोध पूरा नहीं कर सका।';
+
+  @override
+  String get liveErrorNetwork => 'प्रदाता तक पहुँच नहीं';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'सर्वर समय पर प्रदाता तक नहीं पहुँच सका।';
+
+  @override
+  String get liveErrorContentFilter => 'सामग्री नीति द्वारा अवरुद्ध';
+
+  @override
+  String get liveErrorContentFilterDetail =>
+      'प्रदाता ने इस अनुरोध को अवरुद्ध कर दिया।';
+
+  @override
+  String get liveErrorVersion => 'सर्वर संस्करण समर्थित नहीं';
+
+  @override
+  String get liveErrorVersionDetail =>
+      'CodeWalk इस सर्वर संस्करण का समर्थन नहीं करता।';
+
+  @override
+  String get liveErrorUnknown => 'अप्रत्याशित त्रुटि';
+
+  @override
+  String get liveErrorUnknownDetail => 'यह चरण एक त्रुटि के साथ समाप्त हुआ।';
+
+  @override
+  String get liveErrorNoDetails => 'कोई विवरण नहीं दिया गया।';
+
+  @override
+  String get liveErrorShortened => 'संदेश छोटा कर दिया गया।';
+
+  @override
+  String get liveErrorChooseModel => 'दूसरा मॉडल चुनें';
+
+  @override
+  String get liveErrorOpenServers => 'सर्वर खोलें';
 }

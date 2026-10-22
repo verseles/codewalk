@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -11,6 +12,7 @@ import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import 'session_composer.dart';
+import 'session_error_card.dart';
 import 'session_form_card.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
@@ -435,6 +437,14 @@ class _SessionLivePageState extends State<SessionLivePage>
                         onLoadOlder: c.canLoadOlderHistory
                             ? c.loadOlderHistory
                             : null,
+                        errorRecovery: (error) => sessionErrorRecovery(
+                          l10n,
+                          error,
+                          chooseModel: canShowSessionSelection(c)
+                              ? () => showSessionSelection(context, c)
+                              : null,
+                          openServers: () => context.push('/hosts'),
+                        ),
                         headerBuilder: (context) => _header(
                           context,
                           c,

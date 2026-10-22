@@ -1347,4 +1347,70 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => '再次检查';
+
+  @override
+  String get liveErrorAuth => '提供商拒绝访问';
+
+  @override
+  String get liveErrorAuthDetail => '提供商拒绝了此模型的凭据或套餐。';
+
+  @override
+  String get liveErrorRateLimit => '请求过多';
+
+  @override
+  String get liveErrorRateLimitDetail => '提供商正在限制请求。请稍候再发送。';
+
+  @override
+  String get liveErrorQuota => '已达到使用上限';
+
+  @override
+  String get liveErrorQuotaDetail => '提供商账户已达到使用上限。';
+
+  @override
+  String get liveErrorContext => '对话过长';
+
+  @override
+  String get liveErrorContextDetail => '无法将对话压缩到适合该模型的长度。';
+
+  @override
+  String get liveErrorProvider => '提供商错误';
+
+  @override
+  String get liveErrorProviderDetail => '提供商无法完成该请求。';
+
+  @override
+  String get liveErrorNetwork => '无法连接提供商';
+
+  @override
+  String get liveErrorNetworkDetail => '服务器未能及时连接到提供商。';
+
+  @override
+  String get liveErrorContentFilter => '被内容政策阻止';
+
+  @override
+  String get liveErrorContentFilterDetail => '提供商阻止了此请求。';
+
+  @override
+  String get liveErrorVersion => '不支持的服务器版本';
+
+  @override
+  String get liveErrorVersionDetail => 'CodeWalk 不支持此服务器版本。';
+
+  @override
+  String get liveErrorUnknown => '意外错误';
+
+  @override
+  String get liveErrorUnknownDetail => '本轮以错误结束。';
+
+  @override
+  String get liveErrorNoDetails => '未报告任何详情。';
+
+  @override
+  String get liveErrorShortened => '消息已被截短。';
+
+  @override
+  String get liveErrorChooseModel => '选择其他模型';
+
+  @override
+  String get liveErrorOpenServers => '打开服务器';
 }

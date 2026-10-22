@@ -1439,4 +1439,77 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => 'دوبارہ چیک کریں';
+
+  @override
+  String get liveErrorAuth => 'فراہم کنندہ نے رسائی مسترد کر دی';
+
+  @override
+  String get liveErrorAuthDetail =>
+      'فراہم کنندہ نے اس ماڈل کی اسناد یا پلان مسترد کر دیا۔';
+
+  @override
+  String get liveErrorRateLimit => 'بہت زیادہ درخواستیں';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'فراہم کنندہ درخواستیں محدود کر رہا ہے۔ دوبارہ بھیجنے سے پہلے کچھ دیر انتظار کریں۔';
+
+  @override
+  String get liveErrorQuota => 'استعمال کی حد پوری ہو گئی';
+
+  @override
+  String get liveErrorQuotaDetail =>
+      'فراہم کنندہ کا اکاؤنٹ استعمال کی حد تک پہنچ گیا ہے۔';
+
+  @override
+  String get liveErrorContext => 'گفتگو بہت طویل ہے';
+
+  @override
+  String get liveErrorContextDetail =>
+      'گفتگو کو ماڈل میں سمانے کے لیے مختصر نہیں کیا جا سکا۔';
+
+  @override
+  String get liveErrorProvider => 'فراہم کنندہ کی خرابی';
+
+  @override
+  String get liveErrorProviderDetail => 'فراہم کنندہ درخواست مکمل نہیں کر سکا۔';
+
+  @override
+  String get liveErrorNetwork => 'فراہم کنندہ تک رسائی نہیں';
+
+  @override
+  String get liveErrorNetworkDetail =>
+      'سرور وقت پر فراہم کنندہ تک نہیں پہنچ سکا۔';
+
+  @override
+  String get liveErrorContentFilter => 'مواد کی پالیسی کے تحت مسدود';
+
+  @override
+  String get liveErrorContentFilterDetail =>
+      'فراہم کنندہ نے یہ درخواست مسدود کر دی۔';
+
+  @override
+  String get liveErrorVersion => 'سرور کا ورژن معاون نہیں';
+
+  @override
+  String get liveErrorVersionDetail =>
+      'CodeWalk سرور کے اس ورژن کو سپورٹ نہیں کرتا۔';
+
+  @override
+  String get liveErrorUnknown => 'غیر متوقع خرابی';
+
+  @override
+  String get liveErrorUnknownDetail => 'یہ باری ایک خرابی کے ساتھ ختم ہوئی۔';
+
+  @override
+  String get liveErrorNoDetails => 'کوئی تفصیل نہیں بتائی گئی۔';
+
+  @override
+  String get liveErrorShortened => 'پیغام مختصر کر دیا گیا۔';
+
+  @override
+  String get liveErrorChooseModel => 'دوسرا ماڈل منتخب کریں';
+
+  @override
+  String get liveErrorOpenServers => 'سرور کھولیں';
 }

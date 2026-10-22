@@ -1373,4 +1373,71 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveSelectionCheckAgain => '再確認';
+
+  @override
+  String get liveErrorAuth => 'プロバイダーがアクセスを拒否しました';
+
+  @override
+  String get liveErrorAuthDetail => 'プロバイダーがこのモデルの認証情報またはプランを拒否しました。';
+
+  @override
+  String get liveErrorRateLimit => 'リクエストが多すぎます';
+
+  @override
+  String get liveErrorRateLimitDetail =>
+      'プロバイダーがリクエストを制限しています。少し待ってから再送信してください。';
+
+  @override
+  String get liveErrorQuota => '利用上限に達しました';
+
+  @override
+  String get liveErrorQuotaDetail => 'プロバイダーのアカウントが利用上限に達しました。';
+
+  @override
+  String get liveErrorContext => '会話が長すぎます';
+
+  @override
+  String get liveErrorContextDetail => '会話をモデルに収まるように圧縮できませんでした。';
+
+  @override
+  String get liveErrorProvider => 'プロバイダーエラー';
+
+  @override
+  String get liveErrorProviderDetail => 'プロバイダーがリクエストを完了できませんでした。';
+
+  @override
+  String get liveErrorNetwork => 'プロバイダーに接続できません';
+
+  @override
+  String get liveErrorNetworkDetail => 'サーバーが時間内にプロバイダーに接続できませんでした。';
+
+  @override
+  String get liveErrorContentFilter => 'コンテンツポリシーによりブロックされました';
+
+  @override
+  String get liveErrorContentFilterDetail => 'プロバイダーがこのリクエストをブロックしました。';
+
+  @override
+  String get liveErrorVersion => 'サーバーのバージョンはサポートされていません';
+
+  @override
+  String get liveErrorVersionDetail => 'CodeWalk はこのサーバーのバージョンをサポートしていません。';
+
+  @override
+  String get liveErrorUnknown => '予期しないエラー';
+
+  @override
+  String get liveErrorUnknownDetail => 'ターンはエラーで終了しました。';
+
+  @override
+  String get liveErrorNoDetails => '詳細は報告されていません。';
+
+  @override
+  String get liveErrorShortened => 'メッセージは短縮されました。';
+
+  @override
+  String get liveErrorChooseModel => '別のモデルを選択';
+
+  @override
+  String get liveErrorOpenServers => 'サーバーを開く';
 }

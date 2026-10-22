@@ -1223,5 +1223,93 @@
   "liveSelectionCheckAgain": "फिर से जाँचें",
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
+  },
+  "liveErrorAuth": "प्रदाता ने पहुँच अस्वीकार की",
+  "@liveErrorAuth": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorAuthDetail": "प्रदाता ने इस मॉडल के क्रेडेंशियल या प्लान को अस्वीकार कर दिया।",
+  "@liveErrorAuthDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimit": "बहुत अधिक अनुरोध",
+  "@liveErrorRateLimit": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorRateLimitDetail": "प्रदाता अनुरोधों को सीमित कर रहा है। फिर से भेजने से पहले थोड़ा रुकें।",
+  "@liveErrorRateLimitDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuota": "उपयोग सीमा पूरी हुई",
+  "@liveErrorQuota": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorQuotaDetail": "प्रदाता खाते की उपयोग सीमा पूरी हो गई है।",
+  "@liveErrorQuotaDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContext": "बातचीत बहुत लंबी है",
+  "@liveErrorContext": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContextDetail": "बातचीत को मॉडल में समाने लायक संक्षिप्त नहीं किया जा सका।",
+  "@liveErrorContextDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProvider": "प्रदाता त्रुटि",
+  "@liveErrorProvider": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorProviderDetail": "प्रदाता अनुरोध पूरा नहीं कर सका।",
+  "@liveErrorProviderDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetwork": "प्रदाता तक पहुँच नहीं",
+  "@liveErrorNetwork": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNetworkDetail": "सर्वर समय पर प्रदाता तक नहीं पहुँच सका।",
+  "@liveErrorNetworkDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilter": "सामग्री नीति द्वारा अवरुद्ध",
+  "@liveErrorContentFilter": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorContentFilterDetail": "प्रदाता ने इस अनुरोध को अवरुद्ध कर दिया।",
+  "@liveErrorContentFilterDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersion": "सर्वर संस्करण समर्थित नहीं",
+  "@liveErrorVersion": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorVersionDetail": "CodeWalk इस सर्वर संस्करण का समर्थन नहीं करता।",
+  "@liveErrorVersionDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknown": "अप्रत्याशित त्रुटि",
+  "@liveErrorUnknown": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorUnknownDetail": "यह चरण एक त्रुटि के साथ समाप्त हुआ।",
+  "@liveErrorUnknownDetail": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorNoDetails": "कोई विवरण नहीं दिया गया।",
+  "@liveErrorNoDetails": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorShortened": "संदेश छोटा कर दिया गया।",
+  "@liveErrorShortened": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorChooseModel": "दूसरा मॉडल चुनें",
+  "@liveErrorChooseModel": {
+    "description": "V2 typed error cards"
+  },
+  "liveErrorOpenServers": "सर्वर खोलें",
+  "@liveErrorOpenServers": {
+    "description": "V2 typed error cards"
   }
 }

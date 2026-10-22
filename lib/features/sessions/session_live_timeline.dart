@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import 'session_error_card.dart';
 import 'session_live_scroll.dart';
 import 'session_timeline_tile.dart';
 
@@ -28,6 +29,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.olderLoading = false,
     this.onLoadOlder,
     this.topBuilder,
+    this.errorRecovery,
   });
 
   /// The resident items, in the server's order.
@@ -51,6 +53,9 @@ class SessionLiveTimeline extends StatefulWidget {
   /// Reads the next older page; null when none can be read now. The reader
   /// asks for it by reaching the top of the list.
   final VoidCallback? onLoadOlder;
+
+  /// The recovery a failed turn's error card offers; null for none.
+  final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -551,7 +556,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       key: ValueKey(item.id),
       builder: (context) {
         if (isAnswer) _answerContext = context;
-        return SessionTimelineTile(item: item);
+        return SessionTimelineTile(
+          item: item,
+          errorRecovery: widget.errorRecovery,
+        );
       },
     );
   }
@@ -671,9 +679,10 @@ _ItemSignature _itemSignature(TimelineItem item) => (
     _ => null,
   },
   // A tool's input and output, compared by value: a re-read that brings the
-  // same values back is not an arrival.
+  // same values back is not an arrival. A failed turn's error card too.
   payload: switch (item) {
     ToolCall(:final input, :final output) => (input, output),
+    TurnOutcome(:final error) => (error?.kind.value, error?.rawMessage),
     _ => null,
   },
 );
