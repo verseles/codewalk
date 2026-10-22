@@ -223,7 +223,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the label reads "Retrying in m:ss" (hours as h:mm:ss), counted down from the deadline the server reported and never longer than the server's own delay counted from arrival; a deadline already past, or one unknown after a reconnect, reads "Retrying" or the hydrated running state
 - **Then** the count ticks once per second only while the screen is shown and the app is in the foreground, and catches up when it returns; the retry's error type is kept, its message is never shown
 - **Then** the next step start of that execution returns it to running, and any execution end clears the wait
-- **Then** technical coverage is contract-derived (no natural 2.0.22 retry capture) and includes the 2x-text labels in Arabic and Portuguese; installed native/MVP acceptance remains separate
+- **When** the session's direct sub-agent sessions run, including after the session itself went idle
+- **Then** the header shows "Sub-agents running: n" beside the session's own state, which stays idle; a sub-agent's start adds it, any end of its execution (a server shutdown too) removes it, and opening or reconnecting the session counts the ones the server lists as running
+- **Then** only the children the session already follows are counted: direct children, within the existing per-session bound, never by watching them separately
+- **Then** retry coverage is contract-derived (no natural 2.0.22 retry capture) and includes the 2x-text labels in Arabic and Portuguese; the sub-agent count replays the observed background-child capture; installed native/MVP acceptance remains separate
 
 ### V2 live session Stop
 

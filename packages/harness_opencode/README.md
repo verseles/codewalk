@@ -162,6 +162,11 @@ hydration, applies the snapshot and then the buffered events.
 - Any failed or rejected read fails the whole snapshot; empty lists are
   authoritative empty collections. Execution is `running` when the session is
   in the active map, otherwise `idle`, with the last outcome of the page.
+- Each given direct child that the active map shows running becomes a running
+  child `WorkItem` (owner the child, origin the parent, completion scope
+  `child`) in a complete work collection with the active map's boundary. A
+  parent goes idle while its background children still run, so its own
+  execution says nothing about them (V2-046B / #405).
 - The descending page is reversed by native message before projection, so the
   timeline is chronological and identical to `readHistory`; it is complete only
   without an older continuation. The continuation token records the direction,
@@ -202,6 +207,12 @@ and `openCodeServerConnected`, the readiness predicate the injected
   session is evicted (`OpenCodeSessionEvicted`). A disconnect abandons the
   generation, marks every watched session and reports `reconnecting`, or
   `authRequired`/`incompatible` when terminal; reconnecting is the transport's.
+- With `observeChildren`, a watched session follows its direct children: those
+  listed at each hydration, adopted on `session.created`, or still holding a
+  request or running record on it, bounded by `maxChildren`. Their permission
+  and execution frames reach the parent. A followed child's `session.deleted`
+  re-reads the parent when the child held a request or record there, or while
+  the parent's snapshot is still in flight (V2-046B / #405).
 - Updates are `OpenCodeSessionUpdated` (state and reducer effects),
   `OpenCodeSessionEvicted` and `OpenCodeConnectionUpdated` with finite
   `OpenCodeStreamFailure` categories.
@@ -390,6 +401,13 @@ execution state and the timeline. Reduce the events in order against the latest
   outcome, not on the item, so live and history items remain identical.
 - A shutdown records no idle marker because the server keeps the execution claim
   and resumes the same turn; no outcome is invented.
+- `projectOpenCodeChildExecutionEvent(value, parent, child: ...)` projects a
+  direct child's execution frames onto its parent's work as one parent-owned
+  `WorkChanged`: `started` adds the child's running record (the same
+  `openCodeRunningChild` item hydration builds) and every end, a shutdown too,
+  removes it. The parent's execution is never touched, and an unchanged work
+  list returns null. The stream owner calls it for children it already
+  follows.
 - [V2-046B / #405](https://github.com/verseles/codewalk/issues/405): a retry
   wait lasts until the next `session.step.started`, which returns the execution
   to `running` with its previous outcome, or until any execution frame above.

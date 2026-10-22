@@ -2543,7 +2543,7 @@ checksum, build record and launch evidence. The delivered arm64 split itself
 is inspected, not launched. `ci.yml` does not run this workflow, and nothing is
 tagged, released or deployed.
 
-## V2-046B retry wait (#405)
+## V2-046B retry wait and running sub-agents (#405)
 
 ```text
 packages/harness_opencode/lib/src/execution_projection.dart # projectOpenCodeRetryEvent: session.retry.scheduled -> RetryScheduled with a bounded deadline
@@ -2554,9 +2554,16 @@ lib/features/sessions/session_live_controller.dart # canStop while running or re
 lib/platform/sessions/opencode_profile_slot.dart # A Stop settles only on an observed idle
 tool/l10n/session_live_catalog.py # liveRetrying and liveRetryingIn in 14 locales
 packages/harness_opencode/test/retry_projection_test.dart # Contract-derived retry mapping, deadline bounds, clearing and failures
-test/v2/sessions/session_live_execution_test.dart # Chip labels, countdown, pause, 2x text in Arabic and Portuguese
+test/v2/sessions/session_live_execution_test.dart # Chip labels, countdown, pause, 2x text in Arabic and Portuguese; sub-agent chip
+packages/harness_opencode/lib/src/session_reader.dart # Hydration work: the given direct children the active map shows running
+packages/harness_opencode/lib/src/stream_owner.dart # Forwards followed children's execution frames to the parent's work; keeps record-holding children followed; a deletion re-reads a hydrating parent
+packages/harness_opencode/test/stream_owner_test.dart # Running children: deletion live, mid-hydration and during a repair; a listing that omits a followed child
+packages/harness_opencode/test/child_work_projection_test.dart # Child records on the parent, failures, observed background-child replay
 ```
 
 The wait is uncorrelated with its step: the reducer's position order drops a
 stale frame, and the next `session.step.started` or any execution end clears
 it. No 2.0.22 capture holds a retry frame, so the inputs are contract-derived.
+Running direct children are Core `WorkItem`s on the parent
+(`openCodeRunningChild` in `execution_projection.dart`); the header counts them
+while the parent's own execution stays idle.
