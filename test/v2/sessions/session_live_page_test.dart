@@ -3,6 +3,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,59 @@ import 'fakes.dart';
 import 'live_fakes.dart';
 
 void main() {
+  testWidgets('the app bar fits a session page beside the list', (
+    tester,
+  ) async {
+    // 600 dp puts the list beside a page narrower than the window.
+    tester.view.physicalSize = const Size(600, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final directory = LiveDirectory();
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: () => directory,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await tester.pumpAndSettle();
+    final read = dependencies.sessions!.selectProfile('profile_a');
+    final catalog = rig.sources.single;
+    final row = catalog.row('one');
+    catalog.respond([row]);
+    await read;
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey(row.info.ref)));
+    await tester.pumpAndSettle();
+    final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump();
+    final ref = row.info.ref;
+    final handle = directory.grant(ref)
+      ..selectionAvailable = true
+      ..selectionState = const SessionSelectionState(
+        selection: Selection(modelId: 'a-long-model-name', agentId: 'build'),
+      );
+    await tester.pump();
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(ref),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('live-selection')), findsOneWidget);
+    // The page is narrow, so the chip is icon-only although the window is not.
+    expect(find.text('a-long-model-name · build'), findsNothing);
+  });
+
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
     for (final locale in V2Localizations.supportedLocales) {
       testWidgets(
@@ -57,7 +111,14 @@ void main() {
           expect(find.byType(SessionLivePage), findsOneWidget);
           expect(find.text(l10n.liveConnecting), findsWidgets);
           final ref = row.info.ref;
-          final handle = directory.grant(ref);
+          final handle = directory.grant(ref)
+            ..selectionAvailable = true
+            ..selectionState = const SessionSelectionState(
+              selection: Selection(
+                modelId: 'a-long-model-name',
+                agentId: 'build',
+              ),
+            );
           await tester.pump();
           handle.emit(
             SessionLiveView(
@@ -120,6 +181,8 @@ void main() {
           expect(find.byType(TextField), findsNothing);
           expect(find.byKey(const ValueKey('live-composer')), findsOneWidget);
           expect(find.byKey(const ValueKey('live-retry')), findsNothing);
+          // V2-054A: the model and agent fit the AppBar in every locale.
+          expect(find.byKey(const ValueKey('live-selection')), findsOneWidget);
           final status = find.byKey(const ValueKey('live-status'));
           expect(tester.getSemantics(status), isNotNull);
           // The clock changes on every event; only phase changes announce.

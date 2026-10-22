@@ -1150,5 +1150,77 @@
   "liveChildrenRunning": "الوكلاء الفرعيون قيد التشغيل: {count}",
   "@liveChildrenRunning": {
     "description": "V2 live read-only session view"
+  },
+  "liveSelection": "النموذج والوكيل",
+  "@liveSelection": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionModel": "النموذج",
+  "@liveSelectionModel": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAgent": "الوكيل",
+  "@liveSelectionAgent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionDefault": "الافتراضي",
+  "@liveSelectionDefault": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotOffered": "غير متاح هنا",
+  "@liveSelectionNotOffered": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLoading": "جارٍ قراءة النماذج والوكلاء…",
+  "@liveSelectionLoading": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLocationUnknown": "لا يوجد لهذه الجلسة موقع لعرض النماذج والوكلاء.",
+  "@liveSelectionLocationUnknown": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRouteAbsent": "هذا الخادم لا يعرض قائمة النماذج والوكلاء.",
+  "@liveSelectionRouteAbsent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAuthRequired": "تلزم المصادقة لعرض النماذج والوكلاء.",
+  "@liveSelectionAuthRequired": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionServiceUnavailable": "تعذّرت قراءة القائمة الآن.",
+  "@liveSelectionServiceUnavailable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnreadable": "تعذّر فهم قائمة الخادم.",
+  "@liveSelectionUnreadable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionEmpty": "لا يوجد ما يمكن اختياره في هذا الموقع.",
+  "@liveSelectionEmpty": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionPending": "جارٍ التبديل…",
+  "@liveSelectionPending": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRefused": "رفض الخادم التغيير.",
+  "@liveSelectionRefused": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotApplied": "لم يُطبَّق التغيير.",
+  "@liveSelectionNotApplied": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionChangedElsewhere": "غيّره عميل آخر.",
+  "@liveSelectionChangedElsewhere": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnconfirmed": "لم يتأكد التغيير. ينتظر الإرسال التأكيد.",
+  "@liveSelectionUnconfirmed": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionCheckAgain": "تحقّق مرة أخرى",
+  "@liveSelectionCheckAgain": {
+    "description": "V2 live session model and agent selection"
   }
 }

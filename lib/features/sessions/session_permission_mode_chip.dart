@@ -13,9 +13,16 @@ import 'session_unrestricted_dialog.dart';
 /// the session's own rules end with the allow-everything rule, the chip shows
 /// Unrestricted instead, whoever added it, because that rule is what applies.
 class SessionPermissionModeChip extends StatelessWidget {
-  const SessionPermissionModeChip({super.key, required this.live});
+  const SessionPermissionModeChip({
+    super.key,
+    required this.live,
+    this.compact,
+  });
 
   final SessionLiveController live;
+
+  /// Icon-only; by default below 600 dp of window width.
+  final bool? compact;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,7 @@ class SessionPermissionModeChip extends StatelessWidget {
     return ListenableBuilder(
       listenable: live,
       builder: (context, _) {
-        final narrow = MediaQuery.sizeOf(context).width < 600;
+        final narrow = compact ?? MediaQuery.sizeOf(context).width < 600;
         final state = live.permissionModeState;
         final mode = state.mode;
         final unrestricted = live.supportsUnrestricted

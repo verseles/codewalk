@@ -1151,5 +1151,77 @@
   "liveChildrenRunning": "Выполняется субагентов: {count}",
   "@liveChildrenRunning": {
     "description": "V2 live read-only session view"
+  },
+  "liveSelection": "Модель и агент",
+  "@liveSelection": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionModel": "Модель",
+  "@liveSelectionModel": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAgent": "Агент",
+  "@liveSelectionAgent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionDefault": "По умолчанию",
+  "@liveSelectionDefault": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotOffered": "Здесь не предлагается",
+  "@liveSelectionNotOffered": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLoading": "Чтение моделей и агентов…",
+  "@liveSelectionLoading": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLocationUnknown": "У этой сессии нет расположения, для которого можно получить список моделей и агентов.",
+  "@liveSelectionLocationUnknown": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRouteAbsent": "Этот сервер не предоставляет список моделей и агентов.",
+  "@liveSelectionRouteAbsent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAuthRequired": "Для получения списка моделей и агентов требуется аутентификация.",
+  "@liveSelectionAuthRequired": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionServiceUnavailable": "Сейчас не удалось прочитать список.",
+  "@liveSelectionServiceUnavailable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnreadable": "Не удалось разобрать список сервера.",
+  "@liveSelectionUnreadable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionEmpty": "В этом расположении нечего выбрать.",
+  "@liveSelectionEmpty": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionPending": "Переключение…",
+  "@liveSelectionPending": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRefused": "Сервер отклонил изменение.",
+  "@liveSelectionRefused": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotApplied": "Изменение не применено.",
+  "@liveSelectionNotApplied": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionChangedElsewhere": "Изменено другим клиентом.",
+  "@liveSelectionChangedElsewhere": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnconfirmed": "Изменение не подтверждено. Отправка ждёт подтверждения.",
+  "@liveSelectionUnconfirmed": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionCheckAgain": "Проверить снова",
+  "@liveSelectionCheckAgain": {
+    "description": "V2 live session model and agent selection"
   }
 }

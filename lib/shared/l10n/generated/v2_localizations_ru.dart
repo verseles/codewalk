@@ -1396,4 +1396,63 @@ class V2LocalizationsRu extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return 'Выполняется субагентов: $count';
   }
+
+  @override
+  String get liveSelection => 'Модель и агент';
+
+  @override
+  String get liveSelectionModel => 'Модель';
+
+  @override
+  String get liveSelectionAgent => 'Агент';
+
+  @override
+  String get liveSelectionDefault => 'По умолчанию';
+
+  @override
+  String get liveSelectionNotOffered => 'Здесь не предлагается';
+
+  @override
+  String get liveSelectionLoading => 'Чтение моделей и агентов…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'У этой сессии нет расположения, для которого можно получить список моделей и агентов.';
+
+  @override
+  String get liveSelectionRouteAbsent =>
+      'Этот сервер не предоставляет список моделей и агентов.';
+
+  @override
+  String get liveSelectionAuthRequired =>
+      'Для получения списка моделей и агентов требуется аутентификация.';
+
+  @override
+  String get liveSelectionServiceUnavailable =>
+      'Сейчас не удалось прочитать список.';
+
+  @override
+  String get liveSelectionUnreadable => 'Не удалось разобрать список сервера.';
+
+  @override
+  String get liveSelectionEmpty => 'В этом расположении нечего выбрать.';
+
+  @override
+  String get liveSelectionPending => 'Переключение…';
+
+  @override
+  String get liveSelectionRefused => 'Сервер отклонил изменение.';
+
+  @override
+  String get liveSelectionNotApplied => 'Изменение не применено.';
+
+  @override
+  String get liveSelectionChangedElsewhere => 'Изменено другим клиентом.';
+
+  @override
+  String get liveSelectionUnconfirmed =>
+      'Изменение не подтверждено. Отправка ждёт подтверждения.';
+
+  @override
+  String get liveSelectionCheckAgain => 'Проверить снова';
 }

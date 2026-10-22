@@ -1293,4 +1293,58 @@ class V2LocalizationsZh extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return '运行中的子代理：$count';
   }
+
+  @override
+  String get liveSelection => '模型和代理';
+
+  @override
+  String get liveSelectionModel => '模型';
+
+  @override
+  String get liveSelectionAgent => '代理';
+
+  @override
+  String get liveSelectionDefault => '默认';
+
+  @override
+  String get liveSelectionNotOffered => '此处未提供';
+
+  @override
+  String get liveSelectionLoading => '正在读取模型和代理…';
+
+  @override
+  String get liveSelectionLocationUnknown => '此会话没有可列出模型和代理的位置。';
+
+  @override
+  String get liveSelectionRouteAbsent => '此服务器不提供模型和代理列表。';
+
+  @override
+  String get liveSelectionAuthRequired => '需要身份验证才能列出模型和代理。';
+
+  @override
+  String get liveSelectionServiceUnavailable => '暂时无法读取列表。';
+
+  @override
+  String get liveSelectionUnreadable => '无法解析服务器的列表。';
+
+  @override
+  String get liveSelectionEmpty => '此位置没有可选择的项。';
+
+  @override
+  String get liveSelectionPending => '正在切换…';
+
+  @override
+  String get liveSelectionRefused => '服务器拒绝了更改。';
+
+  @override
+  String get liveSelectionNotApplied => '更改未生效。';
+
+  @override
+  String get liveSelectionChangedElsewhere => '已被其他客户端更改。';
+
+  @override
+  String get liveSelectionUnconfirmed => '更改未确认。发送将等待确认。';
+
+  @override
+  String get liveSelectionCheckAgain => '再次检查';
 }

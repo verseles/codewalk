@@ -1372,4 +1372,62 @@ class V2LocalizationsAr extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return 'الوكلاء الفرعيون قيد التشغيل: $count';
   }
+
+  @override
+  String get liveSelection => 'النموذج والوكيل';
+
+  @override
+  String get liveSelectionModel => 'النموذج';
+
+  @override
+  String get liveSelectionAgent => 'الوكيل';
+
+  @override
+  String get liveSelectionDefault => 'الافتراضي';
+
+  @override
+  String get liveSelectionNotOffered => 'غير متاح هنا';
+
+  @override
+  String get liveSelectionLoading => 'جارٍ قراءة النماذج والوكلاء…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'لا يوجد لهذه الجلسة موقع لعرض النماذج والوكلاء.';
+
+  @override
+  String get liveSelectionRouteAbsent =>
+      'هذا الخادم لا يعرض قائمة النماذج والوكلاء.';
+
+  @override
+  String get liveSelectionAuthRequired =>
+      'تلزم المصادقة لعرض النماذج والوكلاء.';
+
+  @override
+  String get liveSelectionServiceUnavailable => 'تعذّرت قراءة القائمة الآن.';
+
+  @override
+  String get liveSelectionUnreadable => 'تعذّر فهم قائمة الخادم.';
+
+  @override
+  String get liveSelectionEmpty => 'لا يوجد ما يمكن اختياره في هذا الموقع.';
+
+  @override
+  String get liveSelectionPending => 'جارٍ التبديل…';
+
+  @override
+  String get liveSelectionRefused => 'رفض الخادم التغيير.';
+
+  @override
+  String get liveSelectionNotApplied => 'لم يُطبَّق التغيير.';
+
+  @override
+  String get liveSelectionChangedElsewhere => 'غيّره عميل آخر.';
+
+  @override
+  String get liveSelectionUnconfirmed =>
+      'لم يتأكد التغيير. ينتظر الإرسال التأكيد.';
+
+  @override
+  String get liveSelectionCheckAgain => 'تحقّق مرة أخرى';
 }

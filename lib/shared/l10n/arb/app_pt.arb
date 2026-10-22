@@ -1151,5 +1151,77 @@
   "liveChildrenRunning": "Subagentes em execução: {count}",
   "@liveChildrenRunning": {
     "description": "V2 live read-only session view"
+  },
+  "liveSelection": "Modelo e agente",
+  "@liveSelection": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionModel": "Modelo",
+  "@liveSelectionModel": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAgent": "Agente",
+  "@liveSelectionAgent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionDefault": "Padrão",
+  "@liveSelectionDefault": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotOffered": "Não oferecido aqui",
+  "@liveSelectionNotOffered": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLoading": "Lendo modelos e agentes…",
+  "@liveSelectionLoading": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLocationUnknown": "Esta sessão não tem um local para listar modelos e agentes.",
+  "@liveSelectionLocationUnknown": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRouteAbsent": "Este servidor não lista modelos e agentes.",
+  "@liveSelectionRouteAbsent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAuthRequired": "É preciso autenticar para listar modelos e agentes.",
+  "@liveSelectionAuthRequired": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionServiceUnavailable": "Não foi possível ler a lista agora.",
+  "@liveSelectionServiceUnavailable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnreadable": "Não foi possível entender a lista do servidor.",
+  "@liveSelectionUnreadable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionEmpty": "Nada para escolher neste local.",
+  "@liveSelectionEmpty": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionPending": "Trocando…",
+  "@liveSelectionPending": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRefused": "O servidor recusou a troca.",
+  "@liveSelectionRefused": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotApplied": "A troca não foi aplicada.",
+  "@liveSelectionNotApplied": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionChangedElsewhere": "Alterado por outro cliente.",
+  "@liveSelectionChangedElsewhere": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnconfirmed": "Troca não confirmada. O envio aguarda a confirmação.",
+  "@liveSelectionUnconfirmed": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionCheckAgain": "Verificar de novo",
+  "@liveSelectionCheckAgain": {
+    "description": "V2 live session model and agent selection"
   }
 }

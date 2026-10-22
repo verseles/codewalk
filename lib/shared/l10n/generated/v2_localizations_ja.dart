@@ -1318,4 +1318,59 @@ class V2LocalizationsJa extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return '実行中のサブエージェント: $count';
   }
+
+  @override
+  String get liveSelection => 'モデルとエージェント';
+
+  @override
+  String get liveSelectionModel => 'モデル';
+
+  @override
+  String get liveSelectionAgent => 'エージェント';
+
+  @override
+  String get liveSelectionDefault => 'デフォルト';
+
+  @override
+  String get liveSelectionNotOffered => 'ここでは提供されていません';
+
+  @override
+  String get liveSelectionLoading => 'モデルとエージェントを読み込み中…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'このセッションには、モデルとエージェントを一覧表示する場所がありません。';
+
+  @override
+  String get liveSelectionRouteAbsent => 'このサーバーはモデルとエージェントを一覧表示しません。';
+
+  @override
+  String get liveSelectionAuthRequired => 'モデルとエージェントを一覧表示するには認証が必要です。';
+
+  @override
+  String get liveSelectionServiceUnavailable => '現在、一覧を読み込めませんでした。';
+
+  @override
+  String get liveSelectionUnreadable => 'サーバーの一覧を解釈できませんでした。';
+
+  @override
+  String get liveSelectionEmpty => 'この場所には選択できるものがありません。';
+
+  @override
+  String get liveSelectionPending => '切り替え中…';
+
+  @override
+  String get liveSelectionRefused => 'サーバーが変更を拒否しました。';
+
+  @override
+  String get liveSelectionNotApplied => '変更は適用されませんでした。';
+
+  @override
+  String get liveSelectionChangedElsewhere => '別のクライアントによって変更されました。';
+
+  @override
+  String get liveSelectionUnconfirmed => '変更が確認されていません。送信は確認を待っています。';
+
+  @override
+  String get liveSelectionCheckAgain => '再確認';
 }

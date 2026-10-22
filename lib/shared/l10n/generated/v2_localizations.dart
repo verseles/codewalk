@@ -2624,6 +2624,114 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Sub-agents running: {count}'**
   String liveChildrenRunning(Object count);
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Model and agent'**
+  String get liveSelection;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get liveSelectionModel;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Agent'**
+  String get liveSelectionAgent;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get liveSelectionDefault;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Not offered here'**
+  String get liveSelectionNotOffered;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Reading models and agents…'**
+  String get liveSelectionLoading;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'This session has no location to list models and agents for.'**
+  String get liveSelectionLocationUnknown;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'This server does not list models and agents.'**
+  String get liveSelectionRouteAbsent;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication is required to list models and agents.'**
+  String get liveSelectionAuthRequired;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'The list could not be read right now.'**
+  String get liveSelectionServiceUnavailable;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'The list from the server could not be understood.'**
+  String get liveSelectionUnreadable;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to choose at this location.'**
+  String get liveSelectionEmpty;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Switching…'**
+  String get liveSelectionPending;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the change.'**
+  String get liveSelectionRefused;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'The change was not applied.'**
+  String get liveSelectionNotApplied;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Changed by another client.'**
+  String get liveSelectionChangedElsewhere;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Change not confirmed. Sending waits for it.'**
+  String get liveSelectionUnconfirmed;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get liveSelectionCheckAgain;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -1376,4 +1376,63 @@ class V2LocalizationsBn extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return 'চলমান সাব-এজেন্ট: $count';
   }
+
+  @override
+  String get liveSelection => 'মডেল ও এজেন্ট';
+
+  @override
+  String get liveSelectionModel => 'মডেল';
+
+  @override
+  String get liveSelectionAgent => 'এজেন্ট';
+
+  @override
+  String get liveSelectionDefault => 'ডিফল্ট';
+
+  @override
+  String get liveSelectionNotOffered => 'এখানে দেওয়া হয়নি';
+
+  @override
+  String get liveSelectionLoading => 'মডেল ও এজেন্ট পড়া হচ্ছে…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'এই সেশনের এমন কোনো অবস্থান নেই যার জন্য মডেল ও এজেন্ট তালিকাভুক্ত করা যায়।';
+
+  @override
+  String get liveSelectionRouteAbsent =>
+      'এই সার্ভার মডেল ও এজেন্ট তালিকাভুক্ত করে না।';
+
+  @override
+  String get liveSelectionAuthRequired =>
+      'মডেল ও এজেন্ট তালিকাভুক্ত করতে প্রমাণীকরণ প্রয়োজন।';
+
+  @override
+  String get liveSelectionServiceUnavailable => 'এখন তালিকাটি পড়া যায়নি।';
+
+  @override
+  String get liveSelectionUnreadable => 'সার্ভারের তালিকাটি বোঝা যায়নি।';
+
+  @override
+  String get liveSelectionEmpty => 'এই অবস্থানে বেছে নেওয়ার কিছু নেই।';
+
+  @override
+  String get liveSelectionPending => 'পরিবর্তন করা হচ্ছে…';
+
+  @override
+  String get liveSelectionRefused => 'সার্ভার পরিবর্তনটি প্রত্যাখ্যান করেছে।';
+
+  @override
+  String get liveSelectionNotApplied => 'পরিবর্তনটি প্রয়োগ হয়নি।';
+
+  @override
+  String get liveSelectionChangedElsewhere =>
+      'অন্য একটি ক্লায়েন্ট পরিবর্তন করেছে।';
+
+  @override
+  String get liveSelectionUnconfirmed =>
+      'পরিবর্তন নিশ্চিত হয়নি। পাঠানো নিশ্চিতকরণের অপেক্ষায় আছে।';
+
+  @override
+  String get liveSelectionCheckAgain => 'আবার যাচাই করুন';
 }

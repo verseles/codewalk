@@ -1381,4 +1381,62 @@ class V2LocalizationsUr extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return 'چل رہے ذیلی ایجنٹ: $count';
   }
+
+  @override
+  String get liveSelection => 'ماڈل اور ایجنٹ';
+
+  @override
+  String get liveSelectionModel => 'ماڈل';
+
+  @override
+  String get liveSelectionAgent => 'ایجنٹ';
+
+  @override
+  String get liveSelectionDefault => 'ڈیفالٹ';
+
+  @override
+  String get liveSelectionNotOffered => 'یہاں پیش نہیں کیا گیا';
+
+  @override
+  String get liveSelectionLoading => 'ماڈلز اور ایجنٹس پڑھے جا رہے ہیں…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'اس سیشن کا کوئی مقام نہیں جس کے لیے ماڈلز اور ایجنٹس کی فہرست بنائی جا سکے۔';
+
+  @override
+  String get liveSelectionRouteAbsent =>
+      'یہ سرور ماڈلز اور ایجنٹس کی فہرست نہیں دیتا۔';
+
+  @override
+  String get liveSelectionAuthRequired =>
+      'ماڈلز اور ایجنٹس کی فہرست کے لیے تصدیق درکار ہے۔';
+
+  @override
+  String get liveSelectionServiceUnavailable => 'ابھی فہرست پڑھی نہیں جا سکی۔';
+
+  @override
+  String get liveSelectionUnreadable => 'سرور کی فہرست سمجھی نہیں جا سکی۔';
+
+  @override
+  String get liveSelectionEmpty => 'اس مقام پر منتخب کرنے کو کچھ نہیں۔';
+
+  @override
+  String get liveSelectionPending => 'تبدیل کیا جا رہا ہے…';
+
+  @override
+  String get liveSelectionRefused => 'سرور نے تبدیلی مسترد کر دی۔';
+
+  @override
+  String get liveSelectionNotApplied => 'تبدیلی لاگو نہیں ہوئی۔';
+
+  @override
+  String get liveSelectionChangedElsewhere => 'کسی دوسرے کلائنٹ نے تبدیل کیا۔';
+
+  @override
+  String get liveSelectionUnconfirmed =>
+      'تبدیلی کی تصدیق نہیں ہوئی۔ بھیجنا تصدیق کا انتظار کرتا ہے۔';
+
+  @override
+  String get liveSelectionCheckAgain => 'دوبارہ چیک کریں';
 }

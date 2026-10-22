@@ -1401,4 +1401,64 @@ class V2LocalizationsPt extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return 'Subagentes em execução: $count';
   }
+
+  @override
+  String get liveSelection => 'Modelo e agente';
+
+  @override
+  String get liveSelectionModel => 'Modelo';
+
+  @override
+  String get liveSelectionAgent => 'Agente';
+
+  @override
+  String get liveSelectionDefault => 'Padrão';
+
+  @override
+  String get liveSelectionNotOffered => 'Não oferecido aqui';
+
+  @override
+  String get liveSelectionLoading => 'Lendo modelos e agentes…';
+
+  @override
+  String get liveSelectionLocationUnknown =>
+      'Esta sessão não tem um local para listar modelos e agentes.';
+
+  @override
+  String get liveSelectionRouteAbsent =>
+      'Este servidor não lista modelos e agentes.';
+
+  @override
+  String get liveSelectionAuthRequired =>
+      'É preciso autenticar para listar modelos e agentes.';
+
+  @override
+  String get liveSelectionServiceUnavailable =>
+      'Não foi possível ler a lista agora.';
+
+  @override
+  String get liveSelectionUnreadable =>
+      'Não foi possível entender a lista do servidor.';
+
+  @override
+  String get liveSelectionEmpty => 'Nada para escolher neste local.';
+
+  @override
+  String get liveSelectionPending => 'Trocando…';
+
+  @override
+  String get liveSelectionRefused => 'O servidor recusou a troca.';
+
+  @override
+  String get liveSelectionNotApplied => 'A troca não foi aplicada.';
+
+  @override
+  String get liveSelectionChangedElsewhere => 'Alterado por outro cliente.';
+
+  @override
+  String get liveSelectionUnconfirmed =>
+      'Troca não confirmada. O envio aguarda a confirmação.';
+
+  @override
+  String get liveSelectionCheckAgain => 'Verificar de novo';
 }

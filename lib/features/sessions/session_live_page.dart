@@ -18,6 +18,7 @@ import 'session_live_controller.dart';
 import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
+import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'sessions_controller.dart';
 
@@ -332,21 +333,39 @@ class _SessionLivePageState extends State<SessionLivePage>
       };
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
-        appBar: AppBar(
-          leading: widget.leading,
-          actions: [
-            if (c.permissionModes != null)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8),
-                child: SessionPermissionModeChip(live: c),
-              ),
-          ],
-          title: Text(
-            c.summary.info.title.trim().isEmpty
-                ? l10n.sessionExportUntitled
-                : c.summary.info.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          // The chips follow this page's width, not the window's: beside the
+          // session list the page is narrower than the window.
+          child: LayoutBuilder(
+            builder: (context, bar) {
+              final compact = bar.maxWidth < 600;
+              return AppBar(
+                leading: widget.leading,
+                actions: [
+                  if (c.supportsSelection)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: SessionSelectionChip(live: c, compact: compact),
+                    ),
+                  if (c.permissionModes != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: SessionPermissionModeChip(
+                        live: c,
+                        compact: compact,
+                      ),
+                    ),
+                ],
+                title: Text(
+                  c.summary.info.title.trim().isEmpty
+                      ? l10n.sessionExportUntitled
+                      : c.summary.info.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            },
           ),
         ),
         body: LayoutBuilder(

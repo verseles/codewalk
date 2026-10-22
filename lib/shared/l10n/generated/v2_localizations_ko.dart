@@ -1320,4 +1320,58 @@ class V2LocalizationsKo extends V2Localizations {
   String liveChildrenRunning(Object count) {
     return '실행 중인 하위 에이전트: $count';
   }
+
+  @override
+  String get liveSelection => '모델 및 에이전트';
+
+  @override
+  String get liveSelectionModel => '모델';
+
+  @override
+  String get liveSelectionAgent => '에이전트';
+
+  @override
+  String get liveSelectionDefault => '기본값';
+
+  @override
+  String get liveSelectionNotOffered => '여기서 제공되지 않음';
+
+  @override
+  String get liveSelectionLoading => '모델과 에이전트를 읽는 중…';
+
+  @override
+  String get liveSelectionLocationUnknown => '이 세션에는 모델과 에이전트를 나열할 위치가 없습니다.';
+
+  @override
+  String get liveSelectionRouteAbsent => '이 서버는 모델과 에이전트를 나열하지 않습니다.';
+
+  @override
+  String get liveSelectionAuthRequired => '모델과 에이전트를 나열하려면 인증이 필요합니다.';
+
+  @override
+  String get liveSelectionServiceUnavailable => '지금은 목록을 읽을 수 없습니다.';
+
+  @override
+  String get liveSelectionUnreadable => '서버의 목록을 해석할 수 없습니다.';
+
+  @override
+  String get liveSelectionEmpty => '이 위치에는 선택할 항목이 없습니다.';
+
+  @override
+  String get liveSelectionPending => '전환 중…';
+
+  @override
+  String get liveSelectionRefused => '서버가 변경을 거부했습니다.';
+
+  @override
+  String get liveSelectionNotApplied => '변경이 적용되지 않았습니다.';
+
+  @override
+  String get liveSelectionChangedElsewhere => '다른 클라이언트가 변경했습니다.';
+
+  @override
+  String get liveSelectionUnconfirmed => '변경이 확인되지 않았습니다. 전송은 확인을 기다립니다.';
+
+  @override
+  String get liveSelectionCheckAgain => '다시 확인';
 }

@@ -1151,5 +1151,77 @@
   "liveChildrenRunning": "چل رہے ذیلی ایجنٹ: {count}",
   "@liveChildrenRunning": {
     "description": "V2 live read-only session view"
+  },
+  "liveSelection": "ماڈل اور ایجنٹ",
+  "@liveSelection": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionModel": "ماڈل",
+  "@liveSelectionModel": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAgent": "ایجنٹ",
+  "@liveSelectionAgent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionDefault": "ڈیفالٹ",
+  "@liveSelectionDefault": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotOffered": "یہاں پیش نہیں کیا گیا",
+  "@liveSelectionNotOffered": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLoading": "ماڈلز اور ایجنٹس پڑھے جا رہے ہیں…",
+  "@liveSelectionLoading": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionLocationUnknown": "اس سیشن کا کوئی مقام نہیں جس کے لیے ماڈلز اور ایجنٹس کی فہرست بنائی جا سکے۔",
+  "@liveSelectionLocationUnknown": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRouteAbsent": "یہ سرور ماڈلز اور ایجنٹس کی فہرست نہیں دیتا۔",
+  "@liveSelectionRouteAbsent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionAuthRequired": "ماڈلز اور ایجنٹس کی فہرست کے لیے تصدیق درکار ہے۔",
+  "@liveSelectionAuthRequired": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionServiceUnavailable": "ابھی فہرست پڑھی نہیں جا سکی۔",
+  "@liveSelectionServiceUnavailable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnreadable": "سرور کی فہرست سمجھی نہیں جا سکی۔",
+  "@liveSelectionUnreadable": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionEmpty": "اس مقام پر منتخب کرنے کو کچھ نہیں۔",
+  "@liveSelectionEmpty": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionPending": "تبدیل کیا جا رہا ہے…",
+  "@liveSelectionPending": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionRefused": "سرور نے تبدیلی مسترد کر دی۔",
+  "@liveSelectionRefused": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionNotApplied": "تبدیلی لاگو نہیں ہوئی۔",
+  "@liveSelectionNotApplied": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionChangedElsewhere": "کسی دوسرے کلائنٹ نے تبدیل کیا۔",
+  "@liveSelectionChangedElsewhere": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionUnconfirmed": "تبدیلی کی تصدیق نہیں ہوئی۔ بھیجنا تصدیق کا انتظار کرتا ہے۔",
+  "@liveSelectionUnconfirmed": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveSelectionCheckAgain": "دوبارہ چیک کریں",
+  "@liveSelectionCheckAgain": {
+    "description": "V2 live session model and agent selection"
   }
 }
