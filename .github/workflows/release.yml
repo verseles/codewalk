@@ -14,8 +14,37 @@ env:
   FLUTTER_VERSION: "3.44.0"
 
 jobs:
+  # Fails closed: only vX.Y.Z (stable) and v1.X.Y-native.N (the transition
+  # cohort) publish anything, and only when pubspec carries that version.
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      kind: ${{ steps.plan.outputs.kind }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test the release plan
+        working-directory: tool/release
+        run: python3 -m unittest test_release_plan
+
+      - name: Decide what this ref publishes
+        id: plan
+        run: python3 tool/release/release_plan.py "$GITHUB_REF_TYPE" "$GITHUB_REF_NAME" pubspec.yaml >> "$GITHUB_OUTPUT"
+
+      - name: Refuse to touch an existing cohort release
+        if: steps.plan.outputs.kind == 'native'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; cohort releases are immutable."
+            exit 1
+          fi
+
   build-linux:
     name: Build Linux (${{ matrix.arch_tag }})
+    needs: plan
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     strategy:
@@ -27,17 +56,32 @@ jobs:
             flutter_arch: x64
             bundle_dir: build/linux/x64/release/bundle
             asset_name: codewalk-linux-x64.tar.gz
+          - runner: ubuntu-24.04-arm
+            arch_tag: arm64
+            flutter_arch: arm64
+            bundle_dir: build/linux/arm64/release/bundle
+            asset_name: codewalk-linux-arm64.tar.gz
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Flutter
+        if: matrix.arch_tag == 'x64'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
           architecture: ${{ matrix.flutter_arch }}
           cache: true
+
+      - name: Setup Flutter from its tag (no published Linux ARM64 archive)
+        if: matrix.arch_tag == 'arm64'
+        run: |
+          test "$(uname -m)" = aarch64
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+          "$RUNNER_TEMP/flutter/bin/flutter" precache --linux
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -75,6 +119,8 @@ jobs:
 
   build-windows:
     name: Build Windows (${{ matrix.arch_tag }})
+    needs: plan
+    if: needs.plan.outputs.kind == 'stable'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
     strategy:
@@ -122,6 +168,8 @@ jobs:
 
   build-macos:
     name: Build macOS (${{ matrix.arch_tag }})
+    needs: plan
+    if: needs.plan.outputs.kind == 'stable'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 35
     strategy:
@@ -171,6 +219,7 @@ jobs:
           retention-days: 2
 
   build-android:
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -242,7 +291,16 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-linux, build-windows, build-macos, build-android]
+    needs: [plan, build-linux, build-windows, build-macos, build-android]
+    # Windows and macOS are skipped for the cohort; every job that ran must
+    # have succeeded.
+    if: >-
+      always() && needs.plan.result == 'success' &&
+      needs.build-linux.result == 'success' &&
+      needs.build-android.result == 'success' &&
+      (needs.plan.outputs.kind == 'native' ||
+      (needs.build-windows.result == 'success' &&
+      needs.build-macos.result == 'success'))
     permissions:
       contents: write
     steps:
@@ -258,15 +316,18 @@ jobs:
         run: find artifacts/ -type f
 
       - name: Prepare release notes
+        if: needs.plan.outputs.kind == 'stable'
         run: |
           version="${GITHUB_REF_NAME#v}"
           python3 tool/release/changelog.py extract "$version" --output release-notes.md
 
       - name: Create GitHub Release
+        if: needs.plan.outputs.kind == 'stable'
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
+            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
             artifacts/codewalk-windows-x64/codewalk-windows-x64.zip
             artifacts/codewalk-macos-arm64/codewalk-macos-arm64.tar.gz
             artifacts/codewalk-android/codewalk-android-arm64.apk
@@ -274,3 +335,22 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+      - name: Create the cohort prerelease
+        if: needs.plan.outputs.kind == 'native'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
+            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
+            artifacts/codewalk-android/codewalk-android-arm64.apk
+          body: >-
+            CodeWalk ${{ github.ref_name }}: the CodeWalk 1 transition cohort
+            for Android and Linux (x64, ARM64). A prerelease, never the latest
+            release; ordinary stable and CodeWalk 1 updates do not offer it.
+          generate_release_notes: false
+          fail_on_unmatched_files: true
+          overwrite_files: false
+          draft: false
+          prerelease: true
+          make_latest: false
