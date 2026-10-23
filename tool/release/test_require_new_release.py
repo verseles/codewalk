@@ -37,22 +37,23 @@ class RequireNewReleaseTests(unittest.TestCase):
                 self.assertEqual(run_with_gh(stub), 1)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 CREATE = Path(__file__).with_name("create_cohort_release.sh")
 
 
-def run_create(stub: str) -> tuple[int, str]:
+def run_create(stub: str, files=None) -> tuple[int, str]:
     with tempfile.TemporaryDirectory() as bin_dir:
+        if files is None:
+            asset = Path(bin_dir) / "a.apk"
+            asset.write_text("apk")
+            files = [str(asset)]
         log = Path(bin_dir) / "calls"
         gh = Path(bin_dir) / "gh"
         gh.write_text(f'#!/bin/sh\necho "$*" >> "{log}"\n' + stub)
         gh.chmod(gh.stat().st_mode | stat.S_IEXEC)
         env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}"}
         code = subprocess.run(
-            ["bash", str(CREATE), "owner/repo", "v1.266.0-native.1", "a.apk"],
+            ["bash", str(CREATE), "owner/repo", "v1.266.0-native.1", *files],
             env=env, capture_output=True,
         ).returncode
         return code, log.read_text() if log.exists() else ""
@@ -66,7 +67,7 @@ class CreateCohortReleaseTests(unittest.TestCase):
         self.assertIn("prerelease=true", create)
         self.assertIn("make_latest=false", create)
         self.assertIn("draft=false", create)
-        self.assertTrue(upload.startswith("release upload v1.266.0-native.1 a.apk"))
+        self.assertTrue(upload.startswith("release upload v1.266.0-native.1 "))
 
     def test_an_existing_release_stops_before_any_upload(self):
         code, calls = run_create(
@@ -74,3 +75,20 @@ class CreateCohortReleaseTests(unittest.TestCase):
         )
         self.assertEqual(code, 1)
         self.assertNotIn("release upload", calls)
+
+    def test_a_missing_asset_fails_before_any_call(self):
+        code, calls = run_create("", files=["/nonexistent/a.apk"])
+        self.assertEqual(code, 1)
+        self.assertEqual(calls, "")
+
+    def test_a_failed_upload_deletes_the_new_release(self):
+        code, calls = run_create(
+            'case "$1 $2" in "api --method") case "$3" in POST) echo 42;; esac;; '
+            '"release upload") exit 1;; esac\n'
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("api --method DELETE repos/owner/repo/releases/42", calls)
+
+
+if __name__ == "__main__":
+    unittest.main()
