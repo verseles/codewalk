@@ -120,7 +120,8 @@ release_records() {
           else if (index("bfnrt", e)) { out = out "\n"; p += 2 }
           else if (e == "u" && substr(s, p + 2, 4) ~ /^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]$/) { out = out "?"; p += 6 }
           else bad()
-        } else { out = out c; p++ }
+        } else if (c < " ") bad()
+        else { out = out c; p++ }
       }
       bad()
     }
@@ -209,7 +210,8 @@ highest_channel_tag() {
   awk -F '\t' -v channel="$1" '
     function newer(a, b,  i, x, y) {
       for (i = 1; i <= 4; i++) {
-        x = a[i]; y = b[i]
+        # The prefix keeps the comparison textual, beyond awk number precision.
+        x = "n" a[i]; y = "n" b[i]
         if (length(x) != length(y)) return length(x) > length(y)
         if (x != y) return x > y
       }

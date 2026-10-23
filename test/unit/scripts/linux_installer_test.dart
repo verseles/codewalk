@@ -742,6 +742,31 @@ void main() {
       expectUntouched(malformed, 'Malformed release list on page 2');
     });
 
+    test('version parts beyond number precision still order', () async {
+      serveList(1, <Map<String, Object?>>[
+        release('v1.9007199254740992.0'),
+        release('v1.9007199254740993.0'),
+      ]);
+      installExisting('v1.0.0');
+
+      final result = await runInstaller(channel: 'v1');
+
+      expectInstalled(result, 'v1.9007199254740993.0', 'v1');
+    });
+
+    test('a raw control character in release text is malformed', () async {
+      serve(
+        'releases?per_page=100&page=1',
+        '[{"tag_name": "v1.2.0", "draft": false, "prerelease": false, '
+            '"body": "line one\nline two"}]',
+      );
+      installExisting('v1.0.0');
+
+      final result = await runInstaller(channel: 'v1');
+
+      expectUntouched(result, 'Malformed release list on page 1');
+    });
+
     test(
       'beta takes the highest v2 beta and never the native cohort',
       () async {
