@@ -416,13 +416,22 @@ class RelayHandler(BaseHTTPRequestHandler):
         reason = "upstream-end"
         try:
             while True:
-                chunk = response.read1(65536)
+                try:
+                    chunk = response.read1(65536)
+                except (http.client.HTTPException, OSError):
+                    # The server died mid-stream (a restart): the client sees
+                    # the stream cut, as it would from the server itself.
+                    reason = "upstream-broken"
+                    break
                 if not chunk:
                     break
                 self.wfile.write(f"{len(chunk):x}\r\n".encode() + chunk + b"\r\n")
                 self.wfile.flush()
-            self.wfile.write(b"0\r\n\r\n")
-            self.wfile.flush()
+            if reason == "upstream-end":
+                self.wfile.write(b"0\r\n\r\n")
+                self.wfile.flush()
+            else:
+                self.close_connection = True
         except (BrokenPipeError, ConnectionResetError, TimeoutError, OSError):
             reason = "client-gone"
             self.close_connection = True

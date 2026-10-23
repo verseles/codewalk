@@ -31,6 +31,16 @@ class _Upstream(BaseHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
             return
+        if self.path == "/api/event?cut":
+            # A chunked stream whose server dies mid-stream.
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Transfer-Encoding", "chunked")
+            self.end_headers()
+            self.wfile.write(b"9\r\ndata: 0\n\n\r\n")
+            self.wfile.flush()
+            self.close_connection = True
+            return
         if self.path == "/api/event":
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
@@ -168,6 +178,17 @@ class RelayTests(unittest.TestCase):
         )
         self.assertEqual({r["client"] for r in records}, {"client-1"})
         self.assertEqual(records[2]["reason"], "upstream-end")
+
+    def test_a_stream_cut_by_the_server_is_recorded_as_broken(self):
+        # The client sees the cut too: the relay never ends it cleanly.
+        with self.assertRaises(http.client.IncompleteRead) as cut:
+            self._get("/api/event?cut")
+        self.assertEqual(cut.exception.partial, b"data: 0\n\n")
+        records = [json.loads(line) for line in self._records(2).splitlines()]
+        self.assertEqual(
+            [(r["kind"], r.get("reason")) for r in records],
+            [("stream-open", None), ("stream-close", "upstream-broken")],
+        )
 
     def test_a_bodiless_answer_is_not_a_stream(self):
         status, body = self._get("/api/empty")

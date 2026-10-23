@@ -314,6 +314,15 @@ class SessionsController extends ChangeNotifier {
 
   /// An automatic re-read is running; it never shows the loading notice.
   bool get quietRefreshing => _quietRefreshing;
+
+  /// The feed's state, for device evidence: whether a feed is held, the
+  /// failed automatic re-reads in a row and whether they stopped.
+  @visibleForTesting
+  ({bool feed, int failures, bool suspended}) get liveDiagnostics => (
+    feed: _changes != null,
+    failures: _liveFailures,
+    suspended: _liveSuspended,
+  );
   Future<void> initialize() => _initialization ??= hosts.load();
   void _notify() {
     if (!_disposed) notifyListeners();

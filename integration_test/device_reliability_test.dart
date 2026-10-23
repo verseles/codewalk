@@ -3,6 +3,7 @@
 // the composer, asks the host to disturb the device and records what the app
 // shows. Run only by tool/ci/device_reliability_android.py, which supplies the
 // endpoint, the password and the control port.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -88,6 +89,23 @@ void main() {
         .length;
     final unsettled = <String>[];
 
+    // The list's own state, so a cell that does not settle says why.
+    Map<String, Object?> catalog() {
+      final list = dependencies.sessions!;
+      final live = list.liveDiagnostics;
+      return {
+        'loaded': list.loaded,
+        'stale': list.stale,
+        'behind': list.behind,
+        'failure': list.failure?.name,
+        'reconciling': list.reconciling,
+        'feed': live.feed,
+        'failures': live.failures,
+        'suspended': live.suspended,
+        'rows': list.sessions.length,
+      };
+    }
+
     final endpoint = Uri.parse(_endpoint);
     final hosts = dependencies.hosts;
     await hosts.load();
@@ -141,6 +159,7 @@ void main() {
         'prompt_shown': count(marker),
         'status': status(),
         'stuck_running': running(),
+        'catalog': catalog(),
       };
       await control('result', record);
       // A turn that never ran was not disturbed: the cell proves nothing.
@@ -170,6 +189,7 @@ void main() {
     // A session another client starts appears in the catalog by itself.
     dependencies.router.go('/');
     await tester.pump();
+    final before = catalog();
     final external = await control('session');
     final id = external['session']! as String;
     final appeared = DateTime.now().toUtc();
@@ -179,12 +199,29 @@ void main() {
       ),
       timeout: const Duration(seconds: 30),
     );
+    final listedAt = DateTime.now().toUtc();
+    final after = catalog();
+    bool? refreshed;
+    if (!listed) {
+      // Diagnosis only: whether a manual read finds what the feed missed.
+      // The cell still fails; nothing here turns it into a pass.
+      unawaited(dependencies.sessions!.refresh());
+      refreshed = await until(
+        () => dependencies.sessions!.sessions.any(
+          (row) => row.info.ref.nativeId == id,
+        ),
+        timeout: const Duration(seconds: 15),
+      );
+    }
     await control('result', {
       'scenario': 'tui-equivalent',
       'session': id,
       'created': appeared.toIso8601String(),
       'listed': listed,
-      'listed_at': DateTime.now().toUtc().toIso8601String(),
+      'listed_at': listedAt.toIso8601String(),
+      'catalog_before': before,
+      'catalog_after': after,
+      'listed_after_refresh': refreshed,
     });
     if (!listed) unsettled.add('tui-equivalent');
     await tester.pumpWidget(const SizedBox.shrink());
