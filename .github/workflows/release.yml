@@ -18,6 +18,8 @@ jobs:
   # cohort) publish anything, and only when pubspec carries that version.
   plan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       kind: ${{ steps.plan.outputs.kind }}
     steps:
@@ -36,17 +38,14 @@ jobs:
         if: steps.plan.outputs.kind == 'native'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $GITHUB_REF_NAME already exists; cohort releases are immutable."
-            exit 1
-          fi
+        run: bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
 
   build-linux:
     name: Build Linux (${{ matrix.arch_tag }})
     needs: plan
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    # The ARM64 leg bootstraps Flutter from its tag without a cache.
+    timeout-minutes: 45
     strategy:
       fail-fast: true
       matrix:
@@ -333,8 +332,17 @@ jobs:
             artifacts/codewalk-android/codewalk-android-arm64.apk
           body_path: release-notes.md
           generate_release_notes: true
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
+
+      # Checked again here: a release created while the builds ran is
+      # still refused.
+      - name: Refuse to touch an existing cohort release
+        if: needs.plan.outputs.kind == 'native'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
 
       - name: Create the cohort prerelease
         if: needs.plan.outputs.kind == 'native'
