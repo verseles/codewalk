@@ -348,29 +348,13 @@ jobs:
           draft: false
           prerelease: false
 
-      # Checked again here: a release created while the builds ran is
-      # still refused.
-      - name: Refuse to touch an existing cohort release
+      # Create-only: fails on an existing release instead of updating it.
+      - name: Create the cohort prerelease
         if: needs.plan.outputs.kind == 'native'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
-
-      - name: Create the cohort prerelease
-        if: needs.plan.outputs.kind == 'native'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
-            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
-            artifacts/codewalk-android/codewalk-android-arm64.apk
-          body: >-
-            CodeWalk ${{ github.ref_name }}: the CodeWalk 1 transition cohort
-            for Android and Linux (x64, ARM64). A prerelease, never the latest
-            release; ordinary stable and CodeWalk 1 updates do not offer it.
-          generate_release_notes: false
-          fail_on_unmatched_files: true
-          overwrite_files: false
-          draft: false
-          prerelease: true
-          make_latest: false
+        run: >-
+          bash tool/release/create_cohort_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
+          artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
+          artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
+          artifacts/codewalk-android/codewalk-android-arm64.apk
