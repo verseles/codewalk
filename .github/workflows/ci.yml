@@ -56,7 +56,7 @@ jobs:
         run: python3 -m unittest discover -s tool/ci -p test_check_coverage.py
 
       - name: Test the release plan
-        run: python3 -m unittest discover -s tool/release -p test_release_plan.py
+        run: python3 -m unittest discover -s tool/release -p 'test_*.py'
 
       - name: Test browser capabilities
         run: flutter test --no-pub --platform chrome test/web
