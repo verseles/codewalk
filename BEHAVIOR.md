@@ -2303,6 +2303,26 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** a silent update check runs at startup and repeats every 1 hour while the app process is alive
 - **Then** the automatic check never shows a manual spinner/up-to-date confirmation; it only surfaces UI when a newer, non-dismissed version is found
 
+### Major update gate to CodeWalk 2
+
+- **Given** an update check finds that GitHub's latest stable release is a higher major than the installed CodeWalk (CodeWalk 2 for a CodeWalk 1 install)
+- **When** the result arrives
+- **Then** CodeWalk never offers that release through the ordinary update prompt, toast, What's-new card or install action; it shows the major-update gate instead: once at startup per release tag, and as a `Review options` card on the Settings landing and in `Settings` > `About`
+- **Then** the gate states that CodeWalk 2 requires OpenCode 2 servers, summarizes what changes, links the release notes, and offers `Update to CodeWalk 2`, `Stay on CodeWalk 1` and `Remind me in 7 days`; Back, Escape and tapping outside count as the reminder
+- **Then** `Update to CodeWalk 2` approves only that exact release tag: Android downloads and installs that release's APK (no APK fails without substituting another release); desktop, Web and iOS open that release's page and never run the install script
+- **Then** `Remind me in 7 days` hides the gate for that major for 7 days (surviving restarts) while 1.x fixes keep flowing from the CodeWalk 1 release list; a manual `Check for updates` shows the gate again during the reminder
+- **Then** a release with a suffixed tag (`-beta`, `-native.N`, build metadata), a draft or a prerelease is never offered
+- **Then** on desktop the install script, which installs whatever release is latest, runs only for a same-major update that `/releases/latest` itself returned; a 1.x fix found through the CodeWalk 1 release list opens its release page
+
+### CodeWalk 1 update channel
+
+- **Given** the user chose `Stay on CodeWalk 1` in the gate, or selected the CodeWalk 1 channel in `Settings` > `About`
+- **When** an update check runs
+- **Then** CodeWalk offers only the highest stable `v1.x.y` release from the repository's release list (never `/releases/latest`), reading at most 10 pages and offering nothing when a page is malformed or the bound is exhausted
+- **Then** the major-update gate is never shown; switching back to the stable channel in `Settings` > `About` re-checks and asks again
+- **Then** desktop updates in this channel open the exact release page instead of running the install script
+- **Then** the choice survives restarts; an unreadable stored value falls back to the stable channel, where the gate still asks; resetting the app clears it
+
 ### Silent update check when opening Settings
 
 - **Given** the user opens the main `Settings` screen
