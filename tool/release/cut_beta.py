@@ -103,7 +103,7 @@ def cut(step: dict, runner=subprocess.run) -> None:
         raise ValueError("pubspec.yaml has no version line")
     pubspec.write_text(updated, encoding="utf-8", newline="\n")
     try:
-        git(runner, "add", "pubspec.yaml", "--", SNAPSHOT)
+        git(runner, "add", "-f", "--", "pubspec.yaml", SNAPSHOT)
         git(runner, "commit", "-m", f"release: cut {step['tag']}")
     except subprocess.CalledProcessError:
         # Nothing was committed: leave main on its previous version.

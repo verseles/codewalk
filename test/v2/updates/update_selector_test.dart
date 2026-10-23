@@ -200,7 +200,7 @@ void main() {
     test('the Linux command names the exact tag and channel', () {
       expect(
         linuxInstallCommand(pick([release('v2.0.0-beta.4')])!),
-        'curl -fsSL install.cat/verseles/codewalk | '
+        'curl -fsSL https://install.cat/verseles/codewalk | '
         'CODEWALK_CHANNEL=beta CODEWALK_VERSION=v2.0.0-beta.4 sh',
       );
       expect(

@@ -27,6 +27,7 @@ ReleaseSource createUpdateSource() => NativeReleaseSource(
     'User-Agent': 'CodeWalk',
   },
   maxBytes: ReleaseSource.maxUpdatesBytes,
+  paginateReleases: true,
 );
 
 /// Separate public-origin transport; it has no profile or credential dependency.
@@ -40,6 +41,7 @@ final class NativeReleaseSource implements ReleaseSource {
       'Accept-Encoding': 'identity',
     },
     this.maxBytes = ReleaseSource.maxBodyBytes,
+    this.paginateReleases = false,
   }) : _transport =
            transport ??
            IoEndpointHttpTransport(
@@ -52,6 +54,7 @@ final class NativeReleaseSource implements ReleaseSource {
   final String path;
   final Map<String, String> headers;
   final int maxBytes;
+  final bool paginateReleases;
   final Set<_NativeTask> _tasks = {};
   bool _closed = false;
 
@@ -99,31 +102,59 @@ final class _NativeTask implements ReleaseSourceTask {
 
   Future<void> _read() async {
     try {
-      final response = await owner._transport.send(
-        TransportRequest(
-          method: 'GET',
-          path: owner.path,
-          headers: owner.headers,
-        ),
-        cancellation: _cancellation,
-      );
-      final encoding = response.header('content-encoding');
-      if (_result.isCompleted ||
-          response.statusCode != 200 ||
-          (encoding != null && encoding.toLowerCase() != 'identity')) {
-        response.cancel();
-        complete(
-          const ReleaseSourceResult.failure(
-            ReleaseSourceFailure.invalidResponse,
+      final releases = <Object?>[];
+      var remaining = owner.maxBytes;
+      for (var page = 1; ; page++) {
+        final response = await owner._transport.send(
+          TransportRequest(
+            method: 'GET',
+            path: owner.paginateReleases
+                ? '${owner.path}&page=$page'
+                : owner.path,
+            headers: owner.headers,
           ),
+          cancellation: _cancellation,
         );
-        return;
+        final encoding = response.header('content-encoding');
+        if (_result.isCompleted ||
+            response.statusCode != 200 ||
+            (encoding != null && encoding.toLowerCase() != 'identity')) {
+          response.cancel();
+          complete(
+            const ReleaseSourceResult.failure(
+              ReleaseSourceFailure.invalidResponse,
+            ),
+          );
+          return;
+        }
+        final bytes = await response.readBytes(
+          maxBytes:
+              owner.paginateReleases &&
+                  remaining > ReleaseSource.maxUpdatePageBytes
+              ? ReleaseSource.maxUpdatePageBytes
+              : remaining,
+          inactivityTimeout: const Duration(seconds: 10),
+        );
+        if (_result.isCompleted) return;
+        final body = utf8.decode(bytes);
+        if (!owner.paginateReleases) {
+          complete(ReleaseSourceResult.success(body));
+          return;
+        }
+        remaining -= bytes.length;
+        final entries = jsonDecode(body);
+        if (entries is! List || entries.length > ReleaseSource.updatePageSize) {
+          throw const FormatException('Invalid release page');
+        }
+        releases.addAll(entries);
+        if (entries.length < ReleaseSource.updatePageSize) {
+          complete(ReleaseSourceResult.success(jsonEncode(releases)));
+          return;
+        }
+        if (page >= ReleaseSource.updatePageLimit || remaining <= 0) {
+          throw const FormatException('Incomplete bounded release listing');
+        }
       }
-      final bytes = await response.readBytes(
-        maxBytes: owner.maxBytes,
-        inactivityTimeout: const Duration(seconds: 10),
-      );
-      complete(ReleaseSourceResult.success(utf8.decode(bytes)));
     } on Object {
       complete(
         const ReleaseSourceResult.failure(ReleaseSourceFailure.unavailable),

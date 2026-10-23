@@ -104,12 +104,46 @@ class CutBetaTests(unittest.TestCase):
         self.assertIn(f"version: 2.0.0-beta.1+{NOW + 2001}\n", (self.root / "pubspec.yaml").read_text())
         writes = [call for call in fake.calls if call[1] in ("add", "commit", "tag", "push")][1:]
         self.assertEqual(writes, [
-            ["git", "add", "pubspec.yaml", "--", ".task-memory"],
+            ["git", "add", "-f", "--", "pubspec.yaml", ".task-memory"],
             ["git", "commit", "-m", "release: cut v2.0.0-beta.1"],
             ["git", "tag", "-a", "v2.0.0-beta.1", "-m", "v2.0.0-beta.1"],
             ["git", "push", "--atomic", "origin", "HEAD:refs/heads/main", "refs/tags/v2.0.0-beta.1"],
         ])
         self.assertNotIn("--follow-tags", sum(fake.calls, []))
+
+    def test_cut_commits_the_ignored_snapshot_including_additions_and_deletions(self):
+        def local_git(*args):
+            return subprocess.run(["git", *args], cwd=self.root, check=True,
+                                  capture_output=True, text=True)
+
+        local_git("init", "-q")
+        local_git("config", "user.name", "Release Test")
+        local_git("config", "user.email", "release-test@example.invalid")
+        (self.root / ".gitignore").write_text(".task-memory/\n")
+        snapshot = self.root / ".task-memory"
+        snapshot.mkdir()
+        (snapshot / "state.json").write_text("old state")
+        (snapshot / "removed.md").write_text("removed")
+        local_git("add", "-f", "--", ".gitignore", "pubspec.yaml", ".task-memory")
+        local_git("commit", "-qm", "Initial fixture")
+        (snapshot / "state.json").write_text("new state")
+        (snapshot / "added.md").write_text("new artifact")
+        (snapshot / "removed.md").unlink()
+        step = cut_beta.plan(FakeGit(), now=NOW)
+
+        def runner(command, **kwargs):
+            if command[1] == "push":
+                return mock.Mock(stdout="")
+            return subprocess.run(command, **kwargs)
+
+        cut_beta.cut(step, runner)
+        self.assertEqual(local_git("show", "HEAD:.task-memory/state.json").stdout,
+                         "new state")
+        self.assertEqual(local_git("show", "HEAD:.task-memory/added.md").stdout,
+                         "new artifact")
+        self.assertNotIn(".task-memory/removed.md",
+                         local_git("ls-tree", "-r", "--name-only", "HEAD").stdout)
+        self.assertEqual(local_git("status", "--porcelain").stdout, "")
 
     def test_a_failed_commit_restores_the_pubspec(self):
         fake = FakeGit(fail="commit")

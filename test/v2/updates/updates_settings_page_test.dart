@@ -150,7 +150,7 @@ void main() {
     );
     await optInAndCheck(tester);
     const command =
-        'curl -fsSL install.cat/verseles/codewalk | '
+        'curl -fsSL https://install.cat/verseles/codewalk | '
         'CODEWALK_CHANNEL=beta CODEWALK_VERSION=v2.0.0-beta.3 sh';
     expect(find.text(command), findsOneWidget);
     expect(find.byKey(const ValueKey('updates_download')), findsNothing);

@@ -104,6 +104,6 @@ UpdateCandidate? _candidate(
 
 /// The installer command that installs exactly [candidate] on Linux.
 String linuxInstallCommand(UpdateCandidate candidate) =>
-    'curl -fsSL install.cat/verseles/codewalk | '
+    'curl -fsSL https://install.cat/verseles/codewalk | '
     'CODEWALK_CHANNEL=${candidate.version.isPrerelease ? 'beta' : 'stable'} '
     'CODEWALK_VERSION=${candidate.tag} sh';

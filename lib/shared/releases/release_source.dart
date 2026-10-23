@@ -21,9 +21,12 @@ abstract interface class ReleaseSource {
   static const maxBodyBytes = 256 * 1024;
   static const url =
       'https://raw.githubusercontent.com/verseles/codewalk/main/CHANGELOG.md';
-  // The newest releases (each with its notes and assets) for update checks.
-  static const updatesPath = '/repos/verseles/codewalk/releases?per_page=30';
-  static const maxUpdatesBytes = 2 * 1024 * 1024;
+  static const updatePageSize = 100;
+  static const updatePageLimit = 10;
+  static const updatesPath =
+      '/repos/verseles/codewalk/releases?per_page=$updatePageSize';
+  static const maxUpdatePageBytes = 2 * 1024 * 1024;
+  static const maxUpdatesBytes = 8 * 1024 * 1024;
   ReleaseSourceTask start();
   void close();
 }
