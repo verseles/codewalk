@@ -43,322 +43,444 @@
     {
       "target": "s25",
       "scenario": "drop",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T04:26:37.674Z",
+      "ended": "2026-10-23T04:27:04.851Z",
+      "steps": [
+        "CW-SLOW drop in session ses_e98fdfb33ffeJ9ZuPnFjKsgQWg",
+        "airplane mode on 15 s, then off"
+      ],
+      "recovery_seconds": 4,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "s25-report.json",
+        "s25-requests.jsonl",
+        "owner report on #408: 2-4 s, prompt once, nothing running, the composer notice clears when Live returns"
+      ],
+      "reconnect_proof": "client-2 stream-open 2026-10-23T04:27:00.914Z after the drop"
     },
     {
       "target": "s25",
       "scenario": "handover",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T04:30:57.436Z",
+      "ended": "2026-10-23T04:31:36.493Z",
+      "steps": [
+        "CW-SLOW handover",
+        "Wi-Fi off with mobile data on, then Wi-Fi back"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "The owner reported recovery in 2-4 s with the prompt once and nothing running, but the transport change (Wi-Fi to mobile and back) was not observed or recorded, and the cell shared the second prompt of session ses_e98fdfb33ffeJ9ZuPnFjKsgQWg instead of a fresh session",
+      "evidence": [
+        "s25-report.json",
+        "s25-requests.jsonl"
+      ],
+      "reconnect_proof": null
     },
     {
       "target": "s25",
       "scenario": "background",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T04:30:57.436Z",
+      "ended": "2026-10-23T04:31:36.493Z",
+      "steps": [
+        "app switched away and back during a running turn"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "The owner reported the same 2-4 s recovery when switching apps, but no dedicated 60 s background turn with the screen off was run in a fresh session",
+      "evidence": [
+        "s25-report.json",
+        "s25-requests.jsonl"
+      ],
+      "reconnect_proof": null
     },
     {
       "target": "s25",
       "scenario": "restart",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T14:23:34.336Z",
+      "ended": "2026-10-23T14:23:50Z",
+      "steps": [
+        "CW-SLOW restart in session ses_e96dae90fffe918BLGsqFYy5qE",
+        "server restarted 8 s after the prompt: requested 14:23:42.771Z, ready 14:23:43.392Z"
+      ],
+      "recovery_seconds": 6,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "s25-report.json",
+        "s25-requests.jsonl",
+        "owner report: 2-6 s, ticks stopped at 9 (turn interrupted by the restart), nothing running"
+      ],
+      "reconnect_proof": "client-2 stream-open 2026-10-23T14:23:44.023Z, 0.6 s after ready"
     },
     {
       "target": "s25",
       "scenario": "tui",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T14:29:06Z",
+      "ended": "2026-10-23T14:29:08Z",
+      "steps": [
+        "session list open",
+        "control session ses_e96d5a0fbffe9h4KSWBo2ljBXR created with marker CW-TUI be6f12"
+      ],
+      "recovery_seconds": 2,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "s25-report.json",
+        "s25-requests.jsonl",
+        "owner report: listed in about 2 s without refresh, prompt shown once"
+      ],
+      "reconnect_proof": null
     },
     {
       "target": "api31",
       "scenario": "drop",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T03:26:34.875422Z",
+      "ended": "2026-10-23T03:27:03.403728Z",
+      "steps": [
+        "CW-SLOW prompt in a fresh session",
+        "adb: Wi-Fi and data off 15 s (off 03:26:36.467Z), restored 03:26:51.509Z"
+      ],
+      "recovery_seconds": 0.7,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "api31-device-report.json",
+        "api31-requests.jsonl"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T03:26:52.237Z, 0.7 s after restored"
     },
     {
       "target": "api31",
       "scenario": "handover",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
-      "transport_proof": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T03:27:06.509407Z",
+      "ended": "2026-10-23T03:27:34.787599Z",
+      "steps": [
+        "CW-SLOW prompt in a fresh session",
+        "adb: Wi-Fi off with mobile data on at 03:27:07.930Z, Wi-Fi back at 03:27:22.968Z"
+      ],
+      "recovery_seconds": 5.0,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
+      "transport_proof": "host action: before WIFI, during CELLULAR, after WIFI, changed true",
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "api31-device-report.json",
+        "api31-requests.jsonl"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T03:27:27.934Z, 5.0 s after Wi-Fi returned"
     },
     {
       "target": "api31",
       "scenario": "background",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T03:27:37.322321Z",
+      "ended": "2026-10-23T03:29:05.972287Z",
+      "steps": [
+        "CW-SLOW90 prompt in a fresh session",
+        "adb: Home at 03:27:38.688Z, relaunched 03:28:39.541Z (61 s)"
+      ],
+      "recovery_seconds": 0.5,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "api31-device-report.json",
+        "api31-requests.jsonl"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T03:28:40.049Z, 0.5 s after relaunch"
     },
     {
       "target": "api31",
       "scenario": "restart",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T03:29:08.897756Z",
+      "ended": "2026-10-23T03:29:11.941985Z",
+      "steps": [
+        "CW-SLOW prompt in a fresh session",
+        "server SIGTERM restart requested 03:29:09.221Z, ready 03:29:09.900Z"
+      ],
+      "recovery_seconds": 0.4,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "api31-device-report.json",
+        "api31-requests.jsonl"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T03:29:10.263Z, 0.4 s after ready"
     },
     {
       "target": "api31",
       "scenario": "tui",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T03:29:12.655Z",
+      "ended": "2026-10-23T03:29:14.731Z",
+      "steps": [
+        "catalog open",
+        "control session created with one marker prompt"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Listed 2.1 s after another HTTP client created it (03:29:12.655Z to 03:29:14.731Z, catalog 4 to 5 rows, no refresh), but the run did not open its timeline, so the prompt shown once was not observed in the app",
+      "evidence": [
+        "api31-device-report.json",
+        "api31-requests.jsonl"
+      ],
+      "reconnect_proof": null
     },
     {
       "target": "linux-x64",
       "scenario": "drop",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T15:45:28.873Z",
+      "ended": "2026-10-23T15:46:20.448Z",
+      "steps": [
+        "CW-SLOW drop in session ses_e96900083ffekboTxgV0TZaN57",
+        "Wi-Fi off, then on (nmcli networking off left Tailscale unable to restore the network and needed a reboot; that first attempt is not counted)"
+      ],
+      "recovery_seconds": 3,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "linux-x64-report.json",
+        "linux-x64-requests.jsonl",
+        "owner report: Live within 3 s, messages refreshed; offline was not shown while Wi-Fi was down (#440)"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T15:46:15.758Z after Wi-Fi returned"
     },
     {
       "target": "linux-x64",
       "scenario": "handover",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T15:58:00Z",
+      "ended": "2026-10-23T15:58:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Skipped by the owner: the desktop has only Wi-Fi and the USB-tether path was not worth setting up now; the same Dart code passed the handover on the API 31 emulator",
+      "evidence": [],
+      "reconnect_proof": null
     },
     {
       "target": "linux-x64",
       "scenario": "background",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T15:50:04.243Z",
+      "ended": "2026-10-23T15:51:45.828Z",
+      "steps": [
+        "CW-SLOW90 background in session ses_e968bcec5ffeRG32ZMKr3MAAJ5",
+        "app minimized about 80 s, then restored"
+      ],
+      "recovery_seconds": 4,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "linux-x64-report.json",
+        "linux-x64-requests.jsonl",
+        "owner report: Live in about 4 s while the data was recovered"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T15:51:34.731Z on restore"
     },
     {
       "target": "linux-x64",
       "scenario": "restart",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T15:53:12.268Z",
+      "ended": "2026-10-23T15:53:31Z",
+      "steps": [
+        "CW-SLOW restart in session ses_e9688c9acffeVfrjuBmYU6jYX1",
+        "server restarted 8 s after the prompt: requested 15:53:20.828Z, ready 15:53:21.501Z"
+      ],
+      "recovery_seconds": 9,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "linux-x64-report.json",
+        "linux-x64-requests.jsonl",
+        "owner report: Live in 9 s, ticks stopped at 9, nothing running; no interrupted notice (#441)"
+      ],
+      "reconnect_proof": "client-1 stream-open 2026-10-23T15:53:22.158Z, 0.7 s after ready"
     },
     {
       "target": "linux-x64",
       "scenario": "tui",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
-      "recovery_seconds": null,
-      "prompt_shown": null,
-      "duplicates": null,
-      "stuck_running": null,
+      "result": "pass",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T15:55:49Z",
+      "ended": "2026-10-23T15:55:50Z",
+      "steps": [
+        "session list open (always visible on desktop)",
+        "control session ses_e96863ee1ffeUjbRybjmUlGDW8 created with marker CW-TUI 0d8d5d"
+      ],
+      "recovery_seconds": 1,
+      "prompt_shown": 1,
+      "duplicates": 0,
+      "stuck_running": false,
       "transport_proof": null,
       "reason": null,
-      "evidence": []
+      "evidence": [
+        "linux-x64-report.json",
+        "linux-x64-requests.jsonl",
+        "owner report: listed almost immediately, prompt shown once"
+      ],
+      "reconnect_proof": null
     },
     {
       "target": "linux-arm64",
       "scenario": "drop",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T16:00:00Z",
+      "ended": "2026-10-23T16:00:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Not run: by the owner amendment of 2026-10-23 (§17) the Linux ARM64 cells were skipped because they run the same Dart code as Linux x64; a deferred target, not a pass",
+      "evidence": [],
+      "reconnect_proof": null
     },
     {
       "target": "linux-arm64",
       "scenario": "handover",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T16:00:00Z",
+      "ended": "2026-10-23T16:00:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Not run: by the owner amendment of 2026-10-23 (§17) the Linux ARM64 cells were skipped because they run the same Dart code as Linux x64; a deferred target, not a pass",
+      "evidence": [],
+      "reconnect_proof": null
     },
     {
       "target": "linux-arm64",
       "scenario": "background",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T16:00:00Z",
+      "ended": "2026-10-23T16:00:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Not run: by the owner amendment of 2026-10-23 (§17) the Linux ARM64 cells were skipped because they run the same Dart code as Linux x64; a deferred target, not a pass",
+      "evidence": [],
+      "reconnect_proof": null
     },
     {
       "target": "linux-arm64",
       "scenario": "restart",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T16:00:00Z",
+      "ended": "2026-10-23T16:00:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Not run: by the owner amendment of 2026-10-23 (§17) the Linux ARM64 cells were skipped because they run the same Dart code as Linux x64; a deferred target, not a pass",
+      "evidence": [],
+      "reconnect_proof": null
     },
     {
       "target": "linux-arm64",
       "scenario": "tui",
-      "result": "pending",
-      "build": null,
-      "started": null,
-      "ended": null,
-      "steps": null,
+      "result": "inconclusive",
+      "build": "0466d015c9408d7c9c34b32e55b6fec25a149aaa",
+      "started": "2026-10-23T16:00:00Z",
+      "ended": "2026-10-23T16:00:00Z",
+      "steps": [
+        "not run"
+      ],
       "recovery_seconds": null,
       "prompt_shown": null,
       "duplicates": null,
       "stuck_running": null,
       "transport_proof": null,
-      "reason": null,
-      "evidence": []
+      "reason": "Not run: by the owner amendment of 2026-10-23 (§17) the Linux ARM64 cells were skipped because they run the same Dart code as Linux x64; a deferred target, not a pass",
+      "evidence": [],
+      "reconnect_proof": null
     }
   ]
 }

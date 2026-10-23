@@ -2638,3 +2638,21 @@ flutter test --no-pub test/v2/sessions/session_error_card_test.dart test/v2/sess
 # From packages/harness_opencode
 dart test test/error_projection_test.dart test/execution_projection_test.dart test/history_projection_test.dart test/step_usage_projection_test.dart
 ```
+
+## V2-042C device reliability evidence (#408)
+
+```text
+tool/ci/v2_device_server.py # Disposable pinned 2.0.22 server, zero-cost stub provider, metadata-only relay, loopback control port (restart, session, report, quit); --open relay accepts any device password
+tool/ci/validate_device_matrix.py # Checks the 20 target x scenario cells: bounds, prompt once, no duplicates or stuck running, reconnect/transport proof, reasons, no credentials or addresses, SHA256SUMS
+tool/ci/device_reliability_android.py # Runs the Android 12/API 31 emulator cells through adb host actions
+.github/workflows/v2-device-reliability.yml # CI job for the emulator cells
+tool/ci/test_v2_device_server.py # Relay, control commands and open-relay authentication
+tool/ci/test_v2_device_matrix.py # Validator rules and the committed final matrix
+test/contract/fixtures/opencode/2.0.22/device-reliability-042c/ # matrix.json, README.md, SHA256SUMS, and api31-/s25-/linux-x64- report.json and requests.jsonl evidence
+```
+
+```text
+# From the repository root
+python3 tool/ci/validate_device_matrix.py --final
+python3 -m unittest discover -s tool/ci -p 'test_v2_device_*.py'
+```

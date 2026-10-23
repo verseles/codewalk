@@ -1,0 +1,93 @@
+{
+  "version": "2.0.22",
+  "restarts": [
+    {
+      "requested": "2026-10-23T15:53:20.828+00:00",
+      "stop_seconds": 0.166,
+      "stopped": "2026-10-23T15:53:20.994+00:00",
+      "ready": "2026-10-23T15:53:21.501+00:00"
+    }
+  ],
+  "active_sessions": [],
+  "sessions": {
+    "ses_e96863ee1ffeUjbRybjmUlGDW8": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 0,
+      "active": false
+    },
+    "ses_e9688c9acffeVfrjuBmYU6jYX1": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e968bcec5ffeRG32ZMKr3MAAJ5": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e96900083ffekboTxgV0TZaN57": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e9699710effeiJR7HB1VgnsT9L": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    }
+  },
+  "event_streams": {
+    "client-1": [
+      {
+        "t": "2026-10-23T15:34:44.438+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T15:43:59.539+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T15:44:25.606+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T15:46:15.758+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T15:46:20.448+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T15:51:34.731+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T15:51:45.828+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T15:53:20.829+00:00",
+        "kind": "stream-close",
+        "reason": "upstream-broken"
+      },
+      {
+        "t": "2026-10-23T15:53:22.158+00:00",
+        "kind": "stream-open",
+        "reason": null
+      }
+    ]
+  }
+}

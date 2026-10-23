@@ -1,0 +1,186 @@
+{
+  "version": "2.0.22",
+  "restarts": [
+    {
+      "requested": "2026-10-23T14:23:42.771+00:00",
+      "stop_seconds": 0.114,
+      "stopped": "2026-10-23T14:23:42.885+00:00",
+      "ready": "2026-10-23T14:23:43.392+00:00"
+    }
+  ],
+  "active_sessions": [],
+  "sessions": {
+    "ses_e96d5a0fbffe9h4KSWBo2ljBXR": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 0,
+      "active": false
+    },
+    "ses_e96dae90fffe918BLGsqFYy5qE": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e98fdfb33ffeJ9ZuPnFjKsgQWg": {
+      "user_prompts": 2,
+      "duplicates": 0,
+      "prompt_posts": 2,
+      "active": false
+    }
+  },
+  "event_streams": {
+    "client-2": [
+      {
+        "t": "2026-10-23T04:25:34.272+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:26:19.455+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:26:24.129+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:27:00.914+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:27:04.851+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:27:30.918+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:27:43.489+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:27:43.666+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:27:58.495+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:27:58.667+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:29:59.680+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:30:29.683+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:30:49.724+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:31:04.189+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:31:05.610+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:31:21.489+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T04:31:22.608+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T04:31:36.493+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T14:23:07.511+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:23:42.772+00:00",
+        "kind": "stream-close",
+        "reason": "upstream-broken"
+      },
+      {
+        "t": "2026-10-23T14:23:44.023+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:24:29.033+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T14:26:01.624+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:26:16.625+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T14:28:31.188+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:29:01.194+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T14:29:10.054+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:29:50.196+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-23T14:29:55.063+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-23T14:30:05.197+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      }
+    ]
+  }
+}

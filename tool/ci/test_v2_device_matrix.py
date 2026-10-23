@@ -37,7 +37,8 @@ class MatrixTests(unittest.TestCase):
         data = _committed()
         self.assertEqual(matrix.problems(data), [])
         self.assertEqual(len(data["cells"]), 20)
-        self.assertEqual(len(matrix.problems(data, final=True)), 20)
+        self.assertEqual(matrix.problems(data, final=True), [])
+        self.assertEqual(matrix.sums(matrix.DEFAULT.parent), [])
 
     def test_a_pass_needs_its_observables_inside_the_bounds(self):
         data = _committed()
