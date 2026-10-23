@@ -1,4 +1,4 @@
-.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-v2-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web web desktop android precommit clean release
+.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-v2-tools test-release-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web web desktop android precommit clean release
 
 APK_DIR = build/app/outputs/flutter-apk
 .PHONY: v2-linux-preview-package v2-linux-preview-smoke v2-android-preview
@@ -58,6 +58,7 @@ help:
 	@echo "  make test-chat  Run ChatPage smoke and extended scenarios"
 	@echo "  make test-web   Run browser capability tests (requires Chrome)"
 	@echo "  make test-coverage-tools  Verify LCOV filtering and coverage gates"
+	@echo "  make test-release-tools  Verify the v2 beta release plan, guards and tooling"
 	@echo "  make test-integration  Run integration-tagged tests only"
 	@echo "  make test-shard SHARD_TOTAL=N SHARD_INDEX=I  Run one sharded test slice"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
@@ -78,8 +79,8 @@ help:
 	@echo "  make desktop    Build desktop app for current host OS"
 	@echo "  make android    Build Android APK (arm64)"
 	@echo "  make precommit  check + android"
-	@echo "  make release V=patch|minor|major  Bump version, changelog, commit, tag, push"
-	@echo "    ANNOUNCE=\"text\" (optional) embeds a release announcement; prompts once on TTY"
+	@echo "  make release V=beta  Cut the next v2.0.0-beta.N on main (DRY_RUN=1 prints the plan only)"
+	@echo "    stable, patch and v1 releases are cut on the v1 branch"
 	@echo "  make clean      Clean and restore dependencies"
 
 deps:
@@ -286,6 +287,9 @@ test-coverage-tools:
 test-v2-tools:
 	python3 -m unittest discover -s tool/ci -p 'test_*v2*.py' $(QUIET)
 
+test-release-tools:
+	python3 -m unittest discover -s tool/release -p 'test_*.py' $(QUIET)
+
 test-integration:
 	flutter test --no-pub -j 1 --tags integration test/integration $(QUIET)
 
@@ -303,7 +307,7 @@ coverage:
 smoke:
 	bash tool/qa/smoke_test.sh
 
-check: deps gen analyze test-coverage-tools test-v2-tools test
+check: deps gen analyze test-coverage-tools test-v2-tools test-release-tools test
 
 check-fast: deps gen analyze test-coverage-tools test-fast
 
@@ -340,13 +344,17 @@ v2-smoke:
 v2-web:
 	flutter build web --no-pub --target lib/main_v2.dart --output build/v2/web
 
+# web, desktop and android build the legacy lib/main.dart; the guard refuses
+# them once pubspec says CodeWalk 2.
 web:
+	@python3 tool/release/guard_legacy_build.py pubspec.yaml
 	flutter build web --release --base-href "$(WEB_BASE_HREF)" $(QUIET)
 	@test -f build/web/index.html || (echo "Missing build/web/index.html after web build"; exit 1)
 	@test -f build/web/flutter_bootstrap.js || (echo "Missing build/web/flutter_bootstrap.js after web build"; exit 1)
 	@echo "Web build ready: build/web/ (base href: $(WEB_BASE_HREF))"
 
 desktop:
+	@python3 tool/release/guard_legacy_build.py pubspec.yaml
 	@set -e; \
 	$(READ_PUBSPEC_VERSION_SH) \
 	if [ "$$OS" = "Windows_NT" ]; then \
@@ -382,6 +390,7 @@ desktop:
 	fi
 
 android:
+	@python3 tool/release/guard_legacy_build.py pubspec.yaml
 	@if [ ! -f "$(ANDROID_KEY_PROPERTIES)" ]; then \
 		echo "Missing $(ANDROID_KEY_PROPERTIES). Refusing to build a debug-signed release APK."; \
 		echo "Create $(ANDROID_KEY_PROPERTIES) with keyAlias/keyPassword/storePassword/storeFile before running make android."; \
@@ -465,40 +474,13 @@ android:
 
 precommit: check icons-check android
 
+# main cuts only v2 betas; stable, patch and v1 releases come from the v1 branch.
 release:
-	@set -e; \
-	if [ -z "$(V)" ]; then echo "Usage: make release V=patch|minor|major"; exit 1; fi; \
-	if [ -n "$$(git status --porcelain)" ]; then \
-		echo "Worktree has pending changes. Commit or resolve them before release."; \
+	@if [ "$(V)" != "beta" ]; then \
+		echo "main releases only v2 betas: make release V=beta [DRY_RUN=1]. Cut stable, patch and v1 releases on the v1 branch."; \
 		exit 1; \
-	fi; \
-	cur_ver=$$(awk '/^version:[[:space:]]*/{sub(/^version:[[:space:]]*/, "", $$0); sub(/\r$$/, "", $$0); split($$0, parts, "+"); print parts[1]; exit}' pubspec.yaml); \
-	cur_build=$$(awk '/^version:[[:space:]]*/{sub(/^version:[[:space:]]*/, "", $$0); sub(/\r$$/, "", $$0); split($$0, parts, "+"); if (parts[2] != "") print parts[2]; exit}' pubspec.yaml); \
-	if [ -z "$$cur_ver" ] || [ -z "$$cur_build" ]; then echo "Unable to parse version from pubspec.yaml (expected name+build)."; exit 1; fi; \
-	major=$$(printf '%s' "$$cur_ver" | cut -d. -f1); \
-	minor=$$(printf '%s' "$$cur_ver" | cut -d. -f2); \
-	patch=$$(printf '%s' "$$cur_ver" | cut -d. -f3); \
-	$(call NEXT_BUILD_CODE_SH,$$cur_build) \
-	new_build="$$next_build_code"; \
-	case "$(V)" in \
-		major) new_ver="$$((major + 1)).0.0" ;; \
-		minor) new_ver="$$major.$$((minor + 1)).0" ;; \
-		patch) new_ver="$$major.$$minor.$$((patch + 1))" ;; \
-		*) echo "V must be patch, minor, or major"; exit 1 ;; \
-	esac; \
-	echo "$$cur_ver+$$cur_build -> $$new_ver+$$new_build"; \
-	announce="$${ANNOUNCE:-}"; \
-	if [ -z "$$announce" ] && [ -t 0 ]; then \
-		printf 'Release announcement (optional, Enter to skip): '; \
-		read -r announce || announce=""; \
-	fi; \
-	python3 tool/release/changelog.py update "$$new_ver" --announce "$$announce"; \
-	sed -i "s/^version: .*/version: $$new_ver+$$new_build/" pubspec.yaml; \
-	git add pubspec.yaml CHANGELOG.md; \
-	git commit -m "release: cut v$$new_ver"; \
-	git tag -a "v$$new_ver" -m "v$$new_ver"; \
-	git push --follow-tags; \
-	echo "Released v$$new_ver — CI and Release workflows triggered."
+	fi
+	python3 tool/release/cut_beta.py $(if $(filter 1,$(DRY_RUN)),--dry-run,)
 
 clean:
 	flutter clean

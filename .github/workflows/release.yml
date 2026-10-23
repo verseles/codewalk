@@ -1,200 +1,185 @@
 name: Release
 
+# main publishes only v2 betas (v2.0.0-beta.N): Android arm64 and Linux
+# x64/ARM64 built from lib/main_v2.dart, as a prerelease that is never latest
+# and never overwritten. tool/release/release_plan.py refuses every other ref
+# before anything is built. A manual dispatch from main is a dry run: it
+# builds and verifies the same artifacts for an explicit beta version and
+# keeps them as workflow artifacts, publishing nothing.
 on:
   push:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      dry_run_version:
+        description: "Dry run from main: the 2.0.0-beta.N version to build and verify (nothing is published)"
+        required: false
+        default: ""
 
+permissions:
+  contents: read
+
+# One publication at a time across refs, so two never race; dry runs queue
+# separately and never hold up a publication.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: codewalk-v2-release-${{ github.event_name == 'workflow_dispatch' && github.ref_type == 'branch' && 'dry-run' || 'publish' }}
   cancel-in-progress: false
 
 env:
   FLUTTER_VERSION: "3.44.1"
+  # The commit of the FLUTTER_VERSION tag; a moved tag fails the SDK check.
+  FLUTTER_REVISION: "924134a44c189315be2148659913dda1671cbe99"
 
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+      version: ${{ steps.plan.outputs.version }}
+      build_number: ${{ steps.plan.outputs.build_number }}
+      apk_version_code: ${{ steps.plan.outputs.apk_version_code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Test the release tooling
+        run: python3 -m unittest discover -s tool/release -p 'test_*.py'
+
+      - name: Decide what this ref may build and publish
+        id: plan
+        env:
+          DRY_RUN_VERSION: ${{ inputs.dry_run_version }}
+        run: |
+          python3 tool/release/release_plan.py "$GITHUB_EVENT_NAME" "$GITHUB_REF_TYPE" "$GITHUB_REF_NAME" pubspec.yaml ${DRY_RUN_VERSION:+"$DRY_RUN_VERSION"} >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - name: Require the tag at this commit and no existing release
+        if: steps.plan.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash tool/release/require_tag_at_commit.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "$GITHUB_SHA"
+          bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
+
+      - name: Require a versionCode above every published APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/release/build_codes.py check "$GITHUB_REPOSITORY" "${{ steps.plan.outputs.apk_version_code }}"
+
   build-linux:
-    name: Build Linux (${{ matrix.arch_tag }})
+    name: Build Linux (${{ matrix.arch }})
+    needs: plan
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    # The ARM64 leg bootstraps Flutter from its tag without a cache.
+    timeout-minutes: 60
     strategy:
       fail-fast: true
       matrix:
         include:
-          - runner: ubuntu-latest
-            arch_tag: x64
-            flutter_arch: x64
-            bundle_dir: build/linux/x64/release/bundle
-            asset_name: codewalk-linux-x64.tar.gz
+          - arch: x64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Flutter
+        if: matrix.arch == 'x64'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          architecture: ${{ matrix.flutter_arch }}
           cache: true
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - name: Setup Flutter from its tag (no published Linux ARM64 archive)
+        if: matrix.arch == 'arm64'
+        run: |
+          test "$(uname -m)" = aarch64
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+          "$RUNNER_TEMP/flutter/bin/flutter" precache --linux
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Verify the pinned Flutter SDK
+        run: |
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
+
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.25"
 
       - name: Install Linux dependencies
         run: |
-          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
-            if [ -f "$source" ]; then
-              sudo sed -i \
-                -e 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
-                -e 's|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
-                "$source"
-            fi
-          done
           sudo apt-get -o Acquire::Retries=3 update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
 
-      - name: Install dependencies
-        run: flutter pub get
+      - run: flutter pub get
 
-      - name: Build Linux
-        run: flutter build linux --release
+      - name: Build the v2 Linux release
+        run: >-
+          flutter build linux --release --no-pub --target lib/main_v2.dart
+          --build-name "${{ needs.plan.outputs.version }}"
+          --build-number "${{ needs.plan.outputs.build_number }}"
 
       - name: Package Linux artifact
-        run: tar -czf "${{ matrix.asset_name }}" -C "${{ matrix.bundle_dir }}" .
+        run: tar -czf "codewalk-linux-${{ matrix.arch }}.tar.gz" -C "build/linux/${{ matrix.arch }}/release/bundle" .
 
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: codewalk-linux-${{ matrix.arch_tag }}
-          path: ${{ matrix.asset_name }}
-          retention-days: 2
-
-  build-windows:
-    name: Build Windows (${{ matrix.arch_tag }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 35
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - runner: windows-latest
-            arch_tag: x64
-            flutter_arch: x64
-            build_dir: build/windows/x64/runner/Release
-            asset_name: codewalk-windows-x64.zip
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          architecture: ${{ matrix.flutter_arch }}
-          cache: false
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.25"
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Windows
-        run: flutter build windows --release
-
-      - name: Package Windows artifact
-        shell: pwsh
-        run: Compress-Archive -Path "${{ matrix.build_dir }}/*" -DestinationPath "${{ matrix.asset_name }}"
-
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codewalk-windows-${{ matrix.arch_tag }}
-          path: ${{ matrix.asset_name }}
-          retention-days: 2
-
-  build-macos:
-    name: Build macOS (${{ matrix.arch_tag }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 35
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - runner: macos-15
-            arch_tag: arm64
-            flutter_arch: arm64
-            asset_name: codewalk-macos-arm64.tar.gz
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          architecture: ${{ matrix.flutter_arch }}
-          cache: true
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.25"
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build macOS
-        # CocoaPods path: Flutter 3.44 uses SPM by default, but
-        # speech_to_text 7.3.0 declares macOS 10.14 in its SPM manifest while
-        # using 10.15+ APIs (its podspec targets 11.0 and builds fine).
-        env:
-          FLUTTER_SWIFT_PACKAGE_MANAGER: "false"
-        run: MACOSX_DEPLOYMENT_TARGET=11.0 flutter build macos --release
-
-      - name: Package macOS artifact
-        run: tar -czf "${{ matrix.asset_name }}" -C build/macos/Build/Products/Release codewalk.app
-
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codewalk-macos-${{ matrix.arch_tag }}
-          path: ${{ matrix.asset_name }}
+          name: codewalk-linux-${{ matrix.arch }}
+          path: codewalk-linux-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
           retention-days: 2
 
   build-android:
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: gradle
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - name: Verify the pinned Flutter SDK
+        run: |
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
+
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.25"
+
+      - name: Install project-pinned Android NDK
+        run: bash tool/ci/install_android_ndk.sh
 
       - name: Setup Android signing
         env:
@@ -215,62 +200,93 @@ jobs:
             echo "storeFile=upload-keystore.jks"
           } > android/key.properties
 
-      - name: Install dependencies
-        run: flutter pub get
+      - run: flutter pub get
 
-      - name: Build APK (arm64 split)
-        run: flutter build apk --release --target-platform android-arm64 --split-per-abi
+      - name: Build the v2 Android release (arm64 split)
+        run: >-
+          flutter build apk --release --no-pub --target lib/main_v2.dart
+          --target-platform android-arm64 --split-per-abi
+          --build-name "${{ needs.plan.outputs.version }}"
+          --build-number "${{ needs.plan.outputs.build_number }}"
 
       - name: Rename APK
-        run: |
-          if [ -f build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ]; then
-            mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk codewalk-android-arm64.apk
-          elif [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
-            mv build/app/outputs/flutter-apk/app-release.apk codewalk-android-arm64.apk
-          else
-            echo "Expected Android APK output was not found."
-            ls -la build/app/outputs/flutter-apk || true
-            exit 1
-          fi
+        run: mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk codewalk-android-arm64.apk
 
-      - name: Upload Android artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: codewalk-android
           path: codewalk-android-arm64.apk
+          if-no-files-found: error
           retention-days: 2
 
-  create-release:
-    runs-on: ubuntu-latest
-    needs: [build-linux, build-windows, build-macos, build-android]
-    permissions:
-      contents: write
+  verify:
+    needs: [plan, build-linux, build-android]
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
-      - name: List artifacts
-        run: find artifacts/ -type f
+      - name: Verify the v2 artifacts and write the manifest
+        run: >-
+          python3 tool/release/verify_v2_artifacts.py
+          --tag "v${{ needs.plan.outputs.version }}"
+          --version "${{ needs.plan.outputs.version }}"
+          --apk-version-code "${{ needs.plan.outputs.apk_version_code }}"
+          --commit "$GITHUB_SHA"
+          --apk artifacts/codewalk-android/codewalk-android-arm64.apk
+          --linux-x64 artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
+          --linux-arm64 artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
+          --out candidate/
 
-      - name: Prepare release notes
+      - name: Keep the verified candidate
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          python3 tool/release/changelog.py extract "$version" --output release-notes.md
+          cp artifacts/codewalk-android/codewalk-android-arm64.apk \
+            artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz \
+            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz candidate/
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         with:
-          files: |
-            artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
-            artifacts/codewalk-windows-x64/codewalk-windows-x64.zip
-            artifacts/codewalk-macos-arm64/codewalk-macos-arm64.tar.gz
-            artifacts/codewalk-android/codewalk-android-arm64.apk
-          body_path: release-notes.md
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+          name: codewalk-v2-release-candidate-${{ github.run_id }}
+          path: candidate/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [plan, verify]
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: codewalk-v2-release-candidate-${{ github.run_id }}
+          path: candidate/
+
+      # Rechecked right before the create-only call.
+      - name: Require the tag at this commit and no existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash tool/release/require_tag_at_commit.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "$GITHUB_SHA"
+          bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
+
+      - name: Create the v2 beta prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          bash tool/release/create_v2_beta_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
+          candidate/codewalk-android-arm64.apk
+          candidate/codewalk-linux-x64.tar.gz
+          candidate/codewalk-linux-arm64.tar.gz
+          candidate/release-manifest.json
+          candidate/SHA256SUMS

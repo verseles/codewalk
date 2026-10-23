@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "through_published_at": "2026-10-23T15:21:00Z",
+    "max_version_code": 1792744369,
+    "release": "v1.266.0-native.1",
+    "evidence": "codewalk-android-arm64.apk of release v1.266.0-native.1 (v1 2db66940, release run 39974616577): versionCode 1792744369, the highest of every release published through this instant (#359)"
+  },
+  "production_signer": {
+    "sha256": "7361852522a3c5baf7eefef3285cf3aa90b6431604f52ee66e92da46b4f846c9",
+    "evidence": "APK Signature Scheme v2 certificate of codewalk-android-arm64.apk in releases v1.265.1 and v1.266.0-native.1 (identical); every update of com.verseles.codewalk must keep it"
+  }
+}

@@ -17,6 +17,9 @@ on:
       - "test/widget/session_attention_overlay_test.dart"
       - "tool/ci/run_session_overlay_instrumentation.sh"
 
+permissions:
+  contents: read
+
 env:
   FLUTTER_VERSION: "3.44.1"
 

@@ -177,12 +177,19 @@ make test-fast  # excludes slow/integration; includes ChatPage smoke scenarios
 make test-chat  # ChatPage smoke + extended scenarios
 make test-web   # browser capability tests; requires Chrome/Chromium
 make test-coverage-tools # LCOV validation and threshold regression fixtures
+make test-release-tools  # v2 beta release plan, publication guards and tooling
 make coverage   # full tests with coverage + global and protected-file floors
-make web        # build Flutter web app into build/web
-make android    # build arm64 APK
-make release V=patch # bump pubspec, update CHANGELOG.md, commit, tag, push
-#   ANNOUNCE="text" embeds an optional What's-new announcement (or answer the prompt)
+make web        # build the legacy Flutter web app into build/web (CodeWalk 1 versions only)
+make android    # build the legacy arm64 APK (CodeWalk 1 versions only)
+make release V=beta # main: cut the next v2.0.0-beta.N (DRY_RUN=1 prints the plan only)
 ```
+
+On `main`, the Release workflow publishes only `v2.0.0-beta.N` tags: Android arm64
+and Linux x64/ARM64 built from `lib/main_v2.dart`, verified (v2 entry library,
+production signer, versionCode above every published APK, digests) and published
+as a prerelease that is never latest. A manual dispatch from `main` with a
+`dry_run_version` builds and verifies the same artifacts without publishing.
+Stable, patch and CodeWalk 1 releases are cut on the `v1` branch.
 
 Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host. `make test-fast` retains the five ChatPage smoke scenarios while the extended suite remains required in full checks. Browser tests run separately via `make test-web` and in CI; set `CHROME_EXECUTABLE` if the browser is not discovered automatically.
 

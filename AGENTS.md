@@ -90,7 +90,7 @@ In CodeWalk, `flow` is the release workflow. Execution of `v2-plan.md` and its o
     
 ## Release
 
-- New versions use `make release V=patch|minor|major`.
+- New versions use `make release V=patch|minor|major` on `v1`. On `main`, `make release` accepts only `V=beta` (next `v2.0.0-beta.N`; `DRY_RUN=1` previews) and betas never write `CHANGELOG.md`, because installed v1 apps parse main's changelog with stable headings only.
 - The release command updates `pubspec.yaml` and `CHANGELOG.md`, commits, creates a `vX.Y.Z` tag, and pushes.
 - Optional release announcement: `ANNOUNCE="text" make release V=minor`, or answer the one-line TTY prompt (empty skips; never blocks CI).
 - The announcement ships as a `> 📣` block at the top of the version section and surfaces in-app as What's-new.

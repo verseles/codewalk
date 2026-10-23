@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -15,9 +18,11 @@ env:
 
 jobs:
   deploy-web:
-    # Pushes to main skip the preview deploy; run the workflow manually to
-    # publish a specific main revision to main.codewalk.pages.dev.
-    if: github.ref != 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # Pushes to main skip the preview deploy; run the workflow manually from
+    # main to publish a main revision to main.codewalk.pages.dev. The deploy
+    # builds the legacy lib/main.dart, so the guard below refuses any other
+    # ref and any CodeWalk 2 version (V1-04 precedes a v2 Web deploy).
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -26,6 +31,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Refuse a v2-labelled legacy build
+        run: python3 tool/release/guard_legacy_build.py pubspec.yaml --web-ref "$GITHUB_REF"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2

@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 env:
   FLUTTER_VERSION: "3.44.1"
 
@@ -58,6 +61,9 @@ jobs:
 
       - name: Verify coverage gate fixtures
         run: python3 -m unittest discover -s tool/ci -p test_check_coverage.py
+
+      - name: Verify the release plan, publication guards and tooling
+        run: python3 -m unittest discover -s tool/release -p 'test_*.py'
 
       - name: Test browser capabilities
         run: flutter test --no-pub --platform chrome test/web
