@@ -12,6 +12,9 @@ path prefix. Relative routes cannot change its origin or escape its prefix,
 including encoded traversal through separators or nested percent encoding.
 Requests never follow redirects or automatically retry. HTTP statuses and bodies
 are preserved for the harness adapter, and errors omit credentials/native causes.
+Bodies are raw entity bytes, so requests ask for `Accept-Encoding: identity`
+(dart:io would otherwise offer gzip, which OpenCode honours above about 1 KB);
+callers must not set another `accept-encoding`.
 
 `basicEndpointHeaders` and `bearerEndpointHeaders` bind credential lookup to the
 validated endpoint; `composeEndpointHeaders` merges providers case-insensitively.

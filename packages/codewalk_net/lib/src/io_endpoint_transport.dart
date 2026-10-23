@@ -118,6 +118,10 @@ final class _Operation {
       }
       _request = request;
       request.followRedirects = false;
+      // Bodies are raw entity bytes, so ask for an uncompressed one:
+      // HttpClient otherwise advertises gzip, which servers honour above a
+      // size threshold. A caller header may still override it.
+      request.headers.set(io.HttpHeaders.acceptEncodingHeader, 'identity');
       for (final entry in input.headers.entries) {
         request.headers.set(entry.key, entry.value);
       }

@@ -188,12 +188,13 @@ final class NativeProbe {
       ),
     );
     try {
-      final raw = await response.readBytes(maxBytes: 4 * 1024 * 1024);
-      // Large native bodies arrive gzipped; the transport hands over raw
-      // bytes, so detect the gzip magic instead of trusting headers.
-      final bytes = raw.length >= 2 && raw[0] == 0x1f && raw[1] == 0x8b
-          ? GZipCodec().decode(raw)
-          : raw;
+      final bytes = await response.readBytes(maxBytes: 4 * 1024 * 1024);
+      // The transport asks for uncompressed bodies; a compressed one is the
+      // regression the app's readers fail on, so it fails here too.
+      if (response.header('content-encoding') != null ||
+          (bytes.length >= 2 && bytes[0] == 0x1f && bytes[1] == 0x8b)) {
+        throw StateError('$method $path answered a compressed body');
+      }
       // 204 No Content (model/agent select, deletes) carries no body.
       final text = utf8.decode(bytes);
       return {

@@ -287,6 +287,26 @@ void main() {
     expect(await response.readBytes(), encoded);
   });
 
+  test('requests an uncompressed entity by default', () async {
+    // Like the OpenCode server: compresses whenever the client accepts gzip.
+    final server = await serve((request) async {
+      final accepted =
+          request.headers.value(HttpHeaders.acceptEncodingHeader) ?? '';
+      if (accepted.contains('gzip')) {
+        request.response.headers.set('content-encoding', 'gzip');
+        request.response.add(gzip.encode(utf8.encode('{"data":[]}')));
+      } else {
+        request.response.write('{"data":[]}');
+      }
+      await request.response.close();
+    });
+    final response = await client(
+      endpoint(server),
+    ).send(TransportRequest(method: 'GET', path: 'page'));
+    expect(response.header('content-encoding'), isNull);
+    expect(utf8.decode(await response.readBytes()), '{"data":[]}');
+  });
+
   test(
     'body limit rejects bytes before retaining the oversized chunk',
     () async {
