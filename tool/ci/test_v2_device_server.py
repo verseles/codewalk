@@ -196,7 +196,7 @@ class RelayTests(unittest.TestCase):
         record = json.loads(self._records(1).splitlines()[-1])
         self.assertEqual((record["kind"], record["status"]), ("request", 204))
 
-    def test_an_open_relay_authenticates_a_client_without_a_password(self):
+    def test_an_open_relay_authenticates_any_client(self):
         self.owner.open_relay = True
         self.owner.password = "pw"
         connection = http.client.HTTPConnection("127.0.0.1", self.relay.server_address[1], timeout=10)
@@ -206,9 +206,9 @@ class RelayTests(unittest.TestCase):
         finally:
             connection.close()
         self.assertEqual(body["auth"], "Basic b3BlbmNvZGU6cHc=")
-        # A client that sends its own credentials keeps them.
+        # Whatever password a client sends, the server gets the real one.
         status, body = self._get("/api/session/ses_abc123/message")
-        self.assertEqual(json.loads(body)["auth"], "Basic c2VjcmV0LXZhbHVl")
+        self.assertEqual(json.loads(body)["auth"], "Basic b3BlbmNvZGU6cHc=")
 
     def test_a_stopped_server_answers_502(self):
         self.upstream.shutdown()

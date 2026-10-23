@@ -369,7 +369,9 @@ class RelayHandler(BaseHTTPRequestHandler):
         client = log.alias(self.client_address[0])
         body = read_body(self)
         headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
-        if getattr(device, "open_relay", False) and not any(k.lower() == "authorization" for k in headers):
+        if getattr(device, "open_relay", False):
+            # Any password a device sends is replaced by the real one.
+            headers = {k: v for k, v in headers.items() if k.lower() != "authorization"}
             token = base64.b64encode(f"opencode:{device.password}".encode()).decode()
             headers["Authorization"] = f"Basic {token}"
         templated = route(self.path)
@@ -964,7 +966,7 @@ def main(argv: list[str]) -> int:
     p_serve.add_argument(
         "--open",
         action="store_true",
-        help="the relay authenticates clients that send no password (private network only)",
+        help="the relay authenticates every client, whatever password it sends (private network only)",
     )
     p_serve.add_argument("--adb-serial", default=None, help="enable emulator host actions")
     p_serve.add_argument("--app-package", default="com.verseles.codewalk")
