@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Ouvrir les serveurs",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Vérifier les mises à jour",
+  "settingsAboutUpdateAvailable": "Mise à jour disponible : v{version}",
+  "settingsGroupVersionUpdates": "Version et mises à jour",
+  "updatesDescription": "Rechercher de nouvelles versions de CodeWalk",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Canal de mise à jour",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Stable",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Bêta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Les versions bêta sont des préversions et peuvent présenter des problèmes.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Version installée",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk est à jour.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Impossible de rechercher des mises à jour. Vérifiez votre connexion et réessayez.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Télécharger",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Exécutez cette commande pour installer exactement cette version :",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Copier la commande",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Commande copiée",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Les mises à jour ne sont pas encore disponibles sur cette plateforme.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

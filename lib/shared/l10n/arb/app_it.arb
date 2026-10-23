@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Apri i server",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Controlla aggiornamenti",
+  "settingsAboutUpdateAvailable": "Aggiornamento disponibile: v{version}",
+  "settingsGroupVersionUpdates": "Versione e aggiornamenti",
+  "updatesDescription": "Cerca nuove versioni di CodeWalk",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Canale di aggiornamento",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Stabile",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Beta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Le versioni beta sono anteprime e possono avere problemi.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Versione installata",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk è aggiornato.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Impossibile cercare aggiornamenti. Controlla la connessione e riprova.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Scarica",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Esegui questo comando per installare esattamente questa versione:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Copia comando",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Comando copiato",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Gli aggiornamenti su questa piattaforma non sono ancora disponibili.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

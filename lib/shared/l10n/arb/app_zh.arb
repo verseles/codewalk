@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "打开服务器",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "检查更新",
+  "settingsAboutUpdateAvailable": "有可用更新: v{version}",
+  "settingsGroupVersionUpdates": "版本与更新",
+  "updatesDescription": "检查 CodeWalk 新版本",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "更新渠道",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "稳定版",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "测试版",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "测试版是预览版本，可能存在问题。",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "已安装的版本",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk 已是最新版本。",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "无法检查更新。请检查网络连接后重试。",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "下载",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "运行此命令以安装此确切版本：",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "复制命令",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "命令已复制",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "此平台暂不支持更新。",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

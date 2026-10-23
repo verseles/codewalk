@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Открыть серверы",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Проверить обновления",
+  "settingsAboutUpdateAvailable": "Доступно обновление: v{version}",
+  "settingsGroupVersionUpdates": "Версия и обновления",
+  "updatesDescription": "Проверить новые версии CodeWalk",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Канал обновлений",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Стабильный",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Бета",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Бета-версии — предварительные и могут работать с ошибками.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Установленная версия",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk обновлён.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Не удалось проверить обновления. Проверьте подключение и повторите попытку.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Скачать",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Выполните эту команду, чтобы установить именно эту версию:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Скопировать команду",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Команда скопирована",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Обновления на этой платформе пока недоступны.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

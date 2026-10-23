@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "サーバーを開く",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "アップデートを確認",
+  "settingsAboutUpdateAvailable": "アップデートが利用可能です: v{version}",
+  "settingsGroupVersionUpdates": "バージョンと更新",
+  "updatesDescription": "CodeWalk の新しいバージョンを確認",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "アップデートチャンネル",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "安定版",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "ベータ版",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "ベータ版はプレビューであり、問題が発生する場合があります。",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "インストール済みのバージョン",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk は最新です。",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "アップデートを確認できませんでした。接続を確認して、もう一度お試しください。",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "ダウンロード",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "このバージョンを正確にインストールするには、次のコマンドを実行してください:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "コマンドをコピー",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "コマンドをコピーしました",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "このプラットフォームのアップデートはまだ利用できません。",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

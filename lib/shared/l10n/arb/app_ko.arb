@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "서버 열기",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "업데이트 확인",
+  "settingsAboutUpdateAvailable": "업데이트 가능: v{version}",
+  "settingsGroupVersionUpdates": "버전 및 업데이트",
+  "updatesDescription": "CodeWalk 새 버전 확인",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "업데이트 채널",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "안정",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "베타",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "베타 버전은 미리보기이며 문제가 있을 수 있습니다.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "설치된 버전",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk가 최신 상태입니다.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "업데이트를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "다운로드",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "이 버전을 정확히 설치하려면 다음 명령을 실행하세요:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "명령 복사",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "명령을 복사했습니다",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "이 플랫폼에서는 아직 업데이트를 사용할 수 없습니다.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

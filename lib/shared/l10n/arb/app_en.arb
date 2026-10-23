@@ -1860,5 +1860,74 @@
   "liveErrorOpenServers": "Open servers",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Check for updates",
+  "@settingsAboutCheckForUpdates": {
+    "description": "CodeWalk UI string — settingsAboutCheckForUpdates"
+  },
+  "settingsAboutUpdateAvailable": "Update available: v{version}",
+  "@settingsAboutUpdateAvailable": {
+    "description": "CodeWalk UI string — settingsAboutUpdateAvailable",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsGroupVersionUpdates": "Version and updates",
+  "@settingsGroupVersionUpdates": {
+    "description": "CodeWalk UI string — settingsGroupVersionUpdates"
+  },
+  "updatesDescription": "Check for new CodeWalk versions",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Update channel",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Stable",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Beta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Beta versions are previews and may have problems.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Installed version",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk is up to date.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Unable to check for updates. Check your connection and try again.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Download",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Run this command to install this exact version:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Copy command",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Command copied",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Updates on this platform are not available yet.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

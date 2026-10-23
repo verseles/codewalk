@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "সার্ভার খুলুন",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "আপডেটের জন্য চেক করুন",
+  "settingsAboutUpdateAvailable": "আপডেট উপলব্ধ: v{version}",
+  "settingsGroupVersionUpdates": "সংস্করণ এবং আপডেট",
+  "updatesDescription": "CodeWalk-এর নতুন সংস্করণ খুঁজুন",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "আপডেট চ্যানেল",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "স্থিতিশীল",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "বিটা",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "বিটা সংস্করণগুলো প্রিভিউ এবং এতে সমস্যা থাকতে পারে।",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "ইনস্টল করা সংস্করণ",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk হালনাগাদ আছে।",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "আপডেট পরীক্ষা করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "ডাউনলোড",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "ঠিক এই সংস্করণটি ইনস্টল করতে এই কমান্ডটি চালান:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "কমান্ড কপি করুন",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "কমান্ড কপি হয়েছে",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "এই প্ল্যাটফর্মে আপডেট এখনও উপলব্ধ নয়।",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

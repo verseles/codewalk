@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Server öffnen",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Nach Updates suchen",
+  "settingsAboutUpdateAvailable": "Update verfügbar: v{version}",
+  "settingsGroupVersionUpdates": "Version und Updates",
+  "updatesDescription": "Nach neuen CodeWalk-Versionen suchen",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Update-Kanal",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Stabil",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Beta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Beta-Versionen sind Vorabversionen und können Probleme haben.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Installierte Version",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk ist auf dem neuesten Stand.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Updates konnten nicht geprüft werden. Prüfe die Verbindung und versuche es erneut.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Herunterladen",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Führe diesen Befehl aus, um genau diese Version zu installieren:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Befehl kopieren",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Befehl kopiert",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Updates sind auf dieser Plattform noch nicht verfügbar.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

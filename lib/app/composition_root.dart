@@ -2,12 +2,14 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
+import '../features/settings/update_check_controller.dart';
 import '../platform/connectivity/network_changes.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
@@ -51,6 +53,8 @@ AppDependencies createAppDependencies({
   QrInput? qrInput,
   DiagnosticsController? diagnostics,
   ReleaseSource? releaseSource,
+  ReleaseSource? updateSource,
+  Future<String> Function()? installedVersion,
   DateTime Function()? releaseClock,
   SessionCatalogFactory? sessionCatalogFactory,
   SessionHistoryFactory? sessionHistoryFactory,
@@ -194,6 +198,14 @@ AppDependencies createAppDependencies({
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),
+    updates: UpdateCheckController(
+      source: updateSource ?? createUpdateSource(),
+      store: metadata,
+      installedVersion:
+          installedVersion ??
+          () async => (await PackageInfo.fromPlatform()).version,
+      target: currentUpdateTarget(),
+    ),
   );
 }
 

@@ -1413,4 +1413,54 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => '打开服务器';
+
+  @override
+  String get settingsAboutCheckForUpdates => '检查更新';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return '有可用更新: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => '版本与更新';
+
+  @override
+  String get updatesDescription => '检查 CodeWalk 新版本';
+
+  @override
+  String get updatesChannel => '更新渠道';
+
+  @override
+  String get updatesChannelStable => '稳定版';
+
+  @override
+  String get updatesChannelBeta => '测试版';
+
+  @override
+  String get updatesBetaHint => '测试版是预览版本，可能存在问题。';
+
+  @override
+  String get updatesInstalledVersion => '已安装的版本';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk 已是最新版本。';
+
+  @override
+  String get updatesCheckFailed => '无法检查更新。请检查网络连接后重试。';
+
+  @override
+  String get updatesDownload => '下载';
+
+  @override
+  String get updatesLinuxInstallHint => '运行此命令以安装此确切版本：';
+
+  @override
+  String get updatesCopyCommand => '复制命令';
+
+  @override
+  String get updatesCommandCopied => '命令已复制';
+
+  @override
+  String get updatesUnsupported => '此平台暂不支持更新。';
 }

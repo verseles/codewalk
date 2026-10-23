@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "سرور کھولیں",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "اپ ڈیٹس کے لیے چیک کریں۔",
+  "settingsAboutUpdateAvailable": "اپ ڈیٹ دستیاب ہے: v {version}",
+  "settingsGroupVersionUpdates": "ورژن اور اپ ڈیٹس",
+  "updatesDescription": "CodeWalk کے نئے ورژن چیک کریں",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "اپڈیٹ چینل",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "مستحکم",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "بیٹا",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "بیٹا ورژن پیش نظارہ ہیں اور ان میں مسائل ہو سکتے ہیں۔",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "انسٹال شدہ ورژن",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk تازہ ترین ہے۔",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "اپڈیٹس چیک نہیں ہو سکیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "ڈاؤن لوڈ کریں",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "بالکل یہی ورژن انسٹال کرنے کے لیے یہ کمانڈ چلائیں:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "کمانڈ کاپی کریں",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "کمانڈ کاپی ہو گئی",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "اس پلیٹ فارم پر اپڈیٹس ابھی دستیاب نہیں ہیں۔",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

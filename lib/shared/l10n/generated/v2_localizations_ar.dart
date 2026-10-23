@@ -1499,4 +1499,57 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => 'افتح الخوادم';
+
+  @override
+  String get settingsAboutCheckForUpdates => 'التحقق من وجود تحديثات';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return 'تحديث متوفر: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => 'الإصدار والتحديثات';
+
+  @override
+  String get updatesDescription => 'التحقق من إصدارات CodeWalk الجديدة';
+
+  @override
+  String get updatesChannel => 'قناة التحديث';
+
+  @override
+  String get updatesChannelStable => 'مستقر';
+
+  @override
+  String get updatesChannelBeta => 'تجريبي';
+
+  @override
+  String get updatesBetaHint =>
+      'الإصدارات التجريبية معاينات وقد تحتوي على مشكلات.';
+
+  @override
+  String get updatesInstalledVersion => 'الإصدار المثبّت';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk محدّث.';
+
+  @override
+  String get updatesCheckFailed =>
+      'تعذّر التحقق من التحديثات. تحقّق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get updatesDownload => 'تنزيل';
+
+  @override
+  String get updatesLinuxInstallHint =>
+      'شغّل هذا الأمر لتثبيت هذا الإصدار تحديدًا:';
+
+  @override
+  String get updatesCopyCommand => 'نسخ الأمر';
+
+  @override
+  String get updatesCommandCopied => 'تم نسخ الأمر';
+
+  @override
+  String get updatesUnsupported => 'التحديثات على هذه المنصة غير متاحة بعد.';
 }

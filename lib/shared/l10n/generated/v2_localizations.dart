@@ -2864,6 +2864,102 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Open servers'**
   String get liveErrorOpenServers;
+
+  /// CodeWalk UI string — settingsAboutCheckForUpdates
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get settingsAboutCheckForUpdates;
+
+  /// CodeWalk UI string — settingsAboutUpdateAvailable
+  ///
+  /// In en, this message translates to:
+  /// **'Update available: v{version}'**
+  String settingsAboutUpdateAvailable(String version);
+
+  /// CodeWalk UI string — settingsGroupVersionUpdates
+  ///
+  /// In en, this message translates to:
+  /// **'Version and updates'**
+  String get settingsGroupVersionUpdates;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Check for new CodeWalk versions'**
+  String get updatesDescription;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Update channel'**
+  String get updatesChannel;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get updatesChannelStable;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Beta'**
+  String get updatesChannelBeta;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Beta versions are previews and may have problems.'**
+  String get updatesBetaHint;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Installed version'**
+  String get updatesInstalledVersion;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk is up to date.'**
+  String get updatesUpToDate;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to check for updates. Check your connection and try again.'**
+  String get updatesCheckFailed;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get updatesDownload;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Run this command to install this exact version:'**
+  String get updatesLinuxInstallHint;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Copy command'**
+  String get updatesCopyCommand;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Command copied'**
+  String get updatesCommandCopied;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Updates on this platform are not available yet.'**
+  String get updatesUnsupported;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

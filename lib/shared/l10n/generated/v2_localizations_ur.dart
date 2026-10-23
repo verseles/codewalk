@@ -1512,4 +1512,58 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => 'سرور کھولیں';
+
+  @override
+  String get settingsAboutCheckForUpdates => 'اپ ڈیٹس کے لیے چیک کریں۔';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return 'اپ ڈیٹ دستیاب ہے: v $version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => 'ورژن اور اپ ڈیٹس';
+
+  @override
+  String get updatesDescription => 'CodeWalk کے نئے ورژن چیک کریں';
+
+  @override
+  String get updatesChannel => 'اپڈیٹ چینل';
+
+  @override
+  String get updatesChannelStable => 'مستحکم';
+
+  @override
+  String get updatesChannelBeta => 'بیٹا';
+
+  @override
+  String get updatesBetaHint =>
+      'بیٹا ورژن پیش نظارہ ہیں اور ان میں مسائل ہو سکتے ہیں۔';
+
+  @override
+  String get updatesInstalledVersion => 'انسٹال شدہ ورژن';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk تازہ ترین ہے۔';
+
+  @override
+  String get updatesCheckFailed =>
+      'اپڈیٹس چیک نہیں ہو سکیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesDownload => 'ڈاؤن لوڈ کریں';
+
+  @override
+  String get updatesLinuxInstallHint =>
+      'بالکل یہی ورژن انسٹال کرنے کے لیے یہ کمانڈ چلائیں:';
+
+  @override
+  String get updatesCopyCommand => 'کمانڈ کاپی کریں';
+
+  @override
+  String get updatesCommandCopied => 'کمانڈ کاپی ہو گئی';
+
+  @override
+  String get updatesUnsupported =>
+      'اس پلیٹ فارم پر اپڈیٹس ابھی دستیاب نہیں ہیں۔';
 }

@@ -1441,4 +1441,54 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => '서버 열기';
+
+  @override
+  String get settingsAboutCheckForUpdates => '업데이트 확인';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return '업데이트 가능: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => '버전 및 업데이트';
+
+  @override
+  String get updatesDescription => 'CodeWalk 새 버전 확인';
+
+  @override
+  String get updatesChannel => '업데이트 채널';
+
+  @override
+  String get updatesChannelStable => '안정';
+
+  @override
+  String get updatesChannelBeta => '베타';
+
+  @override
+  String get updatesBetaHint => '베타 버전은 미리보기이며 문제가 있을 수 있습니다.';
+
+  @override
+  String get updatesInstalledVersion => '설치된 버전';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk가 최신 상태입니다.';
+
+  @override
+  String get updatesCheckFailed => '업데이트를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get updatesDownload => '다운로드';
+
+  @override
+  String get updatesLinuxInstallHint => '이 버전을 정확히 설치하려면 다음 명령을 실행하세요:';
+
+  @override
+  String get updatesCopyCommand => '명령 복사';
+
+  @override
+  String get updatesCommandCopied => '명령을 복사했습니다';
+
+  @override
+  String get updatesUnsupported => '이 플랫폼에서는 아직 업데이트를 사용할 수 없습니다.';
 }

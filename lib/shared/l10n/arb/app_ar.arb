@@ -1310,5 +1310,60 @@
   "liveErrorOpenServers": "افتح الخوادم",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "التحقق من وجود تحديثات",
+  "settingsAboutUpdateAvailable": "تحديث متوفر: v{version}",
+  "settingsGroupVersionUpdates": "الإصدار والتحديثات",
+  "updatesDescription": "التحقق من إصدارات CodeWalk الجديدة",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "قناة التحديث",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "مستقر",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "تجريبي",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "الإصدارات التجريبية معاينات وقد تحتوي على مشكلات.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "الإصدار المثبّت",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk محدّث.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "تعذّر التحقق من التحديثات. تحقّق من اتصالك وحاول مرة أخرى.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "تنزيل",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "شغّل هذا الأمر لتثبيت هذا الإصدار تحديدًا:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "نسخ الأمر",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "تم نسخ الأمر",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "التحديثات على هذه المنصة غير متاحة بعد.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
+import '../features/settings/update_check_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
 import '../platform/sessions/session_draft_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
@@ -99,6 +100,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ChangeNotifierProvider<ReleaseHistoryController>.value(
             value: history,
           ),
+        if (dependencies.updates case final updates?)
+          ChangeNotifierProvider<UpdateCheckController>.value(value: updates),
         if (dependencies.pairing case final pairing?)
           ChangeNotifierProvider.value(value: pairing),
         Provider.value(value: dependencies.localizations),

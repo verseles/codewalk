@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Abrir servidores",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Buscar actualizaciones",
+  "settingsAboutUpdateAvailable": "Actualización disponible: v{version}",
+  "settingsGroupVersionUpdates": "Versión y actualizaciones",
+  "updatesDescription": "Buscar nuevas versiones de CodeWalk",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Canal de actualización",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Estable",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Beta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Las versiones beta son previas y pueden tener problemas.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Versión instalada",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "CodeWalk está actualizado.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "No se pudo buscar actualizaciones. Revisa tu conexión e inténtalo de nuevo.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Descargar",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Ejecuta este comando para instalar exactamente esta versión:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Copiar comando",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Comando copiado",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Las actualizaciones en esta plataforma aún no están disponibles.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

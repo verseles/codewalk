@@ -1,6 +1,11 @@
 import '../../shared/releases/release_source.dart';
+import '../../shared/releases/update_selector.dart';
 
 ReleaseSource createReleaseSource() => _UnsupportedSource();
+
+ReleaseSource createUpdateSource() => _UnsupportedSource();
+
+UpdateTarget? currentUpdateTarget() => null;
 
 final class _UnsupportedSource implements ReleaseSource {
   @override

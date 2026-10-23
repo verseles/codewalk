@@ -7,6 +7,7 @@ import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/settings/release_history_controller.dart';
+import '../features/settings/update_check_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
@@ -31,6 +32,7 @@ class AppDependencies {
     this.pairing,
     this.diagnostics,
     this.releaseHistory,
+    this.updates,
     this.sessions,
     this.historyFactory,
     this.liveDirectory,
@@ -73,6 +75,7 @@ class AppDependencies {
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
+  final UpdateCheckController? updates;
   NativePairingLinks? links;
   bool _disposed = false;
 
@@ -100,6 +103,7 @@ class AppDependencies {
     permissionModes?.dispose();
     hiddenSessions?.dispose();
     releaseHistory?.dispose();
+    updates?.dispose();
     diagnostics?.dispose();
   }
 }

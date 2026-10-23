@@ -1528,4 +1528,58 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => 'Открыть серверы';
+
+  @override
+  String get settingsAboutCheckForUpdates => 'Проверить обновления';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return 'Доступно обновление: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => 'Версия и обновления';
+
+  @override
+  String get updatesDescription => 'Проверить новые версии CodeWalk';
+
+  @override
+  String get updatesChannel => 'Канал обновлений';
+
+  @override
+  String get updatesChannelStable => 'Стабильный';
+
+  @override
+  String get updatesChannelBeta => 'Бета';
+
+  @override
+  String get updatesBetaHint =>
+      'Бета-версии — предварительные и могут работать с ошибками.';
+
+  @override
+  String get updatesInstalledVersion => 'Установленная версия';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk обновлён.';
+
+  @override
+  String get updatesCheckFailed =>
+      'Не удалось проверить обновления. Проверьте подключение и повторите попытку.';
+
+  @override
+  String get updatesDownload => 'Скачать';
+
+  @override
+  String get updatesLinuxInstallHint =>
+      'Выполните эту команду, чтобы установить именно эту версию:';
+
+  @override
+  String get updatesCopyCommand => 'Скопировать команду';
+
+  @override
+  String get updatesCommandCopied => 'Команда скопирована';
+
+  @override
+  String get updatesUnsupported =>
+      'Обновления на этой платформе пока недоступны.';
 }

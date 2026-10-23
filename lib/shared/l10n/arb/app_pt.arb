@@ -1311,5 +1311,60 @@
   "liveErrorOpenServers": "Abrir servidores",
   "@liveErrorOpenServers": {
     "description": "V2 typed error cards"
+  },
+  "settingsAboutCheckForUpdates": "Verificar atualizações",
+  "settingsAboutUpdateAvailable": "Atualização disponível: v{version}",
+  "settingsGroupVersionUpdates": "Versão e atualizações",
+  "updatesDescription": "Verificar novas versões do CodeWalk",
+  "@updatesDescription": {
+    "description": "V2 update check"
+  },
+  "updatesChannel": "Canal de atualização",
+  "@updatesChannel": {
+    "description": "V2 update check"
+  },
+  "updatesChannelStable": "Estável",
+  "@updatesChannelStable": {
+    "description": "V2 update check"
+  },
+  "updatesChannelBeta": "Beta",
+  "@updatesChannelBeta": {
+    "description": "V2 update check"
+  },
+  "updatesBetaHint": "Versões beta são prévias e podem ter problemas.",
+  "@updatesBetaHint": {
+    "description": "V2 update check"
+  },
+  "updatesInstalledVersion": "Versão instalada",
+  "@updatesInstalledVersion": {
+    "description": "V2 update check"
+  },
+  "updatesUpToDate": "O CodeWalk está atualizado.",
+  "@updatesUpToDate": {
+    "description": "V2 update check"
+  },
+  "updatesCheckFailed": "Não foi possível verificar atualizações. Verifique sua conexão e tente novamente.",
+  "@updatesCheckFailed": {
+    "description": "V2 update check"
+  },
+  "updatesDownload": "Baixar",
+  "@updatesDownload": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxInstallHint": "Execute este comando para instalar exatamente esta versão:",
+  "@updatesLinuxInstallHint": {
+    "description": "V2 update check"
+  },
+  "updatesCopyCommand": "Copiar comando",
+  "@updatesCopyCommand": {
+    "description": "V2 update check"
+  },
+  "updatesCommandCopied": "Comando copiado",
+  "@updatesCommandCopied": {
+    "description": "V2 update check"
+  },
+  "updatesUnsupported": "Atualizações nesta plataforma ainda não estão disponíveis.",
+  "@updatesUnsupported": {
+    "description": "V2 update check"
   }
 }

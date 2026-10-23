@@ -12,8 +12,9 @@ import 'appearance_settings_page.dart';
 import 'diagnostics_settings_page.dart';
 import 'release_history_settings_page.dart';
 import 'shortcuts_settings_page.dart';
+import 'updates_settings_page.dart';
 
-enum SettingsSection { appearance, shortcuts, logs, releaseHistory }
+enum SettingsSection { appearance, shortcuts, logs, updates, releaseHistory }
 
 class SettingsShellPage extends StatefulWidget {
   const SettingsShellPage({super.key});
@@ -111,6 +112,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       child: switch (section) {
         SettingsSection.shortcuts => const ShortcutsSettingsPage(),
         SettingsSection.logs => const DiagnosticsSettingsPage(),
+        SettingsSection.updates => const UpdatesSettingsPage(),
         SettingsSection.releaseHistory => const ReleaseHistorySettingsPage(),
         _ => const AppearanceSettingsPage(),
       },
@@ -190,6 +192,11 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       l.logsEnableLoggingDescription,
       l.settingsGroupHelp,
     );
+    final updates = matches(
+      l.settingsGroupVersionUpdates,
+      l.updatesDescription,
+      l.settingsGroupHelp,
+    );
     final history = matches(
       l.releaseHistoryTitle,
       l.releaseHistoryDescription,
@@ -218,7 +225,12 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
                   ),
           ),
         ),
-        if (!servers && !appearance && !shortcuts && !logs && !history)
+        if (!servers &&
+            !appearance &&
+            !shortcuts &&
+            !logs &&
+            !updates &&
+            !history)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l.settingsNavigationNoResults),
@@ -251,13 +263,20 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             Icons.keyboard_outlined,
           ),
         ],
-        if (logs || history) _group(context, l.settingsGroupHelp),
+        if (logs || updates || history) _group(context, l.settingsGroupHelp),
         if (logs)
           _destination(
             SettingsSection.logs,
             l.logsAppLogs,
             l.logsEnableLoggingDescription,
             Icons.receipt_long_outlined,
+          ),
+        if (updates)
+          _destination(
+            SettingsSection.updates,
+            l.settingsGroupVersionUpdates,
+            l.updatesDescription,
+            Icons.system_update_alt,
           ),
         if (history)
           _destination(

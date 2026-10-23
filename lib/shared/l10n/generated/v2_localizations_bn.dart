@@ -1509,4 +1509,57 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => 'সার্ভার খুলুন';
+
+  @override
+  String get settingsAboutCheckForUpdates => 'আপডেটের জন্য চেক করুন';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return 'আপডেট উপলব্ধ: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => 'সংস্করণ এবং আপডেট';
+
+  @override
+  String get updatesDescription => 'CodeWalk-এর নতুন সংস্করণ খুঁজুন';
+
+  @override
+  String get updatesChannel => 'আপডেট চ্যানেল';
+
+  @override
+  String get updatesChannelStable => 'স্থিতিশীল';
+
+  @override
+  String get updatesChannelBeta => 'বিটা';
+
+  @override
+  String get updatesBetaHint =>
+      'বিটা সংস্করণগুলো প্রিভিউ এবং এতে সমস্যা থাকতে পারে।';
+
+  @override
+  String get updatesInstalledVersion => 'ইনস্টল করা সংস্করণ';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk হালনাগাদ আছে।';
+
+  @override
+  String get updatesCheckFailed =>
+      'আপডেট পরীক্ষা করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesDownload => 'ডাউনলোড';
+
+  @override
+  String get updatesLinuxInstallHint =>
+      'ঠিক এই সংস্করণটি ইনস্টল করতে এই কমান্ডটি চালান:';
+
+  @override
+  String get updatesCopyCommand => 'কমান্ড কপি করুন';
+
+  @override
+  String get updatesCommandCopied => 'কমান্ড কপি হয়েছে';
+
+  @override
+  String get updatesUnsupported => 'এই প্ল্যাটফর্মে আপডেট এখনও উপলব্ধ নয়।';
 }

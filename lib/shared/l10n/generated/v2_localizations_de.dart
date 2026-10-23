@@ -1549,4 +1549,58 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get liveErrorOpenServers => 'Server öffnen';
+
+  @override
+  String get settingsAboutCheckForUpdates => 'Nach Updates suchen';
+
+  @override
+  String settingsAboutUpdateAvailable(String version) {
+    return 'Update verfügbar: v$version';
+  }
+
+  @override
+  String get settingsGroupVersionUpdates => 'Version und Updates';
+
+  @override
+  String get updatesDescription => 'Nach neuen CodeWalk-Versionen suchen';
+
+  @override
+  String get updatesChannel => 'Update-Kanal';
+
+  @override
+  String get updatesChannelStable => 'Stabil';
+
+  @override
+  String get updatesChannelBeta => 'Beta';
+
+  @override
+  String get updatesBetaHint =>
+      'Beta-Versionen sind Vorabversionen und können Probleme haben.';
+
+  @override
+  String get updatesInstalledVersion => 'Installierte Version';
+
+  @override
+  String get updatesUpToDate => 'CodeWalk ist auf dem neuesten Stand.';
+
+  @override
+  String get updatesCheckFailed =>
+      'Updates konnten nicht geprüft werden. Prüfe die Verbindung und versuche es erneut.';
+
+  @override
+  String get updatesDownload => 'Herunterladen';
+
+  @override
+  String get updatesLinuxInstallHint =>
+      'Führe diesen Befehl aus, um genau diese Version zu installieren:';
+
+  @override
+  String get updatesCopyCommand => 'Befehl kopieren';
+
+  @override
+  String get updatesCommandCopied => 'Befehl kopiert';
+
+  @override
+  String get updatesUnsupported =>
+      'Updates sind auf dieser Plattform noch nicht verfügbar.';
 }

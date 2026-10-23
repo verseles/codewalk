@@ -58,6 +58,31 @@ void main() {
     },
   );
 
+  test('an update source reads its own path, headers and size limit', () async {
+    final transport = FakeTransport(
+      () async => TransportResponse(
+        statusCode: 200,
+        headers: const {},
+        body: Stream.value(utf8.encode('x' * 20)),
+        cancel: () {},
+      ),
+    );
+    final source = NativeReleaseSource(
+      transport: transport,
+      path: ReleaseSource.updatesPath,
+      headers: const {'User-Agent': 'CodeWalk'},
+      maxBytes: 10,
+    );
+    final result = await source.start().result;
+    expect(
+      transport.request!.path,
+      '/repos/verseles/codewalk/releases?per_page=30',
+    );
+    expect(transport.request!.headers, {'User-Agent': 'CodeWalk'});
+    expect(result.body, isNull, reason: 'a body above the limit is refused');
+    source.close();
+  });
+
   for (final invalid in [(302, null), (200, 'gzip')]) {
     test('rejects status/encoding $invalid without consuming body', () async {
       var consumed = false;
