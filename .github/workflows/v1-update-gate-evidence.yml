@@ -154,7 +154,15 @@ jobs:
               gate=yes
               break
             elif [[ "$text" == *"Skip setup?"* ]]; then
-              click_word "$ev/$name.png" Skip lowest || xdotool key Return
+              # OCR misses the white-on-blue Skip button; it sits right of
+              # the dialog's Cancel action.
+              if xy="$(find_word "$ev/$name.png" Cancel lowest)"; then
+                read -r x y <<< "$xy"
+                echo "clicking the Skip button right of Cancel at $((x + 77)) $y"
+                xdotool mousemove "$((x + 77))" "$y" click 1
+              else
+                xdotool key Return
+              fi
             elif [[ "$text" == *"Skip"* ]]; then
               click_word "$ev/$name.png" Skip top || true
             fi
