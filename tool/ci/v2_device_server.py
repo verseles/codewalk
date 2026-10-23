@@ -369,6 +369,9 @@ class RelayHandler(BaseHTTPRequestHandler):
         client = log.alias(self.client_address[0])
         body = read_body(self)
         headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
+        if getattr(device, "open_relay", False) and not any(k.lower() == "authorization" for k in headers):
+            token = base64.b64encode(f"opencode:{device.password}".encode()).decode()
+            headers["Authorization"] = f"Basic {token}"
         templated = route(self.path)
         meta = {
             "client": client,
@@ -451,6 +454,7 @@ class DeviceServer:
         self.bind = bind
         self.port = port
         self.password = secrets.token_urlsafe(24)
+        self.open_relay = False
         self.log = Log(root / "requests.jsonl")
         self.process: subprocess.Popen | None = None
         self.upstream_port = 0
@@ -869,6 +873,7 @@ def serve(args: argparse.Namespace) -> int:
     if args.port in RESERVED_PORTS:
         die("refusing a reserved port")
     device = DeviceServer(root, args.bind, args.port)
+    device.open_relay = args.open
     secret = root / "password"
     servers: list[ThreadingHTTPServer] = []
     stopping = threading.Event()
@@ -956,6 +961,11 @@ def main(argv: list[str]) -> int:
     p_serve.add_argument("--port", type=int, default=0)
     p_serve.add_argument("--control-port", type=int, default=None)
     p_serve.add_argument("--no-console", dest="console", action="store_false")
+    p_serve.add_argument(
+        "--open",
+        action="store_true",
+        help="the relay authenticates clients that send no password (private network only)",
+    )
     p_serve.add_argument("--adb-serial", default=None, help="enable emulator host actions")
     p_serve.add_argument("--app-package", default="com.verseles.codewalk")
     p_acq = sub.add_parser("acquire")
