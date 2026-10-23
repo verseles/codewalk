@@ -1,0 +1,390 @@
+name: V1 Update Gate Evidence
+
+# Manual evidence for the v1 major update gate (V1-01): the real CodeWalk 1
+# app, built in debug mode against a local fixture of the GitHub releases API
+# (tool/ci/update_gate_fixture_server.py), must request /releases/latest and
+# show the CodeWalk 2 gate. Nothing is published; evidence is uploaded as
+# short-lived workflow artifacts.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v1]
+    paths:
+      - ".github/workflows/v1-update-gate-evidence.yml"
+      - "tool/ci/update_gate_fixture_server.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.0"
+  FIXTURE_PORT: "8765"
+  EVIDENCE_DIR: build/update-gate-evidence
+  # English title of the gate dialog: majorUpdateGateTitle in
+  # lib/l10n/app_en.arb with the fixture's v2.0.0 release.
+  GATE_TITLE: "CodeWalk 2 is available (v2.0.0)"
+  LATEST_PATH: "/repos/verseles/codewalk/releases/latest"
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Install Linux dependencies
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i \
+                -e 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                -e 's|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                "$source"
+            fi
+          done
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
+          sudo apt-get install -y xvfb xauth imagemagick xdotool tesseract-ocr dbus
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux debug app against the fixture
+        run: >-
+          flutter build linux --debug
+          --dart-define=CODEWALK_UPDATE_API_BASE=http://127.0.0.1:${FIXTURE_PORT}
+
+      - name: Start releases API fixture
+        run: |
+          mkdir -p "$EVIDENCE_DIR"
+          : > "$EVIDENCE_DIR/fixture-requests.jsonl"
+          nohup python3 tool/ci/update_gate_fixture_server.py \
+            --port "$FIXTURE_PORT" --bind 127.0.0.1 \
+            --log "$EVIDENCE_DIR/fixture-requests.jsonl" \
+            > "$EVIDENCE_DIR/fixture-stdout.txt" 2>&1 &
+          echo $! > "$RUNNER_TEMP/fixture.pid"
+          for _ in $(seq 1 20); do
+            grep -q 'fixture ready' "$EVIDENCE_DIR/fixture-stdout.txt" && break
+            sleep 0.5
+          done
+          cat "$EVIDENCE_DIR/fixture-stdout.txt"
+          grep -q 'fixture ready' "$EVIDENCE_DIR/fixture-stdout.txt"
+
+      - name: Write Linux driver
+        run: |
+          cat > "$RUNNER_TEMP/linux_gate_evidence.sh" <<'SCRIPT'
+          #!/usr/bin/env bash
+          # Runs inside xvfb-run. Launches the real bundle with an isolated
+          # profile, screenshots each state and dismisses the first-run
+          # onboarding wizard (Skip -> Skip) so the startup gate can appear.
+          set -uo pipefail
+          ev="$EVIDENCE_DIR"
+          app_home="$(mktemp -d)"
+          mkdir -p "$app_home/config" "$app_home/data" "$app_home/cache"
+          export LIBGL_ALWAYS_SOFTWARE=1
+          HOME="$app_home" XDG_CONFIG_HOME="$app_home/config" \
+            XDG_DATA_HOME="$app_home/data" XDG_CACHE_HOME="$app_home/cache" \
+            LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 LANGUAGE=en \
+            dbus-run-session -- build/linux/x64/debug/bundle/codewalk \
+            > "$ev/app-stdout.txt" 2>&1 &
+          app_pid=$!
+
+          shot() { import -window root "$ev/$1.png" || echo "screenshot $1 failed"; }
+          ocr_text() { tesseract "$1" - 2>/dev/null | tr -s ' \n' ' '; }
+          # Prints "x y" of the matching OCR word: topmost or lowest match.
+          find_word() {
+            local png="$1" word="$2" pick="$3" tmp="$RUNNER_TEMP/ocr"
+            convert "$png" -resize 200% "$tmp.png" || return 1
+            tesseract "$tmp.png" "$tmp" tsv >/dev/null 2>&1 || return 1
+            python3 - "$tmp.tsv" "$word" "$pick" <<'PY'
+          import csv, sys
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              rows = list(csv.DictReader(handle, delimiter="\t", quoting=csv.QUOTE_NONE))
+          hits = [r for r in rows if (r.get("text") or "").strip() == sys.argv[2]]
+          if not hits:
+              sys.exit(1)
+          hits.sort(key=lambda r: int(r["top"]))
+          r = hits[0] if sys.argv[3] == "top" else hits[-1]
+          print((int(r["left"]) + int(r["width"]) // 2) // 2,
+                (int(r["top"]) + int(r["height"]) // 2) // 2)
+          PY
+          }
+          click_word() {
+            local xy
+            xy="$(find_word "$@")" || return 1
+            echo "clicking '$2' at $xy"
+            # shellcheck disable=SC2086
+            xdotool mousemove $xy click 1
+          }
+
+          for _ in $(seq 1 60); do
+            grep -q "\"path\": \"$LATEST_PATH\"" "$ev/fixture-requests.jsonl" && break
+            kill -0 "$app_pid" 2>/dev/null || { echo "app exited early"; break; }
+            sleep 1
+          done
+          sleep 8
+          shot 01-startup
+          gate=no
+          for step in $(seq 2 8); do
+            name="$(printf '%02d' "$step")-state"
+            shot "$name"
+            text="$(ocr_text "$ev/$name.png")"
+            if [[ "$text" == *"CodeWalk 2 is available"* ]]; then
+              gate=yes
+              break
+            elif [[ "$text" == *"Skip setup?"* ]]; then
+              click_word "$ev/$name.png" Skip lowest || xdotool key Return
+            elif [[ "$text" == *"Skip"* ]]; then
+              click_word "$ev/$name.png" Skip top || true
+            fi
+            sleep 4
+          done
+          shot 99-final
+          ocr_text "$ev/99-final.png" > "$ev/final-ocr.txt" || true
+          echo "gate_seen_by_ocr=$gate" | tee "$ev/gate-ocr-result.txt"
+
+          pkill -TERM -f 'bundle/codewalk' || true
+          kill -TERM "$app_pid" 2>/dev/null || true
+          sleep 3
+          pkill -KILL -f 'bundle/codewalk' || true
+          rm -rf "$app_home"
+          exit 0
+          SCRIPT
+          chmod +x "$RUNNER_TEMP/linux_gate_evidence.sh"
+
+      - name: Launch the app under Xvfb and capture evidence
+        timeout-minutes: 6
+        run: >-
+          xvfb-run -a -s "-screen 0 1280x800x24"
+          bash "$RUNNER_TEMP/linux_gate_evidence.sh"
+
+      - name: Require the startup update check request
+        run: |
+          cat "$EVIDENCE_DIR/fixture-requests.jsonl"
+          if ! grep -q "\"path\": \"$LATEST_PATH\"" "$EVIDENCE_DIR/fixture-requests.jsonl"; then
+            echo "::error::The app never requested $LATEST_PATH from the fixture."
+            exit 1
+          fi
+          if ! grep -q 'gate_seen_by_ocr=yes' "$EVIDENCE_DIR/gate-ocr-result.txt"; then
+            echo "::warning::OCR did not find the gate title; inspect the screenshots."
+          fi
+
+      - name: Stop releases API fixture
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/fixture.pid" ]; then
+            kill -TERM "$(cat "$RUNNER_TEMP/fixture.pid")" 2>/dev/null || true
+            sleep 1
+          fi
+          cat "$EVIDENCE_DIR/fixture-stdout.txt" 2>/dev/null || true
+
+      - name: Upload Linux evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-update-gate-linux
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 7
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build x86_64 debug APK against the fixture
+        # 10.0.2.2 is the emulator's alias for the runner's loopback; the
+        # app's network_security_config permits cleartext to it.
+        run: >-
+          flutter build apk --debug --target-platform android-x64
+          --dart-define=CODEWALK_UPDATE_API_BASE=http://10.0.2.2:${FIXTURE_PORT}
+
+      - name: Enable KVM group permissions
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Start releases API fixture
+        run: |
+          mkdir -p "$EVIDENCE_DIR"
+          : > "$EVIDENCE_DIR/fixture-requests.jsonl"
+          nohup python3 tool/ci/update_gate_fixture_server.py \
+            --port "$FIXTURE_PORT" --bind 127.0.0.1 \
+            --log "$EVIDENCE_DIR/fixture-requests.jsonl" \
+            > "$EVIDENCE_DIR/fixture-stdout.txt" 2>&1 &
+          echo $! > "$RUNNER_TEMP/fixture.pid"
+          for _ in $(seq 1 20); do
+            grep -q 'fixture ready' "$EVIDENCE_DIR/fixture-stdout.txt" && break
+            sleep 0.5
+          done
+          cat "$EVIDENCE_DIR/fixture-stdout.txt"
+          grep -q 'fixture ready' "$EVIDENCE_DIR/fixture-stdout.txt"
+
+      - name: Write Android driver
+        # android-emulator-runner runs each `script` line separately, so the
+        # multi-line driver lives in a file.
+        run: |
+          cat > "$RUNNER_TEMP/android_gate_evidence.sh" <<'SCRIPT'
+          #!/usr/bin/env bash
+          set -uo pipefail
+          ev="$EVIDENCE_DIR"
+          apk=build/app/outputs/flutter-apk/app-debug.apk
+          component=com.verseles.codewalk/.MainActivity
+
+          dump() {
+            adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 \
+              && adb exec-out cat /sdcard/ui.xml > "$1" 2>/dev/null
+          }
+          # Prints "x y" of a node whose text or content-desc matches.
+          # mode: contains | exact-top | exact-lowest
+          node_xy() {
+            python3 - "$1" "$2" "$3" <<'PY'
+          import re, sys
+          import xml.etree.ElementTree as ET
+          try:
+              root = ET.parse(sys.argv[1]).getroot()
+          except (ET.ParseError, OSError):
+              sys.exit(1)
+          needle, mode = sys.argv[2], sys.argv[3]
+          hits = []
+          for node in root.iter("node"):
+              labels = [node.get("text") or "", node.get("content-desc") or ""]
+              ok = any(needle in l for l in labels) if mode == "contains" \
+                  else any(l.strip() == needle for l in labels)
+              m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds") or "")
+              if ok and m:
+                  x1, y1, x2, y2 = map(int, m.groups())
+                  hits.append(((x1 + x2) // 2, (y1 + y2) // 2))
+          if not hits:
+              sys.exit(1)
+          hits.sort(key=lambda h: h[1])
+          x, y = hits[-1] if mode == "exact-lowest" else hits[0]
+          print(x, y)
+          PY
+          }
+          tap() {
+            local xy
+            xy="$(node_xy "$1" "$2" "$3")" || return 1
+            echo "tapping '$2' at $xy"
+            # shellcheck disable=SC2086
+            adb shell input tap $xy
+          }
+
+          adb install -r "$apk" || exit 1
+          adb logcat -c || true
+          adb shell am start -W -n "$component" || exit 1
+          for _ in $(seq 1 120); do
+            grep -q "\"path\": \"$LATEST_PATH\"" "$ev/fixture-requests.jsonl" && break
+            sleep 1
+          done
+          sleep 10
+          adb exec-out screencap -p > "$ev/01-startup.png"
+          gate=no
+          for step in $(seq 2 20); do
+            name="$(printf '%02d' "$step")-state"
+            if ! dump "$ev/$name.xml"; then
+              echo "uiautomator dump failed at step $step"
+              sleep 3
+              continue
+            fi
+            if node_xy "$ev/$name.xml" "$GATE_TITLE" contains >/dev/null; then
+              gate=yes
+              break
+            elif node_xy "$ev/$name.xml" "Skip setup?" contains >/dev/null; then
+              adb exec-out screencap -p > "$ev/$name.png"
+              tap "$ev/$name.xml" Skip exact-lowest || true
+            elif node_xy "$ev/$name.xml" Skip exact-top >/dev/null; then
+              adb exec-out screencap -p > "$ev/$name.png"
+              tap "$ev/$name.xml" Skip exact-top || true
+            fi
+            sleep 4
+          done
+          adb exec-out screencap -p > "$ev/99-gate.png"
+          dump "$ev/99-gate-ui.xml" || echo "final uiautomator dump failed"
+          adb logcat -d -v threadtime > "$ev/logcat.txt" 2>&1 || true
+          adb shell am force-stop com.verseles.codewalk || true
+
+          if ! grep -q "\"path\": \"$LATEST_PATH\"" "$ev/fixture-requests.jsonl"; then
+            echo "::error::The app never requested $LATEST_PATH from the fixture."
+            exit 1
+          fi
+          if [ "$gate" != yes ]; then
+            echo "::error::The gate title '$GATE_TITLE' was not found in the UI dump."
+            exit 1
+          fi
+          echo "Gate title found: $GATE_TITLE"
+          SCRIPT
+          chmod +x "$RUNNER_TEMP/android_gate_evidence.sh"
+
+      - name: Run the app on an API 31 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: bash "$RUNNER_TEMP/android_gate_evidence.sh"
+
+      - name: Stop releases API fixture
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/fixture.pid" ]; then
+            kill -TERM "$(cat "$RUNNER_TEMP/fixture.pid")" 2>/dev/null || true
+            sleep 1
+          fi
+          cat "$EVIDENCE_DIR/fixture-requests.jsonl" 2>/dev/null || true
+
+      - name: Upload Android evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-update-gate-android
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: warn
+          retention-days: 7
