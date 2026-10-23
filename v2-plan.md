@@ -5,7 +5,7 @@
 > **Evidence snapshot:** 2026-10-02; Codex server/transport facts rechecked on 2026-10-03 against CLI/source 0.160.0 (§3.3). Upstream projects change weekly; every pinned fact below must be re-checked by the spike that owns it before code depends on it.
 > **Inputs:** the research pack in `plan/` (dossiers `00`–`31` plus raw evidence folders), the historical decision round `plan/02-decisions.md`, sixteen original planner reports in `plan/helper-plans/`, and a subsequent twelve-helper readiness assessment reconciled against local evidence. Current decisions are in §2, not in the historical answers or helper proposals.
 > **Language:** English (decision D12). The product discussion happened in Portuguese; decisions are recorded here in English with their intent.
-> **Current MVP boundary (owner amendment, 2026-10-08):** Android/Linux only. Web/Chrome, Safari, iOS, Windows and macOS follow MVP and remain full-GA obligations. The real native v1.266 migration-source cohort precedes MVP; final stable v1.266.0 and Windows/macOS transition acceptance follow it (§9, ADR-060). This is planned scope, not completed acceptance. **Gate placement (owner amendment, 2026-10-21):** the MVP beta requires G3, G4 and the provisional G5 revision; G1, G2 and the final G5 are the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA (§11.6).
+> **Current MVP boundary (owner amendment, 2026-10-08):** Android/Linux only. Web/Chrome, Safari, iOS, Windows and macOS follow MVP and remain full-GA obligations. The opt-in native v1.266 cohort was published before MVP; v1 data is not migrated to v2 (owner amendment, 2026-10-23). Final stable v1.266.0 and Windows/macOS transition acceptance follow it (§9, ADR-060). This is planned scope, not completed acceptance. **Gate placement (owner amendment, 2026-10-21):** the MVP beta requires G3, G4 and the provisional G5 revision; G1, G2 and the final G5 are the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA (§11.6).
 
 ---
 
@@ -73,7 +73,7 @@ The seven key outcomes:
 3. **Hybrid topology (D01).** OpenCode connects directly; Codex, Claude Code, Pi, Muse, Grok, and dsh are reached through the **CodeWalk Host**, a small TypeScript/Node service on the user's machine. Codex already has a native authenticated app-server; the host remains the chosen integration route for protocol translation, continuous approvals, attention, and push. The host translates every native protocol into **one** CodeWalk protocol. Additional direct adapters require the rule in §6.12 and a separate architecture decision. The path toward "everything through the host" stays open.
 4. **Release train (D02).** v2.0 OpenCode → v2.1 Host + Codex → v2.2 Claude Code + Pi → v2.3 Grok Build + Muse Code. DeepSeek Harness (`dsh`) remains experimental.
 5. **"Allow all" stays ON by default (D05)** for every session, as in v1. Underneath, it approves each request **once**, like the official OpenCode clients, so agent restrictions and the user's deny rules keep working and no permanent rules are written. Users can switch a session to another mode when the harness supports it.
-6. **Transition (D04).** Same application ID. A real installed Android/Linux `v1.266.0-native.N` cohort precedes the native MVP; final stable v1.266.0 with the gate and full Windows/macOS installer acceptance follows MVP. Acceptance freezes routine v1 maintenance, with only that finite original-transition completion remaining. Legacy stays available; stable v2 promotion is separate GA work.
+6. **Transition (D04).** Same application ID. An opt-in Android/Linux `v1.266.0-native.N` cohort precedes the native MVP; v2 starts clean and does not import v1 data (owner amendment, 2026-10-23); final stable v1.266.0 with the gate and full Windows/macOS installer acceptance follows MVP. Acceptance freezes routine v1 maintenance, with only that finite original-transition completion remaining. Legacy stays available; stable v2 promotion is separate GA work.
 7. **Honest capabilities.** What a harness cannot do is hidden or disabled with a reason. CodeWalk never emulates missing upstream features with hidden sessions, shell scripts, or credential scraping (v1 did all three).
 
 ```mermaid
@@ -168,7 +168,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 
 ### D04 — Same app ID; last v1 minor asks the user
 
-**Decision (option C, amended 2026-10-08).** Keep `com.verseles.codewalk`. The last planned stable v1 minor retains the update warning, user choice and channel-aware installers. Split delivery: an explicit opt-in, real installed Android/Linux `v1.266.0-native.N` migration-source cohort before MVP; Windows/macOS acceptance and final stable v1.266.0 after MVP. The cohort is not the final stable release or an ordinary updater target. When the updater finds CodeWalk 2, explain the OpenCode 2 requirement and let users update, stay on v1 or decide later. Routine maintenance freezes at accepted Android/Linux MVP (§9.6), with only finite completion of the original transition permitted. Legacy remains downloadable; acceptance does not promote v2 to stable.
+**Decision (option C, amended 2026-10-08).** Keep `com.verseles.codewalk`. The last planned stable v1 minor retains the update warning, user choice and channel-aware installers. Split delivery: an explicit opt-in Android/Linux `v1.266.0-native.N` cohort before MVP; Windows/macOS acceptance and final stable v1.266.0 after MVP. The cohort is not the final stable release or an ordinary updater target. When the updater finds CodeWalk 2, explain the OpenCode 2 requirement and let users update, stay on v1 or decide later. Routine maintenance freezes at accepted Android/Linux MVP (§9.6), with only finite completion of the original transition permitted. Legacy remains downloadable; acceptance does not promote v2 to stable. **Amendment 2026-10-23:** v2 does not import v1 data; it starts clean, users add their servers again, and v1 keys stay untouched (§9.4). The owner chose this because few users run v1.
 
 **Why.** Users must not be silently moved into an app that cannot talk to their servers. The product owner prefers giving the user an explicit, informed choice over creating a second app identity.
 
@@ -176,6 +176,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 
 - Users who never install the transition minor before GA may still be offered v2 by the older latest-only updater [V]. Native cohorts and v2 betas must stay out of latest and ordinary stable/v1 selection. Finish the full stable transition before GA, start v2.0.0 release notes/announcement with the OpenCode 2 requirement, and show the v1-server explainer/legacy link. The 2026-10-08 split supersedes the earlier final-stable-before-first-beta sequencing rule.
 - v1 and v2 cannot coexist on one Android device (same ID).
+- v2 starts without v1 data. The v1 update dialog, the v2.0.0 release notes and the first v2 launch must say that servers and settings are entered again.
 - Android build codes are epoch-based with a branch-local floor [V `Makefile:10,21–25`]. Verify increasing codes across **both** release lines, including concurrent builds; a branch-local floor alone is not a global ordering guarantee. A later-built, higher-code legacy APK can be a rollback path if v1 data is intact, but a frozen v1 APK is not guaranteed to install over a newer beta or GA build. Do not promise one-tap APK rollback after the freeze or create routine v1 rebuilds just to keep that promise.
 
 **Rejected.** A separate legacy app ID (`com.verseles.codewalk.legacy`, would allow coexistence but adds an identity and starts the legacy app empty); same ID without any warning.
@@ -988,7 +989,7 @@ Pins: OpenCode 2.0.21/2.0.22; Codex CLI 0.159.3, daemon 0.160.0; Claude SDK 0.3.
 | Terminal: `third_party/xterm`, terminal widgets | **Keep** | New ticket-based transport. |
 | Payload/SWR caches (ADR-016) | **Keep pattern** | New keys and schema version. |
 | `test/support/mock_opencode_server.dart` | **Replace** | `FakeOpenCodeV2Server` with fault injection (`V2-056`). |
-| Settings entities (`lib/domain/entities/experience_settings.dart`) | **Migrate** | Import values into the v2 namespace (§9.4). |
+| Settings entities (`lib/domain/entities/experience_settings.dart`) | **Rewrite** | v2 defaults; v1 values are not imported (§9.4). |
 
 ### 8.2 The 25 v1-only workarounds (numbering of `plan/00` §3) [H mapping]
 
@@ -1043,8 +1044,8 @@ For each affected family, name its path/cases, disposition, reason, replacement 
 flowchart TD
   C["V1-03 reconcile legacy branch created from d1ed5ee9"] --> A["V1-01 update gate + exact-version handoff on v1"]
   A --> I["V1-05A shared contract + Linux acceptance"]
-  I --> N["V1-02A real installed v1.266.0-native.N Android/Linux cohort"]
-  N --> U["V2-076A installed native migration + V2-077A native publication guards"]
+  I --> N["V1-02A published v1.266.0-native.N Android/Linux cohort"]
+  N --> U["V2-077A native publication guards"]
   U --> F["Android/Linux v2.0.0-beta.N opt-in; G3/G4/provisional G5 + native evidence"]
   F --> M["V2-086 accepted usable MVP: freeze v1 maintenance"]
   A --> P["bounded legacy fixes during migration"]
@@ -1064,7 +1065,7 @@ The branch cut is historical preparation, not a new checkout instruction. The sp
 - "Stay on CodeWalk 1" persists and switches the updater to v1-only mode: it lists releases (GitHub releases API, paginated) and considers only tags `v1.*`; it never offers v2 again unless the user changes it in Settings.
 - Desktop scripts MUST implement the equivalent contract below: V1-05A provides shared selection and Linux evidence for the native cohort; full V1-05 Windows/macOS acceptance remains a prerequisite of final stable v1.266.0, not of native MVP acceptance.
 - **Split transition (2026-10-08):** V1-02A pins real v1.266 source and distributes an immutable `v1.266.0-native.N` Android/Linux cohort (`N` numeric) before MVP under separate release authorization. It uses `prerelease: true`, `make_latest: false` and an explicit cohort opt-in route; ordinary stable/v1 selection and the v2-only beta selector reject it. Current tooling/parsers must be investigated and corrected in the owning unit; suffixes alone are not channel protection.
-- Record actual installed source/tag/commit/version, Android identity/signature/build code, digests and Linux architecture/artifact. Fixtures alone cannot prove the cohort or its later migration. Final stable v1.266.0 and Windows/macOS acceptance follow MVP and precede GA; this finite completion is the only planned post-freeze v1 exception.
+- Record actual installed source/tag/commit/version, Android identity/signature/build code, digests and Linux architecture/artifact. Fixtures alone cannot prove the cohort. Final stable v1.266.0 and Windows/macOS acceptance follow MVP and precede GA; this finite completion is the only planned post-freeze v1 exception.
 - v1.266.0 remains the last planned **minor**. Bounded legacy fixes continue only until accepted MVP; afterward the original transition's finite completion does not restart routine maintenance (§9.6).
 
 #### 9.2.1 CodeWalk desktop installer contract
@@ -1090,13 +1091,10 @@ This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It i
 - Serialize publication across both lines and verify the shared highest published Android build code before each assignment. Ordering follows actual publication, including final stable v1.266.0 after an earlier v2 beta; do not impose a fixed semantic-major order. GA must upgrade every published compatible cohort/patch/beta; retain signatures and test ordering without resetting the epoch scheme.
 - V2-077A must independently prove fail-closed safeguards for **every** relevant `main` source push, native tag and workflow side effect: suppress unsafe/mislabeled Web publication, latest promotion and legacy artifact overwrite. Tag-only guards are insufficient. Missing guards block native beta publication; V1-04 still precedes any rewritten v2 Web preview/deploy, cutover or GA.
 
-### 9.4 Local data migration
+### 9.4 Local data
 
 - v2 writes only a new namespace (`cw2.*` keys, `cw2.schema` version, new file payload directory). It never deletes v1 keys for at least two minor releases; the Android pre-engine preference purge list in `CodeWalkApplication.kt` is updated in the same change.
-- **Import once, read-only, restartable:** appearance, locale, accessibility, shortcuts, voice settings and API keys (secure storage), notification preferences, canned answers, the v1 "Allow all" toggle value (preserve an explicit OFF), server profiles as **"needs OpenCode 2 check"** (credentials re-bound only to the same origin; port 4096 is never rewritten to 49374 automatically).
-- **Not imported as truth:** v1 message caches, tabs and pins whose sessions cannot be mapped. Drafts that cannot be mapped go to a "Recovered drafts" list.
-- A migration report (counts, unresolved items) is visible in Settings → About → Migration.
-- V2-076A owns integrated Android/Linux MVP importer/startup/raw-legacy-backend wiring, namespace-safe pre-engine cleanup, recovered drafts/report and actual install-over/restart/idempotency against the immutable installed V1-02A cohort. It depends on V2-027 and that cohort, not full V2-076 closure. Controlled fixtures supplement installed evidence; full final-stable-v1.266.0/all-platform migration remains V2-076 GA work.
+- **No v1 import (owner amendment, 2026-10-23):** v2 does not read or import v1 settings, server profiles, credentials, drafts or caches. It starts clean and the user adds servers again. V2-076 and V2-076A are cancelled.
 - **Rollback:** v1 keys remain intact, but Android install-over rollback also requires a compatible signature and a higher legacy build code; the frozen v1 artifact may not satisfy that. Document the limitation rather than promising rollback merely because data is preserved. The OpenCode server database is OpenCode's responsibility (back it up before a managed v1→v2 OpenCode upgrade; never run v1 and v2 binaries against the same database concurrently [H]).
 
 ### 9.5 Branches and Web deployment
@@ -1117,7 +1115,7 @@ This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It i
 - Before MVP, validate/install the real Android/Linux V1-02A cohort. Final stable v1.266.0 with full Windows/macOS transition acceptance follows MVP. Bounded legacy fixes remain possible until acceptance; new product work belongs to v2.
 - `V2-086` is an explicit owner checkpoint: an installable opt-in **Android/Linux-only** beta proves connection/pairing, session/history, sending/streamed tools, permissions, stop/reconnect and preservation/import from the installed cohort. Agree flows, Android reference devices and Linux architectures before the run. The beta requires G3, G4 and the provisional G5; G1/G2/final G5 follow it (§11.6 phase 7). Web/Chrome/Safari, iOS, Windows and macOS are post-MVP.
 - **Owner amendment, 2026-10-08:** native-only MVP supersedes the 2026-10-06 Chrome-in-MVP decision (retained in §17 history). Use V2-028D, V2-020CA, V1-02A, V2-076A, V2-077A and V2-078A without full cross-platform parent closure. Deferred targets remain pending for full GA; this is no fallback/tier approval or missing-check pass.
-- Acceptance freezes routine v1 development/releases and records the last stable artifact plus the migration-source cohort. Preserve downloads and production Web. The sole finite planned exception completes Windows/macOS acceptance and final stable v1.266.0; any other later critical exception needs an explicit decision. Do not restart routine maintenance.
+- Acceptance freezes routine v1 development/releases and records the last stable artifact plus the published native cohort. Preserve downloads and production Web. The sole finite planned exception completes Windows/macOS acceptance and final stable v1.266.0; any other later critical exception needs an explicit decision. Do not restart routine maintenance.
 - The freeze does **not** waive G1–G5 (G1/G2/final G5 are §11.6 phase 7, right after the MVP), remaining v2.0 scope, platform gates, or the reviewer loop. Beta feedback and the remaining work continue in v2; only GA promotes stable/latest and production Web.
 
 **Owner clarification, 2026-10-10.** The Android OS reference is **Android 12 / API 31** and Linux targets are **x64 and ARM64**. This declares targets, not installed evidence, and does not raise the application's minimum SDK. The orchestrator owns technical setup, implementation, checks, review, packaging and native smoke testing. The owner evaluates the experience only after receiving a usable application; code review, build troubleshooting or choosing an SDK are not owner prerequisites. `V2-020D` provides the first isolated native development preview before product feedback, independently of the full native matrix and public-beta checkpoint. It does not freeze v1 or accept the MVP.
@@ -1154,8 +1152,8 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 | **v1.266.0-native.N** (explicit native cohort) | Real installed Android/Linux v1.266 source, gate/shared Linux installer evidence; opt-in prerelease, never latest or ordinary stable/v1/v2-beta content | V1-02A before MVP; separately authorized immutable artifacts, signatures/build codes/digests and installation evidence |
 | **v1.266.0** (last planned stable v1 minor) | D04 gate, full Windows/macOS installer/transition acceptance, approved announcement | V1-02 after MVP and before GA; finite exception to routine v1 freeze |
 | **v1.266.x** (temporary maintenance) | Bounded fixes while migrating; no new v1 product work | Until the product owner accepts the v2 MVP |
-| **v2.0.0-beta.N / MVP** | Opt-in usable OpenCode v2 subset on Android/Linux only; all other platforms post-MVP; freeze routine v1 maintenance | V2-086; installed native cohort migration, G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), native platform/flow evidence, V2-077A safeguards and explicit owner acceptance; never stable promotion |
-| **v2.0** | Complete OpenCode v2 client on Android, Linux, macOS, Windows, Web; iOS per prerequisites; managed desktop install; migration from v1; local notifications + Android monitor | Gates G1–G5 pass; platform gates pass; review loop clean |
+| **v2.0.0-beta.N / MVP** | Opt-in usable OpenCode v2 subset on Android/Linux only; all other platforms post-MVP; freeze routine v1 maintenance | V2-086; G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), native platform/flow evidence, V2-077A safeguards and explicit owner acceptance; never stable promotion |
+| **v2.0** | Complete OpenCode v2 client on Android, Linux, macOS, Windows, Web; iOS per prerequisites; managed desktop install; local notifications + Android monitor | Gates G1–G5 pass; platform gates pass; review loop clean |
 | **v2.1** | CodeWalk Host (desktop + headless npm); Codex via shared daemon; OpenCode observer (24/7 "Allow all", attention); push sinks (ntfy, UnifiedPush, webhook, Web Push); Android overlay and Android Auto return; experimental usage connectors | Host packaging proven on all desktop targets; Codex live-attach acceptance passes |
 | **v2.2** | Host workspace services; Claude Code; Pi | Claude licensing/policy gate passes |
 | **v2.3** | Grok Build (ACP + extensions); Muse Code | Muse distribution gate passes; extension fixtures pinned |
@@ -1307,16 +1305,16 @@ Before starting, ensure the Issue contains:
 |---|---|---|---|---|---|---|
 | 4.1 | V1-01 (#227) | v1 updater major-version gate: Update, Stay on v1, Later; stay mode lists only `v1.*` | D04: v1 users decide with full information | 0.2 | #227 tests; manual check on Android and Linux | — |
 | 4.2 | V1-05A (#229) | Installer channel and exact-tag handoff (app and `install.sh`); Windows/macOS stay post-MVP | Required before the cohort exists | 4.1 | Offline pagination/semver/channel fixtures pass on Linux | — |
-| 4.3 | V1-02A (#359) | `v1.266.0-native.N` built, signed and published as a prerelease (never latest) for Android and Linux x64/ARM64, installed on the owner's devices | The migration source must be real | 4.2 | Tag, commit, build code, signatures and digests recorded; selectors exclude the cohort | CP3: authorize publication and install |
+| 4.3 | V1-02A (#359) | `v1.266.0-native.N` built, signed and published as a prerelease (never latest) for Android and Linux x64/ARM64 | The real v1 transition artifacts precede the v2 beta | 4.2 | Tag, commit, build code, signatures and digests recorded; selectors exclude the cohort | CP3: authorize publication |
 
 **Phase 5 — Beta machinery (`main`)**
 
 | Seq | ID / Issue | Output | Why now | Depends on | Exit criteria | Owner action |
 |---|---|---|---|---|---|---|
 | 5.1 | V2-077A (#362) | Native beta updater and selector, prerelease ordering, exact tag, actual v2 entry point, fail-closed guards on every `main` push/tag/workflow path | Nothing v2 is published before the guards | 4.3 | Negative guard tests on every path; dry runs; no Web/latest/legacy overwrite | — |
-| 5.2 | V2-076A (#361) | Installed-cohort migration: importer and startup wiring, install-over from 4.3 on the Galaxy S25 and Linux x64/ARM64, v1 keys preserved, idempotent restart | The data-preservation promise | 4.3, 2.3 | Evidence on the three targets | CP4: allow the upgrade |
+| 5.2 | ~~V2-076A (#361)~~ | Removed (owner amendment, 2026-10-23): v1 data is not migrated | — | — | — | — |
 | 5.3 | V2-060C (#409) | Re-proof of the integrated flow on the new workspace: fake integrated flow plus a disposable-host live smoke (pair → workspace → tab → send → steer → stop → permission → form → model switch → error) | V2-060A/B predate the new shell | 2.3, 3.2, 3.4 | Fake and live logs; no regression | — |
-| 5.4 | V2-078A (#357) | Android/Linux package, install, signature and functional evidence; G3/G4 rerun; the provisional G5 revision revalidated | Entry evidence for the beta | 5.1, 5.2, 5.3 | Per-target evidence; deferred platforms pending, not passed | — |
+| 5.4 | V2-078A (#357) | Android/Linux package, install, signature and functional evidence; G3/G4 rerun; the provisional G5 revision revalidated | Entry evidence for the beta | 5.1, 5.3 | Per-target evidence; deferred platforms pending, not passed | — |
 | 5.5 | V2-071 (#302) | Visual-parity sign-off against v1 on the packaged candidate | The only remaining #302 criterion | 5.4 | Checklist signed; gaps fixed or `after-mvp` | CP5: sign off |
 
 **Phase 6 — MVP**
@@ -1366,9 +1364,9 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 - Spikes: [ ] V2-005 (SP-01) · [ ] V2-006 (SP-02, G1) · [ ] V2-007 (SP-03, G1) · [ ] V2-008 (SP-04) · [ ] V2-009 (SP-05) · [ ] V2-010 (SP-06) · [ ] V2-011 (SP-07) · [ ] V2-012 (SP-08)
 - Core: [ ] V2-020 · [ ] V2-021 (G4) · [ ] V2-022 · [ ] V2-023 · [ ] V2-024 (G3) · [ ] V2-025 (G5) · [ ] V2-026 (G2) · [ ] V2-027 · [ ] V2-028
 - OpenCode adapter: [ ] V2-040 · [ ] V2-041 · [ ] V2-042 · [ ] V2-043 · [ ] V2-044 · [ ] V2-045 · [ ] V2-046 · [ ] V2-047 · [ ] V2-048 · [ ] V2-049 · [ ] V2-050 · [ ] V2-051 · [ ] V2-052 · [ ] V2-053 · [ ] V2-054 · [ ] V2-055 · [ ] V2-056 · [ ] V2-060 (internal vertical slice)
-- App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · [ ] V2-076 · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085 · [ ] V2-086
+- App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · ~~V2-076~~ (cancelled) · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085 · [ ] V2-086
 
-**Bounded Android/Linux MVP path:** V2-028D native transport, V2-020CA native aggregate, V1-02A installed source, V2-076A native migration, V2-077A native update/publication controls and V2-078A native evidence feed V2-086 alongside the core features, G3, G4 and the provisional G5; G1/G2/final G5 follow the MVP. **Order:** the fixed MVP roadmap in §11.6 decides what runs next; the checkboxes above are a scope index and live status is in the Issues. Full Web/Chrome/Safari/iOS/Windows/macOS parents and the final stable legacy transition remain post-MVP/GA obligations; no parent closes by child acceptance alone.
+**Bounded Android/Linux MVP path:** V2-028D native transport, V2-020CA native aggregate, V1-02A published cohort, V2-077A native update/publication controls and V2-078A native evidence feed V2-086 alongside the core features, G3, G4 and the provisional G5; G1/G2/final G5 follow the MVP. **Order:** the fixed MVP roadmap in §11.6 decides what runs next; the checkboxes above are a scope index and live status is in the Issues. Full Web/Chrome/Safari/iOS/Windows/macOS parents and the final stable legacy transition remain post-MVP/GA obligations; no parent closes by child acceptance alone.
 
 **Milestone v2.1 — CodeWalk Host + Codex**
 - [ ] V21-001 · [ ] V21-002 · [ ] V21-003 · [ ] V21-004 · [ ] V21-005 · [ ] V21-006 · [ ] V21-007 · [ ] V21-008 · [ ] V21-009 · [ ] V21-010 · [ ] V21-011 · [ ] V21-012
@@ -1426,7 +1424,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:release`
 - **Depends on:** V1-01, V1-05, V1-02A
 - **Phase boundary:** final stable release after MVP and before GA; the finite original-transition exception to routine v1 freeze. The native cohort is not this parent's acceptance.
-- **Why:** Stable users need the gate and tested installers before GA/latest switches to v2; the native cohort already supplies real MVP migration evidence.
+- **Why:** Stable users need the gate and tested installers before GA/latest switches to v2; v2 does not import v1 data (§9.4).
 - **Scope:** verify published/tracked legacy ref and passing checks, then use `ANNOUNCE="…" make release V=minor` only under the active release authorization. Announcement text (English, ≤ 300 characters) is separately approved by the product owner, for example: "CodeWalk 2 is coming: it requires OpenCode 2 servers. When it arrives, this version will ask before updating."
 - **Done when:** [ ] intended legacy commit/tag released, CI green, What's-new shows the announcement; [ ] release authorization and approved text recorded. Later post-GA metadata/build-code policy is validated in V2-077, not a circular prerequisite for creating the legacy branch.
 
@@ -1635,7 +1633,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 #### V2-027 — Local storage v2
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
 - **Depends on:** V2-020A, V2-021, V2-004
-- **Scope:** `cw2.*` namespace, schema version, payload store with ADR-016 limits, secure storage per endpoint, migration hooks (used by `V2-076`).
+- **Scope:** `cw2.*` namespace, schema version, payload store with ADR-016 limits, secure storage per endpoint, schema migration hooks for v2's own data.
 - **Done when:** [ ] tests for schema upgrades and corrupted payloads; [ ] v1 keys untouched.
 
 #### V2-028 — Transport package
@@ -1933,6 +1931,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 - **Done when:** [ ] tested on Linux and on macOS/Windows runners; [ ] hash mismatch fails closed; [ ] an existing user service is never stopped.
 
 #### V2-076 — v1 → v2 data importer
+- **Status:** cancelled (owner amendment, 2026-10-23); v1 data is not migrated. Kept for history.
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
 - **Depends on:** V2-027, V2-076A
 - **Phase boundary:** V2-076A owns Android/Linux MVP integration and real cohort migration. This full parent retains final-stable-v1.266.0 and all-target migration acceptance for GA; child acceptance does not close it.
@@ -1940,6 +1939,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 - **Done when:** [ ] upgrade test from a real v1.266 install keeps settings and profiles; [ ] v1 keys untouched; [ ] importer is idempotent and restartable.
 
 #### V2-076A — Integrated installed-cohort migration for Android/Linux
+- **Status:** cancelled (owner amendment, 2026-10-23); removed from the §11.6 roadmap. Kept for history.
 - **Issue:** [#361](https://github.com/verseles/codewalk/issues/361).
 - **Type / size / labels:** feature + test · M · `milestone:v2.0` `area:core`
 - **Parent / depends on:** V2-076 / V2-027, V1-02A; no full-parent prerequisite or cycle.
@@ -1969,13 +1969,13 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 #### V2-078A — MVP platform evidence checkpoint
 - **Issue:** [#357](https://github.com/verseles/codewalk/issues/357).
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:platform`
-- **Parent / depends on:** V2-078 / V2-020CA, V2-028D, V2-076A; unfinished full parents and browser checkpoints are not prerequisites.
-- **Scope:** actual-v2 Android/Linux packaging/checks, native runner, functional/device, signing/distribution and installed-cohort migration evidence under §15.4. Declare Android reference devices and Linux architectures, source/version/topology and exact commands. Web/Chrome/Safari, iOS, Windows and macOS are deferred post-MVP, with their full-parent criteria retained.
+- **Parent / depends on:** V2-078 / V2-020CA, V2-028D; unfinished full parents and browser checkpoints are not prerequisites.
+- **Scope:** actual-v2 Android/Linux packaging/checks, native runner, functional/device, signing/distribution evidence under §15.4. Declare Android reference devices and Linux architectures, source/version/topology and exact commands. Web/Chrome/Safari, iOS, Windows and macOS are deferred post-MVP, with their full-parent criteria retained.
 - **Done when:** [ ] agreed native target/flow checklist and real compile/functional/install/signature evidence linked; [ ] missing/failed native criteria remain blockers; [ ] deferred checks remain pending/traceable, not passed or downgraded. This checkpoint neither authorizes release nor replaces owner MVP acceptance or V2-077A publication safeguards.
 
 #### V2-079 — Accessibility and localization pass
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:ui`
-- **Depends on:** V2-041, V2-043, V2-044, V2-045, V2-047, V2-048, V2-049, V2-050, V2-051, V2-052, V2-053, V2-054, V2-055, V2-070, V2-071, V2-072, V2-073, V2-074, V2-075, V2-076, V2-077, V2-081, V2-082
+- **Depends on:** V2-041, V2-043, V2-044, V2-045, V2-047, V2-048, V2-049, V2-050, V2-051, V2-052, V2-053, V2-054, V2-055, V2-070, V2-071, V2-072, V2-073, V2-074, V2-075, V2-077, V2-081, V2-082
 - **Scope:** new keys in all 14 locales (targeted edits, generated code in sync); semantics on approval/form/tray; screen-reader announcements throttled (completion, not every delta); 200% text; RTL (ar, ur); keyboard-only desktop flow; reduced motion.
 - **Done when:** [ ] checklist complete; [ ] no missing keys in English and Portuguese, others tracked.
 
@@ -2019,11 +2019,11 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 
 #### V2-086 — Usable MVP beta and v1 maintenance freeze
 - **Type / size / labels:** test + chore · M · `milestone:v2.0` `area:release`
-- **Depends on:** the §11.6 rows 0.2–5.5: V1-02A, V2-040, V2-041, V2-042C, V2-043J, V2-044C1, V2-044C2, V2-044D, V2-045, V2-046B, V2-047, V2-048, V2-054A, V2-055A, V2-060C, V2-070A, V2-070B, V2-070C, V2-071, V2-076A, V2-077A, V2-078A; G3, G4 and the provisional G5 revision. G1, G2 and the final G5 follow in §11.6 phase 7 (owner amendment, 2026-10-21).
+- **Depends on:** the §11.6 rows 0.2–5.5: V1-02A, V2-040, V2-041, V2-042C, V2-043J, V2-044C1, V2-044C2, V2-044D, V2-045, V2-046B, V2-047, V2-048, V2-054A, V2-055A, V2-060C, V2-070A, V2-070B, V2-070C, V2-071, V2-077A, V2-078A; G3, G4 and the provisional G5 revision. G1, G2 and the final G5 follow in §11.6 phase 7 (owner amendment, 2026-10-21).
 - **Sequencing:** this is an earlier acceptance checkpoint, despite its higher stable ID; it does not depend on GA or V2-084.
 - **Why:** The product owner wants v1 fixes available during migration and routine v1 maintenance frozen once v2 is usable, rather than maintaining v1 until the complete v2.0 GA release.
-- **Scope:** agree the Android/Linux-only flow checklist, reference devices/architectures and §15.4 evidence; name any extra native feature producer (for example forms V2-048 if included). Under active beta-publication authority, publish installable opt-in `v2.0.0-beta.N` with actual v2 entry point, G3, G4, the provisional G5 and V2-077A safeguards passing. Verify native OpenCode flows, real installed V1-02A → V2-076A migration/data preservation, channels and reconnect, then collect explicit owner acceptance. Deferred-platform/full-parent closure is not an MVP prerequisite. Record stable legacy/cohort tags and commits; freeze routine v1 while preserving downloads/production Web, with only finite original Windows/macOS/final-stable transition completion allowed. Finish all remaining v2 features/platform/GA gates. Private smoke, fixture-only migration, missing runner or pending owner acceptance is not this checkpoint.
-- **Done when:** [ ] native checklist, installed migration and safeguards evidenced; [ ] owner accepts the usable MVP; [ ] freeze artifact/cohort and finite transition exception recorded; [ ] beta is not latest and no unsafe Web publication/legacy overwrite occurs; [ ] full six-platform/transition GA obligations remain pending and traceable; [ ] no full-tree merges or runtime compatibility switch.
+- **Scope:** agree the Android/Linux-only flow checklist, reference devices/architectures and §15.4 evidence; name any extra native feature producer (for example forms V2-048 if included). Under active beta-publication authority, publish installable opt-in `v2.0.0-beta.N` with actual v2 entry point, G3, G4, the provisional G5 and V2-077A safeguards passing. Verify native OpenCode flows, channels and reconnect, then collect explicit owner acceptance. Deferred-platform/full-parent closure is not an MVP prerequisite. Record stable legacy/cohort tags and commits; freeze routine v1 while preserving downloads/production Web, with only finite original Windows/macOS/final-stable transition completion allowed. Finish all remaining v2 features/platform/GA gates. Private smoke, fixture-only migration, missing runner or pending owner acceptance is not this checkpoint.
+- **Done when:** [ ] native checklist and safeguards evidenced; [ ] owner accepts the usable MVP; [ ] freeze artifact/cohort and finite transition exception recorded; [ ] beta is not latest and no unsafe Web publication/legacy overwrite occurs; [ ] full six-platform/transition GA obligations remain pending and traceable; [ ] no full-tree merges or runtime compatibility switch.
 
 ### 12.6 Milestone v2.1 — CodeWalk Host + Codex
 
@@ -2343,14 +2343,14 @@ This table specifies **required evidence**, not completed checks. Store each che
 
 **Early visual handoff:** V2-020D proves only its selected first target and tested surfaces; it is not the complete matrix. The orchestrator chooses and records the available reference environment and handles technical QA. Ask the owner for product feedback after usable delivery, not for abstract technical acceptance. Preserve separate compiler, launch, installed-device, migration and publication results. Known failed post-MVP browser checks remain visible; they neither become native start prerequisites nor permit a global-green/GA claim.
 
-Before V2-086, agree Android/Linux-only flows, Android reference devices and Linux architectures. Record Web/Chrome/Safari, iOS, Windows and macOS as **deferred-post-MVP**, never `pass` or approved tiers. V2-028D feeds native feature consumers; V2-020CA/V2-028D/V2-076A → V2-078A and V1-02A/V2-076A/V2-077A/V2-078A → V2-086 are bounded native paths without full-parent closure. Real installed cohort migration, G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), all native checklist checks and independently verified publication guards remain mandatory; explicit owner acceptance is separate. Before GA, complete the full six-platform matrix at approved tiers, final stable transition, V1-04, remaining code/feature checks, cutover and publication evidence. Missing optional signing/resources may retain an already permitted build-only tier; failed required checks/review corrections cannot be excused. Reuse evidence only while code/entry point, source/version, topology and platform assumptions remain valid.
+Before V2-086, agree Android/Linux-only flows, Android reference devices and Linux architectures. Record Web/Chrome/Safari, iOS, Windows and macOS as **deferred-post-MVP**, never `pass` or approved tiers. V2-028D feeds native feature consumers; V2-020CA/V2-028D → V2-078A and V1-02A/V2-077A/V2-078A → V2-086 are bounded native paths without full-parent closure. G3, G4 and the provisional G5 (G1/G2/final G5 follow in §11.6 phase 7), all native checklist checks and independently verified publication guards remain mandatory; explicit owner acceptance is separate. Before GA, complete the full six-platform matrix at approved tiers, final stable transition, V1-04, remaining code/feature checks, cutover and publication evidence. Missing optional signing/resources may retain an already permitted build-only tier; failed required checks/review corrections cannot be excused. Reuse evidence only while code/entry point, source/version, topology and platform assumptions remain valid.
 
 ---
 
 ## 16. Out of scope and deferred
 
 - Web/Chrome, Safari, iOS, Windows and macOS are deferred until after the Android/Linux-only MVP (owner amendment, 2026-10-08). Full GA retains all six platform families and their required approved-tier evidence. The earlier Chrome-in-MVP decision remains history only.
-- Final stable v1.266.0 and Windows/macOS legacy transition acceptance are post-MVP; real installed Android/Linux v1.266.0-native.N source migration remains required before MVP. Only finite completion of the original transition is excepted from routine v1 freeze.
+- Final stable v1.266.0 and Windows/macOS legacy transition acceptance are post-MVP; the Android/Linux v1.266.0-native.N cohort precedes MVP and v1 data is not migrated (§9.4). Only finite completion of the original transition is excepted from routine v1 freeze.
 - MVP feature deferrals (owner decision, 2026-10-21; labelled `after-mvp`, still v2.0 GA scope): the background-work tray (V2-049), revert/fork/diff (V2-050), files (V2-051), terminal (V2-052), commands/mentions/attachments (V2-053), model favorites/recents (rest of V2-054), usage/context meters and cost (rest of V2-055), canned answers (rest of V2-070), the Android background monitor (V2-011/V2-074), managed install (V2-075), voice (V2-072), exports (V2-073), accessibility/performance passes (V2-079/V2-080), reverse-proxy authentication (V2-081) and embedded Tailscale (V2-082).
 - OpenCode v1 support in v2 (legacy only).
 - A CodeWalk-hosted relay or push service (D07/D08).
@@ -2387,6 +2387,7 @@ Implementation will contradict some details. When it does:
 | 2026-10-08 | Supersede Chrome-in-MVP with Android/Linux-only MVP; defer Web/Chrome/Safari, iOS, Windows/macOS; split real v1.266.0-native.N installed-source cohort before MVP from full final stable transition after MVP; add V2-028D, V1-02A, V2-076A and V2-077A and retarget V2-020CA/078A | D02/D04/D09; §§1–2, 5–6, 9–17, 20; ADR-060; `AGENTS.md`; GitHub contracts/native dependencies | Owner requested all remaining platforms post-MVP and chose divided transition. Preserve installed migration, G1–G5, native target/owner acceptance and full GA obligations; native guards must fail closed on every relevant push/tag path before publication without full V1-04. No missing check is passed and no runtime/release/hosting change is made by this documentary recut |
 | 2026-10-10 | Declare Android 12/API 31 and Linux x64/ARM64; distinguish orchestrator-owned technical delivery from product feedback; add bounded V2-020D (#363) for an isolated native visual preview | §§9.6, 11.1, 11.5, 12.3, 15.4, 20; #356/#357/#321/#362/#255; `AGENTS.md` | Owner does not code and evaluates experience only after receiving a usable app. First preview may use one verified native target; full MVP matrix, public-beta G1–G5, publication guards and installed migration remain required. No minSdk, runtime, production identity or publication-policy change. Autonomous continuation retains bounded units and existing permissions |
 | 2026-10-21 | Fixed MVP roadmap revision 1 (§11.6) becomes the only scheduling authority until V2-086; the MVP beta requires G3, G4 and the provisional G5, while G1, G2 and the final G5 move to the first post-MVP phase, required before any other post-MVP feature, v2.1 Host work and GA; MVP scope adds readable tool results (V2-044D), execution truth (V2-046B), model/agent selection (V2-054A), typed errors (V2-055A), the v1-parity workspace (V2-070A–C), session activity (V2-043J), device reliability evidence (V2-042C) and a re-proof on the new shell (V2-060C), and defers the features listed in §16; the owner's Galaxy S25 (Android 16) joins Linux x64/ARM64, with Android 12/API 31 kept as the emulator reference floor | D02/D09; §§0–2, 9.6, 11.1–11.6, 12, 15.4, 16, 20; ADR-058, ADR-060; `AGENTS.md`; GitHub milestone, tracking Issue and roadmap Issues | The owner asked for a fixed, hard path to the MVP that a lower-effort executor follows without drift, after many polish units ran while MVP blockers stayed untouched. Eight helpers planned it independently; the orchestrator judged their proposals. At CP0 the owner chose the post-MVP gate placement, no extra scope, rule alignment, and declared the test devices |
+| 2026-10-23 | Abandon v1 → v2 data migration for the MVP and GA: v2 starts clean and users add servers again; cancel V2-076 and V2-076A, remove Seq 5.2 (#361) and CP4, drop the install requirement from Seq 4.3 (V1-02A), and make Seq 5.4 depend on 5.1 and 5.3 | D04; §§0, 9.1, 9.4, 9.6, 10, 11.6, 12, 15.4; ADR-060; `AGENTS.md`; Issues #398, #359, #361, #311, #357 | The owner judged migration unnecessary because few users run v1; what matters is that v2 looks like v1 and keeps its features (Seq 5.5 and the feature rows, unchanged). The v1 update gate, the cohort and the final stable v1.266.0 remain; v1 keys stay untouched |
 
 ---
 
