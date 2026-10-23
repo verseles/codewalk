@@ -151,9 +151,10 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
 
   /// Begins the in-app update installation flow for the current platform.
   /// Android: downloads the APK then opens the system installer.
-  /// Desktop: runs the install.cat shell script and signals "Restart to apply",
-  /// except for CodeWalk 2 or CodeWalk-1-only updates, which open the exact
-  /// release page because that script installs whatever is latest.
+  /// Desktop: runs the install.cat shell script and signals "Restart to apply".
+  /// Linux hands it the exact release; Windows and macOS, whose installers do
+  /// not take one yet, open the release page for CodeWalk 2, CodeWalk-1-only
+  /// and not-latest updates.
   /// Resetting to idle first lets AppShellPage clear its SnackBar guards on retry.
   Future<void> startInstall() async {
     if (_installState == UpdateInstallState.downloading ||
@@ -190,7 +191,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     if (isAndroid) {
       await _installAndroid(result);
     } else {
-      await _installDesktop();
+      await _installDesktop(result);
     }
   }
 
@@ -233,16 +234,22 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     return result;
   }
 
-  /// The desktop installer resolves /releases/latest and ignores any tag, so
-  /// it runs only for a same-major release that /releases/latest returned.
-  /// A CodeWalk 2 target, CodeWalk-1-only mode and a 1.x fix offered during a
-  /// Later reminder (latest is CodeWalk 2 then) open the release page.
+  /// The Linux installer takes the exact release, so only a release without
+  /// a tag needs its page there. The Windows and macOS installers resolve
+  /// /releases/latest and ignore any tag, so they run only for a same-major
+  /// release that /releases/latest returned; a CodeWalk 2 target,
+  /// CodeWalk-1-only mode and a 1.x fix offered during a Later reminder
+  /// (latest is CodeWalk 2 then) open the release page.
   bool _requiresManualDesktopUpdate(UpdateCheckResult result) {
+    if (kIsWeb) {
+      return false;
+    }
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      return result.releaseTag == null;
+    }
     final isDesktop =
-        !kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.linux ||
-            defaultTargetPlatform == TargetPlatform.macOS ||
-            defaultTargetPlatform == TargetPlatform.windows);
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows;
     return isDesktop &&
         (result.isMajorUpgrade ||
             _updateChannel == UpdateChannel.v1 ||
@@ -332,15 +339,27 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     }
   }
 
-  // Desktop handoff contract (defined by V1-01, implemented by V1-05A in
-  // install.sh/install.ps1 and these invocations): V1-05A must give the
-  // receiving `sh` or PowerShell process — not only `curl`/`irm` —
-  // CODEWALK_UPDATE_CONTRACT=1, CODEWALK_CHANNEL=stable|v1|beta,
-  // CODEWALK_VERSION=<exact approved tag> and
-  // CODEWALK_MIGRATION=none|accept-v2 in its environment. None is sent yet,
-  // so this unpinned installer runs only for a same-major release that
-  // /releases/latest returned.
-  Future<void> _installDesktop() async {
+  // Desktop handoff contract (V1-01, implemented by install.sh in V1-05A):
+  // the receiving `sh` — not only `curl` — gets CODEWALK_UPDATE_CONTRACT=1,
+  // CODEWALK_CHANNEL=stable|v1, CODEWALK_VERSION=<exact approved tag> and
+  // CODEWALK_MIGRATION=none|accept-v2 in its environment. The Windows
+  // installer does not take them yet (V1-05B), so it runs only for a
+  // same-major release that /releases/latest returned.
+  Future<void> _installDesktop(UpdateCheckResult result) async {
+    final releaseTag = result.releaseTag;
+    final handoff =
+        defaultTargetPlatform == TargetPlatform.linux && releaseTag != null
+        ? <String, String>{
+            'CODEWALK_UPDATE_CONTRACT': '1',
+            'CODEWALK_CHANNEL':
+                !result.isMajorUpgrade && _updateChannel == UpdateChannel.v1
+                ? 'v1'
+                : 'stable',
+            'CODEWALK_VERSION': releaseTag,
+            // Reached only for the release the gate approved.
+            'CODEWALK_MIGRATION': result.isMajorUpgrade ? 'accept-v2' : 'none',
+          }
+        : null;
     _installState = UpdateInstallState.installing;
     notifyListeners();
 
@@ -361,7 +380,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
         processResult = await _updateProcessRunner('sh', [
           '-c',
           'curl -fsSL install.cat/verseles/codewalk | sh',
-        ]).timeout(const Duration(minutes: 5));
+        ], environment: handoff).timeout(const Duration(minutes: 5));
       }
       _installState = processResult.exitCode == 0
           ? UpdateInstallState.done

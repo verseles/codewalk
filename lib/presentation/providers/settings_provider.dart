@@ -76,7 +76,11 @@ typedef SessionAttentionPresentationOverrideWriter =
     Future<void> Function(SessionAttentionPresentation presentation);
 typedef CarMessagingDisable = Future<void> Function();
 typedef UpdateProcessRunner =
-    Future<ProcessResult> Function(String executable, List<String> arguments);
+    Future<ProcessResult> Function(
+      String executable,
+      List<String> arguments, {
+      Map<String, String>? environment,
+    });
 typedef ExternalUrlLauncher = Future<bool> Function(Uri uri);
 
 Future<bool> _launchExternalUrl(Uri uri) =>

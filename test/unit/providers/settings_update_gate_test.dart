@@ -82,6 +82,7 @@ class _Harness {
   final _ScriptedUpdateService service;
   final SettingsProvider provider;
   final processCalls = <List<String>>[];
+  final processEnvironments = <Map<String, String>?>[];
   final launchedUrls = <Uri>[];
   DateTime now = DateTime.utc(2026, 10, 22, 12);
 }
@@ -102,8 +103,9 @@ Future<_Harness> _harness({
     soundService: SoundService(),
     updateCheckService: updates,
     clock: () => harness.now,
-    updateProcessRunner: (executable, arguments) async {
+    updateProcessRunner: (executable, arguments, {environment}) async {
       harness.processCalls.add(<String>[executable, ...arguments]);
+      harness.processEnvironments.add(environment);
       return ProcessResult(0, 0, '', '');
     },
     externalUrlLauncher: (uri) async {
@@ -116,6 +118,18 @@ Future<_Harness> _harness({
   await provider.initialize();
   return harness;
 }
+
+/// The environment the Linux installer receives for [tag].
+Map<String, String> _handoff(
+  String tag, {
+  String channel = 'stable',
+  String migration = 'none',
+}) => <String, String>{
+  'CODEWALK_UPDATE_CONTRACT': '1',
+  'CODEWALK_CHANNEL': channel,
+  'CODEWALK_VERSION': tag,
+  'CODEWALK_MIGRATION': migration,
+};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -161,10 +175,23 @@ void main() {
 
       expect(h.processCalls, hasLength(1));
       expect(h.processCalls.single.first, 'sh');
+      expect(h.processEnvironments.single, _handoff('v1.266.0'));
       expect(h.launchedUrls, isEmpty);
       expect(h.provider.installState, UpdateInstallState.done);
     },
   );
+
+  test('macOS keeps the unpinned installer for the latest release', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    final h = await _harness();
+    h.service.latest = _v1Fix;
+    await h.provider.debugRunStartupUpdateCheck();
+
+    await h.provider.startInstall();
+
+    expect(h.processCalls.single.first, 'sh');
+    expect(h.processEnvironments.single, isNull);
+  });
 
   test(
     'a 1.x to 2.y release opens the gate instead of the toast or card',
@@ -225,9 +252,28 @@ void main() {
     },
   );
 
+  test('Linux approval installs exactly the approved CodeWalk 2', () async {
+    final h = await _harness();
+    h.service.latest = _v2;
+    await h.provider.debugRunStartupUpdateCheck();
+    final latestCalls = h.service.latestCalls;
+
+    expect(await h.provider.approveMajorUpdate(_v2), isTrue);
+
+    expect(h.processCalls.single.first, 'sh');
+    expect(
+      h.processEnvironments.single,
+      _handoff('v2.0.0', migration: 'accept-v2'),
+    );
+    expect(h.launchedUrls, isEmpty);
+    expect(h.provider.installState, UpdateInstallState.done);
+    expect(h.service.latestCalls, latestCalls);
+  });
+
   test(
-    'desktop approval opens the exact release page instead of the installer',
+    'macOS approval opens the exact release page instead of the installer',
     () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
       final h = await _harness();
       h.service.latest = _v2;
       await h.provider.debugRunStartupUpdateCheck();
@@ -320,11 +366,18 @@ void main() {
       expect(h.service.v1Calls, 3);
       expect(h.provider.majorUpdateCandidate, isNull);
 
-      // CodeWalk-1-only desktop updates open the exact release page.
+      // CodeWalk-1-only updates install that exact v1 release on Linux and
+      // open its release page on the other desktops.
+      expect(h.provider.canInstallUpdateDirectly(), isTrue);
+      await h.provider.startInstall();
+      expect(h.processEnvironments.single, _handoff('v1.266.0', channel: 'v1'));
+      expect(h.launchedUrls, isEmpty);
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
       expect(h.provider.canInstallUpdateDirectly(), isFalse);
       await h.provider.startInstall();
-      expect(h.processCalls, isEmpty);
+      expect(h.processCalls, hasLength(1));
       expect(h.launchedUrls, <Uri>[Uri.parse(_v1Fix.releaseUrl!)]);
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
 
       // The choice survives a restart.
       final restored = await _harness(local: h.local, service: h.service);
@@ -378,7 +431,7 @@ void main() {
   );
 
   test(
-    'a 1.x fix offered during Later opens its page instead of the installer',
+    'a 1.x fix offered during Later installs exactly that fix on Linux',
     () async {
       final h = await _harness();
       h.service
@@ -390,12 +443,19 @@ void main() {
       expect(h.provider.updateCheckResult, same(_v1Fix));
       expect(h.provider.updateChannel, UpdateChannel.stable);
 
-      // /releases/latest is CodeWalk 2 here, which the installer would take.
+      // /releases/latest is CodeWalk 2 here, so the installer gets the fix's
+      // exact tag; the unpinned Windows and macOS installers would take
+      // CodeWalk 2, so they open its page.
+      await h.provider.startInstall();
+      expect(h.processEnvironments.single, _handoff('v1.266.0'));
+      expect(h.launchedUrls, isEmpty);
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
       expect(h.provider.canInstallUpdateDirectly(), isFalse);
       await h.provider.startInstall();
-
-      expect(h.processCalls, isEmpty);
+      expect(h.processCalls, hasLength(1));
       expect(h.launchedUrls, <Uri>[Uri.parse(_v1Fix.releaseUrl!)]);
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
     },
   );
 

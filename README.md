@@ -90,6 +90,24 @@ Install using the `install.cat` pattern:
 
 Run the same command again any time to update/reinstall to the latest GitHub release.
 
+On Linux and macOS, `install.sh` also takes a release channel. Set the
+variables for `sh`, the command that runs the script:
+
+```bash
+# Stay on CodeWalk 1 (remembered for later updates and reinstalls)
+curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=v1 sh
+# Opt in to CodeWalk 2 betas
+curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=beta CODEWALK_MIGRATION=accept-v2 sh
+# Install one exact release
+curl -fsSL install.cat/verseles/codewalk | CODEWALK_VERSION=v1.265.1 sh
+```
+
+New installations use the `stable` channel; an installation keeps the channel
+it was installed with. Moving a CodeWalk 1 installation to CodeWalk 2, which
+works only with OpenCode 2 servers, requires `CODEWALK_MIGRATION=accept-v2`;
+without it the installer stops and changes nothing. The Windows installer
+always installs the latest release.
+
 Installers automatically pick the right release for your platform.
 
 On Linux, release files are installed under
