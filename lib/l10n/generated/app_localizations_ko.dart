@@ -6586,4 +6586,72 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       '감지된 프로젝트 아이콘의 색상으로 세션 탭을 표시합니다.';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2를 사용할 수 있습니다 (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2에는 OpenCode 2 서버가 필요합니다. 업데이트 후에는 OpenCode 1 서버가 이 앱에서 작동하지 않습니다.';
+
+  @override
+  String get majorUpdateGateChangesTitle => '변경 사항';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      '서버에서 OpenCode 2를 실행해야 하며, OpenCode 1 서버에는 안내와 CodeWalk 1 링크가 표시됩니다.';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      '공유 링크, OpenCode 기본값 편집기, OpenCode 할 일 패널이 제거되고 세션 제목은 서버에서 가져옵니다.';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'OpenCode 할당량 막대, Android 오버레이, Android Auto 답장은 v2.1에서 다시 제공됩니다.';
+
+  @override
+  String get majorUpdateGateChangeArchive =>
+      '보관은 로컬 숨기기로 바뀌고 @ 멘션의 기호 검색은 제거됩니다.';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      'Android에서는 CodeWalk 2가 CodeWalk 1을 대체합니다(같은 앱). CodeWalk 1로 되돌아갈 수 있다는 보장은 없습니다.';
+
+  @override
+  String get majorUpdateGateReleaseNotes => '릴리스 노트 및 마이그레이션';
+
+  @override
+  String get majorUpdateGateUpdate => 'CodeWalk 2로 업데이트';
+
+  @override
+  String get majorUpdateGateStay => 'CodeWalk 1 계속 사용';
+
+  @override
+  String get majorUpdateGateLater => '7일 후 다시 알림';
+
+  @override
+  String get majorUpdateCardDescription =>
+      'OpenCode 2 서버가 필요합니다. 업데이트 전에 변경 사항을 확인하세요.';
+
+  @override
+  String get majorUpdateCardReview => '옵션 보기';
+
+  @override
+  String get settingsAboutUpdateChannel => '업데이트 채널';
+
+  @override
+  String get settingsAboutUpdateChannelStable => '안정 버전 (CodeWalk 2 전에 확인)';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      '새 안정 버전을 모두 제공하고 CodeWalk 2로 전환하기 전에 확인합니다.';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => 'CodeWalk 1만';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      'OpenCode 1 서버용 CodeWalk 1 안정 버전만 제공합니다.';
 }

@@ -2227,5 +2227,24 @@
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
   },
   "settingsAppearanceProjectTabColors": "Colori delle schede per progetto",
-  "settingsAppearanceProjectTabColorsDescription": "Colora le schede delle sessioni con i colori delle icone di progetto rilevate."
+  "settingsAppearanceProjectTabColorsDescription": "Colora le schede delle sessioni con i colori delle icone di progetto rilevate.",
+  "majorUpdateGateTitle": "CodeWalk 2 è disponibile (v{version})",
+  "majorUpdateGateRequirement": "CodeWalk 2 richiede server OpenCode 2. I tuoi server OpenCode 1 smetteranno di funzionare in questa app dopo l''aggiornamento.",
+  "majorUpdateGateChangesTitle": "Cosa cambia",
+  "majorUpdateGateChangeServers": "I server devono eseguire OpenCode 2; i server OpenCode 1 mostrano una spiegazione e un link a CodeWalk 1.",
+  "majorUpdateGateChangeFeatures": "Link di condivisione, editor dei valori predefiniti di OpenCode e pannello delle attività di OpenCode vengono rimossi; i titoli delle sessioni arrivano dal server.",
+  "majorUpdateGateChangeLater": "Le barre delle quote di OpenCode, l''overlay Android e le risposte di Android Auto tornano nella v2.1.",
+  "majorUpdateGateChangeArchive": "Archiviare diventa un nascondimento locale e la ricerca dei simboli nelle menzioni @ viene rimossa.",
+  "majorUpdateGateAndroidNote": "Su Android, CodeWalk 2 sostituisce CodeWalk 1 (stessa app). Il ritorno a CodeWalk 1 non è garantito.",
+  "majorUpdateGateReleaseNotes": "Note di rilascio e migrazione",
+  "majorUpdateGateUpdate": "Aggiorna a CodeWalk 2",
+  "majorUpdateGateStay": "Resta su CodeWalk 1",
+  "majorUpdateGateLater": "Ricordamelo tra 7 giorni",
+  "majorUpdateCardDescription": "Richiede server OpenCode 2. Controlla cosa cambia prima di aggiornare.",
+  "majorUpdateCardReview": "Vedi le opzioni",
+  "settingsAboutUpdateChannel": "Canale di aggiornamento",
+  "settingsAboutUpdateChannelStable": "Stabile (chiede prima di CodeWalk 2)",
+  "settingsAboutUpdateChannelStableDescription": "Propone ogni nuova versione stabile e chiede prima di passare a CodeWalk 2.",
+  "settingsAboutUpdateChannelV1": "Solo CodeWalk 1",
+  "settingsAboutUpdateChannelV1Description": "Propone solo versioni stabili di CodeWalk 1 per i tuoi server OpenCode 1."
 }

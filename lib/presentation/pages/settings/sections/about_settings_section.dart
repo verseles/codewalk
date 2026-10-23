@@ -13,9 +13,11 @@ import '../../../../data/datasources/app_local_datasource.dart';
 import '../../../providers/app_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_completion_resolver.dart';
+import '../../../services/update_check_service.dart';
 import '../../../utils/app_page_route.dart';
 import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
+import '../../../widgets/major_update_gate_dialog.dart';
 import '../../../widgets/settings_update_available_card.dart';
 import '../../app_shell_page.dart';
 import '../release_history_page.dart';
@@ -52,6 +54,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
+        final majorUpdate = settings.majorUpdateCandidate;
         final checking = settings.checkingForUpdate;
         final upToDate = settings.lastCheckFoundNoUpdate;
 
@@ -78,7 +81,16 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
                 context,
               ).push(AppPageRoute(builder: (_) => const ReleaseHistoryPage())),
             ),
-            if (updateResult != null && updateResult.isNewer)
+            if (majorUpdate != null)
+              SettingsUpdateAvailableCard(
+                settings: settings,
+                result: majorUpdate,
+                currentVersion: _version,
+                currentBuildNumber: _buildNumber,
+                onReviewMajorUpdate: () =>
+                    unawaited(showMajorUpdateGate(context, settings)),
+              )
+            else if (updateResult != null && updateResult.isNewer)
               SettingsUpdateAvailableCard(
                 settings: settings,
                 result: updateResult,
@@ -97,6 +109,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
               ),
             if (upToDate && updateResult == null) _buildUpToDateTile(context),
             _buildCheckUpdatesOnOpenTile(context, settings),
+            _buildUpdateChannelTile(context, settings),
             _buildCheckForUpdatesTile(context, settings, checking),
             const SizedBox(height: 20),
             SettingsGroupHeader(title: context.l10n.settingsGroupHelp),
@@ -153,6 +166,67 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
     );
   }
 
+  Widget _buildUpdateChannelTile(
+    BuildContext context,
+    SettingsProvider settings,
+  ) {
+    final l10n = context.l10n;
+    return RadioGroup<UpdateChannel>(
+      key: const ValueKey('settings_about_update_channel'),
+      groupValue: settings.updateChannel,
+      onChanged: (value) {
+        if (value == null || value == settings.updateChannel) return;
+        unawaited(_changeUpdateChannel(context, settings, value));
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: const Icon(Symbols.alt_route),
+            title: Text(l10n.settingsAboutUpdateChannel),
+          ),
+          RadioListTile<UpdateChannel>(
+            key: const ValueKey('settings_about_update_channel_stable'),
+            value: UpdateChannel.stable,
+            title: Text(l10n.settingsAboutUpdateChannelStable),
+            subtitle: Text(l10n.settingsAboutUpdateChannelStableDescription),
+          ),
+          RadioListTile<UpdateChannel>(
+            key: const ValueKey('settings_about_update_channel_v1'),
+            value: UpdateChannel.v1,
+            title: Text(l10n.settingsAboutUpdateChannelV1),
+            subtitle: Text(l10n.settingsAboutUpdateChannelV1Description),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "CodeWalk 1 only" is the gate's Stay choice. Returning to stable
+  /// re-checks and asks through the gate when CodeWalk 2 is available.
+  Future<void> _changeUpdateChannel(
+    BuildContext context,
+    SettingsProvider settings,
+    UpdateChannel channel,
+  ) async {
+    await settings.setUpdateChannel(channel);
+    if (channel == UpdateChannel.stable &&
+        settings.majorUpdateCandidate != null &&
+        context.mounted) {
+      await showMajorUpdateGate(context, settings);
+    }
+  }
+
+  Future<void> _checkForUpdates(
+    BuildContext context,
+    SettingsProvider settings,
+  ) async {
+    final foundMajorUpdate = await settings.checkForUpdate();
+    if (foundMajorUpdate && context.mounted) {
+      await showMajorUpdateGate(context, settings);
+    }
+  }
+
   Widget _buildCheckForUpdatesTile(
     BuildContext context,
     SettingsProvider settings,
@@ -173,7 +247,9 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
             ? context.l10n.settingsAboutChecking
             : context.l10n.settingsAboutTapToCheck,
       ),
-      onTap: checking ? null : () => settings.checkForUpdate(),
+      onTap: checking
+          ? null
+          : () => unawaited(_checkForUpdates(context, settings)),
     );
   }
 

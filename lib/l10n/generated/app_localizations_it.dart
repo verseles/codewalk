@@ -6958,4 +6958,73 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       'Colora le schede delle sessioni con i colori delle icone di progetto rilevate.';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2 è disponibile (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2 richiede server OpenCode 2. I tuoi server OpenCode 1 smetteranno di funzionare in questa app dopo l\'aggiornamento.';
+
+  @override
+  String get majorUpdateGateChangesTitle => 'Cosa cambia';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      'I server devono eseguire OpenCode 2; i server OpenCode 1 mostrano una spiegazione e un link a CodeWalk 1.';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      'Link di condivisione, editor dei valori predefiniti di OpenCode e pannello delle attività di OpenCode vengono rimossi; i titoli delle sessioni arrivano dal server.';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'Le barre delle quote di OpenCode, l\'overlay Android e le risposte di Android Auto tornano nella v2.1.';
+
+  @override
+  String get majorUpdateGateChangeArchive =>
+      'Archiviare diventa un nascondimento locale e la ricerca dei simboli nelle menzioni @ viene rimossa.';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      'Su Android, CodeWalk 2 sostituisce CodeWalk 1 (stessa app). Il ritorno a CodeWalk 1 non è garantito.';
+
+  @override
+  String get majorUpdateGateReleaseNotes => 'Note di rilascio e migrazione';
+
+  @override
+  String get majorUpdateGateUpdate => 'Aggiorna a CodeWalk 2';
+
+  @override
+  String get majorUpdateGateStay => 'Resta su CodeWalk 1';
+
+  @override
+  String get majorUpdateGateLater => 'Ricordamelo tra 7 giorni';
+
+  @override
+  String get majorUpdateCardDescription =>
+      'Richiede server OpenCode 2. Controlla cosa cambia prima di aggiornare.';
+
+  @override
+  String get majorUpdateCardReview => 'Vedi le opzioni';
+
+  @override
+  String get settingsAboutUpdateChannel => 'Canale di aggiornamento';
+
+  @override
+  String get settingsAboutUpdateChannelStable =>
+      'Stabile (chiede prima di CodeWalk 2)';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      'Propone ogni nuova versione stabile e chiede prima di passare a CodeWalk 2.';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => 'Solo CodeWalk 1';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      'Propone solo versioni stabili di CodeWalk 1 per i tuoi server OpenCode 1.';
 }

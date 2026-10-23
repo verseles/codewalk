@@ -395,6 +395,10 @@ List<SettingsSearchOption> settingsSearchOptions(
     );
   }
   add('about', 'settings_about_check_on_open', l.settingsAboutCheckOnOpen);
+  add('about', 'settings_about_update_channel', l.settingsAboutUpdateChannel, [
+    l.settingsAboutUpdateChannelStable,
+    l.settingsAboutUpdateChannelV1,
+  ]);
   add('about', 'settings_about_release_history', l.releaseHistoryTitle, [
     l.settingsAboutChangelog, l.releaseHistoryDescription, 'ANNOUNCE',
   ]);

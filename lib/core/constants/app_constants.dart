@@ -62,6 +62,10 @@ class AppConstants {
   // Update check keys
   static const String dismissedUpdateVersionKey = 'dismissed_update_version';
   static const String dismissedNewsVersionKey = 'dismissed_news_version';
+  static const String updateChannelKey = 'update_channel';
+  static const String majorUpdateRemindUntilMsKey =
+      'major_update_remind_until_ms';
+  static const String majorUpdateRemindMajorKey = 'major_update_remind_major';
   static const String releaseHistoryStateKey = 'release_history_state_v1';
   static const String releaseHistoryCacheKey = 'release_history_cache_v1';
 

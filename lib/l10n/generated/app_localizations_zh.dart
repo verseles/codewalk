@@ -6414,4 +6414,70 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       '使用检测到的项目图标颜色为会话标签页着色。';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2 已发布 (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2 需要 OpenCode 2 服务器。更新后，您的 OpenCode 1 服务器将无法在此应用中使用。';
+
+  @override
+  String get majorUpdateGateChangesTitle => '有哪些变化';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      '服务器必须运行 OpenCode 2；OpenCode 1 服务器会显示说明和 CodeWalk 1 的链接。';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      '移除了分享链接、OpenCode 默认设置编辑器和 OpenCode 待办面板；会话标题由服务器提供。';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'OpenCode 配额条、Android 悬浮窗和 Android Auto 回复将在 v2.1 中回归。';
+
+  @override
+  String get majorUpdateGateChangeArchive => '归档变为本地隐藏，并移除了 @ 提及中的符号搜索。';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      '在 Android 上，CodeWalk 2 会替换 CodeWalk 1（同一应用）。无法保证能退回到 CodeWalk 1。';
+
+  @override
+  String get majorUpdateGateReleaseNotes => '版本说明与迁移';
+
+  @override
+  String get majorUpdateGateUpdate => '更新到 CodeWalk 2';
+
+  @override
+  String get majorUpdateGateStay => '继续使用 CodeWalk 1';
+
+  @override
+  String get majorUpdateGateLater => '7 天后提醒我';
+
+  @override
+  String get majorUpdateCardDescription => '需要 OpenCode 2 服务器。更新前请查看有哪些变化。';
+
+  @override
+  String get majorUpdateCardReview => '查看选项';
+
+  @override
+  String get settingsAboutUpdateChannel => '更新渠道';
+
+  @override
+  String get settingsAboutUpdateChannelStable => '稳定版（升级到 CodeWalk 2 前询问）';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      '提供每个新的稳定版本，并在迁移到 CodeWalk 2 前询问。';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => '仅 CodeWalk 1';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      '仅为您的 OpenCode 1 服务器提供 CodeWalk 1 稳定版本。';
 }

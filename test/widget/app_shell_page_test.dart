@@ -46,6 +46,7 @@ import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/stt_model_download_tracker.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
+import 'package:codewalk/presentation/widgets/major_update_gate_dialog.dart';
 import 'package:codewalk/presentation/widgets/release_announcements_dialog.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:dartz/dartz.dart';
@@ -527,6 +528,93 @@ void main() {
         expect(find.text('Update available: v1.3.0'), findsOneWidget);
         expect(find.text('Install'), findsNothing);
         expect(find.text('GitHub'), findsOneWidget);
+      } finally {
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+        chatProvider?.dispose();
+        appProvider?.dispose();
+        settingsProvider?.dispose();
+        debugDefaultTargetPlatformOverride = previousPlatform;
+      }
+    },
+  );
+
+  testWidgets(
+    'startup major release shows the gate instead of the update toast',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      ChatProvider? chatProvider;
+      AppProvider? appProvider;
+      SettingsProvider? settingsProvider;
+      try {
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.265.1',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+
+        final localDataSource = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = jsonEncode(<String, dynamic>{
+            'checkUpdatesOnOpen': true,
+            'skipOnboardingWizard': true,
+          });
+        settingsProvider = SettingsProvider(
+          localDataSource: localDataSource,
+          dioClient: _NoopDioClient(),
+          soundService: SoundService(),
+          updateCheckService: _FakeUpdateCheckService(
+            const UpdateCheckResult(
+              latestVersion: '2.0.0',
+              releaseTag: 'v2.0.0',
+              releaseUrl:
+                  'https://github.com/verseles/codewalk/releases/tag/v2.0.0',
+              announcement: 'CodeWalk 2 is here',
+              isNewer: true,
+              isMajorUpgrade: true,
+            ),
+          ),
+        );
+        await settingsProvider.initialize();
+        chatProvider = _buildChatProvider(localDataSource: localDataSource);
+        appProvider = _buildAppProvider(
+          localDataSource: localDataSource,
+          dioClient: _NoopDioClient(),
+        );
+
+        await tester.pumpWidget(
+          _testAppWithSettings(chatProvider, appProvider, settingsProvider),
+        );
+        await tester.pump();
+        for (
+          var i = 0;
+          i < 10 && find.byType(MajorUpdateGateDialog).evaluate().isEmpty;
+          i += 1
+        ) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.byType(MajorUpdateGateDialog), findsOneWidget);
+        expect(find.text('Update available: v2.0.0'), findsNothing);
+        expect(find.text('Install'), findsNothing);
+        expect(find.text('CodeWalk 2 is here'), findsNothing);
+        expect(settingsProvider.updateCheckResult, isNull);
+
+        await tester.tap(
+          find.byKey(const ValueKey<String>('major_update_gate_later')),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(find.byType(MajorUpdateGateDialog), findsNothing);
+        expect(settingsProvider.majorUpdateCandidate, isNull);
+        expect(localDataSource.majorUpdateRemindMajor, 2);
+        expect(settingsProvider.installState, UpdateInstallState.idle);
       } finally {
         await tester.pump(const Duration(seconds: 1));
         await tester.pumpWidget(const SizedBox.shrink());

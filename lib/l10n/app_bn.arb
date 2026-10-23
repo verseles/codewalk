@@ -2345,5 +2345,24 @@
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
   },
   "settingsAppearanceProjectTabColors": "প্রকল্পের ট্যাবের রং",
-  "settingsAppearanceProjectTabColorsDescription": "শনাক্ত করা প্রকল্পের আইকনের রং দিয়ে সেশন ট্যাব রাঙান।"
+  "settingsAppearanceProjectTabColorsDescription": "শনাক্ত করা প্রকল্পের আইকনের রং দিয়ে সেশন ট্যাব রাঙান।",
+  "majorUpdateGateTitle": "CodeWalk 2 উপলব্ধ (v{version})",
+  "majorUpdateGateRequirement": "CodeWalk 2-এর জন্য OpenCode 2 সার্ভার প্রয়োজন। আপডেটের পরে আপনার OpenCode 1 সার্ভারগুলো এই অ্যাপে আর কাজ করবে না।",
+  "majorUpdateGateChangesTitle": "কী বদলাচ্ছে",
+  "majorUpdateGateChangeServers": "সার্ভারে OpenCode 2 চালাতে হবে; OpenCode 1 সার্ভারে একটি ব্যাখ্যা ও CodeWalk 1-এর লিঙ্ক দেখানো হয়।",
+  "majorUpdateGateChangeFeatures": "শেয়ার লিঙ্ক, OpenCode ডিফল্ট সম্পাদক এবং OpenCode টুডু প্যানেল সরানো হয়েছে; সেশনের শিরোনাম সার্ভার থেকে আসে।",
+  "majorUpdateGateChangeLater": "OpenCode কোটা বার, Android ওভারলে এবং Android Auto উত্তর v2.1-এ ফিরে আসবে।",
+  "majorUpdateGateChangeArchive": "আর্কাইভ এখন স্থানীয়ভাবে লুকানো হয়, এবং @ উল্লেখে সিম্বল অনুসন্ধান সরানো হয়েছে।",
+  "majorUpdateGateAndroidNote": "Android-এ CodeWalk 2 একই অ্যাপ হিসেবে CodeWalk 1-কে প্রতিস্থাপন করে। CodeWalk 1-এ ফিরে যাওয়ার নিশ্চয়তা নেই।",
+  "majorUpdateGateReleaseNotes": "রিলিজ নোট ও মাইগ্রেশন",
+  "majorUpdateGateUpdate": "CodeWalk 2-এ আপডেট করুন",
+  "majorUpdateGateStay": "CodeWalk 1-এ থাকুন",
+  "majorUpdateGateLater": "৭ দিন পরে মনে করিয়ে দিন",
+  "majorUpdateCardDescription": "OpenCode 2 সার্ভার প্রয়োজন। আপডেটের আগে কী বদলাচ্ছে দেখে নিন।",
+  "majorUpdateCardReview": "বিকল্পগুলো দেখুন",
+  "settingsAboutUpdateChannel": "আপডেট চ্যানেল",
+  "settingsAboutUpdateChannelStable": "স্থিতিশীল (CodeWalk 2-এর আগে জিজ্ঞাসা করে)",
+  "settingsAboutUpdateChannelStableDescription": "প্রতিটি নতুন স্থিতিশীল রিলিজ দেখায় এবং CodeWalk 2-এ যাওয়ার আগে জিজ্ঞাসা করে।",
+  "settingsAboutUpdateChannelV1": "শুধু CodeWalk 1",
+  "settingsAboutUpdateChannelV1Description": "আপনার OpenCode 1 সার্ভারের জন্য শুধু স্থিতিশীল CodeWalk 1 রিলিজ দেখায়।"
 }

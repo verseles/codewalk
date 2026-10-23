@@ -15,6 +15,7 @@ import '../services/desktop_tray_service_types.dart';
 import '../services/stt_model_download_tracker.dart';
 import '../services/update_check_service.dart';
 import '../widgets/app_indeterminate_progress.dart';
+import '../widgets/major_update_gate_dialog.dart';
 import '../widgets/release_announcements_dialog.dart';
 import 'chat_page.dart';
 import 'onboarding_wizard_page.dart';
@@ -384,6 +385,29 @@ class _AppShellPageState extends State<AppShellPage> {
                   );
                 }
               }
+            } finally {
+              if (mounted) setState(() => _releaseDialogScheduled = false);
+            }
+          });
+        } else if (!_releaseDialogScheduled &&
+            routeIsCurrent &&
+            settingsProvider.pendingStartupMajorUpdateGate &&
+            settingsProvider.majorUpdateCandidate != null &&
+            !settingsProvider.pendingPostOnboardingChatTour &&
+            settingsProvider.installState == UpdateInstallState.idle) {
+          // A major release shows the gate instead of the update toast, never
+          // stacked over another modal; the same flag sequences it with the
+          // release announcements dialog.
+          _releaseDialogScheduled = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              if (!mounted ||
+                  _onboardingActive ||
+                  !(ModalRoute.isCurrentOf(context) ?? true) ||
+                  settingsProvider.installState != UpdateInstallState.idle) {
+                return;
+              }
+              await showMajorUpdateGate(context, settingsProvider);
             } finally {
               if (mounted) setState(() => _releaseDialogScheduled = false);
             }

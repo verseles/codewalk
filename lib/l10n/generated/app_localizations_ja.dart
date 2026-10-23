@@ -6588,4 +6588,72 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       '検出されたプロジェクトアイコンの色でセッションタブを彩ります。';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2 が利用可能です (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2 には OpenCode 2 サーバーが必要です。更新後、OpenCode 1 サーバーはこのアプリで使えなくなります。';
+
+  @override
+  String get majorUpdateGateChangesTitle => '変更点';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      'サーバーでは OpenCode 2 を実行する必要があります。OpenCode 1 サーバーには説明と CodeWalk 1 へのリンクが表示されます。';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      '共有リンク、OpenCode の既定値エディター、OpenCode の ToDo パネルは削除され、セッションのタイトルはサーバーから取得されます。';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'OpenCode のクォータバー、Android のオーバーレイ、Android Auto での返信は v2.1 で復活します。';
+
+  @override
+  String get majorUpdateGateChangeArchive =>
+      'アーカイブはローカルでの非表示になり、@ メンションのシンボル検索は削除されます。';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      'Android では CodeWalk 2 が CodeWalk 1 を置き換えます (同じアプリ)。CodeWalk 1 に戻せる保証はありません。';
+
+  @override
+  String get majorUpdateGateReleaseNotes => 'リリースノートと移行';
+
+  @override
+  String get majorUpdateGateUpdate => 'CodeWalk 2 に更新';
+
+  @override
+  String get majorUpdateGateStay => 'CodeWalk 1 を使い続ける';
+
+  @override
+  String get majorUpdateGateLater => '7 日後に通知';
+
+  @override
+  String get majorUpdateCardDescription =>
+      'OpenCode 2 サーバーが必要です。更新前に変更点を確認してください。';
+
+  @override
+  String get majorUpdateCardReview => '選択肢を確認';
+
+  @override
+  String get settingsAboutUpdateChannel => '更新チャンネル';
+
+  @override
+  String get settingsAboutUpdateChannelStable => '安定版 (CodeWalk 2 の前に確認)';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      '新しい安定版を案内し、CodeWalk 2 に移行する前に確認します。';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => 'CodeWalk 1 のみ';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      'OpenCode 1 サーバー向けに、CodeWalk 1 の安定版だけを案内します。';
 }

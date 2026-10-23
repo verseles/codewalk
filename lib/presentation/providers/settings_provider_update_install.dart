@@ -39,34 +39,53 @@ bool shouldNotifyInstallProgress({
 }
 
 extension SettingsProviderUpdateInstall on SettingsProvider {
-  Future<void> checkForUpdate() async {
+  /// Manual "Check for updates". Returns true when it found a CodeWalk major
+  /// update, which the caller presents through the gate dialog. An explicit
+  /// check bypasses an active "Remind me later" reminder.
+  Future<bool> checkForUpdate() async {
     _checkingForUpdate = true;
     _lastCheckFoundNoUpdate = false;
+    final generation = _updatePolicyGeneration;
     try {
       notifyListeners();
       final info = await PackageInfo.fromPlatform();
       _updateCheckService.clearCache();
-      final result = await _updateCheckService.check(info.version);
-      if (result == null) {
+      final routed = await _routeUpdateQuery(
+        info.version,
+        ignoreCooldown: false,
+        bypassReminder: true,
+      );
+      if (routed == null || generation != _updatePolicyGeneration) {
         // Failed check: keep the last known update/news state instead of
         // flashing an empty surface (matches the silent-check behavior).
-        return;
+        return false;
+      }
+      if (routed.isMajorGate) {
+        _presentMajorUpdateGate(routed.result!, startup: false);
+        return true;
+      }
+      _hideMajorUpdateGate();
+      final result = routed.result;
+      if (result == null) {
+        return false;
       }
       _latestRelease = result;
-      if (result.isNewer &&
-          result.latestVersion != _dismissedUpdateVersion) {
+      if (result.isNewer && result.latestVersion != _dismissedUpdateVersion) {
         _updateCheckResult = result;
+        _updateCheckResultIsLatest = routed.isLatest;
         _lastCheckFoundNoUpdate = false;
       } else {
         _updateCheckResult = null;
         _lastCheckFoundNoUpdate = true;
       }
+      return false;
     } catch (error, stackTrace) {
       AppLogger.warn(
         'Update check failed',
         error: error,
         stackTrace: stackTrace,
       );
+      return false;
     } finally {
       _checkingForUpdate = false;
       notifyListeners();
@@ -105,6 +124,12 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     _latestRelease = null;
     _dismissedNewsVersion = null;
     _pendingStartupNewsToast = false;
+    _bumpUpdatePolicyGeneration();
+    _updateChannel = UpdateChannel.stable;
+    _majorUpdateRemindUntil = null;
+    _majorUpdateRemindMajor = null;
+    _hideMajorUpdateGate();
+    _updateCheckService.clearCache();
     _checkingForUpdate = false;
     _lastCheckFoundNoUpdate = false;
     _pendingStartupUpdateToast = false;
@@ -126,15 +151,32 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
 
   /// Begins the in-app update installation flow for the current platform.
   /// Android: downloads the APK then opens the system installer.
-  /// Desktop: runs the install.cat shell script and signals "Restart to apply".
+  /// Desktop: runs the install.cat shell script and signals "Restart to apply",
+  /// except for CodeWalk 2 or CodeWalk-1-only updates, which open the exact
+  /// release page because that script installs whatever is latest.
   /// Resetting to idle first lets AppShellPage clear its SnackBar guards on retry.
   Future<void> startInstall() async {
     if (_installState == UpdateInstallState.downloading ||
         _installState == UpdateInstallState.installing) {
       return;
     }
-    final result = _updateCheckResult;
-    if (result == null || !canInstallUpdateDirectly(result)) {
+    final result = _installTarget();
+    if (result == null) {
+      return;
+    }
+    if (_requiresManualDesktopUpdate(result)) {
+      await _openReleasePageForManualUpdate(result);
+      return;
+    }
+    if (!canInstallUpdateDirectly(result)) {
+      // An approved CodeWalk 2 release on a platform without an installer
+      // (Web, iOS) opens its release page, so the gate's Update is never a
+      // no-op there.
+      final hasNoInstaller =
+          kIsWeb || defaultTargetPlatform == TargetPlatform.iOS;
+      if (result.isMajorUpgrade && hasNoInstaller) {
+        await _openReleasePageForManualUpdate(result);
+      }
       return;
     }
 
@@ -163,10 +205,67 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        return true;
+        return !_requiresManualDesktopUpdate(updateResult);
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         return false;
+    }
+  }
+
+  /// The release startInstall may act on. A major release qualifies only
+  /// after the gate's Update action approved that exact tag, so no retry,
+  /// shortcut or snackbar can bypass the gate.
+  UpdateCheckResult? _installTarget() {
+    final candidate = _majorUpdateCandidate;
+    if (candidate != null) {
+      final approved = _approvedMajorUpdate;
+      if (approved == null ||
+          approved.releaseTag == null ||
+          approved.releaseTag != candidate.releaseTag) {
+        return null;
+      }
+      return approved;
+    }
+    final result = _updateCheckResult;
+    if (result == null || result.isMajorUpgrade) {
+      return null;
+    }
+    return result;
+  }
+
+  /// The desktop installer resolves /releases/latest and ignores any tag, so
+  /// it runs only for a same-major release that /releases/latest returned.
+  /// A CodeWalk 2 target, CodeWalk-1-only mode and a 1.x fix offered during a
+  /// Later reminder (latest is CodeWalk 2 then) open the release page.
+  bool _requiresManualDesktopUpdate(UpdateCheckResult result) {
+    final isDesktop =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.windows);
+    return isDesktop &&
+        (result.isMajorUpgrade ||
+            _updateChannel == UpdateChannel.v1 ||
+            !identical(result, _updateCheckResult) ||
+            !_updateCheckResultIsLatest);
+  }
+
+  Future<bool> _openReleasePageForManualUpdate(UpdateCheckResult result) async {
+    final url = result.releaseUrl;
+    final uri = url == null ? null : Uri.tryParse(url);
+    if (uri == null) {
+      AppLogger.warn('Manual update has no release page to open');
+      return false;
+    }
+    try {
+      return await _externalUrlLauncher(uri);
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Opening the release page failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
     }
   }
 
@@ -197,9 +296,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
         apkUrl,
         destPath,
         onReceiveProgress: (received, total) {
-          final progress = total > 0
-              ? (received / total).clamp(0.0, 1.0)
-              : 0.0;
+          final progress = total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
           final now = DateTime.now();
           if (!shouldNotifyInstallProgress(
             previous: _installProgress,
@@ -235,6 +332,14 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     }
   }
 
+  // Desktop handoff contract (defined by V1-01, implemented by V1-05A in
+  // install.sh/install.ps1 and these invocations): V1-05A must give the
+  // receiving `sh` or PowerShell process — not only `curl`/`irm` —
+  // CODEWALK_UPDATE_CONTRACT=1, CODEWALK_CHANNEL=stable|v1|beta,
+  // CODEWALK_VERSION=<exact approved tag> and
+  // CODEWALK_MIGRATION=none|accept-v2 in its environment. None is sent yet,
+  // so this unpinned installer runs only for a same-major release that
+  // /releases/latest returned.
   Future<void> _installDesktop() async {
     _installState = UpdateInstallState.installing;
     notifyListeners();
@@ -245,7 +350,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
       // Wrap in a timeout so a stalled network does not hang indefinitely.
       ProcessResult processResult;
       if (isWindows) {
-        processResult = await Process.run('powershell', [
+        processResult = await _updateProcessRunner('powershell', [
           '-NoProfile',
           '-ExecutionPolicy',
           'Bypass',
@@ -253,7 +358,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
           r"$env:CODEWALK_INSTALL_MODE='stage'; irm install.cat/verseles/codewalk | iex",
         ]).timeout(const Duration(minutes: 5));
       } else {
-        processResult = await Process.run('sh', [
+        processResult = await _updateProcessRunner('sh', [
           '-c',
           'curl -fsSL install.cat/verseles/codewalk | sh',
         ]).timeout(const Duration(minutes: 5));

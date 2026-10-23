@@ -1145,9 +1145,12 @@ void main() {
     await tester.tap(find.text('About').first);
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('about_replay_chat_tour_tile')),
+    final replayTile = find.byKey(
+      const ValueKey<String>('about_replay_chat_tour_tile'),
     );
+    await tester.ensureVisible(replayTile);
+    await tester.pumpAndSettle();
+    await tester.tap(replayTile);
     await tester.pumpAndSettle();
 
     expect(settingsProvider.pendingPostOnboardingChatTour, isTrue);

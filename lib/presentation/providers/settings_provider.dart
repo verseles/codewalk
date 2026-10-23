@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/android_process_diagnostics.dart';
@@ -74,6 +75,12 @@ typedef SessionAttentionPresentationOverrideReader =
 typedef SessionAttentionPresentationOverrideWriter =
     Future<void> Function(SessionAttentionPresentation presentation);
 typedef CarMessagingDisable = Future<void> Function();
+typedef UpdateProcessRunner =
+    Future<ProcessResult> Function(String executable, List<String> arguments);
+typedef ExternalUrlLauncher = Future<bool> Function(Uri uri);
+
+Future<bool> _launchExternalUrl(Uri uri) =>
+    launchUrl(uri, mode: LaunchMode.externalApplication);
 
 class SettingsProvider extends ChangeNotifier {
   SettingsProvider({
@@ -92,6 +99,9 @@ class SettingsProvider extends ChangeNotifier {
     SessionAttentionPresentationOverrideWriter?
     sessionAttentionPresentationOverrideWriter,
     CarMessagingDisable? carMessagingDisable,
+    DateTime Function()? clock,
+    UpdateProcessRunner? updateProcessRunner,
+    ExternalUrlLauncher? externalUrlLauncher,
   }) : _localDataSource = localDataSource,
        _dioClient = dioClient,
        _soundService = soundService,
@@ -109,6 +119,9 @@ class SettingsProvider extends ChangeNotifier {
            sessionAttentionPresentationOverrideWriter,
        _carMessagingDisable =
            carMessagingDisable ?? CarMessagingRuntime.disable,
+       _clock = clock ?? DateTime.now,
+       _updateProcessRunner = updateProcessRunner ?? Process.run,
+       _externalUrlLauncher = externalUrlLauncher ?? _launchExternalUrl,
        _cellularDataSaverService =
            cellularDataSaverService ?? CellularDataSaverService.disabled() {
     _cellularDataSaverService.addListener(_handleCellularDataSaverChanged);
@@ -138,6 +151,9 @@ class SettingsProvider extends ChangeNotifier {
   _sessionAttentionPresentationOverrideWriter;
   final CellularDataSaverService _cellularDataSaverService;
   final CarMessagingDisable _carMessagingDisable;
+  final DateTime Function() _clock;
+  final UpdateProcessRunner _updateProcessRunner;
+  final ExternalUrlLauncher _externalUrlLauncher;
 
   ExperienceSettings _settings = ExperienceSettings.defaults();
   final Map<NotificationCategory, bool> _serverBackedNotifications =
@@ -149,6 +165,9 @@ class SettingsProvider extends ChangeNotifier {
   final Map<NotificationCategory, String> _serverConfigKeyByCategory =
       <NotificationCategory, String>{};
   UpdateCheckResult? _updateCheckResult;
+  // Whether _updateCheckResult is what /releases/latest returned: the only
+  // release the unpinned desktop installer installs.
+  bool _updateCheckResultIsLatest = false;
   String? _dismissedUpdateVersion;
   // Latest successful release payload, kept even when already up to date so
   // the What's-new announcement stays visible. Null on failure/offline.
@@ -170,9 +189,39 @@ class SettingsProvider extends ChangeNotifier {
   DateTime? _lastSettingsOpenUpdateCheckAt;
   Future<void>? _silentUpdateCheckInFlight;
   bool _silentUpdateCheckInFlightForced = false;
+  // Major-update gate policy (D04). A CodeWalk 2 release is never stored in
+  // _updateCheckResult/_latestRelease; it waits here for the user's choice.
+  UpdateChannel _updateChannel = UpdateChannel.stable;
+  DateTime? _majorUpdateRemindUntil;
+  int? _majorUpdateRemindMajor;
+  UpdateCheckResult? _majorUpdateCandidate;
+  UpdateCheckResult? _approvedMajorUpdate;
+  bool _pendingStartupMajorUpdateGate = false;
+  String? _startupMajorGateTag;
+  // Bumped by channel/reminder changes and resets so results of checks that
+  // started under the previous policy are dropped.
+  int _updatePolicyGeneration = 0;
 
   @visibleForTesting
   static const Duration settingsOpenUpdateCheckInterval = Duration(minutes: 20);
+
+  /// How long "Remind me later" hides the major-update gate.
+  static const Duration majorUpdateRemindInterval = Duration(days: 7);
+  static const int _debugMajorUpdateRemindSeconds = int.fromEnvironment(
+    'CODEWALK_UPDATE_LATER_SECONDS',
+  );
+
+  /// Debug builds may shorten the Later interval for manual testing through
+  /// `--dart-define=CODEWALK_UPDATE_LATER_SECONDS=...`.
+  @visibleForTesting
+  static Duration resolveMajorUpdateRemindInterval({
+    required bool debugMode,
+    int overrideSeconds = _debugMajorUpdateRemindSeconds,
+  }) {
+    if (!debugMode || overrideSeconds <= 0) return majorUpdateRemindInterval;
+    return Duration(seconds: overrideSeconds);
+  }
+
   bool _openCodeDefaultsLoading = false;
   bool _openCodeDefaultsLoaded = false;
   String? _openCodeDefaultsError;
@@ -228,8 +277,16 @@ class SettingsProvider extends ChangeNotifier {
     final announcement = release?.announcement;
     return announcement != null &&
         announcement.isNotEmpty &&
-        release!.latestVersion != _dismissedNewsVersion;
+        !release!.isMajorUpgrade &&
+        release.latestVersion != _dismissedNewsVersion;
   }
+
+  UpdateChannel get updateChannel => _updateChannel;
+
+  /// The CodeWalk 2 release waiting for the user's gate decision, if any.
+  UpdateCheckResult? get majorUpdateCandidate => _majorUpdateCandidate;
+  bool get pendingStartupMajorUpdateGate => _pendingStartupMajorUpdateGate;
+  DateTime? get majorUpdateRemindUntil => _majorUpdateRemindUntil;
 
   bool get checkingForUpdate => _checkingForUpdate;
   bool get lastCheckFoundNoUpdate => _lastCheckFoundNoUpdate;
@@ -454,6 +511,7 @@ class SettingsProvider extends ChangeNotifier {
     _dismissedUpdateVersion = await _localDataSource
         .getDismissedUpdateVersion();
     _dismissedNewsVersion = await _localDataSource.getDismissedNewsVersion();
+    await _loadUpdatePolicy();
     await _initializeReleaseHistory(
       existingInstall: hasStoredExperienceSettings || hadServers,
     );
@@ -590,21 +648,35 @@ class SettingsProvider extends ChangeNotifier {
     required bool announceStartupToast,
     required bool ignoreCooldown,
   }) async {
+    final generation = _updatePolicyGeneration;
     try {
       final info = await PackageInfo.fromPlatform();
-      final result = await _updateCheckService.check(
+      final routed = await _routeUpdateQuery(
         info.version,
         ignoreCooldown: ignoreCooldown,
+        bypassReminder: false,
       );
+      if (routed == null || generation != _updatePolicyGeneration) {
+        return;
+      }
+      if (routed.isMajorGate) {
+        _presentMajorUpdateGate(routed.result!, startup: announceStartupToast);
+        notifyListeners();
+        return;
+      }
+      var shouldNotify = _hideMajorUpdateGate();
+      final result = routed.result;
       if (result == null) {
+        if (shouldNotify) notifyListeners();
         return;
       }
       final latestChanged =
           _latestRelease?.latestVersion != result.latestVersion;
       _latestRelease = result;
-      var shouldNotify = latestChanged;
+      shouldNotify = shouldNotify || latestChanged;
       if (result.isNewer && result.latestVersion != _dismissedUpdateVersion) {
         _updateCheckResult = result;
+        _updateCheckResultIsLatest = routed.isLatest;
         if (announceStartupToast) {
           _pendingStartupUpdateToast = true;
         }
@@ -623,6 +695,223 @@ class SettingsProvider extends ChangeNotifier {
     } catch (_) {
       // Silent checks swallow errors.
     }
+  }
+
+  Future<void> _loadUpdatePolicy() async {
+    try {
+      _updateChannel = UpdateChannel.fromStorage(
+        await _localDataSource.getUpdateChannel(),
+      );
+      final untilMs = await _localDataSource.getMajorUpdateRemindUntilMs();
+      final major = await _localDataSource.getMajorUpdateRemindMajor();
+      final hasReminder = untilMs != null && major != null;
+      _majorUpdateRemindUntil = hasReminder
+          ? DateTime.fromMillisecondsSinceEpoch(untilMs, isUtc: true)
+          : null;
+      _majorUpdateRemindMajor = hasReminder ? major : null;
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to load update channel policy, using stable',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _updateChannel = UpdateChannel.stable;
+      _majorUpdateRemindUntil = null;
+      _majorUpdateRemindMajor = null;
+    }
+  }
+
+  /// Queries the release that the current channel/reminder policy allows.
+  ///
+  /// Returns null when the stable query failed. A gate result carries the
+  /// major candidate; an ordinary result may carry null when the v1-only
+  /// selector failed, which keeps the last known ordinary state.
+  Future<_RoutedUpdate?> _routeUpdateQuery(
+    String version, {
+    required bool ignoreCooldown,
+    required bool bypassReminder,
+  }) async {
+    if (_updateChannel == UpdateChannel.stable) {
+      final latest = await _updateCheckService.check(
+        version,
+        ignoreCooldown: ignoreCooldown,
+      );
+      if (latest == null) return null;
+      if (!latest.isMajorUpgrade) {
+        return _RoutedUpdate.ordinary(latest, isLatest: true);
+      }
+      if (bypassReminder || !_isMajorUpdateReminderActive(latest)) {
+        return _RoutedUpdate.majorGate(latest);
+      }
+    }
+    // CodeWalk 1 only, or a Later reminder for this major: keep offering
+    // ordinary 1.x fixes without ever consulting /releases/latest again.
+    return _RoutedUpdate.ordinary(
+      await _updateCheckService.checkV1Only(
+        version,
+        ignoreCooldown: ignoreCooldown,
+      ),
+      isLatest: false,
+    );
+  }
+
+  bool _isMajorUpdateReminderActive(UpdateCheckResult candidate) {
+    final until = _majorUpdateRemindUntil;
+    final major = Semver.tryParse(candidate.latestVersion)?.major;
+    return until != null &&
+        major != null &&
+        major == _majorUpdateRemindMajor &&
+        _clock().toUtc().isBefore(until);
+  }
+
+  void _presentMajorUpdateGate(
+    UpdateCheckResult candidate, {
+    required bool startup,
+  }) {
+    if (_majorUpdateCandidate?.releaseTag != candidate.releaseTag) {
+      // Approval binds to one exact tag; a different release asks again.
+      _approvedMajorUpdate = null;
+    }
+    _majorUpdateCandidate = candidate;
+    // The gate replaces the ordinary prompt; leave nothing installable or
+    // toastable behind it.
+    _updateCheckResult = null;
+    _pendingStartupUpdateToast = false;
+    _lastCheckFoundNoUpdate = false;
+    if (startup && _startupMajorGateTag != candidate.releaseTag) {
+      _startupMajorGateTag = candidate.releaseTag;
+      _pendingStartupMajorUpdateGate = true;
+    }
+  }
+
+  /// Removes the gate presentation. Returns whether anything changed.
+  bool _hideMajorUpdateGate() {
+    final changed =
+        _majorUpdateCandidate != null || _pendingStartupMajorUpdateGate;
+    _majorUpdateCandidate = null;
+    _approvedMajorUpdate = null;
+    _pendingStartupMajorUpdateGate = false;
+    _startupMajorGateTag = null;
+    return changed;
+  }
+
+  void _bumpUpdatePolicyGeneration() {
+    _updatePolicyGeneration += 1;
+    // Detach in-flight silent checks so the next query runs under the new
+    // policy instead of joining a result that will be dropped.
+    _silentUpdateCheckInFlight = null;
+    _silentUpdateCheckInFlightForced = false;
+  }
+
+  /// Clears the pending startup gate flag once the gate dialog is shown.
+  void acknowledgeStartupMajorUpdateGate() {
+    _pendingStartupMajorUpdateGate = false;
+  }
+
+  /// Switches the updater channel. Choosing [UpdateChannel.v1] is the gate's
+  /// "Stay on CodeWalk 1"; choosing [UpdateChannel.stable] re-allows the gate.
+  /// Either way any Later reminder is cleared and the updater re-queries
+  /// under the new policy. Never installs.
+  Future<void> setUpdateChannel(UpdateChannel channel) async {
+    _bumpUpdatePolicyGeneration();
+    _updateChannel = channel;
+    _majorUpdateRemindUntil = null;
+    _majorUpdateRemindMajor = null;
+    _hideMajorUpdateGate();
+    _updateCheckService.clearCache();
+    notifyListeners();
+    try {
+      await _localDataSource.saveUpdateChannel(channel.name);
+      await _localDataSource.clearMajorUpdateReminder();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to persist update channel',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    await _performSilentUpdateCheck(
+      announceStartupToast: false,
+      ignoreCooldown: true,
+    );
+  }
+
+  /// Gate action "Stay on CodeWalk 1".
+  Future<void> stayOnCodeWalk1() => setUpdateChannel(UpdateChannel.v1);
+
+  /// Gate action "Remind me later": hides the gate for the candidate's major
+  /// until [majorUpdateRemindInterval] has passed. Never
+  /// installs.
+  Future<void> remindMajorUpdateLater() async {
+    final candidate = _majorUpdateCandidate;
+    final major = candidate == null
+        ? null
+        : Semver.tryParse(candidate.latestVersion)?.major;
+    if (major == null) {
+      return;
+    }
+    _bumpUpdatePolicyGeneration();
+    final until = _clock().toUtc().add(
+      resolveMajorUpdateRemindInterval(debugMode: kDebugMode),
+    );
+    _majorUpdateRemindUntil = until;
+    _majorUpdateRemindMajor = major;
+    _hideMajorUpdateGate();
+    notifyListeners();
+    try {
+      await _localDataSource.saveMajorUpdateReminder(
+        untilMs: until.millisecondsSinceEpoch,
+        major: major,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to persist major update reminder',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Gate action "Update to CodeWalk 2" for exactly the [approved] release
+  /// the gate showed. Returns false, without installing anything, when that
+  /// release is no longer the pending candidate.
+  Future<bool> approveMajorUpdate(UpdateCheckResult approved) async {
+    final candidate = _majorUpdateCandidate;
+    final tag = approved.releaseTag;
+    if (!approved.isMajorUpgrade ||
+        tag == null ||
+        candidate == null ||
+        candidate.releaseTag != tag) {
+      return false;
+    }
+    _approvedMajorUpdate = approved;
+    _pendingStartupMajorUpdateGate = false;
+    // Explicit consent ends any earlier Later reminder.
+    _majorUpdateRemindUntil = null;
+    _majorUpdateRemindMajor = null;
+    try {
+      await _localDataSource.clearMajorUpdateReminder();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to clear major update reminder',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    // A check during the await may have replaced or dropped the approval.
+    if (!identical(_approvedMajorUpdate, approved)) {
+      return false;
+    }
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    if (isAndroid && approved.apkUrl == null) {
+      // Never substitute another target for the approved release.
+      _installState = UpdateInstallState.failed;
+      notifyListeners();
+      return false;
+    }
+    await startInstall();
+    return true;
   }
 
   /// Clears the pending startup toast flag after AppShellPage has consumed it.
@@ -1680,6 +1969,13 @@ class SettingsProvider extends ChangeNotifier {
     _lastSettingsOpenUpdateCheckAt = value;
   }
 
+  /// Runs the same silent check as startup and the hourly timer.
+  @visibleForTesting
+  Future<void> debugRunStartupUpdateCheck() => _performStartupUpdateCheck();
+
+  @visibleForTesting
+  UpdateCheckResult? get debugInstallTarget => _installTarget();
+
   Future<void> setSherpaLanguageCode(String languageCode) async {
     final normalized = languageCode.trim().toLowerCase();
     if (normalized.isEmpty) {
@@ -2610,4 +2906,17 @@ class SettingsProvider extends ChangeNotifier {
     _silentUpdateCheckInFlightForced = false;
     super.dispose();
   }
+}
+
+class _RoutedUpdate {
+  const _RoutedUpdate.majorGate(this.result)
+    : isMajorGate = true,
+      isLatest = true;
+  const _RoutedUpdate.ordinary(this.result, {required this.isLatest})
+    : isMajorGate = false;
+
+  final UpdateCheckResult? result;
+  final bool isMajorGate;
+  // False for the CodeWalk-1-only selector, whose release may not be latest.
+  final bool isLatest;
 }

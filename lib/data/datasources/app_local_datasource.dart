@@ -429,6 +429,24 @@ abstract class AppLocalDataSource {
 
   Future<void> saveDismissedNewsVersion(String version);
 
+  /// Stored updater channel (`stable` or `v1`); null when never chosen.
+  Future<String?> getUpdateChannel();
+
+  Future<void> saveUpdateChannel(String channel);
+
+  /// UTC epoch milliseconds until which the major-update gate stays hidden.
+  Future<int?> getMajorUpdateRemindUntilMs();
+
+  /// Major version the stored "Remind me later" choice applies to.
+  Future<int?> getMajorUpdateRemindMajor();
+
+  Future<void> saveMajorUpdateReminder({
+    required int untilMs,
+    required int major,
+  });
+
+  Future<void> clearMajorUpdateReminder();
+
   Future<String?> getReleaseHistoryState();
   Future<void> saveReleaseHistoryState(String state);
   Future<String?> getReleaseHistoryCache();
@@ -2115,6 +2133,62 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   @override
   Future<String?> getDismissedNewsVersion() async {
     return _sharedPreferences.getString(AppConstants.dismissedNewsVersionKey);
+  }
+
+  @override
+  Future<String?> getUpdateChannel() async {
+    try {
+      return _sharedPreferences.getString(AppConstants.updateChannelKey);
+    } catch (_) {
+      // A value of another type is unreadable; callers fall back to stable.
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveUpdateChannel(String channel) async {
+    await _sharedPreferences.setString(AppConstants.updateChannelKey, channel);
+  }
+
+  @override
+  Future<int?> getMajorUpdateRemindUntilMs() async {
+    try {
+      return _sharedPreferences.getInt(
+        AppConstants.majorUpdateRemindUntilMsKey,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<int?> getMajorUpdateRemindMajor() async {
+    try {
+      return _sharedPreferences.getInt(AppConstants.majorUpdateRemindMajorKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveMajorUpdateReminder({
+    required int untilMs,
+    required int major,
+  }) async {
+    await _sharedPreferences.setInt(
+      AppConstants.majorUpdateRemindUntilMsKey,
+      untilMs,
+    );
+    await _sharedPreferences.setInt(
+      AppConstants.majorUpdateRemindMajorKey,
+      major,
+    );
+  }
+
+  @override
+  Future<void> clearMajorUpdateReminder() async {
+    await _sharedPreferences.remove(AppConstants.majorUpdateRemindUntilMsKey);
+    await _sharedPreferences.remove(AppConstants.majorUpdateRemindMajorKey);
   }
 
   @override

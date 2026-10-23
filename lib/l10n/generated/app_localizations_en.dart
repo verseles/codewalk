@@ -6837,4 +6837,73 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       'Tint session tabs with colors from detected project icons.';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2 is available (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2 requires OpenCode 2 servers. Your OpenCode 1 servers will stop working in this app after the update.';
+
+  @override
+  String get majorUpdateGateChangesTitle => 'What changes';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      'Servers must run OpenCode 2; OpenCode 1 servers show an explanation and a link to CodeWalk 1.';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      'Share links, the OpenCode defaults editor and the OpenCode todo panel are removed; session titles come from the server.';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'OpenCode quota bars, the Android overlay and Android Auto replies return in v2.1.';
+
+  @override
+  String get majorUpdateGateChangeArchive =>
+      'Archive becomes a local hide, and symbol search in @ mentions is removed.';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      'On Android, CodeWalk 2 replaces CodeWalk 1 (same app). Going back to CodeWalk 1 is not guaranteed.';
+
+  @override
+  String get majorUpdateGateReleaseNotes => 'Release notes and migration';
+
+  @override
+  String get majorUpdateGateUpdate => 'Update to CodeWalk 2';
+
+  @override
+  String get majorUpdateGateStay => 'Stay on CodeWalk 1';
+
+  @override
+  String get majorUpdateGateLater => 'Remind me in 7 days';
+
+  @override
+  String get majorUpdateCardDescription =>
+      'Requires OpenCode 2 servers. Review what changes before updating.';
+
+  @override
+  String get majorUpdateCardReview => 'Review options';
+
+  @override
+  String get settingsAboutUpdateChannel => 'Update channel';
+
+  @override
+  String get settingsAboutUpdateChannelStable =>
+      'Stable (asks before CodeWalk 2)';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      'Offers each new stable release and asks before moving to CodeWalk 2.';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => 'CodeWalk 1 only';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      'Offers only stable CodeWalk 1 releases for your OpenCode 1 servers.';
 }

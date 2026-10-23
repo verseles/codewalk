@@ -6874,4 +6874,73 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get settingsAppearanceProjectTabColorsDescription =>
       'শনাক্ত করা প্রকল্পের আইকনের রং দিয়ে সেশন ট্যাব রাঙান।';
+
+  @override
+  String majorUpdateGateTitle(String version) {
+    return 'CodeWalk 2 উপলব্ধ (v$version)';
+  }
+
+  @override
+  String get majorUpdateGateRequirement =>
+      'CodeWalk 2-এর জন্য OpenCode 2 সার্ভার প্রয়োজন। আপডেটের পরে আপনার OpenCode 1 সার্ভারগুলো এই অ্যাপে আর কাজ করবে না।';
+
+  @override
+  String get majorUpdateGateChangesTitle => 'কী বদলাচ্ছে';
+
+  @override
+  String get majorUpdateGateChangeServers =>
+      'সার্ভারে OpenCode 2 চালাতে হবে; OpenCode 1 সার্ভারে একটি ব্যাখ্যা ও CodeWalk 1-এর লিঙ্ক দেখানো হয়।';
+
+  @override
+  String get majorUpdateGateChangeFeatures =>
+      'শেয়ার লিঙ্ক, OpenCode ডিফল্ট সম্পাদক এবং OpenCode টুডু প্যানেল সরানো হয়েছে; সেশনের শিরোনাম সার্ভার থেকে আসে।';
+
+  @override
+  String get majorUpdateGateChangeLater =>
+      'OpenCode কোটা বার, Android ওভারলে এবং Android Auto উত্তর v2.1-এ ফিরে আসবে।';
+
+  @override
+  String get majorUpdateGateChangeArchive =>
+      'আর্কাইভ এখন স্থানীয়ভাবে লুকানো হয়, এবং @ উল্লেখে সিম্বল অনুসন্ধান সরানো হয়েছে।';
+
+  @override
+  String get majorUpdateGateAndroidNote =>
+      'Android-এ CodeWalk 2 একই অ্যাপ হিসেবে CodeWalk 1-কে প্রতিস্থাপন করে। CodeWalk 1-এ ফিরে যাওয়ার নিশ্চয়তা নেই।';
+
+  @override
+  String get majorUpdateGateReleaseNotes => 'রিলিজ নোট ও মাইগ্রেশন';
+
+  @override
+  String get majorUpdateGateUpdate => 'CodeWalk 2-এ আপডেট করুন';
+
+  @override
+  String get majorUpdateGateStay => 'CodeWalk 1-এ থাকুন';
+
+  @override
+  String get majorUpdateGateLater => '৭ দিন পরে মনে করিয়ে দিন';
+
+  @override
+  String get majorUpdateCardDescription =>
+      'OpenCode 2 সার্ভার প্রয়োজন। আপডেটের আগে কী বদলাচ্ছে দেখে নিন।';
+
+  @override
+  String get majorUpdateCardReview => 'বিকল্পগুলো দেখুন';
+
+  @override
+  String get settingsAboutUpdateChannel => 'আপডেট চ্যানেল';
+
+  @override
+  String get settingsAboutUpdateChannelStable =>
+      'স্থিতিশীল (CodeWalk 2-এর আগে জিজ্ঞাসা করে)';
+
+  @override
+  String get settingsAboutUpdateChannelStableDescription =>
+      'প্রতিটি নতুন স্থিতিশীল রিলিজ দেখায় এবং CodeWalk 2-এ যাওয়ার আগে জিজ্ঞাসা করে।';
+
+  @override
+  String get settingsAboutUpdateChannelV1 => 'শুধু CodeWalk 1';
+
+  @override
+  String get settingsAboutUpdateChannelV1Description =>
+      'আপনার OpenCode 1 সার্ভারের জন্য শুধু স্থিতিশীল CodeWalk 1 রিলিজ দেখায়।';
 }

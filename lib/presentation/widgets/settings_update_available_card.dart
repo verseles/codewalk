@@ -21,6 +21,7 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
     this.isNews = false,
     this.onDismiss,
     this.onOpenAbout,
+    this.onReviewMajorUpdate,
   });
 
   final SettingsProvider settings;
@@ -38,11 +39,16 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
   /// button is hidden — used when the card already lives in About.
   final VoidCallback? onOpenAbout;
 
+  /// Opens the major-update gate. A major release renders a gate card that
+  /// never installs or dismisses directly; its only action is this callback.
+  final VoidCallback? onReviewMajorUpdate;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final onContainer = colorScheme.onPrimaryContainer;
-    final notesPreview = showReleaseNotes
+    final isMajorGate = !isNews && result.isMajorUpgrade;
+    final notesPreview = showReleaseNotes && !isMajorGate
         ? stripReleaseAnnouncement(result.releaseNotes)
         : null;
     // The installed-vs-available comparison only makes sense for updates;
@@ -52,6 +58,8 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
       key: ValueKey<String>(
         isNews
             ? 'settings_whats_new_banner'
+            : isMajorGate
+            ? 'settings_major_update_banner'
             : 'settings_update_available_banner',
       ),
       color: colorScheme.primaryContainer,
@@ -73,6 +81,10 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                         ? context.l10n.settingsAboutWhatsNew(
                             result.latestVersion,
                           )
+                        : isMajorGate
+                        ? context.l10n.majorUpdateGateTitle(
+                            result.latestVersion,
+                          )
                         : context.l10n.settingsAboutUpdateAvailable(
                             result.latestVersion,
                           ),
@@ -92,7 +104,17 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                 ).textTheme.bodySmall?.copyWith(color: onContainer),
               ),
             ],
-            if (result.announcement != null &&
+            if (isMajorGate) ...[
+              const SizedBox(height: 6),
+              Text(
+                context.l10n.majorUpdateCardDescription,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: onContainer),
+              ),
+            ],
+            if (!isMajorGate &&
+                result.announcement != null &&
                 result.announcement!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Container(
@@ -149,6 +171,8 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                   ),
                 ],
               )
+            else if (isMajorGate)
+              _buildMajorGateControl(context)
             else
               _buildInstallControl(context),
           ],
@@ -169,6 +193,21 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
     return context.l10n.settingsAboutUpdateVersionSummary(
       installed,
       result.latestVersion,
+    );
+  }
+
+  Widget _buildMajorGateControl(BuildContext context) {
+    final installState = settings.installState;
+    if (installState == UpdateInstallState.downloading ||
+        installState == UpdateInstallState.installing ||
+        installState == UpdateInstallState.done) {
+      return _buildInstallControl(context);
+    }
+    return FilledButton.icon(
+      key: const ValueKey<String>('settings_major_update_review'),
+      onPressed: onReviewMajorUpdate,
+      icon: const Icon(Symbols.system_update, size: 16),
+      label: Text(context.l10n.majorUpdateCardReview),
     );
   }
 

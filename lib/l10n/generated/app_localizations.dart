@@ -11752,6 +11752,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tint session tabs with colors from detected project icons.'**
   String get settingsAppearanceProjectTabColorsDescription;
+
+  /// Major update gate dialog and Settings card title
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk 2 is available (v{version})'**
+  String majorUpdateGateTitle(String version);
+
+  /// Major update gate: OpenCode 2 server requirement warning
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk 2 requires OpenCode 2 servers. Your OpenCode 1 servers will stop working in this app after the update.'**
+  String get majorUpdateGateRequirement;
+
+  /// Major update gate: heading of the change list
+  ///
+  /// In en, this message translates to:
+  /// **'What changes'**
+  String get majorUpdateGateChangesTitle;
+
+  /// Major update gate change bullet: server requirement
+  ///
+  /// In en, this message translates to:
+  /// **'Servers must run OpenCode 2; OpenCode 1 servers show an explanation and a link to CodeWalk 1.'**
+  String get majorUpdateGateChangeServers;
+
+  /// Major update gate change bullet: removed features
+  ///
+  /// In en, this message translates to:
+  /// **'Share links, the OpenCode defaults editor and the OpenCode todo panel are removed; session titles come from the server.'**
+  String get majorUpdateGateChangeFeatures;
+
+  /// Major update gate change bullet: features returning in v2.1
+  ///
+  /// In en, this message translates to:
+  /// **'OpenCode quota bars, the Android overlay and Android Auto replies return in v2.1.'**
+  String get majorUpdateGateChangeLater;
+
+  /// Major update gate change bullet: archive and symbol search
+  ///
+  /// In en, this message translates to:
+  /// **'Archive becomes a local hide, and symbol search in @ mentions is removed.'**
+  String get majorUpdateGateChangeArchive;
+
+  /// Major update gate: Android-only note that the update replaces CodeWalk 1
+  ///
+  /// In en, this message translates to:
+  /// **'On Android, CodeWalk 2 replaces CodeWalk 1 (same app). Going back to CodeWalk 1 is not guaranteed.'**
+  String get majorUpdateGateAndroidNote;
+
+  /// Major update gate link to the release page
+  ///
+  /// In en, this message translates to:
+  /// **'Release notes and migration'**
+  String get majorUpdateGateReleaseNotes;
+
+  /// Major update gate action that updates to CodeWalk 2
+  ///
+  /// In en, this message translates to:
+  /// **'Update to CodeWalk 2'**
+  String get majorUpdateGateUpdate;
+
+  /// Major update gate action that keeps CodeWalk 1 and switches to CodeWalk-1-only updates
+  ///
+  /// In en, this message translates to:
+  /// **'Stay on CodeWalk 1'**
+  String get majorUpdateGateStay;
+
+  /// Major update gate action that hides the gate for 7 days
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me in 7 days'**
+  String get majorUpdateGateLater;
+
+  /// Settings card shown while a CodeWalk 2 update waits for a decision
+  ///
+  /// In en, this message translates to:
+  /// **'Requires OpenCode 2 servers. Review what changes before updating.'**
+  String get majorUpdateCardDescription;
+
+  /// Settings card action that opens the major update gate
+  ///
+  /// In en, this message translates to:
+  /// **'Review options'**
+  String get majorUpdateCardReview;
+
+  /// About section: update channel setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Update channel'**
+  String get settingsAboutUpdateChannel;
+
+  /// Update channel option: stable releases, asking before CodeWalk 2
+  ///
+  /// In en, this message translates to:
+  /// **'Stable (asks before CodeWalk 2)'**
+  String get settingsAboutUpdateChannelStable;
+
+  /// Update channel option description: stable
+  ///
+  /// In en, this message translates to:
+  /// **'Offers each new stable release and asks before moving to CodeWalk 2.'**
+  String get settingsAboutUpdateChannelStableDescription;
+
+  /// Update channel option: CodeWalk 1 releases only
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk 1 only'**
+  String get settingsAboutUpdateChannelV1;
+
+  /// Update channel option description: CodeWalk 1 only
+  ///
+  /// In en, this message translates to:
+  /// **'Offers only stable CodeWalk 1 releases for your OpenCode 1 servers.'**
+  String get settingsAboutUpdateChannelV1Description;
 }
 
 class _AppLocalizationsDelegate

@@ -17,6 +17,7 @@ import '../utils/app_page_route.dart';
 import '../utils/window_size_class.dart';
 import '../widgets/desktop_window_title_bar.dart';
 import '../widgets/direct_provider.dart';
+import '../widgets/major_update_gate_dialog.dart';
 import '../widgets/settings_update_available_card.dart';
 import 'logs_page.dart';
 import 'onboarding_wizard_page.dart';
@@ -535,6 +536,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
+        final majorUpdate = settings.majorUpdateCandidate;
         final filteredSections = _filteredSections;
         final visibleSections = _visibleSections;
         final query = _settingsQuery.trim();
@@ -562,7 +564,17 @@ class _SettingsPageState extends State<SettingsPage> {
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            if (updateResult != null && updateResult.isNewer) ...[
+            if (majorUpdate != null) ...[
+              SettingsUpdateAvailableCard(
+                settings: settings,
+                result: majorUpdate,
+                currentVersion: _version,
+                currentBuildNumber: _buildNumber,
+                onReviewMajorUpdate: () =>
+                    unawaited(showMajorUpdateGate(context, settings)),
+              ),
+              const SizedBox(height: 10),
+            ] else if (updateResult != null && updateResult.isNewer) ...[
               SettingsUpdateAvailableCard(
                 settings: settings,
                 result: updateResult,

@@ -8797,5 +8797,86 @@
   },
   "@settingsAppearanceProjectTabColorsDescription": {
     "description": "CodeWalk UI string — settingsAppearanceProjectTabColorsDescription"
+  },
+  "majorUpdateGateTitle": "CodeWalk 2 is available (v{version})",
+  "@majorUpdateGateTitle": {
+    "description": "Major update gate dialog and Settings card title",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "majorUpdateGateRequirement": "CodeWalk 2 requires OpenCode 2 servers. Your OpenCode 1 servers will stop working in this app after the update.",
+  "@majorUpdateGateRequirement": {
+    "description": "Major update gate: OpenCode 2 server requirement warning"
+  },
+  "majorUpdateGateChangesTitle": "What changes",
+  "@majorUpdateGateChangesTitle": {
+    "description": "Major update gate: heading of the change list"
+  },
+  "majorUpdateGateChangeServers": "Servers must run OpenCode 2; OpenCode 1 servers show an explanation and a link to CodeWalk 1.",
+  "@majorUpdateGateChangeServers": {
+    "description": "Major update gate change bullet: server requirement"
+  },
+  "majorUpdateGateChangeFeatures": "Share links, the OpenCode defaults editor and the OpenCode todo panel are removed; session titles come from the server.",
+  "@majorUpdateGateChangeFeatures": {
+    "description": "Major update gate change bullet: removed features"
+  },
+  "majorUpdateGateChangeLater": "OpenCode quota bars, the Android overlay and Android Auto replies return in v2.1.",
+  "@majorUpdateGateChangeLater": {
+    "description": "Major update gate change bullet: features returning in v2.1"
+  },
+  "majorUpdateGateChangeArchive": "Archive becomes a local hide, and symbol search in @ mentions is removed.",
+  "@majorUpdateGateChangeArchive": {
+    "description": "Major update gate change bullet: archive and symbol search"
+  },
+  "majorUpdateGateAndroidNote": "On Android, CodeWalk 2 replaces CodeWalk 1 (same app). Going back to CodeWalk 1 is not guaranteed.",
+  "@majorUpdateGateAndroidNote": {
+    "description": "Major update gate: Android-only note that the update replaces CodeWalk 1"
+  },
+  "majorUpdateGateReleaseNotes": "Release notes and migration",
+  "@majorUpdateGateReleaseNotes": {
+    "description": "Major update gate link to the release page"
+  },
+  "majorUpdateGateUpdate": "Update to CodeWalk 2",
+  "@majorUpdateGateUpdate": {
+    "description": "Major update gate action that updates to CodeWalk 2"
+  },
+  "majorUpdateGateStay": "Stay on CodeWalk 1",
+  "@majorUpdateGateStay": {
+    "description": "Major update gate action that keeps CodeWalk 1 and switches to CodeWalk-1-only updates"
+  },
+  "majorUpdateGateLater": "Remind me in 7 days",
+  "@majorUpdateGateLater": {
+    "description": "Major update gate action that hides the gate for 7 days"
+  },
+  "majorUpdateCardDescription": "Requires OpenCode 2 servers. Review what changes before updating.",
+  "@majorUpdateCardDescription": {
+    "description": "Settings card shown while a CodeWalk 2 update waits for a decision"
+  },
+  "majorUpdateCardReview": "Review options",
+  "@majorUpdateCardReview": {
+    "description": "Settings card action that opens the major update gate"
+  },
+  "settingsAboutUpdateChannel": "Update channel",
+  "@settingsAboutUpdateChannel": {
+    "description": "About section: update channel setting title"
+  },
+  "settingsAboutUpdateChannelStable": "Stable (asks before CodeWalk 2)",
+  "@settingsAboutUpdateChannelStable": {
+    "description": "Update channel option: stable releases, asking before CodeWalk 2"
+  },
+  "settingsAboutUpdateChannelStableDescription": "Offers each new stable release and asks before moving to CodeWalk 2.",
+  "@settingsAboutUpdateChannelStableDescription": {
+    "description": "Update channel option description: stable"
+  },
+  "settingsAboutUpdateChannelV1": "CodeWalk 1 only",
+  "@settingsAboutUpdateChannelV1": {
+    "description": "Update channel option: CodeWalk 1 releases only"
+  },
+  "settingsAboutUpdateChannelV1Description": "Offers only stable CodeWalk 1 releases for your OpenCode 1 servers.",
+  "@settingsAboutUpdateChannelV1Description": {
+    "description": "Update channel option description: CodeWalk 1 only"
   }
 }

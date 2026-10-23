@@ -164,6 +164,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? localOpencodeCommand;
   String? dismissedUpdateVersion;
   String? dismissedNewsVersion;
+  String? updateChannel;
+  int? majorUpdateRemindUntilMs;
+  int? majorUpdateRemindMajor;
   String? releaseHistoryState;
   String? releaseHistoryCache;
   String? apiKey;
@@ -236,6 +239,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     localOpencodeCommand = null;
     dismissedUpdateVersion = null;
     dismissedNewsVersion = null;
+    updateChannel = null;
+    majorUpdateRemindUntilMs = null;
+    majorUpdateRemindMajor = null;
     releaseHistoryState = null;
     releaseHistoryCache = null;
     apiKey = null;
@@ -293,6 +299,35 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
 
   @override
   Future<String?> getDismissedNewsVersion() async => dismissedNewsVersion;
+
+  @override
+  Future<String?> getUpdateChannel() async => updateChannel;
+
+  @override
+  Future<void> saveUpdateChannel(String channel) async {
+    updateChannel = channel;
+  }
+
+  @override
+  Future<int?> getMajorUpdateRemindUntilMs() async => majorUpdateRemindUntilMs;
+
+  @override
+  Future<int?> getMajorUpdateRemindMajor() async => majorUpdateRemindMajor;
+
+  @override
+  Future<void> saveMajorUpdateReminder({
+    required int untilMs,
+    required int major,
+  }) async {
+    majorUpdateRemindUntilMs = untilMs;
+    majorUpdateRemindMajor = major;
+  }
+
+  @override
+  Future<void> clearMajorUpdateReminder() async {
+    majorUpdateRemindUntilMs = null;
+    majorUpdateRemindMajor = null;
+  }
 
   @override
   Future<String?> getReleaseHistoryState() async => releaseHistoryState;

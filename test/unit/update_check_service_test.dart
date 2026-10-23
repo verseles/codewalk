@@ -33,6 +33,8 @@ class _ReleaseAdapter implements HttpClientAdapter {
 
 Map<String, dynamic> _release(String version) => <String, dynamic>{
   'tag_name': 'v$version',
+  'draft': false,
+  'prerelease': false,
   'html_url': 'https://example.com/releases/$version',
   'body': '> 📣 New release\n\n- Fixes',
   'assets': <Map<String, dynamic>>[

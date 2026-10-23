@@ -175,6 +175,41 @@ void main() {
   );
 
   test(
+    'update channel policy persists, tolerates bad types and resets',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+      expect(await dataSource.getUpdateChannel(), isNull);
+      await dataSource.saveUpdateChannel('v1');
+      await dataSource.saveMajorUpdateReminder(untilMs: 1234, major: 2);
+      final restored = AppLocalDataSourceImpl(sharedPreferences: prefs);
+      expect(await restored.getUpdateChannel(), 'v1');
+      expect(await restored.getMajorUpdateRemindUntilMs(), 1234);
+      expect(await restored.getMajorUpdateRemindMajor(), 2);
+      await dataSource.clearMajorUpdateReminder();
+      expect(await restored.getMajorUpdateRemindUntilMs(), isNull);
+      expect(await restored.getMajorUpdateRemindMajor(), isNull);
+      expect(await restored.getUpdateChannel(), 'v1');
+      await dataSource.saveMajorUpdateReminder(untilMs: 1234, major: 2);
+      await dataSource.clearAll();
+      expect(await restored.getUpdateChannel(), isNull);
+      expect(await restored.getMajorUpdateRemindUntilMs(), isNull);
+
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppConstants.updateChannelKey: 7,
+        AppConstants.majorUpdateRemindUntilMsKey: 'soon',
+        AppConstants.majorUpdateRemindMajorKey: 'two',
+      });
+      final corrupted = AppLocalDataSourceImpl(
+        sharedPreferences: await SharedPreferences.getInstance(),
+      );
+      expect(await corrupted.getUpdateChannel(), isNull);
+      expect(await corrupted.getMajorUpdateRemindUntilMs(), isNull);
+      expect(await corrupted.getMajorUpdateRemindMajor(), isNull);
+    },
+  );
+
+  test(
     'migrates legacy api key from SharedPreferences to secure storage',
     () async {
       SharedPreferences.setMockInitialValues(<String, Object>{

@@ -2345,5 +2345,24 @@
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
   },
   "settingsAppearanceProjectTabColors": "Цвета вкладок проектов",
-  "settingsAppearanceProjectTabColorsDescription": "Окрашивать вкладки сеансов в цвета найденных значков проектов."
+  "settingsAppearanceProjectTabColorsDescription": "Окрашивать вкладки сеансов в цвета найденных значков проектов.",
+  "majorUpdateGateTitle": "Доступен CodeWalk 2 (v{version})",
+  "majorUpdateGateRequirement": "Для CodeWalk 2 нужны серверы OpenCode 2. После обновления ваши серверы OpenCode 1 перестанут работать в этом приложении.",
+  "majorUpdateGateChangesTitle": "Что изменится",
+  "majorUpdateGateChangeServers": "На серверах должен работать OpenCode 2; для серверов OpenCode 1 показываются пояснение и ссылка на CodeWalk 1.",
+  "majorUpdateGateChangeFeatures": "Ссылки для общего доступа, редактор настроек OpenCode по умолчанию и панель задач OpenCode удалены; заголовки сеансов приходят с сервера.",
+  "majorUpdateGateChangeLater": "Полосы квот OpenCode, оверлей Android и ответы через Android Auto вернутся в v2.1.",
+  "majorUpdateGateChangeArchive": "Архивирование становится локальным скрытием, а поиск символов в @-упоминаниях удалён.",
+  "majorUpdateGateAndroidNote": "На Android CodeWalk 2 заменяет CodeWalk 1 (то же приложение). Возврат к CodeWalk 1 не гарантируется.",
+  "majorUpdateGateReleaseNotes": "Примечания к выпуску и миграция",
+  "majorUpdateGateUpdate": "Обновиться до CodeWalk 2",
+  "majorUpdateGateStay": "Остаться на CodeWalk 1",
+  "majorUpdateGateLater": "Напомнить через 7 дней",
+  "majorUpdateCardDescription": "Нужны серверы OpenCode 2. Перед обновлением посмотрите, что изменится.",
+  "majorUpdateCardReview": "Посмотреть варианты",
+  "settingsAboutUpdateChannel": "Канал обновлений",
+  "settingsAboutUpdateChannelStable": "Стабильный (спрашивает перед CodeWalk 2)",
+  "settingsAboutUpdateChannelStableDescription": "Предлагает каждый новый стабильный выпуск и спрашивает перед переходом на CodeWalk 2.",
+  "settingsAboutUpdateChannelV1": "Только CodeWalk 1",
+  "settingsAboutUpdateChannelV1Description": "Предлагает только стабильные выпуски CodeWalk 1 для ваших серверов OpenCode 1."
 }
