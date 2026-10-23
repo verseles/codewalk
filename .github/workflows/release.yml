@@ -121,6 +121,14 @@ jobs:
 
       - name: Install Linux dependencies
         run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i \
+                -e 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                -e 's|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                "$source"
+            fi
+          done
           sudo apt-get -o Acquire::Retries=3 update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
 
@@ -128,7 +136,7 @@ jobs:
 
       - name: Build the v2 Linux release
         run: >-
-          flutter build linux --release --no-pub --target lib/main_v2.dart
+          flutter build linux --release --target lib/main_v2.dart
           --build-name "${{ needs.plan.outputs.version }}"
           --build-number "${{ needs.plan.outputs.build_number }}"
 
@@ -202,9 +210,11 @@ jobs:
 
       - run: flutter pub get
 
+      # Without --no-pub: the build then regenerates the plugin registrant for
+      # release, which excludes dev-only plugins such as integration_test.
       - name: Build the v2 Android release (arm64 split)
         run: >-
-          flutter build apk --release --no-pub --target lib/main_v2.dart
+          flutter build apk --release --target lib/main_v2.dart
           --target-platform android-arm64 --split-per-abi
           --build-name "${{ needs.plan.outputs.version }}"
           --build-number "${{ needs.plan.outputs.build_number }}"
