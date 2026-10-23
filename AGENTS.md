@@ -18,13 +18,10 @@
 
 ## Version Lines and Branches
 
-- **`v1` is the legacy CodeWalk 1 / OpenCode 1 maintenance branch.** Prepare the real Android/Linux `v1.266.0-native.N` transition cohort there before MVP, with bounded fixes until product-owner MVP acceptance. Then freeze routine v1 development/releases; the sole finite planned exception is completing Windows/macOS acceptance and the final stable `v1.266.0` transition after MVP. Retain the legacy branch and downloads; this exception does not restart routine maintenance.
-- **`main` is the CodeWalk v2 migration/development line.** It currently retains the v1 source, assets, tests, and build tooling as a temporary reference/reuse baseline alongside `v2-plan.md`; this is not an implemented v2 client. Build the new skeleton and port reusable pieces selectively. Remove superseded v1 code only as validated replacements land and complete the final cutover; do not empty `main` to leave only planning files.
-- Check the active Git branch before editing. A checkout on `v1` means legacy work; the presence of `v2-plan.md` does not authorize implementing the v2 rewrite there. Keep `BEHAVIOR.md` and official contract anchors aligned with the implementation of the active line. Use `main` for v2 work unless the user explicitly directs otherwise; remain on `v1` when that checkout is requested.
-- Do not merge the complete rewritten v2 tree into `v1`, or routinely merge legacy maintenance into `main`. Port only relevant fixes/shared installer changes individually and validate them on each affected line. Keeping source available for reuse does not authorize a v1/v2 runtime compatibility switch.
-- Before any rewritten v2 Web preview/deployment, cutover or GA, implement and verify the production-Web/preview split in `V1-04`. Native-only publication may precede that full gate only under independently verified, fail-closed `V2-077A` guards on every relevant `main` push/tag/workflow path, suppressing unsafe Web publication, latest promotion and legacy artifact overwrite. Missing guards block native beta publication. v2 betas are opt-in prereleases, not the public stable channel; the MVP freeze and GA promotion remain separate.
-- **MVP platform boundary (owner amendment, 2026-10-08):** MVP targets only Android and Linux. Web/Chrome, Safari, native iOS, Windows and macOS are deferred until after MVP, superseding the 2026-10-06 Chrome-in-MVP decision. Use `V2-028D`, `V2-020CA`, `V1-02A`, `V2-077A` and `V2-078A` as bounded native producers; `V2-008A` remains a post-MVP Chrome checkpoint. Require native evidence, G3, G4, the provisional G5 revision and owner acceptance; G1, G2 and the final G5 are the first post-MVP phase (`v2-plan.md` §11.6 phase 7, owner amendment 2026-10-21), required before any other post-MVP feature, any v2.1 Host work and GA. Full six-platform GA obligations remain; deferral is neither a passing check nor an approved capability tier. Declare Android reference devices and Linux architectures before acceptance. **No v1 data migration (owner amendment, 2026-10-23):** v2 starts clean and does not import v1 data; `V2-076`/`V2-076A` are cancelled, and the published `v1.266.0-native.N` cohort is not a migration source.
-- **Native references and first visual delivery (2026-10-10):** Android 12/API 31 is the OS reference, without changing minSdk; Linux MVP covers x64 and ARM64. The orchestrator owns setup, implementation, technical QA, packaging and launch verification. Deliver a usable isolated native development preview through `V2-020D` (#363) before requesting product feedback; do not require the owner to code, diagnose builds or select SDKs. One verified first-preview target is sufficient for that unit, not for the full MVP matrix. Preserve installed v1 and production identity/data policy; public-beta gates, publication authority and Web prerequisites remain unchanged. Record real device gaps before later installed/MVP acceptance rather than blocking safe preview preparation on a phone-model question. **Owner test devices (2026-10-21):** a Galaxy S25 (Android 16), Linux x64 and Linux ARM64; Android 12/API 31 stays the reference floor, evidenced on an emulator.
+- **`v1`** is the legacy CodeWalk 1 branch: bounded fixes until MVP acceptance, then frozen except the final stable `v1.266.0` with Windows/macOS after MVP.
+- **`main`** is the CodeWalk v2 line. It still holds v1 code as a reuse reference; remove it only as validated v2 replacements land. Check the branch before editing and never merge whole trees between lines; port fixes individually.
+- **MVP:** Android (Galaxy S25, Android 12/API 31 emulator floor) and Linux x64/ARM64 only; everything else, G1/G2/final G5 and the full GA matrix follow it. v2 betas are opt-in prereleases published only behind the `V2-077A` guards. v2 does not import v1 data (owner amendment, 2026-10-23).
+- `v2-plan.md` (§11.6 roadmap, §17 history) holds the details and owner amendments; follow it rather than repeating it here.
 
 ## Web Origins and Published State
 
@@ -37,7 +34,7 @@
 
 - Read `BEHAVIOR.md` before substantial planning.
 - For behavior changes, identify the implementation line and verify ADR-023's contract-first principle using `ADR.md`. New v2-authored behavior uses ADR-058 and the versioned official OpenCode anchors `ai-docs-for-opencode-v2/opencode_v2_server.md`, `ai-docs-for-opencode-v2/opencode_v2_web.md`, and `ai-docs-for-opencode-v2/opencode_v2_models.md`. v1 maintenance and retained legacy reference paths (including legacy code still on `main`) use the original anchors `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md`, which live on the `v1` branch, plus their applicable v1-specific invariants. Legacy details such as `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE behavior do not constrain authored v2.
-- For new features or bug fixes, also inspect `https://github.com/openchamber/openchamber` as a secondary community reference. It must never override official OpenCode docs/source.
+- Consult `https://github.com/openchamber/openchamber` only when the official OpenCode contract is ambiguous; it never overrides official docs/source.
 - For OpenCode or OpenChamber source-code investigation, do not use the `researcher` subagent. Inspect GitHub URLs, raw files, commits, pull requests, and code directly with GitHub/URL tools.
 - If a behavior change cannot align with the applicable official contract under ADR-023, it is blocked unless an explicit ADR exception documents rationale, risk, rollback/feature flag, and regression tests.
 
@@ -45,7 +42,7 @@
 
 - `ai-docs-for-opencode-v2/` is the only OpenCode documentation namespace on `main`; the OpenCode v1 documentation (`ai-docs/opencode_*.md`) lives on the `v1` branch. Keep the two namespaces separate. Immutable historical captures may record pre-move paths; the Required Context paths above are the current canonical anchors.
 - `BEHAVIOR.md` documents current implemented behavior only.
-- `ADR.md` stores architecture decisions. Use `adrkeeper`/ADR flow for ADR updates.
+- `ADR.md` stores architecture decisions. Use the `adr` skill for ADR updates.
 - Do not create or update `CODEBASE.md`; it was removed intentionally (owner, 2026-10-23).
 - Avoid duplicating ADR line maps in this file.
 
@@ -60,12 +57,6 @@
 - When the user needs a testable Android build, run `HEY_CAPTION="specific caption" make android` after checks pass.
 - Use a specific upload caption. Avoid generic captions like `Latest adjustments made`.
 - Android APK builds do not work reliably on ARM64 Linux hosts; use GitHub Actions for release APKs. `make check` works on ARM64.
-
-## Tester Subagent
-
-- The `tester` subagent must execute the delegated test command exactly once, wait for that process to finish, read its result once, and respond immediately.
-- The `tester` must never rerun a command because output appears incomplete, truncated, ambiguous, or difficult to interpret. It must report the result as inconclusive and stop.
-- Only a new explicit delegation from the main agent may authorize another test execution.
 
 ## V2 Plan Execution (`avançar` / `continuar`)
 
