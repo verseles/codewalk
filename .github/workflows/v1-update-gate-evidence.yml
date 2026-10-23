@@ -72,6 +72,9 @@ jobs:
           flutter build linux --debug
           --dart-define=CODEWALK_UPDATE_API_BASE=http://127.0.0.1:${FIXTURE_PORT}
 
+      - name: Test the releases API fixture
+        run: python3 -m unittest discover -s tool/ci -p test_update_gate_fixture_server.py
+
       - name: Start releases API fixture
         run: |
           mkdir -p "$EVIDENCE_DIR"
@@ -160,13 +163,21 @@ jobs:
           shot 99-final
           ocr_text "$ev/99-final.png" > "$ev/final-ocr.txt" || true
           echo "gate_seen_by_ocr=$gate" | tee "$ev/gate-ocr-result.txt"
+          status=0
+          if [ ! -s "$ev/99-final.png" ]; then
+            echo "::error::The final screenshot is missing or empty."
+            status=1
+          elif grep -qw Skip "$ev/final-ocr.txt"; then
+            echo "::error::The onboarding wizard is still on screen."
+            status=1
+          fi
 
           pkill -TERM -f 'bundle/codewalk' || true
           kill -TERM "$app_pid" 2>/dev/null || true
           sleep 3
           pkill -KILL -f 'bundle/codewalk' || true
           rm -rf "$app_home"
-          exit 0
+          exit "$status"
           SCRIPT
           chmod +x "$RUNNER_TEMP/linux_gate_evidence.sh"
 
@@ -247,6 +258,9 @@ jobs:
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+
+      - name: Test the releases API fixture
+        run: python3 -m unittest discover -s tool/ci -p test_update_gate_fixture_server.py
 
       - name: Start releases API fixture
         run: |
@@ -350,6 +364,10 @@ jobs:
 
           if ! grep -q "\"path\": \"$LATEST_PATH\"" "$ev/fixture-requests.jsonl"; then
             echo "::error::The app never requested $LATEST_PATH from the fixture."
+            exit 1
+          fi
+          if [ ! -s "$ev/99-gate.png" ]; then
+            echo "::error::The final screenshot is missing or empty."
             exit 1
           fi
           if [ "$gate" != yes ]; then

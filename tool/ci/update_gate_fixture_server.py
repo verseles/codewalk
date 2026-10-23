@@ -129,19 +129,21 @@ class FixtureHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 (http.server API)
         status, payload = route(self.path)
         body = json.dumps(payload).encode("utf-8")
+        # Logged before answering, so a client that has the body also finds
+        # its request in the log.
+        self._record(status)
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
-        self._record(status)
 
     def do_HEAD(self) -> None:  # noqa: N802
         status, _ = route(self.path)
+        self._record(status)
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
-        self._record(status)
 
     def _record(self, status: int) -> None:
         line = json.dumps(log_entry(self.command, self.path, status))
