@@ -1126,7 +1126,7 @@ This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It i
 
 ## 10. Documentation and ADR plan
 
-ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow the `codemapper` flow; `BEHAVIOR.md` describes only implemented behavior and is updated as features land.
+ADR work follows the project's ADR flow (`adrkeeper`); `BEHAVIOR.md` describes only implemented behavior and is updated as features land.
 
 | Document | Action | When |
 |---|---|---|
@@ -1138,7 +1138,7 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 | `CONTRACT_MATRIX.md` | Rewrite per harness and operation (used × tested × stability), generated from `used-operations` lists | v2.0 |
 | `ai-docs-for-opencode-v2/opencode_v2_*.md` | Maintain pinned, explicitly versioned `opencode_v2_server.md`, `opencode_v2_web.md`, `opencode_v2_models.md` anchors and provenance using the research sources. Route ADR/project references by implementation line; the OpenCode v1 documentation namespace (`ai-docs/`) lives on the `v1` branch and is no longer present on `main`. v1-only optimistic-ID and `prompt_async` rules never govern v2. Refresh the v2 anchors at release; the superseded main-side v1 anchors were removed on 2026-10-17 by owner decision and remain on `v1` | `V2-002`, revalidated by the relevant SP-01 child before consumers; release audit `V2-083` |
 | `BEHAVIOR.md` | Reset for v2 and grow stage by stage | v2.0 onward |
-| `CODEBASE.md`, `README.md` | Regenerate when the structure exists; README explains client vs host vs harness setup and platform limits. Before the transition minor, document tested CodeWalk installer commands, stable/v1/beta selection and migration; update for GA and host setup as those ship | `V1-05`, v2.0, v2.1 |
+| `README.md` | README explains client vs host vs harness setup and platform limits. Before the transition minor, document tested CodeWalk installer commands, stable/v1/beta selection and migration; update for GA and host setup as those ship | `V1-05`, v2.0, v2.1 |
 | `CHANGELOG.md` | Keep machine-readable headings; v2.0.0 starts with an announcement line about the OpenCode 2 requirement | Releases |
 
 ---
@@ -1230,7 +1230,7 @@ Before starting, ensure the Issue contains:
 **Cycle.**
 
 1. **Preflight:** reconcile the Issue and live branch/commit, existing changes and Git operations; confirm dependency outputs, resources and command scope. Never rewind a branch or overwrite another task's work to match a dated snapshot. If the unit is too broad for its budget or needs unlisted infrastructure, split it or repair its dependencies before editing.
-2. **Execute:** produce only that output, following the inspected contract. Keep unrelated discoveries as follow-ups in Issues. Use the applicable research, URL, test, ADR/CODEBASE, reviewer and publication workflows; do not introduce another progress-file system.
+2. **Execute:** produce only that output, following the inspected contract. Keep unrelated discoveries as follow-ups in Issues. Use the applicable research, URL, test, ADR, reviewer and publication workflows; do not introduce another progress-file system.
 3. **Stop or accept:** validate the unit and review a coherent code stage. On missing resources, failed assumptions, essential-check failure, conflict with existing work or a required product/MUST decision, preserve evidence and stop that path. Replan before repeating a failed core approach; after three failed fixes, request a decision rather than looping. A time/cost limit stops the unit unless an already-authorized budget permits extension.
 4. **Record and resume:** record artifacts, commands/results, revision, fixture provenance, review outcome, limitations and the next bounded action in the Issue and existing recovery mechanism. On resume, reconcile these with live files; do not repeat an installation, release or uncertain mutation merely because its previous result is unclear.
 5. **Finish:** accept only the evidence-backed output and apply the stage-commit boundary above before any next unit/stage. A parent closes only when every child and parent criterion is accepted. Stop after this unit unless the user's active instruction authorizes executing the next §11.6 row. Issue closure and release/fix closure follow the project's tracker policy.
@@ -2001,7 +2001,7 @@ Phase 7 is mandatory before any other post-MVP feature, any v2.1 Host work and v
 #### V2-083 — Documentation for v2.0
 - **Type / size / labels:** docs · M · `milestone:v2.0` `type:docs`
 - **Depends on:** V2-001–V2-012, V2-020–V2-028, V2-040–V2-056, V2-060, V2-070–V2-082; only explicit recorded deferrals remove a prerequisite.
-- **Scope:** audit implemented v2 behavior and complete its BEHAVIOR documentation; generate the per-operation CONTRACT_MATRIX; refresh the v2 anchors established in V2-002, not introduce them for the first time; CODEBASE flow; README setup/pairing/platform tiers/tested installers/channels/frozen legacy/rollback limits; release notes draft from §5.15. Route any remaining main-side legacy references explicitly until cutover.
+- **Scope:** audit implemented v2 behavior and complete its BEHAVIOR documentation; generate the per-operation CONTRACT_MATRIX; refresh the v2 anchors established in V2-002, not introduce them for the first time; README setup/pairing/platform tiers/tested installers/channels/frozen legacy/rollback limits; release notes draft from §5.15. Route any remaining main-side legacy references explicitly until cutover.
 - **Done when:** [ ] docs reviewed against implemented behavior.
 
 #### V2-084 — Cutover
