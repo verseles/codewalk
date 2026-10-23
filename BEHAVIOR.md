@@ -2866,6 +2866,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** on Windows, the `Restart` action starts an updater helper, closes CodeWalk, applies the staged update after the old process exits, and relaunches CodeWalk from the updated install path
 - **Then** an older snackbar cannot delay the installation progress indicator; if an STT model download overlaps the update, both states remain visible and `Restart` is offered only after the model download finishes
 
+### Linux and macOS install script channels
+
+- **Given** `install.sh` runs (pipe-to-shell or from the app), optionally with `CODEWALK_CHANNEL=stable|v1|beta`, an exact `CODEWALK_VERSION` tag, `CODEWALK_MIGRATION=none|accept-v2`, or the app's `CODEWALK_UPDATE_CONTRACT=1`, which requires all three
+- **When** it selects the release to install
+- **Then** the channel is the explicit one, else the channel saved with the installation (`.installed-channel` beside `.installed-version`), else `stable`; the installed channel is saved after a successful install, so a CodeWalk 1 choice survives updates and reinstalls until another channel is chosen; an unreadable saved channel stops unless a channel is given
+- **Then** `stable` takes `/releases/latest` only when it is a stable `vX.Y.Z` release; `v1` reads the release list (100 per page, at most 10 pages) and takes the highest stable `v1.x.y`; `beta` reads the same list and takes the highest `v2.0.0-beta.N` prerelease; drafts, other suffixes and the `-native.N` cohort are never selected, and an exact tag must be that channel's kind of release
+- **Then** a release of another major replaces the installation only from CodeWalk 1 to CodeWalk 2 with `CODEWALK_MIGRATION=accept-v2`; otherwise it explains the OpenCode 2 requirement and the `CODEWALK_CHANNEL=v1` option and exits without changes; an installation with a missing or unreadable version is treated as CodeWalk 1, never as a fresh install
+- **Then** network, rate-limit or malformed metadata failures, an exhausted page bound, a missing exact tag or a missing asset stop before the installation is replaced
+
 ### Android APK download progress is not hidden behind older snackbars
 
 - **Given** an Android update download starts while an update notice or another snackbar is visible
