@@ -36,7 +36,9 @@ The control port also accepts, with a JSON body:
             for body.seconds, with the device's transports captured before
             and after
 Prompts containing CW-SLOW make the stub answer for 30 s (CW-SLOW90 for 90 s),
-so a scenario can disturb a running turn. Any other prompt is answered at once.
+so a scenario can disturb a running turn. CW-RICH answers a fixed Markdown,
+code, table, math and Mermaid sample, for comparing how each block renders.
+Any other prompt is answered at once.
 
 Usage:
   python3 tool/ci/v2_device_server.py serve --root /tmp/x [--bind ADDR]
@@ -112,6 +114,55 @@ HOP_HEADERS = {
     "content-length",
 }
 ID_SEGMENT = re.compile(r"^[a-z]{2,4}_[A-Za-z0-9]+$")
+# "CW-RICH" answers this fixed sample, so a person can compare how each
+# block renders (V2-071 visual parity); it streams line by line.
+RICH_MARKER = "CW-RICH"
+RICH_SAMPLE = """# Heading 1
+## Heading 2
+
+Plain text with **bold**, *italic*, `inline code`, ~~strike~~, H<sub>2</sub>O, x<sup>2</sup> and a [link](https://example.com).
+
+- First item
+- Second item
+  - Nested item
+1. One
+2. Two
+
+- [x] Done task
+- [ ] Open task
+
+> A quoted line.
+
+| Name | Value |
+|---|---:|
+| alpha | 1 |
+| beta | 22 |
+
+```dart
+void main() {
+  final greeting = 'Hello, CodeWalk';
+  print(greeting);
+}
+```
+
+Inline math $e^{i\\pi} + 1 = 0$ and a block:
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
+
+```mermaid
+graph TD
+  A[Prompt] --> B{Model}
+  B --> C[Answer]
+```
+
+<progress value="40" max="100">40%</progress>
+
+---
+
+Last line.
+"""
 
 
 def now() -> str:
@@ -207,7 +258,12 @@ class StubHandler(BaseHTTPRequestHandler):
         match = SLOW_MARKER.search(prompt)
         slow = match is not None
         seconds = min(int(match.group(1) or 30), 120) if match else 0
-        parts = [f"tick {i} " for i in range(1, seconds + 1)] if slow else ["CW-OK"]
+        if slow:
+            parts = [f"tick {i} " for i in range(1, seconds + 1)]
+        elif RICH_MARKER in prompt:
+            parts = RICH_SAMPLE.splitlines(keepends=True)
+        else:
+            parts = ["CW-OK"]
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")

@@ -122,6 +122,22 @@ class StubTests(unittest.TestCase):
         connection.request("POST", "/elsewhere", body="{}")
         self.assertEqual(connection.getresponse().status, 404)
 
+    def test_the_rich_marker_streams_the_whole_sample(self):
+        stub = device.Stub()
+        self.addCleanup(stub.stop)
+        connection = http.client.HTTPConnection("127.0.0.1", stub.port, timeout=10)
+        payload = {"messages": [{"role": "user", "content": [{"type": "text", "text": "CW-RICH"}]}]}
+        connection.request("POST", "/v1/chat/completions", body=json.dumps(payload))
+        body = connection.getresponse().read().decode()
+        chunks = [json.loads(line[6:]) for line in body.split("\n\n")
+                  if line.startswith("data: {")]
+        text = "".join(c["choices"][0]["delta"]["content"] for c in chunks)
+        self.assertEqual(text, device.RICH_SAMPLE)
+        self.assertEqual(chunks[-1]["choices"][0]["finish_reason"], "stop")
+        self.assertEqual(chunks[-1]["usage"]["cost"], 0)
+        for block in ("```mermaid", "```dart", "$$", "| Name | Value |", "\\int_0^1"):
+            self.assertIn(block, text)
+
 
 class RelayTests(unittest.TestCase):
     def setUp(self):
