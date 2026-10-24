@@ -1,0 +1,23 @@
+{
+  "unit": "V2-060C",
+  "phases": {
+    "pairing": "pairing",
+    "send": "send",
+    "approval": "approval",
+    "approval-manual": "approvalManual",
+    "approval-auto": "approvalAuto",
+    "reconnect-detection": "reconnect",
+    "stop-reconnect": "stop",
+    "stop-idle": "stopIdle",
+    "workspace-pairing": "workspacePairing",
+    "workspace": "workspace",
+    "workspace-tab": "tab",
+    "workspace-send": "workspaceSend",
+    "workspace-steer": "steer",
+    "workspace-stop": "stopTurn",
+    "workspace-approval": "workspaceApproval",
+    "workspace-form": "form",
+    "workspace-model-switch": "modelSwitch",
+    "workspace-error": "error"
+  }
+}

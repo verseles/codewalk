@@ -1,0 +1,107 @@
+{
+  "requests": [
+    {
+      "n": 1,
+      "marker": "CW060B_SCENARIO_SEND",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "n": 2,
+      "marker": "CW060B_SCENARIO_APPROVAL",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user"
+      ]
+    },
+    {
+      "n": 3,
+      "marker": "CW060B_SCENARIO_APPROVAL",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": true,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "tool"
+      ]
+    },
+    {
+      "n": 4,
+      "marker": "CW060B_SCENARIO_SEND workspace",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user"
+      ]
+    },
+    {
+      "n": 5,
+      "marker": "CW060B_SCENARIO_HOLD workspace",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user"
+      ]
+    },
+    {
+      "n": 6,
+      "marker": "CW060B_SCENARIO_ERROR workspace",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "user",
+        "user"
+      ]
+    },
+    {
+      "n": 7,
+      "marker": "CW060B_SCENARIO_HOLD",
+      "tools": [
+        "read"
+      ],
+      "has_tool_result": false,
+      "roles": [
+        "system",
+        "user"
+      ]
+    }
+  ],
+  "holdEnds": [
+    "disconnect",
+    "disconnect"
+  ],
+  "holdAbortedByDisconnect": 2,
+  "holdTimedOut": 0,
+  "cap": 24
+}

@@ -1,0 +1,21 @@
+CODEWALK_LIVE_QA {"phase": "pairing", "status": "passed"}
+CODEWALK_LIVE_QA {"cost": 0, "phase": "native-cost", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "send", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "approval", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "approval-manual", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "final", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-pairing", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-tab", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-send", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-steer", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-stop", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-approval", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-form", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-model-switch", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "workspace-error", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "approval-auto", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "reconnect-detection", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "stop-reconnect", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "stop-idle", "status": "passed"}
+CODEWALK_LIVE_QA {"phase": "final", "status": "passed"}

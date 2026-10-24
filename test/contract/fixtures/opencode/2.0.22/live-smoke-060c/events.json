@@ -1,0 +1,91 @@
+{
+  "markers": [
+    {
+      "phase": "pairing",
+      "status": "passed"
+    },
+    {
+      "cost": 0,
+      "phase": "native-cost",
+      "status": "passed"
+    },
+    {
+      "phase": "send",
+      "status": "passed"
+    },
+    {
+      "phase": "approval",
+      "status": "passed"
+    },
+    {
+      "phase": "approval-manual",
+      "status": "passed"
+    },
+    {
+      "phase": "final",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-pairing",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-tab",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-send",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-steer",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-stop",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-approval",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-form",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-model-switch",
+      "status": "passed"
+    },
+    {
+      "phase": "workspace-error",
+      "status": "passed"
+    },
+    {
+      "phase": "approval-auto",
+      "status": "passed"
+    },
+    {
+      "phase": "reconnect-detection",
+      "status": "passed"
+    },
+    {
+      "phase": "stop-reconnect",
+      "status": "passed"
+    },
+    {
+      "phase": "stop-idle",
+      "status": "passed"
+    },
+    {
+      "phase": "final",
+      "status": "passed"
+    }
+  ],
+  "flutterExit": 0,
+  "s0Probe": "passed"
+}

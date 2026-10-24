@@ -1,0 +1,34 @@
+{
+  "unit": "V2-060C",
+  "issue": "https://github.com/verseles/codewalk/issues/409",
+  "status": "delivered-awaiting-acceptance",
+  "serverVersion": "2.0.22",
+  "host": "linux-aarch64",
+  "zeroSpend": true,
+  "capabilities": {
+    "pairing": "passed",
+    "send": "passed",
+    "approval": "passed",
+    "approvalManual": "passed",
+    "approvalAuto": "passed",
+    "reconnect": "passed",
+    "stop": "passed",
+    "stopIdle": "passed",
+    "workspacePairing": "passed",
+    "workspace": "passed",
+    "tab": "passed",
+    "workspaceSend": "passed",
+    "steer": "passed",
+    "stopTurn": "passed",
+    "workspaceApproval": "passed",
+    "form": "passed",
+    "modelSwitch": "passed",
+    "error": "passed"
+  },
+  "limitations": [
+    "The disposable server ran on this Linux aarch64 host; no Android device, installed client or Windows/macOS target was exercised.",
+    "The provider was a loopback stub (deterministic tokens, cost 0); no real model turn and no provider credential were used, so the live evidence proves the CodeWalk client contract, not provider behaviour.",
+    "The turn that produced the tool-originated permission was served by the stub; the model-origin continuation after approval is a stub behaviour.",
+    "The screenshots and installed-native acceptance of the same screens stay with V2-060A (accepted) and the MVP platform checkpoints."
+  ]
+}
