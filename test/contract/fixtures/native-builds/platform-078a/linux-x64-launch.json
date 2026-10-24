@@ -1,0 +1,30 @@
+{
+  "asset": "codewalk-linux-x64.tar.gz",
+  "target": "linux-x64",
+  "host_machine": "x86_64",
+  "checks": {
+    "hostArchitecture": "passed",
+    "bundleVerified": "passed",
+    "windowVisible": "passed",
+    "aliveAfterSettle": "passed"
+  },
+  "launch": "passed",
+  "sha256": "fe6d74d37b9fb702776f900c16cf6ad98e75959083bfd538d8d4e47072792363",
+  "architecture": "x64",
+  "signature": "none (Linux bundles are not signed)",
+  "windows": 1,
+  "settle_seconds": 10.0,
+  "screenshot": "linux-x64-window.png",
+  "log_tail": [
+    "",
+    "(com.verseles.codewalk:14245): dbind-WARNING **: 15:36:59.220: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files",
+    "libEGL warning: DRI3 error: Could not get DRI3 device",
+    "libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering",
+    "",
+    "** (com.verseles.codewalk:14245): WARNING **: 15:37:00.686: Using the software renderer. Not all features are supported. This is not recommended.",
+    "",
+    "To switch back to the default renderer, unset the FLUTTER_LINUX_RENDERER environment variable.",
+    "",
+    "(com.verseles.codewalk:14245): Atk-CRITICAL **: 15:37:00.696: atk_socket_embed: assertion 'plug_id != NULL' failed"
+  ]
+}

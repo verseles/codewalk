@@ -57,7 +57,11 @@ class PlatformEvidenceTests(unittest.TestCase):
         self.assertEqual(evidence.problems(_all_passing(), final=True), [])
 
     def test_pending_cells_block_the_final_matrix(self):
-        found = evidence.problems(_committed(), final=True)
+        data = _committed()
+        next(c for c in data["cells"] if c["target"] == "android-s25"
+             and c["dimension"] == "functional").update(result="pending")
+        data["gates"]["G3"] = {"result": "pending"}
+        found = evidence.problems(data, final=True)
         self.assertIn("android-s25/functional: still pending", found)
         self.assertIn("G3: still pending", found)
 

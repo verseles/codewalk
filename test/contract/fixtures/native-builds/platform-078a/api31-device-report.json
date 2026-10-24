@@ -1,0 +1,334 @@
+{
+  "device": {
+    "serial_kind": "emulator",
+    "api": "31",
+    "release": "12",
+    "abi": "x86_64",
+    "model": "sdk_gphone64_x86_64"
+  },
+  "server_version": "2.0.22",
+  "flutter_test_rc": 0,
+  "duration_seconds": 701,
+  "results": [
+    {
+      "t": "2026-10-24T16:33:50.852+00:00",
+      "scenario": "flow",
+      "session": "ses_e913d30baffeyBrCyDd0cWKQWB",
+      "opened_live": true,
+      "turn_started": true,
+      "server_active": false,
+      "stopped": true,
+      "prompt_shown": 1,
+      "permission": {
+        "session": "ses_e913d30baffeyBrCyDd0cWKQWB",
+        "permission": "per_16ec2e9df001yGodQxb3ah7J1w",
+        "effect": "ask"
+      },
+      "permission_answered": true,
+      "answered_by": "allow-all",
+      "permission_state": {
+        "session": "ses_e913d30baffeyBrCyDd0cWKQWB",
+        "pending": [],
+        "saved": 0,
+        "client_replies": 1
+      },
+      "status": "Live"
+    },
+    {
+      "t": "2026-10-24T16:34:22.233+00:00",
+      "scenario": "drop",
+      "session": "ses_e913d12deffeT4PZLV7UOAHKiT",
+      "opened_live": true,
+      "turn_started": true,
+      "disturbed": "2026-10-24T16:33:52.773211Z",
+      "action": {
+        "scheduled": "drop",
+        "seconds": 15
+      },
+      "live_and_idle_at": "2026-10-24T16:34:21.517481Z",
+      "settled": true,
+      "prompt_shown": 1,
+      "status": "Live",
+      "stuck_running": false,
+      "catalog": {
+        "loaded": true,
+        "stale": false,
+        "behind": false,
+        "failure": null,
+        "reconciling": true,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 2
+      }
+    },
+    {
+      "t": "2026-10-24T16:34:54.260+00:00",
+      "scenario": "handover",
+      "session": "ses_e913c9768ffevf4k1x7ZiRBNGR",
+      "opened_live": true,
+      "turn_started": true,
+      "disturbed": "2026-10-24T16:34:24.646726Z",
+      "action": {
+        "scheduled": "handover",
+        "seconds": 15
+      },
+      "live_and_idle_at": "2026-10-24T16:34:53.536367Z",
+      "settled": true,
+      "prompt_shown": 1,
+      "status": "Live",
+      "stuck_running": false,
+      "catalog": {
+        "loaded": true,
+        "stale": false,
+        "behind": false,
+        "failure": null,
+        "reconciling": true,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 3
+      }
+    },
+    {
+      "t": "2026-10-24T16:36:25.483+00:00",
+      "scenario": "background",
+      "session": "ses_e913c1b10ffeVe0WQfawVog6kC",
+      "opened_live": true,
+      "turn_started": true,
+      "disturbed": "2026-10-24T16:34:55.586484Z",
+      "action": {
+        "scheduled": "background",
+        "seconds": 60
+      },
+      "live_and_idle_at": "2026-10-24T16:36:24.752119Z",
+      "settled": true,
+      "prompt_shown": 1,
+      "status": "Live",
+      "stuck_running": false,
+      "catalog": {
+        "loaded": true,
+        "stale": false,
+        "behind": false,
+        "failure": null,
+        "reconciling": true,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 4
+      }
+    },
+    {
+      "t": "2026-10-24T16:36:31.485+00:00",
+      "scenario": "restart",
+      "session": "ses_e913ab698ffezw2Ud6RX6mVjyt",
+      "opened_live": true,
+      "turn_started": true,
+      "disturbed": "2026-10-24T16:36:27.427143Z",
+      "action": {
+        "requested": "2026-10-24T16:36:28.152+00:00",
+        "stop_seconds": 0.169,
+        "stopped": "2026-10-24T16:36:28.323+00:00",
+        "ready": "2026-10-24T16:36:28.835+00:00"
+      },
+      "live_and_idle_at": "2026-10-24T16:36:30.761652Z",
+      "settled": true,
+      "prompt_shown": 1,
+      "status": "Live",
+      "stuck_running": false,
+      "catalog": {
+        "loaded": true,
+        "stale": false,
+        "behind": true,
+        "failure": null,
+        "reconciling": true,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 5
+      }
+    },
+    {
+      "t": "2026-10-24T16:36:33.992+00:00",
+      "scenario": "tui-equivalent",
+      "session": "ses_e913a9d93ffeP8AYf997Av7woD",
+      "created": "2026-10-24T16:36:31.347619Z",
+      "listed": true,
+      "listed_at": "2026-10-24T16:36:33.274205Z",
+      "catalog_before": {
+        "loaded": true,
+        "stale": false,
+        "behind": false,
+        "failure": null,
+        "reconciling": false,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 5
+      },
+      "catalog_after": {
+        "loaded": true,
+        "stale": false,
+        "behind": false,
+        "failure": null,
+        "reconciling": false,
+        "feed": true,
+        "failures": 0,
+        "suspended": false,
+        "rows": 6
+      },
+      "listed_after_refresh": null
+    }
+  ],
+  "host_actions": [
+    {
+      "t": "2026-10-24T16:34:14.699+00:00",
+      "kind": "host-action",
+      "action": "drop",
+      "off": "2026-10-24T16:33:54.600+00:00",
+      "restored": "2026-10-24T16:34:09.645+00:00",
+      "applied": true,
+      "before": "WIFI",
+      "during": "none",
+      "after": "WIFI",
+      "changed": true
+    },
+    {
+      "t": "2026-10-24T16:34:46.518+00:00",
+      "kind": "host-action",
+      "action": "handover",
+      "cellular": "2026-10-24T16:34:26.445+00:00",
+      "wifi": "2026-10-24T16:34:41.477+00:00",
+      "applied": true,
+      "mobile_data": "1",
+      "before": "WIFI",
+      "during": "CELLULAR",
+      "after": "WIFI",
+      "changed": true
+    },
+    {
+      "t": "2026-10-24T16:35:58.273+00:00",
+      "kind": "host-action",
+      "action": "background",
+      "home": "2026-10-24T16:34:57.355+00:00",
+      "relaunched": "2026-10-24T16:35:58.273+00:00",
+      "applied": true
+    }
+  ],
+  "report_error": null,
+  "restarts": [
+    {
+      "requested": "2026-10-24T16:36:28.152+00:00",
+      "stop_seconds": 0.169,
+      "stopped": "2026-10-24T16:36:28.323+00:00",
+      "ready": "2026-10-24T16:36:28.835+00:00"
+    }
+  ],
+  "sessions": {
+    "ses_e913a9d93ffeP8AYf997Av7woD": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 0,
+      "active": false
+    },
+    "ses_e913ab698ffezw2Ud6RX6mVjyt": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e913c1b10ffeVe0WQfawVog6kC": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e913c9768ffevf4k1x7ZiRBNGR": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e913d12deffeT4PZLV7UOAHKiT": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    },
+    "ses_e913d30baffeyBrCyDd0cWKQWB": {
+      "user_prompts": 1,
+      "duplicates": 0,
+      "prompt_posts": 1,
+      "active": false
+    }
+  },
+  "event_streams": {
+    "client-1": [
+      {
+        "t": "2026-10-24T16:33:43.222+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:34:10.383+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:34:14.858+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:34:17.009+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-24T16:34:21.011+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-24T16:34:27.000+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:34:29.858+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-24T16:34:45.929+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:34:47.941+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-24T16:35:58.706+00:00",
+        "kind": "stream-open",
+        "reason": null
+      },
+      {
+        "t": "2026-10-24T16:36:00.941+00:00",
+        "kind": "stream-close",
+        "reason": "client-gone"
+      },
+      {
+        "t": "2026-10-24T16:36:28.155+00:00",
+        "kind": "stream-close",
+        "reason": "upstream-broken"
+      },
+      {
+        "t": "2026-10-24T16:36:29.169+00:00",
+        "kind": "stream-open",
+        "reason": null
+      }
+    ]
+  }
+}

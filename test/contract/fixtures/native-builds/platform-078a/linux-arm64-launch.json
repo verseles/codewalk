@@ -1,0 +1,26 @@
+{
+  "asset": "codewalk-linux-arm64.tar.gz",
+  "target": "linux-arm64",
+  "host_machine": "aarch64",
+  "checks": {
+    "hostArchitecture": "passed",
+    "bundleVerified": "passed",
+    "windowVisible": "passed",
+    "aliveAfterSettle": "passed"
+  },
+  "launch": "passed",
+  "sha256": "0102389ca8fc888096757f5fe087e09c3579e4a7b63481dab322ebd10f9d2c04",
+  "architecture": "arm64",
+  "signature": "none (Linux bundles are not signed)",
+  "windows": 1,
+  "settle_seconds": 10.0,
+  "screenshot": "linux-arm64-window.png",
+  "log_tail": [
+    "libEGL warning: DRI3 error: Could not get DRI3 device",
+    "libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering",
+    "",
+    "** (com.verseles.codewalk:14146): WARNING **: 15:37:10.465: Using the software renderer. Not all features are supported. This is not recommended.",
+    "",
+    "To switch back to the default renderer, unset the FLUTTER_LINUX_RENDERER environment variable."
+  ]
+}

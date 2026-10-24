@@ -1,0 +1,34 @@
+{
+  "assets": {
+    "codewalk-android-arm64.apk": {
+      "abi": "arm64-v8a",
+      "application_id": "com.verseles.codewalk",
+      "sha256": "9b5a13f8915666f26a17b73f15695ae783834ac2a42ff246267831cd1183bcf3",
+      "signer_dn": "CN=CodeWalk, OU=CodeWalk, O=Verseles, L=BR, ST=BR, C=BR",
+      "signer_sha256": "7361852522a3c5baf7eefef3285cf3aa90b6431604f52ee66e92da46b4f846c9",
+      "size": 87718605,
+      "version_code": 1792857981,
+      "version_name": "2.0.0-beta.1"
+    },
+    "codewalk-linux-arm64.tar.gz": {
+      "architecture": "arm64",
+      "sha256": "0102389ca8fc888096757f5fe087e09c3579e4a7b63481dab322ebd10f9d2c04",
+      "signature": "none (Linux bundles are not signed)",
+      "size": 62417816
+    },
+    "codewalk-linux-x64.tar.gz": {
+      "architecture": "x64",
+      "sha256": "fe6d74d37b9fb702776f900c16cf6ad98e75959083bfd538d8d4e47072792363",
+      "signature": "none (Linux bundles are not signed)",
+      "size": 61621292
+    }
+  },
+  "commit": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+  "entry_point": "lib/main_v2.dart",
+  "entry_point_sha256": "c2d645068aece80e969deccfc58d0d9589e30bf125315be1f3a3c96d2f440ecc",
+  "make_latest": false,
+  "prerelease": true,
+  "schema": 1,
+  "tag": "v2.0.0-beta.1",
+  "version": "2.0.0-beta.1"
+}

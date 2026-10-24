@@ -1,8 +1,8 @@
 {
   "unit": "V2-078A",
   "issue": "https://github.com/verseles/codewalk/issues/357",
-  "roadmap": "v2-plan.md §11.6 rev 1 Seq 5.4",
-  "plan_matrix": "v2-plan.md §15.4",
+  "roadmap": "v2-plan.md \u00a711.6 rev 1 Seq 5.4",
+  "plan_matrix": "v2-plan.md \u00a715.4",
   "server": {
     "version": "2.0.22",
     "provider": "loopback stub, cost 0"
@@ -11,7 +11,16 @@
     {
       "target": "android-s25",
       "dimension": "package",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml dry run 2.0.0-beta.1 (publish=false), build-android",
+      "sha256": "9b5a13f8915666f26a17b73f15695ae783834ac2a42ff246267831cd1183bcf3",
+      "asset": "codewalk-android-arm64.apk",
+      "note": "The single shipped Android artifact (arm64-v8a) serves both Android targets",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "android-s25",
@@ -21,7 +30,15 @@
     {
       "target": "android-s25",
       "dimension": "signature",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml verify (production signer check)",
+      "signer_sha256": "7361852522a3c5baf7eefef3285cf3aa90b6431604f52ee66e92da46b4f846c9",
+      "application_id": "com.verseles.codewalk",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "android-s25",
@@ -31,37 +48,95 @@
     {
       "target": "android-api31",
       "dimension": "package",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml dry run 2.0.0-beta.1 (publish=false), build-android",
+      "sha256": "9b5a13f8915666f26a17b73f15695ae783834ac2a42ff246267831cd1183bcf3",
+      "asset": "codewalk-android-arm64.apk",
+      "note": "The single shipped Android artifact (arm64-v8a) serves both Android targets",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "android-api31",
       "dimension": "install",
-      "result": "pending"
+      "result": "pass",
+      "revision": "0f0d2119a90eab14521126a1f7587e39fa3dc218",
+      "producer": "v2-device-reliability.yml (tool/ci/device_reliability_android.py)",
+      "device": "Android 12/API 31 emulator sdk_gphone64_x86_64 (x86_64), GitHub ubuntu-24.04",
+      "note": "The integration build of the same app code (lib/ and packages/ unchanged since 42a83936), x86_64, installed and run on the emulator; the shipped APK is arm64-v8a only",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40111252030",
+        "api31-device-report.json"
+      ]
     },
     {
       "target": "android-api31",
       "dimension": "signature",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml verify (production signer check)",
+      "signer_sha256": "7361852522a3c5baf7eefef3285cf3aa90b6431604f52ee66e92da46b4f846c9",
+      "application_id": "com.verseles.codewalk",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "android-api31",
       "dimension": "functional",
-      "result": "pending"
+      "result": "pass",
+      "revision": "0f0d2119a90eab14521126a1f7587e39fa3dc218",
+      "producer": "v2-device-reliability.yml flow and reconnect cells",
+      "device": "Android 12/API 31 emulator sdk_gphone64_x86_64 (x86_64), GitHub ubuntu-24.04",
+      "note": "Pairing, send, Stop (the server reports the session inactive), a native permission answered by the client (Allow all, one relayed reply, nothing saved), and reconnect after drop, handover, background and restart without duplicates",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40111252030",
+        "api31-device-report.json"
+      ]
     },
     {
       "target": "linux-x64",
       "dimension": "package",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml dry run 2.0.0-beta.1 (publish=false), build-linux",
+      "sha256": "fe6d74d37b9fb702776f900c16cf6ad98e75959083bfd538d8d4e47072792363",
+      "asset": "codewalk-linux-x64.tar.gz",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "linux-x64",
       "dimension": "install",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml build-linux: tool/release/smoke_v2_linux_release.py",
+      "device": "GitHub ubuntu-24.04 runner (x86_64), Xvfb",
+      "note": "The shipped tarball, verified then extracted and launched with HOME and XDG redirected; a visible window stayed alive after 10 s",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "linux-x64-launch.json",
+        "linux-x64-window.png"
+      ]
     },
     {
       "target": "linux-x64",
       "dimension": "signature",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml verify (verify_v2_artifacts.py)",
+      "unsigned": true,
+      "note": "Linux bundles are not signed; recorded, not passed as signing",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "linux-x64",
@@ -71,33 +146,84 @@
     {
       "target": "linux-arm64",
       "dimension": "package",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml dry run 2.0.0-beta.1 (publish=false), build-linux",
+      "sha256": "0102389ca8fc888096757f5fe087e09c3579e4a7b63481dab322ebd10f9d2c04",
+      "asset": "codewalk-linux-arm64.tar.gz",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "linux-arm64",
       "dimension": "install",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml build-linux: tool/release/smoke_v2_linux_release.py",
+      "device": "GitHub ubuntu-24.04-arm runner (aarch64), Xvfb",
+      "note": "The shipped tarball, verified then extracted and launched with HOME and XDG redirected; a visible window stayed alive after 10 s",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "linux-arm64-launch.json",
+        "linux-arm64-window.png"
+      ]
     },
     {
       "target": "linux-arm64",
       "dimension": "signature",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "release.yml verify (verify_v2_artifacts.py)",
+      "unsigned": true,
+      "note": "Linux bundles are not signed; recorded, not passed as signing",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107475341",
+        "release-manifest.json"
+      ]
     },
     {
       "target": "linux-arm64",
       "dimension": "functional",
-      "result": "pending"
+      "result": "pass",
+      "revision": "f480ba28f0195be63f41729b3143e6a290202902",
+      "producer": "V2-060C live smoke (tool/ci/live_smoke_v2_opencode.py --unit V2-060C)",
+      "device": "Linux aarch64 host, real OpenCode 2.0.22 with a loopback stub",
+      "note": "Pairing, send, approval, Stop and reconnect through the real shared root screens; lib/ and packages/ are unchanged from f480ba28 through 42a83936, and the packaged arm64 bundle launched at 42a83936 (install cell)",
+      "evidence": [
+        "https://github.com/verseles/codewalk/issues/409",
+        "https://github.com/verseles/codewalk/tree/83b745a5/test/contract/fixtures/opencode/2.0.22/live-smoke-060c"
+      ]
     }
   ],
   "gates": {
     "G3": {
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "orchestrator host (Linux aarch64)",
+      "command": "flutter test --no-pub test/v2/sessions/scripted_screens_*_test.dart (15 passed)",
+      "evidence": [
+        "https://github.com/verseles/codewalk/issues/357"
+      ]
     },
     "G4": {
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "orchestrator host (Linux aarch64)",
+      "command": "make v2-architecture (329 governed Dart files, 4 workspace packages)",
+      "evidence": [
+        "https://github.com/verseles/codewalk/issues/357"
+      ]
     },
     "G5-provisional": {
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "orchestrator host (Linux aarch64)",
+      "command": "flutter test --no-pub test/contract/chp (130 passed); canonicalModelCommit 97dfeb6b equals the packages/codewalk_core tip",
+      "evidence": [
+        "https://github.com/verseles/codewalk/issues/357"
+      ]
     }
   },
   "deferred": {
