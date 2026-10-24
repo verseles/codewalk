@@ -242,6 +242,11 @@ def smoke(archive_path, evidence):
             expect(window, ["Enable app logging", "Logging is disabled"], "08-logs")
             click(window, "Version and updates")
             expect(window, ["Check for updates"], "08b-updates")
+            if locate(capture(window, snapshot), "Release history") is None:
+                run(["xdotool", "mousemove", "--sync", "--window", window, "160", "500"])
+                for _ in range(5):
+                    run(["xdotool", "click", "--clearmodifiers", "5"])
+                time.sleep(0.3)
             click(window, "Release history")
             expect(window, ["Refresh"], "09-history")
             report["public_changelog_read"] = "page activated; fixed public read-only source; loaded notes not claimed"

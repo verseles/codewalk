@@ -204,17 +204,16 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     );
     return ListView(
       key: const ValueKey('settings_destinations'),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       children: [
         Text(l.settingsTitle, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         TextField(
           key: const ValueKey('settings_navigation_search'),
           controller: _search,
           focusNode: _searchFocus,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            isDense: true,
             labelText: l.settingsNavigationSearchHint,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: query.isEmpty
@@ -240,14 +239,9 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
           _group(context, l.settingsNavigationGroupSetup),
           ListTile(
             key: const ValueKey('settings_destination_servers'),
-            visualDensity: VisualDensity.compact,
             leading: const Icon(Icons.dns_outlined),
             title: Text(l.settingsServersTitle),
-            subtitle: Text(
-              l.chatAddServerToStart,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            subtitle: Text(l.chatAddServerToStart),
             onTap: () => context.push('/hosts'),
           ),
         ],
@@ -296,7 +290,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
   }
 
   Widget _group(BuildContext context, String title) => Padding(
-    padding: const EdgeInsets.only(top: 8, bottom: 2),
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
     child: Text(title, style: Theme.of(context).textTheme.titleSmall),
   );
 
@@ -308,10 +302,9 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
   ) => ListTile(
     key: ValueKey('settings_destination_${section.name}'),
     focusNode: _sectionFocus[section],
-    visualDensity: VisualDensity.compact,
     leading: Icon(icon),
     title: Text(title),
-    subtitle: Text(description, maxLines: 1, overflow: TextOverflow.ellipsis),
+    subtitle: Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
     selected: _selected == section,
     onTap: () => _select(section),
   );
