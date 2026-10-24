@@ -143,12 +143,30 @@ jobs:
       - name: Package Linux artifact
         run: tar -czf "codewalk-linux-${{ matrix.arch }}.tar.gz" -C "build/linux/${{ matrix.arch }}/release/bundle" .
 
+      # The packaged asset itself is launched on its own architecture before
+      # it can ship, with HOME and XDG redirected to an owned directory.
+      - name: Launch the packaged Linux artifact
+        run: |
+          sudo apt-get install -y xvfb xauth xdotool imagemagick dbus-x11
+          xvfb-run -a -s "-screen 0 1280x800x24" dbus-run-session -- \
+            python3 tool/release/smoke_v2_linux_release.py \
+            --archive "codewalk-linux-${{ matrix.arch }}.tar.gz" \
+            --target "linux-${{ matrix.arch }}" --evidence launch-evidence
+
       - uses: actions/upload-artifact@v4
         with:
           name: codewalk-linux-${{ matrix.arch }}
           path: codewalk-linux-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
           retention-days: 2
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codewalk-linux-${{ matrix.arch }}-launch
+          path: launch-evidence/
+          if-no-files-found: warn
+          retention-days: 7
 
   build-android:
     needs: plan
