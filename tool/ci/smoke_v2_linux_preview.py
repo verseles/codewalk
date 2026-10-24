@@ -240,6 +240,8 @@ def smoke(archive_path, evidence):
             expect(window, ["Search shortcuts"], "07-shortcuts")
             click(window, "App Logs")
             expect(window, ["Enable app logging", "Logging is disabled"], "08-logs")
+            click(window, "Version and updates")
+            expect(window, ["Check for updates"], "08b-updates")
             click(window, "Release history")
             expect(window, ["Refresh"], "09-history")
             report["public_changelog_read"] = "page activated; fixed public read-only source; loaded notes not claimed"

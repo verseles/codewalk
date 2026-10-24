@@ -113,6 +113,42 @@ void main() {
   );
 
   settingsTest(
+    'wide desktop 1280x720 fits all settings destinations without scrolling',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 720);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox.shrink());
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      final graph = createAppDependencies(initialLink: Uri(path: '/settings'));
+      await graph.preferences.initialize();
+      graph.preferences.setLocale(const Locale('en'));
+      await tester.pumpWidget(
+        CodeWalkV2Bootstrap(
+          dependencies: graph,
+          dynamicColors: (builder) => builder(null, null),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final key in const [
+        'settings_destination_servers',
+        'settings_destination_appearance',
+        'settings_destination_shortcuts',
+        'settings_destination_logs',
+        'settings_destination_updates',
+        'settings_destination_releaseHistory',
+      ]) {
+        final finder = find.byKey(ValueKey(key));
+        expect(finder, findsOneWidget);
+        final rect = tester.getRect(finder);
+        expect(rect.bottom, lessThanOrEqualTo(720));
+      }
+    },
+  );
+
+  settingsTest(
     'wide filtering keeps detail; shrinking preserves selection and back',
     (tester) async {
       await mount(tester, width: 1280);
