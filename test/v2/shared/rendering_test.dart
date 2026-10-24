@@ -1,6 +1,7 @@
 import 'package:codewalk/shared/rendering/file_path_detector.dart';
 import 'package:codewalk/shared/rendering/file_path_markdown.dart';
 import 'package:codewalk/shared/rendering/markdown_content.dart';
+import 'package:codewalk/shared/theme/app_shapes.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -28,6 +29,10 @@ void main() {
     expect(_textContaining('item'), findsOneWidget);
     expect(_textContaining('obsolete'), findsOneWidget);
     expect(find.byType(Table), findsOneWidget);
+    // v1 parity: a rounded border and a raised header row.
+    final table = tester.widget<Table>(find.byType(Table));
+    expect(table.border?.borderRadius, AppShapes.borderExtraSmall);
+    expect(table.children.first.decoration, isA<BoxDecoration>());
     expect(_textContaining('final answer = 42;'), findsOneWidget);
     expect(tester.widget<MarkdownBody>(find.byType(MarkdownBody)).data, source);
     expect(tester.takeException(), isNull);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 
+import '../theme/app_shapes.dart';
 import '../theme/opencode_theme_presets.dart';
 import 'file_path_detector.dart';
 import 'file_path_markdown.dart';
@@ -118,7 +119,20 @@ class _MarkdownContentState extends State<MarkdownContent> {
         [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
         [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
       ),
-      styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+      // Tables match v1: a rounded themed border and a raised header row.
+      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+        tableHead: theme.textTheme.bodyMedium?.copyWith(
+          color: tokens.textBase,
+          fontWeight: FontWeight.bold,
+        ),
+        tableBody: theme.textTheme.bodyMedium?.copyWith(color: tokens.textBase),
+        tableHeadCellsDecoration: BoxDecoration(color: tokens.surfaceRaised),
+        tableBorder: TableBorder.all(
+          color: tokens.border.withValues(alpha: 0.7),
+          borderRadius: AppShapes.borderExtraSmall,
+        ),
+        tableColumnWidth: const IntrinsicColumnWidth(),
+      ),
       builders: builders,
       paddingBuilders: paddingBuilders,
       onTapLink: widget.onLink == null
