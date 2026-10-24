@@ -18,8 +18,9 @@ Commands, typed on stdin or POSTed to the loopback --control-port:
             body.session, or on the session a client prompted last; only
             sessions from `create` ask, any other evaluates to deny
   permissions
-            the pending requests of body.session (or that same session) and
-            the number of persistent approvals the server saved
+            the pending requests of body.session (or that same session), the
+            replies a client sent for it and the number of persistent
+            approvals the server saved
   restart   stop the server gracefully (SIGTERM) and start it again on the
             same state; the relay endpoint does not change
   tui       the command that attaches the official TUI through the relay
@@ -621,9 +622,10 @@ class DeviceServer:
         return record
 
     def _target(self, body: dict | None) -> str | None:
-        session = (body or {}).get("session")
-        if isinstance(session, str) and ID_SEGMENT.match(session):
-            return session
+        if "session" in (body or {}):
+            # An explicit session is that session or nothing, never another.
+            session = body["session"]
+            return session if isinstance(session, str) and ID_SEGMENT.match(session) else None
         prompted = [
             r["session"]
             for r in self.log.records
@@ -643,10 +645,11 @@ class DeviceServer:
             f"/api/session/{session}/permission",
             {"action": "read", "resources": [resource], "save": [resource]},
         )
-        if status != 200:
+        try:
+            data = json.loads(raw)["data"] if status == 200 else None
+            record = {"session": session, "permission": data["id"], "effect": data["effect"]}
+        except (ValueError, KeyError, TypeError):
             return {"error": f"permission HTTP {status}"}
-        data = json.loads(raw)["data"]
-        record = {"session": session, "permission": data["id"], "effect": data["effect"]}
         self.log.write(kind="permission-created", **record)
         return record
 
@@ -654,19 +657,24 @@ class DeviceServer:
         session = self._target(body)
         if session is None:
             return {"error": "no session: pass body.session or prompt one first"}
-        status, raw = self.api("GET", f"/api/session/{session}/permission")
-        if status != 200:
+        try:
+            status, raw = self.api("GET", f"/api/session/{session}/permission")
+            pending = [p["id"] for p in json.loads(raw)["data"]] if status == 200 else None
+            status, raw = self.api("GET", "/api/permission/saved")
+            saved = json.loads(raw).get("data") if status == 200 else None
+        except (ValueError, KeyError, TypeError, AttributeError):
+            pending = saved = None
+        if pending is None or not isinstance(saved, list):
             return {"error": f"permission list HTTP {status}"}
-        pending = [p.get("id") for p in json.loads(raw).get("data", [])]
-        status, raw = self.api("GET", "/api/permission/saved")
-        if status != 200:
-            return {"error": f"saved permission list HTTP {status}"}
-        data = json.loads(raw).get("data")
-        return {
-            "session": session,
-            "pending": pending,
-            "saved": len(data) if isinstance(data, list) else 0,
-        }
+        # A reply the client sent through the relay; an empty pending list
+        # alone could also be the server rejecting the request by itself.
+        replies = sum(
+            1
+            for r in list(self.log.records)
+            if r.get("session") == session and r.get("method") == "POST"
+            and r.get("route", "").endswith("/reply") and 200 <= r.get("status", 0) < 300
+        )
+        return {"session": session, "pending": pending, "saved": len(saved), "client_replies": replies}
 
     def report(self) -> dict:
         records = list(self.log.records)

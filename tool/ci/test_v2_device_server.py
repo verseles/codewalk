@@ -287,7 +287,17 @@ class DeviceServerTests(unittest.TestCase):
 
     def test_a_permission_needs_a_session(self):
         self.assertIn("error", self.server.command("permission"))
-        self.assertIn("error", self.server.command("permissions", {"session": "../x"}))
+        self.server.log.write(
+            kind="request", session="ses_a1", method="POST", route="/api/session/{id}/prompt"
+        )
+        # A malformed explicit session never falls back to another one.
+        with mock.patch.object(self.server, "api") as api:
+            self.assertIn("error", self.server.command("permission", {"session": "../x"}))
+            self.assertIn("error", self.server.command("permissions", {"session": None}))
+        api.assert_not_called()
+        with mock.patch.object(self.server, "api", return_value=(200, "not json")):
+            self.assertIn("error", self.server.command("permission", {"session": "ses_a1"}))
+            self.assertIn("error", self.server.command("permissions", {"session": "ses_a1"}))
 
     def test_permissions_reports_pending_and_saved(self):
         def api(method, path, body=None):
@@ -295,9 +305,14 @@ class DeviceServerTests(unittest.TestCase):
                 return 200, json.dumps({"data": []})
             return 200, json.dumps({"data": [{"id": "per_1"}]})
 
+        for status in (204, 400):
+            self.server.log.write(kind="request", session="ses_a1", method="POST",
+                                  route="/api/session/{id}/permission/{id}/reply", status=status)
         with mock.patch.object(self.server, "api", side_effect=api):
             state = self.server.command("permissions", {"session": "ses_a1"})
-        self.assertEqual(state, {"session": "ses_a1", "pending": ["per_1"], "saved": 0})
+        self.assertEqual(
+            state, {"session": "ses_a1", "pending": ["per_1"], "saved": 0, "client_replies": 1}
+        )
         with mock.patch.object(self.server, "api", return_value=(500, "")):
             self.assertIn("error", self.server.command("permissions", {"session": "ses_a1"}))
 

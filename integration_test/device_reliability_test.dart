@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/session_stop_button.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:flutter/material.dart';
@@ -171,12 +172,19 @@ void main() {
     // The flow cell: send, stop the running turn, then answer a native
     // permission request on the same session. Allow all (the default)
     // answers it by itself; in Ask mode the card's allow action is tapped.
-    // The server's pending list is the settlement evidence.
-    {
+    // The server's pending list and the client's reply on the relay are the
+    // settlement evidence. A failure is recorded and the reconnect cells
+    // still run.
+    final flow = <String, Object?>{'scenario': 'flow'};
+    try {
       final created = await control('create');
       final session = created['session']! as String;
+      flow['session'] = session;
       dependencies.router.go('/s/${profile.id}/$session');
-      final opened = await until(live, timeout: const Duration(seconds: 60));
+      flow['opened_live'] = await until(
+        live,
+        timeout: const Duration(seconds: 60),
+      );
       final marker = 'CW-SLOW flow ${DateTime.now().millisecondsSinceEpoch}';
       await tester.enterText(
         find.byKey(const ValueKey('live-composer-input')),
@@ -188,17 +196,32 @@ void main() {
         running,
         timeout: const Duration(seconds: 30),
       );
+      flow['turn_started'] = started;
       if (started) await tester.tap(find.byKey(const ValueKey('live-stop')));
-      // Well inside the stub's 30 s answer, so only the stop ends the turn.
-      final stopped =
+      // The stop control (button or its in-flight spinner) leaves only when
+      // the turn can no longer be stopped; seen twice, then the server must
+      // agree. Well inside the stub's 30 s answer, so only the stop ends it.
+      var idleSeen = 0;
+      final idle =
           started &&
-          await until(
-            () => live() && !running(),
-            timeout: const Duration(seconds: 20),
-          );
+          await until(() {
+            final gone =
+                live() && find.byType(SessionStopButton).evaluate().isEmpty;
+            idleSeen = gone ? idleSeen + 1 : 0;
+            return idleSeen >= 2;
+          }, timeout: const Duration(seconds: 20));
+      final report = await control('report');
+      final serverSession =
+          ((report['sessions'] as Map?)?[session] as Map?) ?? const {};
+      flow['server_active'] = serverSession['active'];
+      final stopped = idle && serverSession['active'] == false;
+      flow['stopped'] = stopped;
+      flow['prompt_shown'] = count(marker);
       final asked = await control('permission', {'session': session});
+      flow['permission'] = asked;
       final allow = find.byWidgetPredicate(
         (widget) =>
+            widget is ButtonStyleButton &&
             widget.key is ValueKey<String> &&
             (widget.key! as ValueKey<String>).value.startsWith(
               'live-permission-allow-',
@@ -211,8 +234,15 @@ void main() {
         await tester.pump();
         state = await control('permissions', {'session': session});
         if ((state['pending'] as List?)?.isEmpty ?? false) break;
-        if (!tapped && allow.evaluate().isNotEmpty) {
-          await tester.tap(allow.first);
+        // A mounted card can briefly hold a disabled action; tap only an
+        // enabled one, and only once.
+        final ready = allow.evaluate().where(
+          (e) => (e.widget as ButtonStyleButton).onPressed != null,
+        );
+        if (!tapped && ready.isNotEmpty) {
+          final target = find.byWidget(ready.first.widget);
+          await tester.ensureVisible(target);
+          await tester.tap(target);
           tapped = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -220,24 +250,25 @@ void main() {
       final answered =
           asked['effect'] == 'ask' &&
           ((state['pending'] as List?)?.isEmpty ?? false) &&
-          state['saved'] == 0;
-      await control('result', {
-        'scenario': 'flow',
-        'session': session,
-        'opened_live': opened,
-        'turn_started': started,
-        'stopped': stopped,
-        'prompt_shown': count(marker),
-        'permission': asked,
+          state['saved'] == 0 &&
+          ((state['client_replies'] as int?) ?? 0) >= 1;
+      flow.addAll({
         'permission_answered': answered,
         'answered_by': tapped ? 'card' : 'allow-all',
         'permission_state': state,
         'status': status(),
       });
-      if (!opened || !stopped || count(marker) != 1 || !answered) {
+      if (flow['opened_live'] != true ||
+          !stopped ||
+          count(marker) != 1 ||
+          !answered) {
         unsettled.add('flow');
       }
+    } catch (error) {
+      flow['error'] = '$error';
+      unsettled.add('flow');
     }
+    await control('result', flow);
 
     await cell('drop', {
       'command': 'host/drop',
