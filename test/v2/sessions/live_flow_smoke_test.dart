@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
+import 'package:codewalk/app/composition_root.dart';
+import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/hosts/hosts_controller.dart';
+import 'package:codewalk/features/sessions/session_error_card.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/features/sessions/session_permission_card.dart'
@@ -11,6 +14,7 @@ import 'package:codewalk/platform/endpoints/pairing_factory_io.dart';
 import 'package:codewalk/platform/endpoints/probe_factory_io.dart';
 import 'package:codewalk/platform/profiles/endpoint_profile_store.dart';
 import 'package:codewalk/platform/sessions/permission_mode_store.dart';
+import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
 import 'package:codewalk/platform/storage/endpoint_credentials.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -23,6 +27,8 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 import '../hosts/profile_store_test.dart' show Metadata, Secrets;
 import 'live_smoke_support.dart';
@@ -41,6 +47,8 @@ void main() {
   final password = io.Platform.environment['CODEWALK_LIVE_SMOKE_PASSWORD'];
   final projectDir =
       io.Platform.environment['CODEWALK_LIVE_SMOKE_PROJECT_DIR'];
+  final workspaceSmoke =
+      io.Platform.environment['CODEWALK_LIVE_SMOKE_UNIT'] == 'V2-060C';
 
   late io.HttpOverrides? previousOverrides;
   setUpAll(() {
@@ -412,6 +420,7 @@ void main() {
       // chain cancels the stream subscription and the parser isolate, which
       // only settles on real async, so it runs in the background while real
       // slices and pumps let it finish.
+      await tester.pumpWidget(const SizedBox.shrink());
       live.dispose();
       unawaited(directory.close());
       for (var i = 0; i < 12; i++) {
@@ -425,6 +434,381 @@ void main() {
     // lives here because testWidgets only accepts a bool skip flag.
     skip: upstream == null,
     timeout: const Timeout(Duration(seconds: 540)),
+  );
+
+  testWidgets(
+    'disposable 2.0.22 integrated workspace flow through the root app',
+    (tester) async {
+      Future<T> real<T>(Future<T> Function() action) async =>
+          (await tester.runAsync(action)) as T;
+
+      final previousPrefs = SharedPreferencesAsyncPlatform.instance;
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      addTearDown(
+        () => SharedPreferencesAsyncPlatform.instance = previousPrefs,
+      );
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final probe = NativeProbe(
+        endpoint: Uri.parse(upstream!),
+        secret: password!,
+      );
+      addTearDown(probe.close);
+      final metadata = V2MetadataStore(backend: Metadata());
+      final repository = EndpointProfileStore(
+        metadata: metadata,
+        credentials: EndpointCredentialVault(
+          backend: Secrets(),
+          beforeMutation: metadata.ensureSchema,
+        ),
+      );
+      final modes = PermissionModeStore(store: metadata);
+      await real(modes.initialize);
+      final payloads = OutboxStore();
+      final directory = createSessionLiveDirectory(
+        payloads: payloads,
+        permissionModes: modes,
+      )!;
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/pair'),
+        metadataStore: metadata,
+        profileRepository: repository,
+        endpointPairing: createEndpointPairing(),
+        permissionModeStore: modes,
+        sessionLiveDirectory: () => directory,
+        draftStore: SessionDraftStore(payloads: payloads, index: metadata),
+      );
+      await real(dependencies.sessionTabs!.initialize);
+      await real(dependencies.sessions!.initialize);
+      dependencies.preferences.setLocale(const Locale('en'));
+      final nativeIds = <String>[];
+      var cleanedUp = false;
+      // This also runs after an assertion fails: no stream watchdog or native
+      // session may leak into the next test or the user's persistent state.
+      Future<void> cleanUp() async {
+        if (cleanedUp) return;
+        // Capture the first close future: root disposal also calls close,
+        // whose later invocations return before the first shutdown finishes.
+        final closing = directory.close();
+        await tester.pumpWidget(const SizedBox.shrink());
+        var closed = false;
+        unawaited(closing.then((_) => closed = true));
+        await pumpSpin(
+          tester,
+          () => closed,
+          reason: 'workspace directory closed',
+        );
+        for (final id in nativeIds) {
+          await real(() => probe.deleteSession(id));
+        }
+        cleanedUp = true;
+      }
+      addTearDown(cleanUp);
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await tester.pumpAndSettle();
+      final code = await real(probe.createPairingCode);
+      await tester.enterText(
+        find.byKey(const ValueKey('pairing-link')),
+        '$upstream/auth/connect/$code',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('confirm-pairing')));
+      await pumpSpin(
+        tester,
+        () => find.byKey(const ValueKey('save-pairing')).evaluate().isNotEmpty,
+        reason: 'workspace pairing redeemed',
+        timeout: const Duration(seconds: 30),
+      );
+      await tester.tap(find.byKey(const ValueKey('save-pairing')));
+      await pumpSpin(
+        tester,
+        () => dependencies.hosts.profiles.isNotEmpty,
+        reason: 'workspace profile saved',
+      );
+      final profile = dependencies.hosts.profiles.single;
+      // Saving reloads the host catalog and its credentials. Profile presence
+      // precedes that reload; selectProfile intentionally refuses while busy.
+      await pumpSpin(
+        tester,
+        () => !dependencies.hosts.loading &&
+            !dependencies.pairing!.busy &&
+            dependencies.hosts.credentialFor(profile) != null,
+        reason: 'paired host credential reload complete',
+      );
+      expect(
+        (await real(() => repository.readCredential(profile)))?.kind,
+        EndpointAuthKind.paired,
+      );
+      qaMark('workspace-pairing', 'passed');
+
+      for (var i = 0; i < 2; i++) {
+        final id = await real(
+          () => probe.createSession(
+            title: 'cw060c workspace $i',
+            directory: projectDir!,
+          ),
+        );
+        nativeIds.add(id);
+        await real(() => probe.selectModel(id));
+        await real(() => probe.selectAgent(id, 'build'));
+      }
+      SessionRef ref(String id) =>
+          SessionRef(HostId(profile.id), HarnessInstanceId(profile.id), id);
+      final primary = ref(nativeIds.first);
+      final sibling = ref(nativeIds.last);
+      expect(
+        await real(() => modes.setSessionMode(primary, PermissionMode.ask)),
+        isTrue,
+      );
+      dependencies.router.go('/sessions');
+      await tester.pump();
+      final selecting = dependencies.sessions!.selectProfile(profile.id);
+      await pumpSpin(
+        tester,
+        () {
+          final catalog = dependencies.sessions!;
+          if (catalog.failure != null) {
+            fail('Native catalog failed: ${catalog.failure}');
+          }
+          return nativeIds.every((id) => catalog.sessions
+              .any((row) => row.info.ref.nativeId == id));
+        },
+        reason: 'native workspace catalog',
+      );
+      await selecting;
+      expect(find.byKey(const ValueKey('workspace-sidebar')), findsOneWidget);
+      expect(find.byKey(const ValueKey('workspace-empty')), findsOneWidget);
+      qaMark('workspace', 'passed');
+
+      Future<void> open(SessionRef session) async {
+        final row = find.byKey(ValueKey<SessionRef>(session));
+        await tester.ensureVisible(row);
+        await tester.tap(row);
+        await tester.pump();
+        final button = find.byKey(ValueKey('live-open-${session.storageKey}'));
+        await pumpSpin(
+          tester,
+          () => button.evaluate().isNotEmpty,
+          reason: 'workspace open action',
+        );
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await pumpSpin(
+          tester,
+          () => dependencies.sessionTabs!.selectedFor(session.host) == session,
+          reason: 'workspace selected tab',
+        );
+      }
+
+      await open(sibling);
+      await open(primary);
+      expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
+      for (final session in [sibling, primary]) {
+        final tab = find.byKey(ValueKey('session-tab-${session.storageKey}'));
+        expect(tab, findsOneWidget);
+        await tester.tap(tab);
+        await pumpSpin(
+          tester,
+          () => dependencies.sessionTabs!.selectedFor(session.host) == session,
+          reason: 'workspace switch tab',
+        );
+      }
+      qaMark('workspace-tab', 'passed');
+      final live = tester
+          .widget<SessionLivePage>(find.byType(SessionLivePage))
+          .controller;
+      await pumpSpin(
+        tester,
+        () => live.phase == SessionLivePhase.live,
+        reason: 'workspace live stream',
+      );
+      Future<void> send(String text) async {
+        final input = find.byKey(const ValueKey('live-composer-input'));
+        await tester.enterText(input, text);
+        await tester.pump();
+        final send = find.byKey(const ValueKey('live-composer-send'));
+        await tester.tap(send);
+        await pumpSpin(
+          tester,
+          () =>
+              tester.widget<TextField>(input).controller!.text.isEmpty &&
+              !live.composer.sending,
+          reason: 'workspace prompt admitted',
+        );
+      }
+
+      await send('CW060B_SCENARIO_SEND workspace');
+      await pumpSpin(
+        tester,
+        () => timelineHas(live, 'CW060B_STUB_SEND_OK'),
+        reason: 'workspace streamed send',
+        timeout: const Duration(seconds: 30),
+      );
+      final messages = await real(() => probe.listMessages(primary.nativeId));
+      final assistants = messages.where(
+        (row) => row['type'] == 'assistant',
+      );
+      expect(assistants, isNotEmpty);
+      for (final message in assistants) {
+        expect(message['cost'], 0);
+      }
+      await pumpSpin(
+        tester,
+        () => live.state?.execution?.kind.known != ExecutionKind.running,
+        reason: 'workspace first turn complete',
+      );
+      qaMark('workspace-send', 'passed');
+
+      await send('CW060B_SCENARIO_HOLD workspace');
+      await pumpSpin(tester, () => live.canStop, reason: 'workspace held turn');
+      await tester.enterText(
+        find.byKey(const ValueKey('live-composer-input')),
+        'workspace steer while holding',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('live-delivery-steer')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('live-composer-send')));
+      await pumpSpin(
+        tester,
+        () =>
+            tester
+                .widget<TextField>(
+                  find.byKey(const ValueKey('live-composer-input')),
+                )
+                .controller!
+                .text
+                .isEmpty &&
+            !live.composer.sending,
+        reason: 'workspace steer admitted',
+      );
+      qaMark('workspace-steer', 'passed');
+      await pumpSpin(
+        tester,
+        () => find.byKey(const ValueKey('live-stop')).evaluate().isNotEmpty,
+        reason: 'workspace stop enabled',
+      );
+      await tester.tap(find.byKey(const ValueKey('live-stop')));
+      await pumpSpin(
+        tester,
+        () => live.state?.execution?.kind.known != ExecutionKind.running,
+        reason: 'workspace turn interrupted',
+        timeout: const Duration(seconds: 30),
+      );
+      expect(live.canStop, isFalse);
+      qaMark('workspace-stop', 'passed');
+
+      await real(
+        () => probe.createPermission(primary.nativeId, 'workspace-manual'),
+      );
+      await pumpSpin(
+        tester,
+        () => (live.state?.interactions ?? const []).any(
+          (r) => r.kind.known == InteractionKind.permission,
+        ),
+        reason: 'workspace permission card',
+      );
+      final permission = permissionRequest(live);
+      await pumpSpin(
+        tester,
+        () => live.canReply(permission),
+        reason: 'workspace permission enabled',
+      );
+      final allow = find.byKey(
+        ValueKey(
+          'live-permission-allow-${permissionKeyOf(primary, permission)}',
+        ),
+      );
+      await tester.ensureVisible(allow);
+      await tester.tap(allow);
+      await pumpSpin(
+        tester,
+        () async =>
+            (await real(() => probe.listPermissions(primary.nativeId))).isEmpty,
+        reason: 'workspace permission settled natively',
+      );
+      expect(await real(probe.listSavedPermissions), isEmpty);
+      qaMark('workspace-approval', 'passed');
+
+      final formId = await real(() => probe.createForm(primary.nativeId));
+      await pumpSpin(
+        tester,
+        () => find.byKey(ValueKey('live-form-$formId')).evaluate().isNotEmpty,
+        reason: 'workspace form card',
+      );
+      final choice = find.byKey(const ValueKey('form-option-choice-alpha'));
+      await tester.ensureVisible(choice);
+      await tester.tap(choice);
+      await tester.pump();
+      final submit = find.byKey(ValueKey('form-submit-$formId'));
+      await pumpSpin(
+        tester,
+        () => tester.widget<FilledButton>(submit).onPressed != null,
+        reason: 'workspace form enabled',
+      );
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
+      await pumpSpin(
+        tester,
+        () async =>
+            (await real(() => probe.listForms(primary.nativeId))).isEmpty,
+        reason: 'workspace form settled natively',
+      );
+      final nativeForm = await real(
+        () => probe.readForm(primary.nativeId, formId),
+      );
+      expect((nativeForm['state'] as Map)['answer'], {'choice': 'alpha'});
+      qaMark('workspace-form', 'passed');
+
+      await tester.tap(find.byKey(const ValueKey('live-selection')));
+      await tester.pumpAndSettle();
+      final alternate = find.byKey(
+        const ValueKey('live-selection-model-cw060b/stub-alt'),
+      );
+      await tester.ensureVisible(alternate);
+      await tester.tap(alternate);
+      await pumpSpin(
+        tester,
+        () async =>
+            ((await real(() => probe.readSession(primary.nativeId)))['model']
+                as Map?)?['id'] ==
+            'stub-alt',
+        reason: 'workspace native model switch',
+      );
+      await pumpSpin(
+        tester,
+        () => live.selectionState.selection?.modelId == 'stub-alt',
+        reason: 'workspace model chip switched',
+      );
+      qaMark('workspace-model-switch', 'passed');
+
+      await send('CW060B_SCENARIO_ERROR workspace');
+      await pumpSpin(
+        tester,
+        () => find.byType(SessionErrorCard).evaluate().isNotEmpty,
+        reason: 'workspace native provider error',
+        timeout: const Duration(seconds: 30),
+      );
+      final error = tester.widget<SessionErrorCard>(
+        find.byType(SessionErrorCard),
+      );
+      expect(
+        error.error.rawMessage,
+        contains('cw060c simulated provider auth failure'),
+      );
+      expect(find.byKey(const ValueKey('live-error-action')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      qaMark('workspace-error', 'passed');
+      // Widget binding checks timers before addTearDown, so close on success
+      // here as well as retaining the failure cleanup above.
+      await cleanUp();
+    },
+    skip: upstream == null || !workspaceSmoke,
+    timeout: const Timeout(Duration(seconds: 300)),
   );
 
   /// P5–P6 at the directory level with real async: the stub holds a turn

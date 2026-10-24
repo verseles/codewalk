@@ -119,6 +119,10 @@ class ConfigInvariantTests(unittest.TestCase):
             cfg["providers"]["cw060b"]["models"]["stub"]["cost"],
             {"input": 0, "output": 0},
         )
+        self.assertEqual(
+            cfg["providers"]["cw060b"]["models"]["stub-alt"]["cost"],
+            {"input": 0, "output": 0},
+        )
         self.assertNotIn("always", json.dumps(cfg))
         self.assertTrue(
             cfg["providers"]["cw060b"]["settings"]["baseURL"].startswith(
@@ -193,6 +197,16 @@ class StubScenarioTests(unittest.TestCase):
         self.assertTrue(
             self.stub.ledger[-1]["marker"].endswith("CW060B_SCENARIO_APPROVAL")
         )
+
+    def test_error_scenario_returns_401_invalid_api_key(self):
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            self._post("trigger CW060B_SCENARIO_ERROR")
+        self.assertEqual(ctx.exception.code, 401)
+        body = json.loads(ctx.exception.read().decode())
+        self.assertEqual(body["error"]["type"], "invalid_request_error")
+        self.assertEqual(body["error"]["code"], "invalid_api_key")
+        self.assertIn("simulated provider auth failure", body["error"]["message"])
+        self.assertEqual(self.stub.ledger[-1]["marker"], "trigger CW060B_SCENARIO_ERROR")
 
     def test_unknown_path_is_404(self):
         req = urllib.request.Request(
@@ -446,6 +460,40 @@ class FixtureTests(unittest.TestCase):
         self.assertEqual(
             len(set(smoke.CAPABILITY_PHASES.values())), len(smoke.CAPABILITY_PHASES)
         )
+        self.assertEqual(
+            set(smoke.CAPABILITY_PHASES_060C),
+            set(smoke.CAPABILITY_PHASES) | {
+                "workspace-pairing",
+                "workspace",
+                "workspace-tab",
+                "workspace-send",
+                "workspace-steer",
+                "workspace-stop",
+                "workspace-approval",
+                "workspace-form",
+                "workspace-model-switch",
+                "workspace-error",
+            },
+        )
+        self.assertEqual(
+            len(set(smoke.CAPABILITY_PHASES_060C.values())),
+            len(smoke.CAPABILITY_PHASES_060C),
+        )
+        self.assertTrue(
+            set(smoke.CAPABILITY_PHASES).issubset(set(smoke.CAPABILITY_PHASES_060C))
+        )
+
+    def test_baseline_markers_do_not_prove_the_workspace_flow(self):
+        events = [
+            'CODEWALK_LIVE_QA ' + json.dumps({"phase": phase, "status": "passed"})
+            for phase in smoke.CAPABILITY_PHASES
+        ]
+        states = smoke._capability_states(events, smoke.CAPABILITY_PHASES_060C)
+        self.assertEqual(states["pairing"], "passed")
+        self.assertEqual(states["send"], "passed")
+        self.assertEqual(states["workspacePairing"], "missing")
+        self.assertEqual(states["workspaceSend"], "missing")
+        self.assertEqual(states["workspaceApproval"], "missing")
 
     def test_the_committed_fixture_uses_the_launcher_phase_map(self):
         fixture = (
@@ -512,6 +560,19 @@ class FixtureTests(unittest.TestCase):
             digests = (out / "SHA256SUMS").read_text()
             self.assertIn("results.json", digests)
             self.assertIn("capabilities.json", digests)
+
+        with tempfile.TemporaryDirectory() as tmp060c:
+            out060c = Path(tmp060c)
+            smoke._write_fixture(evidence, out060c, unit="V2-060C")
+            provenance = json.loads((out060c / "provenance.json").read_text())
+            self.assertEqual(provenance["unit"], "V2-060C")
+            self.assertEqual(provenance["issue"], smoke.ISSUE_URL_060C)
+            results060c = json.loads((out060c / "results.json").read_text())
+            self.assertEqual(results060c["capabilities"]["pairing"], "passed")
+            self.assertEqual(results060c["capabilities"]["workspace"], "missing")
+            self.assertEqual(results060c["capabilities"]["form"], "missing")
+            self.assertEqual(results060c["capabilities"]["modelSwitch"], "missing")
+            self.assertEqual(results060c["capabilities"]["error"], "missing")
 
 
 if __name__ == "__main__":

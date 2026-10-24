@@ -64,7 +64,9 @@ PINNED_BINARY_SHA256 = (
 EXPECTED_VERSION = "2.0.22"
 NPM_PACKAGE = "@opencode/cli-linux-arm64"
 MAX_STUB_REQUESTS = 12
+MAX_STUB_REQUESTS_060C = 24
 ISSUE_URL = "https://github.com/verseles/codewalk/issues/300"
+ISSUE_URL_060C = "https://github.com/verseles/codewalk/issues/409"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LAUNCHER_PATH = "tool/ci/live_smoke_v2_opencode.py"
 LIVE_SUITE_PATH = "test/v2/sessions/live_flow_smoke_test.dart"
@@ -81,6 +83,33 @@ CAPABILITY_PHASES = {
     "reconnect-detection": "reconnect",
     "stop-reconnect": "stop",
     "stop-idle": "stopIdle",
+}
+
+CAPABILITY_PHASES_060C = {
+    **CAPABILITY_PHASES,
+    "workspace-pairing": "workspacePairing",
+    "workspace": "workspace",
+    "workspace-tab": "tab",
+    "workspace-send": "workspaceSend",
+    "workspace-steer": "steer",
+    "workspace-stop": "stopTurn",
+    "workspace-approval": "workspaceApproval",
+    "workspace-form": "form",
+    "workspace-model-switch": "modelSwitch",
+    "workspace-error": "error",
+}
+
+UNIT_METADATA = {
+    "V2-060B": {
+        "issue": ISSUE_URL,
+        "phases": CAPABILITY_PHASES,
+        "stub_request_cap": MAX_STUB_REQUESTS,
+    },
+    "V2-060C": {
+        "issue": ISSUE_URL_060C,
+        "phases": CAPABILITY_PHASES_060C,
+        "stub_request_cap": MAX_STUB_REQUESTS_060C,
+    },
 }
 
 FIXTURE_LIMITATIONS = [
@@ -251,7 +280,12 @@ def _build_server_config(stub_port: int) -> dict:
                         "name": "cw060b stub",
                         "cost": {"input": 0, "output": 0},
                         "capabilities": {"tools": True},
-                    }
+                    },
+                    "stub-alt": {
+                        "name": "cw060b stub alt",
+                        "cost": {"input": 0, "output": 0},
+                        "capabilities": {"tools": True},
+                    },
                 },
             }
         },
@@ -430,11 +464,23 @@ class _StubHandler(BaseHTTPRequestHandler):
             for m in messages
         ]
         n = stub.record(marker, tools, has_tool_result, roles)
-        if n > MAX_STUB_REQUESTS:
+        if n > stub.max_requests:
             self._send_json(429, {"error": "stub request cap exceeded"})
             return
         if self.path != "/v1/chat/completions":
             self._send_json(404, {"error": "stub serves only chat completions"})
+            return
+        if "ERROR" in marker:
+            self._send_json(
+                401,
+                {
+                    "error": {
+                        "message": "cw060c simulated provider auth failure",
+                        "type": "invalid_request_error",
+                        "code": "invalid_api_key",
+                    }
+                },
+            )
             return
         if "HOLD" in marker:
             # Hold the stream open until the client disconnects (reconnect
@@ -519,7 +565,8 @@ class _StubHandler(BaseHTTPRequestHandler):
 
 
 class StubProvider:
-    def __init__(self) -> None:
+    def __init__(self, *, max_requests: int = MAX_STUB_REQUESTS) -> None:
+        self.max_requests = max_requests
         self.ledger: list[dict] = []
         self.hold_ends: list[str] = []
         self._lock = threading.Lock()
@@ -802,16 +849,19 @@ def _parse_markers(events: list[str]) -> tuple[list[dict], dict[str, str]]:
     return records, observed
 
 
-def _capability_states(events: list[str]) -> dict[str, str]:
+def _capability_states(
+    events: list[str], phases: dict[str, str] | None = None
+) -> dict[str, str]:
     """The state of every capability, derived from the marker of its phase.
 
     A capability without a passing marker is `missing`: the fixture may never
     claim a phase the run did not observe.
     """
+    phase_map = phases or CAPABILITY_PHASES
     observed = _parse_markers(events)[1]
     return {
         capability: observed.get(phase, "missing")
-        for phase, capability in CAPABILITY_PHASES.items()
+        for phase, capability in phase_map.items()
     }
 
 
@@ -823,23 +873,32 @@ def _native_cost(events: list[str]) -> float | None:
     return None
 
 
-def _write_fixture(evidence: dict, out: Path) -> None:
+def _unit_meta(unit: str) -> dict:
+    if unit not in UNIT_METADATA:
+        fail(f"unsupported live-smoke unit: {unit!r}")
+    return UNIT_METADATA[unit]
+
+
+def _write_fixture(evidence: dict, out: Path, unit: str = "V2-060B") -> None:
     """Write the committed evidence fixture from this run.
 
     The fixture is generated, never hand-edited: every value comes from the
     recorded run, so it cannot claim more than the run proved. Every file is
     scanned for secret material before it reaches the disk.
     """
+    meta = _unit_meta(unit)
+    issue_url = meta["issue"]
+    phase_map = meta["phases"]
     events = evidence.get("events", [])
     records = _parse_markers(events)[0]
-    capabilities = _capability_states(events)
+    capabilities = _capability_states(events, phase_map)
     native_cost = _native_cost(events)
     cleanup = evidence.get("cleanup", {})
     egress = evidence.get("egress", {})
     acquisition = evidence.get("acquisition", {})
     results = {
-        "unit": "V2-060B",
-        "issue": ISSUE_URL,
+        "unit": unit,
+        "issue": issue_url,
         "status": evidence.get("status"),
         "serverVersion": evidence.get("version"),
         "host": evidence.get("host"),
@@ -848,8 +907,8 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "limitations": list(FIXTURE_LIMITATIONS),
     }
     provenance = {
-        "unit": "V2-060B",
-        "issue": ISSUE_URL,
+        "unit": unit,
+        "issue": issue_url,
         "status": evidence.get("status"),
         "capturedOn": datetime.now(timezone.utc).date().isoformat(),
         "platform": "Linux aarch64",
@@ -882,7 +941,7 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "holdEnds": hold_ends,
         "holdAbortedByDisconnect": sum(1 for r in hold_ends if r == "disconnect"),
         "holdTimedOut": sum(1 for r in hold_ends if r == "timeout"),
-        "cap": MAX_STUB_REQUESTS,
+        "cap": evidence.get("stub_request_cap", meta["stub_request_cap"]),
     }
     egress_doc = {
         "violation": egress.get("violation"),
@@ -913,7 +972,7 @@ def _write_fixture(evidence: dict, out: Path) -> None:
         "foreignPortsLeft": cleanup.get("foreign_ports_left"),
     }
     files = {
-        "capabilities.json": {"unit": "V2-060B", "phases": CAPABILITY_PHASES},
+        "capabilities.json": {"unit": unit, "phases": phase_map},
         "results.json": results,
         "provenance.json": provenance,
         "events.json": events_doc,
@@ -947,7 +1006,10 @@ def run(
     evidence_out: Path,
     flutter_test: str,
     fixture_out: Path | None = None,
+    unit: str = "V2-060B",
 ) -> int:
+    meta = _unit_meta(unit)
+    phase_map = meta["phases"]
     password = None
     server = None
     stub = None
@@ -957,6 +1019,7 @@ def run(
     events: list[str] = []
     server_port: int | None = None
     evidence: dict = {
+        "unit": unit,
         "status": "inconclusive",
         "version": EXPECTED_VERSION,
         "host": "linux-aarch64",
@@ -1023,7 +1086,8 @@ def run(
         import secrets as _secrets
 
         password = _secrets.token_urlsafe(32)
-        stub = StubProvider()
+        stub = StubProvider(max_requests=meta["stub_request_cap"])
+        evidence["stub_request_cap"] = stub.max_requests
         stub.start()
         config = _build_server_config(stub.port)
         (root / "config.json").write_text(json.dumps(config, indent=2) + "\n")
@@ -1123,6 +1187,7 @@ def run(
                 "CODEWALK_LIVE_SMOKE_UPSTREAM": endpoint,
                 "CODEWALK_LIVE_SMOKE_PASSWORD": password,
                 "CODEWALK_LIVE_SMOKE_PROJECT_DIR": str(project),
+                "CODEWALK_LIVE_SMOKE_UNIT": unit,
             }
         )
         cmd_flutter = shutil.which("flutter") or os.path.expanduser(
@@ -1290,7 +1355,7 @@ def run(
         # The record must not contradict its own gates: a capability that did
         # not pass, or a zero-spend claim the run did not prove, is a failed
         # run, not a delivery.
-        capabilities = _capability_states(events)
+        capabilities = _capability_states(events, phase_map)
         evidence["capabilities"] = capabilities
         if evidence.get("status") == "delivered-awaiting-acceptance":
             if not evidence.get("zero_spend"):
@@ -1322,7 +1387,7 @@ def run(
                     file=sys.stderr,
                 )
             else:
-                _write_fixture(final, fixture_out)
+                _write_fixture(final, fixture_out, unit=unit)
                 print(f"live-smoke: fixture written to {fixture_out}")
     print(json.dumps({"status": evidence.get("status")}))
     return 0 if evidence.get("status") == "delivered-awaiting-acceptance" else 1
@@ -1376,6 +1441,12 @@ def main(argv: list[str]) -> int:
     p_run.add_argument("--evidence-out", required=True)
     p_run.add_argument("--flutter-test", required=True)
     p_run.add_argument(
+        "--unit",
+        default="V2-060B",
+        choices=sorted(UNIT_METADATA),
+        help="roadmap unit for fixture metadata and capability phase map",
+    )
+    p_run.add_argument(
         "--fixture-out",
         default=None,
         help="write the committed evidence fixture from this run (successful runs only)",
@@ -1390,6 +1461,7 @@ def main(argv: list[str]) -> int:
         Path(args.evidence_out),
         args.flutter_test,
         Path(args.fixture_out) if args.fixture_out else None,
+        unit=args.unit,
     )
 
 

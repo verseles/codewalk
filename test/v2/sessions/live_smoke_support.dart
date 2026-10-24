@@ -230,6 +230,14 @@ final class NativeProbe {
     return data['id'] as String;
   }
 
+  Future<String> createPairingCode() async {
+    final result = await _call('POST', '/api/pair');
+    if (result['status'] != 200) {
+      throw StateError('pair create HTTP ${result['status']}');
+    }
+    return (result['body'] as Map)['code'] as String;
+  }
+
   Future<void> selectModel(String sessionId) async {
     final result = await _call('POST', '/api/session/$sessionId/model', {
       'model': {'providerID': 'cw060b', 'id': 'stub'},
@@ -292,6 +300,52 @@ final class NativeProbe {
       throw StateError('message list HTTP ${result['status']}');
     }
     return ((result['body'] as Map)['data'] as List).cast<Map>();
+  }
+
+  Future<Map<String, Object?>> readSession(String sessionId) async {
+    final result = await _call('GET', '/api/session/$sessionId');
+    if (result['status'] != 200) {
+      throw StateError('session read HTTP ${result['status']}');
+    }
+    return Map<String, Object?>.from((result['body'] as Map)['data'] as Map);
+  }
+
+  Future<String> createForm(String sessionId) async {
+    final result = await _call('POST', '/api/session/$sessionId/form', {
+      'title': 'cw060c smoke form',
+      'fields': [
+        {
+          'key': 'choice',
+          'type': 'string',
+          'required': true,
+          'options': [
+            {'value': 'alpha', 'label': 'Alpha'},
+            {'value': 'beta', 'label': 'Beta'},
+          ],
+        },
+      ],
+    });
+    if (result['status'] != 200) {
+      throw StateError('form create HTTP ${result['status']}');
+    }
+    final data = (result['body'] as Map)['data'] as Map;
+    return data['id'] as String;
+  }
+
+  Future<List<Map>> listForms(String sessionId) async {
+    final result = await _call('GET', '/api/session/$sessionId/form');
+    if (result['status'] != 200) {
+      throw StateError('form list HTTP ${result['status']}');
+    }
+    return ((result['body'] as Map)['data'] as List).cast<Map>();
+  }
+
+  Future<Map<String, Object?>> readForm(String sessionId, String formId) async {
+    final result = await _call('GET', '/api/session/$sessionId/form/$formId');
+    if (result['status'] != 200) {
+      throw StateError('form read HTTP ${result['status']}');
+    }
+    return Map<String, Object?>.from((result['body'] as Map)['data'] as Map);
   }
 
   Future<bool> interrupt(String sessionId) async {

@@ -219,6 +219,32 @@ List<Map<String, Object?>> cPermissionRows(
   throw StateError('C permission rows not found');
 }
 
+/// Captured C `permission.asked` frames for [requestId], re-keyed to
+/// [sessionId].
+List<String> cPermissionAskedFrames(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+  String requestId,
+) {
+  final events =
+      (_doc(fixtures, 'c/native-interactions.json')['events'] as List);
+  final frames = <String>[];
+  for (final event in events) {
+    final e = event as Map<String, Object?>;
+    if (e['type'] != 'permission.asked') continue;
+    final data = e['data'];
+    if (data is! Map<String, Object?>) continue;
+    if (data['id'] != requestId) continue;
+    final fixed = Map<String, Object?>.from(e)
+      ..['data'] = (Map<String, Object?>.from(data)..['sessionID'] = sessionId);
+    frames.add('data: ${jsonEncode(fixed)}\n\n');
+  }
+  if (frames.isEmpty) {
+    throw StateError('C permission asked frames not found for $requestId');
+  }
+  return frames;
+}
+
 /// Captured C `permission.replied` frames for [requestId], re-keyed to
 /// [sessionId]. Emitting these settles the matching resident request.
 List<String> cPermissionRepliedFrames(
@@ -244,6 +270,159 @@ List<String> cPermissionRepliedFrames(
   }
   return frames;
 }
+
+/// Captured C form rows, re-keyed to [sessionId].
+List<Map<String, Object?>> cFormRows(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+) {
+  final calls = (_doc(fixtures, 'c/native-interactions.json')['calls'] as List);
+  for (final call in calls) {
+    final c = call as Map<String, Object?>;
+    final path = c['path'] as String;
+    if (c['status'] == 200 &&
+        (path.endsWith('/form') || path.contains('/form/frm_'))) {
+      final data = (c['response'] as Map)['data'];
+      if (data is List && data.isNotEmpty) {
+        return [
+          for (final row in data)
+            Map<String, Object?>.from(row as Map)..['sessionID'] = sessionId,
+        ];
+      }
+      if (data is Map && (data['state'] as Map?)?['status'] == 'pending') {
+        return [Map<String, Object?>.from(data)..['sessionID'] = sessionId];
+      }
+    }
+  }
+  throw StateError('C form rows not found');
+}
+
+/// Captured C `form.created` frames for [formId], re-keyed to [sessionId].
+List<String> cFormCreatedFrames(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+  String formId,
+) {
+  final events =
+      (_doc(fixtures, 'c/native-interactions.json')['events'] as List);
+  final frames = <String>[];
+  for (final event in events) {
+    final e = event as Map<String, Object?>;
+    if (e['type'] != 'form.created') continue;
+    final data = e['data'];
+    if (data is! Map<String, Object?>) continue;
+    final form = data['form'] is Map<String, Object?>
+        ? Map<String, Object?>.from(data['form'] as Map)
+        : Map<String, Object?>.from(data);
+    if (form['id'] != formId) continue;
+    form['sessionID'] = sessionId;
+    final fixed = Map<String, Object?>.from(e)
+      ..['data'] = data['form'] is Map
+          ? (Map<String, Object?>.from(data)..['form'] = form)
+          : form;
+    frames.add('data: ${jsonEncode(fixed)}\n\n');
+  }
+  if (frames.isEmpty) {
+    throw StateError('C form created frames not found for $formId');
+  }
+  return frames;
+}
+
+/// Captured C `form.replied` frames for [formId], re-keyed to [sessionId].
+List<String> cFormRepliedFrames(
+  OpenCodeFixtures fixtures,
+  String sessionId,
+  String formId,
+) {
+  final events =
+      (_doc(fixtures, 'c/native-interactions.json')['events'] as List);
+  final frames = <String>[];
+  for (final event in events) {
+    final e = event as Map<String, Object?>;
+    if (e['type'] != 'form.replied') continue;
+    final data = e['data'];
+    if (data is! Map<String, Object?>) continue;
+    if ((data['id'] ?? data['formID']) != formId) continue;
+    final fixed = Map<String, Object?>.from(e)
+      ..['data'] = (Map<String, Object?>.from(data)..['sessionID'] = sessionId);
+    frames.add('data: ${jsonEncode(fixed)}\n\n');
+  }
+  if (frames.isEmpty) {
+    throw StateError('C form replied frames not found for $formId');
+  }
+  return frames;
+}
+
+/// Captured D `session.execution.interrupted` frame, re-keyed to [sessionId]
+/// and durable sequence [seq].
+String dExecutionInterruptedFrame(
+  OpenCodeFixtures fixtures,
+  String sessionId, {
+  required int seq,
+}) {
+  final events =
+      (_doc(fixtures, 'd/background-interrupt.json')['events'] as List);
+  for (final event in events) {
+    final e = event as Map<String, Object?>;
+    if (e['type'] != 'session.execution.interrupted') continue;
+    final data = e['data'] as Map<String, Object?>;
+    final durable = e['durable'] as Map<String, Object?>;
+    final fixed = Map<String, Object?>.from(e)
+      ..['data'] = (Map<String, Object?>.from(data)..['sessionID'] = sessionId)
+      ..['durable'] = (Map<String, Object?>.from(durable)
+        ..['aggregateID'] = sessionId
+        ..['seq'] = seq);
+    return 'data: ${jsonEncode(fixed)}\n\n';
+  }
+  throw StateError('D execution interrupted frame not found');
+}
+
+/// Durable `session.model.selected` frame for [sessionId] at [seq].
+String modelSelectedFrame(
+  String sessionId, {
+  required String providerId,
+  required String modelId,
+  String? variant,
+  required int seq,
+}) =>
+    'data: ${jsonEncode({
+      'id': 'evt_060cmodel$seq',
+      'type': 'session.model.selected',
+      'created': 1791092040000 + seq,
+      'data': {
+        'sessionID': sessionId,
+        'model': {'providerID': providerId, 'id': modelId, 'variant': ?variant},
+      },
+      'durable': {'aggregateID': sessionId, 'seq': seq, 'version': 1},
+    })}\n\n';
+
+/// Durable `session.execution.started` frame for [sessionId] at [seq].
+String executionStartedFrame(String sessionId, {required int seq}) =>
+    'data: ${jsonEncode({
+      'id': 'evt_060cstart$seq',
+      'type': 'session.execution.started',
+      'created': 1791092041000 + seq,
+      'data': {'sessionID': sessionId},
+      'durable': {'aggregateID': sessionId, 'seq': seq, 'version': 1},
+    })}\n\n';
+
+/// Durable `session.execution.failed` frame for [sessionId] at [seq].
+String executionFailedFrame(
+  String sessionId, {
+  required String errorType,
+  required String message,
+  required int seq,
+}) =>
+    'data: ${jsonEncode({
+      'id': 'evt_060cfail$seq',
+      'type': 'session.execution.failed',
+      'created': 1791092042000 + seq,
+      'data': {
+        'sessionID': sessionId,
+        'error': {'type': errorType, 'message': message},
+      },
+      'durable': {'aggregateID': sessionId, 'seq': seq, 'version': 1},
+    })}\n\n';
 
 /// Captured interrupt acknowledgement shape (`{"interrupted": true}`).
 Map<String, Object?> interruptAck(OpenCodeFixtures fixtures) {
@@ -307,7 +486,12 @@ List<FixtureRoute> sessionRoutes({
   List<Map<String, Object?>>? Function()? descRows,
   List<Map<String, Object?>>? Function()? ascRows,
   List<Map<String, Object?>> permissionRows = const [],
+  List<Map<String, Object?>> Function()? permissionRowsFn,
+  List<Map<String, Object?>> formRows = const [],
+  List<Map<String, Object?>> Function()? formRowsFn,
   List<Map<String, Object?>> inboxRows = const [],
+  List<Map<String, Object?>> extraSessionRows = const [],
+  Map<String, Object?> Function()? sessionRowFn,
   bool activeRunning = false,
   int times = 10,
 }) {
@@ -348,9 +532,12 @@ List<FixtureRoute> sessionRoutes({
         method: 'GET',
         path: '/api/session?limit=50&order=desc',
         status: 200,
-        response: _page([sessionRow]),
+        response: _page([sessionRow, ...extraSessionRows]),
       ),
       times: times,
+      respond: sessionRowFn == null
+          ? null
+          : (_) => _page([sessionRowFn(), ...extraSessionRows]),
     ),
     FixtureRoute(
       _exchange(
@@ -384,6 +571,7 @@ List<FixtureRoute> sessionRoutes({
         response: {'data': sessionRow},
       ),
       times: times,
+      respond: sessionRowFn == null ? null : (_) => {'data': sessionRowFn()},
     ),
     FixtureRoute(
       _exchange(
@@ -429,16 +617,85 @@ List<FixtureRoute> sessionRoutes({
         response: {'data': permissionRows},
       ),
       times: times,
+      respond: permissionRowsFn == null
+          ? null
+          : (_) => {'data': permissionRowsFn()},
     ),
     FixtureRoute(
       _exchange(
         method: 'GET',
         path: '/api/session/$ses/form',
         status: 200,
-        response: {'data': <Object?>[]},
+        response: {'data': formRows},
       ),
       times: times,
+      respond: formRowsFn == null ? null : (_) => {'data': formRowsFn()},
     ),
+    for (final extra in extraSessionRows) ...[
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session?parentID=${extra['id']}&limit=50',
+          status: 200,
+          response: _page([]),
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}',
+          status: 200,
+          response: {'data': extra},
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/inbox',
+          status: 200,
+          response: {'data': const <Object?>[]},
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/message?limit=200&order=desc',
+          status: 200,
+          response: _page(const []),
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/message?limit=50&order=asc',
+          status: 200,
+          response: _page(const []),
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/permission',
+          status: 200,
+          response: {'data': const <Object?>[]},
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/form',
+          status: 200,
+          response: {'data': const <Object?>[]},
+        ),
+        times: times,
+      ),
+    ],
   ];
 }
 
