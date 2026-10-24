@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 /// The assistant answers of a session, one per row.
 List<TimelineItem> _answers(
@@ -73,14 +74,12 @@ Future<({CatalogRig rig, LiveHandle handle, SessionRef ref})> _openLive(
   // The catalog is reached at the regular scale; the live screen is then
   // laid out at the requested one.
   await tester.pumpWidget(app(1));
-  await tester.pumpAndSettle();
+  await showSessionList(tester);
   final read = dependencies.sessions!.selectProfile('profile_a');
   final catalog = rig.sources.single;
   final row = catalog.row('one', title: 'One');
   catalog.respond([row]);
   await read;
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(ValueKey(row.info.ref)));
   await tester.pumpAndSettle();
   final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
   await tester.ensureVisible(button);

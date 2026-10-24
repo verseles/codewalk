@@ -1271,9 +1271,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveShellOutputPartial => '서버에 여기 표시된 것보다 많은 출력이 있습니다.';
 
   @override
-  String get workspaceSelectSession => '여기에서 열려면 목록에서 세션을 선택하세요.';
-
-  @override
   String get sessionLinkUnknownServer => '이 링크는 이 기기에 저장되지 않은 서버를 가리킵니다.';
 
   @override
@@ -1491,4 +1488,16 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get updatesUnsupported => '이 플랫폼에서는 아직 업데이트를 사용할 수 없습니다.';
+
+  @override
+  String get chatNewChat => '새 대화';
+
+  @override
+  String get chatNoServerYet => '아직 설정된 서버가 없습니다';
+
+  @override
+  String get chatSetUpServer => '서버 설정';
+
+  @override
+  String get chatSelectOrCreate => '대화를 시작하려면 대화를 선택하거나 새로 만드세요';
 }

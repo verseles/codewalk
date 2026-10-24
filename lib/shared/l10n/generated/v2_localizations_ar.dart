@@ -1320,9 +1320,6 @@ class V2LocalizationsAr extends V2Localizations {
       'احتفظ الخادم بمخرجات أكثر مما يظهر هنا.';
 
   @override
-  String get workspaceSelectSession => 'اختر جلسة من القائمة لفتحها هنا.';
-
-  @override
   String get sessionLinkUnknownServer =>
       'يشير هذا الرابط إلى خادم غير محفوظ على هذا الجهاز.';
 
@@ -1552,4 +1549,16 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get updatesUnsupported => 'التحديثات على هذه المنصة غير متاحة بعد.';
+
+  @override
+  String get chatNewChat => 'دردشة جديدة';
+
+  @override
+  String get chatNoServerYet => 'لم يتم تكوين أي خادم بعد';
+
+  @override
+  String get chatSetUpServer => 'إعداد الخادم';
+
+  @override
+  String get chatSelectOrCreate => 'حدد محادثة أو أنشئ واحدة لبدء الدردشة';
 }

@@ -1104,10 +1104,6 @@
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
   },
-  "workspaceSelectSession": "여기에서 열려면 목록에서 세션을 선택하세요.",
-  "@workspaceSelectSession": {
-    "description": "V2 bounded read-only session catalog"
-  },
   "sessionLinkUnknownServer": "이 링크는 이 기기에 저장되지 않은 서버를 가리킵니다.",
   "@sessionLinkUnknownServer": {
     "description": "V2 bounded read-only session catalog"
@@ -1366,5 +1362,9 @@
   "updatesUnsupported": "이 플랫폼에서는 아직 업데이트를 사용할 수 없습니다.",
   "@updatesUnsupported": {
     "description": "V2 update check"
-  }
+  },
+  "chatNewChat": "새 대화",
+  "chatNoServerYet": "아직 설정된 서버가 없습니다",
+  "chatSetUpServer": "서버 설정",
+  "chatSelectOrCreate": "대화를 시작하려면 대화를 선택하거나 새로 만드세요"
 }

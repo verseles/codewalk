@@ -7,7 +7,15 @@ import '../../shared/sessions/session_actions.dart';
 import 'sessions_controller.dart';
 
 /// The actions one session row offers.
-enum SessionRowAction { markViewed, rename, fork, hide, unhide, delete }
+enum SessionRowAction {
+  history,
+  markViewed,
+  rename,
+  fork,
+  hide,
+  unhide,
+  delete,
+}
 
 /// The overflow control of a session row.
 ///
@@ -19,6 +27,8 @@ class SessionActionsMenu extends StatefulWidget {
     required this.controller,
     required this.row,
     required this.menuKey,
+    this.onHistory,
+    this.historyEnabled = true,
     super.key,
   });
 
@@ -27,6 +37,11 @@ class SessionActionsMenu extends StatefulWidget {
 
   /// The key of the popup, so the row's own gestures open the same menu.
   final GlobalKey<PopupMenuButtonState> menuKey;
+
+  /// Opens the session's read-only history, the entry the row offers beside
+  /// opening the session itself. Null leaves the entry out.
+  final VoidCallback? onHistory;
+  final bool historyEnabled;
 
   @override
   State<SessionActionsMenu> createState() => _SessionActionsMenuState();
@@ -55,48 +70,51 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     return KeyedSubtree(
       key: ValueKey('session-actions-${row.info.ref.storageKey}'),
       child: PopupMenuButton<SessionRowAction>(
-      key: widget.menuKey,
-      icon: const Icon(Icons.more_vert),
-      tooltip: l10n.sessionsActionsMenu,
-      enabled: !pending,
-      onSelected: (action) => _run(context, action),
-      itemBuilder: (context) => [
-        if (unread)
+        key: widget.menuKey,
+        icon: const Icon(Icons.more_vert),
+        tooltip: l10n.sessionsActionsMenu,
+        enabled: !pending,
+        onSelected: (action) => _run(context, action),
+        itemBuilder: (context) => [
+          if (widget.onHistory != null)
+            PopupMenuItem<SessionRowAction>(
+              key: ValueKey('history-open-${row.info.ref.storageKey}'),
+              value: SessionRowAction.history,
+              enabled: widget.historyEnabled,
+              child: Text(l10n.historyOpen),
+            ),
+          if (unread)
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.markViewed,
+              enabled: enabled,
+              child: _label(l10n.sessionsActionMarkViewed, reason),
+            ),
           PopupMenuItem<SessionRowAction>(
-            value: SessionRowAction.markViewed,
+            value: SessionRowAction.rename,
             enabled: enabled,
-            child: _label(l10n.sessionsActionMarkViewed, reason),
+            child: _label(l10n.sessionsActionRename, reason),
           ),
-        PopupMenuItem<SessionRowAction>(
-          value: SessionRowAction.rename,
-          enabled: enabled,
-          child: _label(l10n.sessionsActionRename, reason),
-        ),
-        PopupMenuItem<SessionRowAction>(
-          value: SessionRowAction.fork,
-          enabled: enabled,
-          child: _label(l10n.sessionsActionFork, reason),
-        ),
-        PopupMenuItem<SessionRowAction>(
-          value: hidden ? SessionRowAction.unhide : SessionRowAction.hide,
-          enabled: controller.hideAvailable,
-          child: _label(
-            hidden ? l10n.sessionsActionUnhide : l10n.sessionsActionHide,
-            controller.hideAvailable
-                ? null
-                : l10n.sessionsActionUnavailableStore,
+          PopupMenuItem<SessionRowAction>(
+            value: SessionRowAction.fork,
+            enabled: enabled,
+            child: _label(l10n.sessionsActionFork, reason),
           ),
-        ),
-        PopupMenuItem<SessionRowAction>(
-          value: SessionRowAction.delete,
-          enabled: enabled,
-          child: _label(
-            l10n.sessionsActionDelete,
-            reason,
-            destructive: true,
+          PopupMenuItem<SessionRowAction>(
+            value: hidden ? SessionRowAction.unhide : SessionRowAction.hide,
+            enabled: controller.hideAvailable,
+            child: _label(
+              hidden ? l10n.sessionsActionUnhide : l10n.sessionsActionHide,
+              controller.hideAvailable
+                  ? null
+                  : l10n.sessionsActionUnavailableStore,
+            ),
           ),
-        ),
-      ],
+          PopupMenuItem<SessionRowAction>(
+            value: SessionRowAction.delete,
+            enabled: enabled,
+            child: _label(l10n.sessionsActionDelete, reason, destructive: true),
+          ),
+        ],
       ),
     );
   }
@@ -151,6 +169,8 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     final controller = widget.controller;
     final row = widget.row;
     switch (action) {
+      case SessionRowAction.history:
+        widget.onHistory?.call();
       case SessionRowAction.markViewed:
         await controller.markViewed(row);
       case SessionRowAction.rename:

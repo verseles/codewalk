@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
@@ -35,16 +36,11 @@ void main() {
           await tester.pumpWidget(
             CodeWalkV2Bootstrap(dependencies: dependencies),
           );
-          await tester.pumpAndSettle();
+          await showSessionList(tester);
           final controller = dependencies.sessions!;
           final l10n = dependencies.localizations.current;
-          expect(rig.sources, isEmpty);
-          final dropdown = tester.widget<DropdownButton<String>>(
-            find.byKey(const ValueKey('sessions-profile')),
-          );
-          expect(dropdown.value, isNull);
-          dropdown.onChanged!('profile_a');
-          await tester.pump();
+          // The single saved server opens without being chosen.
+          expect(controller.selectedProfile?.id, 'profile_a');
           final source = rig.sources.single;
           source.respond(
             [
@@ -61,14 +57,6 @@ void main() {
           expect(find.text(l10n.sessionExportUntitled), findsOneWidget);
           // The ownership label is on every row, in every locale and size.
           expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
-          final row = find.byKey(ValueKey(source.row('first').info.ref));
-          await tester.tap(row);
-          await tester.pumpAndSettle();
-          expect(find.text(l10n.historyReadOnly), findsOneWidget);
-          expect(
-            dependencies.router.state.uri.path,
-            '/sessions',
-          );
           final more = find.byKey(const ValueKey('sessions-more'));
           // The list is built lazily, so it scrolls until the control is
           // built and shown.
@@ -88,10 +76,6 @@ void main() {
           source.respond([source.row('second')]);
           await tester.pumpAndSettle();
           expect(controller.sessions, hasLength(2));
-          expect(
-            controller.selectedSession?.info.ref,
-            source.row('first').info.ref,
-          );
           expect(
             Directionality.of(tester.element(find.byType(Scaffold))),
             {'ar', 'ur'}.contains(locale.languageCode)
@@ -131,15 +115,22 @@ void main() {
       await rig.save('a');
       await dependencies.hosts.load();
       dependencies.router.go('/sessions');
-      await tester.pumpAndSettle();
+      await showSessionList(tester);
       final read = dependencies.sessions!.selectProfile('profile_a');
       rig.sources.single.fail(SessionCatalogFailure.authenticationRequired);
       await read;
       await tester.pumpAndSettle();
+      // The list says why, and the chat beside it keeps the ways out.
       expect(
-        find.text(dependencies.localizations.current.hostsAuthRequired),
+        find.descendant(
+          of: find.byKey(const ValueKey('workspace-sidebar')),
+          matching: find.text(
+            dependencies.localizations.current.hostsAuthRequired,
+          ),
+        ),
         findsOneWidget,
       );
+      expect(find.byKey(const ValueKey('workspace-retry')), findsOneWidget);
       expect(find.byKey(const ValueKey('sessions-hosts')), findsOneWidget);
       expect(
         find.text(dependencies.localizations.current.sessionsEmpty),
@@ -172,7 +163,7 @@ void main() {
         child: CodeWalkV2Bootstrap(dependencies: dependencies),
       ),
     );
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final read = dependencies.sessions!.selectProfile('profile_a');
     final source = rig.sources.single;
     final title = '**not markdown** ${'long '.padRight(400, 'x')}';
@@ -190,10 +181,6 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.pumpAndSettle();
-    // The title is tapped, not the card: at 2x the card is taller than the
-    // viewport and its center can sit below the visible area.
-    await tester.tap(find.text(title));
     await tester.pumpAndSettle();
     expect(find.text(title), findsOneWidget);
     // The group header is laid out at 2x, and its path is always read
@@ -224,14 +211,9 @@ void main() {
         sessionLiveDirectory: () => directory,
       );
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-      await tester.pumpAndSettle();
+      await showSessionList(tester);
       final controller = dependencies.sessions!;
       final l10n = dependencies.localizations.current;
-      final dropdown = tester.widget<DropdownButton<String>>(
-        find.byKey(const ValueKey('sessions-profile')),
-      );
-      dropdown.onChanged!('profile_a');
-      await tester.pump();
       final source = rig.sources.single;
       source.respond([source.row('first')]);
       await tester.pumpAndSettle();
@@ -286,13 +268,8 @@ void main() {
         sessionLiveDirectory: () => directory,
       );
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-      await tester.pumpAndSettle();
+      await showSessionList(tester);
       final l10n = dependencies.localizations.current;
-      final dropdown = tester.widget<DropdownButton<String>>(
-        find.byKey(const ValueKey('sessions-profile')),
-      );
-      dropdown.onChanged!('profile_a');
-      await tester.pump();
       final source = rig.sources.single;
       source.respond([source.row('first')]);
       await tester.pumpAndSettle();
@@ -329,13 +306,8 @@ void main() {
       sessionLiveDirectory: LiveDirectory.new,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
     final source = rig.sources.single;
     final observedAt = DateTime.now();
     OwnershipInfo proven(OwnershipKind kind) => OwnershipInfo.known(
@@ -376,6 +348,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    // The automatic re-read keeps a cooldown on the session clock.
+    var clock = DateTime.now().toUtc();
     final rig = CatalogRig();
     final directory = LiveDirectory();
     await rig.save('a');
@@ -385,15 +359,11 @@ void main() {
       endpointProber: FakeProber(),
       sessionCatalogFactory: rig.create,
       sessionLiveDirectory: () => directory,
+      sessionClock: () => clock,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
     final source = rig.sources.single;
     SessionSummary fresh() => source.row(
       'fresh',
@@ -402,10 +372,15 @@ void main() {
         OwnershipKind.liveShared,
         proof: OwnershipProof(
           source: 'adapterObservation',
-          observedAt: DateTime.now(),
+          observedAt: clock,
         ),
       ),
     );
+    source.respond([fresh()]);
+    await tester.pumpAndSettle();
+    // The stream connected while the first read was open, so the list reads
+    // once more to cover that gap.
+    expect(source.tasks, hasLength(2));
     source.respond([fresh()]);
     await tester.pumpAndSettle();
     // The proof is fresh, so the row shows the ownership it proved.
@@ -421,7 +396,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
-    // A failed re-read marks the list as behind: same fallback.
+    // A failed re-read marks the list as behind: same fallback. The
+    // automatic re-read waits for its cooldown.
+    clock = clock.add(const Duration(seconds: 3));
     directory.feeds.last.emit(const SessionCatalogChanged());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -452,13 +429,8 @@ void main() {
       sessionClock: () => clock,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
     final source = rig.sources.single;
     source.respond([
       source.row(
@@ -504,13 +476,8 @@ void main() {
       sessionClock: () => clock,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
     final source = rig.sources.single;
     source.respond([
       source.row(
@@ -555,13 +522,8 @@ void main() {
       sessionLiveDirectory: LiveDirectory.new,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
     final source = rig.sources.single;
     source.respond([
       source.row('one', directory: '/work/alpha', title: 'One'),
@@ -630,12 +592,7 @@ void main() {
       sessionLiveDirectory: () => directory,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
+    await showSessionList(tester);
     final source = rig.sources.single;
     source.respond([source.row('one', directory: '/work/alpha', title: 'One')]);
     await tester.pumpAndSettle();
@@ -673,13 +630,8 @@ void main() {
         sessionLiveDirectory: LiveDirectory.new,
       );
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-      await tester.pumpAndSettle();
+      await showSessionList(tester);
       final l10n = dependencies.localizations.current;
-      final dropdown = tester.widget<DropdownButton<String>>(
-        find.byKey(const ValueKey('sessions-profile')),
-      );
-      dropdown.onChanged!('profile_a');
-      await tester.pump();
       final source = rig.sources.single;
       source.respond([
         source.row('one', directory: '/work/alpha', title: 'One'),
@@ -729,12 +681,7 @@ void main() {
           child: CodeWalkV2Bootstrap(dependencies: dependencies),
         ),
       );
-      await tester.pumpAndSettle();
-      final dropdown = tester.widget<DropdownButton<String>>(
-        find.byKey(const ValueKey('sessions-profile')),
-      );
-      dropdown.onChanged!('profile_a');
-      await tester.pump();
+      await showSessionList(tester);
       return (
         rig.sources.single,
         dependencies.localizations.current,
@@ -872,15 +819,9 @@ void main() {
       ]);
       await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 10));
-      await tester.tap(find.text('Root'));
-      await tester.pumpAndSettle();
-      final history = find.byKey(
-        ValueKey('history-open-${source.row('root').info.ref.storageKey}'),
-      );
-      expect(history, findsOneWidget);
 
       // A subagent child was created: the quiet re-read nests it under the
-      // parent, and the expanded parent stays expanded.
+      // parent.
       directory.feeds.last.emit(const SessionCatalogChanged());
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
@@ -898,7 +839,6 @@ void main() {
       final root = find.byKey(ValueKey(source.row('root').info.ref));
       expect(child, findsOneWidget);
       expect(tester.getTopLeft(child).dx - tester.getTopLeft(root).dx, 16);
-      expect(history, findsOneWidget);
       expect(find.text(l10n.sessionsLoading), findsNothing);
       expect(find.text(l10n.sessionsPreviousResults), findsNothing);
 

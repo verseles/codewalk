@@ -20,6 +20,7 @@ import '../shared/sessions/session_live_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'live_wake.dart';
+import 'workspace_controller.dart';
 
 /// Explicit graph passed to the app, with one owner for its lifetime.
 class AppDependencies {
@@ -41,6 +42,7 @@ class AppDependencies {
     this.unrestrictedOwnership,
     this.hiddenSessions,
     this.sessionTabs,
+    this.workspace,
     this.sessionDrafts,
   });
 
@@ -70,6 +72,9 @@ class AppDependencies {
   /// The open session tabs and the live views they keep open.
   final SessionTabsController? sessionTabs;
 
+  /// The server and the project the workspace returns to.
+  final WorkspaceController? workspace;
+
   /// The unsent prompt of each session, saved on this device.
   final SessionDraftStore? sessionDrafts;
   final PairingController? pairing;
@@ -92,6 +97,8 @@ class AppDependencies {
     router.dispose();
     pairing?.dispose();
     navigation.dispose();
+    // It listens to the tabs and the list, so it leaves first.
+    workspace?.dispose();
     // The tabs close their live views before the list and the directory.
     sessionTabs?.dispose();
     // What was typed and not yet written is written now.

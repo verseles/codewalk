@@ -12,6 +12,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 typedef _Open = ({
   AppDependencies dependencies,
@@ -277,18 +278,18 @@ void main() {
     expect(find.byType(SessionLivePage), findsOneWidget);
     expect(find.byKey(const ValueKey('workspace-sidebar')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('workspace-drawer')));
+    // The system back at a root session opens the drawer, and once it is
+    // open it sends the app to the background, as the legacy client did.
+    final pops = recordSystemPops(tester);
+    expect(await tester.binding.handlePopRoute(), isTrue);
     await _settle(tester);
     expect(find.byType(Drawer), findsOneWidget);
-    // The system back closes the drawer first, then returns to the list.
+    expect(pops, isEmpty);
     expect(await tester.binding.handlePopRoute(), isTrue);
     await _settle(tester);
-    expect(find.byType(Drawer), findsNothing);
+    expect(pops, ['SystemNavigator.pop']);
+    expect(app.dependencies.router.state.uri.path, '/s/profile_a/ses_one');
     expect(find.byType(SessionLivePage), findsOneWidget);
-    expect(await tester.binding.handlePopRoute(), isTrue);
-    await _settle(tester);
-    expect(app.dependencies.router.state.uri.path, '/sessions');
-    expect(find.byType(SessionLivePage), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

@@ -1104,10 +1104,6 @@
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
   },
-  "workspaceSelectSession": "从列表中选择一个会话以在此打开。",
-  "@workspaceSelectSession": {
-    "description": "V2 bounded read-only session catalog"
-  },
   "sessionLinkUnknownServer": "此链接指向未保存在此设备上的服务器。",
   "@sessionLinkUnknownServer": {
     "description": "V2 bounded read-only session catalog"
@@ -1366,5 +1362,9 @@
   "updatesUnsupported": "此平台暂不支持更新。",
   "@updatesUnsupported": {
     "description": "V2 update check"
-  }
+  },
+  "chatNewChat": "新聊天",
+  "chatNoServerYet": "尚未配置服务器",
+  "chatSetUpServer": "设置服务器",
+  "chatSelectOrCreate": "选择或创建一个会话以开始聊天"
 }

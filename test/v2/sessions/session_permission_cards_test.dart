@@ -19,6 +19,7 @@ import '../hosts/fakes.dart';
 import 'composer_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 ApprovalChoice _once() => ApprovalChoice(
   id: 'once',
@@ -103,15 +104,13 @@ _mountLivePage(
   );
   dependencies.preferences.setLocale(locale);
   await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-  await tester.pumpAndSettle();
+  await showSessionList(tester);
   final l10n = dependencies.localizations.current;
   final read = dependencies.sessions!.selectProfile('profile_a');
   final catalog = rig.sources.single;
   final row = catalog.row('one');
   catalog.respond([row]);
   await read;
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(ValueKey(row.info.ref)));
   await tester.pumpAndSettle();
   final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
   await tester.ensureVisible(button);

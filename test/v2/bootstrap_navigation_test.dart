@@ -5,6 +5,8 @@ import 'package:codewalk/shared/theme/theme_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'sessions/workspace_support.dart';
+
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
     testWidgets('navigation and appearance respond at ${size.width}', (
@@ -18,8 +20,9 @@ void main() {
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
       await tester.pumpAndSettle();
 
-      // The workspace has no destination bar: the list is the page on a
-      // compact window and a pane beside the detail on a wider one.
+      // The workspace has no destination bar: the chat takes a compact
+      // window with the list in a drawer, and a wider one keeps the list in
+      // a pane beside the chat.
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(NavigationRail), findsNothing);
       expect(
@@ -29,6 +32,7 @@ void main() {
       expect(find.text('CodeWalk'), findsOneWidget);
       expect(dependencies.router.routeInformationProvider.value.uri.path, '/');
 
+      await showSessionList(tester);
       await tester.tap(find.byKey(const ValueKey('sessions-settings')));
       await tester.pumpAndSettle();
       expect(dependencies.router.state.uri.path, '/settings');

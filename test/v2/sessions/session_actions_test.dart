@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 void main() {
   late FakeActionSource actions;
@@ -42,12 +43,7 @@ void main() {
       sessionActionFactory: (profile, credential) => actions,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
-    final dropdown = tester.widget<DropdownButton<String>>(
-      find.byKey(const ValueKey('sessions-profile')),
-    );
-    dropdown.onChanged!('profile_a');
-    await tester.pump();
+    await showSessionList(tester);
     final source = rig.sources.single;
     actions.viewStates.addAll(viewStates);
     actions.children = children;
@@ -85,8 +81,11 @@ void main() {
       viewStates: {},
     );
     final key = source.row('first').info.ref.storageKey;
-    // The endpoint's marker arrives with the row.
+    // The endpoint's marker arrives with the row: the catch-up read that
+    // follows the feed's opening returns it.
     actions.viewStates[key] = SessionViewState.unread;
+    expect(source.tasks, hasLength(2));
+    source.respond([source.row('first', title: 'First')]);
     await tester.pumpAndSettle();
     expect(find.byKey(ValueKey('session-unread-$key')), findsOneWidget);
     await tester.tap(find.byKey(ValueKey('session-actions-$key')));

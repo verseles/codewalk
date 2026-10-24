@@ -1244,9 +1244,6 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveShellOutputPartial => '服务器保存的输出比此处显示的更多。';
 
   @override
-  String get workspaceSelectSession => '从列表中选择一个会话以在此打开。';
-
-  @override
   String get sessionLinkUnknownServer => '此链接指向未保存在此设备上的服务器。';
 
   @override
@@ -1463,4 +1460,16 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get updatesUnsupported => '此平台暂不支持更新。';
+
+  @override
+  String get chatNewChat => '新聊天';
+
+  @override
+  String get chatNoServerYet => '尚未配置服务器';
+
+  @override
+  String get chatSetUpServer => '设置服务器';
+
+  @override
+  String get chatSelectOrCreate => '选择或创建一个会话以开始聊天';
 }

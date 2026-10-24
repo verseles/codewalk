@@ -11,11 +11,19 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
 - **When** its root widget mounts
-- **Then** an independent Material3 app opens into the workspace: the projects and sessions list, with no destination bar or rail
-- **Then** below 600 logical pixels the list is the page; from 600 it stays beside the detail in a fixed pane, 260 wide below 840 and 300 from there, and the detail shows an empty state until a session opens
-- **Then** settings and servers open from the list as secondary pages over it; their back button and the system back return to the list, and a page opened by a link with nothing under it goes to the list
+- **Then** an independent Material3 app opens into the chat workspace, with no destination bar or rail
+- **Then** below 600 logical pixels the chat takes the window and the projects and sessions list lives in a drawer; from 600 the list stays beside the chat in a fixed pane, 260 wide below 840 and 300 from there
+- **Then** settings and servers open as secondary pages; their back button and the system back return to the workspace, and a page opened by a link with nothing under it goes to the workspace home
 
 ### V2 workspace
+
+- **Given** the v2 workspace opens on its home
+- **When** saved servers and their credentials have loaded
+- **Then** it selects the server of the restored launch tab, else the last saved selection if it still exists, else the first saved server; one saved server needs no manual selection, and removing the active server selects another saved one
+- **Then** no saved server shows a stable setup action leading to Servers; an unreadable server store offers Servers, and a saved server whose catalog fails keeps its failure reason, Retry and Servers
+- **Then** a selected server with no open session shows the select-or-create chat state and New Chat when creation is available
+- **Then** each server remembers its last explicitly chosen real project, restoring it once when the first successful catalog contains it; the placeholder root and a temporary fallback when the chosen project leaves the rows never overwrite that choice
+- **Then** rapid server or project choices save the last choice in order, and unreadable workspace state is kept untouched
 
 - **Given** the v2 list has loaded sessions of a server
 - **When** they belong to several projects
@@ -25,17 +33,18 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** both land on the same route inside the workspace: the server is the saved profile with that id and the list follows it; the session is the loaded row with the same identity or, outside the loaded rows, one direct read of that server
 - **Then** an unsaved server, a server that wants a login, a session the server no longer has and an unreadable session each have their own notice; the login and unreadable notices offer a retry, and a read answering another session is never opened in its place
 - **Then** from 600 logical pixels the session opens beside the list; below that it takes the window and the list moves to a drawer, opened from the session's app bar
-- **Then** the system back from a session closes an open drawer first, then returns to the list instead of leaving the app
+- **Then** the system back at the chat workspace opens the drawer when it is closed; with the drawer already open, or in a wide window without a drawer, it asks the platform to leave the app and keeps the workspace route
 - **Then** an open session, its draft and its live connection stay through refreshes and filters of the list, a reload of the saved servers and a resize between compact and wide; choosing another server in the list closes it and shows that server's sessions
 - **Then** the new-session shortcut opens the create of the list when it is offered, and the settings shortcut opens settings over the current page
 
 - **Given** the user opens conversations in this v2 app
 - **When** the corresponding route is displayed
-- **Then** a localized, read-only session catalog offers explicit selection of a saved server and an action that opens the hosts page
+- **Then** the localized session catalog offers a server switcher and an action that opens the hosts page, alongside automatic server restoration on the workspace home
 - **Then** loading server profiles, storage failure, missing credentials and a successful empty session read have distinct states; no session request starts before credentials finish loading
 - **When** a server is selected or manually refreshed
 - **Then** native Android/Linux reads use its current password or paired credential and preserve the authored endpoint, port and proxy prefix
-- **Then** sessions retain server order, use complete host/harness/session identity and show a localized fallback for an empty title; tapping a row expands its loaded update time and an explicit read-only history action when a history factory is available
+- **Then** sessions retain server order, use complete host/harness/session identity and show a localized fallback for an empty title; a tap opens the session, falling back to read-only history when only that reader is available
+- **Then** a long press, secondary click, context-menu key or Shift+F10 opens the row actions without selecting it; when both readers are available the menu also offers read-only history, visibly disabled during catalog loading, server unavailability or another history opening
 - **Then** manual pagination requests 50 items per page, retaining at most 200 rows or ten accepted pages; empty or short pages with a continuation remain pageable and a local limit is explicitly identified
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
@@ -54,7 +63,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the strip's trailing button lists every tab of the server, the selected one first, then the most recently opened
 - **Then** on desktop, holding Ctrl with Tab (Shift+Tab backwards, a held Tab keeps cycling) shows the same list and opens the highlighted tab when Ctrl is released; Escape, a tap on the strip or sheet, another session or the app leaving the foreground cancels it
 - **When** the app restarts
-- **Then** the tabs, their order and each server's selection come back the same however often they are read; opening on the list returns once to the selected tab of the server whose tab was used last, while a link or a launch on another page stays where it is
+- **Then** the tabs, their order and each server's selection come back the same however often they are read; opening on the workspace home returns once to the selected tab of the server whose tab was used last, while a link or a launch on another page stays where it is
 - **Then** a tab is dropped only when its server answers that the session no longer exists, with a notice; tabs whose sessions are merely absent from the loaded rows, hidden, unreadable or behind a login stay, and tabs of a removed server are removed with it
 - **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
 
@@ -65,7 +74,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the list groups them by the canonical directory the server reported, scoped by the endpoint host; the groups follow the order the server returned and the rows inside a group keep the server's order
 - **Then** a session the server did not attribute to a project keeps a clearly marked group, and no project is invented for it
 - **Then** the group header shows the reported directory with its last segment as the title, the path is always read left-to-right, and the header carries no count
-- **Then** the grouping follows the rows the server just returned after a live re-read, and the expanded row keeps its group
+- **Then** the grouping follows the rows the server just returned after a live re-read
 - **Then** a session the endpoint moved to another location changes its group with the next re-read
 
 ### V2 nested session catalog
@@ -77,7 +86,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a nested row is indented from the start edge with a guide line and says it is a child session; the indent stops growing after three levels, while deeper rows still nest
 - **Then** a child whose parent is not drawn above it (not loaded yet, hidden, in another group, or a lineage that loops) stays a top-level row where the server put it and says its parent is not shown here; no parent, project or row is invented and no row is dropped or shown twice
 - **Then** the nesting follows the rows the server just returned: a page or a live re-read that brings the parent nests the child, and one that no longer returns it leaves the child where the server put it
-- **Then** a nested row keeps every row affordance: the expand gesture, the actions menu, the ownership label and the activity marks; there is no collapse toggle, and deleting a parent still warns with the endpoint's count of its direct children
+- **Then** a nested row keeps every row affordance: the open gesture, the actions menu, the ownership label and the activity marks; there is no collapse toggle, and deleting a parent still warns with the endpoint's count of its direct children
 
 ### V2 session ownership label
 
@@ -86,7 +95,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the row shows that ownership's label — live shared, owned by this host, saved history or running elsewhere — under the title, in every locale and layout
 - **Then** a row whose ownership is not proven, whose proof is older than the display window or already expired, and a list that is not the endpoint's current answer, show the ownership unknown label
 - **Then** the list wakes up at the end of a proof's freshness window, without any server traffic, so a label never outlives the proof that showed it
-- **Then** the label follows the rows the server just returned after a live re-read, and the expanded row keeps its label
+- **Then** the label follows the rows the server just returned after a live re-read
 - **Then** no ownership is inferred from the endpoint address, the port, the profile or the server's title, and the label never authorizes an action
 
 ### V2 session activity marks
@@ -135,7 +144,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** a saved server is selected in the v2 session catalog
 - **When** the endpoint reports a session lifecycle change on its event stream
 - **Then** the catalog re-reads the authoritative list from the head, up to the depth already loaded, and applies it as a whole; the event itself never becomes a row
-- **Then** the re-read is silent: it shows no loading notice, marks nothing stale, and the expanded row survives only while the server still returns that session
+- **Then** the re-read is silent: it shows no loading notice and marks nothing stale
 - **Then** a burst of changes collapses into one re-read; the debounce and the minimum interval between re-reads bound the traffic, and the interval grows with consecutive failures
 - **Then** a failed re-read keeps the rows and states that the list is not up to date; three consecutive failures or a rate limit suspend the automatic re-read until a successful manual refresh or a new server selection
 - **Then** the automatic re-read obeys the same fence as a manual one: an expired or unreadable credential, a loading server list or a storage failure stops it, and a rejected credential clears the list and reports the authentication state exactly like a manual read
@@ -191,7 +200,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** a loaded session row is expanded in the v2 catalog
 - **When** the user explicitly opens its history
-- **Then** an auxiliary screen covers the shell navigation; Back returns to the existing catalog, selected profile and expanded row without changing the router location or pending opaque session intent
+- **Then** an auxiliary screen covers the shell navigation; Back returns to the existing catalog and selected profile without changing the router location or pending opaque session intent
 - **Then** native reads use the current profile-bound credential and preserve the endpoint port and proxy prefix; an authenticated info probe observes the actual server version before every history page, and version drift invalidates the continuation until manual refresh
 - **Then** server order and complete session/item identity are retained; each request reads at most 50 native messages, permits at most 500 projected items and retains at most 500 items or ten accepted pages, with an explicit local-limit notice beside pagination
 - **Then** refresh and pagination remain manual; cancelled, superseded, expired-credential, reloaded-profile or disposed work cannot publish late history, and authentication rejection clears previous content

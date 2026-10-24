@@ -1358,10 +1358,6 @@ class V2LocalizationsDe extends V2Localizations {
       'Der Server hat mehr Ausgabe gespeichert, als hier angezeigt wird.';
 
   @override
-  String get workspaceSelectSession =>
-      'Wähle eine Sitzung in der Liste, um sie hier zu öffnen.';
-
-  @override
   String get sessionLinkUnknownServer =>
       'Dieser Link verweist auf einen Server, der auf diesem Gerät nicht gespeichert ist.';
 
@@ -1603,4 +1599,17 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get updatesUnsupported =>
       'Updates sind auf dieser Plattform noch nicht verfügbar.';
+
+  @override
+  String get chatNewChat => 'Neuer Chat';
+
+  @override
+  String get chatNoServerYet => 'Noch kein Server konfiguriert';
+
+  @override
+  String get chatSetUpServer => 'Server einrichten';
+
+  @override
+  String get chatSelectOrCreate =>
+      'Wählen oder erstellen Sie eine Konversation, um mit dem Chatten zu beginnen';
 }

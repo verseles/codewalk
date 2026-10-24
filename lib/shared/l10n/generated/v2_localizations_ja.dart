@@ -1269,9 +1269,6 @@ class V2LocalizationsJa extends V2Localizations {
   String get liveShellOutputPartial => 'サーバーにはここに表示されているより多くの出力があります。';
 
   @override
-  String get workspaceSelectSession => 'ここで開くには、一覧からセッションを選んでください。';
-
-  @override
   String get sessionLinkUnknownServer => 'このリンクは、この端末に保存されていないサーバーを指しています。';
 
   @override
@@ -1491,4 +1488,16 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get updatesUnsupported => 'このプラットフォームのアップデートはまだ利用できません。';
+
+  @override
+  String get chatNewChat => '新しいチャット';
+
+  @override
+  String get chatNoServerYet => 'サーバーがまだ設定されていません';
+
+  @override
+  String get chatSetUpServer => 'サーバーを設定';
+
+  @override
+  String get chatSelectOrCreate => 'チャットを開始するには会話を選択するか作成してください';
 }

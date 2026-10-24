@@ -52,7 +52,6 @@ NEW_KEYS = (
     "sessionsCreateDirectoryTooLong",
     "sessionsChildSession",
     "sessionsChildParentElsewhere",
-    "workspaceSelectSession",
     "sessionLinkUnknownServer",
     "sessionLinkNotFound",
     "sessionLinkUnreadable",
@@ -171,22 +170,6 @@ LINEAGE_COPY = {
     "ru": ("Дочерняя сессия", "Дочерняя сессия · родительская сессия здесь не показана"),
     "zh": ("子会话", "子会话 · 父会话未在此显示"),
 }
-WORKSPACE_COPY = {
-    "en": "Choose a session in the list to open it here.",
-    "pt": "Escolha uma sessão na lista para abri-la aqui.",
-    "es": "Elige una sesión de la lista para abrirla aquí.",
-    "fr": "Choisissez une session dans la liste pour l’ouvrir ici.",
-    "de": "Wähle eine Sitzung in der Liste, um sie hier zu öffnen.",
-    "it": "Scegli una sessione nell’elenco per aprirla qui.",
-    "ar": "اختر جلسة من القائمة لفتحها هنا.",
-    "ur": "اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔",
-    "bn": "এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।",
-    "hi": "इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।",
-    "ja": "ここで開くには、一覧からセッションを選んでください。",
-    "ko": "여기에서 열려면 목록에서 세션을 선택하세요.",
-    "ru": "Выберите сессию в списке, чтобы открыть её здесь.",
-    "zh": "从列表中选择一个会话以在此打开。",
-}
 LINK_COPY = {
     "en": ("This link points to a server that is not saved on this device.", "This session no longer exists on its server.", "Could not open this session. Retry."),
     "pt": ("Este link aponta para um servidor que não está salvo neste dispositivo.", "Esta sessão não existe mais no servidor.", "Não foi possível abrir esta sessão. Tente novamente."),
@@ -226,7 +209,6 @@ COPY = {
     + ACTION_COPY[locale]
     + CREATE_COPY[locale]
     + LINEAGE_COPY[locale]
-    + (WORKSPACE_COPY[locale],)
     + LINK_COPY[locale]
     + TAB_COPY[locale]
     for locale, values in COPY.items()

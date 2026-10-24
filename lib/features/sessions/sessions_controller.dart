@@ -277,6 +277,15 @@ class SessionsController extends ChangeNotifier {
     return rows.isEmpty ? null : (project: rows.first.info.project);
   }
 
+  /// Whether the user chose the shown project group, rather than the list
+  /// falling back to the first one.
+  bool get projectChosen => _chosenProject != null;
+
+  /// Whether the shown group is the explicit choice, rather than a fallback
+  /// shown while that choice is absent from the loaded rows.
+  bool get selectedProjectWasChosen =>
+      _chosenProject != null && _chosenProject == selectedProject;
+
   /// Shows the sessions of [project]. Choosing the shown fallback records it,
   /// so a chosen group that returns later does not take its place again.
   void selectProject(ProjectRef? project) {
@@ -421,6 +430,8 @@ class SessionsController extends ChangeNotifier {
 
   Future<void> selectProfile(String id) async {
     if (_disposed || hosts.loading || hosts.storageError) return;
+    // The server already in use keeps its list and its source.
+    if (_profile?.id == id && _source != null) return;
     final profile = _find(id);
     _invalidate(closeSource: true);
     _clear();

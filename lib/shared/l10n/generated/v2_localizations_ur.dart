@@ -1327,10 +1327,6 @@ class V2LocalizationsUr extends V2Localizations {
       'سرور نے یہاں دکھائے گئے سے زیادہ آؤٹ پٹ رکھا ہے۔';
 
   @override
-  String get workspaceSelectSession =>
-      'اسے یہاں کھولنے کے لیے فہرست میں سے ایک سیشن منتخب کریں۔';
-
-  @override
   String get sessionLinkUnknownServer =>
       'یہ لنک ایسے سرور کی طرف اشارہ کرتا ہے جو اس آلے پر محفوظ نہیں ہے۔';
 
@@ -1566,4 +1562,17 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get updatesUnsupported =>
       'اس پلیٹ فارم پر اپڈیٹس ابھی دستیاب نہیں ہیں۔';
+
+  @override
+  String get chatNewChat => 'نئی چیٹ';
+
+  @override
+  String get chatNoServerYet => 'ابھی تک کوئی سرور کنفیگر نہیں ہوا۔';
+
+  @override
+  String get chatSetUpServer => 'سرور مرتب کریں۔';
+
+  @override
+  String get chatSelectOrCreate =>
+      'چیٹنگ شروع کرنے کے لیے ایک گفتگو کو منتخب کریں یا تخلیق کریں۔';
 }

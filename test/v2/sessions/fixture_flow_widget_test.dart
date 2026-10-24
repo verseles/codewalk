@@ -24,6 +24,7 @@ import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'fixture_flow_support.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 /// Layer-2 integrated coverage (V2-060A): the REAL screens and the real
 /// composed app graph mounted over the fixture-backed [FakeOpenCodeServer].
@@ -179,8 +180,8 @@ void main() {
   /// Opens the single catalog row's live page inside the mounted app.
   Future<SessionRef> openLive(WidgetTester tester, AppHarness app) async {
     final ref = app.dependencies.sessions!.sessions.single.info.ref;
-    await tester.tap(find.byKey(ValueKey<SessionRef>(ref)));
-    await tester.pump();
+    // A compact window keeps the list in its drawer.
+    await showSessionList(tester);
     final open = find.byKey(ValueKey('live-open-${ref.storageKey}'));
     await tester.ensureVisible(open);
     await tester.tap(open);
@@ -419,14 +420,12 @@ void main() {
     );
     scripted.preferences.setLocale(const Locale('en'));
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: scripted));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final read = scripted.sessions!.selectProfile('profile_a');
     final catalog = catalogRig.sources.single;
     final row = catalog.row('one', title: 'Fixture turn');
     catalog.respond([row]);
     await read;
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(ValueKey(row.info.ref)));
     await tester.pumpAndSettle();
     final open = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
     await tester.ensureVisible(open);

@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 Future<void> _settle() =>
     Future<void>.delayed(const Duration(milliseconds: 20));
@@ -323,14 +324,9 @@ void main() {
       for (var i = 0; i < 6; i++) {
         await tester.pump(const Duration(milliseconds: 100));
       }
-      if (dependencies.sessions!.selectedProfile == null) {
-        tester
-            .widget<DropdownButton<String>>(
-              find.byKey(const ValueKey('sessions-profile')),
-            )
-            .onChanged!('profile_a');
-      }
-      await tester.pump();
+      // The single saved server opens on its own; a compact window shows
+      // its list in the drawer.
+      await showSessionList(tester);
       final source = rig.sources.single;
       source.activityAnswer = activity;
       // The read, then the catch-up read that follows the feed's opening.

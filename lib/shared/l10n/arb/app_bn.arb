@@ -1104,10 +1104,6 @@
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
   },
-  "workspaceSelectSession": "এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।",
-  "@workspaceSelectSession": {
-    "description": "V2 bounded read-only session catalog"
-  },
   "sessionLinkUnknownServer": "এই লিঙ্কটি এমন একটি সার্ভারের দিকে নির্দেশ করে যা এই ডিভাইসে সংরক্ষিত নেই।",
   "@sessionLinkUnknownServer": {
     "description": "V2 bounded read-only session catalog"
@@ -1366,5 +1362,9 @@
   "updatesUnsupported": "এই প্ল্যাটফর্মে আপডেট এখনও উপলব্ধ নয়।",
   "@updatesUnsupported": {
     "description": "V2 update check"
-  }
+  },
+  "chatNewChat": "নতুন চ্যাট",
+  "chatNoServerYet": "কোন সার্ভার এখনো কনফিগার করা হয়নি",
+  "chatSetUpServer": "সার্ভার সেট আপ করুন",
+  "chatSelectOrCreate": "চ্যাটিং শুরু করতে একটি কথোপকথন নির্বাচন করুন বা তৈরি করুন"
 }

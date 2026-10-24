@@ -2538,12 +2538,6 @@ abstract class V2Localizations {
   /// V2 bounded read-only session catalog
   ///
   /// In en, this message translates to:
-  /// **'Choose a session in the list to open it here.'**
-  String get workspaceSelectSession;
-
-  /// V2 bounded read-only session catalog
-  ///
-  /// In en, this message translates to:
   /// **'This link points to a server that is not saved on this device.'**
   String get sessionLinkUnknownServer;
 
@@ -2960,6 +2954,30 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Updates on this platform are not available yet.'**
   String get updatesUnsupported;
+
+  /// CodeWalk UI string — chatNewChat
+  ///
+  /// In en, this message translates to:
+  /// **'New Chat'**
+  String get chatNewChat;
+
+  /// CodeWalk UI string — chatNoServerYet
+  ///
+  /// In en, this message translates to:
+  /// **'No server configured yet'**
+  String get chatNoServerYet;
+
+  /// CodeWalk UI string — chatSetUpServer
+  ///
+  /// In en, this message translates to:
+  /// **'Set up server'**
+  String get chatSetUpServer;
+
+  /// CodeWalk UI string — chatSelectOrCreate
+  ///
+  /// In en, this message translates to:
+  /// **'Select or create a conversation to start chatting'**
+  String get chatSelectOrCreate;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

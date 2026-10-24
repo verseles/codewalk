@@ -86,12 +86,18 @@ class SessionTabsController extends ChangeNotifier {
     return [?current, ...rest];
   }
 
-  /// The tab to show when the app opens on the list: the selected tab of the
-  /// server whose tab was opened last. Only the first call of a launch gets
-  /// it, so returning to the list later stays there.
+  /// The tab to show when the app opens on the workspace home: the selected
+  /// tab of the server whose tab was opened last. Only the first call of a
+  /// launch gets it, so returning to the home later stays there.
   SessionRef? takeLaunchTab() {
-    if (_launched) return null;
+    final tab = launchTab;
     _launched = true;
+    return tab;
+  }
+
+  /// The tab [takeLaunchTab] would return, without spending it.
+  SessionRef? get launchTab {
+    if (_launched) return null;
     final latest = tabs.fold<SessionTab?>(
       null,
       (latest, tab) =>

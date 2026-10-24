@@ -20,6 +20,7 @@ import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
+import 'workspace_controller.dart';
 
 /// Owns a composed v2 graph; widgets receive typed dependencies, not a locator.
 class CodeWalkV2Bootstrap extends StatefulWidget {
@@ -92,6 +93,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ChangeNotifierProvider<SessionsController>.value(value: sessions),
         if (dependencies.sessionTabs case final tabs?)
           ChangeNotifierProvider<SessionTabsController>.value(value: tabs),
+        if (dependencies.workspace case final workspace?)
+          ChangeNotifierProvider<WorkspaceController>.value(value: workspace),
         if (dependencies.diagnostics case final diagnostics?)
           ChangeNotifierProvider<DiagnosticsController>.value(
             value: diagnostics,

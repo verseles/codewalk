@@ -14,6 +14,7 @@ import '../hosts/fakes.dart';
 import 'composer_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 void main() {
   testWidgets('the app bar fits a session page beside the list', (
@@ -34,14 +35,12 @@ void main() {
       sessionLiveDirectory: () => directory,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final read = dependencies.sessions!.selectProfile('profile_a');
     final catalog = rig.sources.single;
     final row = catalog.row('one');
     catalog.respond([row]);
     await read;
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(ValueKey(row.info.ref)));
     await tester.pumpAndSettle();
     final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
     await tester.ensureVisible(button);
@@ -86,15 +85,13 @@ void main() {
       sessionLiveDirectory: () => directory,
     );
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-    await tester.pumpAndSettle();
+    await showSessionList(tester);
     final l10n = dependencies.localizations.current;
     final read = dependencies.sessions!.selectProfile('profile_a');
     final catalog = rig.sources.single;
     final row = catalog.row('one');
     catalog.respond([row]);
     await read;
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(ValueKey(row.info.ref)));
     await tester.pumpAndSettle();
     final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
     await tester.ensureVisible(button);
@@ -198,15 +195,13 @@ void main() {
           await tester.pumpWidget(
             CodeWalkV2Bootstrap(dependencies: dependencies),
           );
-          await tester.pumpAndSettle();
+          await showSessionList(tester);
           final l10n = dependencies.localizations.current;
           final read = dependencies.sessions!.selectProfile('profile_a');
           final catalog = rig.sources.single;
           final row = catalog.row('one', title: '<b>Plain title</b>');
           catalog.respond([row]);
           await read;
-          await tester.pumpAndSettle();
-          await tester.tap(find.byKey(ValueKey(row.info.ref)));
           await tester.pumpAndSettle();
           final button = find.byKey(
             ValueKey('live-open-${row.info.ref.storageKey}'),
@@ -361,16 +356,25 @@ void main() {
                 ? TextDirection.rtl
                 : TextDirection.ltr,
           );
-          // The system back returns to the list; the open tab keeps the
-          // lease until the tab or the app closes.
+          // The system back at a root session opens the list drawer of a
+          // compact window and, without one, leaves the app; the open tab
+          // keeps the lease until the tab or the app closes.
+          final pops = recordSystemPops(tester);
           expect(await tester.binding.handlePopRoute(), isTrue);
-          await tester.pumpAndSettle();
-          expect(find.byType(SessionLivePage), findsNothing);
+          await tester.pump();
+          await tester.pump(const Duration(seconds: 1));
+          expect(find.byType(SessionLivePage), findsOneWidget);
           expect(again.closes, 0);
           expect(
             dependencies.router.routeInformationProvider.value.uri.path,
-            '/sessions',
+            '/s/profile_a/${ref.nativeId}',
           );
+          if (size.width < 600) {
+            expect(sessionListDrawerOpen(tester), isTrue);
+            expect(pops, isEmpty);
+          } else {
+            expect(pops, ['SystemNavigator.pop']);
+          }
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox.shrink());
           expect(again.closes, 1);
@@ -409,15 +413,13 @@ void main() {
         await tester.pumpWidget(
           CodeWalkV2Bootstrap(dependencies: dependencies),
         );
-        await tester.pumpAndSettle();
+        await showSessionList(tester);
         final l10n = dependencies.localizations.current;
         final read = dependencies.sessions!.selectProfile('profile_a');
         final catalog = rig.sources.single;
         final row = catalog.row('one');
         catalog.respond([row]);
         await read;
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey(row.info.ref)));
         await tester.pumpAndSettle();
         final button = find.byKey(
           ValueKey('live-open-${row.info.ref.storageKey}'),

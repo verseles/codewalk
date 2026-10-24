@@ -88,7 +88,8 @@ class _SessionsPageState extends State<SessionsPage> {
       if (hosts.storageError) l10n.hostsProfileStorageError,
       if (hosts.loading || controller.loading) l10n.sessionsLoading,
       if (available && hosts.profiles.isEmpty) l10n.serversNoServersFound,
-      if (controller.failure != null) _failure(l10n, controller.failure!),
+      if (controller.failure != null)
+        sessionCatalogFailureText(l10n, controller.failure!),
       if (controller.stale) l10n.sessionsPreviousResults,
       if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
@@ -513,154 +514,119 @@ class _SessionsPageState extends State<SessionsPage> {
     String? lineage,
   }) {
     final l10n = context.v2L10n;
-    final expanded = controller.selectedSession?.info.ref == row.info.ref;
+    final live = context.watch<SessionLiveDirectory?>() != null;
+    final history = context.watch<SessionHistoryFactory?>() != null;
     void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
     return Card(
-              key: ValueKey<SessionRef>(row.info.ref),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onSecondaryTapUp: (_) => openMenu(),
-                child: CallbackShortcuts(
-                  bindings: {
-                    const SingleActivator(
-                      LogicalKeyboardKey.contextMenu,
-                    ): openMenu,
-                    const SingleActivator(
-                      LogicalKeyboardKey.f10,
-                      shift: true,
-                    ): openMenu,
-                  },
-                  child: Semantics(
-                    customSemanticsActions: {
-                      CustomSemanticsAction(
-                        label: l10n.sessionsActionsMenu,
-                      ): openMenu,
-                    },
-                    child: InkWell(
-                onTap: () => controller.inspect(row.info.ref),
-                onLongPress: openMenu,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  row.info.title.trim().isEmpty
-                                      ? l10n.sessionExportUntitled
-                                      : row.info.title,
-                                  maxLines: expanded ? null : 3,
-                                  overflow: expanded
-                                      ? null
-                                      : TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
-                                // The ownership the adapter proved, and
-                                // nothing else: an unproven, stale or expired
-                                // proof, and a list that is not the
-                                // endpoint's current answer, show unknown.
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    sessionOwnershipLabel(
-                                      l10n,
-                                      displayedSessionOwnership(
-                                        row.info.ownership,
-                                        now: controller.now,
-                                        current: !controller.stale &&
-                                            !controller.behind,
-                                      ),
-                                    ),
-                                    key: ValueKey(
-                                      'session-ownership-${row.info.ref.storageKey}',
-                                    ),
-                                    style: Theme.of(context).textTheme.labelSmall
-                                        ?.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                        ),
-                                  ),
-                                ),
-                                if (lineage != null)
-                                  _lineage(context, row, lineage),
-                                if (controller.activityMarks(row)
-                                    case final marks when marks.isNotEmpty)
-                                  _activityMarks(context, row, marks),
-                              ],
-                            ),
-                          ),
-                          SessionActionsMenu(
-                            controller: controller,
-                            row: row,
-                            menuKey: _menuKey(row.info.ref),
-                          ),
-                        ],
-                      ),
-                      if (expanded) ...[
-                        if (row.updatedAt case final date?)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(_date(context, date)),
-                          ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.watch<SessionHistoryFactory?>() == null
-                              ? l10n.sessionsHistoryUnavailable
-                              : l10n.historyReadOnly,
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: TextButton(
-                            key: ValueKey(
-                              'history-open-${row.info.ref.storageKey}',
-                            ),
-                            onPressed:
-                                _openingHistory ||
-                                    controller.loading ||
-                                    !available ||
-                                    context.watch<SessionHistoryFactory?>() ==
-                                        null
-                                ? null
-                                : () => _openHistory(context, controller, row),
-                            child: Text(l10n.historyOpen),
-                          ),
-                        ),
-                        if (context.watch<SessionLiveDirectory?>() != null)
-                          Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: TextButton(
-                              key: ValueKey(
-                                'live-open-${row.info.ref.storageKey}',
+      key: ValueKey<SessionRef>(row.info.ref),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (_) => openMenu(),
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.contextMenu): openMenu,
+            const SingleActivator(LogicalKeyboardKey.f10, shift: true):
+                openMenu,
+          },
+          child: Semantics(
+            customSemanticsActions: {
+              CustomSemanticsAction(label: l10n.sessionsActionsMenu): openMenu,
+            },
+            child: InkWell(
+              key: ValueKey('live-open-${row.info.ref.storageKey}'),
+              // A tap opens the session; without a live view it opens the
+              // read-only history instead.
+              onTap: !available
+                  ? null
+                  : live
+                  ? () => _openLive(context, controller, row)
+                  : history
+                  ? () => _openHistory(context, controller, row)
+                  : null,
+              onLongPress: openMenu,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                row.info.title.trim().isEmpty
+                                    ? l10n.sessionExportUntitled
+                                    : row.info.title,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
-                              onPressed:
-                                  controller.loading || !available
-                                  ? null
-                                  : () => _openLive(context, controller, row),
-                              child: Text(l10n.liveOpen),
-                            ),
+                              // The ownership the adapter proved, and
+                              // nothing else: an unproven, stale or expired
+                              // proof, and a list that is not the
+                              // endpoint's current answer, show unknown.
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  sessionOwnershipLabel(
+                                    l10n,
+                                    displayedSessionOwnership(
+                                      row.info.ownership,
+                                      now: controller.now,
+                                      current:
+                                          !controller.stale &&
+                                          !controller.behind,
+                                    ),
+                                  ),
+                                  key: ValueKey(
+                                    'session-ownership-${row.info.ref.storageKey}',
+                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
+                              if (lineage != null)
+                                _lineage(context, row, lineage),
+                              if (controller.activityMarks(row) case final marks
+                                  when marks.isNotEmpty)
+                                _activityMarks(context, row, marks),
+                            ],
                           ),
+                        ),
+                        SessionActionsMenu(
+                          controller: controller,
+                          row: row,
+                          menuKey: _menuKey(row.info.ref),
+                          historyEnabled:
+                              !_openingHistory &&
+                              !controller.loading &&
+                              available,
+                          onHistory: live && history
+                              ? () {
+                                  if (controller.loading || !available) {
+                                    return;
+                                  }
+                                  _openHistory(context, controller, row);
+                                }
+                              : null,
+                        ),
                       ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-                    ),
-                  ),
-                ),
-            );
-  }
-
-  String _date(BuildContext context, DateTime date) {
-    final local = date.toLocal();
-    final material = MaterialLocalizations.of(context);
-    return '${material.formatMediumDate(local)} ${material.formatTimeOfDay(TimeOfDay.fromDateTime(local), alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context))}';
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _openHistory(
@@ -713,18 +679,21 @@ class _SessionsPageState extends State<SessionsPage> {
       Uri(pathSegments: ['', 's', profile.id, row.info.ref.nativeId]).toString(),
     );
   }
-
-  String _failure(V2Localizations l10n, SessionCatalogFailure failure) =>
-      switch (failure) {
-        SessionCatalogFailure.authenticationRequired => l10n.hostsAuthRequired,
-        SessionCatalogFailure.unsupportedPlatform => l10n.sessionsUnavailable,
-        SessionCatalogFailure.timeout => l10n.sessionsTimeout,
-        SessionCatalogFailure.invalidCursor => l10n.sessionsInvalidCursor,
-        SessionCatalogFailure.rateLimited => l10n.sessionsRateLimited,
-        SessionCatalogFailure.unavailable ||
-        SessionCatalogFailure.incompatibleResponse ||
-        SessionCatalogFailure.cancelled ||
-        SessionCatalogFailure.notFound ||
-        SessionCatalogFailure.connection => l10n.sessionsReadFailed,
-      };
 }
+
+/// What a failed read of the session list tells the user.
+String sessionCatalogFailureText(
+  V2Localizations l10n,
+  SessionCatalogFailure failure,
+) => switch (failure) {
+  SessionCatalogFailure.authenticationRequired => l10n.hostsAuthRequired,
+  SessionCatalogFailure.unsupportedPlatform => l10n.sessionsUnavailable,
+  SessionCatalogFailure.timeout => l10n.sessionsTimeout,
+  SessionCatalogFailure.invalidCursor => l10n.sessionsInvalidCursor,
+  SessionCatalogFailure.rateLimited => l10n.sessionsRateLimited,
+  SessionCatalogFailure.unavailable ||
+  SessionCatalogFailure.incompatibleResponse ||
+  SessionCatalogFailure.cancelled ||
+  SessionCatalogFailure.notFound ||
+  SessionCatalogFailure.connection => l10n.sessionsReadFailed,
+};

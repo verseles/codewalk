@@ -10,6 +10,7 @@ import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'history_fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
@@ -40,7 +41,7 @@ void main() {
           await tester.pumpWidget(
             CodeWalkV2Bootstrap(dependencies: dependencies),
           );
-          await tester.pumpAndSettle();
+          await showSessionList(tester);
           // An earlier opaque session intent must not select or start this reader.
           dependencies.navigation.prepareLink(
             Uri.parse('codewalk://s/opaque/pending'),
@@ -53,7 +54,10 @@ void main() {
           catalog.respond([row]);
           await read;
           await tester.pumpAndSettle();
-          await tester.tap(find.byKey(ValueKey(row.info.ref)));
+          // The row's menu holds its read-only history.
+          await tester.longPress(
+            find.byKey(ValueKey('live-open-${row.info.ref.storageKey}')),
+          );
           await tester.pumpAndSettle();
           final button = find.byKey(
             ValueKey('history-open-${row.info.ref.storageKey}'),
@@ -155,10 +159,6 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(SessionHistoryPage), findsNothing);
           expect(source.closes, 1);
-          expect(
-            dependencies.sessions!.selectedSession?.info.ref,
-            row.info.ref,
-          );
           expect(
             dependencies.router.routeInformationProvider.value.uri.path,
             '/sessions',

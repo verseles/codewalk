@@ -26,6 +26,7 @@ import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
 import '../platform/sessions/session_tabs_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
+import '../platform/sessions/workspace_store.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/payload_factory.dart';
@@ -42,6 +43,7 @@ import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'app_router.dart';
 import 'live_wake.dart';
+import 'workspace_controller.dart';
 
 /// Resolve the private graph before mounting widgets; never use the v1 locator.
 AppDependencies createAppDependencies({
@@ -65,6 +67,7 @@ AppDependencies createAppDependencies({
   HiddenSessionStore? hiddenStore,
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
+  WorkspaceStore? workspaceStore,
   Stream<Object?>? networkChanges,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -158,6 +161,12 @@ AppDependencies createAppDependencies({
     catalog: locator<SessionsController>(),
     now: sessionClock,
   );
+  // Brings back the server and the project the workspace was left on.
+  final workspace = WorkspaceController(
+    catalog: locator<SessionsController>(),
+    store: workspaceStore ?? WorkspaceStore(store: metadata),
+    tabs: sessionTabs,
+  );
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
   locator.registerSingleton(
@@ -192,6 +201,7 @@ AppDependencies createAppDependencies({
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
+    workspace: workspace,
     sessionDrafts:
         draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
     unrestrictedOwnership: unrestrictedOwnership,
@@ -230,6 +240,7 @@ Future<AppDependencies> loadAppDependencies({
   await dependencies.unrestrictedOwnership?.initialize();
   await dependencies.hiddenSessions?.initialize();
   await dependencies.sessionTabs?.initialize();
+  await dependencies.workspace?.initialize();
   if (listenNativeLinks) {
     final links = dependencies.links = NativePairingLinks((uri) {
       if (dependencies.isDisposed) return;

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -12,13 +15,15 @@ import '../shared/layout/window_size_class.dart';
 import '../shared/sessions/session_actions.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import 'app_keyboard_shortcuts.dart';
+import 'workspace_controller.dart';
 
 /// The workspace of the legacy client: the projects and their sessions on the
-/// start side, the open session beside them.
+/// start side, the chat beside them.
 ///
-/// A compact window shows the list on its own; from 600 dp the list stays
-/// beside the detail in a fixed pane, 260 dp wide below 840 dp and 300 dp
-/// from there, which leaves the detail at least 339 dp. Servers, settings and
+/// A compact window gives the chat the whole window, the open session or the
+/// workspace home, and keeps the list in a drawer; from 600 dp the list stays
+/// beside the chat in a fixed pane, 260 dp wide below 840 dp and 300 dp from
+/// there, which leaves the chat at least 339 dp. Servers, settings and
 /// pairing are secondary pages with a way back to the workspace.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.location, required this.child});
@@ -69,16 +74,26 @@ class AppShell extends StatelessWidget {
             final width = constraints.maxWidth;
             final size = WindowSizeClass.fromWidth(width);
             if (size.isCompact) {
-              if (home) {
-                return Scaffold(
-                  appBar: AppBar(title: const Text('CodeWalk')),
-                  body: const SessionsPage(),
-                );
-              }
-              // The open session takes the window; the list is a drawer.
+              // The chat takes the window; the list is a drawer. An open
+              // session brings its own bar.
               return Scaffold(
+                appBar: home
+                    ? AppBar(
+                        leading: Builder(
+                          builder: (context) => IconButton(
+                            key: const ValueKey('workspace-drawer'),
+                            icon: const Icon(Icons.menu),
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).openAppDrawerTooltip,
+                            onPressed: Scaffold.of(context).openDrawer,
+                          ),
+                        ),
+                        title: const Text('CodeWalk'),
+                      )
+                    : null,
                 drawer: const Drawer(child: SafeArea(child: SessionsPage())),
-                body: _BackToList(child: child),
+                body: _WorkspaceBack(child: child),
               );
             }
             final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
@@ -92,7 +107,7 @@ class AppShell extends StatelessWidget {
                     child: const SessionsPage(),
                   ),
                   const VerticalDivider(width: 1),
-                  Expanded(child: home ? child : _BackToList(child: child)),
+                  Expanded(child: _WorkspaceBack(child: child)),
                 ],
               ),
             );
@@ -112,14 +127,19 @@ class AppShell extends StatelessWidget {
   /// Opens the create of the list, when the list offers it.
   void _create(BuildContext context) {
     final controller = context.read<SessionsController?>();
-    if (controller == null ||
-        controller.hosts.loading ||
-        controller.hosts.storageError ||
-        controller.selectedProfile == null ||
-        controller.creating ||
-        controller.createReason != SessionActionReason.none) {
-      return;
-    }
+    if (controller == null || !canCreate(controller)) return;
+    showCreate(context, controller);
+  }
+
+  /// Whether the selected server takes a new session now.
+  static bool canCreate(SessionsController controller) =>
+      !controller.hosts.loading &&
+      !controller.hosts.storageError &&
+      controller.selectedProfile != null &&
+      !controller.creating &&
+      controller.createReason == SessionActionReason.none;
+
+  static void showCreate(BuildContext context, SessionsController controller) {
     showDialog<void>(
       context: context,
       builder: (context) => SessionCreateDialog(controller: controller),
@@ -127,10 +147,11 @@ class AppShell extends StatelessWidget {
   }
 }
 
-/// The system back from an open session: it closes the list drawer when
-/// open, otherwise returns to the list instead of leaving the app.
-class _BackToList extends StatelessWidget {
-  const _BackToList({required this.child});
+/// The system back at the root of the workspace, as in the legacy client: it
+/// opens the list drawer while it is closed, and once it is open it sends
+/// the app to the background. Without a drawer it goes straight there.
+class _WorkspaceBack extends StatelessWidget {
+  const _WorkspaceBack({required this.child});
 
   final Widget child;
 
@@ -140,29 +161,182 @@ class _BackToList extends StatelessWidget {
     onPopInvokedWithResult: (didPop, _) {
       if (didPop) return;
       final shell = Scaffold.maybeOf(context);
-      if (shell != null && shell.isDrawerOpen) {
-        shell.closeDrawer();
+      if (shell != null && shell.hasDrawer && !shell.isDrawerOpen) {
+        shell.openDrawer();
       } else {
-        context.go('/sessions');
+        unawaited(SystemNavigator.pop());
       }
     },
     child: child,
   );
 }
 
-/// The detail of the workspace when no session is open.
-class WorkspaceHome extends StatelessWidget {
+/// The chat of the workspace when no session is open: the way to start one,
+/// or what keeps it from starting and the way out.
+///
+/// It asks the workspace for its server when it first shows, so a saved
+/// server opens without being chosen.
+class WorkspaceHome extends StatefulWidget {
   const WorkspaceHome({super.key});
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(
-        context.v2L10n.workspaceSelectSession,
-        key: const ValueKey('workspace-empty'),
-        textAlign: TextAlign.center,
+  State<WorkspaceHome> createState() => _WorkspaceHomeState();
+}
+
+class _WorkspaceHomeState extends State<WorkspaceHome> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<WorkspaceController?>()?.restoreServer();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.v2L10n;
+    final catalog = context.watch<SessionsController?>();
+    if (catalog == null) {
+      return _HomeState(
+        icon: Icons.chat_bubble_outline,
+        title: l10n.sessionsUnavailable,
+      );
+    }
+    final hosts = catalog.hosts;
+    void openServers() => context.push('/hosts');
+    if (hosts.storageError) {
+      return _HomeState(
+        icon: Icons.error_outline,
+        title: l10n.hostsProfileStorageError,
+        actions: [
+          FilledButton(
+            key: const ValueKey('workspace-open-servers'),
+            onPressed: openServers,
+            child: Text(l10n.liveErrorOpenServers),
+          ),
+        ],
+      );
+    }
+    if (hosts.loading || !hosts.loaded) return const _HomeLoading();
+    // No server, no chat: the home says so and leads to the setup.
+    if (hosts.profiles.isEmpty) {
+      return _HomeState(
+        icon: Icons.dns_outlined,
+        title: l10n.chatNoServerYet,
+        body: l10n.chatAddServerToStart,
+        actions: [
+          FilledButton.icon(
+            key: const ValueKey('workspace-set-up-server'),
+            onPressed: openServers,
+            icon: const Icon(Icons.add),
+            label: Text(l10n.chatSetUpServer),
+          ),
+        ],
+      );
+    }
+    final profile = catalog.selectedProfile;
+    if (profile == null) return const _HomeLoading();
+    // A saved server that does not answer limits the chat, and the home
+    // keeps the ways out of it.
+    if (catalog.failure case final failure?) {
+      return _HomeState(
+        icon: Icons.cloud_off_outlined,
+        title: profile.label,
+        body: sessionCatalogFailureText(l10n, failure),
+        actions: [
+          FilledButton(
+            key: const ValueKey('workspace-retry'),
+            onPressed: catalog.loading ? null : catalog.refresh,
+            child: Text(l10n.chatRetry),
+          ),
+          OutlinedButton(
+            key: const ValueKey('workspace-open-servers'),
+            onPressed: openServers,
+            child: Text(l10n.liveErrorOpenServers),
+          ),
+        ],
+      );
+    }
+    final create = AppShell.canCreate(catalog);
+    return _HomeState(
+      icon: Icons.chat_bubble_outline,
+      title: l10n.chatSelectOrCreate,
+      actions: [
+        FilledButton.icon(
+          key: const ValueKey('workspace-new-chat'),
+          onPressed: create
+              ? () => AppShell.showCreate(context, catalog)
+              : null,
+          icon: const Icon(Icons.add),
+          label: Text(l10n.chatNewChat),
+        ),
+      ],
+    );
+  }
+}
+
+/// The home while the saved servers load or one is being chosen: a short
+/// local wait that shows nothing rather than a flicker.
+class _HomeLoading extends StatelessWidget {
+  const _HomeLoading();
+
+  @override
+  Widget build(BuildContext context) =>
+      const SizedBox.expand(key: ValueKey('workspace-loading'));
+}
+
+class _HomeState extends StatelessWidget {
+  const _HomeState({
+    required this.icon,
+    required this.title,
+    this.body,
+    this.actions = const [],
+  });
+
+  final IconData icon;
+  final String title;
+  final String? body;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      key: const ValueKey('workspace-empty'),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 64, color: theme.colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            if (body case final body?) ...[
+              const SizedBox(height: 8),
+              Text(
+                body,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (actions.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: actions,
+              ),
+            ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

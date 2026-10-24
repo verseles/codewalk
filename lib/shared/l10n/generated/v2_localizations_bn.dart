@@ -1321,10 +1321,6 @@ class V2LocalizationsBn extends V2Localizations {
       'সার্ভার এখানে দেখানোর চেয়ে বেশি আউটপুট রেখেছে।';
 
   @override
-  String get workspaceSelectSession =>
-      'এখানে খুলতে তালিকা থেকে একটি সেশন বেছে নিন।';
-
-  @override
   String get sessionLinkUnknownServer =>
       'এই লিঙ্কটি এমন একটি সার্ভারের দিকে নির্দেশ করে যা এই ডিভাইসে সংরক্ষিত নেই।';
 
@@ -1562,4 +1558,17 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get updatesUnsupported => 'এই প্ল্যাটফর্মে আপডেট এখনও উপলব্ধ নয়।';
+
+  @override
+  String get chatNewChat => 'নতুন চ্যাট';
+
+  @override
+  String get chatNoServerYet => 'কোন সার্ভার এখনো কনফিগার করা হয়নি';
+
+  @override
+  String get chatSetUpServer => 'সার্ভার সেট আপ করুন';
+
+  @override
+  String get chatSelectOrCreate =>
+      'চ্যাটিং শুরু করতে একটি কথোপকথন নির্বাচন করুন বা তৈরি করুন';
 }

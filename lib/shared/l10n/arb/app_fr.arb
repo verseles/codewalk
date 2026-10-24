@@ -1104,10 +1104,6 @@
   "@liveShellOutputPartial": {
     "description": "V2 live read-only session view"
   },
-  "workspaceSelectSession": "Choisissez une session dans la liste pour l’ouvrir ici.",
-  "@workspaceSelectSession": {
-    "description": "V2 bounded read-only session catalog"
-  },
   "sessionLinkUnknownServer": "Ce lien pointe vers un serveur qui n’est pas enregistré sur cet appareil.",
   "@sessionLinkUnknownServer": {
     "description": "V2 bounded read-only session catalog"
@@ -1366,5 +1362,9 @@
   "updatesUnsupported": "Les mises à jour ne sont pas encore disponibles sur cette plateforme.",
   "@updatesUnsupported": {
     "description": "V2 update check"
-  }
+  },
+  "chatNewChat": "Nouvelle discussion",
+  "chatNoServerYet": "Aucun serveur configuré pour le moment",
+  "chatSetUpServer": "Configurer le serveur",
+  "chatSelectOrCreate": "Sélectionnez ou créez une conversation pour commencer à discuter"
 }

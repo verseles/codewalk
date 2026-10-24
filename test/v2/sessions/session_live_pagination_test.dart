@@ -12,6 +12,7 @@ import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'history_fakes.dart';
 import 'live_fakes.dart';
+import 'workspace_support.dart';
 
 /// The rows `m<from>`..`m<to - 1>` of a long session, in chronological order.
 /// Their heights differ, like real answers, so an anchor cannot hold by luck.
@@ -90,14 +91,12 @@ Future<({CatalogRig rig, LiveHandle handle, _Session session})> _open(
     },
   );
   await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-  await tester.pumpAndSettle();
+  await showSessionList(tester);
   final read = dependencies.sessions!.selectProfile('profile_a');
   final catalog = rig.sources.single;
   final row = catalog.row('one', title: 'One');
   catalog.respond([row]);
   await read;
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(ValueKey(row.info.ref)));
   await tester.pumpAndSettle();
   final button = find.byKey(ValueKey('live-open-${row.info.ref.storageKey}'));
   await tester.ensureVisible(button);

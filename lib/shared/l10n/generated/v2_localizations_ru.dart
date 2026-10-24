@@ -1341,10 +1341,6 @@ class V2LocalizationsRu extends V2Localizations {
       'Сервер сохранил больше вывода, чем показано здесь.';
 
   @override
-  String get workspaceSelectSession =>
-      'Выберите сессию в списке, чтобы открыть её здесь.';
-
-  @override
   String get sessionLinkUnknownServer =>
       'Эта ссылка ведёт на сервер, который не сохранён на этом устройстве.';
 
@@ -1582,4 +1578,17 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get updatesUnsupported =>
       'Обновления на этой платформе пока недоступны.';
+
+  @override
+  String get chatNewChat => 'Новый чат';
+
+  @override
+  String get chatNoServerYet => 'Сервер еще не настроен';
+
+  @override
+  String get chatSetUpServer => 'Настроить сервер';
+
+  @override
+  String get chatSelectOrCreate =>
+      'Выберите или создайте беседу, чтобы начать общение';
 }

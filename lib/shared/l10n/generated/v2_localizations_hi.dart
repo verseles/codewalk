@@ -1330,10 +1330,6 @@ class V2LocalizationsHi extends V2Localizations {
       'सर्वर ने यहाँ दिखाए गए से अधिक आउटपुट रखा है।';
 
   @override
-  String get workspaceSelectSession =>
-      'इसे यहाँ खोलने के लिए सूची से एक सत्र चुनें।';
-
-  @override
   String get sessionLinkUnknownServer =>
       'यह लिंक ऐसे सर्वर की ओर इशारा करता है जो इस डिवाइस पर सहेजा नहीं गया है।';
 
@@ -1570,4 +1566,17 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get updatesUnsupported =>
       'इस प्लेटफ़ॉर्म पर अपडेट अभी उपलब्ध नहीं हैं।';
+
+  @override
+  String get chatNewChat => 'नई चैट';
+
+  @override
+  String get chatNoServerYet => 'अभी तक कोई सर्वर कॉन्फ़िगर नहीं किया गया है';
+
+  @override
+  String get chatSetUpServer => 'सर्वर सेट अप करें';
+
+  @override
+  String get chatSelectOrCreate =>
+      'चैटिंग शुरू करने के लिए एक बातचीत चुनें या बनाएं';
 }
