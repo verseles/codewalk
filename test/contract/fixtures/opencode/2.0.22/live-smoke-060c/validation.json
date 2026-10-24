@@ -41,6 +41,7 @@
     "noOwnedPortStillListening": "passed",
     "noOwnedProcessSurvivor": "passed",
     "limitationsRecorded": "passed",
+    "noSecretMaterial:README.md": "passed",
     "noSecretMaterial:capabilities.json": "passed",
     "noSecretMaterial:cleanup.json": "passed",
     "noSecretMaterial:egress.json": "passed",
@@ -50,7 +51,7 @@
     "noSecretMaterial:results.json": "passed",
     "noSecretMaterial:stub-ledger.json": "passed"
   },
-  "checkCount": 47,
+  "checkCount": 48,
   "failedChecks": [],
   "observations": {
     "foreignPortsLeft": [],

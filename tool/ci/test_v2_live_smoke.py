@@ -573,6 +573,35 @@ class FixtureTests(unittest.TestCase):
             self.assertEqual(results060c["capabilities"]["form"], "missing")
             self.assertEqual(results060c["capabilities"]["modelSwitch"], "missing")
             self.assertEqual(results060c["capabilities"]["error"], "missing")
+            self.assertEqual(provenance["suite"], smoke.LIVE_SUITE_PATH)
+            # Regenerating the same unit is allowed and records the executed suite.
+            smoke._write_fixture(evidence, out060c, unit="V2-060C", suite="x_test.dart")
+            provenance = json.loads((out060c / "provenance.json").read_text())
+            self.assertEqual(provenance["suite"], "x_test.dart")
+            # Another unit's fixture is immutable evidence.
+            before = (out060c / "results.json").read_text()
+            with self.assertRaises(ValueError):
+                smoke._write_fixture(evidence, out060c, unit="V2-060B")
+            self.assertEqual((out060c / "results.json").read_text(), before)
+            self.assertEqual(smoke._fixture_unit_conflict(out060c, "V2-060B"), "V2-060C")
+            self.assertIsNone(smoke._fixture_unit_conflict(out060c, "V2-060C"))
+
+    def test_a_run_refuses_another_units_fixture_before_starting(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            (out / "results.json").write_text(json.dumps({"unit": "V2-060B"}))
+            code = smoke.run(
+                out / "root",
+                out / "evidence",
+                smoke.LIVE_SUITE_PATH,
+                fixture_out=out,
+                unit="V2-060C",
+            )
+            self.assertEqual(code, 2)
+            self.assertFalse((out / "root").exists())
+            self.assertEqual(
+                json.loads((out / "results.json").read_text()), {"unit": "V2-060B"}
+            )
 
 
 if __name__ == "__main__":

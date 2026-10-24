@@ -879,13 +879,38 @@ def _unit_meta(unit: str) -> dict:
     return UNIT_METADATA[unit]
 
 
-def _write_fixture(evidence: dict, out: Path, unit: str = "V2-060B") -> None:
+def _fixture_unit_conflict(out: Path, unit: str) -> str | None:
+    """The unit of an existing fixture in [out] when it is not [unit].
+
+    An accepted fixture of another unit is immutable evidence: a run with a
+    mismatched `--unit`/`--fixture-out` pair must never overwrite it.
+    """
+    try:
+        existing = json.loads((out / "results.json").read_text()).get("unit")
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError, AttributeError):
+        return "unreadable"
+    return None if existing == unit else str(existing)
+
+
+def _write_fixture(
+    evidence: dict,
+    out: Path,
+    unit: str = "V2-060B",
+    suite: str = LIVE_SUITE_PATH,
+) -> None:
     """Write the committed evidence fixture from this run.
 
     The fixture is generated, never hand-edited: every value comes from the
     recorded run, so it cannot claim more than the run proved. Every file is
     scanned for secret material before it reaches the disk.
     """
+    conflict = _fixture_unit_conflict(out, unit)
+    if conflict is not None:
+        raise ValueError(
+            f"{out} holds the {conflict} fixture; refusing to overwrite it with {unit}"
+        )
     meta = _unit_meta(unit)
     issue_url = meta["issue"]
     phase_map = meta["phases"]
@@ -927,7 +952,7 @@ def _write_fixture(evidence: dict, out: Path, unit: str = "V2-060B") -> None:
         "stubRequests": evidence.get("stub_requests"),
         "wallSeconds": evidence.get("wall_seconds"),
         "launcher": LAUNCHER_PATH,
-        "suite": LIVE_SUITE_PATH,
+        "suite": suite,
         "redactions": list(FIXTURE_REDACTIONS),
     }
     events_doc = {
@@ -1010,6 +1035,15 @@ def run(
 ) -> int:
     meta = _unit_meta(unit)
     phase_map = meta["phases"]
+    if fixture_out is not None:
+        conflict = _fixture_unit_conflict(fixture_out, unit)
+        if conflict is not None:
+            print(
+                f"live-smoke: {fixture_out} holds the {conflict} fixture; "
+                f"refusing to overwrite it with {unit}",
+                file=sys.stderr,
+            )
+            return 2
     password = None
     server = None
     stub = None
@@ -1387,7 +1421,7 @@ def run(
                     file=sys.stderr,
                 )
             else:
-                _write_fixture(final, fixture_out, unit=unit)
+                _write_fixture(final, fixture_out, unit=unit, suite=flutter_test)
                 print(f"live-smoke: fixture written to {fixture_out}")
     print(json.dumps({"status": evidence.get("status")}))
     return 0 if evidence.get("status") == "delivered-awaiting-acceptance" else 1
