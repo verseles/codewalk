@@ -309,6 +309,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** a v2 history or live timeline item with canonical text (`UserInput`, `AssistantText`, `Reasoning`, `Notice`)
 - **When** the shared `SessionTimelineTile` builds its body
 - **Then** `AssistantText` renders GFM Markdown with basic HTML (`b`, `i`, `u`, `br`, `sub`, `sup`, `progress`), LaTeX math (`$...$`, `$$...$$`), fenced code with syntax highlighting and a Mermaid diagram card with raw-source fallback; `UserInput`/`Reasoning`/`Notice` render the same Markdown/math/code without raw HTML (unsupported tags stay safe and never execute)
+- **Then** tables match v1: a rounded themed border, a bold header row on the raised theme surface and intrinsic column widths; a table wider than the message scrolls horizontally inside its own bounds, and cells keep inline formatting and links
 - **Then** images remain text without network or file I/O; links and file paths emit callbacks without navigation; `TurnOutcome` and `UnknownItem` stay minimized markers without exposing `raw` or fallback text; `ToolCall` and `ShellRun` follow the readable-results rules below
 - **Then** sources above 64,000 runes fall back to plain truncated text with a localized notice; code blocks above 8,000 chars render as plain monospace; malformed math/Mermaid degrade to selectable raw source without crashing
 - **Then** streaming re-parses are throttled (120 ms desktop, 48 ms mobile) and settle on completion; the 2,000-item history builds lazily without exception
