@@ -462,6 +462,16 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** opening or refreshing this page neither acknowledges update announcements nor installs an update
 - **Then** disposed or superseded loads cannot publish stale results; unsupported fetch platforms can still display a previously saved copy
 
+- **Given** the user opens Settings > Version and updates
+- **When** the platform is not an MVP native update target (Android arm64, Linux x64, Linux arm64)
+- **Then** the page renders the unsupported-platform notice and offers no update check
+- **When** the platform is a supported native update target
+- **Then** opening the page never starts a network request automatically; the update channel defaults to `stable`, and switching to `beta` is an explicit opt-in persisted under `cw2.updates.channel` (unreadable preferences keep `stable`)
+- **Then** tapping Check for updates reads the public GitHub releases listing (`/repos/verseles/codewalk/releases?per_page=100`) without profile credentials, traversing up to 10 pages (`maxUpdatePageBytes` 2 MiB per page, 8 MiB total, 30 s deadline); any non-200 status, non-identity encoding, exceeded page/byte/deadline bound or invalid JSON fails closed instead of reporting up to date on a partial listing
+- **Then** candidate selection uses strict SemVer 2.0 ordering (`2.0.0-beta.2 < 2.0.0-beta.10 < 2.0.0`), considers only canonical `v2.*` tags, excludes drafts, non-2 majors, `v1.266.0-native.N` cohorts and other prerelease families, allows `v2.0.0-beta.N` (`N >= 1`) only when the `beta` channel is selected and `prerelease` is `true`, and accepts an asset only when its download URL matches `https://github.com/verseles/codewalk/releases/download/<exact-tag>/<target-asset>`
+- **Then** changing the channel or leaving the app cancels any in-flight check and discards its result
+- **Then** when a newer eligible release is found, Android opens the exact verified APK URL (`codewalk-android-arm64.apk`) in the external browser without self-installing, and Linux displays and copies the exact-tag HTTPS installer command (`curl -fsSL https://install.cat/verseles/codewalk | CODEWALK_CHANNEL=<stable|beta> CODEWALK_VERSION=<exact-tag> sh`) without executing it
+
 Session-detail routes retain their navigation placeholders; the conversation
 catalog does not fetch history, attach live execution, send prompts or mutate sessions.
 Locale changes exposed by the v2 controller remain transient;

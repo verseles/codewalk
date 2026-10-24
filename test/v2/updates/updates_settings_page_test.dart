@@ -4,6 +4,7 @@ import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/settings/update_check_controller.dart';
 import 'package:codewalk/features/settings/updates_settings_page.dart';
+import 'package:codewalk/platform/releases/release_source_factory.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/releases/release_source.dart';
 import 'package:codewalk/shared/releases/update_selector.dart';
@@ -186,17 +187,15 @@ void main() {
     expect(find.byKey(const ValueKey('updates_check')), findsNothing);
   });
 
-  testWidgets('Settings opens Version and updates from the Help group', (
-    tester,
-  ) async {
+  testWidgets('Settings Help wires a manual native beta check', (tester) async {
     tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1;
-    final source = ImmediateSource(listing('v2.0.0'));
+    final source = ImmediateSource(listing('v2.0.0-beta.2'));
     final graph = createAppDependencies(
       initialLink: Uri(path: '/settings'),
       metadataStore: V2MetadataStore(backend: FakeMetadataBackend()),
       updateSource: source,
-      installedVersion: () async => '1.265.0',
+      installedVersion: () async => '2.0.0-beta.1',
     );
     await graph.preferences.initialize();
     addTearDown(() async {
@@ -227,5 +226,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('settings_updates_page')), findsOneWidget);
     expect(source.requests, 0, reason: 'opening the page never checks');
+    if (currentUpdateTarget() != null) {
+      expect(find.byKey(const ValueKey('updates_check')), findsOneWidget);
+      expect(find.byKey(const ValueKey('updates_unsupported')), findsNothing);
+      await tester.tap(find.text('Beta'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('updates_check')));
+      await tester.pumpAndSettle();
+      expect(source.requests, 1);
+      expect(find.byKey(const ValueKey('updates_available')), findsOneWidget);
+    }
   });
 }
