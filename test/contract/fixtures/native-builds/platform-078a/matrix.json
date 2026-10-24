@@ -25,7 +25,19 @@
     {
       "target": "android-s25",
       "dimension": "install",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "v2-owner-preview.yml build, installed by the owner",
+      "device": "the owner's Galaxy S25 (Android 16), paired over the tailnet with the disposable 2.0.22 server (tool/ci/v2_device_server.py at 0f0d2119)",
+      "asset": "app-arm64-v8a-profile.apk",
+      "installed_sha256": "b8cefdd324c5d3988cf9e2955bab08670ebef5163a22436c40b5115e1cfeb450",
+      "application_id": "com.verseles.codewalk.v2preview",
+      "note": "The owner preview of the same revision installs beside v1 and leaves it untouched; installing the production id com.verseles.codewalk over v1 belongs to Seq 6.1 (CP6)",
+      "evidence": [
+        "https://github.com/verseles/codewalk/actions/runs/40107477143",
+        "https://github.com/verseles/codewalk/issues/357",
+        "s25-owner-report.json"
+      ]
     },
     {
       "target": "android-s25",
@@ -43,7 +55,15 @@
     {
       "target": "android-s25",
       "dimension": "functional",
-      "result": "pending"
+      "result": "pass",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "producer": "owner run, observed on the device server relay",
+      "device": "the owner's Galaxy S25 (Android 16), paired over the tailnet with the disposable 2.0.22 server (tool/ci/v2_device_server.py at 0f0d2119)",
+      "note": "Pairing; send CW-SLOW then Stop (prompt 17:45:09, interrupt 17:45:13, session inactive); a native permission answered by the client in Allow all mode with nothing shown (one relayed reply, pending empty, nothing saved); Wi-Fi off, the stream closed at 17:47:46 and reopened at 17:48:37, hello answered once, 2 prompts and 0 duplicates",
+      "evidence": [
+        "https://github.com/verseles/codewalk/issues/357",
+        "s25-owner-report.json"
+      ]
     },
     {
       "target": "android-api31",
@@ -141,7 +161,10 @@
     {
       "target": "linux-x64",
       "dimension": "functional",
-      "result": "pending"
+      "result": "approved-tier",
+      "revision": "42a83936342b4c0a680d0e94449222b36bcd84fd",
+      "decision": "v2-plan.md \u00a717, 2026-10-24: the owner skipped the on-device Linux x64 flow; recorded as approved-tier, not pass",
+      "note": "Covered only indirectly: the x64 release tarball launched (install cell), the ARM64 flow passed (V2-060C) and x64 passed drop/background/restart in V2-042C"
     },
     {
       "target": "linux-arm64",
