@@ -137,6 +137,20 @@ class StubTests(unittest.TestCase):
         self.assertEqual(chunks[-1]["usage"]["cost"], 0)
         for block in ("```mermaid", "```dart", "$$", "| Name | Value |", "\\int_0^1"):
             self.assertIn(block, text)
+        # One line per chunk, so a client renders it while it streams.
+        lines = [c["choices"][0]["delta"]["content"] for c in chunks]
+        self.assertEqual(len(lines), len(device.RICH_SAMPLE.splitlines()))
+        self.assertTrue(all(line.endswith("\n") for line in lines))
+
+    def test_the_slow_marker_wins_over_the_rich_one(self):
+        stub = device.Stub()
+        self.addCleanup(stub.stop)
+        connection = http.client.HTTPConnection("127.0.0.1", stub.port, timeout=10)
+        payload = {"messages": [{"role": "user", "content": "CW-SLOW1 CW-RICH"}]}
+        connection.request("POST", "/v1/chat/completions", body=json.dumps(payload))
+        body = connection.getresponse().read().decode()
+        self.assertIn('"content": "tick 1 "', body)
+        self.assertNotIn("Heading", body)
 
 
 class RelayTests(unittest.TestCase):
