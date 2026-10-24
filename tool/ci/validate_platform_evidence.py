@@ -6,9 +6,13 @@ signing and the functional flow are separate cells and one never stands in
 for another. A cell is pending until its producer runs. pass needs the
 revision it was observed at and the evidence that shows it; pending-resource
 names the missing resource and the next action; fail and inconclusive give
-the reason. G3, G4 and the provisional G5 are rerun at a recorded revision.
-Deferred platforms are recorded but can never pass. Evidence never carries a
-credential or an address.
+the reason; approved-tier links the recorded decision. Each passing dimension
+carries its own fact: the artifact digest, the signer (or the explicit
+unsigned record) and the device it ran on. G3, G4 and the provisional G5 are
+rerun at a recorded revision. Deferred platforms are recorded but can never
+pass. Every file beside the matrix is pinned in SHA256SUMS, every local
+evidence file a cell cites is one of them, and none carries a credential or
+an address.
 
 Usage:
   python3 tool/ci/validate_platform_evidence.py [--final] [MATRIX]
@@ -34,15 +38,31 @@ TARGETS = ("android-s25", "android-api31", "linux-x64", "linux-arm64")
 DIMENSIONS = ("package", "install", "signature", "functional")
 GATES = ("G3", "G4", "G5-provisional")
 DEFERRED = ("web", "ios", "macos", "windows")
-RESULTS = {"pending", "pass", "pending-resource", "fail", "inconclusive"}
+RESULTS = {"pending", "pass", "pending-resource", "fail", "inconclusive", "approved-tier"}
 REVISION = re.compile(r"[0-9a-f]{8,40}")
+SHA256 = re.compile(r"[0-9a-f]{64}")
+# Evidence that lives outside the folder (a CI run, an Issue comment).
+REMOTE = "https://github.com/verseles/codewalk/"
+TEXT_SUFFIXES = {".json", ".jsonl", ".md", ".txt", ".log"}
+
+
+def _dimension(name: str, dimension: str, cell: dict) -> list[str]:
+    if dimension == "package" and not (isinstance(cell.get("sha256"), str) and SHA256.fullmatch(cell["sha256"])):
+        return [f"{name}: pass without the artifact sha256"]
+    if dimension == "signature" and not (
+            (isinstance(cell.get("signer_sha256"), str) and SHA256.fullmatch(cell["signer_sha256"]))
+            or cell.get("unsigned") is True):
+        return [f"{name}: pass without the signer or the explicit unsigned record"]
+    if dimension in ("install", "functional") and not cell.get("device"):
+        return [f"{name}: pass without the device or runner it ran on"]
+    return []
 
 
 def _revision(value: object) -> bool:
     return isinstance(value, str) and REVISION.fullmatch(value) is not None
 
 
-def _cell(name: str, cell: dict, final: bool, gate: bool = False) -> list[str]:
+def _cell(name: str, cell: dict, final: bool, gate: bool = False, dimension: str | None = None) -> list[str]:
     found = []
     result = cell.get("result")
     if result not in RESULTS:
@@ -59,12 +79,18 @@ def _cell(name: str, cell: dict, final: bool, gate: bool = False) -> list[str]:
         if not cell.get("reason"):
             found.append(f"{name}: {result} without a reason")
         return found
+    if result == "approved-tier":
+        if not cell.get("decision"):
+            found.append(f"{name}: approved-tier without the recorded decision")
+        return found
     if not cell.get("producer"):
         found.append(f"{name}: pass without its producer")
     if not cell.get("evidence"):
         found.append(f"{name}: pass without evidence")
     if gate and not cell.get("command"):
         found.append(f"{name}: pass without the command that ran")
+    if dimension:
+        found += _dimension(name, dimension, cell)
     return found
 
 
@@ -89,7 +115,7 @@ def problems(matrix: dict, final: bool = False) -> list[str]:
         if key in seen:
             found.append(f"duplicate cell {key}")
         seen.add(key)
-        found += _cell(f"{key[0]}/{key[1]}", cell, final)
+        found += _cell(f"{key[0]}/{key[1]}", cell, final, dimension=key[1])
     for target in TARGETS:
         for dimension in DIMENSIONS:
             if (target, dimension) not in seen:
@@ -113,13 +139,50 @@ def problems(matrix: dict, final: bool = False) -> list[str]:
     return found
 
 
+def _cited(matrix: dict) -> set[str]:
+    entries = [*matrix.get("cells", []), *(matrix.get("gates") or {}).values()]
+    cited = set()
+    for entry in entries:
+        if isinstance(entry, dict):
+            items = entry.get("evidence") or []
+            cited.update(item for item in ([items] if isinstance(items, str) else items)
+                         if isinstance(item, str) and not item.startswith(REMOTE))
+    return cited
+
+
+def folder_problems(folder: Path, matrix: dict) -> list[str]:
+    found = sums(folder)
+    sums_path = folder / "SHA256SUMS"
+    if not sums_path.is_file():
+        return found + ["SHA256SUMS is missing"]
+    listed = {line.split(maxsplit=1)[1].strip().lstrip("*")
+              for line in sums_path.read_text().splitlines() if len(line.split(maxsplit=1)) == 2}
+    present = {path.relative_to(folder).as_posix() for path in folder.rglob("*")
+               if path.is_file() and path.name != "SHA256SUMS"}
+    for name in sorted(present - listed):
+        found.append(f"{name} is not pinned in SHA256SUMS")
+    for name in sorted(_cited(matrix) - present):
+        found.append(f"cited evidence {name} is not beside the matrix")
+    for name in sorted(present):
+        path = folder / name
+        if path.suffix not in TEXT_SUFFIXES:
+            continue
+        text = path.read_text(errors="replace")
+        if SECRET_VALUE_RE.search(text):
+            found.append(f"{name}: a credential-shaped value is recorded")
+        for address in set(ADDRESS.findall(text)) - ALLOWED_ADDRESSES:
+            found.append(f"{name}: an address is recorded: {address}")
+    return found
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("matrix", nargs="?", default=str(DEFAULT))
     parser.add_argument("--final", action="store_true", help="reject pending cells")
     args = parser.parse_args(argv)
     path = Path(args.matrix)
-    found = problems(json.loads(path.read_text()), final=args.final) + sums(path.parent)
+    matrix = json.loads(path.read_text())
+    found = problems(matrix, final=args.final) + folder_problems(path.parent, matrix)
     for line in found:
         print(f"platform-evidence: {line}", file=sys.stderr)
     return 1 if found else 0

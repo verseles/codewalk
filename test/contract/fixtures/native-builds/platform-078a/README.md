@@ -22,9 +22,14 @@ recorded revision. `deferred` lists Web, iOS, macOS and Windows as
 `deferred-post-mvp` with their tracking Issues; they can never pass here.
 
 Cell results: `pending` (its producer has not run), `pass` (revision,
-producer and evidence recorded), `pending-resource` (the missing resource and
-the next action), `fail` or `inconclusive` (with the reason). Evidence files
-beside the matrix are pinned in `SHA256SUMS`.
+producer, evidence and the dimension's own fact: artifact `sha256`, the
+`signer_sha256` or `unsigned: true`, or the `device` it ran on),
+`pending-resource` (the missing resource and the next action), `fail` or
+`inconclusive` (with the reason), `approved-tier` (with the recorded
+decision). Every file in this folder, the matrix included, is pinned in
+`SHA256SUMS`; local evidence a cell cites must be one of them, and none may
+carry a credential or an address. Remote evidence is a link to this
+repository's runs or Issues.
 
 Validate with:
 

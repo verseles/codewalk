@@ -45,6 +45,12 @@ def check_release(text: str) -> None:
         assert re.search(r"^    needs: plan$", found[job], re.M), f"{job} needs plan"
     assert re.search(r"^    needs: \[plan, build-linux, build-android\]$", found["verify"], re.M), "verify needs builds"
     assert "tool/release/verify_v2_artifacts.py" in found["verify"], "verify runs the verifier"
+    linux = found["build-linux"]
+    launch = linux.find("python3 tool/release/smoke_v2_linux_release.py")
+    upload = linux.find("name: codewalk-linux-${{ matrix.arch }}\n")
+    assert 0 <= launch < upload, "build-linux launches the packaged bundle before it is uploaded"
+    assert re.search(r"if: always\(\)\n        with:\n          name: codewalk-linux-\$\{\{ matrix\.arch \}\}-launch",
+                     linux), "the launch evidence is kept even when the launch fails"
     publish = found["publish"]
     assert re.search(r"^    needs: \[plan, verify\]$", publish, re.M), "publish needs plan and verify"
     assert re.search(r"^    if: needs\.plan\.outputs\.publish == 'true'$", publish, re.M), "publish is gated"
@@ -113,6 +119,8 @@ class PublicationPathTests(unittest.TestCase):
             text.replace("  workflow_dispatch:\n", "  workflow_dispatch:\n  pull_request:\n", 1),
             text.replace("bash tool/release/create_v2_beta_release.sh", "uses: softprops/action-gh-release@v2 #"),
             text + "\n      - run: flutter build windows --release --target lib/main_v2.dart\n",
+            text.replace("python3 tool/release/smoke_v2_linux_release.py", "true #", 1),
+            text.replace("        if: always()\n", "", 1),
         ):
             with self.subTest():
                 self.assert_rejected(check_release, mutated)

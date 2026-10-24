@@ -38,7 +38,8 @@ class SmokeTest(unittest.TestCase):
         patches = [
             mock.patch.object(subject.platform, "machine", return_value="aarch64"),
             mock.patch.object(subject.shutil, "which", side_effect=lambda name: f"/usr/bin/{name}"),
-            mock.patch.dict(subject.os.environ, {"DISPLAY": ":99", "HOME": "/home/owner"}),
+            mock.patch.dict(subject.os.environ, {"DISPLAY": ":99", "HOME": "/home/owner",
+                                                 "XAUTHORITY": "/tmp/xvfb-run.abc/Xauthority"}),
             mock.patch.object(subject.os, "killpg", side_effect=lambda pid, sig: self.killed.append(sig)),
         ]
         for patch in patches:
@@ -78,6 +79,9 @@ class SmokeTest(unittest.TestCase):
                     "XDG_RUNTIME_DIR"):
             self.assertIn("cw2-release-smoke-", env[key])
         self.assertNotIn("/home/owner", env.values())
+        # The display cookie from xvfb-run must reach the app, or it cannot open the display.
+        self.assertEqual(env["XAUTHORITY"], "/tmp/xvfb-run.abc/Xauthority")
+        self.assertEqual((env["GDK_BACKEND"], env["FLUTTER_LINUX_RENDERER"]), ("x11", "software"))
 
     def test_no_window_or_an_early_exit_fails(self):
         report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess(), found=())
@@ -98,6 +102,24 @@ class SmokeTest(unittest.TestCase):
         self.assertEqual(report["launch"], "fail")
         self.assertIn("own architecture", report["error"])
         self.assertEqual(self.launched, [])
+
+    def test_a_corrupt_archive_is_recorded_as_a_failed_launch(self):
+        archive = self.root / "codewalk-linux-arm64.tar.gz"
+        archive.write_bytes(b"not a tarball")
+        report = self.smoke(archive, FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertTrue((self.evidence / "linux-arm64-launch.json").is_file())
+        self.assertEqual(self.launched, [])
+
+    def test_an_app_that_exits_as_it_is_stopped_still_passes(self):
+
+        def gone(pid, sig):
+            raise ProcessLookupError
+
+        with mock.patch.object(subject.os, "killpg", side_effect=gone):
+            report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
+        self.assertEqual(report["launch"], "passed", report.get("error"))
+        self.assertIn("log_tail", report)
 
     def test_unsafe_archive_entries_are_refused(self):
         archive = self.fixture.linux("linux-arm64", extra={"../escape": b"x"})

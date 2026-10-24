@@ -51,8 +51,11 @@ def extract(archive: Path, destination: Path) -> Path:
 
 
 def isolated_env(root: Path) -> dict:
+    # XAUTHORITY carries the display cookie (xvfb-run sets it); the file stays
+    # outside the redirected HOME. Rendering matches the proven preview launch.
     env = {key: value for key, value in os.environ.items()
-           if key in ("PATH", "DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "LANG", "LC_ALL")}
+           if key in ("PATH", "DISPLAY", "XAUTHORITY", "XAUTHLOCALHOSTNAME", "DBUS_SESSION_BUS_ADDRESS",
+                      "LANG", "LC_ALL")}
     home = root / "home"
     paths = {"HOME": home, "XDG_DATA_HOME": home / ".local/share", "XDG_CONFIG_HOME": home / ".config",
              "XDG_CACHE_HOME": home / ".cache", "XDG_STATE_HOME": home / ".local/state",
@@ -61,6 +64,7 @@ def isolated_env(root: Path) -> dict:
         path.mkdir(parents=True, exist_ok=True)
     (root / "runtime").chmod(0o700)
     env.update({key: str(path) for key, path in paths.items()})
+    env.update({"GDK_BACKEND": "x11", "FLUTTER_LINUX_RENDERER": "software"})
     env.setdefault("LANG", "C.UTF-8")
     return env
 
@@ -123,18 +127,22 @@ def smoke(archive: Path, target: str, evidence: Path, runner=subprocess.run, pop
                 report["launch"] = "passed"
             finally:
                 if process.poll() is None:
-                    os.killpg(process.pid, signal.SIGTERM)
                     try:
-                        process.wait(timeout=15)
-                    except subprocess.TimeoutExpired:
-                        os.killpg(process.pid, signal.SIGKILL)
-                        process.wait(timeout=15)
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=15)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait(timeout=15)
+                    except ProcessLookupError:
+                        pass  # it exited between the check and the signal
                 lines = sanitized(log_path.read_text(errors="replace")).splitlines()
                 report["log_tail"] = lines[-LOG_TAIL:]
             # The owned tree is removed with the temporary directory; nothing
             # outside it was given to the process.
-    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+    except (OSError, RuntimeError, ValueError, tarfile.TarError, subprocess.SubprocessError) as error:
         report["error"] = str(error)
+        report["launch"] = "fail"
     (evidence / f"{target}-launch.json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 
