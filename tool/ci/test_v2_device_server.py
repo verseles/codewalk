@@ -262,6 +262,55 @@ class DeviceServerTests(unittest.TestCase):
         )
         self.assertNotIn("private words", json.dumps(report))
 
+    def test_a_permission_opens_on_the_session_a_client_prompted_last(self):
+        for session in ("ses_a1", "ses_b2"):
+            self.server.log.write(
+                kind="request", session=session, method="POST", route="/api/session/{id}/prompt"
+            )
+        calls = []
+
+        def api(method, path, body=None):
+            calls.append((method, path, body))
+            return 200, json.dumps({"data": {"id": "per_1", "effect": "ask"}})
+
+        with mock.patch.object(self.server, "api", side_effect=api):
+            record = self.server.command("permission")
+        self.assertEqual(record, {"session": "ses_b2", "permission": "per_1", "effect": "ask"})
+        method, path, body = calls[0]
+        self.assertEqual((method, path), ("POST", "/api/session/ses_b2/permission"))
+        self.assertEqual(body["action"], "read")
+        self.assertEqual(body["resources"], body["save"])
+        with mock.patch.object(self.server, "api", side_effect=api):
+            self.assertEqual(
+                self.server.command("permission", {"session": "ses_a1"})["session"], "ses_a1"
+            )
+
+    def test_a_permission_needs_a_session(self):
+        self.assertIn("error", self.server.command("permission"))
+        self.assertIn("error", self.server.command("permissions", {"session": "../x"}))
+
+    def test_permissions_reports_pending_and_saved(self):
+        def api(method, path, body=None):
+            if path == "/api/permission/saved":
+                return 200, json.dumps({"data": []})
+            return 200, json.dumps({"data": [{"id": "per_1"}]})
+
+        with mock.patch.object(self.server, "api", side_effect=api):
+            state = self.server.command("permissions", {"session": "ses_a1"})
+        self.assertEqual(state, {"session": "ses_a1", "pending": ["per_1"], "saved": 0})
+        with mock.patch.object(self.server, "api", return_value=(500, "")):
+            self.assertIn("error", self.server.command("permissions", {"session": "ses_a1"}))
+
+    def test_only_a_created_session_asks_for_read(self):
+        self.assertEqual(device.server_config(1)["permissions"],
+                         [{"action": "*", "resource": "*", "effect": "deny"}])
+        self.server.project = Path("/tmp/project")
+        with mock.patch.object(self.server, "api",
+                               return_value=(200, json.dumps({"data": {"id": "ses_c3"}}))) as api:
+            self.assertEqual(self.server.command("create")["session"], "ses_c3")
+        self.assertEqual(api.call_args.args[2]["permissions"],
+                         [{"action": "read", "resource": "*", "effect": "ask"}])
+
     def test_a_closed_server_never_starts_again(self):
         self.server.close()
         self.assertEqual(self.server.restart(), {"error": "the server is closed"})

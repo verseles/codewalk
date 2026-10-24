@@ -13,6 +13,13 @@ Commands, typed on stdin or POSTed to the loopback --control-port:
   status    the endpoint, the server state and the relay counters
   session   create a session as another client would (TUI-equivalent) and
             send it one marker prompt
+  permission
+            open a native pending permission request (action read) on
+            body.session, or on the session a client prompted last; only
+            sessions from `create` ask, any other evaluates to deny
+  permissions
+            the pending requests of body.session (or that same session) and
+            the number of persistent approvals the server saved
   restart   stop the server gracefully (SIGTERM) and start it again on the
             same state; the relay endpoint does not change
   tui       the command that attaches the official TUI through the relay
@@ -20,7 +27,7 @@ Commands, typed on stdin or POSTed to the loopback --control-port:
             the event-stream reconnect gaps per client, as JSON
   quit      stop everything and clean the owned processes
 The control port also accepts, with a JSON body:
-  create    an empty session, for a client to prompt
+  create    an empty session, for a client to prompt (also typed on stdin)
   result    one result record, appended to results.jsonl
   host/drop, host/handover, host/background
             emulator controls through adb (only with --adb-serial): airplane
@@ -583,7 +590,14 @@ class DeviceServer:
         status, body = self.api(
             "POST",
             "/api/session",
-            {"title": "CW device cell", "location": {"directory": str(self.project)}},
+            {
+                "title": "CW device cell",
+                "location": {"directory": str(self.project)},
+                # A native request evaluates to deny without a session rule
+                # (verified live); this one lets `permission` open a real ask.
+                # The stub never calls a tool, so nothing else asks.
+                "permissions": [{"action": "read", "resource": "*", "effect": "ask"}],
+            },
         )
         if status != 200:
             return {"error": f"create HTTP {status}"}
@@ -605,6 +619,54 @@ class DeviceServer:
         record = {"session": session, "prompt": marker, "prompt_status": status}
         self.log.write(kind="external-session", **record)
         return record
+
+    def _target(self, body: dict | None) -> str | None:
+        session = (body or {}).get("session")
+        if isinstance(session, str) and ID_SEGMENT.match(session):
+            return session
+        prompted = [
+            r["session"]
+            for r in self.log.records
+            if r.get("session") and r.get("method") == "POST"
+            and r.get("route", "").endswith("/prompt")
+        ]
+        return prompted[-1] if prompted else None
+
+    def permission(self, body: dict | None = None) -> dict:
+        session = self._target(body)
+        if session is None:
+            return {"error": "no session: pass body.session or prompt one first"}
+        # A real native action, so the client sees the shape a tool call makes.
+        resource = f"cw-device-{secrets.token_hex(3)}"
+        status, raw = self.api(
+            "POST",
+            f"/api/session/{session}/permission",
+            {"action": "read", "resources": [resource], "save": [resource]},
+        )
+        if status != 200:
+            return {"error": f"permission HTTP {status}"}
+        data = json.loads(raw)["data"]
+        record = {"session": session, "permission": data["id"], "effect": data["effect"]}
+        self.log.write(kind="permission-created", **record)
+        return record
+
+    def permissions(self, body: dict | None = None) -> dict:
+        session = self._target(body)
+        if session is None:
+            return {"error": "no session: pass body.session or prompt one first"}
+        status, raw = self.api("GET", f"/api/session/{session}/permission")
+        if status != 200:
+            return {"error": f"permission list HTTP {status}"}
+        pending = [p.get("id") for p in json.loads(raw).get("data", [])]
+        status, raw = self.api("GET", "/api/permission/saved")
+        if status != 200:
+            return {"error": f"saved permission list HTTP {status}"}
+        data = json.loads(raw).get("data")
+        return {
+            "session": session,
+            "pending": pending,
+            "saved": len(data) if isinstance(data, list) else 0,
+        }
 
     def report(self) -> dict:
         records = list(self.log.records)
@@ -698,6 +760,10 @@ class DeviceServer:
             return self.status()
         if name == "session":
             return self.session()
+        if name == "permission":
+            return self.permission(body)
+        if name == "permissions":
+            return self.permissions(body)
         if name == "restart":
             return self.restart()
         if name == "report":

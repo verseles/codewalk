@@ -168,6 +168,77 @@ void main() {
       }
     }
 
+    // The flow cell: send, stop the running turn, then answer a native
+    // permission request on the same session. Allow all (the default)
+    // answers it by itself; in Ask mode the card's allow action is tapped.
+    // The server's pending list is the settlement evidence.
+    {
+      final created = await control('create');
+      final session = created['session']! as String;
+      dependencies.router.go('/s/${profile.id}/$session');
+      final opened = await until(live, timeout: const Duration(seconds: 60));
+      final marker = 'CW-SLOW flow ${DateTime.now().millisecondsSinceEpoch}';
+      await tester.enterText(
+        find.byKey(const ValueKey('live-composer-input')),
+        marker,
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('live-composer-send')));
+      final started = await until(
+        running,
+        timeout: const Duration(seconds: 30),
+      );
+      if (started) await tester.tap(find.byKey(const ValueKey('live-stop')));
+      // Well inside the stub's 30 s answer, so only the stop ends the turn.
+      final stopped =
+          started &&
+          await until(
+            () => live() && !running(),
+            timeout: const Duration(seconds: 20),
+          );
+      final asked = await control('permission', {'session': session});
+      final allow = find.byWidgetPredicate(
+        (widget) =>
+            widget.key is ValueKey<String> &&
+            (widget.key! as ValueKey<String>).value.startsWith(
+              'live-permission-allow-',
+            ),
+      );
+      var tapped = false;
+      var state = const <String, Object?>{};
+      final deadline = DateTime.now().add(const Duration(seconds: 60));
+      while (DateTime.now().isBefore(deadline)) {
+        await tester.pump();
+        state = await control('permissions', {'session': session});
+        if ((state['pending'] as List?)?.isEmpty ?? false) break;
+        if (!tapped && allow.evaluate().isNotEmpty) {
+          await tester.tap(allow.first);
+          tapped = true;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
+      final answered =
+          asked['effect'] == 'ask' &&
+          ((state['pending'] as List?)?.isEmpty ?? false) &&
+          state['saved'] == 0;
+      await control('result', {
+        'scenario': 'flow',
+        'session': session,
+        'opened_live': opened,
+        'turn_started': started,
+        'stopped': stopped,
+        'prompt_shown': count(marker),
+        'permission': asked,
+        'permission_answered': answered,
+        'answered_by': tapped ? 'card' : 'allow-all',
+        'permission_state': state,
+        'status': status(),
+      });
+      if (!opened || !stopped || count(marker) != 1 || !answered) {
+        unsettled.add('flow');
+      }
+    }
+
     await cell('drop', {
       'command': 'host/drop',
       'seconds': 15,
