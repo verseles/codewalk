@@ -185,8 +185,9 @@ def smoke(archive_path, evidence):
 
         try:
             window = start()
-            # The app opens into the workspace: the list beside an empty detail.
-            expect(window, ["CodeWalk", "Conversations", "Choose a session"], "01-initial")
+            # The app opens into the workspace: the list beside the actionable
+            # no-server chat state.
+            expect(window, ["CodeWalk", "Conversations", "No server configured yet"], "01-initial")
             click(window, "Connect to a running server")
             expect(window, ["Servers", "No servers found"], "02-hosts")
             # The full-width page leaves its outlined button hard to read, so
