@@ -679,10 +679,13 @@ class DeviceServer:
     def report(self) -> dict:
         records = list(self.log.records)
         status, body = self.api("GET", "/api/session/active")
-        active = json.loads(body).get("data", []) if status == 200 else None
-        active_ids = sorted(
-            a.get("id") if isinstance(a, dict) else a for a in (active or [])
-        )
+        try:
+            active = json.loads(body).get("data") if status == 200 else None
+        except (ValueError, AttributeError):
+            active = None
+        # 2.0.22 answers a map keyed by the running session ids. An
+        # unreadable answer is unknown (None), never "nothing is running".
+        active_ids = sorted(active) if isinstance(active, dict) else None
         sessions = {}
         ids = {r["session"] for r in records if r.get("session")}
         for session in sorted(ids):
@@ -711,7 +714,7 @@ class DeviceServer:
                     and r.get("method") == "POST"
                     and r.get("route", "").endswith("/prompt")
                 ),
-                "active": session in active_ids,
+                "active": None if active_ids is None else session in active_ids,
             }
         streams: dict[str, list[dict]] = {}
         for r in records:

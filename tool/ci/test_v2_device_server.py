@@ -251,7 +251,7 @@ class DeviceServerTests(unittest.TestCase):
 
         def api(method, path, body=None):
             if path == "/api/session/active":
-                return 200, json.dumps({"data": [{"id": "ses_a1"}]})
+                return 200, json.dumps({"data": {"ses_a1": {"type": "running"}}})
             return 200, json.dumps(history)
 
         with mock.patch.object(self.server, "api", side_effect=api):
@@ -261,6 +261,16 @@ class DeviceServerTests(unittest.TestCase):
             {"user_prompts": 3, "duplicates": 1, "prompt_posts": 1, "active": True},
         )
         self.assertNotIn("private words", json.dumps(report))
+
+        def unreadable(method, path, body=None):
+            if path == "/api/session/active":
+                return 500, ""
+            return 200, json.dumps(history)
+
+        with mock.patch.object(self.server, "api", side_effect=unreadable):
+            report = self.server.report()
+        self.assertIsNone(report["active_sessions"])
+        self.assertIsNone(report["sessions"]["ses_a1"]["active"])
 
     def test_a_permission_opens_on_the_session_a_client_prompted_last(self):
         for session in ("ses_a1", "ses_b2"):

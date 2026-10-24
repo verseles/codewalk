@@ -233,14 +233,20 @@ void main() {
       while (DateTime.now().isBefore(deadline)) {
         await tester.pump();
         state = await control('permissions', {'session': session});
-        if ((state['pending'] as List?)?.isEmpty ?? false) break;
+        // The relay logs the reply after the server answers it, so the
+        // pending list can empty first: wait for both.
+        final replies = (state['client_replies'] as int?) ?? 0;
+        if (((state['pending'] as List?)?.isEmpty ?? false) && replies >= 1) {
+          break;
+        }
         // A mounted card can briefly hold a disabled action; tap only an
-        // enabled one, and only once.
+        // enabled one, once, and only while nothing has answered yet.
         final ready = allow.evaluate().where(
           (e) => (e.widget as ButtonStyleButton).onPressed != null,
         );
-        if (!tapped && ready.isNotEmpty) {
-          final target = find.byWidget(ready.first.widget);
+        if (!tapped && replies == 0 && ready.isNotEmpty) {
+          // By key: a rebuild while scrolling replaces the widget instance.
+          final target = find.byKey(ready.first.widget.key!);
           await tester.ensureVisible(target);
           await tester.tap(target);
           tapped = true;
