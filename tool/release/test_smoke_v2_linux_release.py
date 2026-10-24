@@ -121,6 +121,11 @@ class SmokeTest(unittest.TestCase):
         self.assertEqual(report["launch"], "passed", report.get("error"))
         self.assertIn("log_tail", report)
 
+    def test_a_missing_archive_is_recorded_as_a_failed_launch(self):
+        report = self.smoke(self.root / "absent.tar.gz", FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertTrue((self.evidence / "linux-arm64-launch.json").is_file())
+
     def test_unsafe_archive_entries_are_refused(self):
         archive = self.fixture.linux("linux-arm64", extra={"../escape": b"x"})
         report = self.smoke(archive, FakeProcess())

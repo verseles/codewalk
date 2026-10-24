@@ -46,13 +46,21 @@ REMOTE = "https://github.com/verseles/codewalk/"
 TEXT_SUFFIXES = {".json", ".jsonl", ".md", ".txt", ".log"}
 
 
-def _dimension(name: str, dimension: str, cell: dict) -> list[str]:
-    if dimension == "package" and not (isinstance(cell.get("sha256"), str) and SHA256.fullmatch(cell["sha256"])):
+def _digest(value: object) -> bool:
+    return isinstance(value, str) and SHA256.fullmatch(value) is not None
+
+
+def _dimension(name: str, target: str, dimension: str, cell: dict) -> list[str]:
+    if dimension == "package" and not _digest(cell.get("sha256")):
         return [f"{name}: pass without the artifact sha256"]
-    if dimension == "signature" and not (
-            (isinstance(cell.get("signer_sha256"), str) and SHA256.fullmatch(cell["signer_sha256"]))
-            or cell.get("unsigned") is True):
-        return [f"{name}: pass without the signer or the explicit unsigned record"]
+    # An APK is always signed and names its package; a Linux bundle is not
+    # signed, which is recorded rather than passed as signing.
+    if dimension == "signature" and target.startswith("android-") and not (
+            _digest(cell.get("signer_sha256")) and cell.get("application_id") and "unsigned" not in cell):
+        return [f"{name}: pass without the APK signer and application id"]
+    if dimension == "signature" and target.startswith("linux-") and not (
+            cell.get("unsigned") is True and "signer_sha256" not in cell):
+        return [f"{name}: pass without the explicit unsigned record"]
     if dimension in ("install", "functional") and not cell.get("device"):
         return [f"{name}: pass without the device or runner it ran on"]
     return []
@@ -62,7 +70,8 @@ def _revision(value: object) -> bool:
     return isinstance(value, str) and REVISION.fullmatch(value) is not None
 
 
-def _cell(name: str, cell: dict, final: bool, gate: bool = False, dimension: str | None = None) -> list[str]:
+def _cell(name: str, cell: dict, final: bool, gate: bool = False, target: str = "",
+          dimension: str | None = None) -> list[str]:
     found = []
     result = cell.get("result")
     if result not in RESULTS:
@@ -85,12 +94,13 @@ def _cell(name: str, cell: dict, final: bool, gate: bool = False, dimension: str
         return found
     if not cell.get("producer"):
         found.append(f"{name}: pass without its producer")
-    if not cell.get("evidence"):
+    items = cell.get("evidence")
+    if not (isinstance(items, list) and items and all(isinstance(item, str) and item for item in items)):
         found.append(f"{name}: pass without evidence")
     if gate and not cell.get("command"):
         found.append(f"{name}: pass without the command that ran")
     if dimension:
-        found += _dimension(name, dimension, cell)
+        found += _dimension(name, target, dimension, cell)
     return found
 
 
@@ -101,8 +111,8 @@ def problems(matrix: dict, final: bool = False) -> list[str]:
         found.append("a credential-shaped value is recorded")
     for address in set(ADDRESS.findall(text)) - ALLOWED_ADDRESSES:
         found.append(f"an address is recorded: {address}")
-    if matrix.get("unit") != "V2-078A":
-        found.append("the matrix is not V2-078A")
+    if matrix.get("unit") != "V2-078A" or matrix.get("server", {}).get("version") != "2.0.22":
+        found.append("the matrix is not V2-078A on OpenCode 2.0.22")
     cells = matrix.get("cells")
     if not isinstance(cells, list):
         return found + ["cells is not a list"]
@@ -115,7 +125,7 @@ def problems(matrix: dict, final: bool = False) -> list[str]:
         if key in seen:
             found.append(f"duplicate cell {key}")
         seen.add(key)
-        found += _cell(f"{key[0]}/{key[1]}", cell, final, dimension=key[1])
+        found += _cell(f"{key[0]}/{key[1]}", cell, final, target=key[0], dimension=key[1])
     for target in TARGETS:
         for dimension in DIMENSIONS:
             if (target, dimension) not in seen:
@@ -144,9 +154,9 @@ def _cited(matrix: dict) -> set[str]:
     cited = set()
     for entry in entries:
         if isinstance(entry, dict):
-            items = entry.get("evidence") or []
-            cited.update(item for item in ([items] if isinstance(items, str) else items)
-                         if isinstance(item, str) and not item.startswith(REMOTE))
+            items = entry.get("evidence")
+            if isinstance(items, list):
+                cited.update(item for item in items if isinstance(item, str) and not item.startswith(REMOTE))
     return cited
 
 

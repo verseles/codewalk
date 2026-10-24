@@ -81,12 +81,12 @@ def sanitized(text: str) -> str:
 
 def smoke(archive: Path, target: str, evidence: Path, runner=subprocess.run, popen=subprocess.Popen,
           clock=time.monotonic, sleep=time.sleep) -> dict:
-    evidence.mkdir(parents=True, exist_ok=True)
-    data = archive.read_bytes()
-    report = {"asset": archive.name, "sha256": sha256_bytes(data), "target": target,
-              "host_machine": platform.machine(), "checks": {}, "launch": "fail"}
+    report = {"asset": archive.name, "target": target, "host_machine": platform.machine(),
+              "checks": {}, "launch": "fail"}
     checks = report["checks"]
     try:
+        evidence.mkdir(parents=True, exist_ok=True)
+        report["sha256"] = sha256_bytes(archive.read_bytes())
         if platform.machine() not in HOST_MACHINE[target]:
             raise RuntimeError(f"{target} must launch on its own architecture, not {platform.machine()}")
         checks["hostArchitecture"] = "passed"

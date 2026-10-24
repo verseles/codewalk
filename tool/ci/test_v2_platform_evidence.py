@@ -20,7 +20,11 @@ def _passing(cell, gate=False):
     if gate:
         cell["command"] = "make v2-architecture"
     else:
-        cell.update(sha256="ab" * 32, signer_sha256="cd" * 32, device="ubuntu-24.04-arm runner")
+        cell.update(sha256="ab" * 32, device="ubuntu-24.04-arm runner")
+        if cell.get("dimension") == "signature" and cell["target"].startswith("linux-"):
+            cell["unsigned"] = True
+        elif cell.get("dimension") == "signature":
+            cell.update(signer_sha256="cd" * 32, application_id="com.verseles.codewalk")
     return cell
 
 
@@ -79,20 +83,41 @@ class PlatformEvidenceTests(unittest.TestCase):
         self.assertEqual(evidence.problems(data, final=True), [])
 
     def test_each_dimension_records_its_own_fact(self):
-        for dimension, key, message in (("package", "sha256", "artifact sha256"),
-                                        ("signature", "signer_sha256", "explicit unsigned record"),
-                                        ("install", "device", "device or runner"),
-                                        ("functional", "device", "device or runner")):
+        for target, dimension, key, message in (
+                ("android-s25", "package", "sha256", "artifact sha256"),
+                ("android-s25", "signature", "signer_sha256", "APK signer and application id"),
+                ("android-api31", "signature", "application_id", "APK signer and application id"),
+                ("linux-x64", "signature", "unsigned", "explicit unsigned record"),
+                ("linux-arm64", "install", "device", "device or runner"),
+                ("android-s25", "functional", "device", "device or runner")):
             data = _all_passing()
-            cell = next(c for c in data["cells"] if c["dimension"] == dimension)
+            cell = next(c for c in data["cells"] if c["target"] == target and c["dimension"] == dimension)
             del cell[key]
-            with self.subTest(dimension=dimension):
+            with self.subTest(target=target, dimension=dimension):
                 self.assertTrue(any(message in line for line in evidence.problems(data)))
+
+    def test_an_unsigned_apk_or_a_signed_linux_bundle_never_passes(self):
         data = _all_passing()
-        cell = next(c for c in data["cells"] if c["dimension"] == "signature")
-        del cell["signer_sha256"]
+        cell = next(c for c in data["cells"] if c["target"] == "android-s25" and c["dimension"] == "signature")
         cell["unsigned"] = True
-        self.assertEqual(evidence.problems(data), [])
+        self.assertIn("android-s25/signature: pass without the APK signer and application id",
+                      evidence.problems(data))
+        data = _all_passing()
+        cell = next(c for c in data["cells"] if c["target"] == "linux-x64" and c["dimension"] == "signature")
+        cell["signer_sha256"] = "ef" * 32
+        self.assertIn("linux-x64/signature: pass without the explicit unsigned record", evidence.problems(data))
+
+    def test_evidence_is_a_list_of_references(self):
+        for value in ("launch.json", [], [""], [3]):
+            data = _all_passing()
+            data["cells"][0]["evidence"] = value
+            with self.subTest(value=value):
+                self.assertIn("android-s25/package: pass without evidence", evidence.problems(data))
+
+    def test_the_matrix_names_its_server_version(self):
+        data = _committed()
+        data["server"]["version"] = "2.0.21"
+        self.assertIn("the matrix is not V2-078A on OpenCode 2.0.22", evidence.problems(data))
 
     def test_an_approved_tier_links_its_decision(self):
         data = _all_passing()
