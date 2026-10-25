@@ -1612,4 +1612,11 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'Wählen oder erstellen Sie eine Konversation, um mit dem Chatten zu beginnen';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'Die Erstellung wurde nicht bestätigt. Dein Text wurde behalten; die Unterhaltung könnte bereits existieren.';
+
+  @override
+  String get workspaceDraftReset => 'Versuch verwerfen und Text behalten';
 }

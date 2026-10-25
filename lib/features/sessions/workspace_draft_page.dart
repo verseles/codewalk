@@ -1,0 +1,233 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../platform/sessions/workspace_draft_store.dart';
+import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/session_actions.dart';
+import 'sessions_controller.dart';
+import 'workspace_draft_controller.dart';
+
+/// Starts locally: no create is sent by this navigation or by opening a drawer.
+void openWorkspaceDraft(BuildContext context) {
+  final controller = context.read<WorkspaceDraftController?>();
+  if (controller == null) return;
+  Scaffold.maybeOf(context)?.closeDrawer();
+  context.go('/sessions');
+  unawaited(controller.openDraft());
+}
+
+class WorkspaceDraftPage extends StatefulWidget {
+  const WorkspaceDraftPage({required this.controller, super.key});
+  final WorkspaceDraftController controller;
+  @override
+  State<WorkspaceDraftPage> createState() => _WorkspaceDraftPageState();
+}
+
+class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
+  final _directory = TextEditingController();
+  bool _invalidPath = false;
+  @override
+  void dispose() {
+    _directory.dispose();
+    super.dispose();
+  }
+
+  void _chooseDirectory() {
+    final path = _directory.text.trim();
+    if (!(path.startsWith('/') || RegExp(r'^[A-Za-z]:[\\/]').hasMatch(path)) ||
+        path.length > 4096 ||
+        utf8.encode(path).length > 4096 ||
+        path.contains(String.fromCharCode(0))) {
+      setState(() => _invalidPath = true);
+      return;
+    }
+    setState(() => _invalidPath = false);
+    unawaited(widget.controller.openDraft(directory: path));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final catalog = context.watch<SessionsController?>();
+    final l10n = context.v2L10n;
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) {
+        final c = widget.controller;
+        final uncertain =
+            (c.status == WorkspaceDraftStatus.creating && !c.sending) ||
+            const {
+              WorkspaceDraftStatus.uncertain,
+              WorkspaceDraftStatus.confirming,
+              WorkspaceDraftStatus.bound,
+            }.contains(c.status);
+        final failed = c.status == WorkspaceDraftStatus.failed;
+        final notice = uncertain
+            ? c.entry?.createdSession != null
+                  ? l10n.composerNotConfirmed
+                  : l10n.workspaceDraftUncertain
+            : switch (c.notice) {
+                WorkspaceDraftNotice.fenceFailed => l10n.composerNoticeNotSaved,
+                WorkspaceDraftNotice.rejected => l10n.sessionsActionFailed,
+                WorkspaceDraftNotice.unavailable =>
+                  l10n.composerNoticeUnavailable,
+                WorkspaceDraftNotice.unreadable =>
+                  l10n.composerNoticeUnreadable,
+                _ => null,
+              };
+        final unavailable = switch (catalog?.createReason) {
+          null || SessionActionReason.none => null,
+          SessionActionReason.versionUnverified =>
+            l10n.sessionsActionUnavailableVersion,
+          SessionActionReason.unsupportedPlatform =>
+            l10n.sessionsActionUnavailablePlatform,
+          SessionActionReason.authenticationRequired =>
+            l10n.sessionsActionUnavailableAuth,
+          SessionActionReason.listNotCurrent =>
+            l10n.sessionsActionUnavailableList,
+          SessionActionReason.commandInFlight =>
+            l10n.sessionsActionUnavailableBusy,
+          SessionActionReason.noIdleMarker =>
+            l10n.sessionsActionUnavailableMarker,
+        };
+        return LayoutBuilder(
+          builder: (context, box) => SingleChildScrollView(
+            key: const ValueKey('workspace-draft'),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: box.maxHeight),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            l10n.chatNewChat,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 12),
+                          if (c.needsDirectory) ...[
+                            TextField(
+                              key: const ValueKey('workspace-draft-directory'),
+                              controller: _directory,
+                              textDirection: TextDirection.ltr,
+                              decoration: InputDecoration(
+                                labelText: l10n.sessionsCreateProject,
+                                hintText: l10n.sessionsCreateDirectoryHint,
+                                errorText: _invalidPath
+                                    ? l10n.sessionsCreateDirectoryAbsolute
+                                    : null,
+                              ),
+                              onSubmitted: (_) => _chooseDirectory(),
+                            ),
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: TextButton(
+                                key: const ValueKey(
+                                  'workspace-draft-project-confirm',
+                                ),
+                                onPressed: _chooseDirectory,
+                                child: Text(l10n.sessionsCreateProject),
+                              ),
+                            ),
+                          ] else
+                            Text(
+                              c.currentKey!.canonicalDirectory,
+                              textDirection: TextDirection.ltr,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          if (notice != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                notice,
+                                key: const ValueKey('workspace-draft-notice'),
+                              ),
+                            ),
+                          if (uncertain || failed)
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TextButton(
+                                key: const ValueKey('workspace-draft-reset'),
+                                onPressed: c.sending ? null : c.discardAttempt,
+                                child: Text(l10n.workspaceDraftReset),
+                              ),
+                            ),
+                          if (c.loading) Text(l10n.sessionsLoading),
+                          if (!c.needsDirectory &&
+                              !c.loading &&
+                              unavailable != null &&
+                              !c.sending)
+                            Text(unavailable),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                key: const ValueKey('workspace-draft-text'),
+                                controller: c.draft,
+                                enabled: !c.sending,
+                                minLines: 1,
+                                maxLines: 6,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                decoration: InputDecoration(
+                                  hintText: l10n.composerHint,
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton.filled(
+                              key: const ValueKey('workspace-draft-send'),
+                              tooltip: c.sending
+                                  ? l10n.composerSending
+                                  : l10n.composerSend,
+                              onPressed: c.canSend
+                                  ? () => unawaited(
+                                      c.sendFirstPrompt(
+                                        onBound: (ref, _, _) {
+                                          if (context.mounted) {
+                                            context.go(
+                                              Uri(
+                                                pathSegments: [
+                                                  '',
+                                                  's',
+                                                  ref.host.value,
+                                                  ref.nativeId,
+                                                ],
+                                              ).toString(),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    )
+                                  : null,
+                              icon: const Icon(Icons.arrow_upward),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

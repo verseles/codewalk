@@ -161,7 +161,7 @@ class SessionsController extends ChangeNotifier {
     if (_creating) return SessionActionReason.commandInFlight;
     final support = _actionSupport.reason;
     if (support != SessionActionReason.none) return support;
-    if (!loaded || stale || behind) {
+    if (!loaded || stale || behind || _livePending || _quietRefreshing) {
       return SessionActionReason.listNotCurrent;
     }
     return SessionActionReason.none;
@@ -280,6 +280,9 @@ class SessionsController extends ChangeNotifier {
   /// Whether the user chose the shown project group, rather than the list
   /// falling back to the first one.
   bool get projectChosen => _chosenProject != null;
+
+  /// The explicit project choice, including a temporarily absent group.
+  ({ProjectRef? project})? get chosenProject => _chosenProject;
 
   /// Whether the shown group is the explicit choice, rather than a fallback
   /// shown while that choice is absent from the loaded rows.
@@ -760,31 +763,37 @@ class SessionsController extends ChangeNotifier {
   /// The receipt is an admission: the new session reaches the list with the
   /// next authoritative read, and an uncertain create is reconciled there and
   /// never resent.
-  Future<SessionActionOutcome> create({
+  Future<SessionCreateResult> create({
     required String directory,
     String? title,
   }) async {
     final source = _actions;
-    if (source == null) return SessionActionOutcome.unavailable;
-    if (_creating) return SessionActionOutcome.unavailable;
+    if (source == null) {
+      return const SessionCreateResult(SessionActionOutcome.unavailable);
+    }
+    if (_creating) {
+      return const SessionCreateResult(SessionActionOutcome.unavailable);
+    }
     if (!_ready(createSource: false) ||
         _actionSupport.reason != SessionActionReason.none ||
         !loaded ||
         stale ||
         behind ||
-        _livePending) {
+        _livePending ||
+        _quietRefreshing) {
       // Nothing was sent, so the list keeps no failure notice: the dialog
       // says why the create was refused and the user retries.
-      return SessionActionOutcome.unavailable;
+      return const SessionCreateResult(SessionActionOutcome.unavailable);
     }
     _creating = true;
     _actionFailure = null;
     _notify();
     try {
-      final outcome = await source.create(directory: directory, title: title);
+      final result = await source.create(directory: directory, title: title);
+      final outcome = result.outcome;
       if (!identical(source, _actions)) {
         // The profile changed while the create was in flight.
-        return outcome;
+        return result;
       }
       if (outcome == SessionActionOutcome.accepted ||
           outcome == SessionActionOutcome.uncertain) {
@@ -797,7 +806,7 @@ class SessionsController extends ChangeNotifier {
       } else {
         _actionFailure = outcome;
       }
-      return outcome;
+      return result;
     } finally {
       _creating = false;
       _notify();

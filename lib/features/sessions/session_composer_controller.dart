@@ -172,10 +172,21 @@ class SessionComposerController extends ChangeNotifier {
 
   /// Returns whether the field may be cleared: only once the prompt belongs
   /// to a recorded admitted or uncertain entry.
-  Future<bool> send(String text) async {
+  Future<bool> send(
+    String text, {
+    CommandId? commandId,
+    bool Function()? isCurrent,
+  }) async {
     final outbox = _outbox;
     if (!canSend || outbox == null || text.trim().isEmpty) return false;
-    return _submit(outbox, text, delivery, fromChoice: true);
+    return _submit(
+      outbox,
+      text,
+      delivery,
+      fromChoice: true,
+      commandId: commandId,
+      isCurrent: isCurrent,
+    );
   }
 
   /// Sending lasts until the automatic check of an uncertain send ends, so
@@ -185,6 +196,8 @@ class SessionComposerController extends ChangeNotifier {
     String text,
     Delivery as, {
     bool fromChoice = false,
+    CommandId? commandId,
+    bool Function()? isCurrent,
   }) async {
     sending = true;
     notice = ComposerNotice.none;
@@ -192,9 +205,10 @@ class SessionComposerController extends ChangeNotifier {
     try {
       final result = await outbox.submit(
         session: session,
-        commandId: _commandIds(),
+        commandId: commandId ?? _commandIds(),
         draft: PromptDraft(text: text),
         delivery: as,
+        isCurrent: isCurrent,
       );
       if (_disposed) {
         // The session closed meanwhile: a prompt the outbox took must not
@@ -381,6 +395,7 @@ class SessionComposerController extends ChangeNotifier {
 }
 
 ComposerNotice submitRefusal(String? reason) => switch (reason) {
+  'cancelledBeforeSend' => ComposerNotice.cancelled,
   'unreadable' => ComposerNotice.unreadable,
   'notPersisted' => ComposerNotice.notSaved,
   'full' => ComposerNotice.full,
@@ -389,6 +404,7 @@ ComposerNotice submitRefusal(String? reason) => switch (reason) {
 };
 
 ComposerNotice rejection(String? reason) => switch (reason) {
+  'cancelledBeforeSend' => ComposerNotice.cancelled,
   'ConflictError' => ComposerNotice.conflict,
   'PromptIdentityOccupied' ||
   'identityOccupied' => ComposerNotice.identityOccupied,

@@ -432,7 +432,11 @@ final class ScriptedPromptOutbox implements PromptOutbox {
     required CommandId commandId,
     required PromptDraft draft,
     required Delivery delivery,
+    bool Function()? isCurrent,
   }) async {
+    if (isCurrent?.call() == false) {
+      return const OutboxSubmission.refused('cancelledBeforeSend');
+    }
     if (_next >= handle.bridge.sendIds.length) {
       return const OutboxSubmission.refused('notScripted');
     }

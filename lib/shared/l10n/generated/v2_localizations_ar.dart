@@ -1561,4 +1561,11 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get chatSelectOrCreate => 'حدد محادثة أو أنشئ واحدة لبدء الدردشة';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'لم يتم تأكيد إنشاء المحادثة. تم الاحتفاظ بالنص؛ قد تكون المحادثة موجودة بالفعل.';
+
+  @override
+  String get workspaceDraftReset => 'تجاهل المحاولة والاحتفاظ بالنص';
 }

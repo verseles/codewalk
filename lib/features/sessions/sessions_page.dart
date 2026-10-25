@@ -4,6 +4,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
@@ -12,12 +13,12 @@ import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import 'session_actions_menu.dart';
-import 'session_create_dialog.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
 import 'session_ownership.dart';
 import 'sessions_controller.dart';
+import 'workspace_draft_page.dart';
 
 /// The start indent of one nesting level, and the deepest level the list
 /// indents: deeper rows still nest, at the cap's indent.
@@ -194,9 +195,7 @@ class _SessionsPageState extends State<SessionsPage> {
                         onPressed:
                             available &&
                                 controller.selectedProfile != null &&
-                                !controller.creating &&
-                                controller.createReason ==
-                                    SessionActionReason.none
+                                !controller.creating
                             ? () => _openCreate(context, controller)
                             : null,
                         icon: const Icon(Icons.add),
@@ -374,10 +373,7 @@ class _SessionsPageState extends State<SessionsPage> {
     BuildContext context,
     SessionsController controller,
   ) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => SessionCreateDialog(controller: controller),
-    );
+    openWorkspaceDraft(context);
   }
 
   /// The label of the filter that shows which sessions the list holds.

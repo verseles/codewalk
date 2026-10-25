@@ -1366,5 +1366,13 @@
   "chatNewChat": "نئی چیٹ",
   "chatNoServerYet": "ابھی تک کوئی سرور کنفیگر نہیں ہوا۔",
   "chatSetUpServer": "سرور مرتب کریں۔",
-  "chatSelectOrCreate": "چیٹنگ شروع کرنے کے لیے ایک گفتگو کو منتخب کریں یا تخلیق کریں۔"
+  "chatSelectOrCreate": "چیٹنگ شروع کرنے کے لیے ایک گفتگو کو منتخب کریں یا تخلیق کریں۔",
+  "workspaceDraftUncertain": "گفتگو بننے کی تصدیق نہیں ہوئی۔ آپ کا متن محفوظ ہے؛ گفتگو پہلے سے موجود ہو سکتی ہے۔",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "کوشش ترک کریں اور متن رکھیں",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

@@ -75,6 +75,32 @@ enum SessionActionOutcome {
   unavailable,
 }
 
+/// The result of creating a session.
+final class SessionCreateResult {
+  const SessionCreateResult(this.outcome, [this.session]);
+
+  final SessionActionOutcome outcome;
+
+  /// The canonical reference of the created session, when the endpoint
+  /// returned its summary with the receipt.
+  final SessionRef? session;
+
+  bool get accepted => outcome == SessionActionOutcome.accepted;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionCreateResult &&
+          other.outcome == outcome &&
+          other.session == session;
+
+  @override
+  int get hashCode => Object.hash(outcome, session);
+
+  @override
+  String toString() => 'SessionCreateResult($outcome, $session)';
+}
+
 /// The actions the platform can perform on the loaded session rows.
 ///
 /// The ownership of a session is not consulted: it is evidence, not
@@ -102,7 +128,7 @@ abstract interface class SessionActionSource {
   /// The body carries the directory and, when the caller supplies one, the
   /// title. The identifier is the endpoint's, and the effect is observed by
   /// the authoritative read.
-  Future<SessionActionOutcome> create({
+  Future<SessionCreateResult> create({
     required String directory,
     String? title,
   });

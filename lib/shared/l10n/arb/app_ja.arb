@@ -1366,5 +1366,13 @@
   "chatNewChat": "新しいチャット",
   "chatNoServerYet": "サーバーがまだ設定されていません",
   "chatSetUpServer": "サーバーを設定",
-  "chatSelectOrCreate": "チャットを開始するには会話を選択するか作成してください"
+  "chatSelectOrCreate": "チャットを開始するには会話を選択するか作成してください",
+  "workspaceDraftUncertain": "会話の作成を確認できません。入力内容は保持されています。会話は既に存在する可能性があります。",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "試行を破棄して入力内容を保持",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

@@ -130,7 +130,15 @@ class _Router extends Fake implements GoRouter {
   _Router(this.events);
   final List<String> events;
   @override
-  void dispose() => events.add('router');
+  final routeInformationProvider = GoRouteInformationProvider(
+    initialLocation: '/',
+    initialExtra: null,
+  );
+  @override
+  void dispose() {
+    routeInformationProvider.dispose();
+    events.add('router');
+  }
 }
 
 class _Navigation extends AppNavigationController {

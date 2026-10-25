@@ -100,6 +100,13 @@ Future<(AppDependencies, V2Localizations)> _open(
     source.row('three', title: 'Three'),
   ]);
   await tester.pumpAndSettle();
+  if (unread) {
+    await tester.pump(const Duration(milliseconds: 300));
+    if (!source.tasks.last.completion.isCompleted) {
+      source.respond(dependencies.sessions!.sessions);
+      await tester.pumpAndSettle();
+    }
+  }
   if (list) await showSessionList(tester);
   return (dependencies, dependencies.localizations.current);
 }
@@ -372,12 +379,12 @@ void main() {
   });
 
   testWidgets('the new-session shortcut opens the create', (tester) async {
-    final (_, l10n) = await _open(tester, size: const Size(1280, 800));
+    final (_, _) = await _open(tester, size: const Size(1280, 800));
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
-    expect(find.text(l10n.sessionsCreateTitle), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -483,7 +490,7 @@ void main() {
     expect(find.text(l10n.chatSelectOrCreate), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('workspace-new-chat')));
     await tester.pumpAndSettle();
-    expect(find.text(l10n.sessionsCreateTitle), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

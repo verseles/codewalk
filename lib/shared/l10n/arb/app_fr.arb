@@ -1366,5 +1366,13 @@
   "chatNewChat": "Nouvelle discussion",
   "chatNoServerYet": "Aucun serveur configuré pour le moment",
   "chatSetUpServer": "Configurer le serveur",
-  "chatSelectOrCreate": "Sélectionnez ou créez une conversation pour commencer à discuter"
+  "chatSelectOrCreate": "Sélectionnez ou créez une conversation pour commencer à discuter",
+  "workspaceDraftUncertain": "La création de la conversation n’est pas confirmée. Votre texte est conservé ; la conversation existe peut-être déjà.",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "Abandonner la tentative et garder le texte",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

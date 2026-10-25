@@ -1591,4 +1591,11 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'Выберите или создайте беседу, чтобы начать общение';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'Создание беседы не подтверждено. Текст сохранён; беседа, возможно, уже существует.';
+
+  @override
+  String get workspaceDraftReset => 'Отменить попытку и сохранить текст';
 }

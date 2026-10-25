@@ -31,6 +31,35 @@ final class _ThrowingStore extends _Store {
   Future<String?> read(String key) async => throw StateError('io');
 }
 
+final class _IntentGateStore extends _Store {
+  _IntentGateStore(this.stage);
+  final String stage;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  bool held = false;
+
+  @override
+  Future<bool> contains(String key) async {
+    if (stage == 'read' && !held) {
+      held = true;
+      entered.complete();
+      await release.future;
+    }
+    return super.contains(key);
+  }
+
+  @override
+  Future<PayloadWriteResult> write(String key, String value) async {
+    final result = await super.write(key, value);
+    if (stage == 'write' && !held) {
+      held = true;
+      entered.complete();
+      await release.future;
+    }
+    return result;
+  }
+}
+
 /// The native admission for exactly what was sent.
 TransportResponse _admit(Map<String, Object?> body) => _json({
   'data': {
@@ -84,6 +113,81 @@ Map<String, Object?> _ledger(_Store store, [SessionRef session = _session]) =>
         as Map<String, Object?>;
 
 void main() {
+  test('navigation after the POST begins keeps its admission', () async {
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final transport = _Transport((body) async {
+      entered.complete();
+      await release.future;
+      return _admit(body);
+    });
+    var current = true;
+    final sending = _outbox(_Store(), transport).submit(
+      session: _session,
+      commandId: const CommandId('first'),
+      draft: PromptDraft(text: 'First prompt'),
+      delivery: Delivery.steer,
+      isCurrent: () => current,
+    );
+    await entered.future;
+    current = false;
+    release.complete();
+    final result = await sending;
+    expect(result.entry?.state, SubmissionKind.admitted);
+    expect(result.sent, isTrue);
+    expect(transport.bodies, hasLength(1));
+  });
+
+  for (final stage in ['read', 'write']) {
+    test('a cancelled initial intent after $stage never posts', () async {
+      final store = _IntentGateStore(stage);
+      final transport = _Transport(_admit);
+      final outbox = _outbox(store, transport);
+      var current = true;
+      final sending = outbox.submit(
+        session: _session,
+        commandId: const CommandId('first'),
+        draft: PromptDraft(text: 'First prompt'),
+        delivery: Delivery.steer,
+        isCurrent: () => current,
+      );
+      await store.entered.future;
+      current = false;
+      store.release.complete();
+      final result = await sending;
+      expect(transport.bodies, isEmpty);
+      expect(result.sent, isFalse);
+      expect(result.entry?.state, isNot(SubmissionKind.uncertain));
+    });
+  }
+
+  test(
+    'cancel before wire stays unsent if cancellation cleanup fails',
+    () async {
+      final store = _IntentGateStore('write');
+      final transport = _Transport(_admit);
+      final outbox = _outbox(store, transport);
+      var current = true;
+      final sending = outbox.submit(
+        session: _session,
+        commandId: const CommandId('first'),
+        draft: PromptDraft(text: 'First prompt'),
+        delivery: Delivery.steer,
+        isCurrent: () => current,
+      );
+      await store.entered.future;
+      current = false;
+      store.failWrite = true;
+      store.release.complete();
+      final result = await sending;
+      expect(transport.bodies, isEmpty);
+      expect(result.entry?.state, SubmissionKind.rejected);
+      store.failWrite = false;
+      await outbox.entries(_session);
+      expect(transport.bodies, isEmpty);
+    },
+  );
+
   test('the exact payload is durable before the POST', () async {
     final store = _Store();
     final transport = _Transport(_admit);

@@ -1366,5 +1366,13 @@
   "chatNewChat": "Новый чат",
   "chatNoServerYet": "Сервер еще не настроен",
   "chatSetUpServer": "Настроить сервер",
-  "chatSelectOrCreate": "Выберите или создайте беседу, чтобы начать общение"
+  "chatSelectOrCreate": "Выберите или создайте беседу, чтобы начать общение",
+  "workspaceDraftUncertain": "Создание беседы не подтверждено. Текст сохранён; беседа, возможно, уже существует.",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "Отменить попытку и сохранить текст",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

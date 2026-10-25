@@ -1598,4 +1598,11 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'Selecione ou crie uma conversa para começar';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'A criação da conversa não foi confirmada. Seu texto foi mantido; a conversa pode já existir.';
+
+  @override
+  String get workspaceDraftReset => 'Descartar tentativa e manter texto';
 }

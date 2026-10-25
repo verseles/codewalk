@@ -1571,4 +1571,11 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'চ্যাটিং শুরু করতে একটি কথোপকথন নির্বাচন করুন বা তৈরি করুন';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'কথোপকথন তৈরি নিশ্চিত হয়নি। আপনার লেখা রাখা হয়েছে; কথোপকথনটি ইতিমধ্যে থাকতে পারে।';
+
+  @override
+  String get workspaceDraftReset => 'চেষ্টা বাতিল করে লেখা রাখুন';
 }

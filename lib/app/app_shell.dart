@@ -5,14 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../features/sessions/session_create_dialog.dart';
 import '../features/sessions/session_tab_strip.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/sessions_page.dart';
+import '../features/sessions/workspace_draft_controller.dart';
+import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
-import '../shared/sessions/session_actions.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'workspace_controller.dart';
@@ -124,27 +124,19 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  /// Opens the create of the list, when the list offers it.
+  /// Opens the local draft without sending a session command.
   void _create(BuildContext context) {
     final controller = context.read<SessionsController?>();
     if (controller == null || !canCreate(controller)) return;
-    showCreate(context, controller);
+    openWorkspaceDraft(context);
   }
 
-  /// Whether the selected server takes a new session now.
+  /// Whether the workspace can open a local draft for the selected server.
   static bool canCreate(SessionsController controller) =>
       !controller.hosts.loading &&
       !controller.hosts.storageError &&
       controller.selectedProfile != null &&
-      !controller.creating &&
-      controller.createReason == SessionActionReason.none;
-
-  static void showCreate(BuildContext context, SessionsController controller) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => SessionCreateDialog(controller: controller),
-    );
-  }
+      !controller.creating;
 }
 
 /// The system back at the root of the workspace, as in the legacy client: it
@@ -196,6 +188,10 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final catalog = context.watch<SessionsController?>();
+    final drafts = context.watch<WorkspaceDraftController?>();
+    if (drafts != null && drafts.isDraftActive) {
+      return WorkspaceDraftPage(controller: drafts);
+    }
     if (catalog == null) {
       return _HomeState(
         icon: Icons.chat_bubble_outline,
@@ -244,6 +240,13 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
         title: profile.label,
         body: sessionCatalogFailureText(l10n, failure),
         actions: [
+          if (AppShell.canCreate(catalog))
+            FilledButton.icon(
+              key: const ValueKey('workspace-new-chat'),
+              onPressed: () => openWorkspaceDraft(context),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.chatNewChat),
+            ),
           FilledButton(
             key: const ValueKey('workspace-retry'),
             onPressed: catalog.loading ? null : catalog.refresh,
@@ -264,9 +267,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
       actions: [
         FilledButton.icon(
           key: const ValueKey('workspace-new-chat'),
-          onPressed: create
-              ? () => AppShell.showCreate(context, catalog)
-              : null,
+          onPressed: create ? () => openWorkspaceDraft(context) : null,
           icon: const Icon(Icons.add),
           label: Text(l10n.chatNewChat),
         ),

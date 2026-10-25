@@ -21,7 +21,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **When** saved servers and their credentials have loaded
 - **Then** it selects the server of the restored launch tab, else the last saved selection if it still exists, else the first saved server; one saved server needs no manual selection, and removing the active server selects another saved one
 - **Then** no saved server shows a stable setup action leading to Servers; an unreadable server store offers Servers, and a saved server whose catalog fails keeps its failure reason, Retry and Servers
-- **Then** a selected server with no open session shows the select-or-create chat state and New Chat when creation is available
+- **Then** a selected server with no open session shows the select-or-create chat state; New Chat opens its local draft without requiring verified endpoint commands
 - **Then** each server remembers its last explicitly chosen real project, restoring it once when the first successful catalog contains it; the placeholder root and a temporary fallback when the chosen project leaves the rows never overwrite that choice
 - **Then** rapid server or project choices save the last choice in order, and unreadable workspace state is kept untouched
 
@@ -35,7 +35,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** from 600 logical pixels the session opens beside the list; below that it takes the window and the list moves to a drawer, opened from the session's app bar
 - **Then** the system back at the chat workspace opens the drawer when it is closed; with the drawer already open, or in a wide window without a drawer, it asks the platform to leave the app and keeps the workspace route
 - **Then** an open session, its draft and its live connection stay through refreshes and filters of the list, a reload of the saved servers and a resize between compact and wide; choosing another server in the list closes it and shows that server's sessions
-- **Then** the new-session shortcut opens the create of the list when it is offered, and the settings shortcut opens settings over the current page
+- **Then** the new-session shortcut opens the local draft of the selected server and project, and the settings shortcut opens settings over the current page
 
 - **Given** the user opens conversations in this v2 app
 - **When** the corresponding route is displayed
@@ -128,16 +128,21 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 session creation
 
-- **Given** the v2 session catalog shows a saved server
-- **When** the user starts a new session
-- **Then** a dialog offers the projects the endpoint already reported, with the canonical directory always read left-to-right, and a free-form absolute path for a project the list has not shown
-- **Then** the free-form path is checked before anything is sent: it must be absolute and within the bound the client sends, and the confirm stays disabled while it is not
-- **Then** the request carries only that directory, the endpoint names the session, and the client never sends a model, an agent, the metadata, the permissions, a parent identifier or a directory header
-- **Then** the new session appears through the next authoritative read, with the endpoint's own record; the receipt never becomes a row
-- **Then** a create that the endpoint refused, or whose answer was lost, says so and is never sent again
-- **Then** a create that was not sent because the list was not the endpoint's current answer says that instead, and the list keeps no failure notice for a command that never left
-- **Then** the dialog sends only what it shows: a project the endpoint stopped reporting is not chosen any more, and the confirm waits for a path that is
-- **Then** the create is offered only while the list is the endpoint's current answer — not a previous result and not behind — and the endpoint's own commands are available, and the reason is shown when it is not
+- **Given** the workspace has a selected saved server
+- **When** the user starts New Chat from the workspace, drawer or shortcut
+- **Then** the drawer closes and a local draft opens immediately, including from an open conversation; opening it sends no create and acquires no session, live lease, outbox entry or persisted tab
+- **Then** the draft uses the selected project directory; without one, the user supplies an absolute directory before sending, and relative or overlong paths send nothing
+- **Then** drafts keep their own text per server, harness and directory, including edits still waiting to be saved; returning to a project or reopening New Chat restores its latest text, and unreadable local records stay untouched
+- **Then** catalog refreshes keep the draft visible; Settings and Back preserve its mode and text, while a different conversation leaves draft mode
+- **Then** an unverified endpoint still permits a local draft; sending stays disabled with its reason until creation is available
+- **When** the user sends the first message with verified command support, current credentials and a current catalog
+- **Then** one create is sent with the directory only, after a local attempt fence is saved; failure to save that fence sends nothing, and a second tap while sending does nothing
+- **Then** the returned canonical session identity must pass a direct read before navigation; a title, time or newest catalog row never substitutes for it, and the create receipt never becomes a catalog row
+- **Then** the captured message reaches that session once through the normal prompt outbox with the same local command identity; recorded admitted or uncertain input leaves the composer only if the user has not changed its text, and the workspace draft is consumed only after the outbox records it
+- **Then** changing server, project or navigation invalidates the pending intent through creation, direct read and local outbox persistence, preventing any later automatic navigation or initial prompt POST; its text remains in its own draft, and a hidden draft cannot send from Settings
+- **Then** once the prompt POST starts, navigation keeps its normal admission and reconciliation; reopening the workspace draft while its answer settles clears only the consumed text and preserves a later edit
+- **Then** an unfinished fenced attempt keeps its workspace text and requires an explicit discard before another create; after the operation ends, even a fence left creating by a failed status write offers the uncertainty notice and discard without a restart
+- **Then** creation and the bootstrap handoff are never replayed automatically, including after a restart; an uncertain recorded prompt keeps its text in the normal bounded outbox check under the existing verified same-command contract
 
 ### V2 live session catalog
 

@@ -1365,5 +1365,13 @@
   "chatNewChat": "دردشة جديدة",
   "chatNoServerYet": "لم يتم تكوين أي خادم بعد",
   "chatSetUpServer": "إعداد الخادم",
-  "chatSelectOrCreate": "حدد محادثة أو أنشئ واحدة لبدء الدردشة"
+  "chatSelectOrCreate": "حدد محادثة أو أنشئ واحدة لبدء الدردشة",
+  "workspaceDraftUncertain": "لم يتم تأكيد إنشاء المحادثة. تم الاحتفاظ بالنص؛ قد تكون المحادثة موجودة بالفعل.",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "تجاهل المحاولة والاحتفاظ بالنص",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

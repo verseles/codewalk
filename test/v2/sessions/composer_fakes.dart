@@ -13,6 +13,7 @@ final class FakeOutbox implements PromptOutbox {
   String? submitReason;
   String? submitRefusal;
   Completer<void>? holdSubmit;
+  Completer<void>? holdAfterRecord;
   Completer<void>? holdReconcile;
   Completer<void>? holdDismiss;
   OutboxEntry Function(OutboxEntry)? onReconcile;
@@ -34,9 +35,13 @@ final class FakeOutbox implements PromptOutbox {
     required CommandId commandId,
     required PromptDraft draft,
     required Delivery delivery,
+    bool Function()? isCurrent,
   }) async {
     calls.add('submit ${commandId.value} ${delivery.name} ${draft.text}');
     await holdSubmit?.future;
+    if (isCurrent?.call() == false) {
+      return const OutboxSubmission.refused('cancelledBeforeSend');
+    }
     if (submitRefusal case final refusal?) {
       return OutboxSubmission.refused(refusal);
     }
@@ -50,6 +55,7 @@ final class FakeOutbox implements PromptOutbox {
       reason: submitReason,
     );
     _put(entry);
+    await holdAfterRecord?.future;
     return OutboxSubmission.recorded(entry, sent: true);
   }
 

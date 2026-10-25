@@ -1941,5 +1941,13 @@
   "chatSelectOrCreate": "Select or create a conversation to start chatting",
   "@chatSelectOrCreate": {
     "description": "CodeWalk UI string — chatSelectOrCreate"
+  },
+  "workspaceDraftUncertain": "Session creation is unconfirmed. Your text was kept; a session may already exist.",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "Discard attempt and keep text",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
   }
 }

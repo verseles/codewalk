@@ -62,12 +62,19 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     required CommandId commandId,
     required PromptDraft draft,
     required Delivery delivery,
+    bool Function()? isCurrent,
   }) {
     final key = keyFor(session);
     return _queue.run(key, () async {
+      if (isCurrent?.call() == false) {
+        return const OutboxSubmission.refused('cancelledBeforeSend');
+      }
       final read = await _read(key, session);
       if (read == null) return const OutboxSubmission.refused('unreadable');
       final ledger = await _recover(key, session, read);
+      if (isCurrent?.call() == false) {
+        return const OutboxSubmission.refused('cancelledBeforeSend');
+      }
       for (final record in ledger.records) {
         if (record.commandId == commandId) {
           // A deliberate resend is a new command; this one is never reposted.
@@ -129,6 +136,17 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       );
       if (!await _persist(key, session, base.adding(record))) {
         return const OutboxSubmission.refused('notPersisted');
+      }
+      if (isCurrent?.call() == false) {
+        final cancelled = record.copyWith(
+          state: SubmissionKind.rejected,
+          reason: 'cancelledBeforeSend',
+          updatedAt: _now().toUtc(),
+        );
+        // Even when cleanup cannot be saved, report this attempt as unsent:
+        // the composer must not automatically reconcile it as a fresh send.
+        await _persist(key, session, base.adding(cancelled));
+        return OutboxSubmission.recorded(cancelled.entry, sent: false);
       }
       final attempt = await client.post(ready);
       final result = record.copyWith(

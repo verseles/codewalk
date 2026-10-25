@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
+import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
@@ -52,6 +53,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
     // and not yet written is written now.
     if (state != AppLifecycleState.resumed) {
       unawaited(widget.dependencies.sessionDrafts?.flush());
+      unawaited(widget.dependencies.workspaceDrafts?.flush());
     }
   }
 
@@ -95,6 +97,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ChangeNotifierProvider<SessionTabsController>.value(value: tabs),
         if (dependencies.workspace case final workspace?)
           ChangeNotifierProvider<WorkspaceController>.value(value: workspace),
+        if (dependencies.workspaceDrafts case final drafts?)
+          ChangeNotifierProvider<WorkspaceDraftController>.value(value: drafts),
         if (dependencies.diagnostics case final diagnostics?)
           ChangeNotifierProvider<DiagnosticsController>.value(
             value: diagnostics,

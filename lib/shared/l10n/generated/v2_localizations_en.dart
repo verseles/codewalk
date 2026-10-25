@@ -1578,4 +1578,11 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'Select or create a conversation to start chatting';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'Session creation is unconfirmed. Your text was kept; a session may already exist.';
+
+  @override
+  String get workspaceDraftReset => 'Discard attempt and keep text';
 }

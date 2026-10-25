@@ -1366,5 +1366,13 @@
   "chatNewChat": "नई चैट",
   "chatNoServerYet": "अभी तक कोई सर्वर कॉन्फ़िगर नहीं किया गया है",
   "chatSetUpServer": "सर्वर सेट अप करें",
-  "chatSelectOrCreate": "चैटिंग शुरू करने के लिए एक बातचीत चुनें या बनाएं"
+  "chatSelectOrCreate": "चैटिंग शुरू करने के लिए एक बातचीत चुनें या बनाएं",
+  "workspaceDraftUncertain": "बातचीत बनने की पुष्टि नहीं हुई। आपका पाठ रखा गया है; बातचीत पहले से मौजूद हो सकती है।",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "प्रयास छोड़ें और पाठ रखें",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

@@ -1500,4 +1500,11 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get chatSelectOrCreate => 'チャットを開始するには会話を選択するか作成してください';
+
+  @override
+  String get workspaceDraftUncertain =>
+      '会話の作成を確認できません。入力内容は保持されています。会話は既に存在する可能性があります。';
+
+  @override
+  String get workspaceDraftReset => '試行を破棄して入力内容を保持';
 }

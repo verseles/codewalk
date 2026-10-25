@@ -1579,4 +1579,11 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'चैटिंग शुरू करने के लिए एक बातचीत चुनें या बनाएं';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'बातचीत बनने की पुष्टि नहीं हुई। आपका पाठ रखा गया है; बातचीत पहले से मौजूद हो सकती है।';
+
+  @override
+  String get workspaceDraftReset => 'प्रयास छोड़ें और पाठ रखें';
 }

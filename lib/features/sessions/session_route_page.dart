@@ -15,6 +15,8 @@ import 'session_live_page.dart';
 import 'session_tab_strip.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
+import 'workspace_draft_controller.dart';
+import 'workspace_first_prompt.dart';
 
 /// The open session of the workspace, named by `/s/<server>/<session>`.
 ///
@@ -212,12 +214,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     if (page is! SessionLivePage) _live = null;
     final tabs = context.read<SessionTabsController?>();
     final live = _live;
-    if (tabs == null || live == null || page is! SessionLivePage) return page;
+    if (live == null || page is! SessionLivePage) return page;
+    final delivery = _withFirstPrompt(context, live, page);
+    if (tabs == null) return delivery;
     return SessionTabsFrame(
       tabs: tabs,
       current: _ref,
       project: live.summary.info.project,
-      child: page,
+      child: delivery,
     );
   }
 
@@ -323,7 +327,12 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     if (_read == _Read.notFound) {
       return _Notice(message: l10n.sessionLinkNotFound, leading: leading);
     }
-    final summary = _summary ??= row;
+    final summary = _summary ??=
+        context
+            .read<WorkspaceDraftController?>()
+            ?.firstPromptFor(ref)
+            ?.summary ??
+        row;
     if (summary != null) {
       SessionLiveController create() => SessionLiveController(
         hosts: hosts,
@@ -387,6 +396,22 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       ),
       _Read.idle || _Read.reading => _Notice(leading: leading),
     };
+  }
+
+  Widget _withFirstPrompt(
+    BuildContext context,
+    SessionLiveController live,
+    Widget page,
+  ) {
+    final workspace = context.read<WorkspaceDraftController?>();
+    return workspace == null
+        ? page
+        : WorkspaceFirstPromptDelivery(
+            key: ObjectKey(live),
+            workspace: workspace,
+            live: live,
+            child: page,
+          );
   }
 
   EditablePermissionModePolicy? _permissionPolicy(BuildContext context) {

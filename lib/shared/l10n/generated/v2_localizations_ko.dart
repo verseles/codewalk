@@ -1500,4 +1500,11 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get chatSelectOrCreate => '대화를 시작하려면 대화를 선택하거나 새로 만드세요';
+
+  @override
+  String get workspaceDraftUncertain =>
+      '대화 생성이 확인되지 않았습니다. 입력한 내용은 유지되며 대화가 이미 존재할 수 있습니다.';
+
+  @override
+  String get workspaceDraftReset => '시도를 취소하고 입력 유지';
 }

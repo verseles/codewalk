@@ -1575,4 +1575,11 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get chatSelectOrCreate =>
       'چیٹنگ شروع کرنے کے لیے ایک گفتگو کو منتخب کریں یا تخلیق کریں۔';
+
+  @override
+  String get workspaceDraftUncertain =>
+      'گفتگو بننے کی تصدیق نہیں ہوئی۔ آپ کا متن محفوظ ہے؛ گفتگو پہلے سے موجود ہو سکتی ہے۔';
+
+  @override
+  String get workspaceDraftReset => 'کوشش ترک کریں اور متن رکھیں';
 }

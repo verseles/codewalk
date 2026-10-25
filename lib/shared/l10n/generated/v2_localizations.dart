@@ -2978,6 +2978,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Select or create a conversation to start chatting'**
   String get chatSelectOrCreate;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Session creation is unconfirmed. Your text was kept; a session may already exist.'**
+  String get workspaceDraftUncertain;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Discard attempt and keep text'**
+  String get workspaceDraftReset;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

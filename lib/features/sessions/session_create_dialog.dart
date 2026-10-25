@@ -107,15 +107,15 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
       _unavailable = false;
       _submitting = true;
     });
-    final outcome = await widget.controller.create(directory: directory);
+    final result = await widget.controller.create(directory: directory);
     if (!mounted) return;
     setState(() => _submitting = false);
-    if (outcome == SessionActionOutcome.accepted ||
-        outcome == SessionActionOutcome.uncertain) {
+    if (result.outcome == SessionActionOutcome.accepted ||
+        result.outcome == SessionActionOutcome.uncertain) {
       Navigator.of(context).pop();
       return;
     }
-    if (outcome == SessionActionOutcome.unavailable &&
+    if (result.outcome == SessionActionOutcome.unavailable &&
         widget.controller.reconciling) {
       // The create was never sent: a pending re-read may have outdated the
       // list, so the user retries instead of believing that a command failed.

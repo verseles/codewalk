@@ -1,8 +1,12 @@
+import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_actions_menu.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/platform/sessions/session_action_source_io.dart';
+import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
@@ -12,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../hosts/fakes.dart';
+import '../storage/storage_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
 import 'workspace_support.dart';
@@ -19,8 +24,11 @@ import 'workspace_support.dart';
 void main() {
   late FakeActionSource actions;
   late LiveDirectory live;
+  late AppDependencies app;
 
-  Future<(CatalogSource source, V2Localizations l10n, SessionsController controller)>
+  Future<
+    (CatalogSource source, V2Localizations l10n, SessionsController controller)
+  >
   open(
     WidgetTester tester, {
     List<SessionSummary> Function(CatalogSource source)? rows,
@@ -34,7 +42,14 @@ void main() {
     final rig = CatalogRig();
     await rig.save('a');
     live = LiveDirectory();
-    final dependencies = createAppDependencies(
+    final metadata = V2MetadataStore(backend: FakeMetadataBackend());
+    final dependencies = app = createAppDependencies(
+      metadataStore: metadata,
+      sessionClock: () => tester.binding.clock.now(),
+      workspaceDraftStore: WorkspaceDraftStore(
+        payloads: PreferencesPayloadStore(metadata),
+        index: metadata,
+      ),
       initialLink: Uri(path: '/sessions'),
       profileRepository: rig.repository,
       endpointProber: FakeProber(),
@@ -57,7 +72,9 @@ void main() {
     expect(find.byKey(const ValueKey('sessions-filter')), findsOneWidget);
     expect(find.text('First'), findsOneWidget);
     await tester.tap(
-      find.byKey(ValueKey('session-actions-${source.row('first').info.ref.storageKey}')),
+      find.byKey(
+        ValueKey('session-actions-${source.row('first').info.ref.storageKey}'),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text(l10n.sessionsActionRename), findsOneWidget);
@@ -69,21 +86,21 @@ void main() {
   testWidgets('the mark as viewed entry needs an unread row', (tester) async {
     final (source, l10n, _) = await open(tester);
     await tester.tap(
-      find.byKey(ValueKey('session-actions-${source.row('first').info.ref.storageKey}')),
+      find.byKey(
+        ValueKey('session-actions-${source.row('first').info.ref.storageKey}'),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text(l10n.sessionsActionMarkViewed), findsNothing);
   });
 
   testWidgets('the unread mark follows the endpoint epochs', (tester) async {
-    final (source, l10n, _) = await open(
-      tester,
-      viewStates: {},
-    );
+    final (source, l10n, _) = await open(tester, viewStates: {});
     final key = source.row('first').info.ref.storageKey;
     // The endpoint's marker arrives with the row: the catch-up read that
     // follows the feed's opening returns it.
     actions.viewStates[key] = SessionViewState.unread;
+    await tester.pump(const Duration(milliseconds: 300));
     expect(source.tasks, hasLength(2));
     source.respond([source.row('first', title: 'First')]);
     await tester.pumpAndSettle();
@@ -160,33 +177,28 @@ void main() {
     expect(find.text(l10n.sessionsActionRename), findsOneWidget);
   });
 
-  test('the action source observes the version with the profile probe', () async {
-    final prober = FakeProber();
-    final source = createSessionActionSource(
-      profile('a'),
-      EndpointCredential(
-        kind: EndpointAuthKind.password,
-        secret: 'secret',
-      ),
-      prober,
-    );
-    // The probe observed 2.0.22, so the endpoint's own commands are
-    // available.
-    expect((await source.support()).available, isTrue);
-    source.close();
-  });
+  test(
+    'the action source observes the version with the profile probe',
+    () async {
+      final prober = FakeProber();
+      final source = createSessionActionSource(
+        profile('a'),
+        EndpointCredential(kind: EndpointAuthKind.password, secret: 'secret'),
+        prober,
+      );
+      // The probe observed 2.0.22, so the endpoint's own commands are
+      // available.
+      expect((await source.support()).available, isTrue);
+      source.close();
+    },
+  );
 
   test('a transient probe failure is observed again', () async {
     final prober = FakeProber()
-      ..assessment = const EndpointAssessment(
-        EndpointStatus.unreachable,
-      );
+      ..assessment = const EndpointAssessment(EndpointStatus.unreachable);
     final source = createSessionActionSource(
       profile('a'),
-      EndpointCredential(
-        kind: EndpointAuthKind.password,
-        secret: 'secret',
-      ),
+      EndpointCredential(kind: EndpointAuthKind.password, secret: 'secret'),
       prober,
     );
     expect((await source.support()).available, isFalse);
@@ -230,278 +242,273 @@ void main() {
     expect(find.textContaining('3'), findsWidgets);
   });
 
-  testWidgets('the create sends the chosen project directory', (tester) async {
-    final (source, l10n, _) = await open(
+  Future<void> startDraft(
+    WidgetTester tester,
+    CatalogSource source, {
+    String? directory,
+  }) async {
+    // The debounce can outlive pumpAndSettle when no frame is scheduled.
+    await tester.pump(const Duration(milliseconds: 300));
+    // Finish the feed's initial authoritative catch-up before a send intent.
+    if (!source.tasks.last.completion.isCompleted) {
+      source.respond(app.sessions!.sessions);
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
+    expect(actions.calls.where((call) => call == 'create'), isEmpty);
+    if (directory != null) {
+      await tester.enterText(
+        find.byKey(const ValueKey('workspace-draft-directory')),
+        directory,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('workspace-draft-project-confirm')),
+      );
+      await tester.pumpAndSettle();
+    }
+    await tester.enterText(
+      find.byKey(const ValueKey('workspace-draft-text')),
+      'First prompt',
+    );
+    await tester.pump();
+  }
+
+  Future<void> sendDraft(WidgetTester tester) async {
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('workspace-draft-send')),
+          )
+          .onPressed,
+      isNotNull,
+      reason:
+          'loading=${app.workspaceDrafts!.loading} draft=${app.workspaceDrafts!.status} reason=${app.sessions!.createReason} pending=${app.sessions!.reconciling} quiet=${app.sessions!.quietRefreshing}',
+    );
+    await tester.tap(find.byKey(const ValueKey('workspace-draft-send')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('first send creates in the chosen project directory', (
+    tester,
+  ) async {
+    final (source, _, _) = await open(
       tester,
       rows: (source) => [
         source.row('first', title: 'First', directory: '/work/alpha'),
       ],
     );
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    expect(find.text(l10n.sessionsCreateTitle), findsOneWidget);
-    // The path is on the group's header and on the choice.
-    expect(find.text('/work/alpha'), findsWidgets);
-    await tester.tap(
-      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pumpAndSettle();
-    expect(actions.calls, contains('create'));
+    await startDraft(tester, source);
+    await sendDraft(tester);
     expect(actions.created, ['/work/alpha']);
   });
 
-  testWidgets('the create sends a free-form directory', (tester) async {
-    final (source, l10n, _) = await open(
-      tester,
-      rows: (source) => [
-        source.row('first', title: 'First', directory: '/work/alpha'),
-      ],
-    );
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/other',
-    );
-    await tester.pump();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pumpAndSettle();
+  testWidgets('first send creates in an explicit free-form directory', (
+    tester,
+  ) async {
+    final (source, _, _) = await open(tester);
+    await startDraft(tester, source, directory: '/work/other');
+    await sendDraft(tester);
     expect(actions.created, ['/work/other']);
   });
 
-  testWidgets('a refused create says so', (tester) async {
-    final (source, l10n, controller) = await open(
-      tester,
-      rows: (source) => [
-        source.row('first', title: 'First', directory: '/work/alpha'),
-      ],
-    );
-    actions.outcomes['create'] = SessionActionOutcome.rejected;
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pumpAndSettle();
-    // The refused create is reported by the list and by the dialog.
-    expect(controller.actionFailure, SessionActionOutcome.rejected);
-    expect(find.byKey(const ValueKey('sessions-create-failed')), findsOneWidget);
-  });
-
-  testWidgets('the create is disabled with its reason when it is not offered', (
+  testWidgets('a refused create keeps the draft and reports failure', (
     tester,
   ) async {
-    final (_, l10n, _) = await open(
+    final (source, _, controller) = await open(tester);
+    actions.outcomes['create'] = SessionActionOutcome.rejected;
+    await startDraft(tester, source, directory: '/work/other');
+    await sendDraft(tester);
+    expect(controller.actionFailure, SessionActionOutcome.rejected);
+    expect(
+      find.byKey(const ValueKey('workspace-draft-notice')),
+      findsOneWidget,
+    );
+    expect(app.workspaceDrafts!.draft.text, 'First prompt');
+    expect(app.workspaceDrafts!.status, WorkspaceDraftStatus.failed);
+  });
+
+  testWidgets('an unverified endpoint still permits a local draft', (
+    tester,
+  ) async {
+    final (source, l10n, _) = await open(
       tester,
       support: const SessionActionSupport(
         SessionActionReason.versionUnverified,
       ),
     );
-    final button = tester.widget<IconButton>(
-      find.byKey(const ValueKey('sessions-create')),
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const ValueKey('sessions-create')))
+          .onPressed,
+      isNotNull,
     );
-    expect(button.onPressed, isNull);
+    await startDraft(tester, source, directory: '/work/other');
+    expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('workspace-draft-send')),
+          )
+          .onPressed,
+      isNull,
+    );
     expect(find.text(l10n.sessionsActionUnavailableVersion), findsWidgets);
+    expect(actions.calls.where((call) => call == 'create'), isEmpty);
   });
 
-  testWidgets('a relative path is refused before anything is sent', (
-    tester,
-  ) async {
-    final (_, _, _) = await open(tester);
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      'work/other',
-    );
-    await tester.pump();
-    expect(find.byKey(const ValueKey('sessions-create-invalid')), findsOneWidget);
-    // The confirm stays disabled while the path is not usable.
-    final confirm = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('sessions-create-confirm')),
-    );
-    expect(confirm.onPressed, isNull);
-    expect(actions.calls, isNot(contains('create')));
-  });
+  for (final path in ['work/other', '/work/${'x' * 5000}']) {
+    testWidgets('invalid directory is refused before sending: ${path.length}', (
+      tester,
+    ) async {
+      final (source, _, _) = await open(tester);
+      await startDraft(tester, source, directory: path);
+      expect(app.workspaceDrafts!.needsDirectory, isTrue);
+      expect(
+        tester
+            .widget<TextField>(
+              find.byKey(const ValueKey('workspace-draft-directory')),
+            )
+            .decoration!
+            .errorText,
+        isNotNull,
+      );
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byKey(const ValueKey('workspace-draft-send')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(actions.calls, isNot(contains('create')));
+    });
+  }
 
-  testWidgets('a path over the bound is refused before anything is sent', (
-    tester,
-  ) async {
-    final (_, _, _) = await open(tester);
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/${'x' * 5000}',
-    );
+  testWidgets('send stays disabled while create is in flight', (tester) async {
+    final (source, _, _) = await open(tester);
+    actions.createDelay = const Duration(seconds: 2);
+    await startDraft(tester, source, directory: '/work/other');
+    await tester.tap(find.byKey(const ValueKey('workspace-draft-send')));
     await tester.pump();
-    expect(find.byKey(const ValueKey('sessions-create-invalid')), findsOneWidget);
-    final confirm = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('sessions-create-confirm')),
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('workspace-draft-send')),
+          )
+          .onPressed,
+      isNull,
     );
-    expect(confirm.onPressed, isNull);
-    expect(actions.calls, isNot(contains('create')));
-  });
-
-  testWidgets('the confirm is disabled while the create is in flight', (
-    tester,
-  ) async {
-    final (source, l10n, _) = await open(tester);
-    actions.createDelay = const Duration(milliseconds: 200);
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
+    await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/other',
-    );
-    await tester.pump();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pump();
-    final confirm = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('sessions-create-confirm')),
-    );
-    expect(confirm.onPressed, isNull);
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pumpAndSettle();
-    // A second tap never sent a second create.
     expect(actions.created, ['/work/other']);
   });
 
-  testWidgets('a create whose answer was lost says the list is working', (
-    tester,
-  ) async {
-    final (source, l10n, _) = await open(tester);
-    actions.outcomes['create'] = SessionActionOutcome.uncertain;
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/other',
-    );
-    await tester.pump();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pumpAndSettle();
-    // The dialog closes and the list waits for the authoritative read.
-    expect(find.byKey(const ValueKey('sessions-create-confirm')), findsNothing);
-    expect(find.text(l10n.sessionsActionPending), findsWidgets);
-  });
+  testWidgets(
+    'a lost create answer retains text and forbids automatic replay',
+    (tester) async {
+      final (source, _, _) = await open(tester);
+      actions.outcomes['create'] = SessionActionOutcome.uncertain;
+      await startDraft(tester, source, directory: '/work/other');
+      await sendDraft(tester);
+      expect(app.workspaceDrafts!.status, WorkspaceDraftStatus.uncertain);
+      expect(app.workspaceDrafts!.draft.text, 'First prompt');
+      expect(
+        find.byKey(const ValueKey('workspace-draft-reset')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byKey(const ValueKey('workspace-draft-send')),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(actions.created, ['/work/other']);
+    },
+  );
 
-  testWidgets('the created session arrives through the authoritative read', (
-    tester,
-  ) async {
-    final (source, l10n, _) = await open(
+  testWidgets('the receipt never becomes a catalog row', (tester) async {
+    final (source, _, controller) = await open(
       tester,
       rows: (source) => [
         source.row('first', title: 'First', directory: '/work/alpha'),
       ],
     );
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pump();
-    // The receipt never becomes a row.
-    expect(find.text('Second'), findsNothing);
-    // The endpoint's own record arrives with the next authoritative read.
+    await startDraft(tester, source);
+    await sendDraft(tester);
+    expect(controller.sessions.map((row) => row.info.title), ['First']);
+    // The catalog changes only when the endpoint's authoritative read answers.
     await tester.pump(const Duration(milliseconds: 400));
-    await tester.pump();
-    expect(source.tasks.length, 2);
+    expect(source.tasks.last.completion.isCompleted, isFalse);
     source.respond([
       source.row('first', title: 'First', directory: '/work/alpha'),
       source.row('second', title: 'Second', directory: '/work/alpha'),
     ]);
     await tester.pumpAndSettle();
-    expect(find.text('Second'), findsOneWidget);
+    expect(controller.sessions.map((row) => row.info.title), [
+      'First',
+      'Second',
+    ]);
   });
 
-  testWidgets('the create never dispatches a project the list dropped', (
+  testWidgets('background rows never replace the chosen draft context', (
     tester,
   ) async {
-    final (source, l10n, controller) = await open(
+    final (source, _, controller) = await open(
       tester,
-      rows: (source) => [
-        source.row('first', title: 'First', directory: '/work/alpha'),
-      ],
+      rows: (source) => [source.row('first', directory: '/work/alpha')],
     );
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
-    );
-    await tester.pumpAndSettle();
-    // The endpoint stops reporting the project.
+    await startDraft(tester, source);
     final refresh = controller.refresh();
     await tester.pump();
-    source.respond([source.row('first', title: 'First')]);
+    source.respond([source.row('first')]);
     await refresh;
     await tester.pumpAndSettle();
-    // The dialog shows no selected project, so it sends nothing.
-    expect(
-      find.byKey(const ValueKey('sessions-create-project-/work/alpha')),
-      findsNothing,
-    );
-    final confirm = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('sessions-create-confirm')),
-    );
-    expect(confirm.onPressed, isNull);
+    expect(app.workspaceDrafts!.currentKey!.canonicalDirectory, '/work/alpha');
+    expect(app.workspaceDrafts!.draft.text, 'First prompt');
+    expect(actions.calls, isNot(contains('create')));
   });
 
-  testWidgets('a create refused because the list is not current says so', (
-    tester,
-  ) async {
-    final (source, l10n, controller) = await open(tester);
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/other',
-    );
-    await tester.pump();
-    // The list becomes the previous result, so nothing is sent.
+  testWidgets('a stale catalog blocks the draft send', (tester) async {
+    final (source, _, controller) = await open(tester);
+    await startDraft(tester, source, directory: '/work/other');
     final refresh = controller.refresh();
     await tester.pump();
     source.fail(SessionCatalogFailure.connection);
     await refresh;
     await tester.pumpAndSettle();
-    final confirm = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('sessions-create-confirm')),
-    );
-    expect(confirm.onPressed, isNull);
-    expect(actions.calls, isNot(contains('create')));
     expect(
-      find.byKey(const ValueKey('sessions-create-unavailable')),
-      findsOneWidget,
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('workspace-draft-send')),
+          )
+          .onPressed,
+      isNull,
     );
+    expect(actions.calls, isNot(contains('create')));
   });
 
-  testWidgets('a create refused while a re-read pends says the list is not current', (
+  testWidgets('a pending authoritative re-read blocks draft send', (
     tester,
   ) async {
-    final (source, l10n, controller) = await open(tester);
-    await tester.tap(find.byKey(const ValueKey('sessions-create')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('sessions-create-directory')),
-      '/work/other',
-    );
-    await tester.pump();
-    // A live change arms the re-read, and the dispatch refuses the create.
+    final (source, _, _) = await open(tester);
+    await startDraft(tester, source, directory: '/work/other');
     live.feeds.last.emit(const SessionCatalogChanged());
     await tester.pump();
-    await tester.tap(find.text(l10n.sessionsCreateConfirm));
-    await tester.pumpAndSettle();
-    expect(actions.calls, isNot(contains('create')));
+    await tester.pump(const Duration(seconds: 2));
+    expect(source.tasks.last.completion.isCompleted, isFalse);
     expect(
-      find.byKey(const ValueKey('sessions-create-unavailable')),
-      findsOneWidget,
+      tester
+          .widget<IconButton>(
+            find.byKey(const ValueKey('workspace-draft-send')),
+          )
+          .onPressed,
+      isNull,
     );
+    expect(actions.calls, isNot(contains('create')));
   });
 
   testWidgets('the local hide hides the row', (tester) async {

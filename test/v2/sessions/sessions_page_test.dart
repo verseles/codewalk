@@ -379,7 +379,9 @@ void main() {
     source.respond([fresh()]);
     await tester.pumpAndSettle();
     // The stream connected while the first read was open, so the list reads
-    // once more to cover that gap.
+    // once more to cover that gap. pumpAndSettle does not drain a debounce
+    // that has no frame scheduled.
+    await tester.pump(const Duration(milliseconds: 300));
     expect(source.tasks, hasLength(2));
     source.respond([fresh()]);
     await tester.pumpAndSettle();

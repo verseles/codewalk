@@ -1472,4 +1472,10 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get chatSelectOrCreate => '选择或创建一个会话以开始聊天';
+
+  @override
+  String get workspaceDraftUncertain => '无法确认会话是否已创建。输入内容已保留；会话可能已存在。';
+
+  @override
+  String get workspaceDraftReset => '放弃本次尝试并保留输入';
 }

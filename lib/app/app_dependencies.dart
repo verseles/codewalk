@@ -6,6 +6,7 @@ import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
+import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
@@ -44,7 +45,17 @@ class AppDependencies {
     this.sessionTabs,
     this.workspace,
     this.sessionDrafts,
-  });
+    this.workspaceDrafts,
+  }) {
+    router.routeInformationProvider.addListener(_routeChanged);
+    _routeChanged();
+  }
+
+  void _routeChanged() => workspaceDrafts?.locationChanged(
+    router.routeInformationProvider.value.uri.path,
+  );
+
+  final WorkspaceDraftController? workspaceDrafts;
 
   final AppPreferencesController preferences;
   final AppNavigationController navigation;
@@ -94,6 +105,8 @@ class AppDependencies {
     // No wake may reach a directory that is closing.
     liveWake?.dispose();
     links?.dispose();
+    router.routeInformationProvider.removeListener(_routeChanged);
+    workspaceDrafts?.dispose();
     router.dispose();
     pairing?.dispose();
     navigation.dispose();

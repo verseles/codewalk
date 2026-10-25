@@ -8,6 +8,7 @@ import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
+import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/connectivity/network_changes.dart';
@@ -26,6 +27,7 @@ import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
 import '../platform/sessions/session_tabs_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
+import '../platform/sessions/workspace_draft_store.dart';
 import '../platform/sessions/workspace_store.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
@@ -68,6 +70,7 @@ AppDependencies createAppDependencies({
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
   WorkspaceStore? workspaceStore,
+  WorkspaceDraftStore? workspaceDraftStore,
   Stream<Object?>? networkChanges,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -202,6 +205,12 @@ AppDependencies createAppDependencies({
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
     workspace: workspace,
+    workspaceDrafts: WorkspaceDraftController(
+      catalog: locator<SessionsController>(),
+      store:
+          workspaceDraftStore ??
+          WorkspaceDraftStore(payloads: payloads, index: metadata),
+    ),
     sessionDrafts:
         draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
     unrestrictedOwnership: unrestrictedOwnership,

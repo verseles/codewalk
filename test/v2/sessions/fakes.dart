@@ -274,8 +274,11 @@ final class FakeActionSource implements SessionActionSource {
   /// The titles the created sessions carried.
   final createdTitles = <String?>[];
 
+  /// The created session reference to return, if any.
+  SessionRef? createdSessionRef;
+
   @override
-  Future<SessionActionOutcome> create({
+  Future<SessionCreateResult> create({
     required String directory,
     String? title,
   }) async {
@@ -285,7 +288,8 @@ final class FakeActionSource implements SessionActionSource {
     if (createDelay > Duration.zero) {
       await Future<void>.delayed(createDelay);
     }
-    return outcomes['create'] ?? SessionActionOutcome.accepted;
+    final outcome = outcomes['create'] ?? SessionActionOutcome.accepted;
+    return SessionCreateResult(outcome, createdSessionRef);
   }
 
   @override

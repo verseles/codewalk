@@ -78,11 +78,15 @@ final class OutboxMutation {
 /// Records each prompt before sending it and keeps the outcome. Only
 /// [reconcile] ever sends a prompt again, under its original id.
 abstract interface class PromptOutbox {
+  /// An optional transient intent is checked again after local persistence,
+  /// before the initial POST. Once that request starts, normal reconciliation
+  /// still owns its result.
   Future<OutboxSubmission> submit({
     required SessionRef session,
     required CommandId commandId,
     required PromptDraft draft,
     required Delivery delivery,
+    bool Function()? isCurrent,
   });
 
   /// Entries of [session], oldest first, without network access.

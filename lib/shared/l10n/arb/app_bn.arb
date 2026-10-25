@@ -1366,5 +1366,13 @@
   "chatNewChat": "নতুন চ্যাট",
   "chatNoServerYet": "কোন সার্ভার এখনো কনফিগার করা হয়নি",
   "chatSetUpServer": "সার্ভার সেট আপ করুন",
-  "chatSelectOrCreate": "চ্যাটিং শুরু করতে একটি কথোপকথন নির্বাচন করুন বা তৈরি করুন"
+  "chatSelectOrCreate": "চ্যাটিং শুরু করতে একটি কথোপকথন নির্বাচন করুন বা তৈরি করুন",
+  "workspaceDraftUncertain": "কথোপকথন তৈরি নিশ্চিত হয়নি। আপনার লেখা রাখা হয়েছে; কথোপকথনটি ইতিমধ্যে থাকতে পারে।",
+  "@workspaceDraftUncertain": {
+    "description": "V2 chat-first workspace"
+  },
+  "workspaceDraftReset": "চেষ্টা বাতিল করে লেখা রাখুন",
+  "@workspaceDraftReset": {
+    "description": "V2 chat-first workspace"
+  }
 }

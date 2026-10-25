@@ -87,8 +87,8 @@ class SessionLiveController extends ChangeNotifier {
     if (drafts == null) return;
     final text = await drafts.read(session);
     _draftRead = true;
-    if (_disposed || _draftEdited) return;
-    if (text != null && draft.text.isEmpty) {
+    if (_disposed) return;
+    if (!_draftEdited && text != null && draft.text.isEmpty) {
       _applyingDraft = true;
       draft.value = TextEditingValue(
         text: text,
@@ -96,6 +96,7 @@ class SessionLiveController extends ChangeNotifier {
       );
       _applyingDraft = false;
     }
+    _notify();
   }
 
   void _draftChanged() {
