@@ -5,6 +5,7 @@ import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/sessions/workspace_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/sessions/session_activity.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,9 +28,11 @@ SessionSummary _at(SessionSummary row, double hours) => SessionSummary(
 );
 
 final class _Rig {
-  _Rig() {
+  _Rig({MetadataBackend? tabsBackend}) {
     tabs = SessionTabsController(
-      store: SessionTabsStore(store: V2MetadataStore(backend: backend)),
+      store: SessionTabsStore(
+        store: V2MetadataStore(backend: tabsBackend ?? backend),
+      ),
       catalog: catalog.sessions,
       workspace: projects,
       now: () => clock,
@@ -70,7 +73,7 @@ final class _Rig {
     await tabs.initialize();
     await contexts.initialize();
     final read = catalog.sessions.selectProfile('profile_a');
-    source.activityAnswer = const SessionActivity(running: {});
+    source.activityAnswer = const SessionActivity(running: {}, waiting: {});
     source.respond(rows(source));
     await read;
     await settle();
@@ -105,6 +108,28 @@ final class _Rig {
   }
 }
 
+/// Fails the first three tab writes, then allows progress so a regression
+/// cannot trap the test in an unbounded microtask retry loop.
+final class _FailingTabsBackend implements MetadataBackend {
+  final delegate = FakeMetadataBackend();
+  bool fail = false;
+  int attempts = 0;
+
+  @override
+  Future<Object?> read(String key) => delegate.read(key);
+
+  @override
+  Future<void> write(String key, Object value) async {
+    if (key == SessionTabsStore.key && fail && ++attempts <= 3) {
+      throw StateError('tab write failed');
+    }
+    await delegate.write(key, value);
+  }
+
+  @override
+  Future<void> remove(String key) => delegate.remove(key);
+}
+
 void main() {
   late _Rig rig;
   setUp(() => rig = _Rig());
@@ -122,6 +147,70 @@ void main() {
     expect(rig.ids, ['recent']);
     // Nothing was opened, so no tab is selected and nothing navigated.
     expect(rig.tabs.selectedFor(const HostId('profile_a')), isNull);
+  });
+
+  test('a failed automatic tab write waits for external input', () async {
+    rig.dispose();
+    final backend = _FailingTabsBackend();
+    rig = _Rig(tabsBackend: backend);
+    await rig.open((source) => [_at(source.row('s', directory: '/p'), 1)]);
+    backend.fail = true;
+    rig.clock = _noon.add(const Duration(hours: 4));
+    // One input after the catalog settles triggers expiry. Subsequent
+    // failure notifications must not cause additional write attempts.
+    rig.tabs.requestFallback('profile_a', '/not-loaded');
+    await settle();
+    expect(backend.attempts, 1);
+    expect(rig.tabs.hasPersistenceError, isTrue);
+    expect(rig.ids, ['s']);
+  });
+
+  test('a cached project cannot resurrect an authoritative deletion', () async {
+    await rig.open((source) => [_at(source.row('p', directory: '/p'), 1)]);
+    final q = _at(rig.source.row('q', directory: '/q'), 1.5);
+    await rig.tabs.open(q);
+    await rig.reread([_at(rig.source.row('p', directory: '/p'), 1)]);
+    final ref = q.info.ref;
+    final read = rig.source.reads.firstWhere((entry) => entry.$1 == ref).$2;
+    // The direct read began before this context had a snapshot. A later
+    // snapshot must not override its subsequent authoritative not-found.
+    expect(await rig.contexts.openContext('/q'), isTrue);
+    await settle();
+    for (final (i, task) in rig.source.tasks.indexed) {
+      if (!task.completion.isCompleted &&
+          rig.source.queries[i].project?.canonicalDirectory == '/q') {
+        task.completion.complete(Page(items: [q]));
+      }
+    }
+    await settle();
+    expect(await rig.contexts.activate('/p'), isTrue);
+    await settle();
+    expect(rig.catalog.sessions.contextRows('/q'), isNotEmpty);
+    read.completion.completeError(
+      const SessionCatalogException(SessionCatalogFailure.notFound),
+    );
+    await settle();
+    expect(rig.tabs.deleted(ref), isTrue);
+    expect(rig.ids, isNot(contains('q')));
+    // Another input must not admit the stale snapshot either.
+    rig.tabs.requestFallback('profile_a', '/q');
+    await settle();
+    expect(rig.ids, isNot(contains('q')));
+  });
+
+  test('known context rows do not need a full session read', () async {
+    await rig.open(
+      (source) => [
+        _at(source.row('p', directory: '/p'), 1),
+        _at(source.row('q', directory: '/q'), 1.5),
+      ],
+    );
+    expect(await rig.contexts.openContext('/q'), isTrue);
+    await settle();
+    expect(await rig.contexts.activate('/p'), isTrue);
+    await settle();
+    expect(rig.ids, containsAll(['p', 'q']));
+    expect(rig.source.reads, isEmpty);
   });
 
   test('a tab leaves once its window ends', () async {
@@ -220,6 +309,34 @@ void main() {
     expect(rig.contexts.isPinned(row), isTrue);
     expect(rig.ids, ['r', 's']);
   });
+
+  for (final unreadable in [false, true]) {
+    test(
+      'close refuses an unknown pin catalog, unreadable=$unreadable',
+      () async {
+        final row = await pinnedOld();
+        final ref = row.info.ref;
+        rig.tabs.dispose();
+        final projects = ProjectWorkspaceStore(
+          store: V2MetadataStore(
+            backend: unreadable
+                ? (FakeMetadataBackend()..failRead = true)
+                : rig.backend,
+          ),
+        );
+        addTearDown(projects.dispose);
+        if (unreadable) await projects.initialize();
+        rig.tabs = SessionTabsController(
+          store: SessionTabsStore(store: V2MetadataStore(backend: rig.backend)),
+          workspace: projects,
+        );
+        await rig.tabs.initialize();
+        expect((await rig.tabs.close(ref)).removed, isFalse);
+        expect(rig.tabs.tabs.any((tab) => tab.ref == ref), isTrue);
+        expect(rig.contexts.isPinned(row), isTrue);
+      },
+    );
+  }
 
   test('a close that cannot be saved puts the pin back', () async {
     final row = await pinnedOld();

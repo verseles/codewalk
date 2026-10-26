@@ -383,12 +383,26 @@ class SessionsController extends ChangeNotifier {
   }
 
   /// Whether [row] runs or waits for the user, or null while the endpoint's
-  /// running sessions are not known: an unknown activity is not idle.
+  /// relevant activity is not known: an unknown activity is not idle.
   bool? busy(SessionSummary row) {
-    if (stale || behind || _activity.running == null) return null;
-    final marks = activityMarks(row);
-    return marks.contains(SessionActivityMark.running) ||
-        marks.contains(SessionActivityMark.needsYou);
+    if (stale ||
+        behind ||
+        loading ||
+        _livePending ||
+        _quietRefreshing ||
+        _activityPending ||
+        _activityReading) {
+      return null;
+    }
+    final ref = row.info.ref;
+    final waitingKnown =
+        row.info.project?.canonicalDirectory == _activity.directory &&
+        _activity.waiting != null;
+    if ((_activity.running?.contains(ref) ?? false) ||
+        (waitingKnown && _activity.waiting!.contains(ref))) {
+      return true;
+    }
+    return _activity.running != null && waitingKnown ? false : null;
   }
 
   /// The live pane shows [ref] while the app is in the foreground: its

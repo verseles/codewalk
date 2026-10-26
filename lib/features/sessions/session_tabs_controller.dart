@@ -33,7 +33,7 @@ class SessionTabsController extends ChangeNotifier {
        _now = now ?? DateTime.now {
     _store
       ..addListener(_notify)
-      ..addListener(_scheduleReconcile);
+      ..addListener(_tabsChanged);
     _catalog?.addListener(_validate);
     _catalog?.addListener(_scheduleReconcile);
     // A removed server clears the list before it is noticed there.
@@ -66,6 +66,8 @@ class SessionTabsController extends ChangeNotifier {
   final _fallbacks = <(String, String)>{};
   Timer? _expiry;
   bool _reconcileScheduled = false;
+  SessionTabsState? _lastTabState;
+  bool _tabsWereLoaded = false;
   bool _disposed = false;
   bool _launched = false;
 
@@ -217,6 +219,12 @@ class SessionTabsController extends ChangeNotifier {
     final tab = tabs.where((tab) => tab.ref == ref).firstOrNull;
     if (_disposed || tab == null || !_frozen.add(ref)) return none;
     try {
+      final workspace = _workspace;
+      if (tab.project != null &&
+          workspace != null &&
+          (!workspace.loaded || workspace.unreadable)) {
+        return none;
+      }
       final pin = _pinOf(tab);
       var unpinned = false;
       if (pin != null) {
@@ -538,6 +546,7 @@ class SessionTabsController extends ChangeNotifier {
       if (retired.contains(ref.host.value)) _reads.remove(ref)?.cancel();
     }
     _checked.removeWhere((ref) => retired.contains(ref.host.value));
+    _deleted.removeWhere((ref) => retired.contains(ref.host.value));
     for (final ref in _warm.keys.toList()) {
       if (retired.contains(ref.host.value)) _release(_warm.remove(ref));
     }
@@ -570,7 +579,9 @@ class SessionTabsController extends ChangeNotifier {
       );
     }
     for (final tab in tabs) {
-      if (tab.ref.host != host || rows.containsKey(tab.ref)) continue;
+      if (tab.ref.host != host || catalog.findSession(tab.ref) != null) {
+        continue;
+      }
       // A read still in flight answers for a tab closed and reopened since.
       if (_reads.containsKey(tab.ref)) continue;
       if (!_checked.add(tab.ref)) continue;
@@ -632,13 +643,16 @@ class SessionTabsController extends ChangeNotifier {
   }
 
   Future<void> _drop(SessionRef ref, EndpointProfile profile) async {
+    if (!_currentBinding(profile)) return;
+    // Record the authoritative absence before the removal notifies listeners:
+    // a queued reconciliation may still hold an older project snapshot.
+    _deleted.add(ref);
     final (:removed, selectedAfter: _) = await _remove(
       {ref},
       isCurrent: () => _currentBinding(profile),
       forget: (entry) => entry.ref == ref,
     );
     if (removed.isNotEmpty && !_disposed) {
-      _deleted.add(ref);
       _removed.add(removed.single.title);
       _notify();
     }
@@ -651,6 +665,17 @@ class SessionTabsController extends ChangeNotifier {
     if (_disposed) return;
     _fallbacks.add((profile, directory));
     _scheduleReconcile();
+  }
+
+  /// A persistence-error notification changes no state and must not retry
+  /// the same automatic write. A later catalog, pin or tab change can retry.
+  void _tabsChanged() {
+    final changed =
+        !identical(_lastTabState, _store.state) ||
+        _tabsWereLoaded != _store.loaded;
+    _lastTabState = _store.state;
+    _tabsWereLoaded = _store.loaded;
+    if (changed) _scheduleReconcile();
   }
 
   /// Reconciles once after the current changes settle.
@@ -717,16 +742,25 @@ class SessionTabsController extends ChangeNotifier {
               state: state,
               host: host,
               nowMs: now,
-              candidates: candidates,
+              candidates: {
+                for (final entry in candidates.entries)
+                  if (!_deleted.contains(entry.key)) entry.key: entry.value,
+              },
               fallbacks: fallbacks,
               knownDirectories: known,
               frozen: {..._frozen},
             );
             return result!.state;
           })
-          .then((_) {
+          .then((saved) {
             final settled = result;
-            if (_disposed || settled == null) return;
+            if (_disposed ||
+                settled == null ||
+                !_currentBinding(profile) ||
+                catalog.selectedProfile?.id != profile.id ||
+                (!saved && settled.state != null)) {
+              return;
+            }
             for (final directory in settled.consumed) {
               _fallbacks.remove((profile.id, directory));
             }
@@ -755,7 +789,7 @@ class SessionTabsController extends ChangeNotifier {
     _expiry?.cancel();
     _store
       ..removeListener(_notify)
-      ..removeListener(_scheduleReconcile);
+      ..removeListener(_tabsChanged);
     _catalog?.removeListener(_validate);
     _catalog?.removeListener(_scheduleReconcile);
     _catalog?.hosts.removeListener(_validate);

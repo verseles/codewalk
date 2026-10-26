@@ -81,6 +81,42 @@ FakeActionSource _unreadOne() => FakeActionSource(
 
 void main() {
   group('the activity of the rows', () {
+    test('unknown pending requests do not prove an idle session', () async {
+      final rig = await _loaded(activity: const SessionActivity(running: {}));
+      expect(rig.sessions.busy(_row(rig, 'one')), isNull);
+    });
+
+    test('only the observed directory can be known idle', () async {
+      final rig = await _loaded(
+        activity: const SessionActivity(running: {}, waiting: {}),
+      );
+      expect(rig.sessions.busy(_row(rig, 'one')), isFalse);
+      expect(rig.sessions.busy(_row(rig, 'three')), isNull);
+    });
+
+    test('activity being refreshed cannot establish idleness', () async {
+      final rig = await _loaded(
+        activity: const SessionActivity(running: {}, waiting: {}),
+      );
+      final gate = rig.sources.single.activityGate = Completer<void>();
+      rig.feed.emit(const SessionActivityChanged());
+      await _settle();
+      expect(rig.sessions.busy(_row(rig, 'one')), isNull);
+      gate.complete();
+      await _settle();
+      expect(rig.sessions.busy(_row(rig, 'one')), isFalse);
+    });
+
+    test('a pending catalog refresh cannot establish idleness', () async {
+      final rig = await _loaded(
+        activity: const SessionActivity(running: {}, waiting: {}),
+      );
+      rig.feed.emit(const SessionCatalogChanged());
+      await _settle();
+      expect(rig.sessions.busy(_row(rig, 'one')), isNull);
+      await _answer(rig);
+    });
+
     test('each mark comes from its own observed source', () async {
       final rig = await _loaded(
         actions: _unreadOne(),
