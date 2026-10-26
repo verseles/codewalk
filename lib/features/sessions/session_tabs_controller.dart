@@ -45,6 +45,7 @@ class SessionTabsController extends ChangeNotifier {
     _workspace?.addListener(_scheduleReconcile);
     _workspace?.addListener(_notify);
     _icons?.addListener(_notify);
+    _icons?.addListener(_followIcons);
   }
 
   /// The live views kept open beside the shown one.
@@ -335,16 +336,15 @@ class SessionTabsController extends ChangeNotifier {
     );
     // Unreadable tabs are neither known nor closed.
     if (_store.unreadable) return false;
-    // A glyph saved before its tab learned its project still leaves with
-    // the tab.
+    // Glyph cleanup is best effort: the project is closed either way, and an
+    // unreadable glyph record stays untouched. A glyph saved before its tab
+    // learned its project still leaves with the tab.
     final closed = {for (final tab in removed) tab.ref};
-    final iconsSaved =
-        await _icons?.removeWhere(
-          (ref, project) => closed.contains(ref) || inContext(ref, project),
-        ) ??
-        true;
+    await _icons?.removeWhere(
+      (ref, project) => closed.contains(ref) || inContext(ref, project),
+    );
     // Nothing of the project was open, or every tab of it closed.
-    return iconsSaved && (!matched || removed.isNotEmpty);
+    return !matched || removed.isNotEmpty;
   }
 
   /// Puts the closed [tab] back at [index] of the strip; [select] makes it
@@ -720,7 +720,19 @@ class SessionTabsController extends ChangeNotifier {
         _tabsWereLoaded != _store.loaded;
     _lastTabState = _store.state;
     _tabsWereLoaded = _store.loaded;
-    if (changed) _scheduleReconcile();
+    if (changed) {
+      _scheduleReconcile();
+      _followIcons();
+    }
+  }
+
+  /// A glyph follows its tab to the project the server attributes the
+  /// session to, so that project's closure finds it.
+  void _followIcons() {
+    final icons = _icons;
+    if (_disposed || icons == null || icons.unreadable) return;
+    final projects = {for (final tab in tabs) tab.ref: ?tab.project};
+    if (icons.differs(projects)) unawaited(icons.follow(projects));
   }
 
   /// Reconciles once after the current changes settle.
@@ -841,6 +853,7 @@ class SessionTabsController extends ChangeNotifier {
     _workspace?.removeListener(_scheduleReconcile);
     _workspace?.removeListener(_notify);
     _icons?.removeListener(_notify);
+    _icons?.removeListener(_followIcons);
     for (final task in _reads.values) {
       task.cancel();
     }

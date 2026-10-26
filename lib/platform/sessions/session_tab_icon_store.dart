@@ -32,6 +32,26 @@ final class SessionTabIconStore extends ChangeNotifier {
   bool anyWhere(bool Function(SessionRef, ProjectRef?) matches) =>
       _icons.entries.any((e) => matches(e.key, e.value.project));
 
+  /// Whether a glyph was saved under another project than [projects] gives
+  /// its session.
+  bool differs(Map<SessionRef, ProjectRef> projects) =>
+      projects.entries.any((entry) {
+        final icon = _icons[entry.key];
+        return icon != null && icon.project != entry.value;
+      });
+
+  /// Moves the glyphs of [projects] to the project given for their session,
+  /// keeping each preset, so that project's closure finds them.
+  Future<bool> follow(Map<SessionRef, ProjectRef> projects) => _change((icons) {
+    for (final MapEntry(key: ref, value: project) in projects.entries) {
+      final icon = icons[ref];
+      if (icon != null && icon.project != project) {
+        icons[ref] = _TabIcon(project, icon.preset);
+      }
+    }
+    return true;
+  });
+
   Future<void> initialize() => _queue.run(key, () async {
     if (_loaded) return;
     await _read();

@@ -363,6 +363,67 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a failed glyph cleanup still closes the shown project', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final backend = FakeMetadataBackend();
+    final app = await _launch(tester, backend: backend);
+    await _open(tester, app, ['/work/a', '/work/b']);
+    await _visit(tester, app, ['one', 'other', 'one']);
+    expect(
+      await app.dependencies.sessionTabs!.setIcon(
+        _sessionTab(app, 'one'),
+        SessionTabIconPreset.bug.id,
+      ),
+      isTrue,
+    );
+
+    backend.failWrite = SessionTabIconStore.key;
+    await _longPress(tester, app, 'one');
+    await tester.tap(find.text(app.l10n.chatCloseProject('a')));
+    await _settle(tester);
+    expect(app.dependencies.projectContexts!.open, ['/work/b']);
+    expect(_location(app), '/s/profile_a/ses_other');
+    expect(find.text(app.l10n.projectsUnavailable), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a glyph saved before its project was known leaves with it', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester);
+    await _open(tester, app, ['/work/a', '/work/b']);
+    await _visit(tester, app, ['one', 'other']);
+    final tabs = app.dependencies.sessionTabs!;
+    final one = _ref(app, 'one');
+    // Saved from a tab that did not know its project yet.
+    expect(
+      await tabs.setIcon(
+        SessionTab(ref: one, project: null, title: 'One', lastOpenedAtMs: 0),
+        SessionTabIconPreset.bug.id,
+      ),
+      isTrue,
+    );
+    await _settle(tester);
+
+    // The tab closes first; the glyph outlives it until its project closes.
+    await tester.ensureVisible(_tab(app, 'one'));
+    await tester.tap(
+      _tab(app, 'one'),
+      kind: PointerDeviceKind.mouse,
+      buttons: kMiddleMouseButton,
+    );
+    await _settle(tester);
+    expect(_ids(app), ['ses_other']);
+    expect(tabs.iconFor(one), SessionTabIconPreset.bug.id);
+    expect(await app.dependencies.projectContexts!.close('/work/a'), isTrue);
+    await _settle(tester);
+    expect(tabs.iconFor(one), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a tab of another project offers only its local actions', (
     tester,
   ) async {
