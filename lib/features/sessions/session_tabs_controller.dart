@@ -88,6 +88,10 @@ class SessionTabsController extends ChangeNotifier {
   Future<bool> setIcon(SessionTab tab, String? preset) async =>
       await _icons?.set(tab, preset) ?? false;
 
+  /// Forgets the glyph of [ref], whose deletion the server accepted.
+  Future<bool> forgetIcon(SessionRef ref) async =>
+      await _icons?.removeWhere((iconRef, _) => iconRef == ref) ?? true;
+
   SessionTabProjection projection(HostId host) =>
       SessionTabProjection(tabs: tabs, host: host, isPinned: isPinned);
 
@@ -331,7 +335,14 @@ class SessionTabsController extends ChangeNotifier {
     );
     // Unreadable tabs are neither known nor closed.
     if (_store.unreadable) return false;
-    final iconsSaved = await _icons?.removeWhere(inContext) ?? true;
+    // A glyph saved before its tab learned its project still leaves with
+    // the tab.
+    final closed = {for (final tab in removed) tab.ref};
+    final iconsSaved =
+        await _icons?.removeWhere(
+          (ref, project) => closed.contains(ref) || inContext(ref, project),
+        ) ??
+        true;
     // Nothing of the project was open, or every tab of it closed.
     return iconsSaved && (!matched || removed.isNotEmpty);
   }

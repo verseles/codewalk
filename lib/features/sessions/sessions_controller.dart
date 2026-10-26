@@ -236,6 +236,10 @@ class SessionsController extends ChangeNotifier {
       ? loaded && !stale && failure == null && _exhausted && !limited
       : _snapshots[directory]?.complete ?? false;
 
+  /// Whether [ref] is a row of the shown list, the only rows a command can
+  /// run on.
+  bool lists(SessionRef ref) => _sessions.any((row) => row.info.ref == ref);
+
   /// The loaded row of [ref], in the shown rows or in another open
   /// context's rows, so a session of another project opens without a read.
   SessionSummary? findSession(SessionRef ref) {

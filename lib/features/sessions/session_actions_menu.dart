@@ -1,9 +1,11 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
+import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 
 /// The actions one session row offers.
@@ -41,6 +43,7 @@ class SessionActionsMenu extends StatefulWidget {
     this.closeProjectReason,
     this.child,
     this.offset = Offset.zero,
+    this.commands = true,
     super.key,
   });
 
@@ -66,6 +69,10 @@ class SessionActionsMenu extends StatefulWidget {
   final String? closeProjectReason;
   final Widget? child;
   final Offset offset;
+
+  /// Whether the row is in the shown list, the only rows a server command can
+  /// run on; a row of another project offers only its local entries.
+  final bool commands;
 
   @override
   State<SessionActionsMenu> createState() => _SessionActionsMenuState();
@@ -116,22 +123,24 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
                   : SessionRowAction.pin,
               child: Text(widget.pinned ? l10n.sessionUnpin : l10n.sessionPin),
             ),
-          if (unread)
+          if (unread && widget.commands)
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.markViewed,
               enabled: enabled,
               child: _label(l10n.sessionsActionMarkViewed, reason),
             ),
-          PopupMenuItem<SessionRowAction>(
-            value: SessionRowAction.rename,
-            enabled: enabled,
-            child: _label(l10n.sessionsActionRename, reason),
-          ),
-          PopupMenuItem<SessionRowAction>(
-            value: SessionRowAction.fork,
-            enabled: enabled,
-            child: _label(l10n.sessionsActionFork, reason),
-          ),
+          if (widget.commands) ...[
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.rename,
+              enabled: enabled,
+              child: _label(l10n.sessionsActionRename, reason),
+            ),
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.fork,
+              enabled: enabled,
+              child: _label(l10n.sessionsActionFork, reason),
+            ),
+          ],
           PopupMenuItem<SessionRowAction>(
             value: hidden ? SessionRowAction.unhide : SessionRowAction.hide,
             enabled: controller.hideAvailable,
@@ -142,11 +151,16 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
                   : l10n.sessionsActionUnavailableStore,
             ),
           ),
-          PopupMenuItem<SessionRowAction>(
-            value: SessionRowAction.delete,
-            enabled: enabled,
-            child: _label(l10n.sessionsActionDelete, reason, destructive: true),
-          ),
+          if (widget.commands)
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.delete,
+              enabled: enabled,
+              child: _label(
+                l10n.sessionsActionDelete,
+                reason,
+                destructive: true,
+              ),
+            ),
           if (widget.onChangeIcon != null) ...[
             const PopupMenuDivider(),
             PopupMenuItem<SessionRowAction>(
@@ -241,9 +255,14 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       case SessionRowAction.unhide:
         await controller.setHidden(row, hidden: false);
       case SessionRowAction.delete:
+        final tabs = context.read<SessionTabsController?>();
         final confirmed = await _confirmDelete(context);
         if (!confirmed) return;
-        await controller.delete(row);
+        // An accepted deletion drops the session's tab glyph even when it has
+        // no open tab to learn of the deletion.
+        if (await controller.delete(row) == SessionActionOutcome.accepted) {
+          await tabs?.forgetIcon(row.info.ref);
+        }
       case SessionRowAction.changeIcon:
         widget.onChangeIcon?.call();
       case SessionRowAction.closeProject:

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_tab_icons.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
+import 'package:codewalk/platform/sessions/session_tab_icon_store.dart';
 import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -40,6 +43,7 @@ void _useMemoryPreferences() {
 Future<_App> _launch(
   WidgetTester tester, {
   Size size = const Size(1280, 800),
+  FakeMetadataBackend? backend,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -50,7 +54,7 @@ Future<_App> _launch(
   await rig.save('a');
   final directory = LiveDirectory();
   // Drafts are read in fake time: no file I/O.
-  final metadata = V2MetadataStore(backend: FakeMetadataBackend());
+  final metadata = V2MetadataStore(backend: backend ?? FakeMetadataBackend());
   final payloads = PreferencesPayloadStore(metadata);
   final dependencies = createAppDependencies(
     initialLink: Uri.parse('/s/profile_a/ses_one'),
@@ -321,6 +325,72 @@ void main() {
     expect(contexts.open, ['/work/b']);
     expect(_ids(app), ['ses_other']);
     expect(_location(app), '/s/profile_a/ses_other');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('closing the shown project from its tab leaves its session', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final backend = FakeMetadataBackend();
+    final app = await _launch(tester, backend: backend);
+    await _open(tester, app, ['/work/a', '/work/b']);
+    await _visit(tester, app, ['one', 'other', 'one']);
+    final contexts = app.dependencies.projectContexts!;
+    expect(contexts.active, '/work/a');
+    expect(
+      await app.dependencies.sessionTabs!.setIcon(
+        _sessionTab(app, 'one'),
+        SessionTabIconPreset.bug.id,
+      ),
+      isTrue,
+    );
+
+    // The menu belongs to a tab that leaves with the project, and the
+    // glyph cleanup still saves while the strip redraws without it.
+    backend
+      ..blockedKey = SessionTabIconStore.key
+      ..release = Completer<void>();
+    await _longPress(tester, app, 'one');
+    await tester.tap(find.text(app.l10n.chatCloseProject('a')));
+    await _settle(tester);
+    expect(_tab(app, 'one'), findsNothing);
+    backend.release!.complete();
+    await _settle(tester);
+    expect(contexts.open, ['/work/b']);
+    expect(_ids(app), ['ses_other']);
+    expect(_location(app), '/s/profile_a/ses_other');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a tab of another project offers only its local actions', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester);
+    await _open(tester, app, ['/work/a', '/work/b']);
+    await _visit(tester, app, ['one', 'other', 'one']);
+    // The row of the other project is known, but not in the shown list.
+    final other = _ref(app, 'other');
+    expect(app.dependencies.sessions!.findSession(other), isNotNull);
+    expect(app.dependencies.sessions!.lists(other), isFalse);
+
+    await _longPress(tester, app, 'other');
+    expect(find.text(app.l10n.sessionPin), findsOneWidget);
+    expect(find.text(app.l10n.sessionsActionHide), findsOneWidget);
+    expect(find.text(app.l10n.sessionTabChangeIconAction), findsOneWidget);
+    for (final command in [
+      app.l10n.sessionsActionRename,
+      app.l10n.sessionsActionFork,
+      app.l10n.sessionsActionDelete,
+    ]) {
+      expect(find.text(command), findsNothing);
+    }
+    await _dismissMenu(tester);
+
+    await _longPress(tester, app, 'one');
+    expect(find.text(app.l10n.sessionsActionRename), findsOneWidget);
+    await _dismissMenu(tester);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

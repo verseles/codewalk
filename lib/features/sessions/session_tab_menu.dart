@@ -91,12 +91,17 @@ class _SessionTabMenuState extends State<SessionTabMenu> {
       return;
     }
     final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final failed = context.v2L10n.projectsUnavailable;
     final before = router.routeInformationProvider.value.uri;
     final shown = contexts.active == directory;
     final saved = await contexts.close(directory);
-    if (!mounted) return;
+    // This menu leaves with the project's tabs; the router and messenger it
+    // captured still finish the close.
     if (!saved) {
-      _notice(context.v2L10n.projectsUnavailable);
+      if (messenger?.mounted ?? false) {
+        messenger!.showSnackBar(SnackBar(content: Text(failed)));
+      }
     } else if (shown && router.routeInformationProvider.value.uri == before) {
       final next = contexts.active;
       final view = next == null ? null : contexts.viewOf(next);
@@ -170,6 +175,7 @@ class _SessionTabMenuState extends State<SessionTabMenu> {
             row: row,
             menuKey: _menu,
             pinned: widget.tabs.isPinned(widget.tab),
+            commands: catalog.lists(row.info.ref),
             onPin: open
                 ? (pin) => unawaited(contexts.setPinned(row, pinned: pin))
                 : null,

@@ -4,6 +4,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_actions_menu.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/platform/sessions/session_action_source_io.dart';
+import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
@@ -170,6 +171,38 @@ void main() {
     await tester.tap(find.text(l10n.commonDelete).last);
     await tester.pumpAndSettle();
     expect(actions.calls, contains('delete'));
+  });
+
+  testWidgets('an accepted delete forgets the session tab glyph', (
+    tester,
+  ) async {
+    final (source, l10n, _) = await open(tester);
+    final row = source.row('first', title: 'First');
+    final tabs = app.sessionTabs!;
+    // The glyph outlives the tab: no open tab learns of the deletion.
+    expect(
+      await tabs.setIcon(
+        SessionTab(
+          ref: row.info.ref,
+          project: row.info.project,
+          title: 'First',
+          lastOpenedAtMs: 0,
+        ),
+        'bug',
+      ),
+      isTrue,
+    );
+    expect(tabs.iconFor(row.info.ref), 'bug');
+    await tester.tap(
+      find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sessionsActionDelete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.commonDelete).last);
+    await tester.pumpAndSettle();
+    expect(actions.calls, contains('delete'));
+    expect(tabs.iconFor(row.info.ref), isNull);
   });
 
   testWidgets('the long press opens the row menu', (tester) async {

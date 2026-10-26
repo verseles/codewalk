@@ -189,9 +189,16 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
     }
     _openingDraft = true;
     final router = GoRouter.of(context);
-    final before = router.routeInformationProvider.value.uri;
+    final routes = router.routeInformationProvider;
+    // Any navigation while the project opens wins, even one that comes back
+    // to the same place.
+    var moved = false;
+    void navigated() => moved = true;
+    routes.addListener(navigated);
     try {
-      if (!await contexts.openContext(directory)) {
+      final opened = await contexts.openContext(directory);
+      routes.removeListener(navigated);
+      if (!opened) {
         if (mounted) {
           ScaffoldMessenger.maybeOf(context)?.showSnackBar(
             SnackBar(content: Text(context.v2L10n.projectsUnavailable)),
@@ -199,11 +206,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
         }
         return;
       }
-      if (!mounted ||
-          router.routeInformationProvider.value.uri != before ||
-          _host != project.host) {
-        return;
-      }
+      if (!mounted || moved || _host != project.host) return;
       router.go('/sessions');
       await drafts.openDraft(directory: directory);
       if (router.routeInformationProvider.value.uri.path == '/sessions' &&
@@ -212,6 +215,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
         drafts.focusComposer();
       }
     } finally {
+      routes.removeListener(navigated);
       _openingDraft = false;
     }
   }
