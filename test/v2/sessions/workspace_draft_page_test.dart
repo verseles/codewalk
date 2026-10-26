@@ -221,7 +221,10 @@ void main() {
     await open(tester);
     expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
     expect(find.byKey(const ValueKey('workspace-empty')), findsNothing);
-    expect(app.sessionTabs!.tabs, isEmpty);
+    // Only the opened project's latest session has a tab; New Chat adds none.
+    expect(app.sessionTabs!.tabs.map((tab) => tab.ref), [
+      source.row('old').info.ref,
+    ]);
     expect(actions.calls.where((call) => call == 'create'), isEmpty);
     await tester.enterText(
       find.byKey(const ValueKey('workspace-draft-text')),
@@ -507,7 +510,16 @@ void main() {
         expect(outbox.list.single.text, '  first prompt\n');
         expect(app.router.state.uri.path, '/s/profile_a/ses_created');
         expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
-        expect(app.sessionTabs!.tabs.single.ref, summary.info.ref);
+        // The created session's tab follows the opened project's latest
+        // one, and is the selected tab.
+        expect(app.sessionTabs!.tabs.map((tab) => tab.ref), [
+          source.row('old').info.ref,
+          summary.info.ref,
+        ]);
+        expect(
+          app.sessionTabs!.selectedFor(summary.info.ref.host),
+          summary.info.ref,
+        );
         expect(
           tester
               .widget<SessionLivePage>(find.byType(SessionLivePage))

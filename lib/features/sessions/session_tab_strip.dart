@@ -91,7 +91,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.v2L10n;
     final title = _title(context, tab);
-    final (:removed, :next) = await tabs.close(tab.ref);
+    final (:removed, :next, :unpinned) = await tabs.close(tab.ref);
     // Another close, or the server dropping it, got there first.
     if (!removed) return;
     String location() =>
@@ -120,8 +120,16 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             onPressed: () async {
               // The tab comes back in place, and is shown again only while
               // the reader is still where its close took them, once it is
-              // saved: a move meanwhile wins. Showing it selects it.
-              if (!await tabs.reopen(tab, index: index, select: false)) return;
+              // saved: a move meanwhile wins. Showing it selects it. A tab
+              // the close unpinned is pinned again first.
+              if (!await tabs.reopen(
+                tab,
+                index: index,
+                select: false,
+                pin: unpinned,
+              )) {
+                return;
+              }
               if (left != null && location() == left) {
                 router.go(sessionTabLocation(tab.ref));
               }

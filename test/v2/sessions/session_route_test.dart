@@ -459,6 +459,34 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a shown session whose tab closes here stays shown', (
+    tester,
+  ) async {
+    final platform = SharedPreferencesAsyncPlatform.instance;
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    addTearDown(() => SharedPreferencesAsyncPlatform.instance = platform);
+    final app = await _open(tester, '/s/profile_a/ses_one');
+    final source = app.rig.sources.single;
+    source.respond([source.row('one', title: 'One')]);
+    await _settle(tester);
+    final ref = source.row('one').info.ref;
+    app.directory.grant(ref);
+    await _settle(tester);
+    final tabs = app.dependencies.sessionTabs!;
+    expect(tabs.tabs.map((tab) => tab.ref), [ref]);
+    // Closed here, not lost on its server: the session stays on screen.
+    final (:removed, next: _, unpinned: _) = await tabs.close(ref);
+    expect(removed, isTrue);
+    await _settle(tester);
+    expect(tabs.tabs, isEmpty);
+    expect(tabs.deleted(ref), isFalse);
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    expect(find.text(app.l10n.sessionLinkNotFound), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a kept session shows its new title', (tester) async {
     final app = await _open(tester, '/s/profile_a/ses_one');
     final source = app.rig.sources.single;

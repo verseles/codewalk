@@ -184,10 +184,15 @@ AppDependencies createAppDependencies({
             ),
     ),
   );
-  // The open session tabs follow the list, which checks their sessions.
+  // The open projects of each server, their pins and the list preferences.
+  final projectStore =
+      projectWorkspaceStore ?? ProjectWorkspaceStore(store: metadata);
+  // The open session tabs follow the list, which checks their sessions, and
+  // the pins of the projects.
   final sessionTabs = SessionTabsController(
     store: tabsStore ?? SessionTabsStore(store: metadata),
     catalog: locator<SessionsController>(),
+    workspace: projectStore,
     now: sessionClock,
   );
   // Brings back the server the workspace was left on.
@@ -208,7 +213,7 @@ AppDependencies createAppDependencies({
   // The open projects of each server and the project the list shows.
   final projectContexts = ProjectContextsController(
     catalog: locator<SessionsController>(),
-    store: projectWorkspaceStore ?? ProjectWorkspaceStore(store: metadata),
+    store: projectStore,
     workspace: workspaceState,
     tabs: sessionTabs,
     drafts: workspaceDrafts,

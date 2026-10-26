@@ -382,6 +382,15 @@ class SessionsController extends ChangeNotifier {
     ];
   }
 
+  /// Whether [row] runs or waits for the user, or null while the endpoint's
+  /// running sessions are not known: an unknown activity is not idle.
+  bool? busy(SessionSummary row) {
+    if (stale || behind || _activity.running == null) return null;
+    final marks = activityMarks(row);
+    return marks.contains(SessionActivityMark.running) ||
+        marks.contains(SessionActivityMark.needsYou);
+  }
+
   /// The live pane shows [ref] while the app is in the foreground: its
   /// unread mark is cleared through the endpoint's own view command.
   void showing(SessionRef ref) {

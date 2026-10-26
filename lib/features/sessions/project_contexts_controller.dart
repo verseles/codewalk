@@ -142,9 +142,16 @@ class ProjectContextsController extends ChangeNotifier {
     _notify();
   }
 
-  /// Opens [directory], or reopens it from the history, and shows it.
-  Future<bool> openContext(String directory) =>
-      _transition((profile) => _store.open(profile, directory));
+  /// Opens [directory], or reopens it from the history, and shows it. A
+  /// project that was not open gets a tab once its sessions are read.
+  Future<bool> openContext(String directory) => _transition((profile) async {
+    final opening = !_store.workspace(profile).open.contains(directory);
+    final result = await _store.open(profile, directory);
+    if (opening && result == ProjectStoreResult.saved) {
+      _tabs?.requestFallback(profile, directory);
+    }
+    return result;
+  });
 
   /// Shows the open context at [directory].
   Future<bool> activate(String directory) =>
@@ -424,7 +431,11 @@ class ProjectContextsController extends ChangeNotifier {
           _starting = false;
           return;
         }
+        final opening = !_store.workspace(profile).open.contains(chosen);
         result = await _store.open(profile, chosen);
+        if (opening && result == ProjectStoreResult.saved) {
+          _tabs?.requestFallback(profile, chosen);
+        }
       } on Object {
         result = ProjectStoreResult.unavailable;
       }

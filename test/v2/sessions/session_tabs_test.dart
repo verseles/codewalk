@@ -373,6 +373,73 @@ void main() {
     expect(state.selected, isEmpty);
   });
 
+  test('closed tabs and updates are kept beside the tabs', () {
+    const open = SessionRef(HostId('a'), HarnessInstanceId('a'), 'open');
+    const closed = SessionRef(HostId('a'), HarnessInstanceId('a'), 'closed');
+    const project = ProjectRef(HostId('a'), '/work');
+    final state = SessionTabsState(
+      tabs: const [
+        SessionTab(
+          ref: open,
+          project: project,
+          title: 'x',
+          lastOpenedAtMs: 1,
+          updatedAtMs: 5,
+        ),
+      ],
+      suppressed: const [
+        SessionTabSuppression(
+          ref: closed,
+          project: project,
+          closedAtMs: 2,
+          updatedAtMs: 4,
+        ),
+        // A session open again is not closed.
+        SessionTabSuppression(ref: open, project: null, closedAtMs: 3),
+      ],
+    );
+    final decoded = SessionTabsStore.decode(SessionTabsStore.encode(state))!;
+    expect(decoded.tabs.single.updatedAtMs, 5);
+    expect(decoded.suppressed, [state.suppressed.first]);
+    // A record written before these fields reads as tabs without them.
+    final old = SessionTabsStore.decode(
+      '{"version":1,"tabs":[{"ref":${_json(open.storageKey)},'
+      '"project":null,"title":"x","lastOpenedAtMs":1}],"selected":{}}',
+    )!;
+    expect(old.tabs.single.updatedAtMs, isNull);
+    expect(old.suppressed, isEmpty);
+    // A malformed closed record makes the whole record unreadable.
+    expect(
+      SessionTabsStore.decode(
+        '{"version":1,"tabs":[],"selected":{},"suppressed":[7]}',
+      ),
+      isNull,
+    );
+  });
+
+  test('the oldest closed tabs leave beyond the bound', () {
+    var state = SessionTabsState();
+    for (var i = 0; i <= SessionTabsStore.maxSuppressed; i++) {
+      state = state.suppressing(
+        SessionTabSuppression(
+          ref: SessionRef(
+            const HostId('a'),
+            const HarnessInstanceId('a'),
+            '$i',
+          ),
+          project: null,
+          closedAtMs: i,
+        ),
+      );
+    }
+    expect(state.suppressed, hasLength(SessionTabsStore.maxSuppressed));
+    expect(state.suppressed.first.ref.nativeId, '1');
+    expect(
+      state.unsuppressing(state.suppressed.last.ref).suppressed.length,
+      SessionTabsStore.maxSuppressed - 1,
+    );
+  });
+
   group('restored tabs and the list', () {
     late CatalogRig rig;
     late _MemoryBackend backend;

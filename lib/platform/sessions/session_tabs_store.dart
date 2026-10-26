@@ -16,6 +16,7 @@ final class SessionTab {
     required this.project,
     required this.title,
     required this.lastOpenedAtMs,
+    this.updatedAtMs,
   });
 
   final SessionRef ref;
@@ -28,16 +29,22 @@ final class SessionTab {
   /// The last time the tab was opened, for the most-recent order.
   final int lastOpenedAtMs;
 
+  /// The session's last update the server reported, when known: with
+  /// [lastOpenedAtMs] it keeps the tab among the recent ones.
+  final int? updatedAtMs;
+
   SessionTab copyWith({
     ProjectRef? project,
     bool clearProject = false,
     String? title,
     int? lastOpenedAtMs,
+    int? updatedAtMs,
   }) => SessionTab(
     ref: ref,
     project: clearProject ? null : (project ?? this.project),
     title: title ?? this.title,
     lastOpenedAtMs: lastOpenedAtMs ?? this.lastOpenedAtMs,
+    updatedAtMs: updatedAtMs ?? this.updatedAtMs,
   );
 
   @override
@@ -46,10 +53,51 @@ final class SessionTab {
       ref == other.ref &&
       project == other.project &&
       title == other.title &&
-      lastOpenedAtMs == other.lastOpenedAtMs;
+      lastOpenedAtMs == other.lastOpenedAtMs &&
+      updatedAtMs == other.updatedAtMs;
 
   @override
-  int get hashCode => Object.hash(ref, project, title, lastOpenedAtMs);
+  int get hashCode =>
+      Object.hash(ref, project, title, lastOpenedAtMs, updatedAtMs);
+}
+
+/// A tab the user closed: it is not listed again until the user opens it or
+/// the server reports an update newer than [updatedAtMs]. Closing a tab never
+/// changes the session on the server.
+@immutable
+final class SessionTabSuppression {
+  const SessionTabSuppression({
+    required this.ref,
+    required this.project,
+    required this.closedAtMs,
+    this.updatedAtMs,
+  });
+
+  final SessionRef ref;
+  final ProjectRef? project;
+  final int closedAtMs;
+
+  /// The server's last update known when it was closed; null until one is
+  /// seen, and the first one seen only sets it.
+  final int? updatedAtMs;
+
+  SessionTabSuppression withUpdatedAt(int updatedAtMs) => SessionTabSuppression(
+    ref: ref,
+    project: project,
+    closedAtMs: closedAtMs,
+    updatedAtMs: updatedAtMs,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is SessionTabSuppression &&
+      ref == other.ref &&
+      project == other.project &&
+      closedAtMs == other.closedAtMs &&
+      updatedAtMs == other.updatedAtMs;
+
+  @override
+  int get hashCode => Object.hash(ref, project, closedAtMs, updatedAtMs);
 }
 
 /// The open tabs of every server in visual order, and the selected tab of
@@ -59,11 +107,48 @@ final class SessionTabsState {
   SessionTabsState({
     List<SessionTab> tabs = const [],
     Map<HostId, SessionRef> selected = const {},
+    List<SessionTabSuppression> suppressed = const [],
   }) : tabs = List.unmodifiable(tabs),
-       selected = Map.unmodifiable(selected);
+       selected = Map.unmodifiable(selected),
+       suppressed = List.unmodifiable(suppressed);
 
   final List<SessionTab> tabs;
   final Map<HostId, SessionRef> selected;
+
+  /// The tabs the user closed, oldest first.
+  final List<SessionTabSuppression> suppressed;
+
+  SessionTabsState copyWith({
+    List<SessionTab>? tabs,
+    Map<HostId, SessionRef>? selected,
+    List<SessionTabSuppression>? suppressed,
+  }) => SessionTabsState(
+    tabs: tabs ?? this.tabs,
+    selected: selected ?? this.selected,
+    suppressed: suppressed ?? this.suppressed,
+  );
+
+  /// The closed record of [ref], if any.
+  SessionTabSuppression? suppressionOf(SessionRef ref) =>
+      suppressed.where((entry) => entry.ref == ref).firstOrNull;
+
+  /// This state with [entry] recorded as closed, the oldest records leaving
+  /// beyond [SessionTabsStore.maxSuppressed]: they are history, not choices.
+  SessionTabsState suppressing(SessionTabSuppression entry) {
+    final next = [
+      for (final other in suppressed)
+        if (other.ref != entry.ref) other,
+      entry,
+    ];
+    final overflow = next.length - SessionTabsStore.maxSuppressed;
+    return copyWith(suppressed: overflow > 0 ? next.sublist(overflow) : next);
+  }
+
+  /// This state without the closed record of [ref]: it was opened again.
+  SessionTabsState unsuppressing(SessionRef ref) =>
+      suppressed.any((entry) => entry.ref == ref)
+      ? copyWith(suppressed: [...suppressed.where((e) => e.ref != ref)])
+      : this;
 }
 
 /// The open session tabs, a local state the endpoint never sees.
@@ -80,6 +165,9 @@ final class SessionTabsStore extends ChangeNotifier {
 
   /// The open tabs across every server.
   static const maxTabs = 32;
+
+  /// The closed tabs remembered across every server.
+  static const maxSuppressed = 512;
   static const maxTitleChars = 200;
 
   final V2MetadataStore _store;
@@ -166,12 +254,24 @@ final class SessionTabsStore extends ChangeNotifier {
           'project': tab.project?.storageKey,
           'title': boundTitle(tab.title),
           'lastOpenedAtMs': tab.lastOpenedAtMs,
+          'updatedAtMs': ?tab.updatedAtMs,
         },
     ],
     'selected': {
       for (final MapEntry(:key, :value) in state.selected.entries)
         key.value: value.storageKey,
     },
+    // Added fields: an older reader ignores them and keeps its tabs.
+    if (state.suppressed.isNotEmpty)
+      'suppressed': [
+        for (final entry in state.suppressed)
+          {
+            'ref': entry.ref.storageKey,
+            'project': entry.project?.storageKey,
+            'closedAtMs': entry.closedAtMs,
+            'updatedAtMs': ?entry.updatedAtMs,
+          },
+      ],
   });
 
   /// The state of a stored record, or null when it is not one this version
@@ -208,6 +308,7 @@ final class SessionTabsStore extends ChangeNotifier {
         if (project != null && project.host != ref.host) return null;
         final title = entry['title']! as String;
         final opened = entry['lastOpenedAtMs']! as int;
+        final updated = entry['updatedAtMs'] as int?;
         if (seen.add(ref)) {
           tabs.add(
             SessionTab(
@@ -215,6 +316,7 @@ final class SessionTabsStore extends ChangeNotifier {
               project: project,
               title: boundTitle(title),
               lastOpenedAtMs: opened,
+              updatedAtMs: updated,
             ),
           );
         }
@@ -226,7 +328,37 @@ final class SessionTabsStore extends ChangeNotifier {
           selected[ref.host] = ref;
         }
       }
-      return SessionTabsState(tabs: tabs, selected: selected);
+      final rawSuppressed = json['suppressed'] ?? const <Object?>[];
+      if (rawSuppressed is! List || rawSuppressed.length > maxSuppressed) {
+        return null;
+      }
+      final suppressed = <SessionTabSuppression>[];
+      final closed = <SessionRef>{};
+      for (final entry in rawSuppressed) {
+        if (entry is! Map<String, Object?>) return null;
+        final ref = SessionRef.fromStorageKey(entry['ref']! as String);
+        final project = switch (entry['project']) {
+          null => null,
+          final String key => ProjectRef.fromStorageKey(key),
+          _ => throw const FormatException('project'),
+        };
+        if (project != null && project.host != ref.host) return null;
+        // A session open again is not closed.
+        if (seen.contains(ref) || !closed.add(ref)) continue;
+        suppressed.add(
+          SessionTabSuppression(
+            ref: ref,
+            project: project,
+            closedAtMs: entry['closedAtMs']! as int,
+            updatedAtMs: entry['updatedAtMs'] as int?,
+          ),
+        );
+      }
+      return SessionTabsState(
+        tabs: tabs,
+        selected: selected,
+        suppressed: suppressed,
+      );
     } on Object {
       // A wrong type, a malformed key or bad JSON: the record is not read.
       return null;
