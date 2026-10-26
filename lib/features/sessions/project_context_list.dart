@@ -220,7 +220,6 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                       key: _menu,
                       tooltip: l10n.chatCloseProject(name),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                       style: IconButton.styleFrom(
                         fixedSize: Size.square(menuSize),
                         minimumSize: Size.square(menuSize),

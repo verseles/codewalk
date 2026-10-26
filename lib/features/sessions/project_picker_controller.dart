@@ -51,6 +51,8 @@ class ProjectPickerController extends ChangeNotifier {
   String _query = '';
   int _highlight = 0;
   ProjectPickerFailure _failure = ProjectPickerFailure.none;
+  String _failedPath = '';
+  ProjectContextNotice _refusal = ProjectContextNotice.none;
 
   List<String> _serverProjects = const [];
   Future<String?>? _base;
@@ -75,6 +77,13 @@ class ProjectPickerController extends ChangeNotifier {
   String get query => _query;
   int get highlight => _highlight;
   ProjectPickerFailure get failure => _failure;
+
+  /// The project a failed open was for.
+  String get failedPath => _failedPath;
+
+  /// Why the project contexts refused a failed open, when they did: the
+  /// drawer's notice sits behind the dialog.
+  ProjectContextNotice get refusal => _refusal;
   bool get searching => _searching;
   bool get browsing => _browsing;
   String? get browseDirectory => _browseDirectory;
@@ -122,6 +131,11 @@ class ProjectPickerController extends ChangeNotifier {
       for (final directory in _found)
         if (seen.add(directory))
           ProjectPickerEntry(directory, ProjectPickerSource.found),
+      // A completed folder stays the exact result of its own path, which is
+      // not searched again.
+      if (_completed case final completed?
+          when completed == _query && seen.add(completed))
+        ProjectPickerEntry(completed, ProjectPickerSource.found),
     ];
     final query = _query.trim().toLowerCase();
     if (query.isEmpty) {
@@ -312,9 +326,13 @@ class ProjectPickerController extends ChangeNotifier {
   /// Opens [entry]: an open project is shown, a closed or known one is
   /// reopened, and a found folder is first resolved by the server.
   Future<bool> open(ProjectPickerEntry entry) => switch (entry.source) {
-    ProjectPickerSource.open => _run(() => contexts.activate(entry.directory)),
+    ProjectPickerSource.open => _run(
+      () => contexts.activate(entry.directory),
+      target: entry.directory,
+    ),
     ProjectPickerSource.closed || ProjectPickerSource.server => _run(
       () => contexts.openContext(entry.directory),
+      target: entry.directory,
     ),
     ProjectPickerSource.found => openPath(entry.directory),
   };
@@ -322,14 +340,16 @@ class ProjectPickerController extends ChangeNotifier {
   /// Opens the absolute [path] typed or browsed to, as the directory the
   /// server keys it by; any folder works, Git or not. Only a [typed] path
   /// loses its surrounding spaces: a path the server returned is exact.
-  Future<bool> openPath(String path, {bool typed = false}) => _run(() async {
-    final source = catalog.directorySource;
+  Future<bool> openPath(String path, {bool typed = false}) {
     final target = typed && path != _completed ? path.trim() : path;
-    if (source == null || !isAbsoluteServerPath(target)) return false;
-    final location = await source.location(directory: target).result;
-    if (_disposed || _dismissed) return false;
-    return contexts.openContext(location.canonicalDirectory);
-  });
+    return _run(() async {
+      final source = catalog.directorySource;
+      if (source == null || !isAbsoluteServerPath(target)) return false;
+      final location = await source.location(directory: target).result;
+      if (_disposed || _dismissed) return false;
+      return contexts.openContext(location.canonicalDirectory);
+    }, target: target);
+  }
 
   /// Forgets [directory] in the closed history until it is opened again.
   Future<bool> forget(String directory) =>
@@ -338,6 +358,7 @@ class ProjectPickerController extends ChangeNotifier {
   Future<bool> _run(
     Future<bool> Function() action, {
     bool closes = true,
+    String target = '',
   }) async {
     if (_disposed || _dismissed || _opening) return false;
     _opening = true;
@@ -353,13 +374,12 @@ class ProjectPickerController extends ChangeNotifier {
       _opening = false;
     }
     if (!_disposed) {
-      // A refused change says so through the project notice instead, and a
-      // failure is only shown for the query that was submitted.
-      if (!done &&
-          closes &&
-          _query == submitted &&
-          contexts.notice == ProjectContextNotice.none) {
+      // A failure is only shown for the query that was submitted, with the
+      // project it was for and the contexts' refusal, if any.
+      if (!done && closes && _query == submitted) {
         _failure = ProjectPickerFailure.open;
+        _failedPath = target;
+        _refusal = contexts.notice;
       }
       _notify();
     }

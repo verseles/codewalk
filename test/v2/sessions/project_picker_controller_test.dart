@@ -33,6 +33,7 @@ void main() {
   late CatalogRig rig;
   late ProjectContextsController contexts;
   late ProjectPickerController picker;
+  late FakeMetadataBackend backend;
   var opened = false;
 
   CatalogSource source() => rig.sources.single;
@@ -40,11 +41,10 @@ void main() {
   Future<void> open({Duration debounce = Duration.zero}) async {
     opened = true;
     rig = CatalogRig(withFeed: false);
+    backend = FakeMetadataBackend();
     contexts = ProjectContextsController(
       catalog: rig.sessions,
-      store: ProjectWorkspaceStore(
-        store: V2MetadataStore(backend: FakeMetadataBackend()),
-      ),
+      store: ProjectWorkspaceStore(store: V2MetadataStore(backend: backend)),
     );
     await rig.save('a');
     await rig.sessions.initialize();
@@ -195,6 +195,34 @@ void main() {
       expect(picker.failure, ProjectPickerFailure.none);
     },
   );
+
+  test('a completed folder stays the result Enter opens', () async {
+    await open();
+    picker.setQuery('we');
+    await settle();
+    source().findReads.single.$3.completion.complete([_folder('/work', 'we')]);
+    await settle();
+    final completed = picker.completion()!;
+    expect(completed, '/work/we');
+    picker.setQuery(completed);
+    // The known '/work/web' starts with it, yet the completed folder leads.
+    expect(picker.results.first.directory, '/work/we');
+    expect(picker.results.first.source, ProjectPickerSource.found);
+  });
+
+  test('a refused open says why and names its project', () async {
+    await open();
+    backend.failWrite = ProjectWorkspaceStore.key;
+    final opening = picker.openPath('/opt/x');
+    await settle();
+    source().locationReads.last.$2.completion.complete(
+      const ProjectRef(_host, '/opt/x'),
+    );
+    expect(await opening, isFalse);
+    expect(picker.failure, ProjectPickerFailure.open);
+    expect(picker.failedPath, '/opt/x');
+    expect(picker.refusal, ProjectContextNotice.unavailable);
+  });
 
   test('a late open failure is not shown against a newer query', () async {
     await open();

@@ -160,9 +160,11 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
           ProjectPickerFailure.none => null,
           ProjectPickerFailure.search ||
           ProjectPickerFailure.browse => l10n.chatFailedToLoadDirectories,
-          ProjectPickerFailure.open => l10n.workspaceFailedToOpenProjectContext(
-            _picker.query.trim(),
-          ),
+          ProjectPickerFailure.open => switch (_picker.refusal) {
+            ProjectContextNotice.capacity => l10n.projectsCapacity,
+            ProjectContextNotice.unavailable => l10n.projectsUnavailable,
+            _ => l10n.workspaceFailedToOpenProjectContext(_picker.failedPath),
+          },
         };
         return CallbackShortcuts(
           bindings: {
