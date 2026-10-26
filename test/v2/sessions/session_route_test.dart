@@ -487,6 +487,42 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets(
+    'a late server deletion also closes an already removed tab view',
+    (tester) async {
+      final platform = SharedPreferencesAsyncPlatform.instance;
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      addTearDown(() => SharedPreferencesAsyncPlatform.instance = platform);
+      final app = await _open(tester, '/s/profile_a/ses_one');
+      final source = app.rig.sources.single;
+      source.respond([source.row('one', title: 'One')]);
+      await _settle(tester);
+      final ref = source.row('one').info.ref;
+      app.directory.grant(ref);
+      await _settle(tester);
+      app.dependencies.sessions!.refresh().ignore();
+      await tester.pump();
+      source.respond(const []);
+      await _settle(tester);
+      final read = source.reads.single.$2;
+      final tabs = app.dependencies.sessionTabs!;
+      expect((await tabs.close(ref)).removed, isTrue);
+      await _settle(tester);
+      expect(find.byType(SessionLivePage), findsOneWidget);
+      read.completion.completeError(
+        const SessionCatalogException(SessionCatalogFailure.notFound),
+      );
+      await _settle(tester);
+      expect(tabs.deleted(ref), isTrue);
+      expect(find.text(app.l10n.sessionLinkNotFound), findsOneWidget);
+      expect(find.byType(SessionLivePage), findsNothing);
+      expect(tabs.isWarm(ref), isFalse);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   testWidgets('a kept session shows its new title', (tester) async {
     final app = await _open(tester, '/s/profile_a/ses_one');
     final source = app.rig.sources.single;

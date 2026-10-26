@@ -646,16 +646,20 @@ class SessionTabsController extends ChangeNotifier {
     if (!_currentBinding(profile)) return;
     // Record the authoritative absence before the removal notifies listeners:
     // a queued reconciliation may still hold an older project snapshot.
-    _deleted.add(ref);
+    final newlyDeleted = _deleted.add(ref);
     final (:removed, selectedAfter: _) = await _remove(
       {ref},
       isCurrent: () => _currentBinding(profile),
       forget: (entry) => entry.ref == ref,
     );
-    if (removed.isNotEmpty && !_disposed) {
+    if (_disposed || !_currentBinding(profile)) return;
+    // A route can keep its view after its local tab was closed. It still
+    // loses the lease when the server subsequently confirms its absence.
+    _release(_warm.remove(ref));
+    if (removed.isNotEmpty) {
       _removed.add(removed.single.title);
-      _notify();
     }
+    if (newlyDeleted || removed.isNotEmpty) _notify();
   }
 
   /// Gives the project at [directory] of server [profile], just opened, one

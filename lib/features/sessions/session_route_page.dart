@@ -281,12 +281,15 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         _tabbed = false;
         // The view the tab kept is released, so it is never shown again.
         _live = null;
-        // Only its server saying the session no longer exists makes it not
-        // found; a tab closed or expired here leaves the session shown.
-        if (tabs.deleted(_ref)) {
-          _summary = null;
-          _read = _Read.notFound;
-        }
+      }
+      // Absence can arrive after the local tab already left. Only this
+      // authoritative proof, rather than local tab removal, ends the route.
+      if (tabs.deleted(_ref)) {
+        _task?.cancel();
+        _task = null;
+        _live = null;
+        _summary = null;
+        _read = _Read.notFound;
       }
     }
     if (_live?.disposed ?? false) _live = null;
