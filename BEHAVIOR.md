@@ -83,9 +83,13 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the user opens sessions in the v2 workspace
 - **When** a session opens from the list, a link or a tab
 - **Then** it adds a tab, or focuses its tab, keyed by its full identity (server, harness instance, session), so two servers with the same session id keep two tabs; the tab becomes the selected tab of its server
-- **Then** a strip above the open session shows the tabs of its server and project in the order they were opened, keeps the shown tab in view, and switches on a tap; another project shows its own tabs
+- **Then** a strip above the open session shows the tabs of its server and project in their saved order, keeps the shown tab in view, and switches on a tap; another project shows its own tabs
+- **Then** the open projects' recent visible root sessions become tabs automatically: the later of their server update and local open keeps them for three hours; the selected tab, a confirmed running or waiting session and a context-pinned session remain eligible, and unknown activity or a missing partial row never proves idleness or deletion
+- **Then** existing tabs keep their saved order, new candidates append by recency while there is room, and opening a project without an eligible tab adds its most recent visible, non-suppressed root session once
 - **Then** switching tabs keeps each session's live connection and the reader's place in its timeline, including older history it paged in; content that arrived while a tab was hidden is marked on the jump control, and a turn that ended meanwhile is revealed from its start when the reader was at the bottom: up to 8 views stay open, the least recently shown closes first and reopens when shown again, and showing a tab of another server closes the views of the previous one
 - **When** the user closes a tab with its button or `mod+W`
+- **Then** only a local suppression is saved: refreshes and repeated updates keep it closed; an explicit open, a pin or a strictly newer authoritative update can bring it back, while the first update observed after an unknown close only establishes its baseline
+- **Then** closing a pinned tab removes its project pin first, and Undo restores the pin before the tab; a failed tab write compensates that pin once, and an unreadable or unloaded pin catalog refuses the close
 - **Then** a shown tab hands over to the next tab of its project, else the previous one, else the list; navigating elsewhere before the close is saved wins
 - **Then** a 3 s Undo puts the tab back in its place; a shown tab is shown again only while the reader is still where its close took them, otherwise it comes back like a background tab, without taking the selection
 - **When** the user wants a recent tab
@@ -93,7 +97,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** on desktop, holding Ctrl with Tab (Shift+Tab backwards, a held Tab keeps cycling) shows the same list and opens the highlighted tab when Ctrl is released; Escape, a tap on the strip or sheet, another session or the app leaving the foreground cancels it
 - **When** the app restarts
 - **Then** the tabs, their order and each server's selection come back the same however often they are read; opening on the workspace home returns once to the selected tab of the server whose tab was used last, while a link or a launch on another page stays where it is
-- **Then** a tab is dropped only when its server answers that the session no longer exists, with a notice; tabs whose sessions are merely absent from the loaded rows, hidden, unreadable or behind a login stay, and tabs of a removed server are removed with it
+- **Then** expiry, local hide and project closure may remove an unselected tab without making its session route read as missing; only a current server's authoritative not-found ends the view, including an answer arriving after the tab already closed locally, and releases its retained connection
+- **Then** sessions merely absent from the loaded rows, unreadable or behind a login keep their tabs; known background-project rows need no full history read, tabs of a removed server leave with it, and a failed automatic tab write waits for later external input rather than immediately retrying itself
 - **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
 
 ### V2 project contexts
