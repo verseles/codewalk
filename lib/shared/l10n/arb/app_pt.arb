@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "A conexão do servidor mudou. Reabra esta conversa para usar as configurações atuais do servidor.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "Fechar {project}",
+  "chatFilterSessions": "Filtrar sessões",
+  "chatNoConversationsInProject": "Nenhuma conversa neste projeto.",
+  "chatOpenProjectToLoad": "Abra um projeto para carregar conversas.",
+  "chatRecentSessions": "Sessões recentes",
+  "chatSearchConversations": "Buscar conversas",
+  "chatSortOldest": "Mais Antigas",
+  "chatSortRecent": "Recentes",
+  "chatSortSessions": "Ordenar sessões",
+  "chatSortTitle": "Título",
+  "projectProviderErrorAtLeastOneContext": "Pelo menos um contexto deve permanecer aberto",
+  "sessionPin": "Fixar",
+  "sessionUnpin": "Desafixar",
+  "workspaceOpenProjects": "Projetos abertos",
+  "projectsCapacity": "Os projetos abertos ou fixados atingiram o limite. Feche um projeto ou desafixe uma conversa antes.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Não foi possível ler ou salvar os projetos. Tente novamente.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filtro: {filter}. Ordem: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Fixada",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Conversas: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Conversas: {count} ou mais",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Escolher diretório",
+  "chatChooseFolderOpen": "Escolha uma pasta para abrir como contexto do projeto.",
+  "chatFailedToLoadDirectories": "Falha ao carregar diretórios",
+  "workspaceBrowseDirs": "Navegar diretórios",
+  "workspaceCurrentDirectory": "Diretório atual: {path}",
+  "workspaceFailedToOpenProjectContext": "Falha ao abrir o contexto do projeto: {directory}",
+  "workspaceFilterDirs": "Filtrar diretórios",
+  "workspaceOpenFolder": "Abrir pasta",
+  "workspaceProjectHint": "/repo/meu-projeto",
+  "workspaceRemoveFromHistory": "Remover {name} do histórico"
 }

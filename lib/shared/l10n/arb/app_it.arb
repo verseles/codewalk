@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "La connessione al server è cambiata. Riapri questa conversazione per usare le impostazioni attuali del server.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "Chiudi {project}",
+  "chatFilterSessions": "Filtra sessioni",
+  "chatNoConversationsInProject": "Nessuna conversazione in questo progetto.",
+  "chatOpenProjectToLoad": "Apri un progetto per caricare le conversazioni.",
+  "chatRecentSessions": "Sessioni recenti",
+  "chatSearchConversations": "Cerca conversazioni",
+  "chatSortOldest": "Meno recenti",
+  "chatSortRecent": "Recenti",
+  "chatSortSessions": "Ordina sessioni",
+  "chatSortTitle": "Titolo",
+  "projectProviderErrorAtLeastOneContext": "Almeno un contesto deve rimanere aperto",
+  "sessionPin": "Fissa",
+  "sessionUnpin": "Rimuovi",
+  "workspaceOpenProjects": "Progetti aperti",
+  "projectsCapacity": "I progetti aperti o i fissati hanno raggiunto il limite. Chiudi prima un progetto o sblocca una conversazione.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Impossibile leggere o salvare i progetti. Riprova.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filtro: {filter}. Ordine: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Fissata",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Conversazioni: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Conversazioni: {count} o più",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Scegli directory",
+  "chatChooseFolderOpen": "Scegli una cartella da aprire come contesto del progetto.",
+  "chatFailedToLoadDirectories": "Impossibile caricare le directory",
+  "workspaceBrowseDirs": "Sfoglia directory",
+  "workspaceCurrentDirectory": "Directory corrente: {path}",
+  "workspaceFailedToOpenProjectContext": "Impossibile aprire il contesto del progetto: {directory}",
+  "workspaceFilterDirs": "Filtra directory",
+  "workspaceOpenFolder": "Apri cartella",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "Rimuovi {name} dalla cronologia"
 }

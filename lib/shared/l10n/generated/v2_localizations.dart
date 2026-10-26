@@ -3152,6 +3152,186 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'The server connection changed. Reopen this conversation to use the current server settings.'**
   String get liveSourceChanged;
+
+  /// CodeWalk UI string — chatCloseProject
+  ///
+  /// In en, this message translates to:
+  /// **'Close {project}'**
+  String chatCloseProject(String project);
+
+  /// CodeWalk UI string — chatFilterSessions
+  ///
+  /// In en, this message translates to:
+  /// **'Filter sessions'**
+  String get chatFilterSessions;
+
+  /// CodeWalk UI string — chatNoConversationsInProject
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations in this project.'**
+  String get chatNoConversationsInProject;
+
+  /// CodeWalk UI string — chatOpenProjectToLoad
+  ///
+  /// In en, this message translates to:
+  /// **'Open project to load conversations.'**
+  String get chatOpenProjectToLoad;
+
+  /// CodeWalk UI string — chatRecentSessions
+  ///
+  /// In en, this message translates to:
+  /// **'Recent sessions'**
+  String get chatRecentSessions;
+
+  /// CodeWalk UI string — chatSearchConversations
+  ///
+  /// In en, this message translates to:
+  /// **'Search conversations'**
+  String get chatSearchConversations;
+
+  /// CodeWalk UI string — chatSortOldest
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get chatSortOldest;
+
+  /// CodeWalk UI string — chatSortRecent
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get chatSortRecent;
+
+  /// CodeWalk UI string — chatSortSessions
+  ///
+  /// In en, this message translates to:
+  /// **'Sort sessions'**
+  String get chatSortSessions;
+
+  /// CodeWalk UI string — chatSortTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get chatSortTitle;
+
+  /// CodeWalk UI string — projectProviderErrorAtLeastOneContext
+  ///
+  /// In en, this message translates to:
+  /// **'At least one context must remain open'**
+  String get projectProviderErrorAtLeastOneContext;
+
+  /// CodeWalk UI string — sessionPin
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get sessionPin;
+
+  /// CodeWalk UI string — sessionUnpin
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get sessionUnpin;
+
+  /// CodeWalk UI string — workspaceOpenProjects
+  ///
+  /// In en, this message translates to:
+  /// **'Open projects'**
+  String get workspaceOpenProjects;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'The open projects or pins reached their limit. Close a project or unpin a session first.'**
+  String get projectsCapacity;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Projects could not be read or saved. Try again.'**
+  String get projectsUnavailable;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Filter: {filter}. Sort: {sort}.'**
+  String sessionsListState(Object filter, Object sort);
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get sessionsPinnedMark;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations: {count}'**
+  String projectsSessionCount(Object count);
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations: {count} or more'**
+  String projectsSessionCountAtLeast(Object count);
+
+  /// CodeWalk UI string — chatChooseDirectory
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Directory'**
+  String get chatChooseDirectory;
+
+  /// CodeWalk UI string — chatChooseFolderOpen
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder to open as project context.'**
+  String get chatChooseFolderOpen;
+
+  /// CodeWalk UI string — chatFailedToLoadDirectories
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load directories'**
+  String get chatFailedToLoadDirectories;
+
+  /// CodeWalk UI string — workspaceBrowseDirs
+  ///
+  /// In en, this message translates to:
+  /// **'Browse directories'**
+  String get workspaceBrowseDirs;
+
+  /// CodeWalk UI string — workspaceCurrentDirectory
+  ///
+  /// In en, this message translates to:
+  /// **'Current directory: {path}'**
+  String workspaceCurrentDirectory(String path);
+
+  /// CodeWalk UI string — workspaceFailedToOpenProjectContext
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open project context: {directory}'**
+  String workspaceFailedToOpenProjectContext(String directory);
+
+  /// CodeWalk UI string — workspaceFilterDirs
+  ///
+  /// In en, this message translates to:
+  /// **'Filter directories'**
+  String get workspaceFilterDirs;
+
+  /// CodeWalk UI string — workspaceOpenFolder
+  ///
+  /// In en, this message translates to:
+  /// **'Open folder'**
+  String get workspaceOpenFolder;
+
+  /// CodeWalk UI string — workspaceProjectHint
+  ///
+  /// In en, this message translates to:
+  /// **'/repo/my-project'**
+  String get workspaceProjectHint;
+
+  /// CodeWalk UI string — workspaceRemoveFromHistory
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from history'**
+  String workspaceRemoveFromHistory(String name);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

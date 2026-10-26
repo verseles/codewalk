@@ -1702,4 +1702,114 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'La conexión del servidor cambió. Vuelve a abrir esta conversación para usar la configuración actual del servidor.';
+
+  @override
+  String chatCloseProject(String project) {
+    return 'Cerrar $project';
+  }
+
+  @override
+  String get chatFilterSessions => 'Filtrar sesiones';
+
+  @override
+  String get chatNoConversationsInProject =>
+      'No hay conversaciones en este proyecto.';
+
+  @override
+  String get chatOpenProjectToLoad =>
+      'Abra un proyecto para cargar conversaciones.';
+
+  @override
+  String get chatRecentSessions => 'Sesiones recientes';
+
+  @override
+  String get chatSearchConversations => 'Buscar conversaciones';
+
+  @override
+  String get chatSortOldest => 'Más Antiguas';
+
+  @override
+  String get chatSortRecent => 'Recientes';
+
+  @override
+  String get chatSortSessions => 'Ordenar sesiones';
+
+  @override
+  String get chatSortTitle => 'Título';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'Al menos un contexto debe permanecer abierto';
+
+  @override
+  String get sessionPin => 'Fijar';
+
+  @override
+  String get sessionUnpin => 'Desfijar';
+
+  @override
+  String get workspaceOpenProjects => 'Proyectos abiertos';
+
+  @override
+  String get projectsCapacity =>
+      'Los proyectos abiertos o fijados alcanzaron su límite. Cierra un proyecto o desfija una conversación primero.';
+
+  @override
+  String get projectsUnavailable =>
+      'No se pudieron leer ni guardar los proyectos. Inténtalo de nuevo.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'Filtro: $filter. Orden: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'Fijada';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'Conversaciones: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'Conversaciones: $count o más';
+  }
+
+  @override
+  String get chatChooseDirectory => 'Elegir directorio';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'Elija una carpeta para abrir como contexto del proyecto.';
+
+  @override
+  String get chatFailedToLoadDirectories => 'Error al cargar directorios';
+
+  @override
+  String get workspaceBrowseDirs => 'Explorar directorios';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'Directorio actual: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'No se pudo abrir el contexto del proyecto: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'Filtrar directorios';
+
+  @override
+  String get workspaceOpenFolder => 'Abrir carpeta';
+
+  @override
+  String get workspaceProjectHint => '/repo/mi-proyecto';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'Eliminar $name del historial';
+  }
 }

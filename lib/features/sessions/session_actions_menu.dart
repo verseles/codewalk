@@ -9,6 +9,8 @@ import 'sessions_controller.dart';
 /// The actions one session row offers.
 enum SessionRowAction {
   history,
+  pin,
+  unpin,
   markViewed,
   rename,
   fork,
@@ -29,6 +31,8 @@ class SessionActionsMenu extends StatefulWidget {
     required this.menuKey,
     this.onHistory,
     this.historyEnabled = true,
+    this.pinned = false,
+    this.onPin,
     super.key,
   });
 
@@ -42,6 +46,12 @@ class SessionActionsMenu extends StatefulWidget {
   /// opening the session itself. Null leaves the entry out.
   final VoidCallback? onHistory;
   final bool historyEnabled;
+
+  /// Whether the row is pinned in its project, and the local pin toggle;
+  /// a null [onPin] leaves the entry out, as a row outside a project
+  /// context has nothing to be pinned in.
+  final bool pinned;
+  final ValueChanged<bool>? onPin;
 
   @override
   State<SessionActionsMenu> createState() => _SessionActionsMenuState();
@@ -82,6 +92,14 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
               value: SessionRowAction.history,
               enabled: widget.historyEnabled,
               child: Text(l10n.historyOpen),
+            ),
+          if (widget.onPin != null)
+            PopupMenuItem<SessionRowAction>(
+              key: ValueKey('session-pin-${row.info.ref.storageKey}'),
+              value: widget.pinned
+                  ? SessionRowAction.unpin
+                  : SessionRowAction.pin,
+              child: Text(widget.pinned ? l10n.sessionUnpin : l10n.sessionPin),
             ),
           if (unread)
             PopupMenuItem<SessionRowAction>(
@@ -171,6 +189,10 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     switch (action) {
       case SessionRowAction.history:
         widget.onHistory?.call();
+      case SessionRowAction.pin:
+        widget.onPin?.call(true);
+      case SessionRowAction.unpin:
+        widget.onPin?.call(false);
       case SessionRowAction.markViewed:
         await controller.markViewed(row);
       case SessionRowAction.rename:
@@ -203,10 +225,8 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
   Future<bool> _confirmDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => _DeleteDialog(
-        controller: widget.controller,
-        row: widget.row,
-      ),
+      builder: (context) =>
+          _DeleteDialog(controller: widget.controller, row: widget.row),
     );
     return confirmed ?? false;
   }
@@ -224,9 +244,7 @@ class _RenameDialog extends StatefulWidget {
 
 class _RenameDialogState extends State<_RenameDialog> {
   late final TextEditingController _text = TextEditingController(
-    text: widget.row.info.title.trim().isEmpty
-        ? ''
-        : widget.row.info.title,
+    text: widget.row.info.title.trim().isEmpty ? '' : widget.row.info.title,
   );
 
   @override
@@ -258,7 +276,10 @@ class _RenameDialogState extends State<_RenameDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.commonCancel),
         ),
-        TextButton(onPressed: _submit, child: Text(l10n.sessionsActionRenameSave)),
+        TextButton(
+          onPressed: _submit,
+          child: Text(l10n.sessionsActionRenameSave),
+        ),
       ],
     );
   }

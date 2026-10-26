@@ -1565,4 +1565,108 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveSourceChanged => '服务器连接已更改。请重新打开此对话以使用当前服务器设置。';
+
+  @override
+  String chatCloseProject(String project) {
+    return '关闭 $project';
+  }
+
+  @override
+  String get chatFilterSessions => '筛选会话';
+
+  @override
+  String get chatNoConversationsInProject => '此项目中没有会话。';
+
+  @override
+  String get chatOpenProjectToLoad => '打开项目以加载会话。';
+
+  @override
+  String get chatRecentSessions => '最近会话';
+
+  @override
+  String get chatSearchConversations => '搜索会话';
+
+  @override
+  String get chatSortOldest => '最早';
+
+  @override
+  String get chatSortRecent => '最近';
+
+  @override
+  String get chatSortSessions => '排序会话';
+
+  @override
+  String get chatSortTitle => '标题';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext => '至少必须保留一个打开的上下文';
+
+  @override
+  String get sessionPin => '固定';
+
+  @override
+  String get sessionUnpin => '取消固定';
+
+  @override
+  String get workspaceOpenProjects => '打开的项目';
+
+  @override
+  String get projectsCapacity => '打开的项目或置顶已达上限。请先关闭一个项目或取消置顶一个对话。';
+
+  @override
+  String get projectsUnavailable => '无法读取或保存项目。请重试。';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return '筛选：$filter。排序：$sort。';
+  }
+
+  @override
+  String get sessionsPinnedMark => '已置顶';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return '对话：$count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return '对话：$count 个或更多';
+  }
+
+  @override
+  String get chatChooseDirectory => '选择目录';
+
+  @override
+  String get chatChooseFolderOpen => '选择一个文件夹作为项目上下文打开。';
+
+  @override
+  String get chatFailedToLoadDirectories => '加载目录失败';
+
+  @override
+  String get workspaceBrowseDirs => '浏览目录';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return '当前目录：$path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return '打开项目上下文失败：$directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => '过滤目录';
+
+  @override
+  String get workspaceOpenFolder => '打开文件夹';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return '从历史记录中移除 $name';
+  }
 }

@@ -12,6 +12,7 @@ import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../hosts/endpoint_health_controller.dart';
+import 'project_contexts_controller.dart';
 import 'session_live_controller.dart';
 import 'session_live_page.dart';
 import 'session_tab_strip.dart';
@@ -53,6 +54,9 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
 
   /// The session whose tab this page opened, so it is opened once.
   SessionRef? _opened;
+
+  /// The session last reported as the view of its project.
+  SessionRef? _viewed;
 
   /// The tab of this session was seen saved; its later absence means it
   /// was dropped or closed.
@@ -284,9 +288,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     }
     if (_live?.disposed ?? false) _live = null;
     final live = _live;
-    final row = catalog.sessions
-        .where((row) => row.info.ref == _ref)
-        .firstOrNull;
+    final row = catalog.findSession(_ref);
     // A kept view shows the newest row, a rename say, even while it stays
     // on screen.
     if (live != null && row != null && !identical(live.summary, row)) {
@@ -379,6 +381,15 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       if (row != null && !identical(live.summary, row)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) live.updateSummary(row);
+        });
+      }
+      if (_viewed != ref) {
+        // The shown session is the view of its project, which becomes the
+        // project the list shows.
+        _viewed = ref;
+        final contexts = context.read<ProjectContextsController?>();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) contexts?.recordView(summary);
         });
       }
       if (tabs != null && _opened != ref) {

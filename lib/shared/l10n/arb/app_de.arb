@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "Die Serververbindung hat sich geändert. Öffne diese Unterhaltung erneut, um die aktuellen Servereinstellungen zu verwenden.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "{project} schließen",
+  "chatFilterSessions": "Sitzungen filtern",
+  "chatNoConversationsInProject": "Keine Konversationen in diesem Projekt.",
+  "chatOpenProjectToLoad": "Projekt öffnen, um Konversationen zu laden.",
+  "chatRecentSessions": "Letzte Sitzungen",
+  "chatSearchConversations": "Konversationen suchen",
+  "chatSortOldest": "Älteste",
+  "chatSortRecent": "Kürzlich",
+  "chatSortSessions": "Sitzungen sortieren",
+  "chatSortTitle": "Titel",
+  "projectProviderErrorAtLeastOneContext": "Mindestens ein Kontext muss geöffnet bleiben",
+  "sessionPin": "Anheften",
+  "sessionUnpin": "Anheften aufheben",
+  "workspaceOpenProjects": "Offene Projekte",
+  "projectsCapacity": "Die offenen Projekte oder Anheftungen haben ihr Limit erreicht. Schließe zuerst ein Projekt oder löse eine Unterhaltung.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Die Projekte konnten nicht gelesen oder gespeichert werden. Versuche es erneut.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filter: {filter}. Sortierung: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Angeheftet",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Unterhaltungen: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Unterhaltungen: {count} oder mehr",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Verzeichnis auswählen",
+  "chatChooseFolderOpen": "Wählen Sie einen Ordner aus, der als Projektkontext geöffnet werden soll.",
+  "chatFailedToLoadDirectories": "Verzeichnisse konnten nicht geladen werden",
+  "workspaceBrowseDirs": "Verzeichnisse durchsuchen",
+  "workspaceCurrentDirectory": "Aktuelles Verzeichnis: {path}",
+  "workspaceFailedToOpenProjectContext": "Projektkontext konnte nicht geöffnet werden: {directory}",
+  "workspaceFilterDirs": "Verzeichnisse filtern",
+  "workspaceOpenFolder": "Ordner öffnen",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "{name} aus dem Verlauf entfernen"
 }

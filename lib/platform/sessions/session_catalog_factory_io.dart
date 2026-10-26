@@ -21,11 +21,13 @@ final class _NativeSource implements SessionCatalogSource {
       ),
     );
     _reader = OpenCodeSessionReader(_transport, harness: harness);
+    _locations = OpenCodeLocationReader(_transport, harness: harness);
   }
   @override
   final HarnessRef harness;
   late final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
+  late final OpenCodeLocationReader _locations;
   bool _closed = false;
   @override
   SessionCatalogTask list(SessionQuery query) => _NativeTask(_reader, query);
@@ -63,12 +65,70 @@ final class _NativeSource implements SessionCatalogSource {
   }
 
   @override
+  SessionCatalogRead<List<ProjectRef>> projects() => _NativeRequest(
+    (cancellation) => _locations.listProjects(cancellation: cancellation),
+  );
+  @override
+  SessionCatalogRead<ProjectRef> location({String? directory}) =>
+      _NativeRequest(
+        (cancellation) => _locations.readLocation(
+          directory: directory,
+          cancellation: cancellation,
+        ),
+      );
+  @override
+  SessionCatalogRead<List<FileEntry>> listDirectory(
+    String directory, {
+    String? path,
+  }) => _NativeRequest(
+    (cancellation) => _locations.listDirectory(
+      directory: directory,
+      path: path,
+      cancellation: cancellation,
+    ),
+  );
+  @override
+  SessionCatalogRead<List<FileEntry>> findDirectories(
+    String directory,
+    String query,
+  ) => _NativeRequest(
+    (cancellation) => _locations.findDirectories(
+      directory: directory,
+      query: query,
+      cancellation: cancellation,
+    ),
+  );
+
+  @override
   void close() {
     if (_closed) return;
     _closed = true;
     _reader.dispose();
+    _locations.dispose();
     _transport.close();
   }
+}
+
+/// A location or directory read; a missing directory is not found.
+final class _NativeRequest<T> implements SessionCatalogRead<T> {
+  _NativeRequest(Future<T> Function(RequestCancellation) read) {
+    result = _read(read);
+  }
+  final _cancellation = RequestCancellation();
+  @override
+  late final Future<T> result;
+  Future<T> _read(Future<T> Function(RequestCancellation) read) async {
+    try {
+      return await read(_cancellation);
+    } on OpenCodeSessionReadException catch (error) {
+      throw SessionCatalogException(_failure(error.failure, read: true));
+    } on Object {
+      throw const SessionCatalogException(SessionCatalogFailure.connection);
+    }
+  }
+
+  @override
+  void cancel() => _cancellation.cancel();
 }
 
 final class _NativeTask implements SessionCatalogTask {

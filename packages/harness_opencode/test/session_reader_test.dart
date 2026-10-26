@@ -129,7 +129,6 @@ void main() {
       final reader = OpenCodeSessionReader(transport, harness: harness);
       for (final query in [
         SessionQuery(activeOnly: true),
-        SessionQuery(project: const ProjectRef(HostId('host-a'), '/project')),
         SessionQuery(limit: 201),
       ]) {
         await expectLater(
@@ -159,6 +158,135 @@ void main() {
       other.dispose();
     },
   );
+
+  group('directory scope', () {
+    const project = ProjectRef(HostId('host-a'), '/work/app');
+    Map<String, Object?> scoped(String id, String directory) => {
+      ...row(id),
+      'location': {'directory': directory},
+    };
+
+    test('a project lists exactly its directory and pages it', () async {
+      var calls = 0;
+      final transport = TestTransport((request, _) {
+        final query = Uri.parse(request.path).queryParameters;
+        if (calls++ == 0) {
+          expect(query, {
+            'limit': '50',
+            'order': 'desc',
+            'directory': '/work/app',
+          });
+          return response(
+            page([scoped('ses_a', '/work/app')], next: 'native-next'),
+          );
+        }
+        // The native cursor carries its filters; nothing else is sent.
+        expect(query, {'limit': '50', 'cursor': 'native-next'});
+        return response(page([]));
+      });
+      final reader = OpenCodeSessionReader(transport, harness: harness);
+      final first = await reader.listSessions(SessionQuery(project: project));
+      expect(first.items.single.info.project?.canonicalDirectory, '/work/app');
+      final second = await reader.listSessions(
+        SessionQuery(project: project, cursor: first.nextCursor),
+      );
+      expect(second.items, isEmpty);
+      expect(second.nextCursor, isNull);
+      reader.dispose();
+    });
+
+    test(
+      'a cursor never continues another directory or the full list',
+      () async {
+        final transport = TestTransport(
+          (_, _) => response(page([scoped('ses_a', '/work/app')], next: 'n')),
+        );
+        final reader = OpenCodeSessionReader(transport, harness: harness);
+        final cursor = (await reader.listSessions(
+          SessionQuery(project: project),
+        )).nextCursor;
+        for (final query in [
+          SessionQuery(
+            project: const ProjectRef(HostId('host-a'), '/work/other'),
+            cursor: cursor,
+          ),
+          SessionQuery(cursor: cursor),
+        ]) {
+          await expectLater(
+            reader.listSessions(query),
+            throwsA(failure(OpenCodeSessionReadFailure.invalidCursor)),
+          );
+        }
+        expect(transport.requests, hasLength(1));
+        reader.dispose();
+      },
+    );
+
+    test('a row of another directory refuses the page', () async {
+      final transport = TestTransport(
+        (_, _) => response(
+          page([
+            scoped('ses_a', '/work/app'),
+            scoped('ses_b', '/work/app/sub'),
+          ]),
+        ),
+      );
+      final reader = OpenCodeSessionReader(transport, harness: harness);
+      await expectLater(
+        reader.listSessions(SessionQuery(project: project)),
+        throwsA(failure(OpenCodeSessionReadFailure.incompatibleResponse)),
+      );
+      reader.dispose();
+    });
+
+    test('a foreign or empty project never sends', () async {
+      final transport = TestTransport((_, _) => response(page([])));
+      final reader = OpenCodeSessionReader(transport, harness: harness);
+      await expectLater(
+        reader.listSessions(
+          SessionQuery(
+            project: const ProjectRef(HostId('host-b'), '/work/app'),
+          ),
+        ),
+        throwsA(failure(OpenCodeSessionReadFailure.invalidScope)),
+      );
+      await expectLater(
+        reader.listSessions(
+          SessionQuery(project: ProjectRef(HostId('host-a'), 'x' * 4097)),
+        ),
+        throwsA(failure(OpenCodeSessionReadFailure.invalidRequest)),
+      );
+      expect(transport.requests, isEmpty);
+      reader.dispose();
+    });
+  });
+
+  test('creation time and outcome annotate a row when present', () async {
+    final transport = TestTransport(
+      (_, _) => response(
+        page([
+          {...row('ses_done'), 'outcome': 'succeeded'},
+          {...row('ses_odd'), 'outcome': 'paused'},
+          {
+            ...row('ses_bare'),
+            'time': {'updated': 2000},
+          },
+        ]),
+      ),
+    );
+    final reader = OpenCodeSessionReader(transport, harness: harness);
+    final [done, odd, bare] = (await reader.listSessions(SessionQuery())).items;
+    expect(
+      done.createdAt,
+      DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
+    );
+    expect(done.outcome, SessionOutcome.succeeded);
+    // An unknown outcome or a missing creation time leaves them out.
+    expect(odd.outcome, isNull);
+    expect(bare.createdAt, isNull);
+    expect(bare.outcome, isNull);
+    reader.dispose();
+  });
 
   test(
     'metadata keeps lineage and through boundary without inventing item IDs',

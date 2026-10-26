@@ -1601,4 +1601,110 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get liveSourceChanged =>
       '서버 연결이 변경되었습니다. 현재 서버 설정을 사용하려면 이 대화를 다시 여세요.';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project 닫기';
+  }
+
+  @override
+  String get chatFilterSessions => '세션 필터';
+
+  @override
+  String get chatNoConversationsInProject => '이 프로젝트에 대화가 없습니다.';
+
+  @override
+  String get chatOpenProjectToLoad => '대화를 로드하려면 프로젝트를 여십시오.';
+
+  @override
+  String get chatRecentSessions => '최근 세션';
+
+  @override
+  String get chatSearchConversations => '대화 검색';
+
+  @override
+  String get chatSortOldest => '오래된 순';
+
+  @override
+  String get chatSortRecent => '최근 순';
+
+  @override
+  String get chatSortSessions => '세션 정렬';
+
+  @override
+  String get chatSortTitle => '제목 순';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      '최소한 하나의 컨텍스트는 열려 있어야 합니다';
+
+  @override
+  String get sessionPin => '고정';
+
+  @override
+  String get sessionUnpin => '고정 해제';
+
+  @override
+  String get workspaceOpenProjects => '열린 프로젝트';
+
+  @override
+  String get projectsCapacity =>
+      '열린 프로젝트 또는 고정 항목이 한도에 도달했습니다. 먼저 프로젝트를 닫거나 대화 고정을 해제하세요.';
+
+  @override
+  String get projectsUnavailable => '프로젝트를 읽거나 저장할 수 없습니다. 다시 시도하세요.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return '필터: $filter. 정렬: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => '고정됨';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return '대화: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return '대화: $count개 이상';
+  }
+
+  @override
+  String get chatChooseDirectory => '디렉토리 선택';
+
+  @override
+  String get chatChooseFolderOpen => '프로젝트 컨텍스트로 열 폴더를 선택하세요.';
+
+  @override
+  String get chatFailedToLoadDirectories => '디렉토리를 로드하지 못했습니다';
+
+  @override
+  String get workspaceBrowseDirs => '디렉토리 찾아보기';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return '현재 디렉터리: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return '프로젝트 컨텍스트를 열지 못했습니다: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => '디렉토리 필터';
+
+  @override
+  String get workspaceOpenFolder => '폴더 열기';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return '기록에서 $name 제거';
+  }
 }

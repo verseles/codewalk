@@ -1427,5 +1427,53 @@
   "liveSourceChanged": "تغيّر اتصال الخادم. أعد فتح هذه المحادثة لاستخدام إعدادات الخادم الحالية.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "إغلاق {project}",
+  "chatFilterSessions": "تصفية الجلسات",
+  "chatNoConversationsInProject": "لا توجد محادثات في هذا المشروع.",
+  "chatOpenProjectToLoad": "افتح المشروع لتحميل المحادثات.",
+  "chatRecentSessions": "الجلسات الأخيرة",
+  "chatSearchConversations": "البحث في المحادثات",
+  "chatSortOldest": "الأقدم",
+  "chatSortRecent": "الأخيرة",
+  "chatSortSessions": "ترتيب الجلسات",
+  "chatSortTitle": "العنوان",
+  "projectProviderErrorAtLeastOneContext": "يجب أن يبقى سياق واحد على الأقل مفتوحاً",
+  "sessionPin": "تثبيت",
+  "sessionUnpin": "إلغاء التثبيت",
+  "workspaceOpenProjects": "المشاريع المفتوحة",
+  "projectsCapacity": "بلغت المشاريع المفتوحة أو المثبتات حدها. أغلق مشروعًا أو ألغِ تثبيت محادثة أولًا.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "تعذرت قراءة المشاريع أو حفظها. حاول مرة أخرى.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "التصفية: {filter}. الترتيب: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "مثبتة",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "المحادثات: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "المحادثات: {count} أو أكثر",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "اختر الدليل",
+  "chatChooseFolderOpen": "اختر مجلداً لفتحه كسياق للمشروع.",
+  "chatFailedToLoadDirectories": "فشل تحميل الأدلة",
+  "workspaceBrowseDirs": "تصفح الأدلة",
+  "workspaceCurrentDirectory": "المجلد الحالي: {path}",
+  "workspaceFailedToOpenProjectContext": "فشل فتح سياق المشروع: {directory}",
+  "workspaceFilterDirs": "تصفية الأدلة",
+  "workspaceOpenFolder": "فتح مجلد",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "إزالة {name} من السجل"
 }

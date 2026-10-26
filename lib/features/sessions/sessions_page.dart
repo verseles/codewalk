@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -8,16 +10,23 @@ import 'package:provider/provider.dart';
 import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/layout/window_size_class.dart';
+import '../../shared/sessions/server_path.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../hosts/server_switcher.dart';
+import 'project_context_list.dart';
+import 'project_contexts_controller.dart';
+import 'project_picker_dialog.dart';
 import 'session_actions_menu.dart';
+import 'session_drawer_header.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
 import 'session_history_page.dart';
+import 'session_list_projection.dart';
 import 'session_ownership.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_page.dart';
@@ -26,6 +35,9 @@ import 'workspace_draft_page.dart';
 /// indents: deeper rows still nest, at the cap's indent.
 const _nestingIndent = 16.0;
 const _nestingMaxLevels = 3;
+
+/// The conversations an inactive project previews from its last read.
+const _previewRows = 3;
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
@@ -36,6 +48,9 @@ class SessionsPage extends StatefulWidget {
 class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
   bool _openingHistory = false;
+
+  /// Rebuilds the list when the first unread emphasis ends.
+  Timer? _emphasis;
 
   /// The popup of each row, so the row's own gestures open the same menu.
   final _menuKeys = <String, GlobalKey<PopupMenuButtonState>>{};
@@ -63,8 +78,24 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   @override
+  void dispose() {
+    _emphasis?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleEmphasis(Duration? next) {
+    _emphasis?.cancel();
+    _emphasis = next == null
+        ? null
+        : Timer(next, () {
+            if (mounted) setState(() {});
+          });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final controller = context.watch<SessionsController?>();
+    final contexts = context.watch<ProjectContextsController?>();
     final l10n = context.v2L10n;
     if (controller == null) {
       return Center(
@@ -76,17 +107,24 @@ class _SessionsPageState extends State<SessionsPage> {
     }
     final hosts = controller.hosts;
     final available = !hosts.loading && !hosts.storageError;
-    // The list is grouped by the project the server attributed each session
-    // to; the groups follow the rows the server returned, and inside a group
-    // a child is drawn under the parent its record names.
-    final open = controller.selectedProject;
-    final items = sessionListItems(controller.sessions, open: open);
+    final compact = WindowSizeClass.fromWidth(
+      MediaQuery.sizeOf(context).width,
+    ).isCompact;
+    // The list reads one project context once the contexts are readable;
+    // until then it reads the whole server, grouped by project.
+    final directory = controller.directory;
+    final scoped =
+        contexts != null &&
+        contexts.available &&
+        directory != null &&
+        contexts.active == directory;
     final createReason =
         controller.selectedProfile != null &&
             controller.createReason != SessionActionReason.none &&
             controller.createReason != SessionActionReason.commandInFlight
         ? _actionReasonText(l10n, controller.createReason)
         : null;
+    final notice = contexts?.notice ?? ProjectContextNotice.none;
     final notices = <String>[
       if (hosts.storageError) l10n.hostsProfileStorageError,
       if (hosts.loading || controller.loading) l10n.sessionsLoading,
@@ -100,159 +138,396 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.hideUnreadable) l10n.sessionsActionUnavailableStore,
       if (controller.actionUncertain) l10n.sessionsActionPending,
       ?createReason,
+      if (notice == ProjectContextNotice.soleContext)
+        l10n.projectProviderErrorAtLeastOneContext,
+      if (notice == ProjectContextNotice.capacity) l10n.projectsCapacity,
+      if (notice == ProjectContextNotice.unavailable ||
+          (contexts?.unreadable ?? false))
+        l10n.projectsUnavailable,
       if (controller.loaded &&
           !controller.loading &&
           !controller.stale &&
           controller.failure == null &&
           controller.sessions.isEmpty)
-        l10n.sessionsEmpty,
+        scoped ? l10n.chatNoConversationsInProject : l10n.sessionsEmpty,
     ];
+    final rows = scoped
+        ? _scopedRows(context, controller, contexts, available, compact)
+        : _serverRows(context, controller, available, compact);
+    final header = _header(
+      context,
+      controller,
+      contexts != null && contexts.available ? contexts : null,
+      available,
+      notices,
+    );
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 960),
         child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: items.length + 2,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Column(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 12 : 8,
+            vertical: compact ? 16 : 8,
+          ),
+          itemCount: rows.length + 1,
+          itemBuilder: (context, index) =>
+              index == 0 ? header : rows[index - 1](context),
+        ),
+      ),
+    );
+  }
+
+  Widget _header(
+    BuildContext context,
+    SessionsController controller,
+    ProjectContextsController? contexts,
+    bool available,
+    List<String> notices,
+  ) {
+    final l10n = context.v2L10n;
+    final hosts = controller.hosts;
+    final ready = available && controller.selectedProfile != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const WorkspaceDrawerNotice(),
+        if (hosts.loading || controller.loading)
+          LinearProgressIndicator(semanticsLabel: l10n.sessionsLoading),
+        const ServerSwitcher(),
+        if (contexts != null && ready)
+          _projectTitle(context, controller, contexts),
+        const SizedBox(height: 8),
+        SessionDrawerHeader(
+          catalog: controller,
+          contexts: contexts,
+          onCreate: ready && !controller.creating
+              ? () => openWorkspaceDraft(context)
+              : null,
+        ),
+        Wrap(
+          spacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            IconButton(
+              key: const ValueKey('sessions-refresh'),
+              tooltip: l10n.chatRefresh,
+              onPressed: ready && !controller.refreshing
+                  ? controller.refresh
+                  : null,
+              icon: const Icon(Icons.refresh),
+            ),
+            if (hosts.storageError)
+              TextButton(
+                onPressed: hosts.loading ? null : hosts.load,
+                child: Text(l10n.chatRetry),
+              ),
+            IconButton(
+              key: const ValueKey('sessions-settings'),
+              tooltip: l10n.settingsTitle,
+              onPressed: () => context.push('/settings'),
+              icon: const Icon(Icons.settings_outlined),
+            ),
+            TextButton(
+              key: const ValueKey('sessions-hosts'),
+              onPressed: () => context.push('/hosts'),
+              child: Text(l10n.onboardingConnectRunningServer),
+            ),
+          ],
+        ),
+        for (final notice in notices)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(notice),
+          ),
+      ],
+    );
+  }
+
+  /// The project the list shows; a tap opens the project picker.
+  Widget _projectTitle(
+    BuildContext context,
+    SessionsController controller,
+    ProjectContextsController contexts,
+  ) {
+    final l10n = context.v2L10n;
+    final theme = Theme.of(context);
+    final active = contexts.active;
+    return InkWell(
+      key: const ValueKey('project-title'),
+      onTap: () async {
+        final before = contexts.active;
+        await showProjectPicker(
+          context,
+          catalog: controller,
+          contexts: contexts,
+        );
+        final after = contexts.active;
+        if (context.mounted && after != null && after != before) {
+          _showContext(context, controller, contexts, after);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 4, 4),
+        child: Row(
+          children: [
+            const Icon(Icons.folder_outlined, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const WorkspaceDrawerNotice(),
                   Text(
-                    l10n.chatConversations,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    active == null
+                        ? l10n.chatChooseDirectory
+                        : serverPathTitle(active),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 16),
-                  if (hosts.loading || controller.loading)
-                    LinearProgressIndicator(
-                      semanticsLabel: l10n.sessionsLoading,
-                    ),
-                  const ServerSwitcher(),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      PopupMenuButton<SessionActionFilter>(
-                      key: const ValueKey('sessions-filter'),
-                      tooltip: _filterLabel(l10n, controller.filter),
-                      onSelected: controller.setFilter,
-                      itemBuilder: (context) => [
-                        for (final filter in SessionActionFilter.values)
-                          PopupMenuItem<SessionActionFilter>(
-                            value: filter,
-                            child: Text(_filterLabel(l10n, filter)),
-                          ),
-                      ],
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(_filterLabel(l10n, controller.filter)),
-                            ),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
+                  if (active != null)
+                    StartEllipsisPath(
+                      active,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      // The create is a compact control, so the header does
-                      // not push the rows out of a small viewport.
-                      IconButton.filled(
-                        key: const ValueKey('sessions-create'),
-                        tooltip: l10n.sessionsCreateNew,
-                        onPressed:
-                            available &&
-                                controller.selectedProfile != null &&
-                                !controller.creating
-                            ? () => _openCreate(context, controller)
-                            : null,
-                        icon: const Icon(Icons.add),
-                      ),
-                      FilledButton.tonal(
-                        key: const ValueKey('sessions-refresh'),
-                        onPressed:
-                            available &&
-                                controller.selectedProfile != null &&
-                                !controller.refreshing
-                            ? controller.refresh
-                            : null,
-                        child: Text(l10n.chatRefresh),
-                      ),
-                      if (hosts.storageError)
-                        TextButton(
-                          onPressed: hosts.loading ? null : hosts.load,
-                          child: Text(l10n.chatRetry),
-                        ),
-                      IconButton(
-                        key: const ValueKey('sessions-settings'),
-                        tooltip: l10n.settingsTitle,
-                        onPressed: () => context.push('/settings'),
-                        icon: const Icon(Icons.settings_outlined),
-                      ),
-                      TextButton(
-                        key: const ValueKey('sessions-hosts'),
-                        onPressed: () => context.push('/hosts'),
-                        child: Text(l10n.onboardingConnectRunningServer),
-                      ),
-                    ],
-                  ),
-                  for (final notice in notices)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(notice),
                     ),
                 ],
-              );
-            }
-            if (index == items.length + 1) {
-              return Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
-                  key: const ValueKey('sessions-more'),
-                  onPressed:
-                      available &&
-                          controller.hasMore &&
-                          !controller.loading &&
-                          !controller.stale
-                      ? controller.loadMore
-                      : null,
-                  child: Text(l10n.chatLoadMore),
-                ),
-              );
-            }
-            final item = items[index - 1];
-            return switch (item) {
-              SessionGroupHeader(:final group) => _groupHeader(
-                context,
-                controller,
-                group,
-                selected: open?.project == group.project,
               ),
-              SessionRow(
-                :final session,
-                :final depth,
-                :final parentElsewhere,
-              ) =>
-                _nested(
-                  context,
-                  session,
-                  depth,
-                  _row(
-                    context,
-                    controller,
-                    available,
-                    session,
-                    lineage: depth > 0
-                        ? l10n.sessionsChildSession
-                        : parentElsewhere
-                        ? l10n.sessionsChildParentElsewhere
-                        : null,
-                  ),
-                ),
-            };
-          },
+            ),
+            Icon(Icons.unfold_more, semanticLabel: l10n.chatChooseDirectory),
+          ],
         ),
+      ),
+    );
+  }
+
+  /// The list of one project context: Recent across the open projects,
+  /// then the open projects, the shown one followed by its conversations
+  /// and the others by a preview of their last read.
+  List<WidgetBuilder> _scopedRows(
+    BuildContext context,
+    SessionsController controller,
+    ProjectContextsController contexts,
+    bool available,
+    bool compact,
+  ) {
+    final l10n = context.v2L10n;
+    final shown = controller.directory!;
+    final now = controller.now;
+    final current = contexts.viewOf(shown);
+    final everything = [
+      for (final directory in contexts.open)
+        ...?controller.contextRows(directory),
+    ];
+    final hidden = controller.hiddenIn(everything);
+    final visible = filterSessions(everything, hidden, controller.filter);
+    final recent = recentSessions(everything, hidden);
+    // Every emphasized row ends its hour, Recent's included.
+    _scheduleEmphasis(nextEmphasisEnd([...visible, ...recent], now: now));
+    final builders = <WidgetBuilder>[
+      if (recent.isNotEmpty) ...[
+        (context) => _sectionTitle(context, l10n.chatRecentSessions),
+        for (final row in recent)
+          (context) => RecentSessionRow(
+            row: row,
+            current: row.info.ref == current,
+            running: controller
+                .activityMarks(row)
+                .contains(SessionActivityMark.running),
+            emphasized: unreadEmphasized(row, now: now, current: current),
+            onTap: available ? () => _openLive(context, controller, row) : null,
+          ),
+      ],
+      (context) => _sectionTitle(context, l10n.workspaceOpenProjects),
+    ];
+    for (final directory in contexts.open) {
+      final active = directory == shown;
+      // A project not read yet has no count and says so.
+      final rows = active
+          ? (controller.contextRows(directory) == null
+                ? null
+                : controller.sessions)
+          : switch (controller.contextRows(directory)) {
+              final rows? => filterSessions(rows, hidden, controller.filter),
+              null => null,
+            };
+      builders.add(
+        (context) => ProjectContextRow(
+          key: ValueKey('project-row-$directory'),
+          directory: directory,
+          active: active,
+          count: rows?.length,
+          complete: controller.contextComplete(directory),
+          compact: compact,
+          onTap: active || contexts.busy
+              ? null
+              : () async {
+                  if (await contexts.activate(directory) && context.mounted) {
+                    _showContext(context, controller, contexts, directory);
+                  }
+                },
+          onClose: contexts.busy
+              ? null
+              : () async {
+                  // Closing the shown project shows the one that takes
+                  // its place, never a session of the closed project.
+                  // A route the user changed meanwhile wins.
+                  final shown = contexts.active == directory;
+                  final router = GoRouter.of(context);
+                  final before = router.routeInformationProvider.value.uri;
+                  if (await contexts.close(directory) &&
+                      shown &&
+                      context.mounted &&
+                      router.routeInformationProvider.value.uri == before) {
+                    if (contexts.active case final next?) {
+                      _showContext(context, controller, contexts, next);
+                    }
+                  }
+                },
+        ),
+      );
+      if (active && rows != null) {
+        final listed = projectSessionList(
+          controller.sessions,
+          query: contexts.query,
+          sort: contexts.preferences.sort,
+          pinned: contexts.isPinned,
+        );
+        for (final item in listed) {
+          builders.add(
+            (context) => _sessionRow(
+              context,
+              controller,
+              contexts,
+              available,
+              compact,
+              item,
+              current: current,
+              emphasized: unreadEmphasized(
+                item.session,
+                now: now,
+                current: current,
+              ),
+            ),
+          );
+        }
+        builders.add((context) => _more(context, controller, available));
+      } else if (rows == null) {
+        builders.add((context) => _hint(context, l10n.chatOpenProjectToLoad));
+      } else {
+        for (final row
+            in rows
+                .where((row) => row.info.lineage.parent == null)
+                .take(_previewRows)) {
+          builders.add(
+            (context) => _preview(context, controller, available, row),
+          );
+        }
+      }
+    }
+    return builders;
+  }
+
+  /// The whole server's list, grouped by the project the server attributed
+  /// each session to; the groups follow the rows the server returned, and
+  /// inside a group a child is drawn under the parent its record names.
+  List<WidgetBuilder> _serverRows(
+    BuildContext context,
+    SessionsController controller,
+    bool available,
+    bool compact,
+  ) {
+    _scheduleEmphasis(null);
+    final open = controller.selectedProject;
+    return [
+      for (final item in sessionListItems(controller.sessions, open: open))
+        switch (item) {
+          SessionGroupHeader(:final group) => (context) => _groupHeader(
+            context,
+            controller,
+            group,
+            selected: open?.project == group.project,
+          ),
+          final SessionRow row => (context) => _sessionRow(
+            context,
+            controller,
+            null,
+            available,
+            compact,
+            row,
+          ),
+        },
+      (context) => _more(context, controller, available),
+    ];
+  }
+
+  Widget _sectionTitle(BuildContext context, String text) => Padding(
+    padding: const EdgeInsetsDirectional.fromSTEB(12, 16, 12, 4),
+    child: Semantics(
+      header: true,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ),
+  );
+
+  Widget _hint(BuildContext context, String text) => Padding(
+    padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 12, 8),
+    child: Text(
+      text,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    ),
+  );
+
+  /// One conversation of a project the list does not show, from its last
+  /// read; a tap opens it, which shows its project.
+  Widget _preview(
+    BuildContext context,
+    SessionsController controller,
+    bool available,
+    SessionSummary row,
+  ) {
+    final l10n = context.v2L10n;
+    return InkWell(
+      key: ValueKey('project-preview-${row.info.ref.storageKey}'),
+      onTap: available ? () => _openLive(context, controller, row) : null,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(24, 4, 12, 4),
+        child: Text(
+          row.info.title.trim().isEmpty
+              ? l10n.sessionExportUntitled
+              : row.info.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
+
+  Widget _more(
+    BuildContext context,
+    SessionsController controller,
+    bool available,
+  ) {
+    final l10n = context.v2L10n;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton(
+        key: const ValueKey('sessions-more'),
+        onPressed:
+            available &&
+                controller.hasMore &&
+                !controller.loading &&
+                !controller.stale
+            ? controller.loadMore
+            : null,
+        child: Text(l10n.chatLoadMore),
       ),
     );
   }
@@ -271,50 +546,44 @@ class _SessionsPageState extends State<SessionsPage> {
     final l10n = context.v2L10n;
     final theme = Theme.of(context);
     final directory = group.project?.canonicalDirectory;
-    final segments = (directory ?? '')
-        .split(RegExp(r'[/\\]'))
-        .where((segment) => segment.isNotEmpty);
     final title = directory == null
         ? l10n.sessionsUnknownProject
-        : segments.isEmpty
-        ? directory
-        : segments.last;
+        : serverPathTitle(directory);
     return Semantics(
       header: true,
       selected: selected,
-      child: InkWell(
-        key: ValueKey('session-project-${directory ?? ''}'),
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => controller.selectProject(group.project),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: selected ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                    if (directory != null)
+      child: AccentedRow(
+        selected: selected,
+        child: InkWell(
+          key: ValueKey('session-project-${directory ?? ''}'),
+          onTap: () => controller.selectProject(group.project),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 8, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       Text(
-                        directory,
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        textDirection: TextDirection.ltr,
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: selected ? theme.colorScheme.primary : null,
+                        ),
                       ),
-                  ],
+                      if (directory != null)
+                        StartEllipsisPath(
+                          directory,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(selected ? Icons.expand_less : Icons.expand_more),
-            ],
+                Icon(selected ? Icons.expand_less : Icons.expand_more),
+              ],
+            ),
           ),
         ),
       ),
@@ -338,26 +607,12 @@ class _SessionsPageState extends State<SessionsPage> {
     SessionActionReason.noIdleMarker => l10n.sessionsActionUnavailableMarker,
   };
 
-  Future<void> _openCreate(
-    BuildContext context,
-    SessionsController controller,
-  ) async {
-    openWorkspaceDraft(context);
-  }
-
-  /// The label of the filter that shows which sessions the list holds.
-  String _filterLabel(V2Localizations l10n, SessionActionFilter filter) =>
-      switch (filter) {
-        SessionActionFilter.active => l10n.sessionsFilterActive,
-        SessionActionFilter.hidden => l10n.sessionsFilterHidden,
-        SessionActionFilter.all => l10n.sessionsFilterAll,
-      };
-
   /// The row's marks, each from its own observed source: a pending
   /// permission request or form, the endpoint's active map and its unread
   /// marker (the session went idle and that transition was not seen yet).
-  /// They wrap in the narrow pane instead of overflowing it, and the label is
-  /// what a screen reader announces.
+  /// They are compact foreground badges that wrap in the narrow pane
+  /// instead of overflowing it, and the label is what a screen reader
+  /// announces.
   Widget _activityMarks(
     BuildContext context,
     SessionSummary row,
@@ -430,9 +685,9 @@ class _SessionsPageState extends State<SessionsPage> {
     BuildContext context,
     SessionSummary row,
     int depth,
-    Widget card,
+    Widget child,
   ) {
-    if (depth == 0) return card;
+    if (depth == 0) return child;
     final level = depth.clamp(1, _nestingMaxLevels);
     return Padding(
       key: ValueKey('session-nesting-${row.info.ref.storageKey}'),
@@ -451,7 +706,7 @@ class _SessionsPageState extends State<SessionsPage> {
         // The border paints over the box, so the padding clears it.
         child: Padding(
           padding: const EdgeInsetsDirectional.only(start: 8),
-          child: card,
+          child: child,
         ),
       ),
     );
@@ -471,126 +726,207 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
       );
 
+  Widget _sessionRow(
+    BuildContext context,
+    SessionsController controller,
+    ProjectContextsController? contexts,
+    bool available,
+    bool compact,
+    SessionRow item, {
+    SessionRef? current,
+    bool emphasized = false,
+  }) {
+    final l10n = context.v2L10n;
+    final row = item.session;
+    final lineage = item.depth > 0
+        ? l10n.sessionsChildSession
+        : item.parentElsewhere
+        ? l10n.sessionsChildParentElsewhere
+        : null;
+    final pinned = contexts?.isPinned(row) ?? false;
+    return _nested(
+      context,
+      row,
+      item.depth,
+      _row(
+        context,
+        controller,
+        available,
+        compact,
+        row,
+        lineage: lineage,
+        selected: row.info.ref == current,
+        emphasized: emphasized,
+        pinned: pinned,
+        onPin: contexts == null || row.info.project == null
+            ? null
+            : (pin) => unawaited(contexts.setPinned(row, pinned: pin)),
+      ),
+    );
+  }
+
   Widget _row(
     BuildContext context,
     SessionsController controller,
     bool available,
+    bool compact,
     SessionSummary row, {
     String? lineage,
+    bool selected = false,
+    bool emphasized = false,
+    bool pinned = false,
+    ValueChanged<bool>? onPin,
   }) {
     final l10n = context.v2L10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final live = context.watch<SessionLiveDirectory?>() != null;
     final history = context.watch<SessionHistoryFactory?>() != null;
     void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
-    return Card(
-      key: ValueKey<SessionRef>(row.info.ref),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onSecondaryTapUp: (_) => openMenu(),
-        child: CallbackShortcuts(
-          bindings: {
-            const SingleActivator(LogicalKeyboardKey.contextMenu): openMenu,
-            const SingleActivator(LogicalKeyboardKey.f10, shift: true):
-                openMenu,
+    final content = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onSecondaryTapUp: (_) => openMenu(),
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.contextMenu): openMenu,
+          const SingleActivator(LogicalKeyboardKey.f10, shift: true): openMenu,
+        },
+        child: Semantics(
+          selected: selected,
+          customSemanticsActions: {
+            CustomSemanticsAction(label: l10n.sessionsActionsMenu): openMenu,
           },
-          child: Semantics(
-            customSemanticsActions: {
-              CustomSemanticsAction(label: l10n.sessionsActionsMenu): openMenu,
-            },
-            child: InkWell(
-              key: ValueKey('live-open-${row.info.ref.storageKey}'),
-              // A tap opens the session; without a live view it opens the
-              // read-only history instead.
-              onTap: !available
-                  ? null
-                  : live
-                  ? () => _openLive(context, controller, row)
-                  : history
-                  ? () => _openHistory(context, controller, row)
-                  : null,
-              onLongPress: openMenu,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: InkWell(
+            key: ValueKey('live-open-${row.info.ref.storageKey}'),
+            // A tap opens the session; without a live view it opens the
+            // read-only history instead.
+            onTap: !available
+                ? null
+                : live
+                ? () => _openLive(context, controller, row)
+                : history
+                ? () => _openHistory(context, controller, row)
+                : null,
+            onLongPress: openMenu,
+            child: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                12,
+                compact ? 12 : 6,
+                4,
+                compact ? 12 : 6,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
+                        Row(
+                          children: [
+                            if (pinned)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  end: 4,
+                                ),
+                                child: Icon(
+                                  Icons.push_pin,
+                                  key: ValueKey(
+                                    'session-pinned-${row.info.ref.storageKey}',
+                                  ),
+                                  size: 14,
+                                  color: scheme.primary,
+                                  semanticLabel: l10n.sessionsPinnedMark,
+                                ),
+                              ),
+                            Expanded(
+                              child: Text(
                                 row.info.title.trim().isEmpty
                                     ? l10n.sessionExportUntitled
                                     : row.info.title,
-                                maxLines: 3,
+                                maxLines: compact ? 3 : 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style:
+                                    (compact
+                                            ? theme.textTheme.titleMedium
+                                            : theme.textTheme.titleSmall)
+                                        ?.copyWith(
+                                          color: selected || emphasized
+                                              ? scheme.primary
+                                              : null,
+                                          fontWeight: selected || emphasized
+                                              ? FontWeight.w600
+                                              : null,
+                                        ),
                               ),
-                              // The ownership the adapter proved, and
-                              // nothing else: an unproven, stale or expired
-                              // proof, and a list that is not the
-                              // endpoint's current answer, show unknown.
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  sessionOwnershipLabel(
-                                    l10n,
-                                    displayedSessionOwnership(
-                                      row.info.ownership,
-                                      now: controller.now,
-                                      current:
-                                          !controller.stale &&
-                                          !controller.behind,
-                                    ),
-                                  ),
-                                  key: ValueKey(
-                                    'session-ownership-${row.info.ref.storageKey}',
-                                  ),
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      ),
-                                ),
+                            ),
+                          ],
+                        ),
+                        // The ownership the adapter proved, and nothing
+                        // else: an unproven, stale or expired proof, and a
+                        // list that is not the endpoint's current answer,
+                        // show unknown.
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            sessionOwnershipLabel(
+                              l10n,
+                              displayedSessionOwnership(
+                                row.info.ownership,
+                                now: controller.now,
+                                current:
+                                    !controller.stale && !controller.behind,
                               ),
-                              if (lineage != null)
-                                _lineage(context, row, lineage),
-                              if (controller.activityMarks(row) case final marks
-                                  when marks.isNotEmpty)
-                                _activityMarks(context, row, marks),
-                            ],
+                            ),
+                            key: ValueKey(
+                              'session-ownership-${row.info.ref.storageKey}',
+                            ),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
-                        SessionActionsMenu(
-                          controller: controller,
-                          row: row,
-                          menuKey: _menuKey(row.info.ref),
-                          historyEnabled:
-                              !_openingHistory &&
-                              !controller.loading &&
-                              available,
-                          onHistory: live && history
-                              ? () {
-                                  if (controller.loading || !available) {
-                                    return;
-                                  }
-                                  _openHistory(context, controller, row);
-                                }
-                              : null,
-                        ),
+                        if (lineage != null) _lineage(context, row, lineage),
+                        if (controller.activityMarks(row) case final marks
+                            when marks.isNotEmpty)
+                          _activityMarks(context, row, marks),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SessionActionsMenu(
+                    controller: controller,
+                    row: row,
+                    menuKey: _menuKey(row.info.ref),
+                    pinned: pinned,
+                    onPin: onPin,
+                    historyEnabled:
+                        !_openingHistory && !controller.loading && available,
+                    onHistory: live && history
+                        ? () {
+                            if (controller.loading || !available) return;
+                            _openHistory(context, controller, row);
+                          }
+                        : null,
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
+    );
+    // A completed reply not seen yet keeps a subtle highlight for its hour;
+    // every other row stays on the list's own surface.
+    return AccentedRow(
+      key: ValueKey<SessionRef>(row.info.ref),
+      selected: selected,
+      child: emphasized
+          ? ColoredBox(
+              key: ValueKey('session-emphasis-${row.info.ref.storageKey}'),
+              color: scheme.primary.withValues(alpha: 0.08),
+              child: content,
+            )
+          : content,
     );
   }
 
@@ -604,7 +940,7 @@ class _SessionsPageState extends State<SessionsPage> {
     if (_openingHistory ||
         profile == null ||
         factory == null ||
-        !catalog.sessions.any((s) => s.info.ref == row.info.ref)) {
+        catalog.findSession(row.info.ref) == null) {
       return;
     }
     setState(() => _openingHistory = true);
@@ -626,24 +962,50 @@ class _SessionsPageState extends State<SessionsPage> {
     }
   }
 
+  /// Shows what the project at [directory] last showed: its session, or
+  /// its list or draft, so a project never keeps another project's session
+  /// beside its list.
+  void _showContext(
+    BuildContext context,
+    SessionsController catalog,
+    ProjectContextsController contexts,
+    String directory,
+  ) {
+    final profile = catalog.selectedProfile;
+    if (profile == null || contexts.active != directory) return;
+    final view = contexts.viewOf(directory);
+    context.go(
+      view == null
+          ? '/sessions'
+          : Uri(pathSegments: ['', 's', profile.id, view.nativeId]).toString(),
+    );
+  }
 
   /// Opens the session in the workspace, through the same route a link
-  /// takes; a compact window closes the list drawer first.
+  /// takes; a compact window closes the list drawer first. A session of
+  /// another open project opens there, and its project becomes the shown
+  /// one.
   void _openLive(
     BuildContext context,
     SessionsController catalog,
     SessionSummary row,
   ) {
     final profile = catalog.selectedProfile;
-    if (profile == null ||
-        !catalog.sessions.any((s) => s.info.ref == row.info.ref)) {
-      return;
-    }
+    if (profile == null || catalog.findSession(row.info.ref) == null) return;
     Scaffold.maybeOf(context)?.closeDrawer();
     context.go(
-      Uri(pathSegments: ['', 's', profile.id, row.info.ref.nativeId]).toString(),
+      Uri(
+        pathSegments: ['', 's', profile.id, row.info.ref.nativeId],
+      ).toString(),
     );
   }
+}
+
+/// The title of a project: its directory's last segment, or the directory
+/// itself at a root.
+String serverPathTitle(String directory) {
+  final name = serverPathName(directory);
+  return name.isEmpty ? directory : name;
 }
 
 /// What a failed read of the session list tells the user.

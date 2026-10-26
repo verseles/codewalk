@@ -2072,5 +2072,145 @@
   "liveSourceChanged": "The server connection changed. Reopen this conversation to use the current server settings.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
+  },
+  "chatCloseProject": "Close {project}",
+  "@chatCloseProject": {
+    "description": "CodeWalk UI string — chatCloseProject",
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+  "chatFilterSessions": "Filter sessions",
+  "@chatFilterSessions": {
+    "description": "CodeWalk UI string — chatFilterSessions"
+  },
+  "chatNoConversationsInProject": "No conversations in this project.",
+  "@chatNoConversationsInProject": {
+    "description": "CodeWalk UI string — chatNoConversationsInProject"
+  },
+  "chatOpenProjectToLoad": "Open project to load conversations.",
+  "@chatOpenProjectToLoad": {
+    "description": "CodeWalk UI string — chatOpenProjectToLoad"
+  },
+  "chatRecentSessions": "Recent sessions",
+  "@chatRecentSessions": {
+    "description": "CodeWalk UI string — chatRecentSessions"
+  },
+  "chatSearchConversations": "Search conversations",
+  "@chatSearchConversations": {
+    "description": "CodeWalk UI string — chatSearchConversations"
+  },
+  "chatSortOldest": "Oldest",
+  "@chatSortOldest": {
+    "description": "CodeWalk UI string — chatSortOldest"
+  },
+  "chatSortRecent": "Recent",
+  "@chatSortRecent": {
+    "description": "CodeWalk UI string — chatSortRecent"
+  },
+  "chatSortSessions": "Sort sessions",
+  "@chatSortSessions": {
+    "description": "CodeWalk UI string — chatSortSessions"
+  },
+  "chatSortTitle": "Title",
+  "@chatSortTitle": {
+    "description": "CodeWalk UI string — chatSortTitle"
+  },
+  "projectProviderErrorAtLeastOneContext": "At least one context must remain open",
+  "@projectProviderErrorAtLeastOneContext": {
+    "description": "CodeWalk UI string — projectProviderErrorAtLeastOneContext"
+  },
+  "sessionPin": "Pin",
+  "@sessionPin": {
+    "description": "CodeWalk UI string — sessionPin"
+  },
+  "sessionUnpin": "Unpin",
+  "@sessionUnpin": {
+    "description": "CodeWalk UI string — sessionUnpin"
+  },
+  "workspaceOpenProjects": "Open projects",
+  "@workspaceOpenProjects": {
+    "description": "CodeWalk UI string — workspaceOpenProjects"
+  },
+  "projectsCapacity": "The open projects or pins reached their limit. Close a project or unpin a session first.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Projects could not be read or saved. Try again.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filter: {filter}. Sort: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Pinned",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Conversations: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Conversations: {count} or more",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Choose Directory",
+  "@chatChooseDirectory": {
+    "description": "CodeWalk UI string — chatChooseDirectory"
+  },
+  "chatChooseFolderOpen": "Choose a folder to open as project context.",
+  "@chatChooseFolderOpen": {
+    "description": "CodeWalk UI string — chatChooseFolderOpen"
+  },
+  "chatFailedToLoadDirectories": "Failed to load directories",
+  "@chatFailedToLoadDirectories": {
+    "description": "CodeWalk UI string — chatFailedToLoadDirectories"
+  },
+  "workspaceBrowseDirs": "Browse directories",
+  "@workspaceBrowseDirs": {
+    "description": "CodeWalk UI string — workspaceBrowseDirs"
+  },
+  "workspaceCurrentDirectory": "Current directory: {path}",
+  "@workspaceCurrentDirectory": {
+    "description": "CodeWalk UI string — workspaceCurrentDirectory",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceFailedToOpenProjectContext": "Failed to open project context: {directory}",
+  "@workspaceFailedToOpenProjectContext": {
+    "description": "CodeWalk UI string — workspaceFailedToOpenProjectContext",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceFilterDirs": "Filter directories",
+  "@workspaceFilterDirs": {
+    "description": "CodeWalk UI string — workspaceFilterDirs"
+  },
+  "workspaceOpenFolder": "Open folder",
+  "@workspaceOpenFolder": {
+    "description": "CodeWalk UI string — workspaceOpenFolder"
+  },
+  "workspaceProjectHint": "/repo/my-project",
+  "@workspaceProjectHint": {
+    "description": "CodeWalk UI string — workspaceProjectHint"
+  },
+  "workspaceRemoveFromHistory": "Remove {name} from history",
+  "@workspaceRemoveFromHistory": {
+    "description": "CodeWalk UI string — workspaceRemoveFromHistory",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

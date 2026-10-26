@@ -53,3 +53,44 @@ _CREDENTIAL_COPY = {
 }
 for _locale, _copy in _CREDENTIAL_COPY.items():
     COPY[_locale] += _copy
+
+# The project drawer (#453 S4): the list of the open project contexts, its
+# search, filter and sort, Recent and context-scoped pins.
+PORT_KEYS |= {
+    "chatSearchConversations", "chatRecentSessions", "workspaceOpenProjects",
+    "chatOpenProjectToLoad", "chatCloseProject",
+    "projectProviderErrorAtLeastOneContext", "chatSortSessions",
+    "chatSortRecent", "chatSortOldest", "chatSortTitle", "chatFilterSessions",
+    "sessionPin", "sessionUnpin", "chatNoConversationsInProject",
+}
+NEW_KEYS += (
+    "projectsCapacity", "projectsUnavailable", "sessionsListState",
+    "sessionsPinnedMark", "projectsSessionCount", "projectsSessionCountAtLeast",
+)
+_DRAWER_COPY = {
+ "en": ("The open projects or pins reached their limit. Close a project or unpin a session first.", "Projects could not be read or saved. Try again.", "Filter: {filter}. Sort: {sort}.", "Pinned", "Conversations: {count}", "Conversations: {count} or more"),
+ "pt": ("Os projetos abertos ou fixados atingiram o limite. Feche um projeto ou desafixe uma conversa antes.", "Não foi possível ler ou salvar os projetos. Tente novamente.", "Filtro: {filter}. Ordem: {sort}.", "Fixada", "Conversas: {count}", "Conversas: {count} ou mais"),
+ "es": ("Los proyectos abiertos o fijados alcanzaron su límite. Cierra un proyecto o desfija una conversación primero.", "No se pudieron leer ni guardar los proyectos. Inténtalo de nuevo.", "Filtro: {filter}. Orden: {sort}.", "Fijada", "Conversaciones: {count}", "Conversaciones: {count} o más"),
+ "fr": ("Les projets ouverts ou les épingles ont atteint leur limite. Fermez un projet ou désépinglez une conversation d’abord.", "Impossible de lire ou d’enregistrer les projets. Réessayez.", "Filtre : {filter}. Tri : {sort}.", "Épinglée", "Conversations : {count}", "Conversations : {count} ou plus"),
+ "de": ("Die offenen Projekte oder Anheftungen haben ihr Limit erreicht. Schließe zuerst ein Projekt oder löse eine Unterhaltung.", "Die Projekte konnten nicht gelesen oder gespeichert werden. Versuche es erneut.", "Filter: {filter}. Sortierung: {sort}.", "Angeheftet", "Unterhaltungen: {count}", "Unterhaltungen: {count} oder mehr"),
+ "it": ("I progetti aperti o i fissati hanno raggiunto il limite. Chiudi prima un progetto o sblocca una conversazione.", "Impossibile leggere o salvare i progetti. Riprova.", "Filtro: {filter}. Ordine: {sort}.", "Fissata", "Conversazioni: {count}", "Conversazioni: {count} o più"),
+ "ar": ("بلغت المشاريع المفتوحة أو المثبتات حدها. أغلق مشروعًا أو ألغِ تثبيت محادثة أولًا.", "تعذرت قراءة المشاريع أو حفظها. حاول مرة أخرى.", "التصفية: {filter}. الترتيب: {sort}.", "مثبتة", "المحادثات: {count}", "المحادثات: {count} أو أكثر"),
+ "ur": ("کھلے پروجیکٹس یا پنز اپنی حد تک پہنچ گئے۔ پہلے کوئی پروجیکٹ بند کریں یا کسی گفتگو کا پن ہٹائیں۔", "پروجیکٹس پڑھے یا محفوظ نہیں کیے جا سکے۔ دوبارہ کوشش کریں۔", "فلٹر: {filter}۔ ترتیب: {sort}۔", "پن شدہ", "گفتگوئیں: {count}", "گفتگوئیں: {count} یا زیادہ"),
+ "hi": ("खुले प्रोजेक्ट या पिन अपनी सीमा तक पहुँच गए हैं। पहले कोई प्रोजेक्ट बंद करें या किसी बातचीत को अनपिन करें।", "प्रोजेक्ट पढ़े या सहेजे नहीं जा सके। फिर से कोशिश करें।", "फ़िल्टर: {filter}। क्रम: {sort}।", "पिन की गई", "बातचीत: {count}", "बातचीत: {count} या अधिक"),
+ "bn": ("খোলা প্রকল্প বা পিন সীমায় পৌঁছেছে। আগে একটি প্রকল্প বন্ধ করুন বা একটি কথোপকথন আনপিন করুন।", "প্রকল্পগুলো পড়া বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।", "ফিল্টার: {filter}। ক্রম: {sort}।", "পিন করা", "কথোপকথন: {count}", "কথোপকথন: {count} বা তার বেশি"),
+ "ja": ("開いているプロジェクトまたはピン留めが上限に達しました。先にプロジェクトを閉じるか、会話のピン留めを外してください。", "プロジェクトを読み込みまたは保存できませんでした。もう一度お試しください。", "フィルター: {filter}。並べ替え: {sort}。", "ピン留め済み", "会話: {count}", "会話: {count} 件以上"),
+ "ko": ("열린 프로젝트 또는 고정 항목이 한도에 도달했습니다. 먼저 프로젝트를 닫거나 대화 고정을 해제하세요.", "프로젝트를 읽거나 저장할 수 없습니다. 다시 시도하세요.", "필터: {filter}. 정렬: {sort}.", "고정됨", "대화: {count}", "대화: {count}개 이상"),
+ "zh": ("打开的项目或置顶已达上限。请先关闭一个项目或取消置顶一个对话。", "无法读取或保存项目。请重试。", "筛选：{filter}。排序：{sort}。", "已置顶", "对话：{count}", "对话：{count} 个或更多"),
+ "ru": ("Открытые проекты или закрепления достигли предела. Сначала закройте проект или открепите беседу.", "Не удалось прочитать или сохранить проекты. Повторите попытку.", "Фильтр: {filter}. Сортировка: {sort}.", "Закреплена", "Беседы: {count}", "Беседы: {count} или больше"),
+}
+for _locale, _copy in _DRAWER_COPY.items():
+    COPY[_locale] += _copy
+
+# The project picker (#453 S4): known projects, the server's folders, the
+# directory browser and a manual absolute path.
+PORT_KEYS |= {
+    "chatChooseDirectory", "chatChooseFolderOpen", "chatFailedToLoadDirectories",
+    "workspaceBrowseDirs", "workspaceCurrentDirectory",
+    "workspaceFailedToOpenProjectContext", "workspaceFilterDirs",
+    "workspaceOpenFolder", "workspaceProjectHint", "workspaceRemoveFromHistory",
+}

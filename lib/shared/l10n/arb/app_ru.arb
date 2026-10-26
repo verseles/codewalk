@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "Подключение к серверу изменилось. Откройте этот разговор заново, чтобы использовать текущие настройки сервера.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "Закрыть {project}",
+  "chatFilterSessions": "Фильтровать сессии",
+  "chatNoConversationsInProject": "В этом проекте нет бесед.",
+  "chatOpenProjectToLoad": "Открыть проект для загрузки бесед.",
+  "chatRecentSessions": "Недавние сессии",
+  "chatSearchConversations": "Поиск бесед",
+  "chatSortOldest": "Сначала старые",
+  "chatSortRecent": "Недавние",
+  "chatSortSessions": "Сортировать сессии",
+  "chatSortTitle": "По названию",
+  "projectProviderErrorAtLeastOneContext": "Должен оставаться открытым хотя бы один контекст",
+  "sessionPin": "Закрепить",
+  "sessionUnpin": "Открепить",
+  "workspaceOpenProjects": "Открытые проекты",
+  "projectsCapacity": "Открытые проекты или закрепления достигли предела. Сначала закройте проект или открепите беседу.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Не удалось прочитать или сохранить проекты. Повторите попытку.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Фильтр: {filter}. Сортировка: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Закреплена",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Беседы: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Беседы: {count} или больше",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Выбрать каталог",
+  "chatChooseFolderOpen": "Выберите папку для открытия в качестве контекста проекта.",
+  "chatFailedToLoadDirectories": "Не удалось загрузить каталоги",
+  "workspaceBrowseDirs": "Обзор каталогов",
+  "workspaceCurrentDirectory": "Текущий каталог: {path}",
+  "workspaceFailedToOpenProjectContext": "Не удалось открыть контекст проекта: {directory}",
+  "workspaceFilterDirs": "Фильтровать каталоги",
+  "workspaceOpenFolder": "Открыть папку",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "Удалить {name} из истории"
 }

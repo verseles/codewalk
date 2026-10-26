@@ -8,6 +8,7 @@ import 'package:codewalk_net/codewalk_net.dart';
 import 'execution_projection.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
+import 'json_reads.dart';
 import 'interaction_projection.dart';
 import 'revert_projection.dart';
 import 'session_projection.dart';
@@ -172,7 +173,12 @@ final class OpenCodeSessionReader {
   final int maxCatalogBytes;
   final Uri _endpoint;
   final String _cursorScope;
-  final _active = <_ReadOperation>{};
+  late final _reads = OpenCodeJsonReads(
+    transport,
+    deadline: deadline,
+    maxBodyBytes: maxBodyBytes,
+    checkOpen: _checkOpen,
+  );
   bool _disposed = false;
 
   Future<Page<SessionSummary>> listSessions(
@@ -180,19 +186,40 @@ final class OpenCodeSessionReader {
     RequestCancellation? cancellation,
   }) async {
     _checkOpen();
-    if (query.project != null ||
-        query.activeOnly ||
-        query.limit > maxPageItems) {
+    if (query.activeOnly || query.limit > maxPageItems) {
       throw const OpenCodeSessionReadException(
         OpenCodeSessionReadFailure.unsupportedQuery,
       );
     }
-    final cursor = query.cursor == null ? null : _decodeCursor(query.cursor!);
+    // A project scopes the list to the sessions of exactly its directory,
+    // the directory the endpoint records for each session.
+    final directory = query.project?.canonicalDirectory;
+    if (query.project != null && query.project!.host != harness.host) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidScope,
+      );
+    }
+    if (directory != null &&
+        (directory.isEmpty || utf8.encode(directory).length > 4096)) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.invalidRequest,
+      );
+    }
+    final cursor = query.cursor == null
+        ? null
+        : _decodeCursor(query.cursor!, directory);
+    // The native cursor carries its original filters, so a continuation
+    // sends the cursor and the page size only, never the order or directory.
     final path = Uri(
       path: 'api/session',
       queryParameters: {
         'limit': '${query.limit}',
-        if (cursor == null) 'order': 'desc' else 'cursor': cursor,
+        if (cursor != null)
+          'cursor': cursor
+        else ...{
+          'order': 'desc',
+          'directory': ?directory,
+        },
       },
     ).toString();
     return _read(path, (value) {
@@ -211,6 +238,12 @@ final class OpenCodeSessionReader {
       if (items.map((row) => row.info.ref).toSet().length != items.length) {
         throw const FormatException('Duplicate session in one page.');
       }
+      if (directory != null &&
+          items.any(
+            (row) => row.info.project?.canonicalDirectory != directory,
+          )) {
+        throw const FormatException('Session of another directory.');
+      }
       final cursors = value['cursor'] as Map<String, Object?>;
       _nativeCursor(cursors['previous']);
       final next = _nativeCursor(cursors['next']);
@@ -219,7 +252,7 @@ final class OpenCodeSessionReader {
       }
       return Page(
         items: items,
-        nextCursor: next == null ? null : _encodeCursor(next),
+        nextCursor: next == null ? null : _encodeCursor(next, directory),
       );
     }, cancellation);
   }
@@ -1110,9 +1143,7 @@ final class OpenCodeSessionReader {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
-    for (final operation in _active.toList()) {
-      operation.stop(OpenCodeSessionReadFailure.closed);
-    }
+    _reads.dispose();
   }
 
   void _checkOpen() {
@@ -1133,121 +1164,29 @@ final class OpenCodeSessionReader {
     T Function(Object?) project,
     RequestCancellation? parent, {
     int? maxBytes,
-  }) async {
-    if (parent?.isCancelled ?? false) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.cancelled,
-      );
-    }
-    final operation = _ReadOperation(deadline);
-    _active.add(operation);
-    final subscription = parent?.onCancel.listen(
-      (_) => operation.stop(OpenCodeSessionReadFailure.cancelled),
-    );
-    T result;
-    try {
-      result = await Future.any([
-        _collect(path, project, operation, maxBytes ?? maxBodyBytes),
-        operation.stopped.future.then<T>((_) => throw operation.failure!),
-      ]);
-    } on OpenCodeSessionReadException {
-      rethrow;
-    } on TransportException catch (error) {
-      throw _transportError(error);
-    } on FormatException {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.incompatibleResponse,
-      );
-    } on Object {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.connection,
-      );
-    } finally {
-      operation.finish();
-      _active.remove(operation);
-      await subscription?.cancel();
-    }
-    _checkOpen();
-    if (operation.cleanupFailed) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.connection,
-      );
-    }
-    if (parent?.isCancelled ?? false) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.cancelled,
-      );
-    }
-    if (operation.clock.elapsed >= deadline) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.timeout,
-      );
-    }
-    return result;
-  }
+  }) => _reads.read(path, project, parent, maxBytes: maxBytes);
 
-  Future<T> _collect<T>(
-    String path,
-    T Function(Object?) project,
-    _ReadOperation operation,
-    int maxBytes,
-  ) async {
-    final response = await transport.send(
-      TransportRequest(
-        method: 'GET',
-        path: path,
-        headers: const {'Accept': 'application/json'},
-      ),
-      cancellation: operation.cancellation,
-    );
-    if (operation.finished || operation.failure != null) {
-      operation.cancelResponse(response);
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.cancelled,
-      );
-    }
-    operation.response = response;
-    if (response.statusCode != 200) throw _statusError(response.statusCode);
-    final media = response
-        .header('content-type')
-        ?.split(';')
-        .first
-        .trim()
-        .toLowerCase();
-    if (media != 'application/json' &&
-        !(media?.startsWith('application/') == true &&
-            media!.endsWith('+json'))) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.incompatibleResponse,
-      );
-    }
-    final bytes = await response.readBytes(
-      maxBytes: maxBytes,
-      inactivityTimeout: deadline,
-    );
-    if (operation.failure != null) throw operation.failure!;
-    _checkOpen();
-    if (operation.clock.elapsed >= deadline) {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.timeout,
-      );
-    }
-    return project(jsonDecode(utf8.decode(bytes)));
-  }
-
-  String _encodeCursor(String native) => base64Url.encode(
+  /// A list cursor names its reader and the directory it pages, so it never
+  /// continues another reader's list or another directory's.
+  String _encodeCursor(String native, String? directory) => base64Url.encode(
     utf8.encode(
-      jsonEncode({'version': 1, 'scope': _cursorScope, 'native': native}),
+      jsonEncode({
+        'version': 1,
+        'scope': _cursorScope,
+        'directory': ?directory,
+        'native': native,
+      }),
     ),
   );
 
-  String _decodeCursor(String value) {
+  String _decodeCursor(String value, String? directory) {
     try {
       if (value.length > 32 * 1024) throw const FormatException();
       final data = jsonDecode(utf8.decode(base64Url.decode(value)));
       if (data is! Map<String, Object?> ||
           data['version'] != 1 ||
-          data['scope'] != _cursorScope) {
+          data['scope'] != _cursorScope ||
+          data['directory'] != directory) {
         throw const FormatException();
       }
       return _nativeCursor(data['native']) ?? (throw const FormatException());
@@ -1266,45 +1205,6 @@ final class OpenCodeSessionReader {
       throw const FormatException('Malformed OpenCode cursor.');
     }
     return value;
-  }
-}
-
-final class _ReadOperation {
-  _ReadOperation(Duration deadline) {
-    timer = Timer(deadline, () => stop(OpenCodeSessionReadFailure.timeout));
-  }
-
-  final clock = Stopwatch()..start();
-  final cancellation = RequestCancellation();
-  final stopped = Completer<void>();
-  late final Timer timer;
-  TransportResponse? response;
-  OpenCodeSessionReadException? failure;
-  bool finished = false;
-  bool cleanupFailed = false;
-
-  void stop(OpenCodeSessionReadFailure reason) {
-    if (finished || failure != null) return;
-    failure = OpenCodeSessionReadException(reason);
-    stopped.complete();
-    cancellation.cancel();
-    cancelResponse(response);
-  }
-
-  void finish() {
-    finished = true;
-    timer.cancel();
-    cancellation.cancel();
-    cancelResponse(response);
-  }
-
-  void cancelResponse(TransportResponse? value) {
-    try {
-      value?.cancel();
-    } on Object {
-      // A late response cannot replace an already reported cancellation.
-      cleanupFailed = true;
-    }
   }
 }
 
@@ -1331,25 +1231,3 @@ int _catalogCount(Object? value) {
   }
   return value;
 }
-
-OpenCodeSessionReadException _statusError(int status) =>
-    OpenCodeSessionReadException(switch (status) {
-      400 => OpenCodeSessionReadFailure.invalidRequest,
-      401 || 403 => OpenCodeSessionReadFailure.authenticationRequired,
-      404 => OpenCodeSessionReadFailure.notFound,
-      408 => OpenCodeSessionReadFailure.timeout,
-      429 => OpenCodeSessionReadFailure.rateLimited,
-      500 || 502 || 503 || 504 => OpenCodeSessionReadFailure.unavailable,
-      _ => OpenCodeSessionReadFailure.incompatibleResponse,
-    }, statusCode: status);
-
-OpenCodeSessionReadException _transportError(TransportException error) =>
-    OpenCodeSessionReadException(switch (error.failure) {
-      TransportFailure.closed => OpenCodeSessionReadFailure.closed,
-      TransportFailure.cancelled => OpenCodeSessionReadFailure.cancelled,
-      TransportFailure.timeout => OpenCodeSessionReadFailure.timeout,
-      TransportFailure.bodyTooLarge => OpenCodeSessionReadFailure.bodyTooLarge,
-      TransportFailure.invalidTarget || TransportFailure.invalidRequest =>
-        OpenCodeSessionReadFailure.invalidRequest,
-      _ => OpenCodeSessionReadFailure.connection,
-    }, statusCode: error.statusCode);

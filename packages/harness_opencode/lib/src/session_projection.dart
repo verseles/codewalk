@@ -10,6 +10,15 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
   if (title != null && title is! String) _malformed();
   final time = _object(data['time']);
   final updated = _instant(time['updated']);
+  // The creation time and the outcome only order and annotate a row, so an
+  // absent or unknown value leaves them out instead of failing the page.
+  final created = _optionalEpoch(time['created']);
+  final outcome = switch (data['outcome']) {
+    'succeeded' => SessionOutcome.succeeded,
+    'failed' => SessionOutcome.failed,
+    'interrupted' => SessionOutcome.interrupted,
+    _ => null,
+  };
   final parent = data['parentID'];
   final metadata = <String, Object?>{};
   // The upstream project id is an annotation: several directories can share
@@ -79,6 +88,8 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
       metadata: metadata.isEmpty ? null : CanonicalValue(metadata),
     ),
     updatedAt: updated,
+    createdAt: created,
+    outcome: outcome,
   );
 }
 

@@ -1673,4 +1673,112 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'সার্ভার সংযোগ পরিবর্তিত হয়েছে। সার্ভারের বর্তমান সেটিং ব্যবহার করতে এই কথোপকথনটি আবার খুলুন।';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project বন্ধ করুন';
+  }
+
+  @override
+  String get chatFilterSessions => 'ফিল্টার সেশন';
+
+  @override
+  String get chatNoConversationsInProject => 'এই প্রজেক্টে কোনো কথোপকথন নেই।';
+
+  @override
+  String get chatOpenProjectToLoad => 'কথোপকথন লোড করতে প্রজেক্ট খুলুন।';
+
+  @override
+  String get chatRecentSessions => 'সাম্প্রতিক সেশন';
+
+  @override
+  String get chatSearchConversations => 'কথোপকথন অনুসন্ধান করুন';
+
+  @override
+  String get chatSortOldest => 'প্রাচীনতম';
+
+  @override
+  String get chatSortRecent => 'সাম্প্রতিক';
+
+  @override
+  String get chatSortSessions => 'সেশন সাজান';
+
+  @override
+  String get chatSortTitle => 'শিরোনাম';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'অন্তত একটি প্রসঙ্গ খোলা থাকতে হবে';
+
+  @override
+  String get sessionPin => 'পিন করুন';
+
+  @override
+  String get sessionUnpin => 'আনপিন করুন';
+
+  @override
+  String get workspaceOpenProjects => 'খোলা প্রজেক্ট সমূহ';
+
+  @override
+  String get projectsCapacity =>
+      'খোলা প্রকল্প বা পিন সীমায় পৌঁছেছে। আগে একটি প্রকল্প বন্ধ করুন বা একটি কথোপকথন আনপিন করুন।';
+
+  @override
+  String get projectsUnavailable =>
+      'প্রকল্পগুলো পড়া বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'ফিল্টার: $filter। ক্রম: $sort।';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'পিন করা';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'কথোপকথন: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'কথোপকথন: $count বা তার বেশি';
+  }
+
+  @override
+  String get chatChooseDirectory => 'ডিরেক্টরি নির্বাচন করুন';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'প্রকল্পের প্রসঙ্গ হিসাবে খুলতে একটি ফোল্ডার চয়ন করুন।';
+
+  @override
+  String get chatFailedToLoadDirectories => 'ডিরেক্টরি লোড করতে ব্যর্থ';
+
+  @override
+  String get workspaceBrowseDirs => 'ডিরেক্টরি ব্রাউজ করুন';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'বর্তমান ডিরেক্টরি: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'প্রজেক্ট প্রসঙ্গ খুলতে ব্যর্থ: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'ফিল্টার ডিরেক্টরি';
+
+  @override
+  String get workspaceOpenFolder => 'ফোল্ডার খুলুন';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'ইতিহাস থেকে $name সরান';
+  }
 }

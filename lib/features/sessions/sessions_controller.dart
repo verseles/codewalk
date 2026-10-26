@@ -7,6 +7,8 @@ import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
+import 'session_context_refresh.dart';
+import 'session_list_projection.dart';
 import 'session_ownership.dart';
 
 class SessionsController extends ChangeNotifier {
@@ -90,6 +92,7 @@ class SessionsController extends ChangeNotifier {
   Set<String> _liveRequested = const {};
   int _livePagesRead = 0;
   bool _liveHasMore = false;
+  bool _liveExhausted = false;
   bool _liveOmitted = false;
   // The session actions: the endpoint's own commands, the local hide and the
   // commands that are in flight.
@@ -109,6 +112,24 @@ class SessionsController extends ChangeNotifier {
   /// A create is in flight.
   bool _creating = false;
   SessionActionFilter _filter = SessionActionFilter.active;
+
+  /// The project context whose sessions the list reads, or null before one
+  /// is chosen, when the list reads every session of the server.
+  String? _directory;
+
+  /// The open contexts of the selected server, and the head rows last read
+  /// for each one the list does not show.
+  Set<String> _openDirectories = const {};
+  final _snapshots = <String, SessionContextSnapshot>{};
+  late final _contextRefresh = SessionContextRefresh(
+    read: _readContext,
+    publish: _publishContext,
+    now: _now,
+  );
+
+  /// The last page read ended the list: the endpoint keeps a next cursor on
+  /// a short last page, so a short page ends it too.
+  bool _exhausted = false;
   final _received = <String>{};
   final _requested = <String>{};
   List<SessionSummary> _sessions = const [];
@@ -117,12 +138,169 @@ class SessionsController extends ChangeNotifier {
   List<SessionSummary> get sessions {
     final source = _actions;
     if (source == null || _filter == SessionActionFilter.all) return _sessions;
-    return _sessions
-        .where((row) {
-          final hidden = source.isHidden(row);
-          return _filter == SessionActionFilter.hidden ? hidden : !hidden;
-        })
-        .toList(growable: false);
+    // Hiding a parent hides its loaded descendants too.
+    return filterSessions(
+      _sessions,
+      effectivelyHidden(_sessions, source.isHidden),
+      _filter,
+    );
+  }
+
+  /// Every loaded row, before the filter applies: the server's order.
+  List<SessionSummary> get loadedSessions => _sessions;
+
+  /// The rows of [rows] hidden in effect: hidden, or under a hidden parent.
+  Set<SessionRef> hiddenIn(Iterable<SessionSummary> rows) {
+    final source = _actions;
+    return source == null ? const {} : effectivelyHidden(rows, source.isHidden);
+  }
+
+  /// The project context the list reads, or null while none is chosen.
+  String? get directory => _directory;
+
+  /// Shows the sessions of the project context at [directory]: the rows last
+  /// read for it at once, marked as previous results while its head is read
+  /// again, so a switch never waits for the network. Null reads every session
+  /// of the server.
+  void setDirectory(String? directory) {
+    if (_disposed || _profile == null || directory == _directory) return;
+    _stash();
+    _invalidate();
+    _directory = directory;
+    final cached = directory == null ? null : _snapshots.remove(directory);
+    _sessions = cached?.rows ?? const [];
+    _selectedSession = null;
+    _cursor = null;
+    _received.clear();
+    _requested.clear();
+    _pages = 0;
+    hasMore = limited = false;
+    _exhausted = false;
+    loaded = cached != null;
+    failure = null;
+    // The pending lists belong to the location of the shown context.
+    _activity = const SessionActivity();
+    _armOwnershipDeadline();
+    _trackContexts();
+    _notify();
+    unawaited(_refreshShown());
+  }
+
+  /// Keeps the shown rows as the snapshot of the context the list leaves.
+  void _stash() {
+    final directory = _directory;
+    if (directory == null ||
+        !loaded ||
+        failure != null ||
+        !_openDirectories.contains(directory)) {
+      return;
+    }
+    _snapshots[directory] = SessionContextSnapshot(
+      _sessions,
+      complete: _exhausted && !limited,
+    );
+  }
+
+  /// The open contexts of the selected server. A context that is no longer
+  /// open forgets its rows; the ones the list does not show keep their head
+  /// rows current for their counts and recent sessions.
+  void setOpenDirectories(Iterable<String> directories) {
+    final next = directories.toSet();
+    if (_disposed || setEquals(next, _openDirectories)) return;
+    _openDirectories = next;
+    _snapshots.removeWhere(
+      (directory, _) => !_openDirectories.contains(directory),
+    );
+    _trackContexts();
+    _notify();
+  }
+
+  void _trackContexts() {
+    if (_source == null) return;
+    _contextRefresh.track([
+      for (final directory in _openDirectories)
+        if (directory != _directory) directory,
+    ], known: _snapshots.keys.toSet());
+  }
+
+  /// The rows of the open context at [directory]: the shown rows for the
+  /// shown context, otherwise its head rows last read, or null when none
+  /// were read yet.
+  List<SessionSummary>? contextRows(String directory) => directory == _directory
+      ? (loaded ? _sessions : null)
+      : _snapshots[directory]?.rows;
+
+  /// Whether [contextRows] are every session of the context, as the endpoint
+  /// last answered.
+  bool contextComplete(String directory) => directory == _directory
+      ? loaded && !stale && failure == null && _exhausted && !limited
+      : _snapshots[directory]?.complete ?? false;
+
+  /// The loaded row of [ref], in the shown rows or in another open
+  /// context's rows, so a session of another project opens without a read.
+  SessionSummary? findSession(SessionRef ref) {
+    for (final rows in [_sessions, for (final s in _snapshots.values) s.rows]) {
+      for (final row in rows) {
+        if (row.info.ref == ref) return row;
+      }
+    }
+    return null;
+  }
+
+  SessionCatalogTask _readContext(String directory) {
+    final source = _source;
+    if (_disposed || source == null || hosts.loading || hosts.storageError) {
+      throw const SessionCatalogException(SessionCatalogFailure.cancelled);
+    }
+    return source.list(_query(source, null, directory));
+  }
+
+  void _publishContext(String directory, SessionContextSnapshot snapshot) {
+    final source = _source;
+    if (_disposed ||
+        source == null ||
+        directory == _directory ||
+        !_openDirectories.contains(directory) ||
+        snapshot.rows.any((row) => _foreign(row, source, directory))) {
+      return;
+    }
+    _snapshots[directory] = snapshot;
+    _notify();
+  }
+
+  /// One page of the list: the server's rows, or one context's.
+  SessionQuery _query(
+    SessionCatalogSource source,
+    String? cursor,
+    String? directory,
+  ) => SessionQuery(
+    limit: 50,
+    cursor: cursor,
+    project: directory == null
+        ? null
+        : ProjectRef(source.harness.host, directory),
+  );
+
+  /// A row of another server, or of another context than the one read.
+  static bool _foreign(
+    SessionSummary row,
+    SessionCatalogSource source,
+    String? directory,
+  ) =>
+      row.info.ref.harnessRef != source.harness ||
+      (directory != null && row.info.project?.canonicalDirectory != directory);
+
+  /// The source of the selected server for the project and directory reads,
+  /// or null while it is not ready.
+  SessionCatalogSource? get directorySource {
+    if (_disposed ||
+        hosts.loading ||
+        hosts.storageError ||
+        _profile == null ||
+        hosts.pendingBindingChange == _profile!.id) {
+      return null;
+    }
+    return _ready() ? _source : null;
   }
 
   /// Which sessions the catalog shows.
@@ -268,6 +446,8 @@ class SessionsController extends ChangeNotifier {
   /// the shown rows still hold it, otherwise the first group the server
   /// returned. Null when no row is shown.
   ({ProjectRef? project})? get selectedProject {
+    // A chosen context is shown even before it holds a session.
+    if (_scopeChoice case final scope?) return scope;
     final rows = sessions;
     final chosen = _chosenProject;
     if (chosen != null &&
@@ -279,20 +459,33 @@ class SessionsController extends ChangeNotifier {
 
   /// Whether the user chose the shown project group, rather than the list
   /// falling back to the first one.
-  bool get projectChosen => _chosenProject != null;
+  bool get projectChosen => chosenProject != null;
 
   /// The explicit project choice, including a temporarily absent group.
-  ({ProjectRef? project})? get chosenProject => _chosenProject;
+  ({ProjectRef? project})? get chosenProject => _scopeChoice ?? _chosenProject;
 
   /// Whether the shown group is the explicit choice, rather than a fallback
   /// shown while that choice is absent from the loaded rows.
   bool get selectedProjectWasChosen =>
-      _chosenProject != null && _chosenProject == selectedProject;
+      chosenProject != null && chosenProject == selectedProject;
+
+  /// The shown project context as a project choice.
+  ({ProjectRef? project})? get _scopeChoice {
+    final profile = _profile;
+    final directory = _directory;
+    return profile == null || directory == null
+        ? null
+        : (project: ProjectRef(HostId(profile.id), directory));
+  }
 
   /// Shows the sessions of [project]. Choosing the shown fallback records it,
   /// so a chosen group that returns later does not take its place again.
   void selectProject(ProjectRef? project) {
-    if (_disposed || _chosenProject == (project: project)) return;
+    if (_disposed ||
+        _directory != null ||
+        _chosenProject == (project: project)) {
+      return;
+    }
     _chosenProject = (project: project);
     _notify();
     // The pending lists belong to the shown group's location.
@@ -362,6 +555,7 @@ class SessionsController extends ChangeNotifier {
         SessionActionReason.versionUnverified,
       );
       _closeChanges();
+      _contextRefresh.cancel();
       _activity = const SessionActivity();
       _activityPending = false;
       // Only a request of the new endpoint outlives a read of this one.
@@ -379,12 +573,20 @@ class SessionsController extends ChangeNotifier {
     _activity = const SessionActivity();
     _selectedSession = null;
     _chosenProject = null;
+    _snapshots.clear();
     _cursor = null;
     _received.clear();
     _requested.clear();
     _pages = 0;
-    loaded = stale = limited = hasMore = false;
+    loaded = stale = limited = hasMore = _exhausted = false;
     failure = null;
+  }
+
+  /// Leaves the contexts of the server the list no longer reads.
+  void _forgetContexts() {
+    _directory = null;
+    _openDirectories = const {};
+    _contextRefresh.cancel();
   }
 
   EndpointProfile? _find(String id) {
@@ -417,6 +619,7 @@ class SessionsController extends ChangeNotifier {
           hosts.credentialUnreadable(current)) {
         _invalidate(closeSource: true);
         _clear();
+        if (current == null || hosts.storageError) _forgetContexts();
         _profile = hosts.storageError ? null : current;
         _credential = credential;
         if (current != null && !hosts.storageError && !_usable(credential)) {
@@ -443,6 +646,7 @@ class SessionsController extends ChangeNotifier {
     final profile = _find(id);
     _invalidate(closeSource: true);
     _clear();
+    if (_profile?.id != id) _forgetContexts();
     _profile = profile;
     _credential = profile == null ? null : hosts.credentialFor(profile);
     _notify();
@@ -484,7 +688,14 @@ class SessionsController extends ChangeNotifier {
     return false;
   }
 
+  /// Reads the list again from its head; the open contexts the list does
+  /// not show are read again too, even after their reads stopped failing.
   Future<void> refresh() {
+    if (!_disposed) _contextRefresh.refresh();
+    return _refreshShown();
+  }
+
+  Future<void> _refreshShown() {
     if (_disposed) return Future.value();
     if (!_ready()) return Future.value();
     if (_refreshing && loading) return _readFuture ?? Future.value();
@@ -538,13 +749,14 @@ class SessionsController extends ChangeNotifier {
     bool refresh,
   ) async {
     SessionCatalogTask? task;
+    final directory = _directory;
     bool current() =>
         !_disposed &&
         generation == _generation &&
         identical(source, _source) &&
         identical(task, _task);
     try {
-      task = source.list(SessionQuery(limit: 50, cursor: cursor));
+      task = source.list(_query(source, cursor, directory));
       _task = task;
       final page = await task.result;
       if (!current()) return;
@@ -552,8 +764,7 @@ class SessionsController extends ChangeNotifier {
       if (page.items.length > 50 ||
           page.items.any(
             (row) =>
-                row.info.ref.harnessRef != source.harness ||
-                !refs.add(row.info.ref),
+                _foreign(row, source, directory) || !refs.add(row.info.ref),
           )) {
         throw const SessionCatalogException(
           SessionCatalogFailure.incompatibleResponse,
@@ -589,6 +800,7 @@ class SessionsController extends ChangeNotifier {
       _pages++;
       if (next != null) _received.add(next);
       _cursor = next;
+      _exhausted = next == null || page.items.length < 50;
       limited =
           omitted || (next != null && (merged.length >= 200 || _pages >= 10));
       hasMore = next != null && !limited;
@@ -625,6 +837,7 @@ class SessionsController extends ChangeNotifier {
             // A head read reconciles the whole list; a page append does not.
             _behind = false;
             unawaited(_syncActivity());
+            _trackContexts();
           }
           unawaited(_ensureChanges());
           _viewShown();
@@ -736,6 +949,7 @@ class SessionsController extends ChangeNotifier {
     switch (signal) {
       case SessionCatalogChanged():
         _markLiveChange();
+        _contextRefresh.changed();
       case SessionActivityChanged():
         _markLiveChange(rows: false);
       case SessionCatalogConnection(:final connected):
@@ -746,6 +960,7 @@ class SessionsController extends ChangeNotifier {
           // call itself current.
           _liveEpoch++;
           _markLiveChange();
+          _contextRefresh.changed();
         } else {
           _behind = true;
           _notify();
@@ -1066,6 +1281,7 @@ class SessionsController extends ChangeNotifier {
         ..clear()
         ..addAll(_liveRequested);
       _pages = _livePagesRead;
+      _exhausted = _liveExhausted;
       limited =
           _liveOmitted ||
           (_liveHasMore && (rows.length >= 200 || _livePagesRead >= 10));
@@ -1135,9 +1351,10 @@ class SessionsController extends ChangeNotifier {
     String? cursor;
     var pages = 0;
     var omitted = false;
+    final directory = _directory;
     for (var page = 0; page < depth; page++) {
       if (cursor != null) requested.add(cursor);
-      final task = source.list(SessionQuery(limit: 50, cursor: cursor));
+      final task = source.list(_query(source, cursor, directory));
       final result = await task.result;
       if (!_quietCurrent(generation, epoch, source)) return null;
       if (result.items.length > 50) {
@@ -1146,8 +1363,7 @@ class SessionsController extends ChangeNotifier {
         );
       }
       for (final row in result.items) {
-        if (row.info.ref.harnessRef != source.harness ||
-            !refs.add(row.info.ref)) {
+        if (_foreign(row, source, directory) || !refs.add(row.info.ref)) {
           throw const SessionCatalogException(
             SessionCatalogFailure.incompatibleResponse,
           );
@@ -1160,6 +1376,7 @@ class SessionsController extends ChangeNotifier {
       }
       pages++;
       final next = result.nextCursor;
+      _liveExhausted = next == null || result.items.length < 50;
       if (next == null) {
         _liveCursor = null;
         _liveCursors = cursors;
@@ -1238,6 +1455,7 @@ class SessionsController extends ChangeNotifier {
     _ownershipTimer = null;
     hosts.removeListener(_hostsChanged);
     _invalidate(closeSource: true);
+    _contextRefresh.cancel();
     super.dispose();
   }
 }

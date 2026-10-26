@@ -1601,4 +1601,110 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'サーバー接続が変更されました。現在のサーバー設定を使うには、この会話を開き直してください。';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project を閉じる';
+  }
+
+  @override
+  String get chatFilterSessions => 'セッションをフィルター';
+
+  @override
+  String get chatNoConversationsInProject => 'このプロジェクトには会話がありません。';
+
+  @override
+  String get chatOpenProjectToLoad => 'プロジェクトを開いて会話を読み込んでください。';
+
+  @override
+  String get chatRecentSessions => '最近のセッション';
+
+  @override
+  String get chatSearchConversations => '会話を検索';
+
+  @override
+  String get chatSortOldest => '古い順';
+
+  @override
+  String get chatSortRecent => '最近';
+
+  @override
+  String get chatSortSessions => 'セッションをソート';
+
+  @override
+  String get chatSortTitle => 'タイトル';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      '少なくとも1つのコンテキストを開いたままにする必要があります';
+
+  @override
+  String get sessionPin => 'ピン留め';
+
+  @override
+  String get sessionUnpin => 'ピン留めを外す';
+
+  @override
+  String get workspaceOpenProjects => '開いているプロジェクト';
+
+  @override
+  String get projectsCapacity =>
+      '開いているプロジェクトまたはピン留めが上限に達しました。先にプロジェクトを閉じるか、会話のピン留めを外してください。';
+
+  @override
+  String get projectsUnavailable => 'プロジェクトを読み込みまたは保存できませんでした。もう一度お試しください。';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'フィルター: $filter。並べ替え: $sort。';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'ピン留め済み';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return '会話: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return '会話: $count 件以上';
+  }
+
+  @override
+  String get chatChooseDirectory => 'ディレクトリを選択';
+
+  @override
+  String get chatChooseFolderOpen => 'プロジェクトコンテキストとして開くフォルダーを選択してください。';
+
+  @override
+  String get chatFailedToLoadDirectories => 'ディレクトリの読み込みに失敗しました';
+
+  @override
+  String get workspaceBrowseDirs => 'ディレクトリを参照';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return '現在のディレクトリ: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'プロジェクトコンテキストを開けませんでした: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'ディレクトリをフィルター';
+
+  @override
+  String get workspaceOpenFolder => 'フォルダーを開く';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return '履歴から $name を削除';
+  }
 }

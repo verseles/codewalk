@@ -1694,4 +1694,112 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'Подключение к серверу изменилось. Откройте этот разговор заново, чтобы использовать текущие настройки сервера.';
+
+  @override
+  String chatCloseProject(String project) {
+    return 'Закрыть $project';
+  }
+
+  @override
+  String get chatFilterSessions => 'Фильтровать сессии';
+
+  @override
+  String get chatNoConversationsInProject => 'В этом проекте нет бесед.';
+
+  @override
+  String get chatOpenProjectToLoad => 'Открыть проект для загрузки бесед.';
+
+  @override
+  String get chatRecentSessions => 'Недавние сессии';
+
+  @override
+  String get chatSearchConversations => 'Поиск бесед';
+
+  @override
+  String get chatSortOldest => 'Сначала старые';
+
+  @override
+  String get chatSortRecent => 'Недавние';
+
+  @override
+  String get chatSortSessions => 'Сортировать сессии';
+
+  @override
+  String get chatSortTitle => 'По названию';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'Должен оставаться открытым хотя бы один контекст';
+
+  @override
+  String get sessionPin => 'Закрепить';
+
+  @override
+  String get sessionUnpin => 'Открепить';
+
+  @override
+  String get workspaceOpenProjects => 'Открытые проекты';
+
+  @override
+  String get projectsCapacity =>
+      'Открытые проекты или закрепления достигли предела. Сначала закройте проект или открепите беседу.';
+
+  @override
+  String get projectsUnavailable =>
+      'Не удалось прочитать или сохранить проекты. Повторите попытку.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'Фильтр: $filter. Сортировка: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'Закреплена';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'Беседы: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'Беседы: $count или больше';
+  }
+
+  @override
+  String get chatChooseDirectory => 'Выбрать каталог';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'Выберите папку для открытия в качестве контекста проекта.';
+
+  @override
+  String get chatFailedToLoadDirectories => 'Не удалось загрузить каталоги';
+
+  @override
+  String get workspaceBrowseDirs => 'Обзор каталогов';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'Текущий каталог: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'Не удалось открыть контекст проекта: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'Фильтровать каталоги';
+
+  @override
+  String get workspaceOpenFolder => 'Открыть папку';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'Удалить $name из истории';
+  }
 }

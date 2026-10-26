@@ -96,9 +96,49 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a tab is dropped only when its server answers that the session no longer exists, with a notice; tabs whose sessions are merely absent from the loaded rows, hidden, unreadable or behind a login stay, and tabs of a removed server are removed with it
 - **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
 
+### V2 project contexts
+
+- **Given** a v2 server whose saved project contexts can be read
+- **When** the session list is shown
+- **Then** the list reads only the sessions of the active project context, using the official `directory` filter with the exact directory the server keys the project by; the directory is never normalized by the client
+- **Then** a server without contexts starts in the project the user last used, else in the project of its most recent session (sessions recorded at `/` are skipped), else in the server's default location; a failed default-location read is not retried until the server changes
+- **Then** each server keeps its own ordered open contexts (at most 32), the active one, a closed history (the 64 most recent) and the pinned sessions of each open context (at most 512); a change that would pass a bound is refused with a localized notice instead of evicting a user choice
+- **Then** switching to an open context shows the rows last read for it at once, marked as previous results, while its head is read again; the other open contexts keep their first page warm through one background reader that reads one context at a time, coalesces server changes at least 10 s apart and stops after three failed passes until an explicit refresh
+- **Then** closing a project drops its tabs, pins and remembered view locally in one saved change and never creates, archives, aborts or deletes a session on the server; the last open project cannot be closed and says that at least one context must remain open
+- **Then** opening a session of another project from Recent, a preview or a link makes its project the active one
+- **Then** switching projects from the drawer or the picker shows again what that project last showed: its last session, or its list or draft; closing the shown project shows the project that takes its place unless the user already navigated elsewhere
+- **Then** a project whose authoritative, complete and successful read holds no session opens its local New Chat draft once; nothing is created on the server until the first send, and the draft never replaces a session or a draft already shown
+- **Then** while the saved contexts cannot be read they are never overwritten, a notice says the projects could not be read or saved, and the list reads the whole server grouped by project as before
+
+### V2 project drawer
+
+- **Given** the v2 workspace shows the session list in the compact drawer or the medium/expanded pane
+- **When** project contexts are available
+- **Then** both places render the same tree on one continuous surface: the server switcher, the active project's title with its path (opening the project picker), a header row with the Conversations title, a collapsed search button, one filter and sort menu and New Chat, then Recent and the open projects
+- **Then** the search opens inline with the field focused and takes the whole header row (the menu and New Chat step aside until it is cleared), filters the active project's rows by title as each character is typed (Recent is not filtered), keeps its query when the keyboard closes or the user taps outside, and only collapses when cleared with its clear button or Escape; a saved query reopens the field expanded with the list already filtered; the query is saved once typing pauses and when the list closes
+- **Then** the filter (Active, Hidden, All) and the sort (Recent, Oldest, Title) share one menu whose badge names both by their initials and whose tooltip spells them out; pinned sessions lead their project's list whatever the sort, after the filter applies, and children stay nested under their parent inside each band
+- **Then** hiding a parent hides its loaded descendants from the Active list; only the explicit hide is saved
+- **Then** Recent lists up to five visible root sessions across the open projects by last update, one line each with the title, a running mark while it works and a chip with its project; it is hidden when empty
+- **Then** each open project row shows its name, its path with the leading part elided so the trailing folders stay visible (always left-to-right, read whole by a screen reader), its conversation count (`N+` when only the first page was read, none before its first read) and a trailing menu of 32 dp on desktop and 40 dp on compact; the active project is followed by its rows and the others by up to three previews from their last read, or a hint to open them
+- **Then** the project menu, a long press, a secondary click, the Menu key, Shift+F10 or the semantic action open the single destructive `Close {project}` entry; opening the menu never switches projects
+- **Then** the selected project, the shown session and its Recent row carry a thin accent along the start edge with emphasized foreground text; activity marks stay compact foreground badges, and a completed root reply not seen yet keeps a subtle highlight for one hour (never on child sessions)
+- **Then** rows use touch spacing on compact windows and denser spacing beside the chat; session rows never render diff-stat pseudo summaries
+- **Then** a session row's menu offers Pin or Unpin for its project context; the pin is saved locally only for that server and project
+
+### V2 project picker
+
+- **Given** the user opens the project picker from the project title
+- **When** the picker is shown
+- **Then** compact windows use a full-screen dialog and larger windows a centered dialog at most 560 dp wide
+- **Then** one focused search field ranks the open and closed projects, the server's projects and a bounded server directory search (250 ms after typing, from the active project or the server default location, at most 50 results), deduplicated by exact path, with exact and prefix matches ahead of ordered fuzzy matches
+- **Then** arrow keys and Ctrl+N/Ctrl+P move the highlighted result (wrapping, always kept in view), Enter or the keyboard's Go action opens it (or the typed absolute path when nothing matches), Tab completes the field to the highlighted path and Escape dismisses the picker; an unfinished IME composition never submits; a new query highlights its first result
+- **Then** Browse directories switches to a folder browser inside the same dialog, resolving each entry against the location the server answered and offering `..` and Open folder for the folder shown
+- **Then** Open folder accepts any absolute path, including POSIX paths, `C:/` drive roots and native UNC paths (a bare `C:` is not absolute), and opens the directory the server resolves it to; a typed path loses surrounding spaces while a path the server returned (found, browsed or Tab-completed) is used exactly; a folder the server rejects says it could not be opened, only while that query is still the one typed
+- **Then** selecting a result opens or reopens that project immediately and closes the picker; a closed project can be removed from the history until it is opened again; late search or browse replies never replace newer ones; actions run one at a time and a change of server dismisses the picker
+
 ### V2 grouped session catalog
 
-- **Given** the v2 session catalog has loaded sessions
+- **Given** the v2 session catalog has loaded sessions while the project contexts cannot be read
 - **When** the server attributed them to projects
 - **Then** the list groups them by the canonical directory the server reported, scoped by the endpoint host; the groups follow the order the server returned and the rows inside a group keep the server's order
 - **Then** a session the server did not attribute to a project keeps a clearly marked group, and no project is invented for it

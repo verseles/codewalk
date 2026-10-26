@@ -1,5 +1,6 @@
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/project_context_list.dart';
 import 'package:codewalk/features/sessions/session_ownership.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
@@ -185,9 +186,19 @@ void main() {
     expect(find.text(title), findsOneWidget);
     // The group header is laid out at 2x, and its path is always read
     // left-to-right, so the separators do not reorder in a right-to-left
-    // locale.
-    final path = tester.widget<Text>(find.text(directory));
+    // locale. A path too long for the row keeps its trailing folders.
+    final path = tester.widget<Text>(
+      find.descendant(
+        of: find.byWidgetPredicate(
+          (widget) => widget is StartEllipsisPath && widget.path == directory,
+        ),
+        matching: find.byType(Text),
+      ),
+    );
     expect(path.textDirection, TextDirection.ltr);
+    expect(path.data, startsWith('…'));
+    expect(path.data, endsWith('/layout'));
+    expect(path.semanticsLabel, directory);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();

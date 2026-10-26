@@ -1677,4 +1677,113 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'سرور کنکشن بدل گیا ہے۔ سرور کی موجودہ ترتیبات استعمال کرنے کے لیے یہ گفتگو دوبارہ کھولیں۔';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project بند کریں';
+  }
+
+  @override
+  String get chatFilterSessions => 'فلٹر سیشنز';
+
+  @override
+  String get chatNoConversationsInProject =>
+      'اس پروجیکٹ میں کوئی گفتگو نہیں ہے۔';
+
+  @override
+  String get chatOpenProjectToLoad => 'گفتگو لوڈ کرنے کے لیے پروجیکٹ کھولیں۔';
+
+  @override
+  String get chatRecentSessions => 'حالیہ سیشنز';
+
+  @override
+  String get chatSearchConversations => 'مکالمات تلاش کریں۔';
+
+  @override
+  String get chatSortOldest => 'قدیم ترین';
+
+  @override
+  String get chatSortRecent => 'حالیہ';
+
+  @override
+  String get chatSortSessions => 'سیشن ترتیب دیں۔';
+
+  @override
+  String get chatSortTitle => 'عنوان';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'کم از کم ایک سیاق و سباق کھلا رہنا چاہیے';
+
+  @override
+  String get sessionPin => 'پن کریں';
+
+  @override
+  String get sessionUnpin => 'ان پن کریں';
+
+  @override
+  String get workspaceOpenProjects => 'کھلے منصوبے';
+
+  @override
+  String get projectsCapacity =>
+      'کھلے پروجیکٹس یا پنز اپنی حد تک پہنچ گئے۔ پہلے کوئی پروجیکٹ بند کریں یا کسی گفتگو کا پن ہٹائیں۔';
+
+  @override
+  String get projectsUnavailable =>
+      'پروجیکٹس پڑھے یا محفوظ نہیں کیے جا سکے۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'فلٹر: $filter۔ ترتیب: $sort۔';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'پن شدہ';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'گفتگوئیں: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'گفتگوئیں: $count یا زیادہ';
+  }
+
+  @override
+  String get chatChooseDirectory => 'ڈائرکٹری کا انتخاب کریں۔';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'پروجیکٹ سیاق و سباق کے طور پر کھولنے کے لیے فولڈر کا انتخاب کریں۔';
+
+  @override
+  String get chatFailedToLoadDirectories => 'ڈائریکٹریز لوڈ کرنے میں ناکام';
+
+  @override
+  String get workspaceBrowseDirs => 'ڈائریکٹریز کو براؤز کریں۔';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'موجودہ ڈائریکٹری: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'پراجیکٹ کا سیاق و سباق نہیں کھل سکا: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'ڈائریکٹریز کو فلٹر کریں۔';
+
+  @override
+  String get workspaceOpenFolder => 'فولڈر کھولیں۔';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'تاریخ سے $name کو ہٹا دیں۔';
+  }
 }

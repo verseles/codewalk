@@ -245,6 +245,99 @@ void main() {
     );
   });
 
+  test('directory reads share the transport and map failures', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    final paths = <String>[];
+    server.listen((request) async {
+      paths.add(request.uri.path);
+      expect(
+        request.headers.value(HttpHeaders.authorizationHeader),
+        'Basic ${base64Encode(utf8.encode('opencode:fake-secret'))}',
+      );
+      final directory = request.uri.queryParameters['location[directory]'];
+      request.response.headers.contentType = ContentType.json;
+      switch (request.uri.path) {
+        case '/api/project':
+          request.response.write(
+            jsonEncode([
+              {
+                'id': 'prj',
+                'canonical': '/work/app',
+                'time': {'created': 1, 'updated': 2, 'active': 3},
+                'sandboxes': <String>[],
+              },
+            ]),
+          );
+        case '/api/location':
+          if (directory == '/missing') request.response.statusCode = 404;
+          request.response.write(
+            jsonEncode({
+              'directory': directory ?? '/home/me',
+              'project': {
+                'id': 'prj',
+                'directory': '/work/app',
+                'canonical': '/work/app',
+              },
+            }),
+          );
+        default:
+          request.response.write(
+            jsonEncode({
+              'location': {'directory': directory},
+              'data': [
+                {'path': 'lib', 'type': 'directory'},
+              ],
+            }),
+          );
+      }
+      await request.response.close();
+    });
+    final source = createSessionCatalogSource(
+      EndpointProfile(
+        id: 'profile_a',
+        label: 'Native',
+        endpoint: Uri.parse('http://127.0.0.1:${server.port}/'),
+      ),
+      EndpointCredential(
+        kind: EndpointAuthKind.password,
+        secret: 'fake-secret',
+      ),
+    );
+    addTearDown(source.close);
+    expect(
+      (await source.projects().result).single.canonicalDirectory,
+      '/work/app',
+    );
+    expect((await source.location().result).canonicalDirectory, '/home/me');
+    expect(
+      (await source.listDirectory('/work/app').result).single.ref.path,
+      'lib',
+    );
+    expect(
+      (await source.findDirectories('/work/app', 'li').result).single.ref.path,
+      'lib',
+    );
+    // A directory the server does not know is missing, not unavailable.
+    await expectLater(
+      source.location(directory: '/missing').result,
+      throwsA(
+        isA<SessionCatalogException>().having(
+          (e) => e.failure,
+          'failure',
+          SessionCatalogFailure.notFound,
+        ),
+      ),
+    );
+    expect(paths, [
+      '/api/project',
+      '/api/location',
+      '/api/fs/list',
+      '/api/fs/find',
+      '/api/location',
+    ]);
+  });
+
   test('unsupported source opens no transport', () async {
     final source = stub.createSessionCatalogSource(
       EndpointProfile(
@@ -257,16 +350,24 @@ void main() {
         secret: 'fake-secret',
       ),
     );
-    await expectLater(
+    for (final result in [
       source.list(SessionQuery()).result,
-      throwsA(
-        isA<SessionCatalogException>().having(
-          (e) => e.failure,
-          'failure',
-          SessionCatalogFailure.unsupportedPlatform,
+      source.projects().result,
+      source.location().result,
+      source.listDirectory('/work').result,
+      source.findDirectories('/work', 'x').result,
+    ]) {
+      await expectLater(
+        result,
+        throwsA(
+          isA<SessionCatalogException>().having(
+            (e) => e.failure,
+            'failure',
+            SessionCatalogFailure.unsupportedPlatform,
+          ),
         ),
-      ),
-    );
+      );
+    }
     source.close();
   });
 }

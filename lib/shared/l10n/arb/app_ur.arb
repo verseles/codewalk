@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "سرور کنکشن بدل گیا ہے۔ سرور کی موجودہ ترتیبات استعمال کرنے کے لیے یہ گفتگو دوبارہ کھولیں۔",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "{project} بند کریں",
+  "chatFilterSessions": "فلٹر سیشنز",
+  "chatNoConversationsInProject": "اس پروجیکٹ میں کوئی گفتگو نہیں ہے۔",
+  "chatOpenProjectToLoad": "گفتگو لوڈ کرنے کے لیے پروجیکٹ کھولیں۔",
+  "chatRecentSessions": "حالیہ سیشنز",
+  "chatSearchConversations": "مکالمات تلاش کریں۔",
+  "chatSortOldest": "قدیم ترین",
+  "chatSortRecent": "حالیہ",
+  "chatSortSessions": "سیشن ترتیب دیں۔",
+  "chatSortTitle": "عنوان",
+  "projectProviderErrorAtLeastOneContext": "کم از کم ایک سیاق و سباق کھلا رہنا چاہیے",
+  "sessionPin": "پن کریں",
+  "sessionUnpin": "ان پن کریں",
+  "workspaceOpenProjects": "کھلے منصوبے",
+  "projectsCapacity": "کھلے پروجیکٹس یا پنز اپنی حد تک پہنچ گئے۔ پہلے کوئی پروجیکٹ بند کریں یا کسی گفتگو کا پن ہٹائیں۔",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "پروجیکٹس پڑھے یا محفوظ نہیں کیے جا سکے۔ دوبارہ کوشش کریں۔",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "فلٹر: {filter}۔ ترتیب: {sort}۔",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "پن شدہ",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "گفتگوئیں: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "گفتگوئیں: {count} یا زیادہ",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "ڈائرکٹری کا انتخاب کریں۔",
+  "chatChooseFolderOpen": "پروجیکٹ سیاق و سباق کے طور پر کھولنے کے لیے فولڈر کا انتخاب کریں۔",
+  "chatFailedToLoadDirectories": "ڈائریکٹریز لوڈ کرنے میں ناکام",
+  "workspaceBrowseDirs": "ڈائریکٹریز کو براؤز کریں۔",
+  "workspaceCurrentDirectory": "موجودہ ڈائریکٹری: {path}",
+  "workspaceFailedToOpenProjectContext": "پراجیکٹ کا سیاق و سباق نہیں کھل سکا: {directory}",
+  "workspaceFilterDirs": "ڈائریکٹریز کو فلٹر کریں۔",
+  "workspaceOpenFolder": "فولڈر کھولیں۔",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "تاریخ سے {name} کو ہٹا دیں۔"
 }

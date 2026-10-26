@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "La conexión del servidor cambió. Vuelve a abrir esta conversación para usar la configuración actual del servidor.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "Cerrar {project}",
+  "chatFilterSessions": "Filtrar sesiones",
+  "chatNoConversationsInProject": "No hay conversaciones en este proyecto.",
+  "chatOpenProjectToLoad": "Abra un proyecto para cargar conversaciones.",
+  "chatRecentSessions": "Sesiones recientes",
+  "chatSearchConversations": "Buscar conversaciones",
+  "chatSortOldest": "Más Antiguas",
+  "chatSortRecent": "Recientes",
+  "chatSortSessions": "Ordenar sesiones",
+  "chatSortTitle": "Título",
+  "projectProviderErrorAtLeastOneContext": "Al menos un contexto debe permanecer abierto",
+  "sessionPin": "Fijar",
+  "sessionUnpin": "Desfijar",
+  "workspaceOpenProjects": "Proyectos abiertos",
+  "projectsCapacity": "Los proyectos abiertos o fijados alcanzaron su límite. Cierra un proyecto o desfija una conversación primero.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "No se pudieron leer ni guardar los proyectos. Inténtalo de nuevo.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filtro: {filter}. Orden: {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Fijada",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Conversaciones: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Conversaciones: {count} o más",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Elegir directorio",
+  "chatChooseFolderOpen": "Elija una carpeta para abrir como contexto del proyecto.",
+  "chatFailedToLoadDirectories": "Error al cargar directorios",
+  "workspaceBrowseDirs": "Explorar directorios",
+  "workspaceCurrentDirectory": "Directorio actual: {path}",
+  "workspaceFailedToOpenProjectContext": "No se pudo abrir el contexto del proyecto: {directory}",
+  "workspaceFilterDirs": "Filtrar directorios",
+  "workspaceOpenFolder": "Abrir carpeta",
+  "workspaceProjectHint": "/repo/mi-proyecto",
+  "workspaceRemoveFromHistory": "Eliminar {name} del historial"
 }

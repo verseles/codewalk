@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
@@ -21,6 +22,7 @@ import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
+import '../platform/sessions/project_workspace_store.dart';
 import '../platform/sessions/session_action_source.dart';
 import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_draft_store.dart';
@@ -72,6 +74,7 @@ AppDependencies createAppDependencies({
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
   WorkspaceStore? workspaceStore,
+  ProjectWorkspaceStore? projectWorkspaceStore,
   WorkspaceDraftStore? workspaceDraftStore,
   Stream<Object?>? networkChanges,
 }) {
@@ -187,12 +190,28 @@ AppDependencies createAppDependencies({
     catalog: locator<SessionsController>(),
     now: sessionClock,
   );
-  // Brings back the server and the project the workspace was left on.
+  // Brings back the server the workspace was left on.
+  final workspaceState = workspaceStore ?? WorkspaceStore(store: metadata);
   final workspace = WorkspaceController(
     catalog: locator<SessionsController>(),
     health: endpointHealth,
-    store: workspaceStore ?? WorkspaceStore(store: metadata),
+    store: workspaceState,
     tabs: sessionTabs,
+  );
+  final workspaceDrafts = WorkspaceDraftController(
+    catalog: locator<SessionsController>(),
+    health: endpointHealth,
+    store:
+        workspaceDraftStore ??
+        WorkspaceDraftStore(payloads: payloads, index: metadata),
+  );
+  // The open projects of each server and the project the list shows.
+  final projectContexts = ProjectContextsController(
+    catalog: locator<SessionsController>(),
+    store: projectWorkspaceStore ?? ProjectWorkspaceStore(store: metadata),
+    workspace: workspaceState,
+    tabs: sessionTabs,
+    drafts: workspaceDrafts,
   );
   locator.registerSingleton(AppNavigationController());
   locator.registerSingleton(L10nBridge());
@@ -236,13 +255,8 @@ AppDependencies createAppDependencies({
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
     workspace: workspace,
-    workspaceDrafts: WorkspaceDraftController(
-      catalog: locator<SessionsController>(),
-      health: endpointHealth,
-      store:
-          workspaceDraftStore ??
-          WorkspaceDraftStore(payloads: payloads, index: metadata),
-    ),
+    workspaceDrafts: workspaceDrafts,
+    projectContexts: projectContexts,
     sessionDrafts:
         draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
     unrestrictedOwnership: unrestrictedOwnership,

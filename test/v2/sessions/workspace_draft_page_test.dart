@@ -133,6 +133,9 @@ void main() {
     source = rig.sources.single;
     source.respond(empty ? [] : [source.row('old', directory: '/work/alpha')]);
     await tester.pumpAndSettle();
+    // The project context opened on the rows above; later reads are driven
+    // by hand.
+    source.autoContexts = false;
     await tester.tap(find.byKey(const ValueKey('workspace-new-chat')));
     await tester.pumpAndSettle();
   }

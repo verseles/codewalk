@@ -1715,4 +1715,115 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'Die Serververbindung hat sich geändert. Öffne diese Unterhaltung erneut, um die aktuellen Servereinstellungen zu verwenden.';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project schließen';
+  }
+
+  @override
+  String get chatFilterSessions => 'Sitzungen filtern';
+
+  @override
+  String get chatNoConversationsInProject =>
+      'Keine Konversationen in diesem Projekt.';
+
+  @override
+  String get chatOpenProjectToLoad =>
+      'Projekt öffnen, um Konversationen zu laden.';
+
+  @override
+  String get chatRecentSessions => 'Letzte Sitzungen';
+
+  @override
+  String get chatSearchConversations => 'Konversationen suchen';
+
+  @override
+  String get chatSortOldest => 'Älteste';
+
+  @override
+  String get chatSortRecent => 'Kürzlich';
+
+  @override
+  String get chatSortSessions => 'Sitzungen sortieren';
+
+  @override
+  String get chatSortTitle => 'Titel';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'Mindestens ein Kontext muss geöffnet bleiben';
+
+  @override
+  String get sessionPin => 'Anheften';
+
+  @override
+  String get sessionUnpin => 'Anheften aufheben';
+
+  @override
+  String get workspaceOpenProjects => 'Offene Projekte';
+
+  @override
+  String get projectsCapacity =>
+      'Die offenen Projekte oder Anheftungen haben ihr Limit erreicht. Schließe zuerst ein Projekt oder löse eine Unterhaltung.';
+
+  @override
+  String get projectsUnavailable =>
+      'Die Projekte konnten nicht gelesen oder gespeichert werden. Versuche es erneut.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'Filter: $filter. Sortierung: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'Angeheftet';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'Unterhaltungen: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'Unterhaltungen: $count oder mehr';
+  }
+
+  @override
+  String get chatChooseDirectory => 'Verzeichnis auswählen';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'Wählen Sie einen Ordner aus, der als Projektkontext geöffnet werden soll.';
+
+  @override
+  String get chatFailedToLoadDirectories =>
+      'Verzeichnisse konnten nicht geladen werden';
+
+  @override
+  String get workspaceBrowseDirs => 'Verzeichnisse durchsuchen';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'Aktuelles Verzeichnis: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'Projektkontext konnte nicht geöffnet werden: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'Verzeichnisse filtern';
+
+  @override
+  String get workspaceOpenFolder => 'Ordner öffnen';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return '$name aus dem Verlauf entfernen';
+  }
 }

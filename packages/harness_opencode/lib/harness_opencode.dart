@@ -16,6 +16,7 @@ export 'src/session_lifecycle_client.dart';
 export 'src/permission_reply_client.dart';
 export 'src/form_reply_client.dart';
 export 'src/session_reader.dart';
+export 'src/location_reader.dart';
 export 'src/session_rules.dart';
 export 'src/shell_projection.dart';
 export 'src/stream_owner.dart';

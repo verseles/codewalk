@@ -499,6 +499,10 @@ List<FixtureRoute> sessionRoutes({
   final desc = messageRows.reversed.toList();
   final descFn = descRows;
   final directory = (sessionRow['location'] as Map?)?['directory'] as String?;
+  List<Map<String, Object?>> inDirectory(List<Map<String, Object?>> rows) => [
+    for (final row in rows)
+      if ((row['location'] as Map?)?['directory'] == directory) row,
+  ];
   // A location-scoped list: the sidebar reads who waits for the user in the
   // open group's directory, and a live session reads its model and agent
   // catalogs there.
@@ -539,6 +543,27 @@ List<FixtureRoute> sessionRoutes({
           ? null
           : (_) => _page([sessionRowFn(), ...extraSessionRows]),
     ),
+    // The project the list shows reads only the sessions of its directory.
+    if (directory != null)
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: Uri(
+            path: '/api/session',
+            queryParameters: {
+              'limit': '50',
+              'order': 'desc',
+              'directory': directory,
+            },
+          ).toString(),
+          status: 200,
+          response: _page([sessionRow, ...inDirectory(extraSessionRows)]),
+        ),
+        times: times,
+        respond: sessionRowFn == null
+            ? null
+            : (_) => _page([sessionRowFn(), ...inDirectory(extraSessionRows)]),
+      ),
     FixtureRoute(
       _exchange(
         method: 'GET',

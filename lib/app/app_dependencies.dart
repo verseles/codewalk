@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
+import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
@@ -51,6 +52,7 @@ class AppDependencies {
     this.workspace,
     this.sessionDrafts,
     this.workspaceDrafts,
+    this.projectContexts,
   }) {
     router.routeInformationProvider.addListener(_routeChanged);
     _routeChanged();
@@ -60,9 +62,16 @@ class AppDependencies {
     final location = router.routeInformationProvider.value.uri.path;
     workspaceDrafts?.locationChanged(location);
     workspaceChrome?.locationChanged(location);
+    // The home shows the list or the draft of the active project.
+    if (location == '/' || location == '/sessions') {
+      projectContexts?.recordHome();
+    }
   }
 
   final WorkspaceDraftController? workspaceDrafts;
+
+  /// The project contexts of the selected server and the list preferences.
+  final ProjectContextsController? projectContexts;
 
   final AppPreferencesController preferences;
   final AppNavigationController navigation;
@@ -118,6 +127,8 @@ class AppDependencies {
     links?.dispose();
     router.routeInformationProvider.removeListener(_routeChanged);
     workspaceChrome?.dispose();
+    // It listens to the list and drives the drafts, so it leaves first.
+    projectContexts?.dispose();
     workspaceDrafts?.dispose();
     router.dispose();
     pairing?.dispose();

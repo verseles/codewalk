@@ -74,6 +74,14 @@ Future<void> _visit(WidgetTester tester, _App app, List<String> ids) async {
     app.dependencies.router.go('/s/profile_a/ses_$id');
     await _settle(tester);
     final ref = source.row(id).info.ref;
+    // A session of a project the list does not show is read on its own.
+    for (final (read, task) in source.reads.toList()) {
+      if (read != ref || task.completion.isCompleted) continue;
+      task.completion.complete(
+        source.served.firstWhere((row) => row.info.ref == ref),
+      );
+      await _settle(tester);
+    }
     if (app.directory.handles.every((handle) => handle.session != ref)) {
       app.directory.grant(ref);
       await tester.pump();

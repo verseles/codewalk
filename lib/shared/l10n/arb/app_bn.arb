@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "সার্ভার সংযোগ পরিবর্তিত হয়েছে। সার্ভারের বর্তমান সেটিং ব্যবহার করতে এই কথোপকথনটি আবার খুলুন।",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "{project} বন্ধ করুন",
+  "chatFilterSessions": "ফিল্টার সেশন",
+  "chatNoConversationsInProject": "এই প্রজেক্টে কোনো কথোপকথন নেই।",
+  "chatOpenProjectToLoad": "কথোপকথন লোড করতে প্রজেক্ট খুলুন।",
+  "chatRecentSessions": "সাম্প্রতিক সেশন",
+  "chatSearchConversations": "কথোপকথন অনুসন্ধান করুন",
+  "chatSortOldest": "প্রাচীনতম",
+  "chatSortRecent": "সাম্প্রতিক",
+  "chatSortSessions": "সেশন সাজান",
+  "chatSortTitle": "শিরোনাম",
+  "projectProviderErrorAtLeastOneContext": "অন্তত একটি প্রসঙ্গ খোলা থাকতে হবে",
+  "sessionPin": "পিন করুন",
+  "sessionUnpin": "আনপিন করুন",
+  "workspaceOpenProjects": "খোলা প্রজেক্ট সমূহ",
+  "projectsCapacity": "খোলা প্রকল্প বা পিন সীমায় পৌঁছেছে। আগে একটি প্রকল্প বন্ধ করুন বা একটি কথোপকথন আনপিন করুন।",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "প্রকল্পগুলো পড়া বা সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "ফিল্টার: {filter}। ক্রম: {sort}।",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "পিন করা",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "কথোপকথন: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "কথোপকথন: {count} বা তার বেশি",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "ডিরেক্টরি নির্বাচন করুন",
+  "chatChooseFolderOpen": "প্রকল্পের প্রসঙ্গ হিসাবে খুলতে একটি ফোল্ডার চয়ন করুন।",
+  "chatFailedToLoadDirectories": "ডিরেক্টরি লোড করতে ব্যর্থ",
+  "workspaceBrowseDirs": "ডিরেক্টরি ব্রাউজ করুন",
+  "workspaceCurrentDirectory": "বর্তমান ডিরেক্টরি: {path}",
+  "workspaceFailedToOpenProjectContext": "প্রজেক্ট প্রসঙ্গ খুলতে ব্যর্থ: {directory}",
+  "workspaceFilterDirs": "ফিল্টার ডিরেক্টরি",
+  "workspaceOpenFolder": "ফোল্ডার খুলুন",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "ইতিহাস থেকে {name} সরান"
 }

@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "La connexion au serveur a changé. Rouvrez cette conversation pour utiliser les paramètres actuels du serveur.",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "Fermer {project}",
+  "chatFilterSessions": "Filtrer les sessions",
+  "chatNoConversationsInProject": "Aucune conversation dans ce projet.",
+  "chatOpenProjectToLoad": "Ouvrez un projet pour charger les conversations.",
+  "chatRecentSessions": "Sessions récentes",
+  "chatSearchConversations": "Rechercher des conversations",
+  "chatSortOldest": "Les plus anciennes",
+  "chatSortRecent": "Récentes",
+  "chatSortSessions": "Trier les sessions",
+  "chatSortTitle": "Titre",
+  "projectProviderErrorAtLeastOneContext": "Au moins un contexte doit rester ouvert",
+  "sessionPin": "Épingler",
+  "sessionUnpin": "Désépingler",
+  "workspaceOpenProjects": "Projets ouverts",
+  "projectsCapacity": "Les projets ouverts ou les épingles ont atteint leur limite. Fermez un projet ou désépinglez une conversation d’abord.",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "Impossible de lire ou d’enregistrer les projets. Réessayez.",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "Filtre : {filter}. Tri : {sort}.",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "Épinglée",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "Conversations : {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "Conversations : {count} ou plus",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "Choisir le répertoire",
+  "chatChooseFolderOpen": "Choisissez un dossier à ouvrir en tant que contexte du projet.",
+  "chatFailedToLoadDirectories": "Échec du chargement des répertoires",
+  "workspaceBrowseDirs": "Parcourir les répertoires",
+  "workspaceCurrentDirectory": "Répertoire actuel : {path}",
+  "workspaceFailedToOpenProjectContext": "Échec de l''ouverture du contexte du projet : {directory}",
+  "workspaceFilterDirs": "Filtrer les répertoires",
+  "workspaceOpenFolder": "Ouvrir le dossier",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "Retirer {name} de l''historique"
 }

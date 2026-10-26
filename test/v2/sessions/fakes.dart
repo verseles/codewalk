@@ -39,6 +39,15 @@ class CatalogTask implements SessionCatalogTask {
   void cancel() => cancelled = true;
 }
 
+class CatalogRead<T> implements SessionCatalogRead<T> {
+  final completion = Completer<T>();
+  bool cancelled = false;
+  @override
+  Future<T> get result => completion.future;
+  @override
+  void cancel() => cancelled = true;
+}
+
 class ReadTask implements SessionReadTask {
   final completion = Completer<SessionSummary>();
   bool cancelled = false;
@@ -57,8 +66,31 @@ class CatalogSource implements SessionCatalogSource {
   final queries = <SessionQuery>[];
   final reads = <(SessionRef, ReadTask)>[];
   int closes = 0;
+  /// Answers a read of one project context at once with the rows of the
+  /// whole-server answers in that directory, as a consistent server would.
+  /// Tests that drive the context reads by hand turn it off.
+  bool autoContexts = true;
+  final contextQueries = <SessionQuery>[];
+  List<SessionSummary> _served = const [];
+
+  /// The rows of the whole-server answers so far.
+  List<SessionSummary> get served => _served;
+
   @override
   CatalogTask list(SessionQuery query) {
+    if (autoContexts && query.project != null) {
+      contextQueries.add(query);
+      final directory = query.project!.canonicalDirectory;
+      return CatalogTask()
+        ..completion.complete(
+          Page(
+            items: [
+              for (final row in _served)
+                if (row.info.project?.canonicalDirectory == directory) row,
+            ],
+          ),
+        );
+    }
     queries.add(query);
     final task = CatalogTask();
     tasks.add(task);
@@ -119,8 +151,52 @@ class CatalogSource implements SessionCatalogSource {
     );
   }
 
-  void respond(List<SessionSummary> rows, {String? next}) =>
-      tasks.last.completion.complete(Page(items: rows, nextCursor: next));
+  /// The directory reads, each held until a test settles it.
+  final projectReads = <CatalogRead<List<ProjectRef>>>[];
+  final locationReads = <(String?, CatalogRead<ProjectRef>)>[];
+  final listReads = <(String, String?, CatalogRead<List<FileEntry>>)>[];
+  final findReads = <(String, String, CatalogRead<List<FileEntry>>)>[];
+  @override
+  CatalogRead<List<ProjectRef>> projects() {
+    final read = CatalogRead<List<ProjectRef>>();
+    projectReads.add(read);
+    return read;
+  }
+
+  @override
+  CatalogRead<ProjectRef> location({String? directory}) {
+    final read = CatalogRead<ProjectRef>();
+    locationReads.add((directory, read));
+    return read;
+  }
+
+  @override
+  CatalogRead<List<FileEntry>> listDirectory(
+    String directory, {
+    String? path,
+  }) {
+    final read = CatalogRead<List<FileEntry>>();
+    listReads.add((directory, path, read));
+    return read;
+  }
+
+  @override
+  CatalogRead<List<FileEntry>> findDirectories(
+    String directory,
+    String query,
+  ) {
+    final read = CatalogRead<List<FileEntry>>();
+    findReads.add((directory, query, read));
+    return read;
+  }
+
+  void respond(List<SessionSummary> rows, {String? next}) {
+    final query = queries.last;
+    if (query.project == null) {
+      _served = [if (query.cursor != null) ..._served, ...rows];
+    }
+    tasks.last.completion.complete(Page(items: rows, nextCursor: next));
+  }
   void fail(SessionCatalogFailure failure) =>
       tasks.last.completion.completeError(SessionCatalogException(failure));
   @override

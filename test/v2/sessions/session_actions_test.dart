@@ -64,6 +64,9 @@ void main() {
     actions.children = children;
     source.respond(rows?.call(source) ?? [source.row('first', title: 'First')]);
     await tester.pumpAndSettle();
+    // The project context opened on the rows above; later reads are driven
+    // by hand.
+    source.autoContexts = false;
     return (source, dependencies.localizations.current, dependencies.sessions!);
   }
 

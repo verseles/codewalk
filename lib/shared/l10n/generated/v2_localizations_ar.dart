@@ -1663,4 +1663,111 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'تغيّر اتصال الخادم. أعد فتح هذه المحادثة لاستخدام إعدادات الخادم الحالية.';
+
+  @override
+  String chatCloseProject(String project) {
+    return 'إغلاق $project';
+  }
+
+  @override
+  String get chatFilterSessions => 'تصفية الجلسات';
+
+  @override
+  String get chatNoConversationsInProject => 'لا توجد محادثات في هذا المشروع.';
+
+  @override
+  String get chatOpenProjectToLoad => 'افتح المشروع لتحميل المحادثات.';
+
+  @override
+  String get chatRecentSessions => 'الجلسات الأخيرة';
+
+  @override
+  String get chatSearchConversations => 'البحث في المحادثات';
+
+  @override
+  String get chatSortOldest => 'الأقدم';
+
+  @override
+  String get chatSortRecent => 'الأخيرة';
+
+  @override
+  String get chatSortSessions => 'ترتيب الجلسات';
+
+  @override
+  String get chatSortTitle => 'العنوان';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'يجب أن يبقى سياق واحد على الأقل مفتوحاً';
+
+  @override
+  String get sessionPin => 'تثبيت';
+
+  @override
+  String get sessionUnpin => 'إلغاء التثبيت';
+
+  @override
+  String get workspaceOpenProjects => 'المشاريع المفتوحة';
+
+  @override
+  String get projectsCapacity =>
+      'بلغت المشاريع المفتوحة أو المثبتات حدها. أغلق مشروعًا أو ألغِ تثبيت محادثة أولًا.';
+
+  @override
+  String get projectsUnavailable =>
+      'تعذرت قراءة المشاريع أو حفظها. حاول مرة أخرى.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'التصفية: $filter. الترتيب: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'مثبتة';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'المحادثات: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'المحادثات: $count أو أكثر';
+  }
+
+  @override
+  String get chatChooseDirectory => 'اختر الدليل';
+
+  @override
+  String get chatChooseFolderOpen => 'اختر مجلداً لفتحه كسياق للمشروع.';
+
+  @override
+  String get chatFailedToLoadDirectories => 'فشل تحميل الأدلة';
+
+  @override
+  String get workspaceBrowseDirs => 'تصفح الأدلة';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'المجلد الحالي: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'فشل فتح سياق المشروع: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'تصفية الأدلة';
+
+  @override
+  String get workspaceOpenFolder => 'فتح مجلد';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'إزالة $name من السجل';
+  }
 }

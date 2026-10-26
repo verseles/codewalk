@@ -90,11 +90,17 @@ final class SessionSummary {
     required this.info,
     this.execution,
     this.updatedAt,
+    this.createdAt,
+    this.outcome,
     this.view,
   });
   final SessionInfo info;
   final ExecutionState? execution;
   final DateTime? updatedAt;
+  final DateTime? createdAt;
+
+  /// How the session's last run ended, when the record says so.
+  final SessionOutcome? outcome;
 
   /// The endpoint's unread marker, when the record carried one.
   ///
@@ -104,6 +110,9 @@ final class SessionSummary {
   /// the later read.
   final SessionViewMarker? view;
 }
+
+/// How a session's last run ended.
+enum SessionOutcome { succeeded, failed, interrupted }
 
 /// The endpoint's unread marker for a session: the last idle transition and
 /// when that transition was seen.

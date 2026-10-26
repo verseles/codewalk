@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../features/hosts/endpoint_health_controller.dart';
+import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
@@ -120,6 +121,10 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ChangeNotifierProvider<WorkspaceController>.value(value: workspace),
         if (dependencies.workspaceDrafts case final drafts?)
           ChangeNotifierProvider<WorkspaceDraftController>.value(value: drafts),
+        if (dependencies.projectContexts case final contexts?)
+          ChangeNotifierProvider<ProjectContextsController>.value(
+            value: contexts,
+          ),
         if (dependencies.diagnostics case final diagnostics?)
           ChangeNotifierProvider<DiagnosticsController>.value(
             value: diagnostics,

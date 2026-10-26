@@ -176,6 +176,29 @@ class SessionTabsController extends ChangeNotifier {
     return (removed: removed.isNotEmpty, next: selectedAfter[ref]);
   }
 
+  /// Closes every tab of the project context at [directory] of server
+  /// [host], and their live views; the sessions stay on the server. The
+  /// tabs are chosen at the store's turn, so a tab opened meanwhile closes
+  /// too.
+  Future<bool> closeContext(String host, String directory) async {
+    if (_disposed) return false;
+    var matched = false;
+    final (:removed, selectedAfter: _) = await _remove(
+      const {},
+      where: (tab) {
+        final inContext =
+            tab.ref.host.value == host &&
+            tab.project?.canonicalDirectory == directory;
+        matched |= inContext;
+        return inContext;
+      },
+    );
+    // Unreadable tabs are neither known nor closed.
+    if (_store.unreadable) return false;
+    // Nothing of the project was open, or every tab of it closed.
+    return !matched || removed.isNotEmpty;
+  }
+
   /// Puts the closed [tab] back at [index] of the strip; [select] makes it
   /// the selected tab of its server again. False when it is open again
   /// already, the tabs are full or nothing was saved.
@@ -221,21 +244,25 @@ class SessionTabsController extends ChangeNotifier {
     return null;
   }
 
-  /// Removes the tabs of [refs] at the store's turn. A removed selected tab
-  /// hands its selection to its neighbour. The removed tabs, empty when
-  /// nothing was saved, and the tab each removed selected tab handed its
-  /// selection to.
+  /// Removes the tabs of [refs], or the tabs [where] picks, at the store's
+  /// turn. A removed selected tab hands its selection to its neighbour. The
+  /// removed tabs, empty when nothing was saved, and the tab each removed
+  /// selected tab handed its selection to.
   Future<
     ({List<SessionTab> removed, Map<SessionRef, SessionRef?> selectedAfter})
   >
-  _remove(Set<SessionRef> refs, {bool Function()? isCurrent}) async {
+  _remove(
+    Set<SessionRef> refs, {
+    bool Function()? isCurrent,
+    bool Function(SessionTab tab)? where,
+  }) async {
     var removed = <SessionTab>[];
     final selectedAfter = <SessionRef, SessionRef?>{};
     final saved = await _store.update((state) {
       if (isCurrent?.call() == false) return null;
       removed = [
         for (final tab in state.tabs)
-          if (refs.contains(tab.ref)) tab,
+          if (where?.call(tab) ?? refs.contains(tab.ref)) tab,
       ];
       if (removed.isEmpty) return null;
       selectedAfter.clear();

@@ -1681,4 +1681,113 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'The server connection changed. Reopen this conversation to use the current server settings.';
+
+  @override
+  String chatCloseProject(String project) {
+    return 'Close $project';
+  }
+
+  @override
+  String get chatFilterSessions => 'Filter sessions';
+
+  @override
+  String get chatNoConversationsInProject =>
+      'No conversations in this project.';
+
+  @override
+  String get chatOpenProjectToLoad => 'Open project to load conversations.';
+
+  @override
+  String get chatRecentSessions => 'Recent sessions';
+
+  @override
+  String get chatSearchConversations => 'Search conversations';
+
+  @override
+  String get chatSortOldest => 'Oldest';
+
+  @override
+  String get chatSortRecent => 'Recent';
+
+  @override
+  String get chatSortSessions => 'Sort sessions';
+
+  @override
+  String get chatSortTitle => 'Title';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'At least one context must remain open';
+
+  @override
+  String get sessionPin => 'Pin';
+
+  @override
+  String get sessionUnpin => 'Unpin';
+
+  @override
+  String get workspaceOpenProjects => 'Open projects';
+
+  @override
+  String get projectsCapacity =>
+      'The open projects or pins reached their limit. Close a project or unpin a session first.';
+
+  @override
+  String get projectsUnavailable =>
+      'Projects could not be read or saved. Try again.';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'Filter: $filter. Sort: $sort.';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'Pinned';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'Conversations: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'Conversations: $count or more';
+  }
+
+  @override
+  String get chatChooseDirectory => 'Choose Directory';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'Choose a folder to open as project context.';
+
+  @override
+  String get chatFailedToLoadDirectories => 'Failed to load directories';
+
+  @override
+  String get workspaceBrowseDirs => 'Browse directories';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'Current directory: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'Failed to open project context: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'Filter directories';
+
+  @override
+  String get workspaceOpenFolder => 'Open folder';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'Remove $name from history';
+  }
 }

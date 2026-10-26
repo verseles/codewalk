@@ -142,6 +142,41 @@ void main() {
     tabs.dispose();
   });
 
+  test('closing a project closes only its tabs on that server', () async {
+    final backend = _MemoryBackend();
+    final tabs = _tabs(backend);
+    await tabs.open(_row('a', 'ses_1', directory: '/one'));
+    await tabs.open(_row('a', 'ses_2', directory: '/two'));
+    await tabs.open(_row('b', 'ses_3', directory: '/one'));
+    expect(await tabs.closeContext('a', '/one'), isTrue);
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_2', 'ses_3']);
+    // A tab whose open is still being written closes with its project.
+    final gate = backend.writeGate = Completer<void>();
+    final opening = tabs.open(_row('a', 'ses_4', directory: '/two'));
+    await Future<void>.delayed(Duration.zero);
+    final closing = tabs.closeContext('a', '/two');
+    await Future<void>.delayed(Duration.zero);
+    gate.complete();
+    await opening;
+    backend.writeGate = null;
+    expect(await closing, isTrue);
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_3']);
+    // A project without tabs has nothing to close or write.
+    final writes = backend.writes;
+    expect(await tabs.closeContext('a', '/none'), isTrue);
+    expect(backend.writes, writes);
+    tabs.dispose();
+  });
+
+  test('a project close cannot vouch for unreadable tabs', () async {
+    final backend = _MemoryBackend()..failRead = true;
+    final tabs = _tabs(backend);
+    await tabs.initialize();
+    expect(tabs.unreadable, isTrue);
+    expect(await tabs.closeContext('a', '/one'), isFalse);
+    tabs.dispose();
+  });
+
   test('closing the selected tab selects its neighbour', () async {
     final tabs = _tabs(_MemoryBackend());
     for (final id in ['ses_1', 'ses_2', 'ses_3']) {

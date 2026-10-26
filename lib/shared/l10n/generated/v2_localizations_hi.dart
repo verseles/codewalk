@@ -1682,4 +1682,113 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get liveSourceChanged =>
       'सर्वर कनेक्शन बदल गया है। सर्वर की मौजूदा सेटिंग इस्तेमाल करने के लिए यह बातचीत फिर से खोलें।';
+
+  @override
+  String chatCloseProject(String project) {
+    return '$project बंद करें';
+  }
+
+  @override
+  String get chatFilterSessions => 'सत्र फ़िल्टर करें';
+
+  @override
+  String get chatNoConversationsInProject =>
+      'इस प्रोजेक्ट में कोई बातचीत नहीं है।';
+
+  @override
+  String get chatOpenProjectToLoad => 'बातचीत लोड करने के लिए प्रोजेक्ट खोलें।';
+
+  @override
+  String get chatRecentSessions => 'हाल के सत्र';
+
+  @override
+  String get chatSearchConversations => 'बातचीत खोजें';
+
+  @override
+  String get chatSortOldest => 'सबसे पुराना';
+
+  @override
+  String get chatSortRecent => 'हालिया';
+
+  @override
+  String get chatSortSessions => 'सत्र क्रमबद्ध करें';
+
+  @override
+  String get chatSortTitle => 'शीर्षक';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'कम से कम एक संदर्भ खुला रहना चाहिए';
+
+  @override
+  String get sessionPin => 'पिन करें';
+
+  @override
+  String get sessionUnpin => 'अनपिन करें';
+
+  @override
+  String get workspaceOpenProjects => 'खुली परियोजनाएँ';
+
+  @override
+  String get projectsCapacity =>
+      'खुले प्रोजेक्ट या पिन अपनी सीमा तक पहुँच गए हैं। पहले कोई प्रोजेक्ट बंद करें या किसी बातचीत को अनपिन करें।';
+
+  @override
+  String get projectsUnavailable =>
+      'प्रोजेक्ट पढ़े या सहेजे नहीं जा सके। फिर से कोशिश करें।';
+
+  @override
+  String sessionsListState(Object filter, Object sort) {
+    return 'फ़िल्टर: $filter। क्रम: $sort।';
+  }
+
+  @override
+  String get sessionsPinnedMark => 'पिन की गई';
+
+  @override
+  String projectsSessionCount(Object count) {
+    return 'बातचीत: $count';
+  }
+
+  @override
+  String projectsSessionCountAtLeast(Object count) {
+    return 'बातचीत: $count या अधिक';
+  }
+
+  @override
+  String get chatChooseDirectory => 'निर्देशिका चुनें';
+
+  @override
+  String get chatChooseFolderOpen =>
+      'परियोजना संदर्भ के रूप में खोलने के लिए एक फ़ोल्डर चुनें।';
+
+  @override
+  String get chatFailedToLoadDirectories => 'निर्देशिकाएँ लोड करने में विफल';
+
+  @override
+  String get workspaceBrowseDirs => 'निर्देशिकाएं ब्राउज़ करें';
+
+  @override
+  String workspaceCurrentDirectory(String path) {
+    return 'वर्तमान निर्देशिका: $path';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'प्रोजेक्ट संदर्भ खोलने में विफल: $directory';
+  }
+
+  @override
+  String get workspaceFilterDirs => 'निर्देशिकाएं फ़िल्टर करें';
+
+  @override
+  String get workspaceOpenFolder => 'फ़ोल्डर खोलें';
+
+  @override
+  String get workspaceProjectHint => '/repo/my-project';
+
+  @override
+  String workspaceRemoveFromHistory(String name) {
+    return 'इतिहास से $name निकालें';
+  }
 }

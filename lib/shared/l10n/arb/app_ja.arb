@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "サーバー接続が変更されました。現在のサーバー設定を使うには、この会話を開き直してください。",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "{project} を閉じる",
+  "chatFilterSessions": "セッションをフィルター",
+  "chatNoConversationsInProject": "このプロジェクトには会話がありません。",
+  "chatOpenProjectToLoad": "プロジェクトを開いて会話を読み込んでください。",
+  "chatRecentSessions": "最近のセッション",
+  "chatSearchConversations": "会話を検索",
+  "chatSortOldest": "古い順",
+  "chatSortRecent": "最近",
+  "chatSortSessions": "セッションをソート",
+  "chatSortTitle": "タイトル",
+  "projectProviderErrorAtLeastOneContext": "少なくとも1つのコンテキストを開いたままにする必要があります",
+  "sessionPin": "ピン留め",
+  "sessionUnpin": "ピン留めを外す",
+  "workspaceOpenProjects": "開いているプロジェクト",
+  "projectsCapacity": "開いているプロジェクトまたはピン留めが上限に達しました。先にプロジェクトを閉じるか、会話のピン留めを外してください。",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "プロジェクトを読み込みまたは保存できませんでした。もう一度お試しください。",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "フィルター: {filter}。並べ替え: {sort}。",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "ピン留め済み",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "会話: {count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "会話: {count} 件以上",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "ディレクトリを選択",
+  "chatChooseFolderOpen": "プロジェクトコンテキストとして開くフォルダーを選択してください。",
+  "chatFailedToLoadDirectories": "ディレクトリの読み込みに失敗しました",
+  "workspaceBrowseDirs": "ディレクトリを参照",
+  "workspaceCurrentDirectory": "現在のディレクトリ: {path}",
+  "workspaceFailedToOpenProjectContext": "プロジェクトコンテキストを開けませんでした: {directory}",
+  "workspaceFilterDirs": "ディレクトリをフィルター",
+  "workspaceOpenFolder": "フォルダーを開く",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "履歴から {name} を削除"
 }

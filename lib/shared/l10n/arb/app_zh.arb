@@ -1428,5 +1428,53 @@
   "liveSourceChanged": "服务器连接已更改。请重新打开此对话以使用当前服务器设置。",
   "@liveSourceChanged": {
     "description": "V2 live read-only session view"
-  }
+  },
+  "chatCloseProject": "关闭 {project}",
+  "chatFilterSessions": "筛选会话",
+  "chatNoConversationsInProject": "此项目中没有会话。",
+  "chatOpenProjectToLoad": "打开项目以加载会话。",
+  "chatRecentSessions": "最近会话",
+  "chatSearchConversations": "搜索会话",
+  "chatSortOldest": "最早",
+  "chatSortRecent": "最近",
+  "chatSortSessions": "排序会话",
+  "chatSortTitle": "标题",
+  "projectProviderErrorAtLeastOneContext": "至少必须保留一个打开的上下文",
+  "sessionPin": "固定",
+  "sessionUnpin": "取消固定",
+  "workspaceOpenProjects": "打开的项目",
+  "projectsCapacity": "打开的项目或置顶已达上限。请先关闭一个项目或取消置顶一个对话。",
+  "@projectsCapacity": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsUnavailable": "无法读取或保存项目。请重试。",
+  "@projectsUnavailable": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsListState": "筛选：{filter}。排序：{sort}。",
+  "@sessionsListState": {
+    "description": "V2 chat-first workspace"
+  },
+  "sessionsPinnedMark": "已置顶",
+  "@sessionsPinnedMark": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCount": "对话：{count}",
+  "@projectsSessionCount": {
+    "description": "V2 chat-first workspace"
+  },
+  "projectsSessionCountAtLeast": "对话：{count} 个或更多",
+  "@projectsSessionCountAtLeast": {
+    "description": "V2 chat-first workspace"
+  },
+  "chatChooseDirectory": "选择目录",
+  "chatChooseFolderOpen": "选择一个文件夹作为项目上下文打开。",
+  "chatFailedToLoadDirectories": "加载目录失败",
+  "workspaceBrowseDirs": "浏览目录",
+  "workspaceCurrentDirectory": "当前目录：{path}",
+  "workspaceFailedToOpenProjectContext": "打开项目上下文失败：{directory}",
+  "workspaceFilterDirs": "过滤目录",
+  "workspaceOpenFolder": "打开文件夹",
+  "workspaceProjectHint": "/repo/my-project",
+  "workspaceRemoveFromHistory": "从历史记录中移除 {name}"
 }
