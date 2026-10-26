@@ -19,6 +19,8 @@ final class EndpointProfileStore implements EndpointProfileRepository {
   Future<void> _tail = Future.value();
 
   static String itemKey(String id) => 'cw2.endpointProfiles.item.$id';
+  static String retiredKey(String id) => 'cw2.endpointProfiles.retired.$id';
+  static const _retiredMarker = 'retired-v1';
 
   Future<T> _run<T>(Future<T> Function() operation) {
     final next = _tail.then((_) => operation());
@@ -54,13 +56,19 @@ final class EndpointProfileStore implements EndpointProfileRepository {
         json['id'] is! String ||
         (expectedId != null && json['id'] != expectedId) ||
         json['label'] is! String ||
-        json['url'] is! String) {
+        json['url'] is! String ||
+        (json.containsKey('bindingRevision') &&
+            (json['bindingRevision'] is! int ||
+                (json['bindingRevision'] as int) < 0 ||
+                (json['bindingRevision'] as int) >
+                    EndpointProfile.maxBindingRevision))) {
       throw const FormatException('Unreadable profile.');
     }
     return EndpointProfile(
       id: json['id'] as String,
       label: json['label'] as String,
       endpoint: Uri.parse(json['url'] as String),
+      bindingRevision: json['bindingRevision'] as int? ?? 0,
     );
   }
 
@@ -73,6 +81,51 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       result.add(await _read(id));
     }
     return List.unmodifiable(result);
+  });
+
+  @override
+  Future<EndpointProfile> updateProfile(
+    EndpointProfile expected, {
+    required String label,
+    required Uri endpoint,
+  }) => _run(() async {
+    await metadata.ensureSchema();
+    await _finishCreation();
+    await _finishRemoval();
+    if (!(await _index()).contains(expected.id)) {
+      throw const FormatException('Profile changed; edit preserved.');
+    }
+    final raw = await metadata.read(itemKey(expected.id));
+    final stored = _decodeProfile(raw, expectedId: expected.id);
+    if (!stored.sameBinding(expected) || stored.label != expected.label) {
+      throw const FormatException('Profile changed; edit preserved.');
+    }
+    final validated = EndpointProfile.validateEndpoint(endpoint);
+    final next = EndpointProfile(
+      id: stored.id,
+      label: label,
+      endpoint: validated,
+      bindingRevision:
+          stored.bindingRevision + (stored.endpoint == validated ? 0 : 1),
+    );
+    final patch = jsonDecode(raw! as String) as Map<String, Object?>;
+    patch['label'] = next.label;
+    patch['url'] = next.endpoint.toString();
+    patch['bindingRevision'] = next.bindingRevision;
+    final payload = jsonEncode(patch);
+    if (payload.length > 8192) {
+      throw const FormatException('Profile is too large; data preserved.');
+    }
+    try {
+      await metadata.write(itemKey(next.id), payload);
+    } on Object {
+      if (await metadata.read(itemKey(next.id)) == payload) return next;
+      throw StateError('Profile update unconfirmed; data preserved.');
+    }
+    if (await metadata.read(itemKey(next.id)) != payload) {
+      throw StateError('Profile update unconfirmed; data preserved.');
+    }
+    return next;
   });
 
   EndpointCredentialScope _scope(EndpointProfile profile) =>
@@ -90,7 +143,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       _run(() async {
         if (!(await _index()).contains(profile.id)) return null;
         final stored = await _read(profile.id);
-        if (stored.endpoint != profile.endpoint) return null;
+        if (!stored.sameBinding(profile)) return null;
         return _readCredential(stored);
       });
 
@@ -174,6 +227,10 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     await _finishCreation();
     await _finishRemoval();
     final index = await _index();
+    if (profile.bindingRevision != 0 ||
+        await metadata.read(retiredKey(profile.id)) != null) {
+      throw const FormatException('Profile identity cannot be reused.');
+    }
     for (final id in index) {
       await _read(id);
     }
@@ -238,7 +295,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     await _finishCreation();
     await _finishRemoval();
     if (!(await _index()).contains(profile.id) ||
-        (await _read(profile.id)).endpoint != profile.endpoint) {
+        !(await _read(profile.id)).sameBinding(profile)) {
       throw const FormatException('Profile changed; credentials preserved.');
     }
     final current = await _readCredential(profile);
@@ -281,7 +338,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     final index = await _index();
     if (!index.contains(profile.id)) return;
     final stored = await _read(profile.id);
-    if (stored.endpoint != profile.endpoint) {
+    if (!stored.sameBinding(profile)) {
       throw const FormatException('Profile changed.');
     }
     // Persist explicit intent before hiding the row. A restart can retry only
@@ -292,6 +349,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
         'id': stored.id,
         'label': stored.label,
         'url': stored.endpoint.toString(),
+        'bindingRevision': stored.bindingRevision,
       }),
     );
     await _finishRemoval();
@@ -302,6 +360,11 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     if (raw == null) return false;
     await metadata.ensureSchema();
     final pending = _decodeProfile(raw);
+    if (await metadata.read(retiredKey(pending.id)) != null) {
+      throw const FormatException(
+        'Profile identity retired; creation preserved.',
+      );
+    }
     final format = (jsonDecode(raw as String) as Map)['credentialFormat'];
     if (format != null && format != 'legacy' && format != 'active') {
       throw const FormatException('Unknown creation format; preserved.');
@@ -312,8 +375,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     final index = await _index();
     final item = await metadata.read(itemKey(pending.id));
     if (item != null &&
-        _decodeProfile(item, expectedId: pending.id).endpoint !=
-            pending.endpoint) {
+        !_decodeProfile(item, expectedId: pending.id).sameBinding(pending)) {
       throw const FormatException('Profile changed; creation preserved.');
     }
     final committed = index.contains(pending.id);
@@ -341,9 +403,24 @@ final class EndpointProfileStore implements EndpointProfileRepository {
     final index = await _index();
     if (await metadata.read(itemKey(pending.id)) != null) {
       final stored = await _read(pending.id);
-      if (stored.endpoint != pending.endpoint) {
+      if (!stored.sameBinding(pending)) {
         throw const FormatException('Profile changed; removal preserved.');
       }
+    }
+    // Outboxes survive removal. Persist non-reuse before hiding the profile,
+    // so its old revision-zero commands cannot belong to a recreated ID.
+    final markerKey = retiredKey(pending.id);
+    final marker = await metadata.read(markerKey);
+    if (marker != null && marker != _retiredMarker) {
+      throw const FormatException('Unreadable retirement marker; preserved.');
+    }
+    try {
+      await metadata.write(markerKey, _retiredMarker);
+    } on Object {
+      if (await metadata.read(markerKey) != _retiredMarker) rethrow;
+    }
+    if (await metadata.read(markerKey) != _retiredMarker) {
+      throw StateError('Profile retirement unconfirmed; data preserved.');
     }
     await metadata.write(
       indexKey,

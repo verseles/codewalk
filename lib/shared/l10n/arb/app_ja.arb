@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "試行を破棄して入力内容を保持",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "その他のアクション",
+  "chatAppBarPinAction": "アプリバーにピン留め",
+  "chatAppBarUnpinAction": "アプリバーからピン留めを解除",
+  "chatBadgeConversationError": "「{title}」にエラーがあります。",
+  "chatBadgeConversationNeedsInput": "「{title}」はあなたの入力を待っています。",
+  "chatBadgeConversationNewReply": "「{title}」に新しい返信があります。",
+  "chatBadgeServerNeedsAttention": "サーバー接続に注意が必要です。",
+  "chatBadgeSyncing": "会話を同期中...",
+  "serversSearchActiveHint": "アクティブサーバーを検索",
+  "serversSetActive": "アクティブに設定",
+  "statusDelayed": "遅延",
+  "statusOffline": "オフライン",
+  "statusOnline": "オンライン",
+  "healthCredentialMissing": "このサーバーの認証情報は保存されていません。再ペアリングするかパスワードを入力してください。",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "保存された認証情報を読み取れません。サーバー設定からアクセスを復旧してください。",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "ペアリング認証情報の有効期限が切れました。サーバー設定で再ペアリングするか更新してください。",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "アクティブ",
+  "serversClearDefault": "デフォルトをクリア",
+  "serversDefault": "デフォルト",
+  "serversEdit": "編集",
+  "serversSetDefault": "デフォルトに設定",
+  "composerSourceChanged": "このメッセージは以前のサーバー接続に属しています。ローカルコピーを確認または破棄できます。",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "元のサーバー接続を確認できませんでした。このローカルメッセージを確認または破棄できます。",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "有効なサーバー名を入力してください（1～160文字）。",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "プロファイルが変更されたか、保存を確認できませんでした。再読み込みして保存済みのプロファイルを確認してから、もう一度保存してください。",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "保存済みのプロファイル",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "サーバー接続が変更されました。現在のサーバー設定を使うには、この会話を開き直してください。",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

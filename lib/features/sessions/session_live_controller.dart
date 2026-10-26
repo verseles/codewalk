@@ -12,6 +12,7 @@ import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../hosts/endpoint_health_controller.dart';
 import '../hosts/hosts_controller.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
@@ -25,6 +26,7 @@ class SessionLiveController extends ChangeNotifier {
     required this.profile,
     required SessionSummary summary,
     required this.directory,
+    this.health,
     this.permissionModes,
     this.drafts,
     DateTime Function()? now,
@@ -33,13 +35,25 @@ class SessionLiveController extends ChangeNotifier {
        _now = now ?? DateTime.now,
        _commandIds = commandIds ?? mintCommandId {
     hosts.addListener(_hostsChanged);
+    health?.addListener(_notify);
     permissionModes?.addListener(_policyChanged);
     draft.addListener(_draftChanged);
     drafts?.attach(session, _draftForgotten);
     unawaited(_restoreDraft());
   }
   final HostsController hosts;
+  final EndpointHealthController? health;
+  EndpointHealthView get endpointHealth =>
+      health?.view(profile) ?? const EndpointHealthView();
+  bool get endpointOffline =>
+      endpointHealth.status == EndpointHealthStatus.offline;
   final EndpointProfile profile;
+  String get profileLabel =>
+      hosts.profiles
+          .where((saved) => saved.sameBinding(profile))
+          .firstOrNull
+          ?.label ??
+      profile.label;
   SessionSummary _summary;
 
   /// The listed session. A session tab keeps this view open, so a later row
@@ -462,16 +476,11 @@ class SessionLiveController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> dismissForm({
-    required InteractionRequest request,
-  }) async {
+  Future<void> dismissForm({required InteractionRequest request}) async {
     final handle = _handle;
     if (!canReplyForm(request) || handle == null) return;
     final generation = _generation;
-    final dismissing = handle.dismissForm(
-      request: request,
-      id: _commandIds(),
-    );
+    final dismissing = handle.dismissForm(request: request, id: _commandIds());
     _notify();
     await dismissing;
     if (_disposed || generation != _generation || !identical(handle, _handle)) {
@@ -528,11 +537,7 @@ class SessionLiveController extends ChangeNotifier {
   String permissionNote(InteractionId id, {SessionRef? owner}) =>
       _notes[_noteKey(id, owner)] ?? '';
 
-  void setPermissionNote(
-    InteractionId id,
-    String value, {
-    SessionRef? owner,
-  }) {
+  void setPermissionNote(InteractionId id, String value, {SessionRef? owner}) {
     if (_disposed) return;
     final key = _noteKey(id, owner);
     if (value.isEmpty) {
@@ -577,8 +582,8 @@ class SessionLiveController extends ChangeNotifier {
   EndpointCredential? _currentCredential() {
     if (_disposed || hosts.loading || hosts.storageError) return null;
     for (final current in hosts.profiles) {
-      if (current.id == profile.id &&
-          current.endpoint == profile.endpoint &&
+      if (current.sameBinding(profile) &&
+          hosts.pendingBindingChange != profile.id &&
           !hosts.credentialUnreadable(current)) {
         final credential = hosts.credentialFor(current);
         if (credential != null &&
@@ -613,7 +618,19 @@ class SessionLiveController extends ChangeNotifier {
   void _hostsChanged() {
     // A reload of the saved servers is not a change of credential; the
     // session is checked against them once they are read again.
-    if (_disposed || hosts.loading) return;
+    if (_disposed) return;
+    if (hosts.pendingBindingChange == profile.id ||
+        (!hosts.loading &&
+            !hosts.storageError &&
+            hosts.profiles.any((saved) => saved.id == profile.id) &&
+            !hosts.isCurrentProfile(profile))) {
+      _detach();
+      view = null;
+      failure = SessionLiveFailure.sourceChanged;
+      _notify();
+      return;
+    }
+    if (hosts.loading) return;
     final credential = _currentCredential();
     if (credential == null || _credential?.matches(credential) != true) {
       _detach();
@@ -692,6 +709,7 @@ class SessionLiveController extends ChangeNotifier {
     if (_disposed) return;
     _disposed = true;
     hosts.removeListener(_hostsChanged);
+    health?.removeListener(_notify);
     permissionModes?.removeListener(_policyChanged);
     _detach();
     scroll.dispose();

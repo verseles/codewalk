@@ -1585,4 +1585,100 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'Discard attempt and keep text';
+
+  @override
+  String get chatAppBarMoreActions => 'More actions';
+
+  @override
+  String get chatAppBarPinAction => 'Pin to app bar';
+
+  @override
+  String get chatAppBarUnpinAction => 'Unpin from app bar';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" has an error.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" needs your input.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" has a new reply.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'Server connection needs attention.';
+
+  @override
+  String get chatBadgeSyncing => 'Syncing conversations...';
+
+  @override
+  String get serversSearchActiveHint => 'Search active server';
+
+  @override
+  String get serversSetActive => 'Set Active';
+
+  @override
+  String get statusDelayed => 'Delayed';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get statusOnline => 'Online';
+
+  @override
+  String get healthCredentialMissing =>
+      'This server has no saved credential. Pair again or enter its password.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'The saved credential could not be read. Open Servers to recover access.';
+
+  @override
+  String get healthCredentialExpired =>
+      'The saved pairing credential has expired. Pair again or renew it in Servers.';
+
+  @override
+  String get serversActive => 'Active';
+
+  @override
+  String get serversClearDefault => 'Clear Default';
+
+  @override
+  String get serversDefault => 'Default';
+
+  @override
+  String get serversEdit => 'Edit';
+
+  @override
+  String get serversSetDefault => 'Set Default';
+
+  @override
+  String get composerSourceChanged =>
+      'This message belongs to an earlier server connection. You can inspect or discard its local copy.';
+
+  @override
+  String get composerSourceUnknown =>
+      'The original server connection could not be verified. You can inspect or discard this local message.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'Enter a valid server name (1–160 characters).';
+
+  @override
+  String get hostsEditChanged =>
+      'The profile changed or the save could not be confirmed. Reload to compare the saved profile before saving again.';
+
+  @override
+  String get hostsEditSavedProfile => 'Saved profile';
+
+  @override
+  String get liveSourceChanged =>
+      'The server connection changed. Reopen this conversation to use the current server settings.';
 }

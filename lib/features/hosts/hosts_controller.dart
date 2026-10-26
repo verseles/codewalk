@@ -41,12 +41,40 @@ class HostsController extends ChangeNotifier {
   String? _verifiedSecret;
   EndpointAssessment? _verifiedAssessment;
   int _catalogRevision = 0;
+  int get catalogRevision => _catalogRevision;
+  String? _pendingBindingChange;
+  String? get pendingBindingChange => _pendingBindingChange;
+  bool get savingProfile => _adding;
+  bool isCurrentProfile(EndpointProfile profile) =>
+      _profiles.any((saved) => saved.sameBinding(profile));
   final Map<String, EndpointCredential> _credentials = {};
   final Set<String> _credentialErrors = {};
   bool credentialUnreadable(EndpointProfile profile) =>
-      _credentialErrors.contains(profile.id);
+      isCurrentProfile(profile) && _credentialErrors.contains(profile.id);
   EndpointCredential? credentialFor(EndpointProfile profile) =>
-      _credentials[profile.id];
+      isCurrentProfile(profile) ? _credentials[profile.id] : null;
+
+  /// Shares a current background observation without touching the manual
+  /// probe, its busy state or the verification used to save a credential.
+  void observeAssessment(
+    EndpointProfile profile,
+    EndpointCredential credential,
+    EndpointAssessment assessment,
+  ) {
+    if (_disposed ||
+        loading ||
+        storageError ||
+        !_loaded ||
+        assessment.status == EndpointStatus.cancelled ||
+        !credential.matches(_credentials[profile.id]) ||
+        !isCurrentProfile(profile) ||
+        identical(_assessments[profile.id], assessment)) {
+      return;
+    }
+    _assessments[profile.id] = assessment;
+    _notify();
+  }
+
   bool _adding = false;
   String? _checkingProfileId;
   EndpointProfile? _pendingCreation;
@@ -62,7 +90,7 @@ class HostsController extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    if (_disposed || loading) return;
+    if (_disposed || loading || _adding) return;
     loading = true;
     final revision = ++_catalogRevision;
     storageError = false;
@@ -70,6 +98,13 @@ class HostsController extends ChangeNotifier {
     try {
       final loaded = await repository.load();
       if (_disposed || revision != _catalogRevision) return;
+      final previous = {for (final profile in _profiles) profile.id: profile};
+      final next = {for (final profile in loaded) profile.id: profile};
+      _assessments.removeWhere((id, _) {
+        final old = previous[id];
+        final current = next[id];
+        return old == null || current == null || !old.sameBinding(current);
+      });
       _profiles = loaded;
       _loaded = true;
       _credentials.clear();
@@ -114,6 +149,80 @@ class HostsController extends ChangeNotifier {
       }
     } finally {
       loading = false;
+      _notify();
+    }
+  }
+
+  Future<bool> updateProfile(
+    EndpointProfile expected, {
+    required String label,
+    required Uri endpoint,
+    required int expectedRevision,
+  }) async {
+    if (_disposed ||
+        _adding ||
+        loading ||
+        storageError ||
+        !_loaded ||
+        expectedRevision != _catalogRevision ||
+        !isCurrentProfile(expected) ||
+        !_profiles.any(
+          (saved) => saved.id == expected.id && saved.label == expected.label,
+        )) {
+      return false;
+    }
+    final Uri validated;
+    try {
+      validated = EndpointProfile.validateEndpoint(endpoint);
+      EndpointProfile(id: expected.id, label: label, endpoint: validated);
+    } on FormatException {
+      return false;
+    }
+    final changedBinding = expected.endpoint != validated;
+    _adding = true;
+    final revision = ++_catalogRevision;
+    if (changedBinding) {
+      cancelProbe();
+      _pendingBindingChange = expected.id;
+      loading = true;
+    }
+    _notify();
+    try {
+      final updated = await repository.updateProfile(
+        expected,
+        label: label,
+        endpoint: validated,
+      );
+      if (_disposed || revision != _catalogRevision) return false;
+      if (changedBinding) {
+        _assessments.remove(expected.id);
+        _credentials.remove(expected.id);
+        _credentialErrors.remove(expected.id);
+      }
+      _profiles = [
+        for (final saved in _profiles) saved.id == updated.id ? updated : saved,
+      ];
+      if (changedBinding) {
+        try {
+          final credential = await repository.readCredential(updated);
+          if (_disposed || revision != _catalogRevision) return false;
+          if (credential != null) _credentials[updated.id] = credential;
+        } on Object {
+          if (_disposed || revision != _catalogRevision) return false;
+          _credentialErrors.add(updated.id);
+        }
+      }
+      storageError = false;
+      return true;
+    } on Object {
+      if (!_disposed && revision == _catalogRevision) storageError = true;
+      return false;
+    } finally {
+      _adding = false;
+      if (changedBinding) {
+        _pendingBindingChange = null;
+        loading = false;
+      }
       _notify();
     }
   }
@@ -200,7 +309,7 @@ class HostsController extends ChangeNotifier {
     EndpointAssessment assessment,
   ) async {
     final secret = credential.secret;
-    if (_disposed || _adding || !assessment.canUse) return false;
+    if (_disposed || _adding || loading || !assessment.canUse) return false;
     if (_verifiedEndpoint != EndpointProfile.validateEndpoint(endpoint) ||
         _verifiedSecret != secret ||
         !identical(_verifiedAssessment, assessment)) {
@@ -306,7 +415,9 @@ class HostsController extends ChangeNotifier {
     EndpointCredential credential, {
     bool Function()? isCurrent,
   }) async {
-    if (_disposed || _adding) return false;
+    if (_disposed || _adding || loading || !isCurrentProfile(profile)) {
+      return false;
+    }
     _adding = true;
     final revision = ++_catalogRevision;
     try {
@@ -355,13 +466,20 @@ class HostsController extends ChangeNotifier {
 
   Future<void> check(EndpointProfile profile) async {
     if (_disposed || !canCheck(profile)) return;
+    final expectedCredential = credentialFor(profile);
+    bool current() =>
+        !loading &&
+        isCurrentProfile(profile) &&
+        (expectedCredential == null
+            ? credentialFor(profile) == null
+            : expectedCredential.matches(credentialFor(profile)));
     cancelProbe();
     var revision = _generation;
     _checkingProfileId = profile.id;
     _notify();
     try {
       final secret = await repository.readSecret(profile);
-      if (_disposed || revision != _generation) return;
+      if (_disposed || revision != _generation || !current()) return;
       final pending = secret == null
           ? Future.value(
               const EndpointAssessment(EndpointStatus.authenticationRequired),
@@ -372,7 +490,7 @@ class HostsController extends ChangeNotifier {
       if (result != null &&
           !_disposed &&
           revision == _generation &&
-          _profiles.any((p) => p.id == profile.id)) {
+          current()) {
         _assessments[profile.id] = result;
         _armRetryTimer();
       }
@@ -388,7 +506,11 @@ class HostsController extends ChangeNotifier {
 
   bool canCheck(EndpointProfile profile) {
     final assessment = _assessments[profile.id];
-    return !isChecking(profile) &&
+    return !_disposed &&
+        !loading &&
+        !_adding &&
+        isCurrentProfile(profile) &&
+        !isChecking(profile) &&
         assessment?.retryDeferred != true &&
         !(assessment?.retryAt?.isAfter(_now().toUtc()) ?? false);
   }
@@ -417,8 +539,12 @@ class HostsController extends ChangeNotifier {
   }
 
   Future<void> remove(EndpointProfile profile) async {
+    if (_disposed || _adding || loading || !isCurrentProfile(profile)) return;
+    _adding = true;
+    _pendingBindingChange = profile.id;
     cancelProbe();
     final revision = ++_catalogRevision;
+    _notify();
     var committed = false;
     try {
       await repository.remove(profile);
@@ -453,8 +579,11 @@ class HostsController extends ChangeNotifier {
           severity: DiagnosticSeverity.error,
         );
       }
+    } finally {
+      _adding = false;
+      _pendingBindingChange = null;
+      _notify();
     }
-    _notify();
   }
 
   @override

@@ -40,6 +40,8 @@ final class _Server {
   final replies = <String>[];
   final permissions = <Object?>[];
   int replyStatus = 204;
+  Completer<void>? holdInfo;
+  final firstInfo = Completer<void>();
 
   /// The older-history cursor the newest page offers; null for none.
   String? olderCursor;
@@ -60,6 +62,10 @@ final class _Server {
 
   /// 1-based indices of `GET /api/session/<id>` reads answered with 500.
   final failSessionReads = <int>{};
+  Completer<void>? holdSessionRead;
+  Completer<void>? sessionReadHeld;
+  Completer<void>? holdPatch;
+  Completer<void>? patchHeld;
   int sessionReads = 0;
   final running = <String>{};
   bool includePreviousOutcome = false;
@@ -68,6 +74,7 @@ final class _Server {
   Completer<void>? holdInterrupt;
   Object? interruptBody = const {'interrupted': true};
   int interruptStatus = 200;
+
   /// The model reference and agent each session's record carries.
   final sessionModel = <String, Map<String, Object?>>{};
   final sessionAgent = <String, String>{};
@@ -138,6 +145,10 @@ final class _Server {
     }
     r.response.headers.contentType = ContentType.json;
     final tail = segments.last;
+    if (tail == 'info') {
+      if (!firstInfo.isCompleted) firstInfo.complete();
+      await holdInfo?.future;
+    }
     if (r.method == 'POST' && tail == 'interrupt') {
       interrupts.add(r.uri);
       if (!firstInterrupt.isCompleted) firstInterrupt.complete();
@@ -161,6 +172,12 @@ final class _Server {
       if (patchApplies ?? patchStatus == 204) {
         final decoded = jsonDecode(body) as Map<String, Object?>;
         sessionRules[segments[3]] = (decoded['permissions']! as List).toList();
+      }
+      final gate = holdPatch;
+      if (gate != null) {
+        final held = patchHeld;
+        if (held != null && !held.isCompleted) held.complete();
+        await gate.future;
       }
       r.response.statusCode = patchStatus;
       await r.response.close();
@@ -242,6 +259,12 @@ final class _Server {
     }
     final session = segments.length > 3 ? segments[3] : 'ses_one';
     if (r.method == 'GET' && segments.length == 4 && tail == session) {
+      final gate = holdSessionRead;
+      if (gate != null) {
+        final held = sessionReadHeld;
+        if (held != null && !held.isCompleted) held.complete();
+        await gate.future;
+      }
       if (failSessionReads.contains(++sessionReads)) {
         r.response.statusCode = 500;
         await r.response.close();
@@ -429,6 +452,163 @@ void main() {
     );
   });
   tearDown(() => server.close());
+
+  test(
+    'confirmed binding ownership suspends reloads without replacing live leases',
+    () async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      void reconcile(bool available) => directory.reconcileProfiles(
+        profiles: [p],
+        credentials: {p.id: credential},
+        available: available,
+      );
+      reconcile(true);
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (view) => view.phase == SessionLivePhase.live);
+      final requests = server.paths.length;
+      reconcile(false);
+      await expectLater(
+        directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_two'),
+        ),
+        throwsA(
+          isA<SessionLiveException>().having(
+            (error) => error.failure,
+            'failure',
+            SessionLiveFailure.sourceChanged,
+          ),
+        ),
+      );
+      expect(handle.current.phase, SessionLivePhase.live);
+      expect(server.paths, hasLength(requests));
+      reconcile(true);
+      final next = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_two'),
+      );
+      addTearDown(next.close);
+      await until(next, (view) => view.phase == SessionLivePhase.live);
+      expect(server.events, 1);
+    },
+  );
+
+  test(
+    'an ABA binding retires a pending probe before any old lease can attach',
+    () async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      final gate = server.holdInfo = Completer<void>();
+      directory.reconcileProfiles(
+        profiles: [p],
+        credentials: {p.id: credential},
+        available: true,
+      );
+      final opening = directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      final rejected = expectLater(
+        opening,
+        throwsA(isA<SessionLiveException>()),
+      );
+      await server.firstInfo.future.timeout(const Duration(seconds: 10));
+      directory.reconcileProfiles(
+        profiles: [p],
+        credentials: {p.id: credential},
+        available: false,
+        changingProfile: p.id,
+      );
+      final current = EndpointProfile(
+        id: p.id,
+        label: p.label,
+        endpoint: p.endpoint,
+        bindingRevision: 2,
+      );
+      directory.reconcileProfiles(
+        profiles: [current],
+        credentials: {p.id: credential},
+        available: true,
+      );
+      server.holdInfo = null;
+      gate.complete();
+      await rejected;
+      expect(server.events, 0);
+      final handle = await directory.open(
+        profile: current,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (view) => view.phase == SessionLivePhase.live);
+      final requests = server.paths.length;
+      await expectLater(
+        directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        ),
+        throwsA(
+          isA<SessionLiveException>().having(
+            (error) => error.failure,
+            'failure',
+            SessionLiveFailure.sourceChanged,
+          ),
+        ),
+      );
+      expect(server.paths, hasLength(requests));
+      expect(server.events, 1);
+    },
+  );
+
+  test(
+    'confirmed replacement synchronously revokes existing live handles',
+    () async {
+      final directory = createSessionLiveDirectory()!;
+      addTearDown(directory.close);
+      directory.reconcileProfiles(
+        profiles: [p],
+        credentials: {p.id: credential},
+        available: true,
+      );
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(handle.close);
+      await until(handle, (view) => view.phase == SessionLivePhase.live);
+      final current = EndpointProfile(
+        id: p.id,
+        label: p.label,
+        endpoint: p.endpoint,
+        bindingRevision: 2,
+      );
+      directory.reconcileProfiles(
+        profiles: [current],
+        credentials: {p.id: credential},
+        available: true,
+      );
+      expect(handle.current.phase, SessionLivePhase.closed);
+      final next = await directory.open(
+        profile: current,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      addTearDown(next.close);
+      await until(next, (view) => view.phase == SessionLivePhase.live);
+      expect(server.events, 2);
+    },
+  );
 
   test(
     'Stop shares a fence across leases, same credential/prefix, no ledger',
@@ -1869,6 +2049,152 @@ void main() {
     });
 
     test(
+      'terminal ownership loss forbids a delayed Unrestricted mutation',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final (_, handle) = await openLive(await ledger());
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        final gate = server.holdSessionRead = Completer<void>();
+        server.sessionReadHeld = Completer<void>();
+        final enabling = handle.enableUnrestricted(
+          id: const CommandId('cmd_on'),
+        );
+        await server.sessionReadHeld!.future;
+        server.eventStatus = 401;
+        for (final stream in server.streams.toList()) {
+          await stream.close();
+        }
+        await until(
+          handle,
+          (view) => view.phase == SessionLivePhase.authRequired,
+        );
+        server.holdSessionRead = null;
+        gate.complete();
+        await enabling;
+        expect(server.patches, isEmpty);
+        expect(server.sessionRules['ses_one'], [ask]);
+      },
+    );
+
+    test(
+      'temporary catalog suspension never revives a held Unrestricted action',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final (directory, handle) = await openLive(await ledger());
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        final gate = server.holdSessionRead = Completer<void>();
+        server.sessionReadHeld = Completer<void>();
+        final enabling = handle.enableUnrestricted(
+          id: const CommandId('cmd_on'),
+        );
+        await server.sessionReadHeld!.future;
+        directory.reconcileProfiles(
+          profiles: [p],
+          credentials: {p.id: credential},
+          available: false,
+        );
+        directory.reconcileProfiles(
+          profiles: [p],
+          credentials: {p.id: credential},
+          available: true,
+        );
+        server.holdSessionRead = null;
+        gate.complete();
+        await enabling;
+        expect(server.patches, isEmpty);
+        expect(handle.unrestrictedState.busy, isFalse);
+        expect(handle.current.phase, SessionLivePhase.live);
+      },
+    );
+
+    test(
+      'a write already sent keeps its receipt and is not verified after suspension',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final store = await ledger();
+        final (directory, handle) = await openLive(store);
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        final gate = server.holdPatch = Completer<void>();
+        server.patchHeld = Completer<void>();
+        final enabling = handle.enableUnrestricted(
+          id: const CommandId('cmd_on'),
+        );
+        await server.patchHeld!.future;
+        final reads = server.sessionReads;
+        directory.reconcileProfiles(
+          profiles: [p],
+          credentials: {p.id: credential},
+          available: false,
+        );
+        directory.reconcileProfiles(
+          profiles: [p],
+          credentials: {p.id: credential},
+          available: true,
+        );
+        server.holdPatch = null;
+        gate.complete();
+        await enabling;
+        expect(server.patches, hasLength(1));
+        expect(server.sessionReads, reads, reason: 'no verification read');
+        final state = handle.unrestrictedState;
+        expect(state.busy, isFalse);
+        expect(state.notice, SessionUnrestrictedNotice.unconfirmed);
+        expect(state.receipt?.state.known, ReceiptState.accepted);
+        expect(
+          store.recordFor(unrestrictedBindingFor(p), ref('ses_one'))!.stage,
+          UnrestrictedStage.applying,
+        );
+        // Only a fresh read, never a replay, recognizes the insertion.
+        await handle.refreshUnrestricted();
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.on);
+        expect(server.patches, hasLength(1));
+      },
+    );
+
+    test(
+      'a different binding never inherits another server Unrestricted ownership',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final store = await ledger();
+        final (directory, handle) = await openLive(store);
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        await handle.enableUnrestricted(id: const CommandId('cmd_a_on'));
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.on);
+        expect(server.patches, hasLength(1));
+
+        final other = await _Server.start();
+        addTearDown(other.close);
+        other.sessionRules['ses_one'] = [ask, wildcard];
+        final edited = EndpointProfile(
+          id: p.id,
+          label: p.label,
+          endpoint: Uri.parse('http://127.0.0.1:${other.port}/proxy/'),
+          bindingRevision: 1,
+        );
+        directory.reconcileProfiles(
+          profiles: [edited],
+          credentials: {edited.id: credential},
+          available: true,
+        );
+        final changed = await directory.open(
+          profile: edited,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        addTearDown(changed.close);
+        await until(changed, (view) => view.phase == SessionLivePhase.live);
+        await settled(changed);
+        await changed.disableUnrestricted(id: const CommandId('cmd_b_off'));
+        expect(other.patches, isEmpty);
+        expect(other.sessionRules['ses_one'], [ask, wildcard]);
+        expect(
+          changed.unrestrictedState.phase,
+          SessionUnrestrictedPhase.elsewhere,
+        );
+      },
+    );
+
+    test(
       'enable appends to fresh rules and shows on only after a read',
       () async {
         server.sessionRules['ses_one'] = [ask];
@@ -1887,7 +2213,10 @@ void main() {
           hasLength(1),
           reason: 'title and metadata are never sent',
         );
-        expect(store.recordFor(ref('ses_one'))!.stage, UnrestrictedStage.owned);
+        expect(
+          store.recordFor(unrestrictedBindingFor(p), ref('ses_one'))!.stage,
+          UnrestrictedStage.owned,
+        );
       },
     );
 
@@ -1927,7 +2256,10 @@ void main() {
       expect(state.phase, SessionUnrestrictedPhase.off);
       expect(state.notice, SessionUnrestrictedNotice.refused);
       expect(server.patches, hasLength(1));
-      expect(store.recordFor(ref('ses_one')), isNull);
+      expect(
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+        isNull,
+      );
     });
 
     test('an unknown outcome is checked by one read, never resent', () async {
@@ -1942,7 +2274,10 @@ void main() {
       expect(state.phase, SessionUnrestrictedPhase.on);
       expect(state.notice, SessionUnrestrictedNotice.unconfirmed);
       expect(server.patches, hasLength(1));
-      expect(store.recordFor(ref('ses_one'))!.stage, UnrestrictedStage.owned);
+      expect(
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one'))!.stage,
+        UnrestrictedStage.owned,
+      );
     });
 
     test('disable restores exactly the preceding rules', () async {
@@ -1960,7 +2295,10 @@ void main() {
       expect(server.patches, hasLength(2));
       expect(sent(1), [ask]);
       expect(server.sessionRules['ses_one'], [ask]);
-      expect(store.recordFor(ref('ses_one')), isNull);
+      expect(
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+        isNull,
+      );
     });
 
     test('rules changed by another client are never overwritten', () async {
@@ -1980,7 +2318,10 @@ void main() {
       expect(state.inEffect, isTrue);
       expect(server.patches, hasLength(1));
       expect(server.sessionRules['ses_one'], [ask, deny, wildcard]);
-      expect(store.recordFor(ref('ses_one')), isNotNull);
+      expect(
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+        isNotNull,
+      );
       expect(handle.canDisableUnrestricted, isFalse);
     });
 
@@ -2133,6 +2474,7 @@ void main() {
       server.sessionRules['ses_one'] = [ask, wildcard];
       final store = await ledger();
       await store.put(
+        unrestrictedBindingFor(p),
         ref('ses_one'),
         UnrestrictedOwnership(
           stage: UnrestrictedStage.applying,
@@ -2148,14 +2490,17 @@ void main() {
       expect(state.phase, SessionUnrestrictedPhase.on);
       expect(state.notice, SessionUnrestrictedNotice.refused);
       expect(
-        store.recordFor(ref('ses_one'))!.stage,
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one'))!.stage,
         UnrestrictedStage.applying,
       );
       backend.failWrite = null;
       await handle.disableUnrestricted(id: const CommandId('cmd_off'));
       expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
       expect(server.sessionRules['ses_one'], [ask]);
-      expect(store.recordFor(ref('ses_one')), isNull);
+      expect(
+        store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+        isNull,
+      );
     });
 
     test('live session.permissions frame reconciles unrestricted phase without a manual refresh', () async {

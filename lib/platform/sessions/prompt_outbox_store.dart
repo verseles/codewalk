@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:codewalk_net/codewalk_net.dart';
 import 'package:crypto/crypto.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
@@ -22,12 +23,20 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     DateTime Function()? now,
     Future<void> Function(Duration)? wait,
     KeySerialExecutor? queue,
+    this.profile,
+    bool Function()? isCurrentBinding,
+    RequestCancellation? cancellation,
   }) : _now = now ?? DateTime.now,
        _wait = wait ?? Future<void>.delayed,
-       _queue = queue ?? KeySerialExecutor() {
+       _queue = queue ?? KeySerialExecutor(),
+       _isCurrentBinding = isCurrentBinding,
+       _cancellation = cancellation ?? RequestCancellation() {
     if (reader.harness != client.harness ||
         reader.transport.endpoint != client.transport.endpoint) {
       throw ArgumentError('The reader and the client serve another server.');
+    }
+    if (profile != null && profile!.endpoint != client.transport.endpoint) {
+      throw ArgumentError('The profile and client serve another endpoint.');
     }
   }
 
@@ -46,12 +55,47 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   final OpenCodePromptClient client;
   final OpenCodeSessionReader reader;
   final OpenCodeMessageIds ids;
+
+  /// Explicit trusted profile context; absence never authorizes old records.
+  final EndpointProfile? profile;
+  final bool Function()? _isCurrentBinding;
+  final RequestCancellation _cancellation;
   final DateTime Function() _now;
   final Future<void> Function(Duration) _wait;
 
   /// Shared by every outbox of one server, so two instances writing the same
   /// session ledger still take turns.
   final KeySerialExecutor _queue;
+
+  bool get _current =>
+      profile != null &&
+      !_cancellation.isCancelled &&
+      (_isCurrentBinding?.call() ?? true);
+
+  OutboxSource _source(_Record record) {
+    final current = profile;
+    if (current == null) return OutboxSource.unknown;
+    if (!_current || record.session.host.value != current.id) {
+      return OutboxSource.changed;
+    }
+    if (record.endpoint == null) {
+      return current.bindingRevision == 0
+          ? OutboxSource.current
+          : OutboxSource.unknown;
+    }
+    return record.endpoint == current.endpoint &&
+            record.bindingRevision == current.bindingRevision
+        ? OutboxSource.current
+        : OutboxSource.changed;
+  }
+
+  String? _sourceRefusal(_Record record) => switch (_source(record)) {
+    OutboxSource.current => null,
+    OutboxSource.changed => 'sourceChanged',
+    OutboxSource.unknown => 'sourceUnknown',
+  };
+
+  OutboxEntry _entry(_Record record) => record.entry(_source(record));
 
   static String keyFor(SessionRef session) =>
       'cw2.outbox.v1.${sha256.convert(utf8.encode(session.storageKey))}';
@@ -66,19 +110,28 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   }) {
     final key = keyFor(session);
     return _queue.run(key, () async {
+      if (!_current || profile!.id != session.host.value) {
+        return OutboxSubmission.refused(
+          profile == null ? 'sourceUnknown' : 'sourceChanged',
+        );
+      }
       if (isCurrent?.call() == false) {
         return const OutboxSubmission.refused('cancelledBeforeSend');
       }
       final read = await _read(key, session);
       if (read == null) return const OutboxSubmission.refused('unreadable');
       final ledger = await _recover(key, session, read);
+      if (!_current) return const OutboxSubmission.refused('sourceChanged');
       if (isCurrent?.call() == false) {
         return const OutboxSubmission.refused('cancelledBeforeSend');
       }
       for (final record in ledger.records) {
         if (record.commandId == commandId) {
+          if (_sourceRefusal(record) case final reason?) {
+            return OutboxSubmission.refused(reason);
+          }
           // A deliberate resend is a new command; this one is never reposted.
-          return OutboxSubmission.recorded(record.entry, sent: false);
+          return OutboxSubmission.recorded(_entry(record), sent: false);
         }
       }
       if (ledger.forgotten.contains(commandId.value)) {
@@ -133,22 +186,24 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         state: SubmissionKind.sending,
         createdAt: now,
         updatedAt: now,
+        endpoint: client.transport.endpoint,
+        bindingRevision: profile!.bindingRevision,
       );
       if (!await _persist(key, session, base.adding(record))) {
         return const OutboxSubmission.refused('notPersisted');
       }
-      if (isCurrent?.call() == false) {
+      if (!_current || isCurrent?.call() == false) {
         final cancelled = record.copyWith(
           state: SubmissionKind.rejected,
-          reason: 'cancelledBeforeSend',
+          reason: _current ? 'cancelledBeforeSend' : 'sourceChanged',
           updatedAt: _now().toUtc(),
         );
         // Even when cleanup cannot be saved, report this attempt as unsent:
         // the composer must not automatically reconcile it as a fresh send.
         await _persist(key, session, base.adding(cancelled));
-        return OutboxSubmission.recorded(cancelled.entry, sent: false);
+        return OutboxSubmission.recorded(_entry(cancelled), sent: false);
       }
-      final attempt = await client.post(ready);
+      final attempt = await client.post(ready, cancellation: _cancellation);
       final result = record.copyWith(
         // Refused locally before the wire: definitely not admitted.
         state: attempt.posted
@@ -160,7 +215,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       // If this write fails the ledger keeps `sending`, read back later as
       // uncertain: never as unsent.
       await _persist(key, session, base.adding(result));
-      return OutboxSubmission.recorded(result.entry, sent: attempt.posted);
+      return OutboxSubmission.recorded(_entry(result), sent: attempt.posted);
     });
   }
 
@@ -174,7 +229,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       }
       return [
         for (final record in (await _recover(key, session, ledger)).records)
-          record.entry,
+          _entry(record),
       ];
     });
   }
@@ -212,12 +267,12 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       final record = result.record;
       if (record == null) return OutboxReconciliation.refused(result.refusal!);
       if (retryAt == null || step >= 2 * maxReplays) {
-        return OutboxReconciliation.recorded(record.entry, posts: posts);
+        return OutboxReconciliation.recorded(_entry(record), posts: posts);
       }
       final delay = retryAt.difference(_now().toUtc());
       // A clock set back since the replay must not park the caller.
       if (delay > replayBackoff.last) {
-        return OutboxReconciliation.recorded(record.entry, posts: posts);
+        return OutboxReconciliation.recorded(_entry(record), posts: posts);
       }
       if (delay > Duration.zero) await _wait(delay);
     }
@@ -267,6 +322,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       var ledger = await _recover(key, session, read);
       var record = ledger.find(commandId);
       if (record == null) return const OutboxMutation.refused('unknownCommand');
+      if (_sourceRefusal(record) case final reason?) {
+        return OutboxMutation.refused(reason);
+      }
       if (record.connectedVersion != client.connectedVersion) {
         return const OutboxMutation.refused('versionChanged');
       }
@@ -275,7 +333,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       if ((record.state != SubmissionKind.admitted &&
               record.state != SubmissionKind.uncertain) ||
           (record.fence != CancellationFence.none && !_open(record.fence))) {
-        return OutboxMutation.recorded(record.entry);
+        return OutboxMutation.recorded(_entry(record));
       }
       // The server holds another record under this id: deleting it would
       // remove input that is not this prompt.
@@ -306,18 +364,22 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       if (!await write(fenced(CancellationFence.submitting))) {
         return const OutboxMutation.refused('notPersisted');
       }
+      if (_sourceRefusal(record!) case final reason?) {
+        return OutboxMutation.refused(reason);
+      }
       final result = await client.cancelInbox(
         session: session,
         messageId: record!.messageId,
+        cancellation: _cancellation,
       );
       if (result case OpenCodeInboxNotSent(:final reason)) {
         await write(fenced(CancellationFence.requested, reason));
-        return OutboxMutation.recorded(record!.entry);
+        return OutboxMutation.recorded(_entry(record!));
       }
       // Whatever the status, a crash from here must not look settled.
       await write(fenced(CancellationFence.uncertain));
       await write(await _afterCancel(session, record!));
-      return OutboxMutation.recorded(record!.entry);
+      return OutboxMutation.recorded(_entry(record!));
     });
   }
 
@@ -337,6 +399,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       final ledger = await _recover(key, session, read);
       final record = ledger.find(commandId);
       if (record == null) return const OutboxMutation.refused('unknownCommand');
+      if (_sourceRefusal(record) case final reason?) {
+        return OutboxMutation.refused(reason);
+      }
       if (record.connectedVersion != client.connectedVersion) {
         return const OutboxMutation.refused('versionChanged');
       }
@@ -347,12 +412,13 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         return const OutboxMutation.refused('cancellationFence');
       }
       if (record.delivery == delivery) {
-        return OutboxMutation.recorded(record.entry);
+        return OutboxMutation.recorded(_entry(record));
       }
       final result = await client.switchInboxDelivery(
         session: session,
         messageId: record.messageId,
         delivery: delivery,
+        cancellation: _cancellation,
       );
       if (result case OpenCodeInboxNotSent(:final reason)) {
         return OutboxMutation.refused(reason);
@@ -372,11 +438,17 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       // The server decides; an admitted entry never becomes uncertain here,
       // where it could be replayed.
       final _Record after;
+      if (_sourceRefusal(record) case final reason?) {
+        final unresolved = next(reason);
+        await _persist(key, session, ledger.replacing(record, unresolved));
+        return OutboxMutation.recorded(_entry(unresolved));
+      }
       try {
         after = switch (await reader.locatePrompt(
           session,
           record.messageId,
           sourceVersion: client.connectedVersion,
+          cancellation: _cancellation,
         )) {
           OpenCodePromptPending(:final text, delivery: final shown)
               when text == record.text =>
@@ -407,14 +479,14 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         final failed = next(error.failure.name);
         return OutboxMutation.recorded(
           await _persist(key, session, ledger.replacing(record, failed))
-              ? failed.entry
-              : record.entry,
+              ? _entry(failed)
+              : _entry(record),
         );
       }
       return OutboxMutation.recorded(
         await _persist(key, session, ledger.replacing(record, after))
-            ? after.entry
-            : record.entry,
+            ? _entry(after)
+            : _entry(record),
       );
     });
   }
@@ -448,11 +520,13 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       fence: fence,
       updatedAt: _now().toUtc(),
     );
+    if (_sourceRefusal(record) case final reason?) return next(reason);
     try {
       return switch (await reader.locatePrompt(
         session,
         record.messageId,
         sourceVersion: client.connectedVersion,
+        cancellation: _cancellation,
       )) {
         OpenCodePromptPending(:final text, :final delivery)
             when text == record.text =>
@@ -492,6 +566,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     final ledger = await _recover(key, session, read);
     final record = ledger.find(commandId);
     if (record == null) return const _Step.refused('unknownCommand');
+    if (_sourceRefusal(record) case final reason?) {
+      return _Step.refused(reason);
+    }
     // Only an unknown admission or an unsettled cancel is checked; a known
     // outcome never regresses, and an entry recorded under another version
     // is left to the user.
@@ -531,6 +608,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         session,
         record.messageId,
         sourceVersion: client.connectedVersion,
+        cancellation: _cancellation,
       );
     } on OpenCodeSessionReadException catch (error) {
       return settle(SubmissionKind.uncertain, error.failure.name);
@@ -603,7 +681,10 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     if (!await _persist(key, session, ledger.replacing(record, sending))) {
       return settle(SubmissionKind.uncertain, 'notPersisted');
     }
-    final attempt = await client.post(ready);
+    if (_sourceRefusal(record) case final reason?) {
+      return settle(SubmissionKind.uncertain, reason);
+    }
+    final attempt = await client.post(ready, cancellation: _cancellation);
     final result = sending.copyWith(
       // Unlike a first send, nothing posted keeps the earlier uncertainty.
       state: attempt.posted
@@ -779,10 +860,31 @@ final class _Record {
     this.replays = 0,
     this.fence = CancellationFence.none,
     this.notBefore,
+    this.endpoint,
+    this.bindingRevision,
   });
 
   factory _Record.fromJson(Object? value, SessionRef session) {
     final json = value! as Map<String, Object?>;
+    final hasEndpoint = json.containsKey('endpoint');
+    final hasRevision = json.containsKey('bindingRevision');
+    Uri? endpoint;
+    int? revision;
+    if (hasEndpoint || hasRevision) {
+      if (!hasEndpoint ||
+          !hasRevision ||
+          json['endpoint'] is! String ||
+          json['bindingRevision'] is! int) {
+        throw const FormatException('Unreadable outbox source; preserved.');
+      }
+      endpoint = EndpointProfile.validateEndpoint(
+        Uri.parse(json['endpoint']! as String),
+      );
+      revision = json['bindingRevision']! as int;
+      if (revision < 0 || revision > EndpointProfile.maxBindingRevision) {
+        throw const FormatException('Unreadable outbox source; preserved.');
+      }
+    }
     final state = SubmissionKind.values.byName(json['state']! as String);
     if (state == SubmissionKind.draft) {
       throw const FormatException('A draft is never recorded.');
@@ -811,6 +913,8 @@ final class _Record {
         json['fence'] as String? ?? CancellationFence.none.name,
       ),
       notBefore: notBefore == null ? null : DateTime.parse(notBefore),
+      endpoint: endpoint,
+      bindingRevision: revision,
     );
   }
 
@@ -821,6 +925,8 @@ final class _Record {
   final Delivery delivery;
   final String connectedVersion;
   final bool resume;
+  final Uri? endpoint;
+  final int? bindingRevision;
 
   /// The exact body posted; a later same-id replay must repeat it unchanged.
   final String payload;
@@ -834,7 +940,7 @@ final class _Record {
   /// The earliest time of the next replay.
   final DateTime? notBefore;
 
-  OutboxEntry get entry => OutboxEntry(
+  OutboxEntry entry(OutboxSource source) => OutboxEntry(
     session: session,
     commandId: commandId,
     messageId: messageId,
@@ -846,6 +952,7 @@ final class _Record {
     reason: reason,
     replays: replays,
     fence: fence,
+    source: source,
   );
 
   /// [reason] is replaced, even by null; the replay fields and the delivery
@@ -874,6 +981,8 @@ final class _Record {
     replays: replays ?? this.replays,
     fence: fence ?? this.fence,
     notBefore: notBefore ?? this.notBefore,
+    endpoint: endpoint,
+    bindingRevision: bindingRevision,
   );
 
   Map<String, Object?> toJson() => {
@@ -891,5 +1000,7 @@ final class _Record {
     'replays': replays,
     'fence': fence.name,
     'notBefore': ?notBefore?.toIso8601String(),
+    if (endpoint != null) 'endpoint': endpoint.toString(),
+    if (bindingRevision != null) 'bindingRevision': bindingRevision,
   };
 }

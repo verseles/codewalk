@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "प्रयास छोड़ें और पाठ रखें",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "अधिक क्रियाएं",
+  "chatAppBarPinAction": "ऐप बार पर पिन करें",
+  "chatAppBarUnpinAction": "ऐप बार से अनपिन करें",
+  "chatBadgeConversationError": "\"{title}\" में एक त्रुटि है।",
+  "chatBadgeConversationNeedsInput": "\"{title}\" को आपके इनपुट की आवश्यकता है।",
+  "chatBadgeConversationNewReply": "\"{title}\" में एक नई प्रतिक्रिया है।",
+  "chatBadgeServerNeedsAttention": "सर्वर कनेक्शन पर ध्यान देने की आवश्यकता है।",
+  "chatBadgeSyncing": "बातचीत सिंक हो रही है...",
+  "serversSearchActiveHint": "सक्रिय सर्वर खोजें",
+  "serversSetActive": "सक्रिय सेट करें",
+  "statusDelayed": "विलंबित",
+  "statusOffline": "ऑफ़लाइन",
+  "statusOnline": "ऑनलाइन",
+  "healthCredentialMissing": "इस सर्वर के लिए कोई सहेजा गया क्रेडेंशियल नहीं है। फिर से पेयर करें या पासवर्ड डालें।",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "सहेजा गया क्रेडेंशियल पढ़ा नहीं जा सका। पहुँच बहाल करने के लिए सर्वर खोलें।",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "पेयरिंग क्रेडेंशियल की समय सीमा समाप्त हो गई है। फिर से पेयर करें या सर्वर में नवीनीकृत करें।",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "सक्रिय",
+  "serversClearDefault": "डिफ़ॉल्ट साफ़ करें",
+  "serversDefault": "डिफ़ॉल्ट",
+  "serversEdit": "संपादित करें",
+  "serversSetDefault": "डिफ़ॉल्ट सेट करें",
+  "composerSourceChanged": "यह संदेश सर्वर के पिछले कनेक्शन का है। आप स्थानीय प्रति देख सकते हैं या हटा सकते हैं।",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "मूल सर्वर कनेक्शन की पुष्टि नहीं हो सकी। आप यह स्थानीय संदेश देख सकते हैं या हटा सकते हैं।",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "सर्वर का मान्य नाम दर्ज करें (1–160 अक्षर)।",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "प्रोफ़ाइल बदल गई है या सहेजने की पुष्टि नहीं हुई। फिर से सहेजने से पहले सहेजी गई प्रोफ़ाइल की तुलना करने के लिए पुनः लोड करें।",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "सहेजी गई प्रोफ़ाइल",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "सर्वर कनेक्शन बदल गया है। सर्वर की मौजूदा सेटिंग इस्तेमाल करने के लिए यह बातचीत फिर से खोलें।",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

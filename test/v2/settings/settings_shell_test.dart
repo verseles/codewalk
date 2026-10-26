@@ -5,14 +5,18 @@ import 'package:codewalk/app/app_keyboard_shortcuts.dart';
 import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/hosts/hosts_page.dart';
 import 'package:codewalk/features/settings/shortcuts_settings_page.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/shortcuts/shortcut_action.dart';
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
+import '../hosts/fakes.dart';
 import '../storage/storage_fakes.dart';
 
 void main() {
@@ -28,6 +32,8 @@ void main() {
     String route = '/settings',
     Locale locale = const Locale('en'),
     V2MetadataStore? metadataStore,
+    EndpointProfileRepository? profiles,
+    EndpointProber? prober,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -39,6 +45,8 @@ void main() {
     final graph = createAppDependencies(
       initialLink: Uri(path: route),
       metadataStore: metadataStore,
+      profileRepository: profiles,
+      endpointProber: prober,
     );
     await graph.preferences.initialize();
     graph.preferences.setLocale(locale);
@@ -74,6 +82,90 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(row);
     await tester.pumpAndSettle();
+  }
+
+  for (final (locale, width, scale) in [
+    ('en', 390.0, 1.0),
+    ('ar', 390.0, 2.0),
+    ('ur', 1280.0, 2.0),
+  ]) {
+    settingsTest(
+      'Settings filter target reveals only the server search: $locale/$width/$scale',
+      (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        addTearDown(tester.view.resetViewInsets);
+        final graph = await mount(
+          tester,
+          width: width,
+          locale: Locale(locale),
+          profiles: MemoryProfiles(),
+          prober: FakeProber(),
+          metadataStore: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        final query = graph.localizations.current.serversSearchActiveHint;
+        await tester.enterText(
+          find.byKey(const ValueKey('settings_navigation_search')),
+          query,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('settings_destination_servers')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          GoRouterState.of(tester.element(find.byType(HostsPage))).uri.path,
+          '/hosts',
+        );
+        TextField search() => tester.widget<TextField>(
+          find.byKey(const ValueKey('hosts-search')),
+        );
+        expect(search().controller!.text, isEmpty);
+        expect(search().focusNode!.hasFocus, isTrue);
+        expect(
+          find.byKey(const ValueKey('hosts-search-highlight')),
+          findsOneWidget,
+        );
+        tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+        await tester.pumpAndSettle();
+        final field = tester.getRect(
+          find.byKey(const ValueKey('hosts-search')),
+        );
+        expect(field.bottom, lessThanOrEqualTo(580));
+        expect(tester.takeException(), isNull);
+        await tester.pump(const Duration(seconds: 2));
+        expect(
+          find.byKey(const ValueKey('hosts-search-highlight')),
+          findsNothing,
+        );
+        expect(search().focusNode!.hasFocus, isTrue);
+        tester.view.resetViewInsets();
+        graph.router.pop();
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<TextField>(
+                find.byKey(const ValueKey('settings_navigation_search')),
+              )
+              .controller!
+              .text,
+          query,
+        );
+        graph.router.go('/hosts', extra: 'unknown-target');
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('hosts-search-highlight')),
+          findsNothing,
+        );
+        expect(search().focusNode!.hasFocus, isFalse);
+        graph.router.go('/hosts?focus=selection-filter');
+        await tester.pumpAndSettle();
+        expect(
+          graph.router.routeInformationProvider.value.uri.toString(),
+          '/unsupported',
+        );
+      },
+    );
   }
 
   settingsTest(

@@ -1,5 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+enum OutboxSource { current, changed, unknown }
+
 /// One locally recorded prompt. [state] is never `draft`: an entry exists only
 /// once its exact payload was durably written, before any POST. `sending`
 /// found after a restart is reported as `uncertain`, never as unsent.
@@ -16,6 +18,7 @@ final class OutboxEntry {
     this.reason,
     this.replays = 0,
     this.fence = CancellationFence.none,
+    this.source = OutboxSource.unknown,
   });
   final SessionRef session;
   final CommandId commandId;
@@ -35,6 +38,9 @@ final class OutboxEntry {
 
   /// Anything but `none` stops every replay of this entry.
   final CancellationFence fence;
+
+  /// Whether this record belongs to the current confirmed server binding.
+  final OutboxSource source;
 }
 
 /// [entry] is null when nothing was recorded or sent, so the caller keeps the

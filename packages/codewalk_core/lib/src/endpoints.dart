@@ -37,17 +37,29 @@ final class EndpointProfile {
     required this.id,
     required this.label,
     required Uri endpoint,
+    this.bindingRevision = 0,
   }) : endpoint = validateEndpoint(endpoint) {
     if (!RegExp(r'^[A-Za-z0-9_-]{8,64}$').hasMatch(id) ||
         label.trim().isEmpty ||
         label.length > 160 ||
-        label.runes.any((c) => c < 32 || c == 127)) {
+        label.runes.any((c) => c < 32 || c == 127) ||
+        bindingRevision < 0 ||
+        bindingRevision > maxBindingRevision) {
       throw const FormatException('Invalid profile identity or label.');
     }
   }
   final String id;
   final String label;
   final Uri endpoint;
+  static const maxBindingRevision = 0x7fffffff;
+
+  /// Changes only when the saved endpoint URL changes, including A–B–A.
+  final int bindingRevision;
+
+  bool sameBinding(EndpointProfile other) =>
+      id == other.id &&
+      endpoint == other.endpoint &&
+      bindingRevision == other.bindingRevision;
 
   static Uri validateEndpoint(Uri uri) {
     if (!{'http', 'https'}.contains(uri.scheme) ||
@@ -88,6 +100,11 @@ abstract interface class EndpointProber {
 
 abstract interface class EndpointProfileRepository {
   Future<List<EndpointProfile>> load();
+  Future<EndpointProfile> updateProfile(
+    EndpointProfile expected, {
+    required String label,
+    required Uri endpoint,
+  });
   Future<void> save(EndpointProfile profile, String secret);
   Future<String?> readSecret(EndpointProfile profile);
   Future<EndpointCredential?> readCredential(EndpointProfile profile);

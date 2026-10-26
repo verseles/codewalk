@@ -1578,4 +1578,99 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'চেষ্টা বাতিল করে লেখা রাখুন';
+
+  @override
+  String get chatAppBarMoreActions => 'আরো কর্ম';
+
+  @override
+  String get chatAppBarPinAction => 'অ্যাপ বারে পিন করুন';
+
+  @override
+  String get chatAppBarUnpinAction => 'অ্যাপ বার থেকে আনপিন করুন';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\"-এ একটি ত্রুটি রয়েছে।';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\"-এর আপনার ইনপুট প্রয়োজন।';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\"-এ একটি নতুন উত্তর রয়েছে।';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => 'সার্ভার সংযোগে মনোযোগ প্রয়োজন।';
+
+  @override
+  String get chatBadgeSyncing => 'কথোপকথন সিঙ্ক হচ্ছে...';
+
+  @override
+  String get serversSearchActiveHint => 'সক্রিয় সার্ভার অনুসন্ধান করুন';
+
+  @override
+  String get serversSetActive => 'সক্রিয় সেট করুন';
+
+  @override
+  String get statusDelayed => 'বিলম্বিত';
+
+  @override
+  String get statusOffline => 'অফলাইন';
+
+  @override
+  String get statusOnline => 'অনলাইন';
+
+  @override
+  String get healthCredentialMissing =>
+      'এই সার্ভারের কোনো সংরক্ষিত পরিচয়পত্র নেই। আবার পেয়ার করুন বা পাসওয়ার্ড দিন।';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'সংরক্ষিত পরিচয়পত্র পড়া যায়নি। প্রবেশাধিকার ফেরাতে সার্ভার খুলুন।';
+
+  @override
+  String get healthCredentialExpired =>
+      'পেয়ারিং পরিচয়পত্রের মেয়াদ শেষ হয়েছে। আবার পেয়ার করুন বা সার্ভারে নবায়ন করুন।';
+
+  @override
+  String get serversActive => 'সক্রিয়';
+
+  @override
+  String get serversClearDefault => 'ডিফল্ট সাফ করুন';
+
+  @override
+  String get serversDefault => 'ডিফল্ট';
+
+  @override
+  String get serversEdit => 'সম্পাদনা করুন';
+
+  @override
+  String get serversSetDefault => 'ডিফল্ট সেট করুন';
+
+  @override
+  String get composerSourceChanged =>
+      'এই বার্তাটি সার্ভারের আগের সংযোগের। আপনি স্থানীয় কপি দেখতে বা মুছে ফেলতে পারেন।';
+
+  @override
+  String get composerSourceUnknown =>
+      'মূল সার্ভার সংযোগ যাচাই করা যায়নি। আপনি এই স্থানীয় বার্তা দেখতে বা মুছে ফেলতে পারেন।';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'সার্ভারের একটি বৈধ নাম লিখুন (১–১৬০ অক্ষর)।';
+
+  @override
+  String get hostsEditChanged =>
+      'প্রোফাইল বদলেছে বা সংরক্ষণ নিশ্চিত করা যায়নি। আবার সংরক্ষণের আগে সংরক্ষিত প্রোফাইলের সঙ্গে তুলনা করতে পুনরায় লোড করুন।';
+
+  @override
+  String get hostsEditSavedProfile => 'সংরক্ষিত প্রোফাইল';
+
+  @override
+  String get liveSourceChanged =>
+      'সার্ভার সংযোগ পরিবর্তিত হয়েছে। সার্ভারের বর্তমান সেটিং ব্যবহার করতে এই কথোপকথনটি আবার খুলুন।';
 }

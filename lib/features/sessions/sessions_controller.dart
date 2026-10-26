@@ -303,7 +303,12 @@ class SessionsController extends ChangeNotifier {
   /// session outside the loaded rows. Null while that server has no source.
   SessionReadTask? read(SessionRef ref) {
     final source = _source;
-    if (_disposed || source == null || ref.harnessRef != source.harness) {
+    if (_disposed ||
+        source == null ||
+        hosts.loading ||
+        hosts.storageError ||
+        hosts.pendingBindingChange == ref.host.value ||
+        ref.harnessRef != source.harness) {
       return null;
     }
     return source.read(ref);
@@ -407,7 +412,7 @@ class SessionsController extends ChangeNotifier {
       final credential = current == null ? null : hosts.credentialFor(current);
       if (hosts.storageError ||
           current == null ||
-          current.endpoint != old.endpoint ||
+          !current.sameBinding(old) ||
           !_credentialMatches(credential) ||
           hosts.credentialUnreadable(current)) {
         _invalidate(closeSource: true);
@@ -451,7 +456,7 @@ class SessionsController extends ChangeNotifier {
     final current = _find(_profile!.id);
     final credential = current == null ? null : hosts.credentialFor(current);
     if (current == null ||
-        current.endpoint != _profile!.endpoint ||
+        !current.sameBinding(_profile!) ||
         !_credentialMatches(credential)) {
       _hostsChanged();
       return false;

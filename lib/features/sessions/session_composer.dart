@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
+import '../hosts/endpoint_health_view.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
 import 'session_stop_button.dart';
@@ -185,6 +186,8 @@ class _SessionComposerState extends State<SessionComposer> {
         ComposerNotice.switchNotApplied => l10n.composerNoticeSwitchNotApplied,
         ComposerNotice.changeFailed => l10n.composerNoticeChangeFailed,
         ComposerNotice.versionChanged => l10n.composerNoticeVersionChanged,
+        ComposerNotice.sourceChanged => l10n.composerSourceChanged,
+        ComposerNotice.sourceUnknown => l10n.composerSourceUnknown,
       };
 
   static String _preview(String text) =>
@@ -288,9 +291,13 @@ class _SessionComposerState extends State<SessionComposer> {
     final l10n = context.v2L10n;
     final c = widget.controller;
     final id = entry.commandId.value;
-    final idle = !c.live.stopping && !c.busy.contains(entry.commandId);
+    final localIdle = !c.busy.contains(entry.commandId);
+    final idle =
+        localIdle && !c.live.stopping && entry.source == OutboxSource.current;
     final fenced = openFence(entry.fence);
     final status = switch (entry.state) {
+      _ when entry.source == OutboxSource.changed => l10n.composerSourceChanged,
+      _ when entry.source == OutboxSource.unknown => l10n.composerSourceUnknown,
       _ when fenced => l10n.composerCancelling,
       SubmissionKind.sending => l10n.composerSending,
       SubmissionKind.rejected => l10n.composerNotSent,
@@ -328,7 +335,28 @@ class _SessionComposerState extends State<SessionComposer> {
                   : null,
               child: Text(l10n.composerSendAgain),
             ),
-          if (idle && entry.state != SubmissionKind.sending)
+          if (localIdle && entry.source != OutboxSource.current)
+            IconButton(
+              key: ValueKey('live-row-inspect-$id'),
+              tooltip: l10n.composerHint,
+              icon: const Icon(Icons.visibility_outlined),
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(l10n.composerHint),
+                  content: SingleChildScrollView(
+                    child: SelectableText(entry.text),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(l10n.commonCancel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (localIdle && entry.state != SubmissionKind.sending)
             TextButton(
               key: ValueKey('live-row-discard-$id'),
               onPressed: () => c.discard(entry.commandId),
@@ -398,6 +426,11 @@ class _SessionComposerState extends State<SessionComposer> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (notice != null) Text(notice),
+                    if (c.live.endpointOffline && c.live.health != null)
+                      EndpointHealthRecovery(
+                        profile: c.live.profile,
+                        health: c.live.health!,
+                      ),
                     SessionStopNotice(live: c.live),
                     if (c.unreadable)
                       Align(
@@ -409,6 +442,7 @@ class _SessionComposerState extends State<SessionComposer> {
                         ),
                       ),
                     if (!c.canSend &&
+                        !c.live.endpointOffline &&
                         !c.sending &&
                         !c.unreadable &&
                         !c.live.stopping)
@@ -446,7 +480,7 @@ class _SessionComposerState extends State<SessionComposer> {
                         controller: _text,
                         // A text that a failed resend hands back needs the field
                         // untouched until the send ends.
-                        readOnly: c.sending,
+                        readOnly: c.sending || c.live.endpointOffline,
                         minLines: 1,
                         maxLines: 4,
                         decoration: InputDecoration(

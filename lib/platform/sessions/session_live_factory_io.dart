@@ -55,7 +55,110 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
   // Includes terminal slots detached from [_slots] while screens still hold
   // them, so closing the directory reaches every open stream.
   final _owned = <OpenCodeProfileSlot>{};
+  final _retirements = <OpenCodeProfileSlot, Future<void>>{};
+  final _profiles = <String, EndpointProfile>{};
+  final _credentials = <String, EndpointCredential>{};
+  final _observed = <String, EndpointProfile>{};
+  bool _managed = false;
+  bool _available = true;
+  String? _changingProfile;
   bool _closed = false;
+
+  static String _key(EndpointProfile profile) =>
+      '${profile.id}|${profile.endpoint}|${profile.bindingRevision}';
+
+  bool _current(EndpointProfile profile, EndpointCredential credential) {
+    if (_closed || !_available || _changingProfile == profile.id) return false;
+    if (!_managed) {
+      return _observed[profile.id]?.sameBinding(profile) ?? false;
+    }
+    return _profiles[profile.id]?.sameBinding(profile) == true &&
+        credential.matches(_credentials[profile.id]);
+  }
+
+  void _retire(OpenCodeProfileSlot slot) {
+    if (_retirements.containsKey(slot)) return;
+    final key = _key(slot.profile);
+    if (identical(_slots[key], slot)) _slots.remove(key);
+    final retirement = slot.close();
+    _retirements[slot] = retirement;
+    unawaited(
+      retirement.then<void>(
+        (_) {
+          _owned.remove(slot);
+          _retirements.remove(slot);
+        },
+        // Keep failed teardown authoritative: a replacement cannot overlap it.
+        onError: (Object _, StackTrace _) {},
+      ),
+    );
+  }
+
+  @override
+  void reconcileProfiles({
+    required List<EndpointProfile> profiles,
+    required Map<String, EndpointCredential> credentials,
+    required bool available,
+    String? changingProfile,
+  }) {
+    if (_closed) return;
+    _managed = true;
+    _available = available;
+    _changingProfile = changingProfile;
+    if (available) {
+      _profiles
+        ..clear()
+        ..addEntries(profiles.map((profile) => MapEntry(profile.id, profile)));
+      _credentials
+        ..clear()
+        ..addAll(credentials);
+    }
+    for (final slot in _owned.toList()) {
+      if (!available) slot.suspendUnrestricted();
+      if (slot.profile.id == changingProfile ||
+          (available && !_current(slot.profile, slot.credential))) {
+        _retire(slot);
+      }
+    }
+  }
+
+  Future<void> _prepareBinding(
+    EndpointProfile profile,
+    EndpointCredential credential,
+  ) async {
+    if (!_managed) {
+      final previous = _observed[profile.id];
+      if (previous != null &&
+          (previous.bindingRevision > profile.bindingRevision ||
+              (previous.bindingRevision == profile.bindingRevision &&
+                  !previous.sameBinding(profile)))) {
+        throw const SessionLiveException(SessionLiveFailure.sourceChanged);
+      }
+      _observed[profile.id] = profile;
+    }
+    if (!_current(profile, credential)) {
+      throw const SessionLiveException(SessionLiveFailure.sourceChanged);
+    }
+    for (final slot in _owned.toList()) {
+      if (slot.profile.id == profile.id &&
+          (!slot.profile.sameBinding(profile) ||
+              slot.isClosed ||
+              (_managed && !slot.credential.matches(credential)))) {
+        _retire(slot);
+      }
+    }
+    try {
+      await Future.wait([
+        for (final entry in _retirements.entries)
+          if (entry.key.profile.id == profile.id) entry.value,
+      ]);
+    } on Object {
+      throw const SessionLiveException(SessionLiveFailure.connection);
+    }
+    if (!_current(profile, credential)) {
+      throw const SessionLiveException(SessionLiveFailure.sourceChanged);
+    }
+  }
 
   @override
   Future<SessionLiveHandle> open({
@@ -68,7 +171,8 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
         HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id))) {
       throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
     }
-    final key = '${profile.id}|${profile.endpoint}';
+    await _prepareBinding(profile, credential);
+    final key = _key(profile);
     var slot = _slots[key];
     if (slot != null && !slot.credential.matches(credential)) {
       // Never multiplex two secrets over one stream: a live session or a
@@ -86,6 +190,11 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
         slot ?? _createSlot(key, profile, credential, session.harnessRef);
     try {
       await current.ready();
+      if (!_current(profile, credential) ||
+          !identical(_slots[key], current) ||
+          current.isClosed) {
+        throw const SessionLiveException(SessionLiveFailure.sourceChanged);
+      }
       return current.lease(session);
     } on Object {
       if (current.handles.isEmpty && identical(_slots[key], current)) {
@@ -118,10 +227,10 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
       permissionModes: _permissionModes,
       unrestrictedOwnership: _unrestrictedOwnership,
       commandIds: _commandIds,
+      isCurrentBinding: () =>
+          _current(profile, credential) && identical(_slots[key], slot),
     );
-    _owned
-      ..removeWhere((owned) => owned.isClosed)
-      ..add(slot);
+    _owned.add(slot);
     return _slots[key] = slot;
   }
 
@@ -136,7 +245,8 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     required EndpointCredential credential,
   }) async {
     if (_closed) throw const SessionLiveException(SessionLiveFailure.cancelled);
-    final key = '${profile.id}|${profile.endpoint}';
+    await _prepareBinding(profile, credential);
+    final key = _key(profile);
     var slot = _slots[key];
     if (slot != null && !slot.credential.matches(credential)) {
       // Never multiplex two secrets over one stream.
@@ -159,6 +269,11 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
         );
     try {
       await current.ready();
+      if (!_current(profile, credential) ||
+          !identical(_slots[key], current) ||
+          current.isClosed) {
+        throw const SessionLiveException(SessionLiveFailure.sourceChanged);
+      }
       return current.catalogLease();
     } on Object {
       if (current.handles.isEmpty &&

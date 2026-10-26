@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart'
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../hosts/endpoint_health_controller.dart';
 import 'sessions_controller.dart';
 
 enum WorkspaceDraftNotice {
@@ -26,11 +27,13 @@ final class WorkspaceFirstPrompt {
     required this.summary,
     required this.text,
     required this.commandId,
+    required this.profile,
   });
   final WorkspaceDraftKey key;
   final SessionSummary summary;
   final String text;
   final CommandId commandId;
+  final EndpointProfile profile;
   SessionRef get session => summary.info.ref;
   String get location =>
       Uri(pathSegments: ['', 's', session.host.value, session.nativeId]).path;
@@ -40,15 +43,27 @@ class WorkspaceDraftController extends ChangeNotifier {
   WorkspaceDraftController({
     required SessionsController catalog,
     required WorkspaceDraftStore store,
+    this.health,
     CommandId Function()? commandIds,
   }) : _catalog = catalog,
        _store = store,
        _commandIds = commandIds ?? mintCommandId {
     _catalog.addListener(_catalogChanged);
+    health?.addListener(_notify);
     draft.addListener(_draftChanged);
     _catalogChanged();
   }
   final SessionsController _catalog;
+  final EndpointHealthController? health;
+  EndpointHealthView get endpointHealth {
+    final profile = _catalog.selectedProfile;
+    return profile == null
+        ? const EndpointHealthView()
+        : health?.view(profile) ?? const EndpointHealthView();
+  }
+
+  bool get endpointOffline =>
+      endpointHealth.status == EndpointHealthStatus.offline;
   final WorkspaceDraftStore _store;
   final CommandId Function() _commandIds;
   final draft = TextEditingController();
@@ -60,6 +75,8 @@ class WorkspaceDraftController extends ChangeNotifier {
   WorkspaceDraftNotice _notice = WorkspaceDraftNotice.none;
   WorkspaceFirstPrompt? _handoff;
   String? _profile;
+  EndpointProfile? _binding;
+  bool _changingBinding = false;
   ({ProjectRef? project})? _choice;
   String _location = '';
   int _intent = 0;
@@ -87,6 +104,8 @@ class WorkspaceDraftController extends ChangeNotifier {
       _currentKey != null &&
       !_loading &&
       !_sending &&
+      !endpointOffline &&
+      _catalog.hosts.pendingBindingChange != _profile &&
       status == WorkspaceDraftStatus.ready &&
       !_store.isUnreadable(_currentKey!) &&
       draft.text.trim().isNotEmpty &&
@@ -166,6 +185,11 @@ class WorkspaceDraftController extends ChangeNotifier {
       : null;
   bool owns(WorkspaceFirstPrompt handoff) =>
       identical(_handoff, handoff) &&
+      !endpointOffline &&
+      !_catalog.hosts.loading &&
+      !_catalog.hosts.storageError &&
+      _catalog.hosts.pendingBindingChange != handoff.profile.id &&
+      _catalog.selectedProfile?.sameBinding(handoff.profile) == true &&
       _location == handoff.location &&
       _currentKey == handoff.key;
 
@@ -197,13 +221,30 @@ class WorkspaceDraftController extends ChangeNotifier {
 
   void _catalogChanged() {
     if (_disposed) return;
-    final profile = _catalog.selectedProfile?.id;
+    final selected = _catalog.selectedProfile;
+    final profile = selected?.id;
+    final changing =
+        profile != null && _catalog.hosts.pendingBindingChange == profile;
+    final invalidated =
+        (changing && !_changingBinding) ||
+        (_binding != null &&
+            selected != null &&
+            !_binding!.sameBinding(selected));
+    if (invalidated) {
+      _intent++;
+      _handoff = null;
+    }
+    _changingBinding = changing;
+    _binding = selected;
     final choice = _catalog.chosenProject;
     // A changed row order or a temporarily absent group is not a context
     // switch. Only an explicit choice or another server changes a draft.
     final changed =
         profile != _profile || (choice != null && choice != _choice);
-    if (!changed && (isDraftActive || _handoff != null)) return;
+    if (!changed && (isDraftActive || _handoff != null)) {
+      if (invalidated) _notify();
+      return;
+    }
     final key = _deriveKey();
     if (profile == _profile && key == _currentKey) return;
     if (_profile != null && _currentKey == null) {
@@ -316,12 +357,14 @@ class WorkspaceDraftController extends ChangeNotifier {
     final credential = _catalog.hosts.credentialFor(profile);
     bool wanted() =>
         !_disposed &&
+        !endpointOffline &&
         _intent == intent &&
         _currentKey == key &&
         isDraftActive &&
-        _catalog.selectedProfile?.endpoint == profile.endpoint &&
+        _catalog.selectedProfile?.sameBinding(profile) == true &&
+        _catalog.hosts.pendingBindingChange != profile.id &&
         !_catalog.hosts.loading &&
-        _catalog.hosts.credentialFor(profile)?.secret == credential?.secret;
+        credential?.matches(_catalog.hosts.credentialFor(profile)) == true;
     final text = draft.text;
     final id = _commandIds();
     _sending = true;
@@ -408,6 +451,7 @@ class WorkspaceDraftController extends ChangeNotifier {
         summary: summary!,
         text: text,
         commandId: id,
+        profile: profile,
       );
       _activeDraftContexts.remove(key);
       onBound(ref, text, id);
@@ -443,6 +487,7 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (_currentKey case final key?) _store.detach(key, _draftForgotten);
     unawaited(_store.flush());
     _catalog.removeListener(_catalogChanged);
+    health?.removeListener(_notify);
     draft.removeListener(_draftChanged);
     draft.dispose();
     super.dispose();

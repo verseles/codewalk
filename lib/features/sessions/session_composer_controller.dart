@@ -30,6 +30,8 @@ enum ComposerNotice {
   switchNotApplied,
   changeFailed,
   versionChanged,
+  sourceChanged,
+  sourceUnknown,
 }
 
 /// One pending inbox row; [entry] is set when this device sent it.
@@ -47,6 +49,7 @@ bool openFence(CancellationFence fence) => const {
 }.contains(fence);
 
 bool canCancel(OutboxEntry entry) =>
+    entry.source == OutboxSource.current &&
     entry.state == SubmissionKind.admitted &&
     entry.fence == CancellationFence.none;
 
@@ -83,6 +86,7 @@ class SessionComposerController extends ChangeNotifier {
       _outbox != null &&
       !unreadable &&
       !sending &&
+      !live.endpointOffline &&
       !live.stopping &&
       // A model or agent change settles before the next prompt goes out.
       !live.selectionState.holdsSend &&
@@ -142,7 +146,10 @@ class SessionComposerController extends ChangeNotifier {
 
   /// The pending inbox rows, each with this device's entry when it sent it.
   List<ComposerChip> chips(SessionState? state) {
-    final byMessage = {for (final e in entries) e.messageId: e};
+    final byMessage = {
+      for (final e in entries)
+        if (e.source == OutboxSource.current) e.messageId: e,
+    };
     return [
       for (final pending in state?.pending ?? const <PendingInput>[])
         ComposerChip(pending, byMessage[live.nativeMessageOf(pending.id)]),
@@ -161,7 +168,8 @@ class SessionComposerController extends ChangeNotifier {
     return [
       for (final entry in entries)
         if (!shown.contains(entry.commandId) &&
-            (entry.state == SubmissionKind.uncertain ||
+            (entry.source != OutboxSource.current ||
+                entry.state == SubmissionKind.uncertain ||
                 entry.state == SubmissionKind.rejected ||
                 entry.state == SubmissionKind.sending ||
                 (entry.state == SubmissionKind.admitted &&
@@ -208,7 +216,7 @@ class SessionComposerController extends ChangeNotifier {
         commandId: commandId ?? _commandIds(),
         draft: PromptDraft(text: text),
         delivery: as,
-        isCurrent: isCurrent,
+        isCurrent: () => !live.endpointOffline && (isCurrent?.call() ?? true),
       );
       if (_disposed) {
         // The session closed meanwhile: a prompt the outbox took must not
@@ -276,10 +284,20 @@ class SessionComposerController extends ChangeNotifier {
 
   Future<void> _run(
     CommandId id,
-    Future<void> Function(PromptOutbox) op,
-  ) async {
+    Future<void> Function(PromptOutbox) op, {
+    bool network = true,
+  }) async {
     final outbox = _outbox;
-    if (outbox == null || live.stopping || !busy.add(id)) return;
+    if (outbox == null || (network && live.stopping)) return;
+    final source = _entry(id)?.source;
+    if (network && source != null && source != OutboxSource.current) {
+      notice = source == OutboxSource.changed
+          ? ComposerNotice.sourceChanged
+          : ComposerNotice.sourceUnknown;
+      _notify();
+      return;
+    }
+    if (!busy.add(id)) return;
     _notify();
     try {
       await op(outbox);
@@ -383,7 +401,7 @@ class SessionComposerController extends ChangeNotifier {
 
   Future<void> discard(CommandId id) => _run(id, (outbox) async {
     if (!await outbox.dismiss(session, id)) notice = ComposerNotice.notSaved;
-  });
+  }, network: false);
 
   @override
   void dispose() {
@@ -395,6 +413,8 @@ class SessionComposerController extends ChangeNotifier {
 }
 
 ComposerNotice submitRefusal(String? reason) => switch (reason) {
+  'sourceChanged' => ComposerNotice.sourceChanged,
+  'sourceUnknown' => ComposerNotice.sourceUnknown,
   'cancelledBeforeSend' => ComposerNotice.cancelled,
   'unreadable' => ComposerNotice.unreadable,
   'notPersisted' => ComposerNotice.notSaved,
@@ -404,6 +424,8 @@ ComposerNotice submitRefusal(String? reason) => switch (reason) {
 };
 
 ComposerNotice rejection(String? reason) => switch (reason) {
+  'sourceChanged' => ComposerNotice.sourceChanged,
+  'sourceUnknown' => ComposerNotice.sourceUnknown,
   'cancelledBeforeSend' => ComposerNotice.cancelled,
   'ConflictError' => ComposerNotice.conflict,
   'PromptIdentityOccupied' ||
@@ -415,6 +437,8 @@ ComposerNotice rejection(String? reason) => switch (reason) {
 };
 
 ComposerNotice mutationRefusal(String? reason) => switch (reason) {
+  'sourceChanged' => ComposerNotice.sourceChanged,
+  'sourceUnknown' => ComposerNotice.sourceUnknown,
   'versionChanged' => ComposerNotice.versionChanged,
   'identityOccupied' => ComposerNotice.identityOccupied,
   'notPersisted' => ComposerNotice.notSaved,

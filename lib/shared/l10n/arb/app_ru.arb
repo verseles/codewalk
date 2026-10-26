@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "Отменить попытку и сохранить текст",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "Другие действия",
+  "chatAppBarPinAction": "Закрепить на панели приложения",
+  "chatAppBarUnpinAction": "Открепить от панели приложения",
+  "chatBadgeConversationError": "Ошибка в беседе \"{title}\".",
+  "chatBadgeConversationNeedsInput": "Беседа \"{title}\" требует вашего ввода.",
+  "chatBadgeConversationNewReply": "В беседе \"{title}\" появился новый ответ.",
+  "chatBadgeServerNeedsAttention": "Подключение к серверу требует внимания.",
+  "chatBadgeSyncing": "Синхронизация бесед...",
+  "serversSearchActiveHint": "Поиск активного сервера",
+  "serversSetActive": "Сделать активным",
+  "statusDelayed": "Задержка",
+  "statusOffline": "Офлайн",
+  "statusOnline": "Онлайн",
+  "healthCredentialMissing": "Для этого сервера нет сохранённых учётных данных. Выполните сопряжение заново или введите пароль.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "Не удалось прочитать сохранённые учётные данные. Откройте раздел «Серверы», чтобы восстановить доступ.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "Срок действия данных сопряжения истёк. Выполните сопряжение заново или обновите их в разделе «Серверы».",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Активные",
+  "serversClearDefault": "Сбросить по умолчанию",
+  "serversDefault": "По умолчанию",
+  "serversEdit": "Редактировать",
+  "serversSetDefault": "Сделать по умолчанию",
+  "composerSourceChanged": "Это сообщение относится к прежнему подключению к серверу. Локальную копию можно просмотреть или удалить.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "Не удалось подтвердить исходное подключение к серверу. Локальное сообщение можно просмотреть или удалить.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Введите допустимое имя сервера (1–160 символов).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "Профиль изменился или сохранение не подтверждено. Загрузите сохранённый профиль для сравнения перед повторным сохранением.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Сохранённый профиль",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "Подключение к серверу изменилось. Откройте этот разговор заново, чтобы использовать текущие настройки сервера.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

@@ -15,6 +15,7 @@ final class _MemoryBackend implements MetadataBackend {
   int writes = 0;
   bool failRead = false;
   bool failWrite = false;
+  Completer<void>? writeGate;
 
   @override
   Future<Object?> read(String key) async {
@@ -25,6 +26,7 @@ final class _MemoryBackend implements MetadataBackend {
   @override
   Future<void> write(String key, Object value) async {
     if (failWrite) throw StateError('unwritable');
+    await writeGate?.future;
     writes++;
     values[key] = value;
   }
@@ -365,6 +367,63 @@ void main() {
       await tabs.initialize();
       return tabs;
     }
+
+    test(
+      'queued old-binding not-found cannot remove a tab after URL editing',
+      () async {
+        final source = await selectA();
+        final tabs = await restore([source.row('gone', title: 'Gone')]);
+        addTearDown(tabs.dispose);
+        source.respond(const []);
+        await pumpEventQueue();
+        final oldRead = source.reads.single.$2;
+        final gate = backend.writeGate = Completer<void>();
+        final opening = tabs.open(source.row('blocker'));
+        await pumpEventQueue();
+        oldRead.completion.completeError(
+          const SessionCatalogException(SessionCatalogFailure.notFound),
+        );
+        await pumpEventQueue();
+        final original = rig.hosts.profiles.firstWhere(
+          (profile) => profile.id == 'profile_a',
+        );
+        expect(
+          await rig.hosts.updateProfile(
+            original,
+            label: original.label,
+            endpoint: original.endpoint.resolve('/other/'),
+            expectedRevision: rig.hosts.catalogRevision,
+          ),
+          isTrue,
+        );
+        backend.writeGate = null;
+        gate.complete();
+        await opening;
+        await pumpEventQueue();
+        expect(tabs.tabs.any((tab) => tab.ref.nativeId == 'ses_gone'), isTrue);
+        expect(tabs.takeRemoved(), isEmpty);
+        final refreshing = rig.sessions.refresh();
+        await pumpEventQueue();
+        final currentSource = rig.sources.last;
+        currentSource.respond(const []);
+        await refreshing;
+        await pumpEventQueue();
+        final currentRead = currentSource.reads
+            .firstWhere((read) => read.$1.nativeId == 'ses_gone')
+            .$2;
+        currentRead.completion.completeError(
+          const SessionCatalogException(SessionCatalogFailure.notFound),
+        );
+        for (final (ref, task) in currentSource.reads) {
+          if (ref.nativeId != 'ses_gone') {
+            task.completion.complete(currentSource.row('blocker'));
+          }
+        }
+        await pumpEventQueue();
+        expect(tabs.tabs.any((tab) => tab.ref.nativeId == 'ses_gone'), isFalse);
+        expect(tabs.takeRemoved(), ['Gone']);
+      },
+    );
 
     test('a tab reopened while its read is out is still dropped', () async {
       final source = await selectA();

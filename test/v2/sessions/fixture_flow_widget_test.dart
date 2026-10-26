@@ -946,6 +946,8 @@ void main() {
       );
 
       // 8. Model switch (`model switch`): open selection dialog, pick variant.
+      await tester.ensureVisible(find.byKey(const ValueKey('live-selection')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('live-selection')));
       await tester.pumpAndSettle();
       final variantFinder = find.byKey(
@@ -967,14 +969,18 @@ void main() {
           'variant': 'high',
         },
       });
-      // Emit `session.model.selected` and verify the chip label updates.
+      // Compact chips carry the selected model in their accessible tooltip.
       await emitFrames(tester, rig.server, 0, count: 1);
       await pumpSpin(
         tester,
-        () =>
-            find.textContaining('Fledge Alpha Free#high').evaluate().isNotEmpty,
-        reason: 'selection chip updated to Fledge Alpha Free#high',
+        () => find
+            .byTooltip(RegExp('Fledge Alpha Free#high'))
+            .evaluate()
+            .isNotEmpty,
+        reason: 'selection chip label updated to Fledge Alpha Free#high',
       );
+      await tester.tap(find.byKey(const ValueKey('live-jump-latest')));
+      await tester.pumpAndSettle();
 
       // 9. Error (`error`): emit `session.execution.started` + `failed`.
       await emitFrames(tester, rig.server, 0, count: 2);

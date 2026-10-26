@@ -8,8 +8,15 @@ import 'package:provider/provider.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../hosts/endpoint_health_view.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
+
+bool canOpenWorkspaceDraft(SessionsController catalog) =>
+    !catalog.hosts.loading &&
+    !catalog.hosts.storageError &&
+    catalog.selectedProfile != null &&
+    !catalog.creating;
 
 /// Starts locally: no create is sent by this navigation or by opening a drawer.
 void openWorkspaceDraft(BuildContext context) {
@@ -162,6 +169,13 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                               ),
                             ),
                           if (c.loading) Text(l10n.sessionsLoading),
+                          if (c.endpointOffline &&
+                              c.health != null &&
+                              catalog?.selectedProfile != null)
+                            EndpointHealthRecovery(
+                              profile: catalog!.selectedProfile!,
+                              health: c.health!,
+                            ),
                           if (!c.needsDirectory &&
                               !c.loading &&
                               unavailable != null &&
@@ -179,6 +193,7 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                 key: const ValueKey('workspace-draft-text'),
                                 controller: c.draft,
                                 enabled: !c.sending,
+                                readOnly: c.endpointOffline,
                                 minLines: 1,
                                 maxLines: 6,
                                 textCapitalization:

@@ -1598,4 +1598,100 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'Отменить попытку и сохранить текст';
+
+  @override
+  String get chatAppBarMoreActions => 'Другие действия';
+
+  @override
+  String get chatAppBarPinAction => 'Закрепить на панели приложения';
+
+  @override
+  String get chatAppBarUnpinAction => 'Открепить от панели приложения';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return 'Ошибка в беседе \"$title\".';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return 'Беседа \"$title\" требует вашего ввода.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return 'В беседе \"$title\" появился новый ответ.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'Подключение к серверу требует внимания.';
+
+  @override
+  String get chatBadgeSyncing => 'Синхронизация бесед...';
+
+  @override
+  String get serversSearchActiveHint => 'Поиск активного сервера';
+
+  @override
+  String get serversSetActive => 'Сделать активным';
+
+  @override
+  String get statusDelayed => 'Задержка';
+
+  @override
+  String get statusOffline => 'Офлайн';
+
+  @override
+  String get statusOnline => 'Онлайн';
+
+  @override
+  String get healthCredentialMissing =>
+      'Для этого сервера нет сохранённых учётных данных. Выполните сопряжение заново или введите пароль.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'Не удалось прочитать сохранённые учётные данные. Откройте раздел «Серверы», чтобы восстановить доступ.';
+
+  @override
+  String get healthCredentialExpired =>
+      'Срок действия данных сопряжения истёк. Выполните сопряжение заново или обновите их в разделе «Серверы».';
+
+  @override
+  String get serversActive => 'Активные';
+
+  @override
+  String get serversClearDefault => 'Сбросить по умолчанию';
+
+  @override
+  String get serversDefault => 'По умолчанию';
+
+  @override
+  String get serversEdit => 'Редактировать';
+
+  @override
+  String get serversSetDefault => 'Сделать по умолчанию';
+
+  @override
+  String get composerSourceChanged =>
+      'Это сообщение относится к прежнему подключению к серверу. Локальную копию можно просмотреть или удалить.';
+
+  @override
+  String get composerSourceUnknown =>
+      'Не удалось подтвердить исходное подключение к серверу. Локальное сообщение можно просмотреть или удалить.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'Введите допустимое имя сервера (1–160 символов).';
+
+  @override
+  String get hostsEditChanged =>
+      'Профиль изменился или сохранение не подтверждено. Загрузите сохранённый профиль для сравнения перед повторным сохранением.';
+
+  @override
+  String get hostsEditSavedProfile => 'Сохранённый профиль';
+
+  @override
+  String get liveSourceChanged =>
+      'Подключение к серверу изменилось. Откройте этот разговор заново, чтобы использовать текущие настройки сервера.';
 }

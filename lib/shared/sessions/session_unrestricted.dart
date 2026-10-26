@@ -66,16 +66,49 @@ final class UnrestrictedOwnership {
       UnrestrictedOwnership(stage: next, base: base, owned: owned);
 }
 
-/// Durable record of the insertions CodeWalk owns, one per session.
+/// The server binding an insertion was made through: an opaque digest of
+/// the profile, its full endpoint and its binding revision. A record is only
+/// ever read or changed through the binding that wrote it.
+final class UnrestrictedBinding {
+  UnrestrictedBinding(this.digest) {
+    if (!RegExp(r'^[0-9a-f]{64}$').hasMatch(digest)) {
+      throw ArgumentError.value(digest, 'digest');
+    }
+  }
+  final String digest;
+
+  @override
+  bool operator ==(Object other) =>
+      other is UnrestrictedBinding && other.digest == digest;
+
+  @override
+  int get hashCode => digest.hashCode;
+}
+
+/// Durable record of the insertions CodeWalk owns, one per session and
+/// binding.
 abstract interface class UnrestrictedOwnershipLedger {
   bool get loaded;
 
-  /// Stored records could not be read; every write is refused so they are
-  /// never overwritten.
+  /// Stored records could not be read, or a write's outcome could not be
+  /// established; every write is refused so they are never overwritten.
   bool get unreadable;
-  UnrestrictedOwnership? recordFor(SessionRef session);
+  UnrestrictedOwnership? recordFor(
+    UnrestrictedBinding binding,
+    SessionRef session,
+  );
 
-  /// Persists before applying; false means nothing changed.
-  Future<bool> put(SessionRef session, UnrestrictedOwnership record);
-  Future<bool> remove(SessionRef session);
+  /// Persists before applying; false means the record was not stored. [when]
+  /// is checked again right before persisting, after earlier writes ran.
+  Future<bool> put(
+    UnrestrictedBinding binding,
+    SessionRef session,
+    UnrestrictedOwnership record, {
+    bool Function()? when,
+  });
+  Future<bool> remove(
+    UnrestrictedBinding binding,
+    SessionRef session, {
+    bool Function()? when,
+  });
 }

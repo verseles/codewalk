@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/hosts/hosts_filter_target.dart';
 import '../features/hosts/hosts_page.dart';
 import '../features/pairing/pairing_page.dart';
 import '../features/sessions/session_route_page.dart';
@@ -41,7 +42,9 @@ GoRouter createAppRouter({
           GoRoute(path: '/sessions', builder: _sessions),
           GoRoute(
             path: '/hosts',
-            builder: (context, state) => const HostsPage(),
+            builder: (context, state) => HostsPage(
+              revealFilter: state.extra == hostsSelectionFilterTarget,
+            ),
           ),
           GoRoute(
             path: '/settings',

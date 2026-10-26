@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "放弃本次尝试并保留输入",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "更多操作",
+  "chatAppBarPinAction": "固定到应用栏",
+  "chatAppBarUnpinAction": "从应用栏取消固定",
+  "chatBadgeConversationError": "“{title}”出现错误。",
+  "chatBadgeConversationNeedsInput": "“{title}”需要您的输入。",
+  "chatBadgeConversationNewReply": "“{title}”有新回复。",
+  "chatBadgeServerNeedsAttention": "服务器连接需要注意。",
+  "chatBadgeSyncing": "正在同步会话...",
+  "serversSearchActiveHint": "搜索活动服务器",
+  "serversSetActive": "设为活动",
+  "statusDelayed": "延迟",
+  "statusOffline": "离线",
+  "statusOnline": "在线",
+  "healthCredentialMissing": "此服务器没有已保存的凭据。请重新配对或输入密码。",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "无法读取已保存的凭据。请打开服务器设置以恢复访问。",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "配对凭据已过期。请在服务器设置中重新配对或续期。",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "活动",
+  "serversClearDefault": "清除默认值",
+  "serversDefault": "默认",
+  "serversEdit": "编辑",
+  "serversSetDefault": "设为默认",
+  "composerSourceChanged": "此消息属于之前的服务器连接。你可以查看或丢弃本地副本。",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "无法确认原始服务器连接。你可以查看或丢弃此本地消息。",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "请输入有效的服务器名称（1–160 个字符）。",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "配置已更改或无法确认保存结果。请重新加载并比较已保存的配置，然后再保存。",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "已保存的配置",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "服务器连接已更改。请重新打开此对话以使用当前服务器设置。",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
@@ -12,6 +13,7 @@ import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../hosts/server_switcher.dart';
 import 'session_actions_menu.dart';
 import 'session_grouping.dart';
 import 'session_history_controller.dart';
@@ -116,6 +118,7 @@ class _SessionsPageState extends State<SessionsPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const WorkspaceDrawerNotice(),
                   Text(
                     l10n.chatConversations,
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -125,41 +128,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     LinearProgressIndicator(
                       semanticsLabel: l10n.sessionsLoading,
                     ),
-                  DropdownButton<String>(
-                    key: const ValueKey('sessions-profile'),
-                    isExpanded: true,
-                    value:
-                        hosts.profiles.any(
-                          (p) => p.id == controller.selectedProfile?.id,
-                        )
-                        ? controller.selectedProfile?.id
-                        : null,
-                    hint: Text(
-                      l10n.sessionsSelectProfile,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    itemHeight: null,
-                    items: [
-                      for (final profile in hosts.profiles)
-                        DropdownMenuItem(
-                          value: profile.id,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              profile.label,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                    ],
-                    onChanged: available
-                        ? (id) {
-                            if (id != null) controller.selectProfile(id);
-                          }
-                        : null,
-                  ),
+                  const ServerSwitcher(),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,

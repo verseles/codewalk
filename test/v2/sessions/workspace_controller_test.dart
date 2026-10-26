@@ -12,12 +12,16 @@ import 'fakes.dart';
 
 final class _MemoryBackend implements MetadataBackend {
   final values = <String, Object>{};
+  Completer<void>? writeGate;
 
   @override
   Future<Object?> read(String key) async => values[key];
 
   @override
-  Future<void> write(String key, Object value) async => values[key] = value;
+  Future<void> write(String key, Object value) async {
+    await writeGate?.future;
+    values[key] = value;
+  }
 
   @override
   Future<void> remove(String key) async => values.remove(key);
@@ -44,6 +48,89 @@ Map<String, Object?> _saved(_MemoryBackend backend) =>
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  for (final (active, defaultProfile, expected) in [
+    ('profile_b', 'profile_c', 'profile_b'),
+    ('profile_gone', 'profile_c', 'profile_c'),
+    (null, 'profile_gone', 'profile_a'),
+  ]) {
+    test(
+      'restore active=$active default=$defaultProfile selects $expected',
+      () async {
+        final rig = CatalogRig();
+        addTearDown(rig.dispose);
+        for (final id in ['a', 'b', 'c']) {
+          await rig.save(id);
+        }
+        final backend = _MemoryBackend()
+          ..values[WorkspaceStore.key] = jsonEncode({
+            'v': 1,
+            'active': active,
+            'default': defaultProfile,
+          });
+        final workspace = _workspace(rig, backend);
+        await workspace.initialize();
+        workspace.restoreServer();
+        await pumpEventQueue();
+        expect(rig.sessions.selectedProfile?.id, expected);
+        expect(rig.sources, hasLength(1));
+      },
+    );
+  }
+
+  test(
+    'default set and clear are single-flight and never select another server',
+    () async {
+      final rig = CatalogRig();
+      addTearDown(rig.dispose);
+      for (final id in ['a', 'b', 'c']) {
+        await rig.save(id);
+      }
+      final backend = _MemoryBackend();
+      final workspace = _workspace(rig, backend);
+      await workspace.initialize();
+      workspace.restoreServer();
+      await pumpEventQueue();
+      final gate = backend.writeGate = Completer<void>();
+      final choosing = workspace.setDefaultProfile('profile_b');
+      await pumpEventQueue();
+      expect(workspace.savingDefault, isTrue);
+      expect(await workspace.setDefaultProfile('profile_c'), isFalse);
+      backend.writeGate = null;
+      gate.complete();
+      expect(await choosing, isTrue);
+      expect(workspace.defaultProfile, 'profile_b');
+      expect(rig.sessions.selectedProfile?.id, 'profile_a');
+      expect(rig.sources, hasLength(1));
+      expect(await workspace.setDefaultProfile(null), isTrue);
+      expect(workspace.defaultProfile, isNull);
+      expect(rig.sessions.selectedProfile?.id, 'profile_a');
+    },
+  );
+
+  test(
+    'removing the default clears it while keeping the active server',
+    () async {
+      final rig = CatalogRig();
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.save('b');
+      final backend = _MemoryBackend();
+      final workspace = _workspace(rig, backend);
+      await workspace.initialize();
+      workspace.restoreServer();
+      await pumpEventQueue();
+      expect(await workspace.setDefaultProfile('profile_b'), isTrue);
+      await rig.hosts.remove(
+        rig.hosts.profiles.firstWhere((profile) => profile.id == 'profile_b'),
+      );
+      await pumpEventQueue();
+      expect(workspace.defaultProfile, isNull);
+      expect(rig.sessions.selectedProfile?.id, 'profile_a');
+      expect(_saved(backend)['active'], 'profile_a');
+      expect(_saved(backend)['default'], isNull);
+    },
+  );
 
   test('a single saved server opens without being chosen', () async {
     final rig = CatalogRig();
@@ -135,6 +222,7 @@ void main() {
       ..values[WorkspaceStore.key] = jsonEncode({
         'v': 1,
         'active': 'profile_a',
+        'default': 'profile_a',
       });
     final workspace = _workspace(rig, backend, tabs: tabs);
     await workspace.initialize();

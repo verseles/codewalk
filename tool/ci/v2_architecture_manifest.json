@@ -37,7 +37,7 @@
     {"path": "lib/shared/l10n/generated/v2_localizations_pt.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_ru.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_ur.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
-    {"path": "lib/shared/l10n/generated/v2_localizations_zh.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."}
+    {"path": "lib/shared/l10n/generated/v2_localizations_zh.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by tool/l10n/generate_v2_localizations.py. Has an exact generated-size exception below; import boundaries remain governed."}
   ],
   "sizeExceptions": [
     {"path":"lib/shared/theme/opencode_web_theme_registry.dart","category":"generated","reason":"The consolidated 37-preset data snapshot exceeds 1500 lines; no import-boundary exemption."},
@@ -54,7 +54,8 @@
     {"path":"lib/shared/l10n/generated/v2_localizations_ko.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale reaches 1510 lines after the Seq 5.4a S2 workspace draft keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."},
     {"path":"lib/shared/l10n/generated/v2_localizations_pt.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale exceeds 1500 lines after the V2-055A error card keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."},
     {"path":"lib/shared/l10n/generated/v2_localizations_ru.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale exceeds 1500 lines after the V2-055A error card keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."},
-    {"path":"lib/shared/l10n/generated/v2_localizations_ur.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale exceeds 1500 lines after the V2-055A error card keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."}
+    {"path":"lib/shared/l10n/generated/v2_localizations_ur.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale exceeds 1500 lines after the V2-055A error card keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."},
+    {"path":"lib/shared/l10n/generated/v2_localizations_zh.dart","category":"generated","reason":"Flutter gen-l10n emits one class per locale with every scoped catalog string; this locale reaches 1568 lines after the Seq 5.4a S3 health, workspace chrome and local server parity keys. Reproduced by tool/l10n/generate_v2_localizations.py; no authored-file or import-boundary exemption."}
   ],
   "compositionRoots": ["lib/app/composition_root.dart"],
   "packageDependencies": {

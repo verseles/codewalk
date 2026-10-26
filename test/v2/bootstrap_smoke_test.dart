@@ -1,3 +1,4 @@
+import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/main_v2.dart' as entry_point;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,13 +21,26 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await entry_point.main();
-      await tester.pumpAndSettle();
+      try {
+        // main calls runApp directly. Establish this test's frame clock before
+        // its warm-up frame starts any progress animation.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await entry_point.main();
+        await tester.pumpAndSettle();
 
-      expect(find.byType(MaterialApp), findsOneWidget);
-      expect(find.byType(Scaffold), findsOneWidget);
-      expect(find.text('CodeWalk'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+        expect(find.byType(MaterialApp), findsOneWidget);
+        expect(find.byType(Scaffold), findsOneWidget);
+        expect(find.text('CodeWalk'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        final graph = tester
+            .widget<CodeWalkV2Bootstrap>(find.byType(CodeWalkV2Bootstrap))
+            .dependencies;
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(graph.isDisposed, isTrue);
+      } finally {
+        // Finish this graph before the next test receives a fresh fake clock.
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
     });
   }
 }

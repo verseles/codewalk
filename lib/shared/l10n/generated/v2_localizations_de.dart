@@ -1619,4 +1619,100 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'Versuch verwerfen und Text behalten';
+
+  @override
+  String get chatAppBarMoreActions => 'Weitere Aktionen';
+
+  @override
+  String get chatAppBarPinAction => 'An App-Leiste anheften';
+
+  @override
+  String get chatAppBarUnpinAction => 'Von App-Leiste lösen';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" hat einen Fehler.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" benötigt Ihre Eingabe.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" hat eine neue Antwort.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'Serververbindung benötigt Aufmerksamkeit.';
+
+  @override
+  String get chatBadgeSyncing => 'Konversationen werden synchronisiert...';
+
+  @override
+  String get serversSearchActiveHint => 'Aktiven Server durchsuchen';
+
+  @override
+  String get serversSetActive => 'Als aktiv festlegen';
+
+  @override
+  String get statusDelayed => 'Verzögert';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get statusOnline => 'Online';
+
+  @override
+  String get healthCredentialMissing =>
+      'Für diesen Server sind keine Zugangsdaten gespeichert. Erneut koppeln oder das Passwort eingeben.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'Die gespeicherten Zugangsdaten konnten nicht gelesen werden. Öffne Server, um den Zugriff wiederherzustellen.';
+
+  @override
+  String get healthCredentialExpired =>
+      'Die Kopplungsdaten sind abgelaufen. Erneut koppeln oder unter Server erneuern.';
+
+  @override
+  String get serversActive => 'Aktiv';
+
+  @override
+  String get serversClearDefault => 'Standard löschen';
+
+  @override
+  String get serversDefault => 'Standard';
+
+  @override
+  String get serversEdit => 'Bearbeiten';
+
+  @override
+  String get serversSetDefault => 'Als Standard festlegen';
+
+  @override
+  String get composerSourceChanged =>
+      'Diese Nachricht gehört zu einer früheren Serververbindung. Du kannst die lokale Kopie ansehen oder verwerfen.';
+
+  @override
+  String get composerSourceUnknown =>
+      'Die ursprüngliche Serververbindung konnte nicht bestätigt werden. Du kannst diese lokale Nachricht ansehen oder verwerfen.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'Gib einen gültigen Servernamen ein (1–160 Zeichen).';
+
+  @override
+  String get hostsEditChanged =>
+      'Das Profil wurde geändert oder das Speichern konnte nicht bestätigt werden. Lade es neu, um das gespeicherte Profil vor dem erneuten Speichern zu vergleichen.';
+
+  @override
+  String get hostsEditSavedProfile => 'Gespeichertes Profil';
+
+  @override
+  String get liveSourceChanged =>
+      'Die Serververbindung hat sich geändert. Öffne diese Unterhaltung erneut, um die aktuellen Servereinstellungen zu verwenden.';
 }

@@ -6,33 +6,208 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../shared/l10n/generated/v2_localizations.dart';
+import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../pairing/pairing_controller.dart';
+import '../sessions/sessions_controller.dart';
+import 'endpoint_health_controller.dart';
+import 'endpoint_health_view.dart';
 import 'hosts_controller.dart';
+import 'profile_edit_dialog.dart';
+import 'server_switcher.dart';
 
 const legacyDownloadUrl =
     'https://github.com/verseles/codewalk/releases/tag/v1.265.1';
 
+enum _ServerAction {
+  check,
+  remove,
+  pair,
+  renew,
+  password,
+  edit,
+  setDefault,
+  clearDefault,
+}
+
 class HostsPage extends StatefulWidget {
-  const HostsPage({super.key});
+  const HostsPage({this.revealFilter = false, super.key});
+  final bool revealFilter;
   @override
   State<HostsPage> createState() => _HostsPageState();
 }
 
-class _HostsPageState extends State<HostsPage> {
+class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+  final _searchAnchor = GlobalKey();
+  Timer? _highlightTimer;
+  bool _highlight = false;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _highlightTimer?.cancel();
+    _searchFocus.dispose();
+    _search.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<HostsController>().load();
     });
+    if (widget.revealFilter) _revealFilter();
+  }
+
+  @override
+  void didUpdateWidget(HostsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.revealFilter && !oldWidget.revealFilter) _revealFilter();
+  }
+
+  void _revealFilter() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _highlight = true);
+      _searchFocus.requestFocus();
+      _revealSearch();
+      _highlightTimer?.cancel();
+      _highlightTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _highlight = false);
+      });
+    });
+  }
+
+  void _revealSearch() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _searchAnchor.currentContext;
+      if (mounted && _highlight && _searchFocus.hasFocus && target != null) {
+        Scrollable.ensureVisible(target, alignment: 0.4);
+      }
+    });
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (_highlight && _searchFocus.hasFocus) _revealSearch();
+  }
+
+  Widget _actions(HostsController hosts, EndpointProfile profile) {
+    final l = context.v2L10n;
+    final catalog = context.read<SessionsController?>();
+    final workspace = context.read<WorkspaceController?>();
+    final canEdit =
+        !hosts.savingProfile && !hosts.loading && !hosts.storageError;
+    return PopupMenuButton<_ServerAction>(
+      key: ValueKey('endpoint-actions-${profile.id}'),
+      tooltip: l.chatAppBarMoreActions,
+      onSelected: (action) async {
+        switch (action) {
+          case _ServerAction.check:
+            unawaited(hosts.check(profile));
+          case _ServerAction.remove:
+            unawaited(hosts.remove(profile));
+          case _ServerAction.pair:
+            context.read<PairingController>().empty(profile: profile);
+            unawaited(context.push('/pair'));
+          case _ServerAction.renew:
+            final pairing = context.read<PairingController>();
+            unawaited(context.push('/pair'));
+            unawaited(pairing.renew(profile));
+          case _ServerAction.password:
+            unawaited(
+              showDialog<void>(
+                context: context,
+                builder: (_) => _ProfileDialog(hosts: hosts, repair: profile),
+              ),
+            );
+          case _ServerAction.edit:
+            final saved = await showDialog<bool>(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => ProfileEditDialog(hosts: hosts, profile: profile),
+            );
+            if (!mounted || saved != true) return;
+            final current = hosts.profiles
+                .where((saved) => saved.id == profile.id)
+                .firstOrNull;
+            if (catalog?.selectedProfile?.id == profile.id &&
+                current != null &&
+                !current.sameBinding(profile)) {
+              unawaited(catalog!.refresh());
+            }
+          case _ServerAction.setDefault || _ServerAction.clearDefault:
+            final saved = await workspace?.setDefaultProfile(
+              action == _ServerAction.clearDefault ? null : profile.id,
+            );
+            if (!mounted) return;
+            if (saved != true) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l.hostsProfileStorageError)),
+              );
+            }
+        }
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _ServerAction.edit,
+          enabled: canEdit,
+          child: Text(l.serversEdit),
+        ),
+        if (workspace != null)
+          PopupMenuItem(
+            value: workspace.defaultProfile == profile.id
+                ? _ServerAction.clearDefault
+                : _ServerAction.setDefault,
+            enabled: canEdit && !workspace.savingDefault,
+            child: Text(
+              workspace.defaultProfile == profile.id
+                  ? l.serversClearDefault
+                  : l.serversSetDefault,
+            ),
+          ),
+        PopupMenuItem(
+          value: _ServerAction.check,
+          enabled: hosts.canCheck(profile),
+          child: Text(l.hostsCheckConnection),
+        ),
+        PopupMenuItem(
+          value: _ServerAction.password,
+          enabled: canEdit,
+          child: Text(l.onboardingPassword),
+        ),
+        PopupMenuItem(
+          value: _ServerAction.pair,
+          enabled: canEdit,
+          child: Text(l.pairingAgain),
+        ),
+        if (hosts.credentialFor(profile)?.kind == EndpointAuthKind.paired &&
+            hosts.assessments[profile.id]?.version == '2.0.22')
+          PopupMenuItem(
+            value: _ServerAction.renew,
+            enabled: canEdit,
+            child: Text(l.pairingRenew),
+          ),
+        PopupMenuItem(
+          value: _ServerAction.remove,
+          enabled: canEdit,
+          child: Text(l.commonDelete),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.v2L10n;
     final hosts = context.watch<HostsController>();
+    final health = context.watch<EndpointHealthController?>();
+    final catalog = context.watch<SessionsController?>();
+    final workspace = context.watch<WorkspaceController?>();
+    final profiles = filterSavedServers(hosts.profiles, _search.text);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 960),
@@ -69,6 +244,46 @@ class _HostsPageState extends State<HostsPage> {
               ],
             ),
             if (hosts.loading) const LinearProgressIndicator(),
+            Padding(
+              key: _searchAnchor,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Stack(
+                children: [
+                  TextField(
+                    key: const ValueKey('hosts-search'),
+                    controller: _search,
+                    focusNode: _searchFocus,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: l.serversSearchActiveHint,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _search.text.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: l.commonCancel,
+                              icon: const Icon(Icons.clear),
+                              onPressed: () => setState(_search.clear),
+                            ),
+                    ),
+                  ),
+                  if (_highlight)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          key: const ValueKey('hosts-search-highlight'),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             if (hosts.storageError)
               Card(
                 child: Padding(
@@ -85,92 +300,123 @@ class _HostsPageState extends State<HostsPage> {
                   ),
                 ),
               ),
-            if (!hosts.loading && !hosts.storageError && hosts.profiles.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(l.serversNoServersFound),
-              ),
-            for (final profile in hosts.profiles)
+            if (workspace?.hasPersistenceError == true)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        profile.label,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SelectableText(profile.endpoint.toString()),
-                      if (hosts.credentialUnreadable(profile))
-                        Text(l.hostsProfileStorageError),
-                      if (hosts.credentialFor(profile)?.kind ==
-                          EndpointAuthKind.paired) ...[
-                        Text(l.pairingPaired),
-                        if (hosts.credentialFor(profile)?.expiresAt
-                            case final expiry?)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${l.pairingExpires}: ${expiry.toLocal()}'),
-                              if (!expiry.isAfter(DateTime.now().toUtc()))
-                                Text(l.hostsAuthRequired),
-                            ],
-                          ),
-                      ],
-                      if (hosts.assessments[profile.id] case final assessment?)
-                        EndpointStatusView(assessment: assessment),
-                      if (hosts.isChecking(profile))
-                        LinearProgressIndicator(
-                          key: ValueKey('endpoint-check-${profile.id}'),
-                          semanticsLabel: l.hostsCheckConnection,
-                        ),
-                      Wrap(
-                        spacing: 12,
-                        children: [
-                          TextButton(
-                            onPressed: hosts.canCheck(profile)
-                                ? () => hosts.check(profile)
-                                : null,
-                            child: Text(l.hostsCheckConnection),
-                          ),
-                          TextButton(
-                            onPressed: () => hosts.remove(profile),
-                            child: Text(l.commonDelete),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              context.read<PairingController>().empty(
-                                profile: profile,
-                              );
-                              context.push('/pair');
-                            },
-                            child: Text(l.pairingAgain),
-                          ),
-                          if (hosts.credentialFor(profile)?.kind ==
-                                  EndpointAuthKind.paired &&
-                              hosts.assessments[profile.id]?.version ==
-                                  '2.0.22')
-                            TextButton(
-                              onPressed: () {
-                                final pairing = context
-                                    .read<PairingController>();
-                                context.push('/pair');
-                                pairing.renew(profile);
-                              },
-                              child: Text(l.pairingRenew),
-                            ),
-                          TextButton(
-                            onPressed: () => showDialog<void>(
-                              context: context,
-                              builder: (_) =>
-                                  _ProfileDialog(hosts: hosts, repair: profile),
-                            ),
-                            child: Text(l.onboardingPassword),
-                          ),
-                        ],
+                      Text(l.hostsProfileStorageError),
+                      TextButton(
+                        key: const ValueKey('workspace-preferences-retry'),
+                        onPressed: workspace!.retryPreferences,
+                        child: Text(l.chatRetry),
                       ),
                     ],
+                  ),
+                ),
+              ),
+            if (!hosts.loading && !hosts.storageError && hosts.profiles.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(l.serversNoServersFound),
+              ),
+            if (profiles.isEmpty && hosts.profiles.isNotEmpty)
+              Text(l.settingsNavigationNoResults),
+            for (final profile in profiles)
+              Card(
+                key: ValueKey('saved-server-${profile.id}'),
+                child: InkWell(
+                  onTap: catalog == null || workspace?.switchingServer == true
+                      ? null
+                      : () => selectWorkspaceServer(context, profile),
+                  child: Semantics(
+                    selected: catalog?.selectedProfile?.id == profile.id,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  profile.label,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ),
+                              _actions(hosts, profile),
+                            ],
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              if (catalog?.selectedProfile?.id == profile.id)
+                                Chip(
+                                  key: ValueKey('server-active-${profile.id}'),
+                                  label: Text(l.serversActive),
+                                ),
+                              if (workspace?.defaultProfile == profile.id)
+                                Chip(
+                                  key: ValueKey('server-default-${profile.id}'),
+                                  label: Text(l.serversDefault),
+                                ),
+                              if (!hosts.loading)
+                                Chip(
+                                  label: Text(
+                                    hosts.credentialUnreadable(profile)
+                                        ? l.healthCredentialUnreadable
+                                        : switch (hosts
+                                              .credentialFor(profile)
+                                              ?.kind) {
+                                            EndpointAuthKind.password =>
+                                              l.onboardingPassword,
+                                            EndpointAuthKind.paired =>
+                                              l.pairingPaired,
+                                            null => l.healthCredentialMissing,
+                                          },
+                                  ),
+                                ),
+                            ],
+                          ),
+                          EndpointHealthIndicator(
+                            view:
+                                health?.view(profile) ??
+                                const EndpointHealthView(),
+                          ),
+                          SelectableText(profile.endpoint.toString()),
+                          if (hosts.credentialUnreadable(profile))
+                            Text(l.hostsProfileStorageError),
+                          if (hosts.credentialFor(profile)?.kind ==
+                              EndpointAuthKind.paired) ...[
+                            if (hosts.credentialFor(profile)?.expiresAt
+                                case final expiry?)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${l.pairingExpires}: ${expiry.toLocal()}',
+                                  ),
+                                  if (!expiry.isAfter(DateTime.now().toUtc()))
+                                    Text(l.hostsAuthRequired),
+                                ],
+                              ),
+                          ],
+                          if (hosts.assessments[profile.id]
+                              case final assessment?)
+                            EndpointStatusView(assessment: assessment),
+                          if (hosts.isChecking(profile))
+                            LinearProgressIndicator(
+                              key: ValueKey('endpoint-check-${profile.id}'),
+                              semanticsLabel: l.hostsCheckConnection,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -415,7 +661,7 @@ class EndpointStatusView extends StatelessWidget {
         children: [
           Chip(
             label: Text(
-              '${_status(l, assessment.status)}${assessment.version == null ? '' : ' · ${assessment.version}'}',
+              '${endpointStatusText(l, assessment.status)}${assessment.version == null ? '' : ' · ${assessment.version}'}',
             ),
           ),
           if (assessment.status == EndpointStatus.belowMinimum)
@@ -430,22 +676,6 @@ class EndpointStatusView extends StatelessWidget {
     );
   }
 }
-
-String _status(V2Localizations l, EndpointStatus status) => switch (status) {
-  EndpointStatus.compatible => l.onboardingReady,
-  EndpointStatus.untested => l.hostsUntested,
-  EndpointStatus.belowMinimum => l.hostsUpgradeRequired,
-  EndpointStatus.legacyServer => l.hostsLegacyExplanation,
-  EndpointStatus.authenticationRequired => l.hostsAuthRequired,
-  EndpointStatus.serviceStarting => l.onboardingStarting,
-  EndpointStatus.serviceStopping => l.onboardingStopping,
-  EndpointStatus.serviceFailed => l.onboardingFailed,
-  EndpointStatus.serviceUnavailable => l.onboardingNotAvailable,
-  EndpointStatus.unrecognized => l.onboardingCouldNotVerify,
-  EndpointStatus.unreachable => l.hostsTransportHelp,
-  EndpointStatus.cancelled => l.commonCancel,
-  EndpointStatus.unsupportedPlatform => l.hostsNativeOnly,
-};
 
 class LegacyEndpointPage extends StatefulWidget {
   const LegacyEndpointPage({super.key});

@@ -65,6 +65,47 @@ Future<void> _settle(WidgetTester tester) async {
 Finder get _notice => find.byKey(const ValueKey('session-notice'));
 
 void main() {
+  testWidgets('compact live toolbar survives retained-view rebuilds', (
+    tester,
+  ) async {
+    final platform = SharedPreferencesAsyncPlatform.instance;
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    addTearDown(() => SharedPreferencesAsyncPlatform.instance = platform);
+    final app = await _open(
+      tester,
+      '/s/profile_a/ses_one',
+      size: const Size(390, 844),
+    );
+    try {
+      final source = app.rig.sources.single;
+      source.respond([source.row('one', title: 'One')]);
+      await _settle(tester);
+      app.directory.grant(source.row('one').info.ref);
+      await tester.pump();
+      final state = tester.state(find.byType(SessionLivePage));
+      for (var round = 0; round < 2; round++) {
+        expect(find.byKey(const ValueKey('live-server')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('workspace-pinned-newChat')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const ValueKey('workspace-actions')), findsOneWidget);
+        if (round == 0) {
+          app.dependencies.sessions!.refresh().ignore();
+          await tester.pump();
+          source.respond([source.row('one', title: 'Renamed')]);
+          await _settle(tester);
+          expect(tester.state(find.byType(SessionLivePage)), same(state));
+        }
+      }
+      expect(app.directory.opens, hasLength(1));
+      expect(tester.takeException(), isNull);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
+
   testWidgets('a link to a loaded session opens it beside the list', (
     tester,
   ) async {
@@ -113,7 +154,51 @@ void main() {
     task.completion.complete(source.row('far', title: 'Far'));
     await _settle(tester);
     expect(find.byType(SessionLivePage), findsOneWidget);
-    expect(find.text('Far'), findsWidgets);
+    final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
+    expect(page.controller.summary.info.title, 'Far');
+    expect(find.byKey(const ValueKey('live-server')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a late direct read cannot open the previous endpoint binding', (
+    tester,
+  ) async {
+    final app = await _open(tester, '/s/profile_a/ses_far');
+    final oldSource = app.rig.sources.single;
+    oldSource.respond(const []);
+    await _settle(tester);
+    final oldRead = oldSource.reads.single.$2;
+    final hosts = app.dependencies.hosts;
+    final original = hosts.profiles.single;
+    expect(
+      await hosts.updateProfile(
+        original,
+        label: original.label,
+        endpoint: original.endpoint.resolve('/other/'),
+        expectedRevision: hosts.catalogRevision,
+      ),
+      isTrue,
+    );
+    await _settle(tester);
+    oldRead.completion.complete(
+      oldSource.row('far', title: 'Old endpoint title'),
+    );
+    await _settle(tester);
+    expect(find.byType(SessionLivePage), findsNothing);
+    final refreshing = app.dependencies.sessions!.refresh();
+    await _settle(tester);
+    final currentSource = app.rig.sources.last;
+    expect(currentSource, isNot(same(oldSource)));
+    currentSource.respond(const []);
+    await refreshing;
+    await _settle(tester);
+    currentSource.reads.single.$2.completion.complete(
+      currentSource.row('far', title: 'Current endpoint title'),
+    );
+    await _settle(tester);
+    final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
+    expect(page.controller.profile.bindingRevision, 1);
+    expect(page.controller.summary.info.title, 'Current endpoint title');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

@@ -8,6 +8,7 @@ import '../../app/app_preferences_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import '../hosts/hosts_filter_target.dart';
 import 'appearance_settings_page.dart';
 import 'diagnostics_settings_page.dart';
 import 'release_history_settings_page.dart';
@@ -172,7 +173,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         '${l.settingsAppearanceThemeDescription} ${l.settingsAppearanceDensityDescription}';
     final servers = matches(
       l.settingsServersTitle,
-      l.chatAddServerToStart,
+      '${l.chatAddServerToStart} ${l.serversSearchActiveHint}',
       l.settingsNavigationGroupSetup,
     );
     final appearance = matches(
@@ -242,7 +243,10 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             leading: const Icon(Icons.dns_outlined),
             title: Text(l.settingsServersTitle),
             subtitle: Text(l.chatAddServerToStart),
-            onTap: () => context.push('/hosts'),
+            onTap: () => context.push(
+              '/hosts',
+              extra: query.isEmpty ? null : hostsSelectionFilterTarget,
+            ),
           ),
         ],
         if (appearance) ...[

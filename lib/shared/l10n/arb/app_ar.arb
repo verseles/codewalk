@@ -1373,5 +1373,59 @@
   "workspaceDraftReset": "تجاهل المحاولة والاحتفاظ بالنص",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "مزيد من الإجراءات",
+  "chatAppBarPinAction": "تثبيت في شريط التطبيق",
+  "chatAppBarUnpinAction": "إلغاء التثبيت من شريط التطبيق",
+  "chatBadgeConversationError": "\"{title}\" به خطأ.",
+  "chatBadgeConversationNeedsInput": "\"{title}\" يحتاج إلى مدخلاتك.",
+  "chatBadgeConversationNewReply": "\"{title}\" به رد جديد.",
+  "chatBadgeServerNeedsAttention": "اتصال الخادم يحتاج إلى انتباه.",
+  "chatBadgeSyncing": "جاري مزامنة المحادثات...",
+  "serversSearchActiveHint": "ابحث في الخادم النشط",
+  "serversSetActive": "تعيين كنشط",
+  "statusDelayed": "متأخر",
+  "statusOffline": "غير متصل",
+  "statusOnline": "متصل",
+  "healthCredentialMissing": "لا توجد بيانات اعتماد محفوظة لهذا الخادم. أعد الإقران أو أدخل كلمة مروره.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "تعذرت قراءة بيانات الاعتماد المحفوظة. افتح الخوادم لاستعادة الوصول.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "انتهت صلاحية بيانات الإقران. أعد الإقران أو جددها في الخوادم.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "نشط",
+  "serversClearDefault": "مسح الافتراضي",
+  "serversDefault": "افتراضي",
+  "serversEdit": "تعديل",
+  "serversSetDefault": "تعيين كافتراضي",
+  "composerSourceChanged": "تنتمي هذه الرسالة إلى اتصال سابق بالخادم. يمكنك عرض النسخة المحلية أو حذفها.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "تعذر التحقق من اتصال الخادم الأصلي. يمكنك عرض هذه الرسالة المحلية أو حذفها.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "أدخل اسم خادم صالحًا (من 1 إلى 160 حرفًا).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "تغير الملف الشخصي أو تعذر تأكيد الحفظ. أعد التحميل لمقارنة الملف المحفوظ قبل الحفظ مجددًا.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "الملف المحفوظ",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "تغيّر اتصال الخادم. أعد فتح هذه المحادثة لاستخدام إعدادات الخادم الحالية.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

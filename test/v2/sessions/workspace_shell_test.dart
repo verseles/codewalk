@@ -297,6 +297,18 @@ void main() {
       unread: true,
     );
     expect(find.byKey(const ValueKey('workspace-sidebar')), findsOneWidget);
+    // The attention notice now precedes Conversations; bring the row into
+    // view before checking its badge at the enlarged text scale.
+    await tester.scrollUntilVisible(
+      find.text('One'),
+      120,
+      scrollable: find
+          .ancestor(
+            of: find.byKey(const ValueKey('sessions-profile')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(
       find.textContaining('прочитано', skipOffstage: false),
       findsOneWidget,
@@ -521,7 +533,13 @@ void main() {
     final source = rig.sources.single;
     source.fail(SessionCatalogFailure.connection);
     await tester.pumpAndSettle();
-    expect(find.text('Server a'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('workspace-empty')),
+        matching: find.text('Server a'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text(l10n.sessionsReadFailed), findsOneWidget);
     // Retry reads the list again from the same source.
     await tester.tap(find.byKey(const ValueKey('workspace-retry')));

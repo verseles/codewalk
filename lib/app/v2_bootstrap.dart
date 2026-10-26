@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/hosts/endpoint_health_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
@@ -21,6 +22,7 @@ import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
+import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
 
 /// Owns a composed v2 graph; widgets receive typed dependencies, not a locator.
@@ -44,11 +46,23 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    unawaited(widget.dependencies.preferences.initialize());
+    _startHealth();
   }
+
+  bool _visible(AppLifecycleState? state) =>
+      state == null ||
+      state == AppLifecycleState.resumed ||
+      state == AppLifecycleState.inactive;
+
+  void _startHealth() => widget.dependencies.endpointHealth?.start(
+    foreground: _visible(WidgetsBinding.instance.lifecycleState),
+  );
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     widget.dependencies.liveWake?.lifecycle(state);
+    widget.dependencies.endpointHealth?.setForeground(_visible(state));
     // The app may be killed once it leaves the foreground: what was typed
     // and not yet written is written now.
     if (state != AppLifecycleState.resumed) {
@@ -62,6 +76,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.dependencies, widget.dependencies)) {
       oldWidget.dependencies.dispose();
+      _startHealth();
     }
   }
 
@@ -80,6 +95,12 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         ChangeNotifierProvider.value(value: dependencies.preferences),
         ChangeNotifierProvider.value(value: dependencies.navigation),
         ChangeNotifierProvider.value(value: dependencies.hosts),
+        ListenableProvider<EndpointHealthController?>.value(
+          value: dependencies.endpointHealth,
+        ),
+        ListenableProvider<WorkspaceChromeController?>.value(
+          value: dependencies.workspaceChrome,
+        ),
         Provider<SessionHistoryFactory?>.value(
           value: dependencies.historyFactory,
         ),

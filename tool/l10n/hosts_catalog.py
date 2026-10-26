@@ -1,6 +1,7 @@
 """Bounded v2 endpoint copy; no legacy catalog mutation."""
 
 PORT_KEYS = {
+    "serversActive", "serversDefault", "serversSetDefault", "serversClearDefault", "serversEdit",
     "serversAddServer", "serversNoServersFound", "commonDelete", "commonSave",
     "onboardingServerUrl", "onboardingLabel", "onboardingPassword",
     "onboardingPasswordRequired", "onboardingInvalidUrl", "onboardingReady",
@@ -12,6 +13,9 @@ NEW_KEYS = (
     "hostsUpgradeRequired", "hostsUntested", "hostsTransportHelp",
     "hostsNativeOnly", "hostsAuthRequired", "hostsProfileStorageError",
     "hostsRetryLater", "hostsCheckConnection",
+    "hostsEditInvalidLabel",
+    "hostsEditChanged",
+    "hostsEditSavedProfile",
 )
 COPY = {
     "en": (
@@ -24,6 +28,9 @@ COPY = {
         "Could not load or save profiles. Retry to reconcile the saved state.",
         "The server requested a delay. Retry after the indicated time; no automatic retry is running.",
         "Check connection",
+        "Enter a valid server name (1–160 characters).",
+        "The profile changed or the save could not be confirmed. Reload to compare the saved profile before saving again.",
+        "Saved profile",
     ),
     "pt": (
         "Este servidor executa OpenCode 1. O CodeWalk 2 precisa do OpenCode 2.",
@@ -35,6 +42,9 @@ COPY = {
         "Não foi possível carregar ou salvar os perfis. Tente novamente para verificar o que foi salvo.",
         "O servidor pediu uma espera. Tente após o horário indicado; não há nova tentativa automática.",
         "Verificar conexão",
+        "Informe um nome válido para o servidor (1 a 160 caracteres).",
+        "O perfil mudou ou não foi possível confirmar o salvamento. Recarregue para comparar o perfil salvo antes de salvar novamente.",
+        "Perfil salvo",
     ),
     "es": (
         "Este servidor ejecuta OpenCode 1. CodeWalk 2 necesita OpenCode 2.",
@@ -45,6 +55,9 @@ COPY = {
         "Comprueba la contraseña o las credenciales de emparejamiento.",
         "No se pudieron cargar o guardar los perfiles. Reintenta para comprobar el estado guardado.",
         "El servidor solicitó una espera. Reintenta después de la hora indicada; no hay reintento automático.", "Comprobar conexión",
+        "Introduce un nombre válido para el servidor (1–160 caracteres).",
+        "El perfil cambió o no se pudo confirmar el guardado. Recarga para comparar el perfil guardado antes de guardar de nuevo.",
+        "Perfil guardado",
     ),
     "fr": (
         "Ce serveur utilise OpenCode 1. CodeWalk 2 nécessite OpenCode 2.",
@@ -55,6 +68,9 @@ COPY = {
         "Vérifiez le mot de passe ou les identifiants d’appairage.",
         "Impossible de charger ou sauvegarder les profils. Réessayez pour vérifier l’état enregistré.",
         "Le serveur demande un délai. Réessayez après l’heure indiquée ; aucun nouvel essai automatique.", "Vérifier la connexion",
+        "Saisissez un nom de serveur valide (1 à 160 caractères).",
+        "Le profil a changé ou l’enregistrement n’a pas pu être confirmé. Rechargez pour comparer le profil enregistré avant de réessayer.",
+        "Profil enregistré",
     ),
     "de": (
         "Dieser Server verwendet OpenCode 1. CodeWalk 2 benötigt OpenCode 2.",
@@ -65,6 +81,9 @@ COPY = {
         "Prüfen Sie das Serverpasswort oder die Kopplungsdaten.",
         "Profile konnten nicht geladen oder gespeichert werden. Erneut versuchen, um den gespeicherten Zustand zu prüfen.",
         "Der Server fordert eine Wartezeit. Versuchen Sie es nach der angegebenen Zeit; kein automatischer Wiederholungsversuch.", "Verbindung prüfen",
+        "Gib einen gültigen Servernamen ein (1–160 Zeichen).",
+        "Das Profil wurde geändert oder das Speichern konnte nicht bestätigt werden. Lade es neu, um das gespeicherte Profil vor dem erneuten Speichern zu vergleichen.",
+        "Gespeichertes Profil",
     ),
     "it": (
         "Questo server usa OpenCode 1. CodeWalk 2 richiede OpenCode 2.",
@@ -75,6 +94,9 @@ COPY = {
         "Controlla la password o le credenziali di abbinamento.",
         "Impossibile caricare o salvare i profili. Riprova per verificare lo stato salvato.",
         "Il server richiede un’attesa. Riprova dopo l’ora indicata; nessun tentativo automatico.", "Verifica connessione",
+        "Inserisci un nome valido per il server (1–160 caratteri).",
+        "Il profilo è cambiato o il salvataggio non è stato confermato. Ricarica per confrontare il profilo salvato prima di salvare di nuovo.",
+        "Profilo salvato",
     ),
     "ru": (
         "Этот сервер использует OpenCode 1. CodeWalk 2 нужен OpenCode 2.",
@@ -85,6 +107,9 @@ COPY = {
         "Проверьте пароль сервера или данные сопряжения.",
         "Не удалось загрузить или сохранить профили. Повторите попытку, чтобы проверить сохранённое состояние.",
         "Сервер запросил задержку. Повторите после указанного времени; автоматических попыток нет.", "Проверить подключение",
+        "Введите допустимое имя сервера (1–160 символов).",
+        "Профиль изменился или сохранение не подтверждено. Загрузите сохранённый профиль для сравнения перед повторным сохранением.",
+        "Сохранённый профиль",
     ),
     "ar": (
         "يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.",
@@ -95,6 +120,9 @@ COPY = {
         "تحقق من كلمة مرور الخادم أو بيانات الاقتران.",
         "تعذر تحميل الملفات التعريفية أو حفظها. أعد المحاولة للتحقق من الحالة المحفوظة.",
         "طلب الخادم الانتظار. أعد المحاولة بعد الوقت المحدد؛ لا توجد إعادة محاولة تلقائية.", "التحقق من الاتصال",
+        "أدخل اسم خادم صالحًا (من 1 إلى 160 حرفًا).",
+        "تغير الملف الشخصي أو تعذر تأكيد الحفظ. أعد التحميل لمقارنة الملف المحفوظ قبل الحفظ مجددًا.",
+        "الملف المحفوظ",
     ),
     "ur": (
         "یہ سرور OpenCode 1 چلاتا ہے۔ CodeWalk 2 کو OpenCode 2 درکار ہے۔",
@@ -105,6 +133,9 @@ COPY = {
         "سرور کا پاس ورڈ یا پیئرنگ کی اسناد دیکھیں۔",
         "پروفائل لوڈ یا محفوظ نہیں ہو سکے۔ محفوظ شدہ حالت دیکھنے کے لیے دوبارہ کوشش کریں۔",
         "سرور نے انتظار طلب کیا ہے۔ بتائے گئے وقت کے بعد کوشش کریں؛ خودکار کوشش نہیں ہو رہی۔", "کنکشن چیک کریں",
+        "سرور کا درست نام درج کریں (1 سے 160 حروف)۔",
+        "پروفائل بدل گیا ہے یا محفوظ ہونے کی تصدیق نہیں ہو سکی۔ دوبارہ محفوظ کرنے سے پہلے محفوظ پروفائل کا موازنہ کرنے کے لیے دوبارہ لوڈ کریں۔",
+        "محفوظ پروفائل",
     ),
     "hi": (
         "यह सर्वर OpenCode 1 चलाता है। CodeWalk 2 को OpenCode 2 चाहिए।",
@@ -115,6 +146,9 @@ COPY = {
         "सर्वर पासवर्ड या पेयरिंग क्रेडेंशियल जाँचें।",
         "प्रोफ़ाइल लोड या सेव नहीं हुईं। सेव की गई स्थिति जाँचने के लिए फिर कोशिश करें।",
         "सर्वर ने प्रतीक्षा करने को कहा है। बताए समय के बाद कोशिश करें; कोई स्वचालित पुनः प्रयास नहीं है।", "कनेक्शन जाँचें",
+        "सर्वर का मान्य नाम दर्ज करें (1–160 अक्षर)।",
+        "प्रोफ़ाइल बदल गई है या सहेजने की पुष्टि नहीं हुई। फिर से सहेजने से पहले सहेजी गई प्रोफ़ाइल की तुलना करने के लिए पुनः लोड करें।",
+        "सहेजी गई प्रोफ़ाइल",
     ),
     "bn": (
         "এই সার্ভার OpenCode 1 চালায়। CodeWalk 2-এর জন্য OpenCode 2 দরকার।",
@@ -125,6 +159,9 @@ COPY = {
         "সার্ভারের পাসওয়ার্ড বা পেয়ারিং শংসাপত্র পরীক্ষা করুন।",
         "প্রোফাইল লোড বা সংরক্ষণ করা যায়নি। সংরক্ষিত অবস্থা যাচাই করতে আবার চেষ্টা করুন।",
         "সার্ভার অপেক্ষা করতে বলেছে। নির্দিষ্ট সময়ের পরে চেষ্টা করুন; স্বয়ংক্রিয় পুনরায় চেষ্টা হচ্ছে না।", "সংযোগ পরীক্ষা করুন",
+        "সার্ভারের একটি বৈধ নাম লিখুন (১–১৬০ অক্ষর)।",
+        "প্রোফাইল বদলেছে বা সংরক্ষণ নিশ্চিত করা যায়নি। আবার সংরক্ষণের আগে সংরক্ষিত প্রোফাইলের সঙ্গে তুলনা করতে পুনরায় লোড করুন।",
+        "সংরক্ষিত প্রোফাইল",
     ),
     "zh": (
         "此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。",
@@ -135,6 +172,9 @@ COPY = {
         "请检查服务器密码或配对凭据。",
         "无法加载或保存配置。请重试以确认保存状态。",
         "服务器要求等待。请在指定时间后重试；不会自动重试。", "检查连接",
+        "请输入有效的服务器名称（1–160 个字符）。",
+        "配置已更改或无法确认保存结果。请重新加载并比较已保存的配置，然后再保存。",
+        "已保存的配置",
     ),
     "ja": (
         "このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。",
@@ -145,6 +185,9 @@ COPY = {
         "サーバーのパスワードまたはペアリング認証情報を確認してください。",
         "プロファイルを読み込みまたは保存できません。保存状態を確認するため再試行してください。",
         "サーバーが待機を要求しています。指定時刻後に再試行してください。自動再試行は行いません。", "接続を確認",
+        "有効なサーバー名を入力してください（1～160文字）。",
+        "プロファイルが変更されたか、保存を確認できませんでした。再読み込みして保存済みのプロファイルを確認してから、もう一度保存してください。",
+        "保存済みのプロファイル",
     ),
     "ko": (
         "이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.",
@@ -155,5 +198,8 @@ COPY = {
         "서버 비밀번호 또는 페어링 인증 정보를 확인하세요.",
         "프로필을 불러오거나 저장할 수 없습니다. 저장 상태를 확인하려면 다시 시도하세요.",
         "서버가 대기를 요청했습니다. 지정 시간 이후 다시 시도하세요. 자동 재시도는 없습니다.", "연결 확인",
+        "올바른 서버 이름을 입력하세요(1~160자).",
+        "프로필이 변경되었거나 저장을 확인할 수 없습니다. 다시 불러와 저장된 프로필을 비교한 후 다시 저장하세요.",
+        "저장된 프로필",
     ),
 }

@@ -49,6 +49,35 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
 
+### V2 server health and workspace status
+
+- **Given** the v2 app is in the foreground with saved servers whose credentials have loaded
+- **When** the health lane runs
+- **Then** every saved server is checked with the read-only compatibility probe at most every 10 seconds on its own lane, never cancelling or borrowing a manual check from the Servers page; a resume rechecks at once, a server `Retry-After` delays the next check, and nothing is probed in the background or while the server catalog is reloading or an edit is pending
+- **Then** a compatible answer shows Online, a check still pending or never completed shows Delayed, and a confirmed failure or a missing, unreadable or expired credential shows Offline with its localized reason and a way to recover (Retry, Servers or credential repair); a cancelled check never proves Offline, and a live stream that is reconnecting is shown separately from server health
+- **Then** the server switcher in the list header shows the active server with that status and opens a searchable list of saved servers; the Servers page has the same search
+- **Then** an Offline active server disables the composer with that reason instead of letting a message be sent
+
+- **Given** the compact workspace shows its app bar
+- **When** something needs the user's attention
+- **Then** the hamburger carries one badge chosen in this order: the active server Offline after a 5-second resume grace, a conversation still syncing 10 seconds after that grace, a conversation of the current project that failed, one that waits for input or approval, one with an unread reply, and a resume sync in progress; the drawer opens with a notice explaining that badge, and tapping the notice opens the conversation it names, or Servers for the server alert
+- **Then** a warning snackbar about an Offline active server appears only 5 seconds after the resume grace, once per outage, and is cancelled by recovery, a move to the background or a change of server or page
+- **Then** New Chat is pinned in the app bar by default and up to three of New Chat, Refresh, Servers and Settings can be pinned from the overflow menu, which offers every action; the choice is kept locally
+
+- **Given** the user edits a saved server on the Servers page
+- **When** only its name changes
+- **Then** the server keeps its identity, connection, credentials and checks, with no new probe or credential access
+- **When** its URL changes (including a proxy path, or a return to an earlier URL)
+- **Then** the server keeps its identity but gets a new binding revision: everything still running against the old URL is retired before the edit is saved, a reply or request the old URL never answered is never sent to the new one, saved tabs, drafts and queued messages stay on the device without acquiring the new URL, and the credential of the old origin is never copied to the new one
+- **Then** a stale editor or an unknown save outcome is reconciled from storage before another save, and the failed form keeps its values
+- **Then** a server can be marked as the local default; marking it never switches or probes the active server, and on start the workspace restores the launch tab's server, else the last active one, else a valid default, else the first saved server
+- **Then** each server card shows wrapping Active, Default and sign-in metadata, and its overflow menu offers Edit, Set or Clear default and the existing actions without activating the card
+- **Then** searching Settings for the server filter opens Servers with its filter focused and briefly highlighted, without copying the query; Back returns to Settings with the query kept
+
+- **Given** a live conversation's server connection changed while it was open
+- **When** the live view shows the failure
+- **Then** it explains that the server connection changed and offers to reopen the conversation with the current settings, rather than a generic unavailable message
+
 ### V2 session tabs
 
 - **Given** the user opens sessions in the v2 workspace
@@ -313,6 +342,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the live page's app bar shows a permission-mode chip with the mode the store has acknowledged for that session (Ask or Allow all, marked as set for this session or the app default), icon-only below 600 dp with the full label in its tooltip and semantics; picking a mode writes a session override and the label changes only after the write succeeds, a failed write keeps the previous label and shows a snackbar, and "Use app default" appears only while the session has its own override; picking Allow all while the app default already applies it stores nothing, so the session never pins standing approval, while an explicit Ask is always stored and survives a later change of the default
 - **Then** the chip is disabled while the policy loads, while a write is in flight and while stored overrides are unreadable, and it is absent when the app has no policy; switching a watched, live session to Allow all answers its already-resident eligible `once` requests at once through the same gate and fence, while switching back to Ask never sends anything and does not revoke a reply already in flight
 - **Then** the same menu offers OpenCode Unrestricted as a separate server rule: turning it on needs an explicit confirmation that explains overridden agent ask/deny rules, requests still waiting, child sessions copying the rule only at creation, and other clients being able to change it; CodeWalk then reads the session's rules, stores a fingerprint record of its own insertion, appends `{action:"*", resource:"*", effect:"allow"}` once through `PATCH /api/session/<session>` and shows Unrestricted only after a new read confirms it
+- **Then** CodeWalk's record of its insertion belongs to the server binding it was written through (the server, its full URL and its binding revision): after a URL edit the other server's identical rule is shown as set outside CodeWalk and never removed, and records written before this scoping are kept but never claimed
+- **Then** a read or write that loses its server binding, or that was in flight while the server catalog was being reloaded, stops without sending anything more; the screen keeps its last known state, a change that was not sent is reported as not made, and one already sent keeps its receipt as unconfirmed until a fresh read
 - **Then** turning it off sends exactly the preceding rules, and only while a fresh read still matches what CodeWalk wrote; a trailing allow-everything rule CodeWalk did not add is shown as set outside CodeWalk and never removed, and rules changed by another client are reported and never overwritten; a refused write sends nothing more, an unknown outcome is checked by one read and never resent, and the local Ask/Allow all mode and the automatic responder are unaffected
 - **Then** the rules are read when the session is live and current (on open and after each reconnect, with one retry of a failed first read), around each change and on an explicit refresh; live `session.permissions` SSE stream events reconcile rules in real time (deferring re-read when busy); a failed or unreadable read makes the actions unavailable but keeps showing a rule already known to be in effect, a ruleset at the 1024-rule local bound is never extended, and unreadable overrides have no in-session repair surface yet
 - **Then** sub-agent permission requests (SessionOwner with origin matching the parent) appear directly in the parent session's resident permission cards alongside the parent's own requests; cards are ordered with the parent's own requests first, followed by child requests grouped by sub-agent in order of first appearance, with child requests badged with a Sub-agent badge and arrow icon; manual replies post directly to the child session's reply endpoint `/api/session/<child>/permission/<request>/reply`; the reply fence, reply states, and note drafts are scoped per owning session; child automatic responder follows canonical precedence (fail-closed, explicit Ask on either parent or child vetoes auto-approval, child explicit mode override wins, otherwise inherits parent's effective mode), evaluated symmetrically when watched in the parent card or directly; watching both parent and child concurrently deduplicates replies via the shared `(owningSession, requestId)` fence so only one reply is sent; late 404 (first-reply-wins) is mapped to answered elsewhere and triggers a single state refresh

@@ -11,9 +11,11 @@ import 'fakes.dart';
 
 class _TrackingProber extends FakeProber {
   final endpoints = <Uri>[];
+  final secrets = <String>[];
   @override
   EndpointProbeTask start(Uri endpoint, String secret) {
     endpoints.add(endpoint);
+    secrets.add(secret);
     return super.start(endpoint, secret);
   }
 }
@@ -51,7 +53,16 @@ void main() {
       );
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: graph));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(TextButton, 'Password'));
+      await tester.tap(
+        find.byKey(const ValueKey('endpoint-actions-endpoint_one')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byWidgetPredicate((widget) => widget is PopupMenuItem),
+          matching: find.text('Password'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
         tester
@@ -73,7 +84,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('save-endpoint')));
       await tester.pumpAndSettle();
-      expect(prober.endpoints, [profile.endpoint, profile.endpoint]);
+      // Initial and replaced-credential health probes surround the two
+      // explicit repair checks; all four retain the original endpoint.
+      expect(prober.endpoints, List.filled(4, profile.endpoint));
+      expect(prober.secrets, ['fake-old', 'fake-new', 'fake-new', 'fake-new']);
       expect(repo.profiles.single, same(profile));
       expect(repo.profiles.single.label, 'Original');
       expect(await repo.readSecret(profile), 'fake-new');
@@ -311,16 +325,35 @@ void main() {
       );
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: graph));
       await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('endpoint-actions-endpoint_one')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Check connection'));
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(
         find.byKey(const ValueKey('endpoint-check-endpoint_one')),
         findsOneWidget,
       );
-      final button = tester.widget<TextButton>(
-        find.widgetWithText(TextButton, 'Check connection'),
+      expect(graph.hosts.isChecking(profile), isTrue);
+      expect(graph.hosts.canCheck(profile), isFalse);
+      await tester.tap(
+        find.byKey(const ValueKey('endpoint-actions-endpoint_one')),
       );
-      expect(button.onPressed, isNull);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      final button = tester.widget<PopupMenuItem<dynamic>>(
+        find
+            .ancestor(
+              of: find.text('Check connection'),
+              matching: find.byWidgetPredicate((w) => w is PopupMenuItem),
+            )
+            .first,
+      );
+      expect(button.enabled, isFalse);
+      Navigator.of(tester.element(find.text('Check connection'))).pop();
+      await tester.pump(const Duration(milliseconds: 300));
       result.complete(
         const EndpointAssessment(EndpointStatus.compatible, version: '2.0.22'),
       );

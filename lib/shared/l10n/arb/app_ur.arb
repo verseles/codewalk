@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "کوشش ترک کریں اور متن رکھیں",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "مزید کارروائیاں",
+  "chatAppBarPinAction": "ایپ بار پر پن کریں۔",
+  "chatAppBarUnpinAction": "ایپ بار سے پن ہٹا دیں۔",
+  "chatBadgeConversationError": "\"{title}\" میں ایک خرابی ہے۔",
+  "chatBadgeConversationNeedsInput": "\"{title}\" کو آپ کے ان پٹ کی ضرورت ہے۔",
+  "chatBadgeConversationNewReply": "\"{title}\" کا ایک نیا جواب آیا ہے۔",
+  "chatBadgeServerNeedsAttention": "سرور کنکشن پر توجہ کی ضرورت ہے۔",
+  "chatBadgeSyncing": "گفتگو کی مطابقت پذیری ہو رہی ہے...",
+  "serversSearchActiveHint": "فعال سرور تلاش کریں",
+  "serversSetActive": "ایکٹو سیٹ کریں۔",
+  "statusDelayed": "تاخیر شدہ",
+  "statusOffline": "آف لائن",
+  "statusOnline": "آن لائن",
+  "healthCredentialMissing": "اس سرور کی محفوظ اسناد موجود نہیں۔ دوبارہ پیئر کریں یا پاس ورڈ درج کریں۔",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "محفوظ اسناد پڑھی نہیں جا سکیں۔ رسائی بحال کرنے کے لیے سرورز کھولیں۔",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "پیئرنگ کی اسناد کی میعاد ختم ہو گئی۔ دوبارہ پیئر کریں یا سرورز میں تجدید کریں۔",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "فعال",
+  "serversClearDefault": "ڈیفالٹ صاف کریں۔",
+  "serversDefault": "طے شدہ",
+  "serversEdit": "ترمیم کریں۔",
+  "serversSetDefault": "ڈیفالٹ سیٹ کریں۔",
+  "composerSourceChanged": "یہ پیغام سرور کے پچھلے کنکشن سے متعلق ہے۔ آپ مقامی نقل دیکھ یا حذف کر سکتے ہیں۔",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "اصل سرور کنکشن کی تصدیق نہیں ہو سکی۔ آپ یہ مقامی پیغام دیکھ یا حذف کر سکتے ہیں۔",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "سرور کا درست نام درج کریں (1 سے 160 حروف)۔",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "پروفائل بدل گیا ہے یا محفوظ ہونے کی تصدیق نہیں ہو سکی۔ دوبارہ محفوظ کرنے سے پہلے محفوظ پروفائل کا موازنہ کرنے کے لیے دوبارہ لوڈ کریں۔",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "محفوظ پروفائل",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "سرور کنکشن بدل گیا ہے۔ سرور کی موجودہ ترتیبات استعمال کرنے کے لیے یہ گفتگو دوبارہ کھولیں۔",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

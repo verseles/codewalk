@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk/features/hosts/endpoint_health_controller.dart';
 import 'package:codewalk/features/sessions/workspace_draft_controller.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -19,6 +20,7 @@ final class _Rig {
       endpointSupport: const SessionActionSupport(SessionActionReason.none),
     );
     catalogRig = CatalogRig(actions: actions, withFeed: false);
+    health = EndpointHealthController(hosts: catalogRig.hosts);
     backend = FakeMetadataBackend();
     metadata = V2MetadataStore(backend: backend);
     draftStore = WorkspaceDraftStore(
@@ -28,12 +30,14 @@ final class _Rig {
     );
     controller = WorkspaceDraftController(
       catalog: catalogRig.sessions,
+      health: health,
       store: draftStore,
     );
   }
 
   late final FakeActionSource actions;
   late final CatalogRig catalogRig;
+  late final EndpointHealthController health;
   late final FakeMetadataBackend backend;
   late final V2MetadataStore metadata;
   late final WorkspaceDraftStore draftStore;
@@ -74,6 +78,7 @@ final class _Rig {
 
   void dispose() {
     controller.dispose();
+    health.dispose();
     catalogRig.dispose();
   }
 }
@@ -82,6 +87,161 @@ void main() {
   late _Rig rig;
   setUp(() => rig = _Rig());
   tearDown(() => rig.dispose());
+
+  test(
+    'URL ABA during a created-session read preserves the draft without handoff',
+    () async {
+      await rig.setupServerAndProjects();
+      await rig.controller.openDraft(directory: '/work/project-a');
+      rig.controller.draft.text = 'Preserve across binding changes';
+      final key = rig.controller.currentKey!;
+      final source = rig.catalogRig.sources.single;
+      rig.actions.createdSessionRef = source
+          .row('created', directory: '/work/project-a')
+          .info
+          .ref;
+      final sending = rig.controller.sendFirstPrompt(
+        onBound: (_, _, _) => fail('old binding cannot hand off'),
+      );
+      for (var i = 0; i < 100 && source.reads.isEmpty; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(source.reads, isNotEmpty);
+      final hosts = rig.catalogRig.hosts;
+      final original = hosts.profiles.single;
+      expect(
+        await hosts.updateProfile(
+          original,
+          label: original.label,
+          endpoint: original.endpoint.resolve('/other/'),
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      expect(
+        await hosts.updateProfile(
+          hosts.profiles.single,
+          label: original.label,
+          endpoint: original.endpoint,
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      source.reads.single.$2.completion.complete(
+        source.row('created', directory: '/work/project-a'),
+      );
+      expect(await sending, isFalse);
+      final saved = await rig.draftStore.read(key);
+      expect(saved!.text, 'Preserve across binding changes');
+      expect(saved.status, WorkspaceDraftStatus.uncertain);
+      expect(
+        rig.controller.firstPromptFor(rig.actions.createdSessionRef!),
+        isNull,
+      );
+      expect(rig.actions.calls.where((call) => call == 'create'), hasLength(1));
+    },
+  );
+
+  test('a bound first-prompt intent never revives after URL ABA', () async {
+    await rig.setupServerAndProjects();
+    await rig.controller.openDraft(directory: '/work/project-a');
+    rig.controller.draft.text = 'Preserved first prompt';
+    final ref = rig.catalogRig.sources.single
+        .row('created', directory: '/work/project-a')
+        .info
+        .ref;
+    rig.actions.createdSessionRef = ref;
+    final sending = rig.controller.sendFirstPrompt(
+      onBound: (session, _, _) => rig.controller.locationChanged(
+        Uri(pathSegments: ['', 's', session.host.value, session.nativeId]).path,
+      ),
+    );
+    await rig.completeCreatedRead();
+    expect(await sending, isTrue);
+    final handoff = rig.controller.firstPromptFor(ref)!;
+    expect(rig.controller.owns(handoff), isTrue);
+    final hosts = rig.catalogRig.hosts;
+    final original = hosts.profiles.single;
+    expect(
+      await hosts.updateProfile(
+        original,
+        label: original.label,
+        endpoint: original.endpoint.resolve('/other/'),
+        expectedRevision: hosts.catalogRevision,
+      ),
+      isTrue,
+    );
+    expect(
+      await hosts.updateProfile(
+        hosts.profiles.single,
+        label: original.label,
+        endpoint: original.endpoint,
+        expectedRevision: hosts.catalogRevision,
+      ),
+      isTrue,
+    );
+    expect(rig.controller.owns(handoff), isFalse);
+    expect(rig.controller.firstPromptFor(ref), isNull);
+    expect(
+      (await rig.draftStore.read(handoff.key))!.text,
+      'Preserved first prompt',
+    );
+    expect(rig.actions.calls.where((call) => call == 'create'), hasLength(1));
+  });
+
+  test('offline keeps a local draft available but prevents creation', () async {
+    await rig.setupServerAndProjects();
+    rig.health.start(foreground: true);
+    await flush();
+    final profile = rig.catalogRig.sessions.selectedProfile!;
+    rig.catalogRig.hosts.observeAssessment(
+      profile,
+      rig.catalogRig.hosts.credentialFor(profile)!,
+      const EndpointAssessment(EndpointStatus.unreachable),
+    );
+    await rig.controller.openDraft(directory: '/work/project-a');
+    rig.controller.draft.text = 'keep my local draft';
+    expect(rig.controller.isDraftActive, isTrue);
+    expect(rig.controller.endpointOffline, isTrue);
+    expect(rig.controller.canSend, isFalse);
+    expect(
+      await rig.controller.sendFirstPrompt(onBound: (_, _, _) => fail('bind')),
+      isFalse,
+    );
+    expect(rig.actions.calls.where((call) => call == 'create'), isEmpty);
+    expect(rig.controller.draft.text, 'keep my local draft');
+  });
+
+  test('offline during the created session read prevents binding', () async {
+    await rig.setupServerAndProjects();
+    rig.health.start(foreground: true);
+    await flush();
+    await rig.controller.openDraft(directory: '/work/project-a');
+    rig.controller.draft.text = 'keep while offline';
+    rig.actions.createdSessionRef = rig.catalogRig.sources.single
+        .row('created', directory: '/work/project-a')
+        .info
+        .ref;
+    final sending = rig.controller.sendFirstPrompt(
+      onBound: (_, _, _) => fail('offline draft must not bind'),
+    );
+    final source = rig.catalogRig.sources.single;
+    for (var i = 0; i < 100 && source.reads.isEmpty; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    expect(source.reads, isNotEmpty);
+    final profile = rig.catalogRig.sessions.selectedProfile!;
+    rig.catalogRig.hosts.observeAssessment(
+      profile,
+      rig.catalogRig.hosts.credentialFor(profile)!,
+      const EndpointAssessment(EndpointStatus.unreachable),
+    );
+    await rig.completeCreatedRead();
+    expect(await sending, isFalse);
+    expect(rig.controller.draft.text, 'keep while offline');
+    expect(rig.controller.status, WorkspaceDraftStatus.uncertain);
+    expect(rig.actions.calls.where((call) => call == 'create'), hasLength(1));
+  });
 
   test('discard invalidates the pending first-prompt handoff', () async {
     await rig.setupServerAndProjects();

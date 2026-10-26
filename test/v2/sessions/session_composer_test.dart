@@ -23,6 +23,7 @@ OutboxEntry _with(
   CancellationFence? fence,
   Delivery? delivery,
   String? reason,
+  OutboxSource? source,
 }) => entryOf(
   e.session,
   e.commandId.value,
@@ -32,6 +33,7 @@ OutboxEntry _with(
   state ?? e.state,
   reason: reason,
   fence: fence ?? e.fence,
+  source: source ?? e.source,
 );
 
 SessionState withPending(SessionRef ref, List<PendingInput> pending) =>
@@ -85,6 +87,47 @@ void main() {
     live.dispose();
     rig.dispose();
   });
+
+  for (final source in [OutboxSource.changed, OutboxSource.unknown]) {
+    test(
+      '$source never owns a current pending message or triggers network actions',
+      () async {
+        final entry = entryOf(
+          ref,
+          'old',
+          'msg_0001',
+          'preserved text',
+          Delivery.queue,
+          SubmissionKind.admitted,
+          source: source,
+        );
+        final outbox = FakeOutbox()..list.add(entry);
+        await open(
+          outbox,
+          state: withPending(ref, [
+            pendingRow(ref, 'msg_0001', 'new server message'),
+          ]),
+        );
+        expect(composer.chips(live.state).single.entry, isNull);
+        expect(composer.rows(live.state), [entry]);
+        expect(canCancel(entry), isFalse);
+        expect(canSwitch(entry), isFalse);
+        await composer.checkAgain(entry.commandId);
+        await composer.cancel(entry.commandId);
+        await composer.switchDelivery(entry.commandId, Delivery.steer);
+        expect(outbox.calls, isEmpty);
+        expect(
+          composer.notice,
+          source == OutboxSource.changed
+              ? ComposerNotice.sourceChanged
+              : ComposerNotice.sourceUnknown,
+        );
+        await composer.discard(entry.commandId);
+        expect(outbox.calls, ['dismiss old']);
+        expect(composer.rows(live.state), isEmpty);
+      },
+    );
+  }
 
   group('sending', () {
     test(
@@ -628,7 +671,9 @@ void main() {
 
     setUp(() {
       server = OutboxServer();
+      server.transport.endpoint = live.profile.endpoint;
       outbox = OpenCodePromptOutbox(
+        profile: live.profile,
         store: OutboxStore(),
         client: OpenCodePromptClient(
           server.transport,

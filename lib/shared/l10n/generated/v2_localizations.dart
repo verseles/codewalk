@@ -2990,6 +2990,168 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Discard attempt and keep text'**
   String get workspaceDraftReset;
+
+  /// CodeWalk UI string — chatAppBarMoreActions
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get chatAppBarMoreActions;
+
+  /// CodeWalk UI string — chatAppBarPinAction
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to app bar'**
+  String get chatAppBarPinAction;
+
+  /// CodeWalk UI string — chatAppBarUnpinAction
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin from app bar'**
+  String get chatAppBarUnpinAction;
+
+  /// CodeWalk UI string — chatBadgeConversationError
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" has an error.'**
+  String chatBadgeConversationError(String title);
+
+  /// CodeWalk UI string — chatBadgeConversationNeedsInput
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" needs your input.'**
+  String chatBadgeConversationNeedsInput(String title);
+
+  /// CodeWalk UI string — chatBadgeConversationNewReply
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" has a new reply.'**
+  String chatBadgeConversationNewReply(String title);
+
+  /// CodeWalk UI string — chatBadgeServerNeedsAttention
+  ///
+  /// In en, this message translates to:
+  /// **'Server connection needs attention.'**
+  String get chatBadgeServerNeedsAttention;
+
+  /// CodeWalk UI string — chatBadgeSyncing
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing conversations...'**
+  String get chatBadgeSyncing;
+
+  /// CodeWalk UI string — serversSearchActiveHint
+  ///
+  /// In en, this message translates to:
+  /// **'Search active server'**
+  String get serversSearchActiveHint;
+
+  /// CodeWalk UI string — serversSetActive
+  ///
+  /// In en, this message translates to:
+  /// **'Set Active'**
+  String get serversSetActive;
+
+  /// CodeWalk UI string — statusDelayed
+  ///
+  /// In en, this message translates to:
+  /// **'Delayed'**
+  String get statusDelayed;
+
+  /// CodeWalk UI string — statusOffline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get statusOffline;
+
+  /// CodeWalk UI string — statusOnline
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get statusOnline;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'This server has no saved credential. Pair again or enter its password.'**
+  String get healthCredentialMissing;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'The saved credential could not be read. Open Servers to recover access.'**
+  String get healthCredentialUnreadable;
+
+  /// V2 chat-first workspace
+  ///
+  /// In en, this message translates to:
+  /// **'The saved pairing credential has expired. Pair again or renew it in Servers.'**
+  String get healthCredentialExpired;
+
+  /// CodeWalk UI string — serversActive
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get serversActive;
+
+  /// CodeWalk UI string — serversClearDefault
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Default'**
+  String get serversClearDefault;
+
+  /// CodeWalk UI string — serversDefault
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get serversDefault;
+
+  /// CodeWalk UI string — serversEdit
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get serversEdit;
+
+  /// CodeWalk UI string — serversSetDefault
+  ///
+  /// In en, this message translates to:
+  /// **'Set Default'**
+  String get serversSetDefault;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'This message belongs to an earlier server connection. You can inspect or discard its local copy.'**
+  String get composerSourceChanged;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'The original server connection could not be verified. You can inspect or discard this local message.'**
+  String get composerSourceUnknown;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid server name (1–160 characters).'**
+  String get hostsEditInvalidLabel;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'The profile changed or the save could not be confirmed. Reload to compare the saved profile before saving again.'**
+  String get hostsEditChanged;
+
+  /// V2 endpoint profile and compatibility UI
+  ///
+  /// In en, this message translates to:
+  /// **'Saved profile'**
+  String get hostsEditSavedProfile;
+
+  /// V2 live read-only session view
+  ///
+  /// In en, this message translates to:
+  /// **'The server connection changed. Reopen this conversation to use the current server settings.'**
+  String get liveSourceChanged;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

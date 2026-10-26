@@ -1507,4 +1507,98 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get workspaceDraftReset => '試行を破棄して入力内容を保持';
+
+  @override
+  String get chatAppBarMoreActions => 'その他のアクション';
+
+  @override
+  String get chatAppBarPinAction => 'アプリバーにピン留め';
+
+  @override
+  String get chatAppBarUnpinAction => 'アプリバーからピン留めを解除';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '「$title」にエラーがあります。';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '「$title」はあなたの入力を待っています。';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '「$title」に新しい返信があります。';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => 'サーバー接続に注意が必要です。';
+
+  @override
+  String get chatBadgeSyncing => '会話を同期中...';
+
+  @override
+  String get serversSearchActiveHint => 'アクティブサーバーを検索';
+
+  @override
+  String get serversSetActive => 'アクティブに設定';
+
+  @override
+  String get statusDelayed => '遅延';
+
+  @override
+  String get statusOffline => 'オフライン';
+
+  @override
+  String get statusOnline => 'オンライン';
+
+  @override
+  String get healthCredentialMissing =>
+      'このサーバーの認証情報は保存されていません。再ペアリングするかパスワードを入力してください。';
+
+  @override
+  String get healthCredentialUnreadable =>
+      '保存された認証情報を読み取れません。サーバー設定からアクセスを復旧してください。';
+
+  @override
+  String get healthCredentialExpired =>
+      'ペアリング認証情報の有効期限が切れました。サーバー設定で再ペアリングするか更新してください。';
+
+  @override
+  String get serversActive => 'アクティブ';
+
+  @override
+  String get serversClearDefault => 'デフォルトをクリア';
+
+  @override
+  String get serversDefault => 'デフォルト';
+
+  @override
+  String get serversEdit => '編集';
+
+  @override
+  String get serversSetDefault => 'デフォルトに設定';
+
+  @override
+  String get composerSourceChanged =>
+      'このメッセージは以前のサーバー接続に属しています。ローカルコピーを確認または破棄できます。';
+
+  @override
+  String get composerSourceUnknown =>
+      '元のサーバー接続を確認できませんでした。このローカルメッセージを確認または破棄できます。';
+
+  @override
+  String get hostsEditInvalidLabel => '有効なサーバー名を入力してください（1～160文字）。';
+
+  @override
+  String get hostsEditChanged =>
+      'プロファイルが変更されたか、保存を確認できませんでした。再読み込みして保存済みのプロファイルを確認してから、もう一度保存してください。';
+
+  @override
+  String get hostsEditSavedProfile => '保存済みのプロファイル';
+
+  @override
+  String get liveSourceChanged =>
+      'サーバー接続が変更されました。現在のサーバー設定を使うには、この会話を開き直してください。';
 }

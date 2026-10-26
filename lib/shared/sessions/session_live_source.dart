@@ -177,6 +177,15 @@ abstract interface class SessionLiveHandle {
 
 /// Shares one event stream per endpoint profile across every open handle.
 abstract interface class SessionLiveDirectory {
+  /// Reconciles canonical saved bindings before their consumers react.
+  /// Reloads suspend requests; explicit changes permanently retire old leases.
+  void reconcileProfiles({
+    required List<EndpointProfile> profiles,
+    required Map<String, EndpointCredential> credentials,
+    required bool available,
+    String? changingProfile,
+  });
+
   Future<SessionLiveHandle> open({
     required EndpointProfile profile,
     required EndpointCredential credential,

@@ -9,6 +9,9 @@ final class _MemoryBackend implements MetadataBackend {
   final values = <String, Object>{};
   bool failRead = false;
   bool failWrite = false;
+  bool throwAfterWrite = false;
+  bool unreadableAfterWrite = false;
+  int workspaceWrites = 0;
   Completer<void>? writeGate;
 
   @override
@@ -22,6 +25,12 @@ final class _MemoryBackend implements MetadataBackend {
     if (failWrite) throw StateError('unwritable');
     await writeGate?.future;
     values[key] = value;
+    if (key == WorkspaceStore.key) workspaceWrites++;
+    if (throwAfterWrite && key == WorkspaceStore.key) {
+      throwAfterWrite = false;
+      if (unreadableAfterWrite) failRead = true;
+      throw StateError('committed without acknowledgement');
+    }
   }
 
   @override
@@ -38,6 +47,97 @@ Future<WorkspaceStore> _open(_MemoryBackend backend) async {
 }
 
 void main() {
+  test('default survives restart without changing the active server', () async {
+    final backend = _MemoryBackend();
+    final store = await _open(backend);
+    await store.setActiveProfile('profile_a');
+    expect(await store.setDefaultProfile('profile_b'), isTrue);
+    final reloaded = await _open(backend);
+    expect(reloaded.defaultProfile, 'profile_b');
+    expect(reloaded.activeProfile, 'profile_a');
+    expect(await store.setDefaultProfile(null), isTrue);
+    expect((await _open(backend)).defaultProfile, isNull);
+    expect(store.activeProfile, 'profile_a');
+  });
+
+  test(
+    'a removed default clears without changing another active server',
+    () async {
+      final backend = _MemoryBackend();
+      final store = await _open(backend);
+      await store.setActiveProfile('profile_a');
+      await store.setDefaultProfile('profile_b');
+      expect(await store.forget('profile_b'), isTrue);
+      final reloaded = await _open(backend);
+      expect(reloaded.defaultProfile, isNull);
+      expect(reloaded.activeProfile, 'profile_a');
+    },
+  );
+
+  test('unknown write blocks queued updates until read-only retry', () async {
+    final backend = _MemoryBackend();
+    final store = await _open(backend);
+    final gate = backend.writeGate = Completer<void>();
+    backend.throwAfterWrite = true;
+    backend.unreadableAfterWrite = true;
+    final active = store.setActiveProfile('profile_b');
+    await pumpEventQueue();
+    final project = store.setLastProject('profile_b', 'project_beta');
+    gate.complete();
+    expect(await active, isFalse);
+    expect(await project, isFalse);
+    expect(store.unreadable, isTrue);
+    expect(backend.workspaceWrites, 1);
+    backend.failRead = false;
+    await store.retry();
+    expect(backend.workspaceWrites, 1);
+    expect(store.unreadable, isFalse);
+    expect(store.activeProfile, 'profile_b');
+    expect(store.lastProject('profile_b'), isNull);
+    expect(await store.setDefaultProfile('profile_a'), isTrue);
+    expect((await _open(backend)).activeProfile, 'profile_b');
+  });
+
+  test(
+    'workspace updates preserve unknown fields in the readable envelope',
+    () async {
+      final backend = _MemoryBackend()
+        ..values[WorkspaceStore.key] = jsonEncode({
+          'v': 1,
+          'active': 'profile_a',
+          'projects': <String, String>{},
+          'futurePreference': {'enabled': true},
+        });
+      final store = await _open(backend);
+      expect(await store.setLastProject('profile_a', 'project_alpha'), isTrue);
+      final raw = jsonDecode(backend.values[WorkspaceStore.key]! as String);
+      expect(raw['futurePreference'], {'enabled': true});
+      expect(raw['active'], 'profile_a');
+      expect((await _open(backend)).lastProject('profile_a'), 'project_alpha');
+    },
+  );
+
+  test(
+    'a committed write is reconciled before the next queued update',
+    () async {
+      final backend = _MemoryBackend();
+      final store = await _open(backend);
+      final gate = backend.writeGate = Completer<void>();
+      backend.throwAfterWrite = true;
+      final active = store.setActiveProfile('profile_b');
+      await pumpEventQueue();
+      final project = store.setLastProject('profile_b', 'project_beta');
+      gate.complete();
+      final activeWritten = await active;
+      expect(await project, isTrue);
+      final restored = await _open(backend);
+      expect(restored.activeProfile, 'profile_b');
+      expect(restored.lastProject('profile_b'), 'project_beta');
+      expect(activeWritten, isTrue);
+      expect(store.hasPersistenceError, isFalse);
+    },
+  );
+
   test('the server and its last project come back', () async {
     final backend = _MemoryBackend();
     final store = await _open(backend);
@@ -59,6 +159,8 @@ void main() {
     ('another version', jsonEncode({'v': 2, 'active': 'profile_a'})),
     ('a wrong active', jsonEncode({'v': 1, 'active': 3})),
     ('an empty active', jsonEncode({'v': 1, 'active': ''})),
+    ('a wrong default', jsonEncode({'v': 1, 'default': 3})),
+    ('an empty default', jsonEncode({'v': 1, 'default': ''})),
     (
       'a wrong project',
       jsonEncode({
@@ -74,6 +176,7 @@ void main() {
       expect(store.unreadable, isTrue);
       expect(store.activeProfile, isNull);
       expect(await store.setActiveProfile('profile_b'), isFalse);
+      expect(await store.setDefaultProfile('profile_b'), isFalse);
       expect(await store.setLastProject('profile_b', 'project_beta'), isFalse);
       expect(backend.values[WorkspaceStore.key], raw);
     });

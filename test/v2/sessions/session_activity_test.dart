@@ -409,6 +409,17 @@ void main() {
           activity: all,
         );
         final one = _ref('one').storageKey;
+        // The attention notice can put this lazy row below the viewport.
+        await tester.scrollUntilVisible(
+          find.byKey(ValueKey('session-needs-you-$one')),
+          120,
+          scrollable: find
+              .ancestor(
+                of: find.byKey(const ValueKey('sessions-profile')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         for (final mark in ['needs-you', 'running', 'unread']) {
           expect(
             find.byKey(ValueKey('session-$mark-$one'), skipOffstage: false),

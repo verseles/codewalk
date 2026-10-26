@@ -273,6 +273,16 @@ void main() {
           expect(find.text(l10n.liveOutcomeFailed), findsOneWidget);
           expect(find.text(l10n.liveOutcomeInterrupted), findsOneWidget);
           expect(find.byKey(const ValueKey('live-needs-you')), findsOneWidget);
+          await tester.scrollUntilVisible(
+            find.byKey(const ValueKey('live-history-limit')),
+            -120,
+            scrollable: find
+                .descendant(
+                  of: find.byType(SessionLivePage),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
           expect(find.text(l10n.historyLimit), findsOneWidget);
           expect(find.textContaining(l10n.liveLastSynced), findsOneWidget);
           // V2-071A: <b> renders rich (bold) with … prefix, not literal tags.
@@ -347,6 +357,14 @@ void main() {
           await tester.pump();
           expect(directory.opens, hasLength(2));
           expect(handle.closes, 1);
+          directory.fail(SessionLiveFailure.sourceChanged);
+          await tester.pumpAndSettle();
+          expect(find.text(l10n.liveSourceChanged), findsOneWidget);
+          expect(find.text(l10n.liveUnavailable), findsNothing);
+          await tester.tap(find.byKey(const ValueKey('live-retry')));
+          await tester.pump();
+          await tester.pump();
+          expect(directory.opens, hasLength(3));
           final again = directory.grant(ref);
 
           final context = tester.element(find.byType(SessionLivePage));

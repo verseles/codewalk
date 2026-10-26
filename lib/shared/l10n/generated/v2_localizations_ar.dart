@@ -1568,4 +1568,99 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'تجاهل المحاولة والاحتفاظ بالنص';
+
+  @override
+  String get chatAppBarMoreActions => 'مزيد من الإجراءات';
+
+  @override
+  String get chatAppBarPinAction => 'تثبيت في شريط التطبيق';
+
+  @override
+  String get chatAppBarUnpinAction => 'إلغاء التثبيت من شريط التطبيق';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" به خطأ.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" يحتاج إلى مدخلاتك.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" به رد جديد.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => 'اتصال الخادم يحتاج إلى انتباه.';
+
+  @override
+  String get chatBadgeSyncing => 'جاري مزامنة المحادثات...';
+
+  @override
+  String get serversSearchActiveHint => 'ابحث في الخادم النشط';
+
+  @override
+  String get serversSetActive => 'تعيين كنشط';
+
+  @override
+  String get statusDelayed => 'متأخر';
+
+  @override
+  String get statusOffline => 'غير متصل';
+
+  @override
+  String get statusOnline => 'متصل';
+
+  @override
+  String get healthCredentialMissing =>
+      'لا توجد بيانات اعتماد محفوظة لهذا الخادم. أعد الإقران أو أدخل كلمة مروره.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'تعذرت قراءة بيانات الاعتماد المحفوظة. افتح الخوادم لاستعادة الوصول.';
+
+  @override
+  String get healthCredentialExpired =>
+      'انتهت صلاحية بيانات الإقران. أعد الإقران أو جددها في الخوادم.';
+
+  @override
+  String get serversActive => 'نشط';
+
+  @override
+  String get serversClearDefault => 'مسح الافتراضي';
+
+  @override
+  String get serversDefault => 'افتراضي';
+
+  @override
+  String get serversEdit => 'تعديل';
+
+  @override
+  String get serversSetDefault => 'تعيين كافتراضي';
+
+  @override
+  String get composerSourceChanged =>
+      'تنتمي هذه الرسالة إلى اتصال سابق بالخادم. يمكنك عرض النسخة المحلية أو حذفها.';
+
+  @override
+  String get composerSourceUnknown =>
+      'تعذر التحقق من اتصال الخادم الأصلي. يمكنك عرض هذه الرسالة المحلية أو حذفها.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'أدخل اسم خادم صالحًا (من 1 إلى 160 حرفًا).';
+
+  @override
+  String get hostsEditChanged =>
+      'تغير الملف الشخصي أو تعذر تأكيد الحفظ. أعد التحميل لمقارنة الملف المحفوظ قبل الحفظ مجددًا.';
+
+  @override
+  String get hostsEditSavedProfile => 'الملف المحفوظ';
+
+  @override
+  String get liveSourceChanged =>
+      'تغيّر اتصال الخادم. أعد فتح هذه المحادثة لاستخدام إعدادات الخادم الحالية.';
 }

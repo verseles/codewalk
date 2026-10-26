@@ -37,6 +37,59 @@ void main() {
   });
 
   test(
+    'rename updates the display label while keeping the existing lease',
+    () async {
+      final opening = controller.start();
+      final handle = directory.grant(ref);
+      await opening;
+      final original = controller.profile;
+      expect(
+        await rig.hosts.updateProfile(
+          original,
+          label: 'Renamed server',
+          endpoint: original.endpoint,
+          expectedRevision: rig.hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      expect(controller.profileLabel, 'Renamed server');
+      expect(controller.profile, same(original));
+      expect(handle.closes, 0);
+      expect(directory.opens, hasLength(1));
+    },
+  );
+
+  test('an old pending acquisition stays invalid after URL ABA', () async {
+    final opening = controller.start();
+    final original = controller.profile;
+    expect(
+      await rig.hosts.updateProfile(
+        original,
+        label: original.label,
+        endpoint: original.endpoint.resolve('/other/'),
+        expectedRevision: rig.hosts.catalogRevision,
+      ),
+      isTrue,
+    );
+    final moved = rig.hosts.profiles.single;
+    expect(
+      await rig.hosts.updateProfile(
+        moved,
+        label: original.label,
+        endpoint: original.endpoint,
+        expectedRevision: rig.hosts.catalogRevision,
+      ),
+      isTrue,
+    );
+    final late = directory.grant(ref);
+    await opening;
+    expect(late.closes, 1);
+    expect(controller.view, isNull);
+    expect(controller.failure, SessionLiveFailure.sourceChanged);
+    expect(controller.composer.canSend, isFalse);
+  });
+
+  test(
     'Stop requires live current running or retrying, never resumes shutdown',
     () async {
       final opening = controller.start();

@@ -42,6 +42,22 @@ class GatedSaveProfiles extends MemoryProfiles {
   }
 }
 
+class GatedEditProfiles extends MemoryProfiles {
+  final entered = Completer<void>();
+  final gate = Completer<void>();
+
+  @override
+  Future<EndpointProfile> updateProfile(
+    EndpointProfile expected, {
+    required String label,
+    required Uri endpoint,
+  }) async {
+    entered.complete();
+    await gate.future;
+    return super.updateProfile(expected, label: label, endpoint: endpoint);
+  }
+}
+
 class UnknownCommitProfiles extends MemoryProfiles {
   int saves = 0;
   int secretReads = 0;
@@ -68,6 +84,206 @@ class UnknownCommitProfiles extends MemoryProfiles {
 
 void main() {
   final endpoint = Uri.parse('http://127.0.0.1:4096/');
+  test(
+    'local rename tolerates unreadable credentials and URL edit drops the old scope',
+    () async {
+      final backend = Metadata();
+      final secrets = Secrets();
+      final metadata = V2MetadataStore(backend: backend);
+      final repository = EndpointProfileStore(
+        metadata: metadata,
+        credentials: EndpointCredentialVault(
+          backend: secrets,
+          beforeMutation: metadata.ensureSchema,
+        ),
+      );
+      final original = EndpointProfile(
+        id: 'endpoint_one',
+        label: 'Original',
+        endpoint: endpoint,
+      );
+      await repository.save(original, 'origin-a-secret');
+      final vaultBefore = Map.of(secrets.values);
+      final prober = FakeProber();
+      final hosts = HostsController(repository: repository, prober: prober);
+      addTearDown(hosts.dispose);
+      secrets.failRead = true;
+      await hosts.load();
+      expect(hosts.credentialUnreadable(original), isTrue);
+      expect(
+        await hosts.updateProfile(
+          original,
+          label: 'Renamed',
+          endpoint: endpoint,
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      final renamed = hosts.profiles.single;
+      expect(renamed.sameBinding(original), isTrue);
+      expect(hosts.credentialUnreadable(renamed), isTrue);
+      final staleRevision = hosts.catalogRevision;
+      secrets.failRead = false;
+      await hosts.load();
+      expect(
+        await hosts.updateProfile(
+          renamed,
+          label: 'Stale',
+          endpoint: endpoint,
+          expectedRevision: staleRevision,
+        ),
+        isFalse,
+      );
+      var sawPending = false;
+      hosts.addListener(() {
+        if (hosts.pendingBindingChange == original.id) sawPending = true;
+      });
+      expect(
+        await hosts.updateProfile(
+          renamed,
+          label: 'Destination',
+          endpoint: Uri.parse('https://destination.example/'),
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      final moved = hosts.profiles.single;
+      expect(sawPending, isTrue);
+      expect(hosts.pendingBindingChange, isNull);
+      expect(moved.bindingRevision, 1);
+      expect(hosts.credentialFor(original), isNull);
+      expect(hosts.credentialFor(moved), isNull);
+      expect(secrets.values, vaultBefore);
+      expect(prober.tasks, isEmpty);
+    },
+  );
+
+  test(
+    'pending binding edit is single-flight and visible before persistence',
+    () async {
+      final original = EndpointProfile(
+        id: 'endpoint_one',
+        label: 'Original',
+        endpoint: endpoint,
+      );
+      final repository = GatedEditProfiles()
+        ..profiles.add(original)
+        ..secrets[original.id] = 'fake-secret';
+      final hosts = HostsController(
+        repository: repository,
+        prober: FakeProber(),
+      );
+      addTearDown(hosts.dispose);
+      await hosts.load();
+      final editing = hosts.updateProfile(
+        original,
+        label: 'Moved',
+        endpoint: endpoint.resolve('/other/'),
+        expectedRevision: hosts.catalogRevision,
+      );
+      await repository.entered.future;
+      expect(hosts.pendingBindingChange, original.id);
+      expect(hosts.loading, isTrue);
+      expect(hosts.savingProfile, isTrue);
+      expect(hosts.profiles.single, same(original));
+      expect(
+        await hosts.updateProfile(
+          original,
+          label: 'Duplicate',
+          endpoint: endpoint,
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isFalse,
+      );
+      repository.gate.complete();
+      expect(await editing, isTrue);
+      expect(hosts.profiles.single.bindingRevision, 1);
+      expect(hosts.loading, isFalse);
+      expect(hosts.savingProfile, isFalse);
+    },
+  );
+
+  test(
+    'rename preserves the pending health check and its observation',
+    () async {
+      final original = EndpointProfile(
+        id: 'endpoint_one',
+        label: 'Original',
+        endpoint: endpoint,
+      );
+      final repository = MemoryProfiles()
+        ..profiles.add(original)
+        ..secrets[original.id] = 'fake-secret';
+      final prober = GatedProber();
+      final hosts = HostsController(repository: repository, prober: prober);
+      addTearDown(hosts.dispose);
+      await hosts.load();
+      final checking = hosts.check(original);
+      await pumpEventQueue();
+      expect(prober.tasks, hasLength(1));
+      expect(
+        await hosts.updateProfile(
+          original,
+          label: 'Renamed',
+          endpoint: endpoint,
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      expect(prober.tasks.single.cancelled, isFalse);
+      prober.replies.single.complete(
+        const EndpointAssessment(EndpointStatus.compatible),
+      );
+      await checking;
+      expect(hosts.assessments[original.id]?.status, EndpointStatus.compatible);
+    },
+  );
+
+  test(
+    'reloading an ABA binding rejects old manual and observed health results',
+    () async {
+      final original = EndpointProfile(
+        id: 'endpoint_one',
+        label: 'Original',
+        endpoint: endpoint,
+      );
+      final repository = MemoryProfiles()
+        ..profiles.add(original)
+        ..secrets[original.id] = 'fake-secret';
+      final prober = GatedProber();
+      final hosts = HostsController(repository: repository, prober: prober);
+      addTearDown(hosts.dispose);
+      await hosts.load();
+      final credential = hosts.credentialFor(original)!;
+      hosts.observeAssessment(
+        original,
+        credential,
+        const EndpointAssessment(EndpointStatus.compatible),
+      );
+      final checking = hosts.check(original);
+      await pumpEventQueue();
+      repository.profiles[0] = EndpointProfile(
+        id: original.id,
+        label: original.label,
+        endpoint: endpoint,
+        bindingRevision: 2,
+      );
+      await hosts.load();
+      expect(hosts.assessments, isEmpty);
+      hosts.observeAssessment(
+        original,
+        credential,
+        const EndpointAssessment(EndpointStatus.compatible),
+      );
+      prober.replies.single.complete(
+        const EndpointAssessment(EndpointStatus.compatible),
+      );
+      await checking;
+      expect(hosts.assessments, isEmpty);
+      expect(hosts.canCheck(original), isFalse);
+      expect(hosts.credentialFor(original), isNull);
+    },
+  );
   test(
     'one unreadable active credential does not hide healthy profile metadata',
     () async {

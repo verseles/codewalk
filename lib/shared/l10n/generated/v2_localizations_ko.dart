@@ -1507,4 +1507,98 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get workspaceDraftReset => '시도를 취소하고 입력 유지';
+
+  @override
+  String get chatAppBarMoreActions => '추가 작업';
+
+  @override
+  String get chatAppBarPinAction => '앱 바에 고정';
+
+  @override
+  String get chatAppBarUnpinAction => '앱 바에서 고정 해제';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\"에 오류가 있습니다.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\"에 입력이 필요합니다.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\"에 새 답장이 있습니다.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => '서버 연결에 주의가 필요합니다.';
+
+  @override
+  String get chatBadgeSyncing => '대화 동기화 중...';
+
+  @override
+  String get serversSearchActiveHint => '활성 서버 검색';
+
+  @override
+  String get serversSetActive => '활성으로 설정';
+
+  @override
+  String get statusDelayed => '지연됨';
+
+  @override
+  String get statusOffline => '오프라인';
+
+  @override
+  String get statusOnline => '온라인';
+
+  @override
+  String get healthCredentialMissing =>
+      '이 서버에 저장된 인증 정보가 없습니다. 다시 페어링하거나 비밀번호를 입력하세요.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      '저장된 인증 정보를 읽을 수 없습니다. 서버 설정에서 접근을 복구하세요.';
+
+  @override
+  String get healthCredentialExpired =>
+      '페어링 인증 정보가 만료되었습니다. 서버 설정에서 다시 페어링하거나 갱신하세요.';
+
+  @override
+  String get serversActive => '활성';
+
+  @override
+  String get serversClearDefault => '기본값 지우기';
+
+  @override
+  String get serversDefault => '기본값';
+
+  @override
+  String get serversEdit => '편집';
+
+  @override
+  String get serversSetDefault => '기본값으로 설정';
+
+  @override
+  String get composerSourceChanged =>
+      '이 메시지는 이전 서버 연결에 속합니다. 로컬 사본을 확인하거나 삭제할 수 있습니다.';
+
+  @override
+  String get composerSourceUnknown =>
+      '원래 서버 연결을 확인할 수 없습니다. 이 로컬 메시지를 확인하거나 삭제할 수 있습니다.';
+
+  @override
+  String get hostsEditInvalidLabel => '올바른 서버 이름을 입력하세요(1~160자).';
+
+  @override
+  String get hostsEditChanged =>
+      '프로필이 변경되었거나 저장을 확인할 수 없습니다. 다시 불러와 저장된 프로필을 비교한 후 다시 저장하세요.';
+
+  @override
+  String get hostsEditSavedProfile => '저장된 프로필';
+
+  @override
+  String get liveSourceChanged =>
+      '서버 연결이 변경되었습니다. 현재 서버 설정을 사용하려면 이 대화를 다시 여세요.';
 }

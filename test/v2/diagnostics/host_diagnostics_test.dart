@@ -11,18 +11,20 @@ void main() {
     () async {
       final repo = MemoryProfiles();
       final profile = EndpointProfile(
-      id: 'endpoint_test',
+        id: 'endpoint_test',
         label: 'Example',
         endpoint: Uri.parse('https://example.invalid'),
       );
       repo.profiles.add(profile);
-      repo.failLoad = true;
       final logs = DiagnosticsController()..setEnabled(true);
       final hosts = HostsController(
         repository: repo,
         prober: FakeProber(),
         diagnostics: logs,
       );
+      await hosts.load();
+      logs.clear();
+      repo.failLoad = true;
       await hosts.remove(profile);
       expect(repo.profiles, isEmpty);
       expect(hosts.storageError, isTrue);

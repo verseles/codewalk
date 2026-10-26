@@ -1606,4 +1606,100 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'Descartar intento y conservar texto';
+
+  @override
+  String get chatAppBarMoreActions => 'Más acciones';
+
+  @override
+  String get chatAppBarPinAction => 'Fijar a la barra de la aplicación';
+
+  @override
+  String get chatAppBarUnpinAction => 'Desfijar de la barra de la aplicación';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" tiene un error.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" necesita su intervención.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" tiene una nueva respuesta.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'La conexión del servidor necesita atención.';
+
+  @override
+  String get chatBadgeSyncing => 'Sincronizando conversaciones...';
+
+  @override
+  String get serversSearchActiveHint => 'Buscar servidor activo';
+
+  @override
+  String get serversSetActive => 'Establecer como activo';
+
+  @override
+  String get statusDelayed => 'Retrasado';
+
+  @override
+  String get statusOffline => 'Desconectado';
+
+  @override
+  String get statusOnline => 'Conectado';
+
+  @override
+  String get healthCredentialMissing =>
+      'Este servidor no tiene credencial guardada. Vuelve a vincularlo o introduce su contraseña.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'No se pudo leer la credencial guardada. Abre Servidores para recuperar el acceso.';
+
+  @override
+  String get healthCredentialExpired =>
+      'La credencial de vinculación caducó. Vuelve a vincularlo o renuévala en Servidores.';
+
+  @override
+  String get serversActive => 'Activo';
+
+  @override
+  String get serversClearDefault => 'Limpar Predeterminado';
+
+  @override
+  String get serversDefault => 'Predeterminado';
+
+  @override
+  String get serversEdit => 'Editar';
+
+  @override
+  String get serversSetDefault => 'Establecer como predeterminado';
+
+  @override
+  String get composerSourceChanged =>
+      'Este mensaje pertenece a una conexión anterior del servidor. Puedes consultar o descartar su copia local.';
+
+  @override
+  String get composerSourceUnknown =>
+      'No se pudo verificar la conexión de origen. Puedes consultar o descartar este mensaje local.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'Introduce un nombre válido para el servidor (1–160 caracteres).';
+
+  @override
+  String get hostsEditChanged =>
+      'El perfil cambió o no se pudo confirmar el guardado. Recarga para comparar el perfil guardado antes de guardar de nuevo.';
+
+  @override
+  String get hostsEditSavedProfile => 'Perfil guardado';
+
+  @override
+  String get liveSourceChanged =>
+      'La conexión del servidor cambió. Vuelve a abrir esta conversación para usar la configuración actual del servidor.';
 }

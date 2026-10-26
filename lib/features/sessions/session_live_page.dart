@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../hosts/server_switcher.dart';
 import 'session_composer.dart';
 import 'session_error_card.dart';
 import 'session_form_card.dart';
@@ -35,12 +37,14 @@ class SessionLivePage extends StatefulWidget {
     required this.controller,
     this.leading,
     this.ownsController = true,
+    this.workspaceChrome = false,
   });
   final SessionLiveController controller;
 
   /// Whether the page disposes [controller] with itself. A session tab keeps
   /// its view open while other tabs are shown, so its page does not.
   final bool ownsController;
+  final bool workspaceChrome;
 
   /// The control before the title, such as the list drawer button of a
   /// compact window.
@@ -122,11 +126,22 @@ class _SessionLivePageState extends State<SessionLivePage>
   }) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      if (widget.workspaceChrome)
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            if (c.supportsSelection)
+              SessionSelectionChip(live: c, compact: true),
+            if (c.permissionModes != null)
+              SessionPermissionModeChip(live: c, compact: true),
+          ],
+        ),
       Text(
         canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
         style: textTheme.titleMedium,
       ),
-      Text(c.profile.label, maxLines: 2, overflow: TextOverflow.ellipsis),
+      Text(c.profileLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
       Semantics(
         liveRegion: true,
         container: true,
@@ -251,6 +266,7 @@ class _SessionLivePageState extends State<SessionLivePage>
         SessionLiveFailure.notFound => l10n.liveEvicted,
         SessionLiveFailure.incompatibleResponse => l10n.liveIncompatible,
         SessionLiveFailure.capacity => l10n.liveCapacity,
+        SessionLiveFailure.sourceChanged => l10n.liveSourceChanged,
         _ => l10n.liveUnavailable,
       };
 
@@ -345,12 +361,13 @@ class _SessionLivePageState extends State<SessionLivePage>
               return AppBar(
                 leading: widget.leading,
                 actions: [
-                  if (c.supportsSelection)
+                  if (widget.workspaceChrome) const WorkspaceAppBarActions(),
+                  if (!widget.workspaceChrome && c.supportsSelection)
                     Padding(
                       padding: const EdgeInsetsDirectional.only(end: 8),
                       child: SessionSelectionChip(live: c, compact: compact),
                     ),
-                  if (c.permissionModes != null)
+                  if (!widget.workspaceChrome && c.permissionModes != null)
                     Padding(
                       padding: const EdgeInsetsDirectional.only(end: 8),
                       child: SessionPermissionModeChip(
@@ -359,13 +376,15 @@ class _SessionLivePageState extends State<SessionLivePage>
                       ),
                     ),
                 ],
-                title: Text(
-                  c.summary.info.title.trim().isEmpty
-                      ? l10n.sessionExportUntitled
-                      : c.summary.info.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                title: widget.workspaceChrome
+                    ? const ServerSwitcher(controlKey: ValueKey('live-server'))
+                    : Text(
+                        c.summary.info.title.trim().isEmpty
+                            ? l10n.sessionExportUntitled
+                            : c.summary.info.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
               );
             },
           ),
@@ -396,8 +415,7 @@ class _SessionLivePageState extends State<SessionLivePage>
             // The prompt-less footer also renders the Stop button and, while a
             // Stop waits or failed, its notice: both live outside the partition.
             final stopNotice =
-                c.outbox == null &&
-                c.stopState.phase != SessionStopPhase.ready;
+                c.outbox == null && c.stopState.phase != SessionStopPhase.ready;
             final chrome =
                 (c.loading ? 4.0 : 0.0) +
                 MediaQuery.paddingOf(context).bottom +
@@ -472,8 +490,9 @@ class _SessionLivePageState extends State<SessionLivePage>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ConstrainedBox(
-                              constraints:
-                                  BoxConstraints(maxHeight: cardBudget),
+                              constraints: BoxConstraints(
+                                maxHeight: cardBudget,
+                              ),
                               child: SingleChildScrollView(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,

@@ -11,6 +11,26 @@ import '../storage/storage_support.dart';
 String unrestrictedFingerprint(OpenCodeSessionRules rules) =>
     sha256.convert(utf8.encode(rules.canonical)).toString();
 
+/// The binding Unrestricted records are scoped to. The label is left out, so
+/// renaming keeps ownership; an endpoint edit raises the revision, so even a
+/// return to an earlier URL is another binding.
+UnrestrictedBinding unrestrictedBindingFor(EndpointProfile profile) =>
+    UnrestrictedBinding(
+      sha256
+          .convert(
+            utf8.encode(
+              jsonEncode([
+                'unrestricted-binding',
+                1,
+                profile.id,
+                profile.endpoint.toString(),
+                profile.bindingRevision,
+              ]),
+            ),
+          )
+          .toString(),
+    );
+
 /// What a fresh read of the rules means for a session, given CodeWalk's
 /// record. [record] is the record to keep afterwards (null drops it).
 typedef UnrestrictedReading = ({
@@ -89,8 +109,14 @@ UnrestrictedReading classifyUnrestricted(
 final class UnrestrictedOwnershipStore implements UnrestrictedOwnershipLedger {
   UnrestrictedOwnershipStore({required V2MetadataStore store}) : _store = store;
 
-  /// JSON object of session storage keys to `{stage, base, owned}`.
+  /// JSON object of [recordKey]s to `{stage, base, owned}`. Entries keyed by
+  /// a bare session storage key predate binding scopes: nothing proves which
+  /// server they were written through, so they are kept and counted but
+  /// never read or removed.
   static const key = 'cw2.sessions.unrestrictedRules';
+
+  static String recordKey(UnrestrictedBinding binding, SessionRef session) =>
+      '${binding.digest}|${session.storageKey}';
 
   /// Records come only from deliberate actions and are never evicted: a
   /// dropped record would leave a rule CodeWalk can no longer remove.
@@ -175,27 +201,37 @@ final class UnrestrictedOwnershipStore implements UnrestrictedOwnershipLedger {
       value is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(value);
 
   @override
-  UnrestrictedOwnership? recordFor(SessionRef session) =>
-      _loaded && !_unreadable ? _records[session.storageKey] : null;
+  UnrestrictedOwnership? recordFor(
+    UnrestrictedBinding binding,
+    SessionRef session,
+  ) => _loaded && !_unreadable ? _records[recordKey(binding, session)] : null;
 
   @override
-  Future<bool> put(SessionRef session, UnrestrictedOwnership record) =>
-      _executor.run(key, () async {
-        if (!_loaded || _unreadable) return false;
-        final id = session.storageKey;
-        if (!_records.containsKey(id) && _records.length >= maxRecords) {
-          return false;
-        }
-        final next = {..._records, id: record};
-        if (!await _write(next)) return false;
-        _records[id] = record;
-        return true;
-      });
+  Future<bool> put(
+    UnrestrictedBinding binding,
+    SessionRef session,
+    UnrestrictedOwnership record, {
+    bool Function()? when,
+  }) => _executor.run(key, () async {
+    if (!_loaded || _unreadable || !(when?.call() ?? true)) return false;
+    final id = recordKey(binding, session);
+    if (!_records.containsKey(id) && _records.length >= maxRecords) {
+      return false;
+    }
+    final next = {..._records, id: record};
+    if (!await _write(next)) return false;
+    _records[id] = record;
+    return true;
+  });
 
   @override
-  Future<bool> remove(SessionRef session) => _executor.run(key, () async {
-    if (!_loaded || _unreadable) return false;
-    final id = session.storageKey;
+  Future<bool> remove(
+    UnrestrictedBinding binding,
+    SessionRef session, {
+    bool Function()? when,
+  }) => _executor.run(key, () async {
+    if (!_loaded || _unreadable || !(when?.call() ?? true)) return false;
+    final id = recordKey(binding, session);
     if (!_records.containsKey(id)) return true;
     final next = Map.of(_records)..remove(id);
     if (!await _write(next)) return false;
@@ -203,21 +239,37 @@ final class UnrestrictedOwnershipStore implements UnrestrictedOwnershipLedger {
     return true;
   });
 
+  static String _encode(Map<String, UnrestrictedOwnership> records) =>
+      jsonEncode({
+        for (final entry in records.entries)
+          entry.key: {
+            'stage': entry.value.stage.name,
+            'base': entry.value.base,
+            'owned': entry.value.owned,
+          },
+      });
+
+  /// A write whose acknowledgement is lost is decided by reading the value
+  /// back. An outcome that cannot be established refuses every later write,
+  /// so a stale snapshot never overwrites a record that was stored.
   Future<bool> _write(Map<String, UnrestrictedOwnership> records) async {
-    final value = jsonEncode({
-      for (final entry in records.entries)
-        entry.key: {
-          'stage': entry.value.stage.name,
-          'base': entry.value.base,
-          'owned': entry.value.owned,
-        },
-    });
+    final value = _encode(records);
     try {
       requireV2Key(key);
       if (await _store.write(key, value)) return true;
-      return await _store.read(key) == value;
     } on Object {
-      return false;
+      // It may have been stored before it failed: read it back.
     }
+    try {
+      final stored = await _store.read(key);
+      if (stored == value) return true;
+      if (stored == _encode(_records) || (stored == null && _records.isEmpty)) {
+        return false;
+      }
+    } on Object {
+      // Unknown outcome, below.
+    }
+    _unreadable = true;
+    return false;
   }
 }

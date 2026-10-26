@@ -1582,4 +1582,99 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'کوشش ترک کریں اور متن رکھیں';
+
+  @override
+  String get chatAppBarMoreActions => 'مزید کارروائیاں';
+
+  @override
+  String get chatAppBarPinAction => 'ایپ بار پر پن کریں۔';
+
+  @override
+  String get chatAppBarUnpinAction => 'ایپ بار سے پن ہٹا دیں۔';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" میں ایک خرابی ہے۔';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" کو آپ کے ان پٹ کی ضرورت ہے۔';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" کا ایک نیا جواب آیا ہے۔';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => 'سرور کنکشن پر توجہ کی ضرورت ہے۔';
+
+  @override
+  String get chatBadgeSyncing => 'گفتگو کی مطابقت پذیری ہو رہی ہے...';
+
+  @override
+  String get serversSearchActiveHint => 'فعال سرور تلاش کریں';
+
+  @override
+  String get serversSetActive => 'ایکٹو سیٹ کریں۔';
+
+  @override
+  String get statusDelayed => 'تاخیر شدہ';
+
+  @override
+  String get statusOffline => 'آف لائن';
+
+  @override
+  String get statusOnline => 'آن لائن';
+
+  @override
+  String get healthCredentialMissing =>
+      'اس سرور کی محفوظ اسناد موجود نہیں۔ دوبارہ پیئر کریں یا پاس ورڈ درج کریں۔';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'محفوظ اسناد پڑھی نہیں جا سکیں۔ رسائی بحال کرنے کے لیے سرورز کھولیں۔';
+
+  @override
+  String get healthCredentialExpired =>
+      'پیئرنگ کی اسناد کی میعاد ختم ہو گئی۔ دوبارہ پیئر کریں یا سرورز میں تجدید کریں۔';
+
+  @override
+  String get serversActive => 'فعال';
+
+  @override
+  String get serversClearDefault => 'ڈیفالٹ صاف کریں۔';
+
+  @override
+  String get serversDefault => 'طے شدہ';
+
+  @override
+  String get serversEdit => 'ترمیم کریں۔';
+
+  @override
+  String get serversSetDefault => 'ڈیفالٹ سیٹ کریں۔';
+
+  @override
+  String get composerSourceChanged =>
+      'یہ پیغام سرور کے پچھلے کنکشن سے متعلق ہے۔ آپ مقامی نقل دیکھ یا حذف کر سکتے ہیں۔';
+
+  @override
+  String get composerSourceUnknown =>
+      'اصل سرور کنکشن کی تصدیق نہیں ہو سکی۔ آپ یہ مقامی پیغام دیکھ یا حذف کر سکتے ہیں۔';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'سرور کا درست نام درج کریں (1 سے 160 حروف)۔';
+
+  @override
+  String get hostsEditChanged =>
+      'پروفائل بدل گیا ہے یا محفوظ ہونے کی تصدیق نہیں ہو سکی۔ دوبارہ محفوظ کرنے سے پہلے محفوظ پروفائل کا موازنہ کرنے کے لیے دوبارہ لوڈ کریں۔';
+
+  @override
+  String get hostsEditSavedProfile => 'محفوظ پروفائل';
+
+  @override
+  String get liveSourceChanged =>
+      'سرور کنکشن بدل گیا ہے۔ سرور کی موجودہ ترتیبات استعمال کرنے کے لیے یہ گفتگو دوبارہ کھولیں۔';
 }

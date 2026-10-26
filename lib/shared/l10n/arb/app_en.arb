@@ -1949,5 +1949,128 @@
   "workspaceDraftReset": "Discard attempt and keep text",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "More actions",
+  "@chatAppBarMoreActions": {
+    "description": "CodeWalk UI string — chatAppBarMoreActions"
+  },
+  "chatAppBarPinAction": "Pin to app bar",
+  "@chatAppBarPinAction": {
+    "description": "CodeWalk UI string — chatAppBarPinAction"
+  },
+  "chatAppBarUnpinAction": "Unpin from app bar",
+  "@chatAppBarUnpinAction": {
+    "description": "CodeWalk UI string — chatAppBarUnpinAction"
+  },
+  "chatBadgeConversationError": "\"{title}\" has an error.",
+  "@chatBadgeConversationError": {
+    "description": "CodeWalk UI string — chatBadgeConversationError",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "chatBadgeConversationNeedsInput": "\"{title}\" needs your input.",
+  "@chatBadgeConversationNeedsInput": {
+    "description": "CodeWalk UI string — chatBadgeConversationNeedsInput",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "chatBadgeConversationNewReply": "\"{title}\" has a new reply.",
+  "@chatBadgeConversationNewReply": {
+    "description": "CodeWalk UI string — chatBadgeConversationNewReply",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "chatBadgeServerNeedsAttention": "Server connection needs attention.",
+  "@chatBadgeServerNeedsAttention": {
+    "description": "CodeWalk UI string — chatBadgeServerNeedsAttention"
+  },
+  "chatBadgeSyncing": "Syncing conversations...",
+  "@chatBadgeSyncing": {
+    "description": "CodeWalk UI string — chatBadgeSyncing"
+  },
+  "serversSearchActiveHint": "Search active server",
+  "@serversSearchActiveHint": {
+    "description": "CodeWalk UI string — serversSearchActiveHint"
+  },
+  "serversSetActive": "Set Active",
+  "@serversSetActive": {
+    "description": "CodeWalk UI string — serversSetActive"
+  },
+  "statusDelayed": "Delayed",
+  "@statusDelayed": {
+    "description": "CodeWalk UI string — statusDelayed"
+  },
+  "statusOffline": "Offline",
+  "@statusOffline": {
+    "description": "CodeWalk UI string — statusOffline"
+  },
+  "statusOnline": "Online",
+  "@statusOnline": {
+    "description": "CodeWalk UI string — statusOnline"
+  },
+  "healthCredentialMissing": "This server has no saved credential. Pair again or enter its password.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "The saved credential could not be read. Open Servers to recover access.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "The saved pairing credential has expired. Pair again or renew it in Servers.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Active",
+  "@serversActive": {
+    "description": "CodeWalk UI string — serversActive"
+  },
+  "serversClearDefault": "Clear Default",
+  "@serversClearDefault": {
+    "description": "CodeWalk UI string — serversClearDefault"
+  },
+  "serversDefault": "Default",
+  "@serversDefault": {
+    "description": "CodeWalk UI string — serversDefault"
+  },
+  "serversEdit": "Edit",
+  "@serversEdit": {
+    "description": "CodeWalk UI string — serversEdit"
+  },
+  "serversSetDefault": "Set Default",
+  "@serversSetDefault": {
+    "description": "CodeWalk UI string — serversSetDefault"
+  },
+  "composerSourceChanged": "This message belongs to an earlier server connection. You can inspect or discard its local copy.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "The original server connection could not be verified. You can inspect or discard this local message.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Enter a valid server name (1–160 characters).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "The profile changed or the save could not be confirmed. Reload to compare the saved profile before saving again.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Saved profile",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "The server connection changed. Reopen this conversation to use the current server settings.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

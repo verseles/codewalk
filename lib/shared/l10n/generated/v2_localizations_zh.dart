@@ -1478,4 +1478,91 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get workspaceDraftReset => '放弃本次尝试并保留输入';
+
+  @override
+  String get chatAppBarMoreActions => '更多操作';
+
+  @override
+  String get chatAppBarPinAction => '固定到应用栏';
+
+  @override
+  String get chatAppBarUnpinAction => '从应用栏取消固定';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '“$title”出现错误。';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '“$title”需要您的输入。';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '“$title”有新回复。';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention => '服务器连接需要注意。';
+
+  @override
+  String get chatBadgeSyncing => '正在同步会话...';
+
+  @override
+  String get serversSearchActiveHint => '搜索活动服务器';
+
+  @override
+  String get serversSetActive => '设为活动';
+
+  @override
+  String get statusDelayed => '延迟';
+
+  @override
+  String get statusOffline => '离线';
+
+  @override
+  String get statusOnline => '在线';
+
+  @override
+  String get healthCredentialMissing => '此服务器没有已保存的凭据。请重新配对或输入密码。';
+
+  @override
+  String get healthCredentialUnreadable => '无法读取已保存的凭据。请打开服务器设置以恢复访问。';
+
+  @override
+  String get healthCredentialExpired => '配对凭据已过期。请在服务器设置中重新配对或续期。';
+
+  @override
+  String get serversActive => '活动';
+
+  @override
+  String get serversClearDefault => '清除默认值';
+
+  @override
+  String get serversDefault => '默认';
+
+  @override
+  String get serversEdit => '编辑';
+
+  @override
+  String get serversSetDefault => '设为默认';
+
+  @override
+  String get composerSourceChanged => '此消息属于之前的服务器连接。你可以查看或丢弃本地副本。';
+
+  @override
+  String get composerSourceUnknown => '无法确认原始服务器连接。你可以查看或丢弃此本地消息。';
+
+  @override
+  String get hostsEditInvalidLabel => '请输入有效的服务器名称（1–160 个字符）。';
+
+  @override
+  String get hostsEditChanged => '配置已更改或无法确认保存结果。请重新加载并比较已保存的配置，然后再保存。';
+
+  @override
+  String get hostsEditSavedProfile => '已保存的配置';
+
+  @override
+  String get liveSourceChanged => '服务器连接已更改。请重新打开此对话以使用当前服务器设置。';
 }

@@ -116,8 +116,7 @@ class LiveHandle implements SessionLiveHandle {
     InteractionId id, {
     SessionRef? owner,
   }) =>
-      _replyStates[_replyKey(id, owner)] ??
-      const SessionPermissionReplyState();
+      _replyStates[_replyKey(id, owner)] ?? const SessionPermissionReplyState();
 
   @override
   bool canReply(InteractionRequest request) {
@@ -349,6 +348,14 @@ class LiveHandle implements SessionLiveHandle {
 }
 
 class LiveDirectory implements SessionLiveDirectory {
+  @override
+  void reconcileProfiles({
+    required List<EndpointProfile> profiles,
+    required Map<String, EndpointCredential> credentials,
+    required bool available,
+    String? changingProfile,
+  }) {}
+
   final opens = <Completer<SessionLiveHandle>>[];
   final credentials = <EndpointCredential>[];
   final handles = <LiveHandle>[];

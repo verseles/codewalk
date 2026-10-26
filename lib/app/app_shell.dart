@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../features/hosts/endpoint_health_controller.dart';
+import '../features/hosts/endpoint_health_view.dart';
+import '../features/hosts/server_switcher.dart';
 import '../features/sessions/session_tab_strip.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
@@ -15,6 +18,7 @@ import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import 'app_keyboard_shortcuts.dart';
+import 'workspace_chrome.dart';
 import 'workspace_controller.dart';
 
 /// The workspace of the legacy client: the projects and their sessions on the
@@ -61,6 +65,8 @@ class AppShell extends StatelessWidget {
       );
     }
     final home = location == '/' || location == '/sessions';
+    final hasServer =
+        context.watch<SessionsController?>()?.selectedProfile != null;
     final tabs = context.read<SessionTabsController?>();
     final workspace = KeyboardActionScope(
       handlers: {ShortcutAction.newChat: () => _create(context)},
@@ -80,16 +86,16 @@ class AppShell extends StatelessWidget {
                 appBar: home
                     ? AppBar(
                         leading: Builder(
-                          builder: (context) => IconButton(
-                            key: const ValueKey('workspace-drawer'),
-                            icon: const Icon(Icons.menu),
-                            tooltip: MaterialLocalizations.of(
-                              context,
-                            ).openAppDrawerTooltip,
-                            onPressed: Scaffold.of(context).openDrawer,
+                          builder: (context) => WorkspaceMenuButton(
+                            openDrawer: Scaffold.of(context).openDrawer,
                           ),
                         ),
-                        title: const Text('CodeWalk'),
+                        title: hasServer
+                            ? const ServerSwitcher(
+                                controlKey: ValueKey('workspace-server'),
+                              )
+                            : const Text('CodeWalk'),
+                        actions: const [WorkspaceAppBarActions()],
                       )
                     : null,
                 drawer: const Drawer(child: SafeArea(child: SessionsPage())),
@@ -98,7 +104,14 @@ class AppShell extends StatelessWidget {
             }
             final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
             return Scaffold(
-              appBar: AppBar(title: const Text('CodeWalk')),
+              appBar: AppBar(
+                title: hasServer
+                    ? const ServerSwitcher(
+                        controlKey: ValueKey('workspace-server'),
+                      )
+                    : const Text('CodeWalk'),
+                actions: const [WorkspaceAppBarActions()],
+              ),
               body: Row(
                 children: [
                   SizedBox(
@@ -115,12 +128,13 @@ class AppShell extends StatelessWidget {
         ),
       ),
     );
-    if (tabs == null) return workspace;
+    final observed = WorkspaceWarningObserver(child: workspace);
+    if (tabs == null) return observed;
     return SessionTabsWatcher(
       tabs: tabs,
       catalog: context.read<SessionsController?>(),
       home: home,
-      child: workspace,
+      child: observed,
     );
   }
 
@@ -133,10 +147,7 @@ class AppShell extends StatelessWidget {
 
   /// Whether the workspace can open a local draft for the selected server.
   static bool canCreate(SessionsController controller) =>
-      !controller.hosts.loading &&
-      !controller.hosts.storageError &&
-      controller.selectedProfile != null &&
-      !controller.creating;
+      canOpenWorkspaceDraft(controller);
 }
 
 /// The system back at the root of the workspace, as in the legacy client: it
@@ -188,6 +199,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final catalog = context.watch<SessionsController?>();
+    final health = context.watch<EndpointHealthController?>();
     final drafts = context.watch<WorkspaceDraftController?>();
     if (drafts != null && drafts.isDraftActive) {
       return WorkspaceDraftPage(controller: drafts);
@@ -232,6 +244,22 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     }
     final profile = catalog.selectedProfile;
     if (profile == null) return const _HomeLoading();
+    if (health?.view(profile).status == EndpointHealthStatus.offline) {
+      return _HomeState(
+        icon: Icons.cloud_off_outlined,
+        title: profile.label,
+        actions: [
+          if (AppShell.canCreate(catalog))
+            FilledButton.icon(
+              key: const ValueKey('workspace-new-chat'),
+              onPressed: () => openWorkspaceDraft(context),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.chatNewChat),
+            ),
+          EndpointHealthRecovery(profile: profile, health: health!),
+        ],
+      );
+    }
     // A saved server that does not answer limits the chat, and the home
     // keeps the ways out of it.
     if (catalog.failure case final failure?) {

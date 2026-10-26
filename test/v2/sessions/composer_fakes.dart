@@ -115,6 +115,7 @@ OutboxEntry entryOf(
   SubmissionKind state, {
   String? reason,
   CancellationFence fence = CancellationFence.none,
+  OutboxSource source = OutboxSource.current,
 }) => OutboxEntry(
   session: session,
   commandId: CommandId(command),
@@ -126,6 +127,7 @@ OutboxEntry entryOf(
   updatedAt: DateTime.utc(2026, 10, 15),
   reason: reason,
   fence: fence,
+  source: source,
 );
 
 /// A pending inbox row as the live projection shapes it.

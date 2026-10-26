@@ -1614,4 +1614,100 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get workspaceDraftReset =>
       'Abandonner la tentative et garder le texte';
+
+  @override
+  String get chatAppBarMoreActions => 'Plus d\'actions';
+
+  @override
+  String get chatAppBarPinAction => 'Épingler à la barre d\'application';
+
+  @override
+  String get chatAppBarUnpinAction => 'Désépingler de la barre d\'application';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" a une erreur.';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" nécessite votre intervention.';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" a une nouvelle réponse.';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'La connexion au serveur nécessite une attention particulière.';
+
+  @override
+  String get chatBadgeSyncing => 'Synchronisation des conversations...';
+
+  @override
+  String get serversSearchActiveHint => 'Rechercher un serveur actif';
+
+  @override
+  String get serversSetActive => 'Définir comme actif';
+
+  @override
+  String get statusDelayed => 'Retardé';
+
+  @override
+  String get statusOffline => 'Hors ligne';
+
+  @override
+  String get statusOnline => 'En ligne';
+
+  @override
+  String get healthCredentialMissing =>
+      'Ce serveur n’a pas d’identifiant enregistré. Associez-le à nouveau ou saisissez son mot de passe.';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'Impossible de lire l’identifiant enregistré. Ouvrez Serveurs pour rétablir l’accès.';
+
+  @override
+  String get healthCredentialExpired =>
+      'L’identifiant d’association a expiré. Associez à nouveau le serveur ou renouvelez-le dans Serveurs.';
+
+  @override
+  String get serversActive => 'Actif';
+
+  @override
+  String get serversClearDefault => 'Effacer par défaut';
+
+  @override
+  String get serversDefault => 'Par défaut';
+
+  @override
+  String get serversEdit => 'Modifier';
+
+  @override
+  String get serversSetDefault => 'Définir comme serveur par défaut';
+
+  @override
+  String get composerSourceChanged =>
+      'Ce message appartient à une ancienne connexion au serveur. Vous pouvez consulter ou supprimer sa copie locale.';
+
+  @override
+  String get composerSourceUnknown =>
+      'La connexion d’origine n’a pas pu être vérifiée. Vous pouvez consulter ou supprimer ce message local.';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'Saisissez un nom de serveur valide (1 à 160 caractères).';
+
+  @override
+  String get hostsEditChanged =>
+      'Le profil a changé ou l’enregistrement n’a pas pu être confirmé. Rechargez pour comparer le profil enregistré avant de réessayer.';
+
+  @override
+  String get hostsEditSavedProfile => 'Profil enregistré';
+
+  @override
+  String get liveSourceChanged =>
+      'La connexion au serveur a changé. Rouvrez cette conversation pour utiliser les paramètres actuels du serveur.';
 }

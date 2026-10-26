@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/workspace_chrome.dart';
 import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../hosts/endpoint_health_controller.dart';
 import 'session_live_controller.dart';
 import 'session_live_page.dart';
 import 'session_tab_strip.dart';
@@ -43,6 +45,7 @@ enum _Read { idle, reading, notFound, login, failed }
 class _SessionRoutePageState extends State<SessionRoutePage> {
   SessionSummary? _summary;
   SessionReadTask? _task;
+  EndpointProfile? _binding;
 
   /// The live view of the open session, made once. Its tab keeps it open
   /// while other tabs are shown; without tabs its page disposes it.
@@ -99,6 +102,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       _task?.cancel();
       _task = null;
       _summary = null;
+      _binding = null;
       _live = null;
       _opened = null;
       _tabbed = false;
@@ -118,6 +122,11 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
   /// Reads the session once from its server. A late answer for another
   /// session or a disposed page is dropped.
   void _start(SessionsController catalog) {
+    final binding = catalog.selectedProfile;
+    if (binding == null) {
+      _read = _Read.failed;
+      return;
+    }
     final task = catalog.read(_ref);
     if (task == null) {
       _read = _Read.failed;
@@ -126,9 +135,25 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     _task = task;
     _read = _Read.reading;
     final ref = _ref;
+    bool current() {
+      if (!mounted || !identical(_task, task)) return false;
+      final hosts = catalog.hosts;
+      if (hosts.loading ||
+          hosts.storageError ||
+          hosts.pendingBindingChange == binding.id ||
+          !hosts.isCurrentProfile(binding)) {
+        setState(() {
+          _task = null;
+          _read = _Read.idle;
+        });
+        return false;
+      }
+      return true;
+    }
+
     task.result.then(
       (summary) {
-        if (!mounted || !identical(_task, task)) return;
+        if (!current()) return;
         setState(() {
           _task = null;
           // An answer for another session is never opened in its place.
@@ -140,7 +165,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         });
       },
       onError: (Object error) {
-        if (!mounted || !identical(_task, task)) return;
+        if (!current()) return;
         setState(() {
           _task = null;
           _read = switch (error) {
@@ -190,12 +215,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
   Widget? _leading(BuildContext context) {
     final shell = Scaffold.maybeOf(context);
     if (shell == null || !shell.hasDrawer) return null;
-    return IconButton(
-      key: const ValueKey('workspace-drawer'),
-      icon: const Icon(Icons.menu),
-      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      onPressed: shell.openDrawer,
-    );
+    return WorkspaceMenuButton(openDrawer: shell.openDrawer);
   }
 
   Future<void> _open(SessionTabsController tabs, SessionSummary summary) async {
@@ -235,6 +255,20 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     final hosts = catalog.hosts;
     final selected = catalog.selectedProfile;
     final tabs = context.watch<SessionTabsController?>();
+    final profile = hosts.profiles
+        .where((profile) => profile.id == widget.host)
+        .firstOrNull;
+    if (hosts.loaded && !hosts.loading && !hosts.storageError) {
+      if (_binding != null &&
+          (profile == null || !_binding!.sameBinding(profile))) {
+        _task?.cancel();
+        _task = null;
+        _summary = null;
+        _live = null;
+        _read = _Read.idle;
+      }
+      _binding = profile;
+    }
     if (tabs != null) {
       final open = tabs.tabs.any((tab) => tab.ref == _ref);
       if (open) {
@@ -263,7 +297,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     // An open session outlasts a reload of the saved servers; it closes
     // only when its server is removed or another one is chosen.
     if (live != null &&
-        (hosts.loading || hosts.profiles.any((p) => p.id == widget.host)) &&
+        (hosts.loading || profile?.sameBinding(live.profile) == true) &&
         (selected == null || selected.id == widget.host)) {
       // The list holds this server again, so a later reload may reselect.
       if (selected != null) _selecting = false;
@@ -281,6 +315,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         key: ObjectKey(live),
         controller: live,
         leading: leading,
+        workspaceChrome: true,
         ownsController: context.read<SessionTabsController?>() == null,
       );
     }
@@ -292,9 +327,6 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         onRetry: hosts.load,
       );
     }
-    final profile = hosts.profiles
-        .where((p) => p.id == widget.host)
-        .firstOrNull;
     if (profile == null) {
       return _Notice(message: l10n.sessionLinkUnknownServer, leading: leading);
     }
@@ -339,6 +371,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         profile: profile,
         summary: summary,
         directory: directory,
+        health: context.read<EndpointHealthController?>(),
         permissionModes: _permissionPolicy(context),
         drafts: context.read<SessionDraftStore?>(),
       );
@@ -360,6 +393,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         controller: live,
         leading: leading,
         ownsController: tabs == null,
+        workspaceChrome: true,
       );
     }
     if (catalog.failure == SessionCatalogFailure.authenticationRequired) {

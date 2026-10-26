@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "시도를 취소하고 입력 유지",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "추가 작업",
+  "chatAppBarPinAction": "앱 바에 고정",
+  "chatAppBarUnpinAction": "앱 바에서 고정 해제",
+  "chatBadgeConversationError": "\"{title}\"에 오류가 있습니다.",
+  "chatBadgeConversationNeedsInput": "\"{title}\"에 입력이 필요합니다.",
+  "chatBadgeConversationNewReply": "\"{title}\"에 새 답장이 있습니다.",
+  "chatBadgeServerNeedsAttention": "서버 연결에 주의가 필요합니다.",
+  "chatBadgeSyncing": "대화 동기화 중...",
+  "serversSearchActiveHint": "활성 서버 검색",
+  "serversSetActive": "활성으로 설정",
+  "statusDelayed": "지연됨",
+  "statusOffline": "오프라인",
+  "statusOnline": "온라인",
+  "healthCredentialMissing": "이 서버에 저장된 인증 정보가 없습니다. 다시 페어링하거나 비밀번호를 입력하세요.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "저장된 인증 정보를 읽을 수 없습니다. 서버 설정에서 접근을 복구하세요.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "페어링 인증 정보가 만료되었습니다. 서버 설정에서 다시 페어링하거나 갱신하세요.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "활성",
+  "serversClearDefault": "기본값 지우기",
+  "serversDefault": "기본값",
+  "serversEdit": "편집",
+  "serversSetDefault": "기본값으로 설정",
+  "composerSourceChanged": "이 메시지는 이전 서버 연결에 속합니다. 로컬 사본을 확인하거나 삭제할 수 있습니다.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "원래 서버 연결을 확인할 수 없습니다. 이 로컬 메시지를 확인하거나 삭제할 수 있습니다.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "올바른 서버 이름을 입력하세요(1~160자).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "프로필이 변경되었거나 저장을 확인할 수 없습니다. 다시 불러와 저장된 프로필을 비교한 후 다시 저장하세요.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "저장된 프로필",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "서버 연결이 변경되었습니다. 현재 서버 설정을 사용하려면 이 대화를 다시 여세요.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

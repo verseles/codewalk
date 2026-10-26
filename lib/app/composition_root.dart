@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
@@ -45,6 +46,7 @@ import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'app_router.dart';
 import 'live_wake.dart';
+import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
 
 /// Resolve the private graph before mounting widgets; never use the v1 locator.
@@ -118,6 +120,7 @@ AppDependencies createAppDependencies({
           ),
       prober: prober,
       diagnostics: locator<DiagnosticsController>(),
+      now: sessionClock,
     ),
   );
   locator.registerSingleton(
@@ -125,6 +128,10 @@ AppDependencies createAppDependencies({
       store: metadataStore,
       diagnostics: locator<DiagnosticsController>(),
     ),
+  );
+  final endpointHealth = EndpointHealthController(
+    hosts: locator<HostsController>(),
+    now: sessionClock,
   );
   // One payload store for the outbox and the drafts, which use their own
   // keys.
@@ -139,6 +146,22 @@ AppDependencies createAppDependencies({
         permissionModes: permissionModes,
         unrestrictedOwnership: unrestrictedOwnership,
       ))();
+  void Function()? disposeProfileBindings;
+  if (liveDirectory != null) {
+    final hosts = locator<HostsController>();
+    void reconcileProfiles() => liveDirectory.reconcileProfiles(
+      profiles: hosts.profiles,
+      credentials: {
+        for (final profile in hosts.profiles)
+          profile.id: ?hosts.credentialFor(profile),
+      },
+      available: hosts.loaded && !hosts.loading && !hosts.storageError,
+      changingProfile: hosts.pendingBindingChange,
+    );
+    hosts.addListener(reconcileProfiles);
+    reconcileProfiles();
+    disposeProfileBindings = () => hosts.removeListener(reconcileProfiles);
+  }
   // Reconnects every open endpoint stream on a return from the background
   // or a network change.
   final liveWake = liveDirectory == null
@@ -167,6 +190,7 @@ AppDependencies createAppDependencies({
   // Brings back the server and the project the workspace was left on.
   final workspace = WorkspaceController(
     catalog: locator<SessionsController>(),
+    health: endpointHealth,
     store: workspaceStore ?? WorkspaceStore(store: metadata),
     tabs: sessionTabs,
   );
@@ -197,9 +221,16 @@ AppDependencies createAppDependencies({
     localizations: locator<L10nBridge>(),
     router: locator<GoRouter>(),
     hosts: locator<HostsController>(),
+    endpointHealth: endpointHealth,
+    workspaceChrome: WorkspaceChromeController(
+      health: endpointHealth,
+      catalog: locator<SessionsController>(),
+      tabs: sessionTabs,
+    ),
     sessions: locator<SessionsController>(),
     historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
     liveDirectory: liveDirectory,
+    disposeProfileBindings: disposeProfileBindings,
     liveWake: liveWake,
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
@@ -207,6 +238,7 @@ AppDependencies createAppDependencies({
     workspace: workspace,
     workspaceDrafts: WorkspaceDraftController(
       catalog: locator<SessionsController>(),
+      health: endpointHealth,
       store:
           workspaceDraftStore ??
           WorkspaceDraftStore(payloads: payloads, index: metadata),

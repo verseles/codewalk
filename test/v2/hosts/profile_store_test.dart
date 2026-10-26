@@ -48,8 +48,13 @@ class Secrets implements EndpointCredentialBackend {
   final values = <String, String>{};
   bool failRemove = false;
   bool failAfterWrite = false;
+  bool failRead = false;
   @override
-  Future<String?> read(String key) async => values[key];
+  Future<String?> read(String key) async {
+    if (failRead) throw StateError('controlled vault read failure');
+    return values[key];
+  }
+
   @override
   Future<void> write(String key, String value) async {
     values[key] = value;
@@ -88,6 +93,264 @@ void main() {
     secrets = Secrets();
     store = openStore(backend);
   });
+
+  test(
+    'rename preserves binding and unknown fields without reading the vault',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'fake-secret');
+      final key = EndpointProfileStore.itemKey(original.id);
+      final raw =
+          jsonDecode(backend.values[key]! as String) as Map<String, dynamic>;
+      raw['futurePreference'] = {'retained': true};
+      backend.values[key] = jsonEncode(raw);
+      final vaultBefore = Map.of(secrets.values);
+      secrets.failRead = true;
+      final renamed = await store.updateProfile(
+        original,
+        label: 'Renamed',
+        endpoint: original.endpoint,
+      );
+      expect(renamed.sameBinding(original), isTrue);
+      expect(renamed.label, 'Renamed');
+      expect(secrets.values, vaultBefore);
+      expect(jsonDecode(backend.values[key]! as String)['futurePreference'], {
+        'retained': true,
+      });
+      secrets.failRead = false;
+      expect(await store.readSecret(renamed), 'fake-secret');
+      await expectLater(
+        store.updateProfile(
+          original,
+          label: 'Stale',
+          endpoint: original.endpoint,
+        ),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test(
+    'URL ABA advances binding and rejects stale credential and removal operations',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'fake-secret');
+      final vaultBefore = Map.of(secrets.values);
+      final moved = await store.updateProfile(
+        original,
+        label: original.label,
+        endpoint: original.endpoint.resolve('/another-proxy/'),
+      );
+      expect(moved.bindingRevision, 1);
+      expect(await store.readSecret(moved), 'fake-secret');
+      final returned = await store.updateProfile(
+        moved,
+        label: original.label,
+        endpoint: original.endpoint,
+      );
+      expect(returned.bindingRevision, 2);
+      expect(returned.sameBinding(original), isFalse);
+      expect(await store.readCredential(original), isNull);
+      await expectLater(store.remove(original), throwsFormatException);
+      await expectLater(
+        store.replaceCredential(
+          original,
+          EndpointCredential(
+            kind: EndpointAuthKind.password,
+            secret: 'replacement',
+          ),
+          expected: EndpointCredential(
+            kind: EndpointAuthKind.password,
+            secret: 'fake-secret',
+          ),
+        ),
+        throwsFormatException,
+      );
+      expect(secrets.values, vaultBefore);
+      expect((await openStore(backend).load()).single.bindingRevision, 2);
+    },
+  );
+
+  test(
+    'changing origin leaves credentials untouched and uses only destination scope',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'origin-a-secret');
+      final destination = Uri.parse('https://destination.example/proxy/');
+      await store.credentials.write(
+        EndpointCredentialScope(endpoint: destination, profileId: original.id),
+        EndpointCredentialKind.endpointPassword,
+        'origin-b-secret',
+      );
+      final vaultBefore = Map.of(secrets.values);
+      final moved = await store.updateProfile(
+        original,
+        label: 'B',
+        endpoint: destination,
+      );
+      expect(await store.readSecret(moved), 'origin-b-secret');
+      expect(secrets.values, vaultBefore);
+      final missing = await store.updateProfile(
+        moved,
+        label: 'C',
+        endpoint: Uri.parse('https://missing.example/'),
+      );
+      expect(await store.readCredential(missing), isNull);
+      expect(secrets.values, vaultBefore);
+    },
+  );
+
+  test(
+    'revision overflow refuses URL edits but still permits rename',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'fake-secret');
+      final key = EndpointProfileStore.itemKey(original.id);
+      final raw =
+          jsonDecode(backend.values[key]! as String) as Map<String, dynamic>;
+      raw['bindingRevision'] = EndpointProfile.maxBindingRevision;
+      backend.values[key] = jsonEncode(raw);
+      final current = (await store.load()).single;
+      final before = backend.values[key];
+      await expectLater(
+        store.updateProfile(
+          current,
+          label: current.label,
+          endpoint: Uri.parse('https://other.example/'),
+        ),
+        throwsFormatException,
+      );
+      expect(backend.values[key], before);
+      final renamed = await store.updateProfile(
+        current,
+        label: 'Renamed',
+        endpoint: current.endpoint,
+      );
+      expect(renamed.bindingRevision, EndpointProfile.maxBindingRevision);
+    },
+  );
+
+  test(
+    'an unreadable retirement marker blocks identity reuse without overwriting it',
+    () async {
+      final original = profile('endpoint_one');
+      final key = EndpointProfileStore.retiredKey(original.id);
+      backend.values[key] = 'future-retirement-version';
+      await expectLater(
+        store.save(original, 'fake-secret'),
+        throwsFormatException,
+      );
+      expect(backend.values[key], 'future-retirement-version');
+      expect(await store.load(), isEmpty);
+      expect(secrets.values, isEmpty);
+    },
+  );
+
+  for (final committed in [false, true]) {
+    test(
+      'profile edit reconciles failed write, committed=$committed',
+      () async {
+        final original = profile('endpoint_one');
+        await store.save(original, 'fake-secret');
+        backend.failWrite = EndpointProfileStore.itemKey(original.id);
+        backend.failAfterWrite = committed;
+        final editing = store.updateProfile(
+          original,
+          label: 'Renamed',
+          endpoint: original.endpoint,
+        );
+        if (committed) {
+          expect((await editing).label, 'Renamed');
+        } else {
+          await expectLater(editing, throwsStateError);
+        }
+        expect(
+          (await openStore(backend).load()).single.label,
+          committed ? 'Renamed' : 'Server',
+        );
+      },
+    );
+  }
+
+  test(
+    'removed profile IDs cannot be recreated against another endpoint',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'fake-secret');
+      await store.remove(original);
+      expect(await openStore(backend).load(), isEmpty);
+      final replacement = EndpointProfile(
+        id: original.id,
+        label: 'Another server',
+        endpoint: Uri.parse('https://other.example/'),
+      );
+      await expectLater(
+        store.save(replacement, 'other-secret'),
+        throwsFormatException,
+      );
+      expect(await store.load(), isEmpty);
+      expect(secrets.values, isEmpty);
+      expect(
+        backend.values[EndpointProfileStore.retiredKey(original.id)],
+        'retired-v1',
+      );
+    },
+  );
+
+  test(
+    'retirement must be acknowledged before hiding a removed profile',
+    () async {
+      final original = profile('endpoint_one');
+      await store.save(original, 'fake-secret');
+      backend.failWrite = EndpointProfileStore.retiredKey(original.id);
+      await expectLater(store.remove(original), throwsStateError);
+      expect(
+        backend.values[EndpointProfileStore.indexKey],
+        contains(original.id),
+      );
+      expect(
+        backend.values[EndpointProfileStore.itemKey(original.id)],
+        isNotNull,
+      );
+      backend.failWrite = null;
+      expect(await openStore(backend).load(), isEmpty);
+      await expectLater(
+        store.save(original, 'new-secret'),
+        throwsFormatException,
+      );
+    },
+  );
+
+  for (final revision in [
+    null,
+    -1,
+    '0',
+    EndpointProfile.maxBindingRevision + 1,
+  ]) {
+    test(
+      'malformed explicit binding $revision is preserved unreadable',
+      () async {
+        final original = profile('endpoint_one');
+        await store.save(original, 'fake-secret');
+        final key = EndpointProfileStore.itemKey(original.id);
+        final raw =
+            jsonDecode(backend.values[key]! as String) as Map<String, dynamic>;
+        raw['bindingRevision'] = revision;
+        final payload = jsonEncode(raw);
+        backend.values[key] = payload;
+        await expectLater(store.load(), throwsFormatException);
+        await expectLater(
+          store.updateProfile(
+            original,
+            label: 'Edit',
+            endpoint: original.endpoint,
+          ),
+          throwsFormatException,
+        );
+        expect(backend.values[key], payload);
+      },
+    );
+  }
 
   test(
     'paired credential survives restart without secrets in metadata',

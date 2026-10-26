@@ -58,6 +58,7 @@ void main() {
         repository: delayed,
         prober: FakeProber(),
       );
+      await localHosts.load();
       final localAdapter = FakePairing();
       final local = PairingController(
         pairing: localAdapter,
@@ -108,6 +109,7 @@ void main() {
       await repo.save(profile, 'fake-old');
       final prober = GatedProber();
       final localHosts = HostsController(repository: repo, prober: prober);
+      await localHosts.load();
       final local = PairingController(
         pairing: adapter,
         hosts: localHosts,

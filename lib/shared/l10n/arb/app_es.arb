@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "Descartar intento y conservar texto",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "Más acciones",
+  "chatAppBarPinAction": "Fijar a la barra de la aplicación",
+  "chatAppBarUnpinAction": "Desfijar de la barra de la aplicación",
+  "chatBadgeConversationError": "\"{title}\" tiene un error.",
+  "chatBadgeConversationNeedsInput": "\"{title}\" necesita su intervención.",
+  "chatBadgeConversationNewReply": "\"{title}\" tiene una nueva respuesta.",
+  "chatBadgeServerNeedsAttention": "La conexión del servidor necesita atención.",
+  "chatBadgeSyncing": "Sincronizando conversaciones...",
+  "serversSearchActiveHint": "Buscar servidor activo",
+  "serversSetActive": "Establecer como activo",
+  "statusDelayed": "Retrasado",
+  "statusOffline": "Desconectado",
+  "statusOnline": "Conectado",
+  "healthCredentialMissing": "Este servidor no tiene credencial guardada. Vuelve a vincularlo o introduce su contraseña.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "No se pudo leer la credencial guardada. Abre Servidores para recuperar el acceso.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "La credencial de vinculación caducó. Vuelve a vincularlo o renuévala en Servidores.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Activo",
+  "serversClearDefault": "Limpar Predeterminado",
+  "serversDefault": "Predeterminado",
+  "serversEdit": "Editar",
+  "serversSetDefault": "Establecer como predeterminado",
+  "composerSourceChanged": "Este mensaje pertenece a una conexión anterior del servidor. Puedes consultar o descartar su copia local.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "No se pudo verificar la conexión de origen. Puedes consultar o descartar este mensaje local.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Introduce un nombre válido para el servidor (1–160 caracteres).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "El perfil cambió o no se pudo confirmar el guardado. Recarga para comparar el perfil guardado antes de guardar de nuevo.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Perfil guardado",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "La conexión del servidor cambió. Vuelve a abrir esta conversación para usar la configuración actual del servidor.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

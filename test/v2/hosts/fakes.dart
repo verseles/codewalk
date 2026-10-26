@@ -6,6 +6,35 @@ class MemoryProfiles implements EndpointProfileRepository {
   final credentials = <String, EndpointCredential>{};
   bool failSave = false;
   bool failLoad = false;
+  final retired = <String>{};
+
+  @override
+  Future<EndpointProfile> updateProfile(
+    EndpointProfile expected, {
+    required String label,
+    required Uri endpoint,
+  }) async {
+    final index = profiles.indexWhere((profile) => profile.id == expected.id);
+    if (failSave ||
+        index < 0 ||
+        !profiles[index].sameBinding(expected) ||
+        profiles[index].label != expected.label) {
+      throw StateError('controlled stale profile edit');
+    }
+    final next = EndpointProfile(
+      id: expected.id,
+      label: label,
+      endpoint: endpoint,
+      bindingRevision:
+          expected.bindingRevision +
+          (EndpointProfile.validateEndpoint(endpoint) == expected.endpoint
+              ? 0
+              : 1),
+    );
+    profiles[index] = next;
+    return next;
+  }
+
   @override
   Future<List<EndpointProfile>> load() async {
     if (failLoad) throw StateError('controlled catalog read failure');
@@ -14,7 +43,9 @@ class MemoryProfiles implements EndpointProfileRepository {
 
   @override
   Future<void> save(EndpointProfile profile, String secret) async {
-    if (failSave) throw StateError('controlled persistence failure');
+    if (failSave || retired.contains(profile.id)) {
+      throw StateError('controlled persistence failure');
+    }
     profiles.add(profile);
     secrets[profile.id] = secret;
   }
@@ -56,6 +87,7 @@ class MemoryProfiles implements EndpointProfileRepository {
 
   @override
   Future<void> remove(EndpointProfile profile) async {
+    retired.add(profile.id);
     profiles.removeWhere((p) => p.id == profile.id);
     secrets.remove(profile.id);
     credentials.remove(profile.id);

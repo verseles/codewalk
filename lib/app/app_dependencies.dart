@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:go_router/go_router.dart';
 
+import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/hosts_controller.dart';
 import '../features/pairing/pairing_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
@@ -21,6 +22,7 @@ import '../shared/sessions/session_live_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'live_wake.dart';
+import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
 
 /// Explicit graph passed to the app, with one owner for its lifetime.
@@ -31,6 +33,8 @@ class AppDependencies {
     required this.localizations,
     required this.router,
     required this.hosts,
+    this.endpointHealth,
+    this.workspaceChrome,
     this.pairing,
     this.diagnostics,
     this.releaseHistory,
@@ -38,6 +42,7 @@ class AppDependencies {
     this.sessions,
     this.historyFactory,
     this.liveDirectory,
+    this.disposeProfileBindings,
     this.liveWake,
     this.permissionModes,
     this.unrestrictedOwnership,
@@ -51,9 +56,11 @@ class AppDependencies {
     _routeChanged();
   }
 
-  void _routeChanged() => workspaceDrafts?.locationChanged(
-    router.routeInformationProvider.value.uri.path,
-  );
+  void _routeChanged() {
+    final location = router.routeInformationProvider.value.uri.path;
+    workspaceDrafts?.locationChanged(location);
+    workspaceChrome?.locationChanged(location);
+  }
 
   final WorkspaceDraftController? workspaceDrafts;
 
@@ -62,9 +69,12 @@ class AppDependencies {
   final L10nBridge localizations;
   final GoRouter router;
   final HostsController hosts;
+  final EndpointHealthController? endpointHealth;
+  final WorkspaceChromeController? workspaceChrome;
   final SessionsController? sessions;
   final SessionHistoryFactory? historyFactory;
   final SessionLiveDirectory? liveDirectory;
+  final void Function()? disposeProfileBindings;
 
   /// Reconnects [liveDirectory] on a return from the background or a network
   /// change.
@@ -102,10 +112,12 @@ class AppDependencies {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    disposeProfileBindings?.call();
     // No wake may reach a directory that is closing.
     liveWake?.dispose();
     links?.dispose();
     router.routeInformationProvider.removeListener(_routeChanged);
+    workspaceChrome?.dispose();
     workspaceDrafts?.dispose();
     router.dispose();
     pairing?.dispose();
@@ -118,6 +130,7 @@ class AppDependencies {
     unawaited(sessionDrafts?.flush());
     sessions?.dispose();
     unawaited(liveDirectory?.close());
+    endpointHealth?.dispose();
     hosts.dispose();
     preferences.dispose();
     permissionModes?.dispose();

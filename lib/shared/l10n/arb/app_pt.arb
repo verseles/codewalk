@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "Descartar tentativa e manter texto",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "Mais ações",
+  "chatAppBarPinAction": "Fixar na barra do app",
+  "chatAppBarUnpinAction": "Desafixar da barra do app",
+  "chatBadgeConversationError": "\"{title}\" tem um erro.",
+  "chatBadgeConversationNeedsInput": "\"{title}\" precisa da sua intervenção.",
+  "chatBadgeConversationNewReply": "\"{title}\" tem uma nova resposta.",
+  "chatBadgeServerNeedsAttention": "A conexão do servidor precisa de atenção.",
+  "chatBadgeSyncing": "Sincronizando conversas...",
+  "serversSearchActiveHint": "Pesquisar servidor ativo",
+  "serversSetActive": "Definir como ativo",
+  "statusDelayed": "Atrasado",
+  "statusOffline": "Offline",
+  "statusOnline": "Online",
+  "healthCredentialMissing": "Este servidor não tem credencial salva. Pareie novamente ou informe a senha.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "Não foi possível ler a credencial salva. Abra Servidores para recuperar o acesso.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "A credencial de pareamento expirou. Pareie novamente ou renove em Servidores.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Ativo",
+  "serversClearDefault": "Limpar Padrão",
+  "serversDefault": "Padrão",
+  "serversEdit": "Editar",
+  "serversSetDefault": "Definir como padrão",
+  "composerSourceChanged": "Esta mensagem pertence a uma conexão anterior do servidor. Você pode consultar ou descartar a cópia local.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "Não foi possível confirmar a conexão de origem. Você pode consultar ou descartar esta mensagem local.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Informe um nome válido para o servidor (1 a 160 caracteres).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "O perfil mudou ou não foi possível confirmar o salvamento. Recarregue para comparar o perfil salvo antes de salvar novamente.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Perfil salvo",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "A conexão do servidor mudou. Reabra esta conversa para usar as configurações atuais do servidor.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

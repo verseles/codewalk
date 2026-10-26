@@ -19,9 +19,12 @@ typedef _Transport = OutboxTransport;
 typedef _Server = OutboxServer;
 const _json = outboxJson;
 
-const _harness = HarnessRef(HostId('host'), HarnessInstanceId('instance'));
+const _harness = HarnessRef(
+  HostId('profile_host'),
+  HarnessInstanceId('instance'),
+);
 const _session = SessionRef(
-  HostId('host'),
+  HostId('profile_host'),
   HarnessInstanceId('instance'),
   'ses_one',
 );
@@ -60,6 +63,22 @@ final class _IntentGateStore extends _Store {
   }
 }
 
+final class _MutationGateStore extends _Store {
+  bool armed = false;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<PayloadWriteResult> write(String key, String value) async {
+    final result = await super.write(key, value);
+    if (armed) {
+      armed = false;
+      entered.complete();
+      await release.future;
+    }
+    return result;
+  }
+}
+
 /// The native admission for exactly what was sent.
 TransportResponse _admit(Map<String, Object?> body) => _json({
   'data': {
@@ -78,7 +97,19 @@ OpenCodePromptOutbox _outbox(
   String version = '2.0.22',
   DateTime Function()? now,
   Future<void> Function(Duration)? wait,
+  int bindingRevision = 0,
+  bool trustedProfile = true,
+  bool Function()? isCurrentBinding,
 }) => OpenCodePromptOutbox(
+  profile: trustedProfile
+      ? EndpointProfile(
+          id: _session.host.value,
+          label: 'Fixture server',
+          endpoint: transport.endpoint,
+          bindingRevision: bindingRevision,
+        )
+      : null,
+  isCurrentBinding: isCurrentBinding,
   store: store,
   client: OpenCodePromptClient(
     transport,
@@ -113,6 +144,262 @@ Map<String, Object?> _ledger(_Store store, [SessionRef session = _session]) =>
         as Map<String, Object?>;
 
 void main() {
+  group('saved endpoint binding', () {
+    for (final (name, endpoint, revision) in [
+      ('path', 'http://127.0.0.1/another/', 1),
+      ('origin', 'https://other.example/', 1),
+      ('ABA', 'http://127.0.0.1/', 2),
+    ]) {
+      test('$name never reconciles or mutates an old command', () async {
+        final store = _Store();
+        final original = _Server()..loseResponse = true;
+        final sent = await _submit(_outbox(store, original.transport));
+        expect(sent.entry!.state, SubmissionKind.uncertain);
+        final destination = _Server();
+        destination.transport.endpoint = Uri.parse(endpoint);
+        final outbox = _outbox(
+          store,
+          destination.transport,
+          bindingRevision: revision,
+        );
+        expect(
+          (await outbox.reconcile(_session, const CommandId('cmd_1'))).refusal,
+          'sourceChanged',
+        );
+        expect(
+          (await outbox.cancel(_session, const CommandId('cmd_1'))).refusal,
+          'sourceChanged',
+        );
+        expect(
+          (await outbox.switchDelivery(
+            _session,
+            const CommandId('cmd_1'),
+            Delivery.queue,
+          )).refusal,
+          'sourceChanged',
+        );
+        expect((await _submit(outbox)).refusal, 'sourceChanged');
+        expect(destination.transport.reads, isEmpty);
+        expect(destination.transport.changes, isEmpty);
+        expect(destination.transport.bodies, isEmpty);
+        expect(
+          (await outbox.entries(_session)).single.source,
+          OutboxSource.changed,
+        );
+        expect(
+          await outbox.dismiss(_session, const CommandId('cmd_1')),
+          isTrue,
+        );
+        expect((await _submit(outbox, command: 'fresh')).sent, isTrue);
+        expect(destination.transport.bodies, hasLength(1));
+        final record = (_ledger(store)['entries']! as List).single as Map;
+        expect(record['endpoint'], endpoint);
+        expect(record['bindingRevision'], revision);
+      });
+    }
+
+    test(
+      'legacy compatibility requires trusted unchanged profile context',
+      () async {
+        final store = _Store();
+        final server = _Server()..loseResponse = true;
+        await _submit(_outbox(store, server.transport));
+        final legacy = _ledger(store);
+        ((legacy['entries']! as List).single as Map)
+          ..remove('endpoint')
+          ..remove('bindingRevision');
+        final raw = jsonEncode(legacy);
+        final key = OpenCodePromptOutbox.keyFor(_session);
+        store.values[key] = raw;
+        final result = await _outbox(
+          store,
+          server.transport,
+        ).reconcile(_session, const CommandId('cmd_1'));
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.source, OutboxSource.current);
+        expect(server.transport.reads, isNotEmpty);
+        for (final outbox in [
+          _outbox(store, server.transport, bindingRevision: 1),
+          _outbox(store, server.transport, trustedProfile: false),
+        ]) {
+          store.values[key] = raw;
+          final reads = server.transport.reads.length;
+          expect(
+            (await outbox.reconcile(
+              _session,
+              const CommandId('cmd_1'),
+            )).refusal,
+            'sourceUnknown',
+          );
+          expect(
+            (await outbox.cancel(_session, const CommandId('cmd_1'))).refusal,
+            'sourceUnknown',
+          );
+          expect(
+            (await outbox.entries(_session)).single.source,
+            OutboxSource.unknown,
+          );
+          expect(server.transport.reads, hasLength(reads));
+          expect(server.transport.changes, isEmpty);
+        }
+      },
+    );
+
+    test(
+      'malformed or partial explicit provenance is never treated as legacy',
+      () async {
+        final store = _Store();
+        final server = _Server();
+        final outbox = _outbox(store, server.transport);
+        await _submit(outbox);
+        final key = OpenCodePromptOutbox.keyFor(_session);
+        final valid = store.values[key]!;
+        for (final (field, value) in [
+          ('endpoint', null),
+          ('endpoint', 'https://user:private@example.test/'),
+          ('bindingRevision', null),
+          ('bindingRevision', -1),
+          ('bindingRevision', '0'),
+          ('bindingRevision', EndpointProfile.maxBindingRevision + 1),
+          ('remove', 'endpoint'),
+          ('remove', 'bindingRevision'),
+        ]) {
+          final ledger = jsonDecode(valid) as Map;
+          final entry = (ledger['entries']! as List).single as Map;
+          if (field == 'remove') {
+            entry.remove(value);
+          } else {
+            entry[field] = value;
+          }
+          final raw = jsonEncode(ledger);
+          store.values[key] = raw;
+          await expectLater(outbox.entries(_session), throwsStateError);
+          expect(
+            (await outbox.reconcile(
+              _session,
+              const CommandId('cmd_1'),
+            )).refusal,
+            'unreadable',
+          );
+          expect(
+            await outbox.dismiss(_session, const CommandId('cmd_1')),
+            isFalse,
+          );
+          expect(store.values[key], raw);
+          expect(server.transport.reads, isEmpty);
+        }
+      },
+    );
+
+    test('revocation during persistence prevents the first POST', () async {
+      final store = _IntentGateStore('write');
+      final server = _Server();
+      var current = true;
+      final outbox = _outbox(
+        store,
+        server.transport,
+        isCurrentBinding: () => current,
+      );
+      final sending = _submit(outbox);
+      await store.entered.future;
+      current = false;
+      store.release.complete();
+      final result = await sending;
+      expect(result.sent, isFalse);
+      expect(result.entry!.source, OutboxSource.changed);
+      expect(server.transport.bodies, isEmpty);
+    });
+
+    test(
+      'revocation in backoff prevents the next location read and replay',
+      () async {
+        final store = _Store();
+        final server = _Server()..reachServer = false;
+        var current = true;
+        final outbox = _outbox(
+          store,
+          server.transport,
+          isCurrentBinding: () => current,
+          wait: (_) async {
+            current = false;
+          },
+        );
+        await _submit(outbox);
+        final result = await outbox.reconcile(
+          _session,
+          const CommandId('cmd_1'),
+        );
+        expect(result.refusal, 'sourceChanged');
+        expect(server.transport.bodies, hasLength(2));
+        expect((await outbox.entries(_session)).single.replays, 1);
+      },
+    );
+
+    test(
+      'revocation while persisting cancel intent prevents the DELETE',
+      () async {
+        final store = _MutationGateStore();
+        final server = _Server();
+        var current = true;
+        final outbox = _outbox(
+          store,
+          server.transport,
+          isCurrentBinding: () => current,
+        );
+        await _submit(outbox);
+        store.armed = true;
+        final cancelling = outbox.cancel(_session, const CommandId('cmd_1'));
+        await store.entered.future;
+        current = false;
+        store.release.complete();
+        expect((await cancelling).refusal, 'sourceChanged');
+        expect(server.transport.changes, isEmpty);
+        expect(server.transport.reads, isEmpty);
+      },
+    );
+
+    test(
+      'a delivery change already started never follows up on a revoked binding',
+      () async {
+        final store = _Store();
+        final server = _Server();
+        var current = true;
+        final outbox = _outbox(
+          store,
+          server.transport,
+          isCurrentBinding: () => current,
+        );
+        await _submit(outbox);
+        server.beforeChange = () => current = false;
+        final result = await outbox.switchDelivery(
+          _session,
+          const CommandId('cmd_1'),
+          Delivery.queue,
+        );
+        expect(server.transport.changes, hasLength(1));
+        expect(server.transport.reads, isEmpty);
+        expect(result.entry!.source, OutboxSource.changed);
+        expect(result.entry!.reason, 'sourceChanged');
+      },
+    );
+
+    test('revocation after POST starts preserves actual admission', () async {
+      final server = _Server();
+      var current = true;
+      final outbox = _outbox(
+        _Store(),
+        server.transport,
+        isCurrentBinding: () => current,
+      );
+      server.onPost = () => current = false;
+      final result = await _submit(outbox);
+      expect(result.sent, isTrue);
+      expect(result.entry!.state, SubmissionKind.admitted);
+      expect(result.entry!.source, OutboxSource.changed);
+      expect(server.inbox, hasLength(1));
+    });
+  });
+
   test('navigation after the POST begins keeps its admission', () async {
     final entered = Completer<void>();
     final release = Completer<void>();
@@ -457,7 +744,7 @@ void main() {
     final store = _Store();
     final outbox = _outbox(store, _Transport(_admit));
     const other = SessionRef(
-      HostId('host'),
+      HostId('profile_host'),
       HarnessInstanceId('instance'),
       'ses_two',
     );

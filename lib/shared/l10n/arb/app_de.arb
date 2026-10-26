@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "Versuch verwerfen und Text behalten",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "Weitere Aktionen",
+  "chatAppBarPinAction": "An App-Leiste anheften",
+  "chatAppBarUnpinAction": "Von App-Leiste lösen",
+  "chatBadgeConversationError": "\"{title}\" hat einen Fehler.",
+  "chatBadgeConversationNeedsInput": "\"{title}\" benötigt Ihre Eingabe.",
+  "chatBadgeConversationNewReply": "\"{title}\" hat eine neue Antwort.",
+  "chatBadgeServerNeedsAttention": "Serververbindung benötigt Aufmerksamkeit.",
+  "chatBadgeSyncing": "Konversationen werden synchronisiert...",
+  "serversSearchActiveHint": "Aktiven Server durchsuchen",
+  "serversSetActive": "Als aktiv festlegen",
+  "statusDelayed": "Verzögert",
+  "statusOffline": "Offline",
+  "statusOnline": "Online",
+  "healthCredentialMissing": "Für diesen Server sind keine Zugangsdaten gespeichert. Erneut koppeln oder das Passwort eingeben.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "Die gespeicherten Zugangsdaten konnten nicht gelesen werden. Öffne Server, um den Zugriff wiederherzustellen.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "Die Kopplungsdaten sind abgelaufen. Erneut koppeln oder unter Server erneuern.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Aktiv",
+  "serversClearDefault": "Standard löschen",
+  "serversDefault": "Standard",
+  "serversEdit": "Bearbeiten",
+  "serversSetDefault": "Als Standard festlegen",
+  "composerSourceChanged": "Diese Nachricht gehört zu einer früheren Serververbindung. Du kannst die lokale Kopie ansehen oder verwerfen.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "Die ursprüngliche Serververbindung konnte nicht bestätigt werden. Du kannst diese lokale Nachricht ansehen oder verwerfen.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Gib einen gültigen Servernamen ein (1–160 Zeichen).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "Das Profil wurde geändert oder das Speichern konnte nicht bestätigt werden. Lade es neu, um das gespeicherte Profil vor dem erneuten Speichern zu vergleichen.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Gespeichertes Profil",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "Die Serververbindung hat sich geändert. Öffne diese Unterhaltung erneut, um die aktuellen Servereinstellungen zu verwenden.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

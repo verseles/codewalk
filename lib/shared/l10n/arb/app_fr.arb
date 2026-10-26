@@ -1374,5 +1374,59 @@
   "workspaceDraftReset": "Abandonner la tentative et garder le texte",
   "@workspaceDraftReset": {
     "description": "V2 chat-first workspace"
+  },
+  "chatAppBarMoreActions": "Plus d''actions",
+  "chatAppBarPinAction": "Épingler à la barre d''application",
+  "chatAppBarUnpinAction": "Désépingler de la barre d''application",
+  "chatBadgeConversationError": "\"{title}\" a une erreur.",
+  "chatBadgeConversationNeedsInput": "\"{title}\" nécessite votre intervention.",
+  "chatBadgeConversationNewReply": "\"{title}\" a une nouvelle réponse.",
+  "chatBadgeServerNeedsAttention": "La connexion au serveur nécessite une attention particulière.",
+  "chatBadgeSyncing": "Synchronisation des conversations...",
+  "serversSearchActiveHint": "Rechercher un serveur actif",
+  "serversSetActive": "Définir comme actif",
+  "statusDelayed": "Retardé",
+  "statusOffline": "Hors ligne",
+  "statusOnline": "En ligne",
+  "healthCredentialMissing": "Ce serveur n’a pas d’identifiant enregistré. Associez-le à nouveau ou saisissez son mot de passe.",
+  "@healthCredentialMissing": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialUnreadable": "Impossible de lire l’identifiant enregistré. Ouvrez Serveurs pour rétablir l’accès.",
+  "@healthCredentialUnreadable": {
+    "description": "V2 chat-first workspace"
+  },
+  "healthCredentialExpired": "L’identifiant d’association a expiré. Associez à nouveau le serveur ou renouvelez-le dans Serveurs.",
+  "@healthCredentialExpired": {
+    "description": "V2 chat-first workspace"
+  },
+  "serversActive": "Actif",
+  "serversClearDefault": "Effacer par défaut",
+  "serversDefault": "Par défaut",
+  "serversEdit": "Modifier",
+  "serversSetDefault": "Définir comme serveur par défaut",
+  "composerSourceChanged": "Ce message appartient à une ancienne connexion au serveur. Vous pouvez consulter ou supprimer sa copie locale.",
+  "@composerSourceChanged": {
+    "description": "V2 live session composer"
+  },
+  "composerSourceUnknown": "La connexion d’origine n’a pas pu être vérifiée. Vous pouvez consulter ou supprimer ce message local.",
+  "@composerSourceUnknown": {
+    "description": "V2 live session composer"
+  },
+  "hostsEditInvalidLabel": "Saisissez un nom de serveur valide (1 à 160 caractères).",
+  "@hostsEditInvalidLabel": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditChanged": "Le profil a changé ou l’enregistrement n’a pas pu être confirmé. Rechargez pour comparer le profil enregistré avant de réessayer.",
+  "@hostsEditChanged": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "hostsEditSavedProfile": "Profil enregistré",
+  "@hostsEditSavedProfile": {
+    "description": "V2 endpoint profile and compatibility UI"
+  },
+  "liveSourceChanged": "La connexion au serveur a changé. Rouvrez cette conversation pour utiliser les paramètres actuels du serveur.",
+  "@liveSourceChanged": {
+    "description": "V2 live read-only session view"
   }
 }

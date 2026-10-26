@@ -39,6 +39,14 @@ final class ScriptedLiveBridge implements SessionLiveDirectory {
     }
   }
 
+  @override
+  void reconcileProfiles({
+    required List<EndpointProfile> profiles,
+    required Map<String, EndpointCredential> credentials,
+    required bool available,
+    String? changingProfile,
+  }) {}
+
   final ScriptedScenario scenario;
   final OpenIntent intent;
 
@@ -140,8 +148,7 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
       bridge.adapter.interactions != null &&
       _closes == 0;
 
-  bool get _stale =>
-      _phase != SessionLivePhase.live && _lastSyncedAt != null;
+  bool get _stale => _phase != SessionLivePhase.live && _lastSyncedAt != null;
 
   @override
   SessionLiveView get current => _current;
@@ -277,8 +284,7 @@ final class ScriptedLiveHandle implements SessionLiveHandle {
     InteractionId id, {
     SessionRef? owner,
   }) =>
-      _replyStates[_replyKey(id, owner)] ??
-      const SessionPermissionReplyState();
+      _replyStates[_replyKey(id, owner)] ?? const SessionPermissionReplyState();
 
   @override
   bool canReply(InteractionRequest request) {
@@ -450,6 +456,7 @@ final class ScriptedPromptOutbox implements PromptOutbox {
     );
     final now = handle.bridge._now();
     final entry = OutboxEntry(
+      source: OutboxSource.current,
       session: session,
       commandId: commandId,
       messageId: 'message-${commandId.value}',
@@ -470,9 +477,8 @@ final class ScriptedPromptOutbox implements PromptOutbox {
   }
 
   @override
-  Future<List<OutboxEntry>> entries(SessionRef session) async => List.of(
-    _entries.where((entry) => entry.session == session),
-  );
+  Future<List<OutboxEntry>> entries(SessionRef session) async =>
+      List.of(_entries.where((entry) => entry.session == session));
 
   @override
   Future<bool> dismiss(SessionRef session, CommandId commandId) async {

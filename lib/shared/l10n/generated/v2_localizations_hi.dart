@@ -1586,4 +1586,100 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get workspaceDraftReset => 'प्रयास छोड़ें और पाठ रखें';
+
+  @override
+  String get chatAppBarMoreActions => 'अधिक क्रियाएं';
+
+  @override
+  String get chatAppBarPinAction => 'ऐप बार पर पिन करें';
+
+  @override
+  String get chatAppBarUnpinAction => 'ऐप बार से अनपिन करें';
+
+  @override
+  String chatBadgeConversationError(String title) {
+    return '\"$title\" में एक त्रुटि है।';
+  }
+
+  @override
+  String chatBadgeConversationNeedsInput(String title) {
+    return '\"$title\" को आपके इनपुट की आवश्यकता है।';
+  }
+
+  @override
+  String chatBadgeConversationNewReply(String title) {
+    return '\"$title\" में एक नई प्रतिक्रिया है।';
+  }
+
+  @override
+  String get chatBadgeServerNeedsAttention =>
+      'सर्वर कनेक्शन पर ध्यान देने की आवश्यकता है।';
+
+  @override
+  String get chatBadgeSyncing => 'बातचीत सिंक हो रही है...';
+
+  @override
+  String get serversSearchActiveHint => 'सक्रिय सर्वर खोजें';
+
+  @override
+  String get serversSetActive => 'सक्रिय सेट करें';
+
+  @override
+  String get statusDelayed => 'विलंबित';
+
+  @override
+  String get statusOffline => 'ऑफ़लाइन';
+
+  @override
+  String get statusOnline => 'ऑनलाइन';
+
+  @override
+  String get healthCredentialMissing =>
+      'इस सर्वर के लिए कोई सहेजा गया क्रेडेंशियल नहीं है। फिर से पेयर करें या पासवर्ड डालें।';
+
+  @override
+  String get healthCredentialUnreadable =>
+      'सहेजा गया क्रेडेंशियल पढ़ा नहीं जा सका। पहुँच बहाल करने के लिए सर्वर खोलें।';
+
+  @override
+  String get healthCredentialExpired =>
+      'पेयरिंग क्रेडेंशियल की समय सीमा समाप्त हो गई है। फिर से पेयर करें या सर्वर में नवीनीकृत करें।';
+
+  @override
+  String get serversActive => 'सक्रिय';
+
+  @override
+  String get serversClearDefault => 'डिफ़ॉल्ट साफ़ करें';
+
+  @override
+  String get serversDefault => 'डिफ़ॉल्ट';
+
+  @override
+  String get serversEdit => 'संपादित करें';
+
+  @override
+  String get serversSetDefault => 'डिफ़ॉल्ट सेट करें';
+
+  @override
+  String get composerSourceChanged =>
+      'यह संदेश सर्वर के पिछले कनेक्शन का है। आप स्थानीय प्रति देख सकते हैं या हटा सकते हैं।';
+
+  @override
+  String get composerSourceUnknown =>
+      'मूल सर्वर कनेक्शन की पुष्टि नहीं हो सकी। आप यह स्थानीय संदेश देख सकते हैं या हटा सकते हैं।';
+
+  @override
+  String get hostsEditInvalidLabel =>
+      'सर्वर का मान्य नाम दर्ज करें (1–160 अक्षर)।';
+
+  @override
+  String get hostsEditChanged =>
+      'प्रोफ़ाइल बदल गई है या सहेजने की पुष्टि नहीं हुई। फिर से सहेजने से पहले सहेजी गई प्रोफ़ाइल की तुलना करने के लिए पुनः लोड करें।';
+
+  @override
+  String get hostsEditSavedProfile => 'सहेजी गई प्रोफ़ाइल';
+
+  @override
+  String get liveSourceChanged =>
+      'सर्वर कनेक्शन बदल गया है। सर्वर की मौजूदा सेटिंग इस्तेमाल करने के लिए यह बातचीत फिर से खोलें।';
 }

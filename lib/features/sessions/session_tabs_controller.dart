@@ -42,6 +42,7 @@ class SessionTabsController extends ChangeNotifier {
   final _warm = <SessionRef, SessionLiveController>{};
   final _checked = <SessionRef>{};
   final _reads = <SessionRef, SessionReadTask>{};
+  final _bindings = <String, EndpointProfile>{};
   final _removed = <String>[];
   bool _disposed = false;
   bool _launched = false;
@@ -227,10 +228,11 @@ class SessionTabsController extends ChangeNotifier {
   Future<
     ({List<SessionTab> removed, Map<SessionRef, SessionRef?> selectedAfter})
   >
-  _remove(Set<SessionRef> refs) async {
+  _remove(Set<SessionRef> refs, {bool Function()? isCurrent}) async {
     var removed = <SessionTab>[];
     final selectedAfter = <SessionRef, SessionRef?>{};
     final saved = await _store.update((state) {
+      if (isCurrent?.call() == false) return null;
       removed = [
         for (final tab in state.tabs)
           if (refs.contains(tab.ref)) tab,
@@ -280,7 +282,20 @@ class SessionTabsController extends ChangeNotifier {
     SessionRef ref,
     SessionLiveController Function() create,
   ) {
-    final existing = _warm.remove(ref);
+    var existing = _warm.remove(ref);
+    final hosts = _catalog?.hosts;
+    final saved = hosts?.profiles
+        .where((profile) => profile.id == ref.host.value)
+        .firstOrNull;
+    if (existing != null &&
+        (existing.disposed ||
+            hosts?.pendingBindingChange == ref.host.value ||
+            (hosts?.loaded == true &&
+                hosts?.loading == false &&
+                (saved == null || !saved.sameBinding(existing.profile))))) {
+      _release(existing);
+      existing = null;
+    }
     final live = existing ?? create();
     for (final other in _warm.keys.toList()) {
       if (other.host != ref.host) _release(_warm.remove(other));
@@ -289,17 +304,26 @@ class SessionTabsController extends ChangeNotifier {
       _release(_warm.remove(_warm.keys.first));
     }
     _warm[ref] = live;
+    if (existing == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
+    }
     return live;
   }
 
   /// Whether the live view of [ref] is open.
   bool isWarm(SessionRef ref) => _warm.containsKey(ref);
 
+  /// Observing these views never opens a lease or changes their warm order.
+  List<SessionLiveController> get warmViews => List.unmodifiable(_warm.values);
+
   /// Disposes a view after the frame, once the page that showed it is gone.
   void _release(SessionLiveController? live) {
     if (live == null) return;
     WidgetsBinding.instance
-      ..addPostFrameCallback((_) => live.dispose())
+      ..addPostFrameCallback((_) {
+        live.dispose();
+        _notify();
+      })
       // An idle app draws no frame on its own; the lease closes now.
       ..ensureVisualUpdate();
   }
@@ -314,7 +338,19 @@ class SessionTabsController extends ChangeNotifier {
       return;
     }
     final hosts = catalog.hosts;
+    final retired = <String>{?hosts.pendingBindingChange};
     if (hosts.loaded && !hosts.loading && !hosts.storageError) {
+      final current = {
+        for (final profile in hosts.profiles) profile.id: profile,
+      };
+      for (final entry in _bindings.entries) {
+        if (current[entry.key]?.sameBinding(entry.value) != true) {
+          retired.add(entry.key);
+        }
+      }
+      _bindings
+        ..clear()
+        ..addAll(current);
       // A removed server's tabs can never be shown or closed again.
       final saved = {for (final p in hosts.profiles) HostId(p.id)};
       final orphans = {
@@ -323,8 +359,21 @@ class SessionTabsController extends ChangeNotifier {
       };
       if (orphans.isNotEmpty) unawaited(_remove(orphans));
     }
+    for (final ref in _reads.keys.toList()) {
+      if (retired.contains(ref.host.value)) _reads.remove(ref)?.cancel();
+    }
+    _checked.removeWhere((ref) => retired.contains(ref.host.value));
+    for (final ref in _warm.keys.toList()) {
+      if (retired.contains(ref.host.value)) _release(_warm.remove(ref));
+    }
+    if (hosts.loading || hosts.storageError) return;
     final profile = catalog.selectedProfile;
-    if (profile == null || !catalog.loaded || catalog.failure != null) return;
+    if (profile == null ||
+        hosts.pendingBindingChange == profile.id ||
+        !catalog.loaded ||
+        catalog.failure != null) {
+      return;
+    }
     final host = HostId(profile.id);
     final rows = {for (final row in catalog.sessions) row.info.ref: row};
     // A listed tab takes its row's newer title and project, without
@@ -337,10 +386,12 @@ class SessionTabsController extends ChangeNotifier {
     if (stale.isNotEmpty) {
       unawaited(
         _store.update(
-          (state) => SessionTabsState(
-            tabs: [for (final tab in state.tabs) stale[tab.ref] ?? tab],
-            selected: state.selected,
-          ),
+          (state) => !_currentBinding(profile)
+              ? null
+              : SessionTabsState(
+                  tabs: [for (final tab in state.tabs) stale[tab.ref] ?? tab],
+                  selected: state.selected,
+                ),
         ),
       );
     }
@@ -359,6 +410,10 @@ class SessionTabsController extends ChangeNotifier {
       bool settle() {
         if (!identical(_reads[tab.ref], task)) return false;
         _reads.remove(tab.ref);
+        if (!_currentBinding(profile)) {
+          _checked.remove(tab.ref);
+          return false;
+        }
         return true;
       }
 
@@ -371,7 +426,7 @@ class SessionTabsController extends ChangeNotifier {
           if (error case SessionCatalogException(
             failure: SessionCatalogFailure.notFound,
           )) {
-            _drop(tab.ref);
+            _drop(tab.ref, profile);
           }
         },
       );
@@ -389,8 +444,19 @@ class SessionTabsController extends ChangeNotifier {
     );
   }
 
-  Future<void> _drop(SessionRef ref) async {
-    final (:removed, selectedAfter: _) = await _remove({ref});
+  bool _currentBinding(EndpointProfile profile) {
+    final hosts = _catalog?.hosts;
+    return hosts != null &&
+        !hosts.loading &&
+        !hosts.storageError &&
+        hosts.pendingBindingChange != profile.id &&
+        hosts.isCurrentProfile(profile);
+  }
+
+  Future<void> _drop(SessionRef ref, EndpointProfile profile) async {
+    final (:removed, selectedAfter: _) = await _remove({
+      ref,
+    }, isCurrent: () => _currentBinding(profile));
     if (removed.isNotEmpty && !_disposed) {
       _removed.add(removed.single.title);
       _notify();

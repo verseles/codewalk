@@ -9,6 +9,8 @@ import '../shared/shortcuts/shortcut_binding_codec.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
 import '../shared/theme/theme_preferences.dart';
 
+enum WorkspacePinnedAction { refresh, servers, settings, newChat }
+
 /// Appearance uses only the v2 metadata namespace; locale remains transient.
 class AppPreferencesController extends ChangeNotifier {
   AppPreferencesController({
@@ -43,6 +45,10 @@ class AppPreferencesController extends ChangeNotifier {
   bool _disposed = false;
   bool _loadFailed = false;
   bool _shortcutLoadFailed = false;
+  bool _pinsLoaded = false;
+  bool _pinsLoading = false;
+  bool _pinsUnreadable = false;
+  List<WorkspacePinnedAction> _appBarPins = [WorkspacePinnedAction.newChat];
   bool _hasPhysicalKeyboard = false;
   Map<String, dynamic> _shortcutOverrides = {};
   final Map<String, String?> _shortcutEdits = {};
@@ -62,7 +68,27 @@ class AppPreferencesController extends ChangeNotifier {
   bool get useDynamicColor => _useDynamicColor;
   bool get dynamicColorAvailable => _dynamicColorAvailable;
   bool get hasPersistenceError =>
-      _loadFailed || _shortcutLoadFailed || _failedKeys.isNotEmpty;
+      _loadFailed ||
+      _shortcutLoadFailed ||
+      _pinsUnreadable ||
+      _failedKeys.isNotEmpty;
+  List<WorkspacePinnedAction> get appBarPins => List.unmodifiable(_appBarPins);
+  bool get canEditAppBarPins =>
+      _store == null ||
+      (_pinsLoaded && !_pinsLoading && !_pinsUnreadable && !_loadFailed);
+
+  void setAppBarPinned(WorkspacePinnedAction action, bool pinned) {
+    if (_disposed ||
+        !canEditAppBarPins ||
+        _appBarPins.contains(action) == pinned) {
+      return;
+    }
+    final next = [..._appBarPins]..remove(action);
+    if (pinned) next.add(action);
+    _appBarPins = next.length > 3 ? next.sublist(next.length - 3) : next;
+    _changed('appBarPins');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -148,6 +174,7 @@ class AppPreferencesController extends ChangeNotifier {
     'useAmoledDark': _useAmoledDark,
     'useDynamicColor': _useDynamicColor,
     'loggingEnabled': _loggingEnabled,
+    'appBarPins': jsonEncode(_appBarPins.map((action) => action.name).toList()),
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -158,6 +185,7 @@ class AppPreferencesController extends ChangeNotifier {
     final store = _store;
     if (store == null || _disposed) return;
     _shortcutLoadFailed = true;
+    _pinsLoading = true;
     final revisions = Map<String, int>.of(_revisions);
     try {
       await store.ensureSchema();
@@ -167,6 +195,8 @@ class AppPreferencesController extends ChangeNotifier {
       }
       // Accepted shortcut writes must still merge their snapshot after disposal.
       _hydrateShortcuts(values['shortcuts']);
+      _hydratePins(values['appBarPins']);
+      _pinsLoading = false;
       if (_disposed) return;
       // A choice made while storage was loading always wins over the snapshot.
       Object? value(String key) =>
@@ -221,6 +251,7 @@ class AppPreferencesController extends ChangeNotifier {
       );
       notifyListeners();
     } catch (_) {
+      _pinsLoading = false;
       if (_disposed) return;
       _loadFailed = true;
       // Cold failure grants no consent; a failed reload preserves known intent.
@@ -262,6 +293,37 @@ class AppPreferencesController extends ChangeNotifier {
     } on FormatException {
       // Do not turn an unrelated edit into destruction of unreadable metadata.
       _shortcutLoadFailed = true;
+    }
+  }
+
+  void _hydratePins(Object? raw) {
+    try {
+      if (raw != null) {
+        if (raw is! String || raw.length > V2MetadataStore.maxPreferenceChars) {
+          throw const FormatException('Invalid pinned actions');
+        }
+        final decoded = jsonDecode(raw);
+        if (decoded is! List || decoded.length > 64) {
+          throw const FormatException('Invalid pinned actions');
+        }
+        final next = <WorkspacePinnedAction>[];
+        for (final name in decoded) {
+          final action = WorkspacePinnedAction.values
+              .where((action) => action.name == name)
+              .firstOrNull;
+          if (action == null) {
+            throw const FormatException('Unknown pinned action');
+          }
+          next.remove(action);
+          next.add(action);
+        }
+        _appBarPins = next.length > 3 ? next.sublist(next.length - 3) : next;
+      }
+      _pinsLoaded = true;
+      _pinsUnreadable = false;
+    } on FormatException {
+      _pinsLoaded = true;
+      _pinsUnreadable = true;
     }
   }
 
@@ -324,7 +386,7 @@ class AppPreferencesController extends ChangeNotifier {
 
   Future<void> retryPersistence() async {
     if (_disposed) return;
-    if (_loadFailed || _shortcutLoadFailed) {
+    if (_loadFailed || _shortcutLoadFailed || _pinsUnreadable) {
       _initialization = null;
       await initialize();
     }

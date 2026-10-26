@@ -25,7 +25,7 @@ import 'unrestricted_ownership_store.dart';
 /// architecture guard's file-size limit.
 final class OpenCodeProfileSlot {
   OpenCodeProfileSlot(
-    EndpointProfile profile,
+    this.profile,
     this.credential,
     this.harness,
     this._now,
@@ -37,6 +37,7 @@ final class OpenCodeProfileSlot {
     required this.permissionModes,
     required this.unrestrictedOwnership,
     required this.commandIds,
+    required this.isCurrentBinding,
   }) : _transport = IoEndpointHttpTransport(
          endpoint: profile.endpoint,
          headers: basicEndpointHeaders(
@@ -52,7 +53,10 @@ final class OpenCodeProfileSlot {
     );
   }
 
+  final EndpointProfile profile;
   final EndpointCredential credential;
+  final bool Function() isCurrentBinding;
+  final lifetimeCancellation = RequestCancellation();
   final HarnessRef harness;
   final DateTime Function() _now;
   final void Function() _release;
@@ -63,6 +67,8 @@ final class OpenCodeProfileSlot {
 
   /// CodeWalk's own Unrestricted insertions; without it the action is absent.
   final UnrestrictedOwnershipLedger? unrestrictedOwnership;
+  late final _unrestrictedBinding = unrestrictedBindingFor(profile);
+  int _unrestrictedEpoch = 0;
   final CommandId Function() commandIds;
   PromptOutbox? outbox;
   OpenCodeInterruptClient? _interrupt;
@@ -103,7 +109,7 @@ final class OpenCodeProfileSlot {
 
   Future<void> _probe() async {
     final assessment = await OpenCodeEndpointProbe(_transport).detect();
-    if (_closing != null) {
+    if (_closing != null || !isCurrentBinding()) {
       throw const SessionLiveException(SessionLiveFailure.cancelled);
     }
     switch (assessment.status) {
@@ -170,6 +176,9 @@ final class OpenCodeProfileSlot {
         ids: ids,
         now: _now,
         queue: queue,
+        profile: profile,
+        isCurrentBinding: () => !isClosed && isCurrentBinding(),
+        cancellation: lifetimeCancellation,
       );
     }
     final connection = IoSseRecovery(
@@ -195,7 +204,7 @@ final class OpenCodeProfileSlot {
   /// Reconnects the stream now; one still probing has nothing to wake, and a
   /// terminal stream stays stopped until the user retries.
   void wake() {
-    if (isClosed ||
+    if (!_activeBinding ||
         _phase == SessionLivePhase.authRequired ||
         _phase == SessionLivePhase.incompatible) {
       return;
@@ -312,14 +321,14 @@ final class OpenCodeProfileSlot {
 
   /// The model and agent of the watched sessions; absent until the endpoint
   /// is verified and after the profile closes.
-  OpenCodeSelectionLane? get selection => isClosed ? null : _selection;
+  OpenCodeSelectionLane? get selection => _activeBinding ? _selection : null;
 
   SessionStopState stopState(SessionRef ref) =>
       _stops[ref]?.state ?? const SessionStopState();
 
   bool canStop(SessionRef ref) {
     final current = view(ref);
-    return !isClosed &&
+    return _activeBinding &&
         _interrupt != null &&
         !stopState(ref).busy &&
         _stops[ref]?.inFlight != true &&
@@ -382,7 +391,7 @@ final class OpenCodeProfileSlot {
 
   bool canLoadOlderHistory(SessionRef ref) {
     final current = view(ref);
-    return !isClosed &&
+    return _activeBinding &&
         _older[ref]?.loading != true &&
         current.phase == SessionLivePhase.live &&
         !current.stale &&
@@ -430,7 +439,7 @@ final class OpenCodeProfileSlot {
   /// from the local Ask / Allow all mode. It exists only with an ownership
   /// ledger, and nothing here runs from the automatic responder.
   bool get supportsUnrestricted =>
-      !isClosed && _rules != null && unrestrictedOwnership != null;
+      _activeBinding && _rules != null && unrestrictedOwnership != null;
 
   SessionUnrestrictedState unrestrictedState(SessionRef ref) =>
       _unrestricted[ref]?.state ?? const SessionUnrestrictedState();
@@ -514,8 +523,46 @@ final class OpenCodeProfileSlot {
     _publish(ref, view(ref));
   }
 
+  /// The binding's catalog became unknown: a read or write in flight never
+  /// continues, even once the same binding is confirmed again.
+  void suspendUnrestricted() => _unrestrictedEpoch++;
+
   bool _currentUnrestricted(SessionRef ref, _UnrestrictedEntry entry) =>
-      !isClosed && identical(_unrestricted[ref], entry);
+      _activeBinding &&
+      identical(_unrestricted[ref], entry) &&
+      entry.epoch == _unrestrictedEpoch;
+
+  /// A read or write that lost its binding stops here and sends nothing more.
+  /// A screen still attached keeps its last known state, no longer busy:
+  /// nothing changed before a write, and a write already sent keeps its
+  /// receipt, unconfirmed unless it was refused.
+  void _stopUnrestricted(
+    SessionRef ref,
+    _UnrestrictedEntry entry, {
+    bool write = false,
+    CommandReceipt? receipt,
+  }) {
+    if (isClosed || !identical(_unrestricted[ref], entry)) return;
+    final known = receipt?.state.known;
+    final state = entry.state;
+    _setUnrestricted(
+      ref,
+      entry,
+      SessionUnrestrictedState(
+        phase: state.phase,
+        inEffect: state.inEffect,
+        notice:
+            known == ReceiptState.rejected ||
+                known == ReceiptState.unavailable ||
+                (receipt == null && write)
+            ? SessionUnrestrictedNotice.refused
+            : receipt == null
+            ? SessionUnrestrictedNotice.none
+            : SessionUnrestrictedNotice.unconfirmed,
+        receipt: receipt,
+      ),
+    );
+  }
 
   /// Classifies [rules] against the ledger and stores the record transition.
   /// A failed or unrecognized read keeps nothing writable, and keeps the last
@@ -547,18 +594,21 @@ final class OpenCodeProfileSlot {
       );
       return;
     }
-    final previous = ledger.recordFor(ref);
+    final previous = ledger.recordFor(_unrestrictedBinding, ref);
     final reading = classifyUnrestricted(rules, previous);
     final next = reading.record;
     var stored = true;
     if (!_sameRecord(previous, next)) {
       // A failed transition leaves the older stage; it is reported, and the
       // next read classifies that stage again.
+      bool current() => _currentUnrestricted(ref, entry);
       stored = next == null
-          ? await ledger.remove(ref)
-          : await ledger.put(ref, next);
+          ? await ledger.remove(_unrestrictedBinding, ref, when: current)
+          : await ledger.put(_unrestrictedBinding, ref, next, when: current);
     }
-    if (!_currentUnrestricted(ref, entry)) return;
+    if (!_currentUnrestricted(ref, entry)) {
+      return _stopUnrestricted(ref, entry, receipt: receipt);
+    }
     // CodeWalk could not record its own state. After an accepted write the
     // rules did change, so that is unconfirmed rather than refused.
     if (!stored && notice != SessionUnrestrictedNotice.unconfirmed) {
@@ -591,6 +641,7 @@ final class OpenCodeProfileSlot {
             a.owned == b.owned;
 
   void _markUnrestrictedBusy(SessionRef ref, _UnrestrictedEntry entry) {
+    entry.epoch = _unrestrictedEpoch;
     final state = entry.state;
     _setUnrestricted(
       ref,
@@ -609,7 +660,7 @@ final class OpenCodeProfileSlot {
     if (entry == null || !supportsUnrestricted || entry.state.busy) return;
     _markUnrestrictedBusy(ref, entry);
     final rules = await _readRules(ref, entry);
-    if (!_currentUnrestricted(ref, entry)) return;
+    if (!_currentUnrestricted(ref, entry)) return _stopUnrestricted(ref, entry);
     await _settleUnrestricted(ref, entry, rules);
   }
 
@@ -626,10 +677,11 @@ final class OpenCodeProfileSlot {
         !canEnableUnrestricted(ref)) {
       return;
     }
+    bool current() => _currentUnrestricted(ref, entry);
     _markUnrestrictedBusy(ref, entry);
     final rules = await _readRules(ref, entry);
-    if (!_currentUnrestricted(ref, entry)) return;
-    final record = ledger.recordFor(ref);
+    if (!current()) return _stopUnrestricted(ref, entry, write: true);
+    final record = ledger.recordFor(_unrestrictedBinding, ref);
     final fresh = rules != null && rules.recognized;
     // Only from a clean state: no wildcard yet, and no record other than an
     // unapplied insertion over these exact rules.
@@ -664,8 +716,8 @@ final class OpenCodeProfileSlot {
       base: unrestrictedFingerprint(rules),
       owned: unrestrictedFingerprint(next),
     );
-    if (!await ledger.put(ref, pending)) {
-      if (!_currentUnrestricted(ref, entry)) return;
+    if (!await ledger.put(_unrestrictedBinding, ref, pending, when: current)) {
+      if (!current()) return _stopUnrestricted(ref, entry, write: true);
       return _settleUnrestricted(
         ref,
         entry,
@@ -673,7 +725,7 @@ final class OpenCodeProfileSlot {
         notice: SessionUnrestrictedNotice.refused,
       );
     }
-    if (!_currentUnrestricted(ref, entry)) return;
+    if (!current()) return _stopUnrestricted(ref, entry, write: true);
     final attempt = await client.replace(
       session: ref,
       rules: next,
@@ -681,12 +733,12 @@ final class OpenCodeProfileSlot {
       id: id,
       cancellation: entry.cancellation,
     );
-    if (!_currentUnrestricted(ref, entry)) return;
     final receipt = attempt.receipt;
+    if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
     switch (receipt.state.known) {
       case ReceiptState.accepted:
         final after = await _readRules(ref, entry);
-        if (!_currentUnrestricted(ref, entry)) return;
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -698,8 +750,8 @@ final class OpenCodeProfileSlot {
         );
       case ReceiptState.rejected || ReceiptState.unavailable:
         // Definitely not applied: the pending record is dropped.
-        await ledger.remove(ref);
-        if (!_currentUnrestricted(ref, entry)) return;
+        await ledger.remove(_unrestrictedBinding, ref, when: current);
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -710,7 +762,7 @@ final class OpenCodeProfileSlot {
       default:
         // Unknown outcome: one verification read, never a second write.
         final after = await _readRules(ref, entry);
-        if (!_currentUnrestricted(ref, entry)) return;
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -733,10 +785,11 @@ final class OpenCodeProfileSlot {
         !canDisableUnrestricted(ref)) {
       return;
     }
+    bool current() => _currentUnrestricted(ref, entry);
     _markUnrestrictedBusy(ref, entry);
     final rules = await _readRules(ref, entry);
-    if (!_currentUnrestricted(ref, entry)) return;
-    final record = ledger.recordFor(ref);
+    if (!current()) return _stopUnrestricted(ref, entry, write: true);
+    final record = ledger.recordFor(_unrestrictedBinding, ref);
     final fresh = rules != null && rules.recognized;
     // Any stage counts once the rules match CodeWalk's insertion exactly: an
     // earlier stage that failed to persist must not strand the rule.
@@ -753,8 +806,9 @@ final class OpenCodeProfileSlot {
             : SessionUnrestrictedNotice.none,
       );
     }
-    if (!await ledger.put(ref, record.at(UnrestrictedStage.removing))) {
-      if (!_currentUnrestricted(ref, entry)) return;
+    final removing = record.at(UnrestrictedStage.removing);
+    if (!await ledger.put(_unrestrictedBinding, ref, removing, when: current)) {
+      if (!current()) return _stopUnrestricted(ref, entry, write: true);
       return _settleUnrestricted(
         ref,
         entry,
@@ -762,7 +816,7 @@ final class OpenCodeProfileSlot {
         notice: SessionUnrestrictedNotice.refused,
       );
     }
-    if (!_currentUnrestricted(ref, entry)) return;
+    if (!current()) return _stopUnrestricted(ref, entry, write: true);
     final attempt = await client.replace(
       session: ref,
       rules: rules.withoutTrailingWildcardAllow(),
@@ -770,12 +824,12 @@ final class OpenCodeProfileSlot {
       id: id,
       cancellation: entry.cancellation,
     );
-    if (!_currentUnrestricted(ref, entry)) return;
     final receipt = attempt.receipt;
+    if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
     switch (receipt.state.known) {
       case ReceiptState.accepted:
         final after = await _readRules(ref, entry);
-        if (!_currentUnrestricted(ref, entry)) return;
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -787,8 +841,9 @@ final class OpenCodeProfileSlot {
         );
       case ReceiptState.rejected || ReceiptState.unavailable:
         // Definitely not applied: the insertion is still CodeWalk's.
-        await ledger.put(ref, record.at(UnrestrictedStage.owned));
-        if (!_currentUnrestricted(ref, entry)) return;
+        final owned = record.at(UnrestrictedStage.owned);
+        await ledger.put(_unrestrictedBinding, ref, owned, when: current);
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -798,7 +853,7 @@ final class OpenCodeProfileSlot {
         );
       default:
         final after = await _readRules(ref, entry);
-        if (!_currentUnrestricted(ref, entry)) return;
+        if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
           entry,
@@ -837,11 +892,11 @@ final class OpenCodeProfileSlot {
       const SessionPermissionReplyState();
 
   bool get supportsReplies =>
-      (_replies != null || _forms != null) && !isClosed;
+      (_replies != null || _forms != null) && _activeBinding;
 
   bool canReply(SessionRef ref, InteractionRequest request) {
     final owner = request.owner;
-    if (isClosed ||
+    if (!_activeBinding ||
         _replies == null ||
         owner is! SessionOwner ||
         (owner.session != ref && owner.origin != ref)) {
@@ -889,25 +944,26 @@ final class OpenCodeProfileSlot {
     return _dispatchReply(
       ref: ref,
       request: request,
-      send: (cancellation) async => (automatic
-              ? await client.approveOnce(
-                  request: request,
-                  id: id,
-                  cancellation: cancellation,
-                )
-              : await client.reply(
-                  request: request,
-                  response: response,
-                  id: id,
-                  cancellation: cancellation,
-                ))
-          .receipt,
+      send: (cancellation) async =>
+          (automatic
+                  ? await client.approveOnce(
+                      request: request,
+                      id: id,
+                      cancellation: cancellation,
+                    )
+                  : await client.reply(
+                      request: request,
+                      response: response,
+                      id: id,
+                      cancellation: cancellation,
+                    ))
+              .receipt,
     );
   }
 
   bool canReplyForm(SessionRef ref, InteractionRequest request) {
     final owner = request.owner;
-    if (isClosed || _forms == null) return false;
+    if (!_activeBinding || _forms == null) return false;
     if (owner is SessionOwner) {
       if (owner.session != ref && owner.origin != ref) return false;
     } else if (owner is GlobalOwner) {
@@ -966,19 +1022,20 @@ final class OpenCodeProfileSlot {
     return _dispatchReply(
       ref: ref,
       request: request,
-      send: (cancellation) async => (isDismiss
-              ? await client.dismiss(
-                  request: request,
-                  id: id,
-                  cancellation: cancellation,
-                )
-              : await client.reply(
-                  request: request,
-                  response: response!,
-                  id: id,
-                  cancellation: cancellation,
-                ))
-          .receipt,
+      send: (cancellation) async =>
+          (isDismiss
+                  ? await client.dismiss(
+                      request: request,
+                      id: id,
+                      cancellation: cancellation,
+                    )
+                  : await client.reply(
+                      request: request,
+                      response: response!,
+                      id: id,
+                      cancellation: cancellation,
+                    ))
+              .receipt,
     );
   }
 
@@ -1260,8 +1317,22 @@ final class OpenCodeProfileSlot {
   int get catalogLeases => _catalogLeases;
 
   bool get isClosed => _closing != null;
+  bool get _activeBinding => !isClosed && isCurrentBinding();
 
-  Future<void> close() => _closing ??= _shutdown();
+  Future<void> close() {
+    final closing = _closing;
+    if (closing != null) return closing;
+    final completion = Completer<void>();
+    _closing = completion.future;
+    lifetimeCancellation.cancel();
+    unawaited(
+      _shutdown().then<void>(
+        (_) => completion.complete(),
+        onError: completion.completeError,
+      ),
+    );
+    return completion.future;
+  }
 
   Future<void> _shutdown() async {
     for (final lease in _leases.toList()) {
@@ -1313,6 +1384,9 @@ final class _UnrestrictedEntry {
   final cancellation = RequestCancellation();
   bool needsRead = true;
 
+  /// The slot's epoch when the operation in flight started.
+  int epoch = 0;
+
   /// The current live period already retried a failed automatic read.
   bool retried = false;
   SessionUnrestrictedState state = const SessionUnrestrictedState();
@@ -1352,7 +1426,9 @@ final class _CatalogLease implements SessionCatalogChanges {
     // per-session degradation leaves the stream live.
     _connection = _owner.updates
         .where((update) => update is OpenCodeConnectionUpdated)
-        .where((update) => (update as OpenCodeConnectionUpdated).session == null)
+        .where(
+          (update) => (update as OpenCodeConnectionUpdated).session == null,
+        )
         .listen((update) {
           final kind = (update as OpenCodeConnectionUpdated).kind;
           _add(SessionCatalogConnection(kind == ConnectionKind.live));
@@ -1374,19 +1450,19 @@ final class _CatalogLease implements SessionCatalogChanges {
 
   @override
   Stream<SessionCatalogSignal> get signals => Stream.multi((controller) {
-        // A subscriber that arrives late learns the current state first: a
-        // broadcast controller would drop it.
-        final kind = _owner.connectionKind;
-        if (kind != null) {
-          controller.add(SessionCatalogConnection(kind == ConnectionKind.live));
-        }
-        final subscription = _controller.stream.listen(
-          controller.add,
-          onError: controller.addError,
-          onDone: controller.close,
-        );
-        controller.onCancel = subscription.cancel;
-      });
+    // A subscriber that arrives late learns the current state first: a
+    // broadcast controller would drop it.
+    final kind = _owner.connectionKind;
+    if (kind != null) {
+      controller.add(SessionCatalogConnection(kind == ConnectionKind.live));
+    }
+    final subscription = _controller.stream.listen(
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    );
+    controller.onCancel = subscription.cancel;
+  });
 
   void _add(SessionCatalogSignal signal) {
     if (!_closed && !_controller.isClosed) _controller.add(signal);
