@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "ڈائریکٹریز کو فلٹر کریں۔",
   "workspaceOpenFolder": "فولڈر کھولیں۔",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "تاریخ سے {name} کو ہٹا دیں۔"
+  "workspaceRemoveFromHistory": "تاریخ سے {name} کو ہٹا دیں۔",
+  "sessionTabChangeIconAction": "آئیکن تبدیل کریں",
+  "sessionTabIconPickerTitle": "ٹیب آئیکن منتخب کریں",
+  "sessionTabIconPresetBug": "بگ",
+  "sessionTabIconPresetCloud": "کلاؤڈ",
+  "sessionTabIconPresetCode": "کوڈ",
+  "sessionTabIconPresetData": "ڈیٹا",
+  "sessionTabIconPresetDesign": "ڈیزائن",
+  "sessionTabIconPresetIdea": "خیال",
+  "sessionTabIconPresetLaunch": "لانچ",
+  "sessionTabIconPresetResearch": "تحقیق",
+  "sessionTabIconPresetSecurity": "سیکورٹی",
+  "sessionTabIconPresetTasks": "کام",
+  "sessionTabIconPresetTerminal": "ٹرمینل",
+  "sessionTabIconPresetTools": "ٹولز",
+  "sessionTabIconSaveFailed": "ٹیب آئیکن محفوظ نہیں ہو سکا۔",
+  "sessionTabIconUseProjectIcon": "پروجیکٹ آئیکن استعمال کریں",
+  "sessionTabRestoreFailed": "ٹیب بحال نہیں ہو سکا۔"
 }

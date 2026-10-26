@@ -5,6 +5,7 @@ import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,36 +95,46 @@ SessionRef _ref(_App app, String id) => app.rig.sources.single.row(id).info.ref;
 Finder _tab(_App app, String id) =>
     find.byKey(ValueKey('session-tab-${_ref(app, id).storageKey}'));
 
+Future<void> _middleClose(WidgetTester tester, _App app, String id) async {
+  await tester.ensureVisible(_tab(app, id));
+  await tester.tap(
+    _tab(app, id),
+    kind: PointerDeviceKind.mouse,
+    buttons: kMiddleMouseButton,
+  );
+}
+
 String _location(_App app) =>
     app.dependencies.router.routerDelegate.currentConfiguration.uri.toString();
 
 void main() {
-  testWidgets('the strip shows the tabs of the shown project and switches', (
-    tester,
-  ) async {
-    _useMemoryPreferences();
-    final app = await _launch(tester, '/s/profile_a/ses_one');
-    final source = app.rig.sources.single;
-    source.respond([
-      source.row('one', title: 'One', directory: '/work/a'),
-      source.row('two', title: 'Two', directory: '/work/a'),
-      source.row('other', title: 'Other', directory: '/work/b'),
-    ]);
-    await _settle(tester);
-    await _visit(tester, app, ['one', 'other', 'two']);
+  testWidgets(
+    'the strip shows all server tabs grouped by project and switches',
+    (tester) async {
+      _useMemoryPreferences();
+      final app = await _launch(tester, '/s/profile_a/ses_one');
+      final source = app.rig.sources.single;
+      source.respond([
+        source.row('one', title: 'One', directory: '/work/a'),
+        source.row('two', title: 'Two', directory: '/work/a'),
+        source.row('other', title: 'Other', directory: '/work/b'),
+      ]);
+      await _settle(tester);
+      await _visit(tester, app, ['one', 'other', 'two']);
 
-    expect(_tab(app, 'one'), findsOneWidget);
-    expect(_tab(app, 'two'), findsOneWidget);
-    // Another project keeps its own set.
-    expect(_tab(app, 'other'), findsNothing);
+      expect(_tab(app, 'one'), findsOneWidget);
+      expect(_tab(app, 'two'), findsOneWidget);
+      // Other projects share the same server strip.
+      expect(_tab(app, 'other'), findsOneWidget);
 
-    await tester.tap(_tab(app, 'one'));
-    await _settle(tester);
-    expect(_location(app), '/s/profile_a/ses_one');
-    // The view of the first tab was kept, not opened again.
-    expect(app.directory.opens, hasLength(3));
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+      await tester.tap(_tab(app, 'one'));
+      await _settle(tester);
+      expect(_location(app), '/s/profile_a/ses_one');
+      // The view of the first tab was kept, not opened again.
+      expect(app.directory.opens, hasLength(3));
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('a tab shown again keeps the reader\'s place', (tester) async {
     _useMemoryPreferences();
@@ -335,15 +346,13 @@ void main() {
     await _visit(tester, app, ['one', 'two', 'three', 'two']);
     final tabs = app.dependencies.sessionTabs!;
 
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${_ref(app, 'two').storageKey}')),
-    );
+    await _middleClose(tester, app, 'two');
     await _settle(tester);
     expect(
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_three'],
     );
-    // The next tab of the project takes its place.
+    // Its right-hand neighbour takes its place; Undo never navigates.
     expect(_location(app), '/s/profile_a/ses_three');
     expect(find.text(app.l10n.sessionTabClosedMessage('Two')), findsOneWidget);
 
@@ -353,7 +362,7 @@ void main() {
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_two');
+    expect(_location(app), '/s/profile_a/ses_three');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -368,9 +377,7 @@ void main() {
     await _visit(tester, app, ['one', 'two']);
     final tabs = app.dependencies.sessionTabs!;
 
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${_ref(app, 'one').storageKey}')),
-    );
+    await _middleClose(tester, app, 'one');
     await _settle(tester);
     expect(_location(app), '/s/profile_a/ses_two');
     await tester.tap(find.text(app.l10n.sessionTabUndo));
@@ -399,9 +406,7 @@ void main() {
     await _visit(tester, app, ['one', 'two', 'three', 'two']);
     final tabs = app.dependencies.sessionTabs!;
 
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${_ref(app, 'two').storageKey}')),
-    );
+    await _middleClose(tester, app, 'two');
     await _settle(tester);
     expect(_location(app), '/s/profile_a/ses_three');
     // The reader moves on before using the undo.
@@ -430,9 +435,7 @@ void main() {
     await _visit(tester, app, ['one', 'two', 'three', 'two']);
     final tabs = app.dependencies.sessionTabs!;
 
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${_ref(app, 'two').storageKey}')),
-    );
+    await _middleClose(tester, app, 'two');
     await _settle(tester);
     expect(_location(app), '/s/profile_a/ses_three');
     await tester.tap(find.text(app.l10n.sessionTabUndo));
@@ -459,14 +462,8 @@ void main() {
     await _visit(tester, app, ['one', 'two', 'three', 'two']);
 
     // Both closes start before either is saved.
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${_ref(app, 'two').storageKey}')),
-    );
-    await tester.tap(
-      find.byKey(
-        ValueKey('session-tab-close-${_ref(app, 'three').storageKey}'),
-      ),
-    );
+    await _middleClose(tester, app, 'two');
+    await _middleClose(tester, app, 'three');
     await _settle(tester);
     expect(
       [for (final tab in app.dependencies.sessionTabs!.tabs) tab.ref.nativeId],

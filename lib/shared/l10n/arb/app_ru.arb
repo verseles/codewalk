@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Фильтровать каталоги",
   "workspaceOpenFolder": "Открыть папку",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "Удалить {name} из истории"
+  "workspaceRemoveFromHistory": "Удалить {name} из истории",
+  "sessionTabChangeIconAction": "Сменить значок",
+  "sessionTabIconPickerTitle": "Выбрать значок вкладки",
+  "sessionTabIconPresetBug": "Ошибка",
+  "sessionTabIconPresetCloud": "Облако",
+  "sessionTabIconPresetCode": "Код",
+  "sessionTabIconPresetData": "Данные",
+  "sessionTabIconPresetDesign": "Дизайн",
+  "sessionTabIconPresetIdea": "Идея",
+  "sessionTabIconPresetLaunch": "Запуск",
+  "sessionTabIconPresetResearch": "Исследование",
+  "sessionTabIconPresetSecurity": "Безопасность",
+  "sessionTabIconPresetTasks": "Задачи",
+  "sessionTabIconPresetTerminal": "Терминал",
+  "sessionTabIconPresetTools": "Инструменты",
+  "sessionTabIconSaveFailed": "Не удалось сохранить значок вкладки.",
+  "sessionTabIconUseProjectIcon": "Использовать значок проекта",
+  "sessionTabRestoreFailed": "Не удалось восстановить вкладку."
 }

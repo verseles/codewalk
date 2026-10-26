@@ -1669,4 +1669,55 @@ class V2LocalizationsZh extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return '从历史记录中移除 $name';
   }
+
+  @override
+  String get sessionTabChangeIconAction => '更改图标';
+
+  @override
+  String get sessionTabIconPickerTitle => '选择标签页图标';
+
+  @override
+  String get sessionTabIconPresetBug => '缺陷';
+
+  @override
+  String get sessionTabIconPresetCloud => '云端';
+
+  @override
+  String get sessionTabIconPresetCode => '代码';
+
+  @override
+  String get sessionTabIconPresetData => '数据';
+
+  @override
+  String get sessionTabIconPresetDesign => '设计';
+
+  @override
+  String get sessionTabIconPresetIdea => '灵感';
+
+  @override
+  String get sessionTabIconPresetLaunch => '启动';
+
+  @override
+  String get sessionTabIconPresetResearch => '研究';
+
+  @override
+  String get sessionTabIconPresetSecurity => '安全';
+
+  @override
+  String get sessionTabIconPresetTasks => '任务';
+
+  @override
+  String get sessionTabIconPresetTerminal => '终端';
+
+  @override
+  String get sessionTabIconPresetTools => '工具';
+
+  @override
+  String get sessionTabIconSaveFailed => '无法保存标签页图标。';
+
+  @override
+  String get sessionTabIconUseProjectIcon => '使用项目图标';
+
+  @override
+  String get sessionTabRestoreFailed => '无法恢复标签页。';
 }

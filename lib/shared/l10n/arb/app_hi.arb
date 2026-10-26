@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "निर्देशिकाएं फ़िल्टर करें",
   "workspaceOpenFolder": "फ़ोल्डर खोलें",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "इतिहास से {name} निकालें"
+  "workspaceRemoveFromHistory": "इतिहास से {name} निकालें",
+  "sessionTabChangeIconAction": "आइकन बदलें",
+  "sessionTabIconPickerTitle": "टैब आइकन चुनें",
+  "sessionTabIconPresetBug": "बग",
+  "sessionTabIconPresetCloud": "क्लाउड",
+  "sessionTabIconPresetCode": "कोड",
+  "sessionTabIconPresetData": "डेटा",
+  "sessionTabIconPresetDesign": "डिज़ाइन",
+  "sessionTabIconPresetIdea": "विचार",
+  "sessionTabIconPresetLaunch": "लॉन्च",
+  "sessionTabIconPresetResearch": "शोध",
+  "sessionTabIconPresetSecurity": "सुरक्षा",
+  "sessionTabIconPresetTasks": "कार्य",
+  "sessionTabIconPresetTerminal": "टर्मिनल",
+  "sessionTabIconPresetTools": "टूल्स",
+  "sessionTabIconSaveFailed": "टैब आइकन सहेजा नहीं जा सका।",
+  "sessionTabIconUseProjectIcon": "प्रोजेक्ट आइकन का उपयोग करें",
+  "sessionTabRestoreFailed": "टैब पुनर्स्थापित नहीं किया जा सका।"
 }

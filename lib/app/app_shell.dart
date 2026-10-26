@@ -99,7 +99,7 @@ class AppShell extends StatelessWidget {
                       )
                     : null,
                 drawer: const Drawer(child: SafeArea(child: SessionsPage())),
-                body: _WorkspaceBack(child: child),
+                body: _WorkspaceBack(child: _homeTabs(context, tabs, home)),
               );
             }
             final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
@@ -120,7 +120,11 @@ class AppShell extends StatelessWidget {
                     child: const SessionsPage(),
                   ),
                   const VerticalDivider(width: 1),
-                  Expanded(child: _WorkspaceBack(child: child)),
+                  Expanded(
+                    child: _WorkspaceBack(
+                      child: _homeTabs(context, tabs, home),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -139,6 +143,21 @@ class AppShell extends StatelessWidget {
   }
 
   /// Opens the local draft without sending a session command.
+  Widget _homeTabs(
+    BuildContext context,
+    SessionTabsController? tabs,
+    bool home,
+  ) {
+    final catalog = context.watch<SessionsController?>();
+    if (!home || tabs == null || catalog?.selectedProfile == null) return child;
+    return SessionTabsFrame(
+      tabs: tabs,
+      current: null,
+      project: catalog?.selectedProject?.project,
+      child: child,
+    );
+  }
+
   void _create(BuildContext context) {
     final controller = context.read<SessionsController?>();
     if (controller == null || !canCreate(controller)) return;

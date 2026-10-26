@@ -1791,4 +1791,55 @@ class V2LocalizationsHi extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'इतिहास से $name निकालें';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'आइकन बदलें';
+
+  @override
+  String get sessionTabIconPickerTitle => 'टैब आइकन चुनें';
+
+  @override
+  String get sessionTabIconPresetBug => 'बग';
+
+  @override
+  String get sessionTabIconPresetCloud => 'क्लाउड';
+
+  @override
+  String get sessionTabIconPresetCode => 'कोड';
+
+  @override
+  String get sessionTabIconPresetData => 'डेटा';
+
+  @override
+  String get sessionTabIconPresetDesign => 'डिज़ाइन';
+
+  @override
+  String get sessionTabIconPresetIdea => 'विचार';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'लॉन्च';
+
+  @override
+  String get sessionTabIconPresetResearch => 'शोध';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'सुरक्षा';
+
+  @override
+  String get sessionTabIconPresetTasks => 'कार्य';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'टर्मिनल';
+
+  @override
+  String get sessionTabIconPresetTools => 'टूल्स';
+
+  @override
+  String get sessionTabIconSaveFailed => 'टैब आइकन सहेजा नहीं जा सका।';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'प्रोजेक्ट आइकन का उपयोग करें';
+
+  @override
+  String get sessionTabRestoreFailed => 'टैब पुनर्स्थापित नहीं किया जा सका।';
 }

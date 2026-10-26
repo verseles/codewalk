@@ -1826,4 +1826,57 @@ class V2LocalizationsDe extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return '$name aus dem Verlauf entfernen';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Symbol ändern';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Tab-Symbol wählen';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Cloud';
+
+  @override
+  String get sessionTabIconPresetCode => 'Code';
+
+  @override
+  String get sessionTabIconPresetData => 'Daten';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idee';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Start';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Recherche';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Sicherheit';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Aufgaben';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetTools => 'Werkzeuge';
+
+  @override
+  String get sessionTabIconSaveFailed =>
+      'Tab-Symbol konnte nicht gespeichert werden.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Projektsymbol verwenden';
+
+  @override
+  String get sessionTabRestoreFailed =>
+      'Tab konnte nicht wiederhergestellt werden.';
 }

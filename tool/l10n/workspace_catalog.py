@@ -94,3 +94,22 @@ PORT_KEYS |= {
     "workspaceFailedToOpenProjectContext", "workspaceFilterDirs",
     "workspaceOpenFolder", "workspaceProjectHint", "workspaceRemoveFromHistory",
 }
+
+# Session tab glyph picker and local restore errors (#453 S5).
+PORT_KEYS |= {
+    "sessionTabChangeIconAction", "sessionTabIconPickerTitle",
+    "sessionTabIconUseProjectIcon", "sessionTabRestoreFailed",
+    "sessionTabIconSaveFailed",
+    "sessionTabIconPresetCode",
+    "sessionTabIconPresetTerminal",
+    "sessionTabIconPresetBug",
+    "sessionTabIconPresetTasks",
+    "sessionTabIconPresetLaunch",
+    "sessionTabIconPresetIdea",
+    "sessionTabIconPresetResearch",
+    "sessionTabIconPresetDesign",
+    "sessionTabIconPresetData",
+    "sessionTabIconPresetCloud",
+    "sessionTabIconPresetSecurity",
+    "sessionTabIconPresetTools",
+}

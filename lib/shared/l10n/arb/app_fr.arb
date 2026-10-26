@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Filtrer les répertoires",
   "workspaceOpenFolder": "Ouvrir le dossier",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "Retirer {name} de l''historique"
+  "workspaceRemoveFromHistory": "Retirer {name} de l''historique",
+  "sessionTabChangeIconAction": "Changer l''icône",
+  "sessionTabIconPickerTitle": "Choisir une icône d''onglet",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Cloud",
+  "sessionTabIconPresetCode": "Code",
+  "sessionTabIconPresetData": "Données",
+  "sessionTabIconPresetDesign": "Design",
+  "sessionTabIconPresetIdea": "Idée",
+  "sessionTabIconPresetLaunch": "Lancement",
+  "sessionTabIconPresetResearch": "Recherche",
+  "sessionTabIconPresetSecurity": "Sécurité",
+  "sessionTabIconPresetTasks": "Tâches",
+  "sessionTabIconPresetTerminal": "Terminal",
+  "sessionTabIconPresetTools": "Outils",
+  "sessionTabIconSaveFailed": "L''icône d''onglet n''a pas pu être enregistrée.",
+  "sessionTabIconUseProjectIcon": "Utiliser l''icône du projet",
+  "sessionTabRestoreFailed": "L''onglet n''a pas pu être restauré."
 }

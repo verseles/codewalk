@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Filtrar directorios",
   "workspaceOpenFolder": "Abrir carpeta",
   "workspaceProjectHint": "/repo/mi-proyecto",
-  "workspaceRemoveFromHistory": "Eliminar {name} del historial"
+  "workspaceRemoveFromHistory": "Eliminar {name} del historial",
+  "sessionTabChangeIconAction": "Cambiar icono",
+  "sessionTabIconPickerTitle": "Elegir icono de pestaña",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Nube",
+  "sessionTabIconPresetCode": "Código",
+  "sessionTabIconPresetData": "Datos",
+  "sessionTabIconPresetDesign": "Diseño",
+  "sessionTabIconPresetIdea": "Idea",
+  "sessionTabIconPresetLaunch": "Inicio",
+  "sessionTabIconPresetResearch": "Investigación",
+  "sessionTabIconPresetSecurity": "Seguridad",
+  "sessionTabIconPresetTasks": "Tareas",
+  "sessionTabIconPresetTerminal": "Terminal",
+  "sessionTabIconPresetTools": "Herramientas",
+  "sessionTabIconSaveFailed": "No se pudo guardar el icono de la pestaña.",
+  "sessionTabIconUseProjectIcon": "Usar icono del proyecto",
+  "sessionTabRestoreFailed": "No se pudo restaurar la pestaña."
 }

@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Verzeichnisse filtern",
   "workspaceOpenFolder": "Ordner öffnen",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "{name} aus dem Verlauf entfernen"
+  "workspaceRemoveFromHistory": "{name} aus dem Verlauf entfernen",
+  "sessionTabChangeIconAction": "Symbol ändern",
+  "sessionTabIconPickerTitle": "Tab-Symbol wählen",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Cloud",
+  "sessionTabIconPresetCode": "Code",
+  "sessionTabIconPresetData": "Daten",
+  "sessionTabIconPresetDesign": "Design",
+  "sessionTabIconPresetIdea": "Idee",
+  "sessionTabIconPresetLaunch": "Start",
+  "sessionTabIconPresetResearch": "Recherche",
+  "sessionTabIconPresetSecurity": "Sicherheit",
+  "sessionTabIconPresetTasks": "Aufgaben",
+  "sessionTabIconPresetTerminal": "Terminal",
+  "sessionTabIconPresetTools": "Werkzeuge",
+  "sessionTabIconSaveFailed": "Tab-Symbol konnte nicht gespeichert werden.",
+  "sessionTabIconUseProjectIcon": "Projektsymbol verwenden",
+  "sessionTabRestoreFailed": "Tab konnte nicht wiederhergestellt werden."
 }

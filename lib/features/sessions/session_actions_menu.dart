@@ -17,6 +17,8 @@ enum SessionRowAction {
   hide,
   unhide,
   delete,
+  changeIcon,
+  closeProject,
 }
 
 /// The overflow control of a session row.
@@ -33,6 +35,12 @@ class SessionActionsMenu extends StatefulWidget {
     this.historyEnabled = true,
     this.pinned = false,
     this.onPin,
+    this.onChangeIcon,
+    this.onCloseProject,
+    this.closeProjectLabel,
+    this.closeProjectReason,
+    this.child,
+    this.offset = Offset.zero,
     super.key,
   });
 
@@ -52,6 +60,12 @@ class SessionActionsMenu extends StatefulWidget {
   /// context has nothing to be pinned in.
   final bool pinned;
   final ValueChanged<bool>? onPin;
+  final VoidCallback? onChangeIcon;
+  final VoidCallback? onCloseProject;
+  final String? closeProjectLabel;
+  final String? closeProjectReason;
+  final Widget? child;
+  final Offset offset;
 
   @override
   State<SessionActionsMenu> createState() => _SessionActionsMenuState();
@@ -81,9 +95,10 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       key: ValueKey('session-actions-${row.info.ref.storageKey}'),
       child: PopupMenuButton<SessionRowAction>(
         key: widget.menuKey,
-        icon: const Icon(Icons.more_vert),
+        icon: widget.child == null ? const Icon(Icons.more_vert) : null,
+        offset: widget.offset,
         tooltip: l10n.sessionsActionsMenu,
-        enabled: !pending,
+        enabled: !pending || widget.onChangeIcon != null,
         onSelected: (action) => _run(context, action),
         itemBuilder: (context) => [
           if (widget.onHistory != null)
@@ -132,7 +147,27 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
             enabled: enabled,
             child: _label(l10n.sessionsActionDelete, reason, destructive: true),
           ),
+          if (widget.onChangeIcon != null) ...[
+            const PopupMenuDivider(),
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.changeIcon,
+              child: Text(l10n.sessionTabChangeIconAction),
+            ),
+          ],
+          if (widget.closeProjectLabel case final label?)
+            PopupMenuItem<SessionRowAction>(
+              value: SessionRowAction.closeProject,
+              enabled:
+                  widget.onCloseProject != null &&
+                  widget.closeProjectReason == null,
+              child: _label(
+                label,
+                widget.closeProjectReason,
+                destructive: true,
+              ),
+            ),
         ],
+        child: widget.child,
       ),
     );
   }
@@ -209,6 +244,10 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
         final confirmed = await _confirmDelete(context);
         if (!confirmed) return;
         await controller.delete(row);
+      case SessionRowAction.changeIcon:
+        widget.onChangeIcon?.call();
+      case SessionRowAction.closeProject:
+        widget.onCloseProject?.call();
     }
   }
 

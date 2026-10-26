@@ -1707,4 +1707,55 @@ class V2LocalizationsKo extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return '기록에서 $name 제거';
   }
+
+  @override
+  String get sessionTabChangeIconAction => '아이콘 변경';
+
+  @override
+  String get sessionTabIconPickerTitle => '탭 아이콘 선택';
+
+  @override
+  String get sessionTabIconPresetBug => '버그';
+
+  @override
+  String get sessionTabIconPresetCloud => '클라우드';
+
+  @override
+  String get sessionTabIconPresetCode => '코드';
+
+  @override
+  String get sessionTabIconPresetData => '데이터';
+
+  @override
+  String get sessionTabIconPresetDesign => '디자인';
+
+  @override
+  String get sessionTabIconPresetIdea => '아이디어';
+
+  @override
+  String get sessionTabIconPresetLaunch => '시작';
+
+  @override
+  String get sessionTabIconPresetResearch => '연구';
+
+  @override
+  String get sessionTabIconPresetSecurity => '보안';
+
+  @override
+  String get sessionTabIconPresetTasks => '작업';
+
+  @override
+  String get sessionTabIconPresetTerminal => '터미널';
+
+  @override
+  String get sessionTabIconPresetTools => '도구';
+
+  @override
+  String get sessionTabIconSaveFailed => '탭 아이콘을 저장할 수 없습니다.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => '프로젝트 아이콘 사용';
+
+  @override
+  String get sessionTabRestoreFailed => '탭을 복원할 수 없습니다.';
 }

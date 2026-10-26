@@ -4,9 +4,11 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../platform/sessions/project_workspace_store.dart';
+import '../../platform/sessions/session_tab_icon_store.dart';
 import '../../platform/sessions/session_tabs_store.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import 'session_live_controller.dart';
+import 'session_tab_projection.dart';
 import 'session_tab_reconciler.dart';
 import 'sessions_controller.dart';
 
@@ -26,10 +28,12 @@ class SessionTabsController extends ChangeNotifier {
     required SessionTabsStore store,
     SessionsController? catalog,
     ProjectWorkspaceStore? workspace,
+    SessionTabIconStore? icons,
     DateTime Function()? now,
   }) : _store = store,
        _catalog = catalog,
        _workspace = workspace,
+       _icons = icons,
        _now = now ?? DateTime.now {
     _store
       ..addListener(_notify)
@@ -39,6 +43,8 @@ class SessionTabsController extends ChangeNotifier {
     // A removed server clears the list before it is noticed there.
     _catalog?.hosts.addListener(_validate);
     _workspace?.addListener(_scheduleReconcile);
+    _workspace?.addListener(_notify);
+    _icons?.addListener(_notify);
   }
 
   /// The live views kept open beside the shown one.
@@ -47,6 +53,7 @@ class SessionTabsController extends ChangeNotifier {
   final SessionTabsStore _store;
   final SessionsController? _catalog;
   final ProjectWorkspaceStore? _workspace;
+  final SessionTabIconStore? _icons;
   final DateTime Function() _now;
 
   /// The live views, least recently shown first.
@@ -71,7 +78,18 @@ class SessionTabsController extends ChangeNotifier {
   bool _disposed = false;
   bool _launched = false;
 
-  Future<void> initialize() => _store.initialize();
+  Future<void> initialize() async {
+    await Future.wait([_store.initialize(), ?_icons?.initialize()]);
+    _validate();
+  }
+
+  bool isPinned(SessionTab tab) => _pinOf(tab) != null;
+  String? iconFor(SessionRef ref) => _icons?.presetFor(ref);
+  Future<bool> setIcon(SessionTab tab, String? preset) async =>
+      await _icons?.set(tab, preset) ?? false;
+
+  SessionTabProjection projection(HostId host) =>
+      SessionTabProjection(tabs: tabs, host: host, isPinned: isPinned);
 
   bool get loaded => _store.loaded;
 
@@ -236,6 +254,7 @@ class SessionTabsController extends ChangeNotifier {
       final row = _catalog?.findSession(ref);
       final (:removed, :selectedAfter) = await _remove(
         {ref},
+        pinned: (tab) => (tab.ref == ref && unpinned) || isPinned(tab),
         suppress: (tab) => SessionTabSuppression(
           ref: tab.ref,
           project: tab.project,
@@ -312,8 +331,9 @@ class SessionTabsController extends ChangeNotifier {
     );
     // Unreadable tabs are neither known nor closed.
     if (_store.unreadable) return false;
+    final iconsSaved = await _icons?.removeWhere(inContext) ?? true;
     // Nothing of the project was open, or every tab of it closed.
-    return !matched || removed.isNotEmpty;
+    return iconsSaved && (!matched || removed.isNotEmpty);
   }
 
   /// Puts the closed [tab] back at [index] of the strip; [select] makes it
@@ -369,20 +389,17 @@ class SessionTabsController extends ChangeNotifier {
     }
   }
 
-  /// The tab a server selects after its selected tab [ref] closed: the next
-  /// tab of the same project, else the previous one.
-  static SessionRef? _neighbour(SessionTabsState state, SessionRef ref) {
-    final closed = state.tabs.where((tab) => tab.ref == ref).firstOrNull;
-    if (closed == null) return null;
-    final set = [
-      for (final tab in state.tabs)
-        if (tab.ref.host == ref.host && tab.project == closed.project) tab,
-    ];
-    final at = set.indexWhere((tab) => tab.ref == ref);
-    if (at + 1 < set.length) return set[at + 1].ref;
-    if (at > 0) return set[at - 1].ref;
-    return null;
-  }
+  /// Chooses in the same grouped order the strip displays, without changing
+  /// the durable order used by Undo.
+  SessionRef? _neighbour(
+    SessionTabsState state,
+    SessionRef ref,
+    bool Function(SessionTab)? pinned,
+  ) => SessionTabProjection(
+    tabs: state.tabs,
+    host: ref.host,
+    isPinned: pinned ?? isPinned,
+  ).neighbour(ref);
 
   /// Removes the tabs of [refs], or the tabs [where] picks, at the store's
   /// turn, recording each as closed when [suppress] is given; the closed
@@ -399,6 +416,7 @@ class SessionTabsController extends ChangeNotifier {
     bool Function(SessionTab tab)? where,
     SessionTabSuppression Function(SessionTab tab)? suppress,
     bool Function(SessionTabSuppression entry)? forget,
+    bool Function(SessionTab)? pinned,
   }) async {
     var removed = <SessionTab>[];
     final selectedAfter = <SessionRef, SessionRef?>{};
@@ -421,7 +439,7 @@ class SessionTabsController extends ChangeNotifier {
         final ref = tab.ref;
         final selected = {...current.selected};
         if (selected[ref.host] == ref) {
-          final next = _neighbour(current, ref);
+          final next = _neighbour(current, ref, pinned);
           selectedAfter[ref] = next;
           if (next == null) {
             selected.remove(ref.host);
@@ -537,6 +555,13 @@ class SessionTabsController extends ChangeNotifier {
       };
       bool orphaned(SessionTabSuppression entry) =>
           !saved.contains(entry.ref.host);
+      bool orphanIcon(SessionRef ref, ProjectRef? _) =>
+          !hosts.loading &&
+          !hosts.storageError &&
+          !hosts.profiles.any((p) => p.id == ref.host.value);
+      if (_icons?.anyWhere(orphanIcon) ?? false) {
+        unawaited(_icons?.removeWhere(orphanIcon));
+      }
       if (orphans.isNotEmpty || _store.state.suppressed.any(orphaned)) {
         unawaited(_remove(orphans, forget: orphaned));
       }
@@ -656,6 +681,11 @@ class SessionTabsController extends ChangeNotifier {
     // A route can keep its view after its local tab was closed. It still
     // loses the lease when the server subsequently confirms its absence.
     _release(_warm.remove(ref));
+    unawaited(
+      _icons?.removeWhere(
+        (iconRef, _) => _currentBinding(profile) && iconRef == ref,
+      ),
+    );
     if (removed.isNotEmpty) {
       _removed.add(removed.single.title);
     }
@@ -798,6 +828,8 @@ class SessionTabsController extends ChangeNotifier {
     _catalog?.removeListener(_scheduleReconcile);
     _catalog?.hosts.removeListener(_validate);
     _workspace?.removeListener(_scheduleReconcile);
+    _workspace?.removeListener(_notify);
+    _icons?.removeListener(_notify);
     for (final task in _reads.values) {
       task.cancel();
     }

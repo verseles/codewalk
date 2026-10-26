@@ -1786,4 +1786,55 @@ class V2LocalizationsUr extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'تاریخ سے $name کو ہٹا دیں۔';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'آئیکن تبدیل کریں';
+
+  @override
+  String get sessionTabIconPickerTitle => 'ٹیب آئیکن منتخب کریں';
+
+  @override
+  String get sessionTabIconPresetBug => 'بگ';
+
+  @override
+  String get sessionTabIconPresetCloud => 'کلاؤڈ';
+
+  @override
+  String get sessionTabIconPresetCode => 'کوڈ';
+
+  @override
+  String get sessionTabIconPresetData => 'ڈیٹا';
+
+  @override
+  String get sessionTabIconPresetDesign => 'ڈیزائن';
+
+  @override
+  String get sessionTabIconPresetIdea => 'خیال';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'لانچ';
+
+  @override
+  String get sessionTabIconPresetResearch => 'تحقیق';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'سیکورٹی';
+
+  @override
+  String get sessionTabIconPresetTasks => 'کام';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'ٹرمینل';
+
+  @override
+  String get sessionTabIconPresetTools => 'ٹولز';
+
+  @override
+  String get sessionTabIconSaveFailed => 'ٹیب آئیکن محفوظ نہیں ہو سکا۔';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'پروجیکٹ آئیکن استعمال کریں';
+
+  @override
+  String get sessionTabRestoreFailed => 'ٹیب بحال نہیں ہو سکا۔';
 }

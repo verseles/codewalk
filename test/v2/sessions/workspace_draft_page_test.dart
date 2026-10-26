@@ -608,6 +608,21 @@ void main() {
     },
   );
 
+  testWidgets('the draft composer takes the focus only when asked', (
+    tester,
+  ) async {
+    await open(tester);
+    final field = find.byKey(const ValueKey('workspace-draft-text'));
+    bool focused() =>
+        tester.widget<TextField>(field).focusNode?.hasFocus ?? false;
+    // Showing a draft never raises the keyboard by itself.
+    expect(focused(), isFalse);
+    app.workspaceDrafts!.focusComposer();
+    await tester.pumpAndSettle();
+    expect(focused(), isTrue);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   for (final width in [360.0, 840.0]) {
     for (final language in ['ar', 'ur']) {
       testWidgets('draft fits width$width / $language / 2x', (tester) async {

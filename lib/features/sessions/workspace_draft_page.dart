@@ -36,10 +36,12 @@ class WorkspaceDraftPage extends StatefulWidget {
 
 class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
   final _directory = TextEditingController();
+  final _composerFocus = FocusNode();
   bool _invalidPath = false;
   @override
   void dispose() {
     _directory.dispose();
+    _composerFocus.dispose();
     super.dispose();
   }
 
@@ -64,6 +66,14 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
       listenable: widget.controller,
       builder: (context, _) {
         final c = widget.controller;
+        if (!c.loading &&
+            !c.sending &&
+            !c.needsDirectory &&
+            c.takeFocusRequest()) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _composerFocus.requestFocus();
+          });
+        }
         final uncertain =
             (c.status == WorkspaceDraftStatus.creating && !c.sending) ||
             const {
@@ -192,6 +202,7 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                               child: TextField(
                                 key: const ValueKey('workspace-draft-text'),
                                 controller: c.draft,
+                                focusNode: _composerFocus,
                                 enabled: !c.sending,
                                 readOnly: c.endpointOffline,
                                 minLines: 1,

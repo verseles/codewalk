@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Filtrar diretórios",
   "workspaceOpenFolder": "Abrir pasta",
   "workspaceProjectHint": "/repo/meu-projeto",
-  "workspaceRemoveFromHistory": "Remover {name} do histórico"
+  "workspaceRemoveFromHistory": "Remover {name} do histórico",
+  "sessionTabChangeIconAction": "Alterar ícone",
+  "sessionTabIconPickerTitle": "Escolher ícone da aba",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Nuvem",
+  "sessionTabIconPresetCode": "Código",
+  "sessionTabIconPresetData": "Dados",
+  "sessionTabIconPresetDesign": "Design",
+  "sessionTabIconPresetIdea": "Ideia",
+  "sessionTabIconPresetLaunch": "Lançamento",
+  "sessionTabIconPresetResearch": "Pesquisa",
+  "sessionTabIconPresetSecurity": "Segurança",
+  "sessionTabIconPresetTasks": "Tarefas",
+  "sessionTabIconPresetTerminal": "Terminal",
+  "sessionTabIconPresetTools": "Ferramentas",
+  "sessionTabIconSaveFailed": "Não foi possível salvar o ícone da aba.",
+  "sessionTabIconUseProjectIcon": "Usar ícone do projeto",
+  "sessionTabRestoreFailed": "Não foi possível restaurar a aba."
 }

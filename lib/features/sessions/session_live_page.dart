@@ -38,6 +38,7 @@ class SessionLivePage extends StatefulWidget {
     this.leading,
     this.ownsController = true,
     this.workspaceChrome = false,
+    this.bodyFrame,
   });
   final SessionLiveController controller;
 
@@ -45,6 +46,7 @@ class SessionLivePage extends StatefulWidget {
   /// its view open while other tabs are shown, so its page does not.
   final bool ownsController;
   final bool workspaceChrome;
+  final Widget Function(BuildContext, Widget)? bodyFrame;
 
   /// The control before the title, such as the list drawer button of a
   /// compact window.
@@ -310,6 +312,9 @@ class _SessionLivePageState extends State<SessionLivePage>
         alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
       );
 
+  Widget _frameBody(BuildContext context, Widget body) =>
+      widget.bodyFrame?.call(context, body) ?? body;
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.controller,
@@ -389,160 +394,164 @@ class _SessionLivePageState extends State<SessionLivePage>
             },
           ),
         ),
-        body: LayoutBuilder(
-          builder: (context, body) {
-            final tight = body.maxHeight < 200;
-            final pad = tight ? 8.0 : 32.0;
-            final hasCards =
-                c.supportsReplies &&
-                (state?.interactions.any(
-                      (r) =>
-                          r.kind.known == InteractionKind.permission ||
-                          r.kind.known == InteractionKind.form,
-                    ) ??
-                    false);
-            final canAct =
-                c.outbox != null || c.canStop || c.stopping || hasCards;
-            // Cards and composer partition the footer instead of competing for
-            // it: cards take a bounded slice, the composer keeps at least a
-            // usable field, and their sum never exceeds the body, so a short
-            // viewport (keyboard open, landscape) cannot overrun the footer and
-            // a pending card can never starve the composer. The other fixed
-            // children of this column (the loading bar, the safe-area inset and
-            // a rendered Stop button) are reserved up front, or the partition
-            // would saturate the body and those would overflow it.
-            final stopButton = c.outbox == null && (c.canStop || c.stopping);
-            // The prompt-less footer also renders the Stop button and, while a
-            // Stop waits or failed, its notice: both live outside the partition.
-            final stopNotice =
-                c.outbox == null && c.stopState.phase != SessionStopPhase.ready;
-            final chrome =
-                (c.loading ? 4.0 : 0.0) +
-                MediaQuery.paddingOf(context).bottom +
-                (stopButton ? 56.0 : 0.0) +
-                (stopNotice ? 24.0 : 0.0);
-            final space = max(0.0, body.maxHeight - pad - chrome);
-            final composerBase = max(
-              0.0,
-              max(body.maxHeight * 0.4, min(body.maxHeight - 4, 136)) - pad,
-            );
-            final cardBudget = hasCards
-                ? min(
-                    min(300.0, max(0.0, body.maxHeight * 0.45)),
-                    max(0.0, space - min(composerBase, _composerFloor)),
-                  )
-                : 0.0;
-            final composerBudget = min(
-              composerBase,
-              max(0.0, space - cardBudget),
-            );
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 960),
-                child: Column(
-                  children: [
-                    if (c.loading)
-                      LinearProgressIndicator(
-                        semanticsLabel: l10n.liveConnecting,
-                      ),
-                    Expanded(
-                      child: SessionLiveTimeline(
-                        items: items,
-                        scroll: widget.controller.scroll,
-                        settled: settled,
-                        olderLoading: c.olderHistory.loading,
-                        topBuilder: _top(c, l10n),
-                        onLoadOlder: c.canLoadOlderHistory
-                            ? c.loadOlderHistory
-                            : null,
-                        errorRecovery: (error) => sessionErrorRecovery(
-                          l10n,
-                          error,
-                          chooseModel: canShowSessionSelection(c)
-                              ? () => showSessionSelection(context, c)
+        body: _frameBody(
+          context,
+          LayoutBuilder(
+            builder: (context, body) {
+              final tight = body.maxHeight < 200;
+              final pad = tight ? 8.0 : 32.0;
+              final hasCards =
+                  c.supportsReplies &&
+                  (state?.interactions.any(
+                        (r) =>
+                            r.kind.known == InteractionKind.permission ||
+                            r.kind.known == InteractionKind.form,
+                      ) ??
+                      false);
+              final canAct =
+                  c.outbox != null || c.canStop || c.stopping || hasCards;
+              // Cards and composer partition the footer instead of competing for
+              // it: cards take a bounded slice, the composer keeps at least a
+              // usable field, and their sum never exceeds the body, so a short
+              // viewport (keyboard open, landscape) cannot overrun the footer and
+              // a pending card can never starve the composer. The other fixed
+              // children of this column (the loading bar, the safe-area inset and
+              // a rendered Stop button) are reserved up front, or the partition
+              // would saturate the body and those would overflow it.
+              final stopButton = c.outbox == null && (c.canStop || c.stopping);
+              // The prompt-less footer also renders the Stop button and, while a
+              // Stop waits or failed, its notice: both live outside the partition.
+              final stopNotice =
+                  c.outbox == null &&
+                  c.stopState.phase != SessionStopPhase.ready;
+              final chrome =
+                  (c.loading ? 4.0 : 0.0) +
+                  MediaQuery.paddingOf(context).bottom +
+                  (stopButton ? 56.0 : 0.0) +
+                  (stopNotice ? 24.0 : 0.0);
+              final space = max(0.0, body.maxHeight - pad - chrome);
+              final composerBase = max(
+                0.0,
+                max(body.maxHeight * 0.4, min(body.maxHeight - 4, 136)) - pad,
+              );
+              final cardBudget = hasCards
+                  ? min(
+                      min(300.0, max(0.0, body.maxHeight * 0.45)),
+                      max(0.0, space - min(composerBase, _composerFloor)),
+                    )
+                  : 0.0;
+              final composerBudget = min(
+                composerBase,
+                max(0.0, space - cardBudget),
+              );
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: Column(
+                    children: [
+                      if (c.loading)
+                        LinearProgressIndicator(
+                          semanticsLabel: l10n.liveConnecting,
+                        ),
+                      Expanded(
+                        child: SessionLiveTimeline(
+                          items: items,
+                          scroll: widget.controller.scroll,
+                          settled: settled,
+                          olderLoading: c.olderHistory.loading,
+                          topBuilder: _top(c, l10n),
+                          onLoadOlder: c.canLoadOlderHistory
+                              ? c.loadOlderHistory
                               : null,
-                          openServers: () => context.push('/hosts'),
-                        ),
-                        headerBuilder: (context) => _header(
-                          context,
-                          c,
-                          l10n,
-                          textTheme,
-                          failure: failure,
-                          execution: execution,
-                          retryAt: retryAt,
-                          children: children,
-                          outcome: outcome,
-                          needsYou: needsYou,
-                          view: view,
-                          canAct: canAct,
+                          errorRecovery: (error) => sessionErrorRecovery(
+                            l10n,
+                            error,
+                            chooseModel: canShowSessionSelection(c)
+                                ? () => showSessionSelection(context, c)
+                                : null,
+                            openServers: () => context.push('/hosts'),
+                          ),
+                          headerBuilder: (context) => _header(
+                            context,
+                            c,
+                            l10n,
+                            textTheme,
+                            failure: failure,
+                            execution: execution,
+                            retryAt: retryAt,
+                            children: children,
+                            outcome: outcome,
+                            needsYou: needsYou,
+                            view: view,
+                            canAct: canAct,
+                          ),
                         ),
                       ),
-                    ),
-                    SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: tight ? 4 : 16,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxHeight: cardBudget,
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SessionPermissionCards(
-                                      live: c,
-                                      maxHeight: cardBudget,
-                                    ),
-                                    SessionFormCards(
-                                      live: c,
-                                      maxHeight: cardBudget,
-                                    ),
-                                  ],
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: tight ? 4 : 16,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight: cardBudget,
                                 ),
-                              ),
-                            ),
-                            c.outbox == null
-                                ? Column(
+                                child: SingleChildScrollView(
+                                  child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // Prompt storage is missing, so the
-                                      // footer explains that only prompt
-                                      // sending is out, whether or not the
-                                      // cards above it can still reply.
-                                      Text(
-                                        l10n.liveSendUnavailable,
-                                        key: const ValueKey('live-composer'),
+                                      SessionPermissionCards(
+                                        live: c,
+                                        maxHeight: cardBudget,
                                       ),
-                                      if (c.canStop || c.stopping)
-                                        SessionStopButton(live: c),
-                                      SessionStopNotice(live: c),
+                                      SessionFormCards(
+                                        live: c,
+                                        maxHeight: cardBudget,
+                                      ),
                                     ],
-                                  )
-                                : SessionComposer(
-                                    controller: widget.controller.composer,
-                                    text: widget.controller.draft,
-                                    // Most of the body stays the timeline's; with
-                                    // the keyboard over a short body the field
-                                    // wins instead (the 4 is the progress bar).
-                                    maxHeight: composerBudget,
                                   ),
-                          ],
+                                ),
+                              ),
+                              c.outbox == null
+                                  ? Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Prompt storage is missing, so the
+                                        // footer explains that only prompt
+                                        // sending is out, whether or not the
+                                        // cards above it can still reply.
+                                        Text(
+                                          l10n.liveSendUnavailable,
+                                          key: const ValueKey('live-composer'),
+                                        ),
+                                        if (c.canStop || c.stopping)
+                                          SessionStopButton(live: c),
+                                        SessionStopNotice(live: c),
+                                      ],
+                                    )
+                                  : SessionComposer(
+                                      controller: widget.controller.composer,
+                                      text: widget.controller.draft,
+                                      // Most of the body stays the timeline's; with
+                                      // the keyboard over a short body the field
+                                      // wins instead (the 4 is the progress bar).
+                                      maxHeight: composerBudget,
+                                    ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       );
     },

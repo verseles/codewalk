@@ -1475,5 +1475,22 @@
   "workspaceFilterDirs": "تصفية الأدلة",
   "workspaceOpenFolder": "فتح مجلد",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "إزالة {name} من السجل"
+  "workspaceRemoveFromHistory": "إزالة {name} من السجل",
+  "sessionTabChangeIconAction": "تغيير الأيقونة",
+  "sessionTabIconPickerTitle": "اختر أيقونة التبويب",
+  "sessionTabIconPresetBug": "خلل",
+  "sessionTabIconPresetCloud": "سحابة",
+  "sessionTabIconPresetCode": "الكود",
+  "sessionTabIconPresetData": "البيانات",
+  "sessionTabIconPresetDesign": "التصميم",
+  "sessionTabIconPresetIdea": "فكرة",
+  "sessionTabIconPresetLaunch": "إطلاق",
+  "sessionTabIconPresetResearch": "بحث",
+  "sessionTabIconPresetSecurity": "الأمان",
+  "sessionTabIconPresetTasks": "المهام",
+  "sessionTabIconPresetTerminal": "الطرفية",
+  "sessionTabIconPresetTools": "الأدوات",
+  "sessionTabIconSaveFailed": "تعذر حفظ أيقونة التبويب.",
+  "sessionTabIconUseProjectIcon": "استخدام أيقونة المشروع",
+  "sessionTabRestoreFailed": "تعذر استعادة التبويب."
 }

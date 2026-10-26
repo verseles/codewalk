@@ -1707,4 +1707,55 @@ class V2LocalizationsJa extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return '履歴から $name を削除';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'アイコンを変更';
+
+  @override
+  String get sessionTabIconPickerTitle => 'タブのアイコンを選択';
+
+  @override
+  String get sessionTabIconPresetBug => 'バグ';
+
+  @override
+  String get sessionTabIconPresetCloud => 'クラウド';
+
+  @override
+  String get sessionTabIconPresetCode => 'コード';
+
+  @override
+  String get sessionTabIconPresetData => 'データ';
+
+  @override
+  String get sessionTabIconPresetDesign => 'デザイン';
+
+  @override
+  String get sessionTabIconPresetIdea => 'アイデア';
+
+  @override
+  String get sessionTabIconPresetLaunch => '起動';
+
+  @override
+  String get sessionTabIconPresetResearch => '調査';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'セキュリティ';
+
+  @override
+  String get sessionTabIconPresetTasks => 'タスク';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'ターミナル';
+
+  @override
+  String get sessionTabIconPresetTools => 'ツール';
+
+  @override
+  String get sessionTabIconSaveFailed => 'タブのアイコンを保存できませんでした。';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'プロジェクトのアイコンを使用';
+
+  @override
+  String get sessionTabRestoreFailed => 'タブを復元できませんでした。';
 }

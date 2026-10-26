@@ -1819,4 +1819,55 @@ class V2LocalizationsIt extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Rimuovi $name dalla cronologia';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Cambia icona';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Scegli icona della scheda';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Cloud';
+
+  @override
+  String get sessionTabIconPresetCode => 'Codice';
+
+  @override
+  String get sessionTabIconPresetData => 'Dati';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idea';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Avvio';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Ricerca';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Sicurezza';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Attività';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminale';
+
+  @override
+  String get sessionTabIconPresetTools => 'Strumenti';
+
+  @override
+  String get sessionTabIconSaveFailed => 'Icona della scheda non salvata.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Usa icona del progetto';
+
+  @override
+  String get sessionTabRestoreFailed => 'Impossibile ripristinare la scheda.';
 }

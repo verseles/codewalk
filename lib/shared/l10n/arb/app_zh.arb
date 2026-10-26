@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "过滤目录",
   "workspaceOpenFolder": "打开文件夹",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "从历史记录中移除 {name}"
+  "workspaceRemoveFromHistory": "从历史记录中移除 {name}",
+  "sessionTabChangeIconAction": "更改图标",
+  "sessionTabIconPickerTitle": "选择标签页图标",
+  "sessionTabIconPresetBug": "缺陷",
+  "sessionTabIconPresetCloud": "云端",
+  "sessionTabIconPresetCode": "代码",
+  "sessionTabIconPresetData": "数据",
+  "sessionTabIconPresetDesign": "设计",
+  "sessionTabIconPresetIdea": "灵感",
+  "sessionTabIconPresetLaunch": "启动",
+  "sessionTabIconPresetResearch": "研究",
+  "sessionTabIconPresetSecurity": "安全",
+  "sessionTabIconPresetTasks": "任务",
+  "sessionTabIconPresetTerminal": "终端",
+  "sessionTabIconPresetTools": "工具",
+  "sessionTabIconSaveFailed": "无法保存标签页图标。",
+  "sessionTabIconUseProjectIcon": "使用项目图标",
+  "sessionTabRestoreFailed": "无法恢复标签页。"
 }

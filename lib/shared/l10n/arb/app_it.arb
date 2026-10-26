@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "Filtra directory",
   "workspaceOpenFolder": "Apri cartella",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "Rimuovi {name} dalla cronologia"
+  "workspaceRemoveFromHistory": "Rimuovi {name} dalla cronologia",
+  "sessionTabChangeIconAction": "Cambia icona",
+  "sessionTabIconPickerTitle": "Scegli icona della scheda",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Cloud",
+  "sessionTabIconPresetCode": "Codice",
+  "sessionTabIconPresetData": "Dati",
+  "sessionTabIconPresetDesign": "Design",
+  "sessionTabIconPresetIdea": "Idea",
+  "sessionTabIconPresetLaunch": "Avvio",
+  "sessionTabIconPresetResearch": "Ricerca",
+  "sessionTabIconPresetSecurity": "Sicurezza",
+  "sessionTabIconPresetTasks": "Attività",
+  "sessionTabIconPresetTerminal": "Terminale",
+  "sessionTabIconPresetTools": "Strumenti",
+  "sessionTabIconSaveFailed": "Icona della scheda non salvata.",
+  "sessionTabIconUseProjectIcon": "Usa icona del progetto",
+  "sessionTabRestoreFailed": "Impossibile ripristinare la scheda."
 }

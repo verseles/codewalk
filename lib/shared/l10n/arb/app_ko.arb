@@ -1487,5 +1487,22 @@
   "workspaceFilterDirs": "디렉토리 필터",
   "workspaceOpenFolder": "폴더 열기",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "기록에서 {name} 제거"
+  "workspaceRemoveFromHistory": "기록에서 {name} 제거",
+  "sessionTabChangeIconAction": "아이콘 변경",
+  "sessionTabIconPickerTitle": "탭 아이콘 선택",
+  "sessionTabIconPresetBug": "버그",
+  "sessionTabIconPresetCloud": "클라우드",
+  "sessionTabIconPresetCode": "코드",
+  "sessionTabIconPresetData": "데이터",
+  "sessionTabIconPresetDesign": "디자인",
+  "sessionTabIconPresetIdea": "아이디어",
+  "sessionTabIconPresetLaunch": "시작",
+  "sessionTabIconPresetResearch": "연구",
+  "sessionTabIconPresetSecurity": "보안",
+  "sessionTabIconPresetTasks": "작업",
+  "sessionTabIconPresetTerminal": "터미널",
+  "sessionTabIconPresetTools": "도구",
+  "sessionTabIconSaveFailed": "탭 아이콘을 저장할 수 없습니다.",
+  "sessionTabIconUseProjectIcon": "프로젝트 아이콘 사용",
+  "sessionTabRestoreFailed": "탭을 복원할 수 없습니다."
 }

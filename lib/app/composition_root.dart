@@ -28,6 +28,7 @@ import '../platform/sessions/session_catalog_factory.dart';
 import '../platform/sessions/session_draft_store.dart';
 import '../platform/sessions/session_history_factory.dart';
 import '../platform/sessions/session_live_factory.dart';
+import '../platform/sessions/session_tab_icon_store.dart';
 import '../platform/sessions/session_tabs_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../platform/sessions/workspace_draft_store.dart';
@@ -191,6 +192,7 @@ AppDependencies createAppDependencies({
   // the pins of the projects.
   final sessionTabs = SessionTabsController(
     store: tabsStore ?? SessionTabsStore(store: metadata),
+    icons: SessionTabIconStore(store: metadata),
     catalog: locator<SessionsController>(),
     workspace: projectStore,
     now: sessionClock,

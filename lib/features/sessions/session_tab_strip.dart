@@ -1,16 +1,25 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
 import '../../platform/sessions/session_tabs_store.dart';
+import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import 'project_contexts_controller.dart';
+import 'session_tab_chip.dart';
+import 'session_tab_menu.dart';
+import 'session_tab_projection.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
+import 'workspace_draft_controller.dart';
 
 /// The route of the session of [ref].
 String sessionTabLocation(SessionRef ref) =>
@@ -31,7 +40,7 @@ class SessionTabsFrame extends StatefulWidget {
   final SessionTabsController tabs;
 
   /// The session of the route.
-  final SessionRef current;
+  final SessionRef? current;
 
   /// The project whose tabs show when the route's session has no tab.
   final ProjectRef? project;
@@ -46,6 +55,14 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   /// The candidates of an open switcher, frozen while it is open.
   List<SessionTab>? _switcher;
   int _highlight = 0;
+  bool _openingDraft = false;
+  final _closing = <SessionRef>{};
+
+  HostId? get _host {
+    final profile = context.read<SessionsController?>()?.selectedProfile;
+    return widget.current?.host ??
+        (profile == null ? null : HostId(profile.id));
+  }
 
   SessionTab? get _tab =>
       widget.tabs.tabs.where((tab) => tab.ref == widget.current).firstOrNull;
@@ -85,26 +102,48 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   }
 
   Future<void> _close(SessionTab tab) async {
+    if (!_closing.add(tab.ref)) return;
     final tabs = widget.tabs;
     final index = tabs.tabs.indexOf(tab);
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.v2L10n;
     final title = _title(context, tab);
-    final (:removed, :next, :unpinned) = await tabs.close(tab.ref);
-    // Another close, or the server dropping it, got there first.
-    if (!removed) return;
+    final drafts = context.read<WorkspaceDraftController?>();
+    late final ({bool removed, SessionRef? next, bool unpinned}) result;
+    try {
+      result = await tabs.close(tab.ref);
+    } finally {
+      _closing.remove(tab.ref);
+    }
+    final (:removed, :next, :unpinned) = result;
+    if (!removed) {
+      if (tabs.tabs.any((t) => t.ref == tab.ref) &&
+          (messenger?.mounted ?? false)) {
+        messenger!.showSnackBar(
+          SnackBar(content: Text(l10n.sessionsActionFailed)),
+        );
+      }
+      return;
+    }
     String location() =>
         router.routerDelegate.currentConfiguration.uri.toString();
     // Whatever the route shows now decides: navigating away meanwhile wins
     // over the neighbour, and a tab shown since (the neighbour of another
     // close, say) is left as well.
-    String? left;
     if (location() == sessionTabLocation(tab.ref)) {
       final target = tabs.tabs.any((other) => other.ref == next) ? next : null;
-      left = target == null ? '/sessions' : sessionTabLocation(target);
-      router.go(left);
+      if (target != null) {
+        router.go(sessionTabLocation(target));
+      } else {
+        await drafts?.openDraft(directory: tab.project?.canonicalDirectory);
+        if (location() == sessionTabLocation(tab.ref)) {
+          router.go('/sessions');
+          drafts?.focusComposer();
+        }
+      }
     }
+    if (!(messenger?.mounted ?? false)) return;
     messenger
       ?..clearSnackBars()
       ..showSnackBar(
@@ -118,25 +157,63 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
           action: SnackBarAction(
             label: l10n.sessionTabUndo,
             onPressed: () async {
-              // The tab comes back in place, and is shown again only while
-              // the reader is still where its close took them, once it is
-              // saved: a move meanwhile wins. Showing it selects it. A tab
-              // the close unpinned is pinned again first.
+              // Undo restores only local state, without taking navigation.
               if (!await tabs.reopen(
                 tab,
                 index: index,
                 select: false,
                 pin: unpinned,
               )) {
-                return;
-              }
-              if (left != null && location() == left) {
-                router.go(sessionTabLocation(tab.ref));
+                if (messenger.mounted) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n.sessionTabRestoreFailed)),
+                  );
+                }
               }
             },
           ),
         ),
       );
+  }
+
+  Future<void> _draft(ProjectRef project) async {
+    final drafts = context.read<WorkspaceDraftController?>();
+    final contexts = context.read<ProjectContextsController?>();
+    if (_openingDraft || drafts == null || contexts == null) return;
+    final directory = project.canonicalDirectory;
+    if (widget.current == null &&
+        drafts.isDraftActive &&
+        drafts.currentKey?.canonicalDirectory == directory) {
+      drafts.focusComposer();
+      return;
+    }
+    _openingDraft = true;
+    final router = GoRouter.of(context);
+    final before = router.routeInformationProvider.value.uri;
+    try {
+      if (!await contexts.openContext(directory)) {
+        if (mounted) {
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(content: Text(context.v2L10n.projectsUnavailable)),
+          );
+        }
+        return;
+      }
+      if (!mounted ||
+          router.routeInformationProvider.value.uri != before ||
+          _host != project.host) {
+        return;
+      }
+      router.go('/sessions');
+      await drafts.openDraft(directory: directory);
+      if (router.routeInformationProvider.value.uri.path == '/sessions' &&
+          drafts.currentKey?.profileId == project.host.value &&
+          drafts.currentKey?.canonicalDirectory == directory) {
+        drafts.focusComposer();
+      }
+    } finally {
+      _openingDraft = false;
+    }
   }
 
   void _cycle({required bool reverse}) {
@@ -147,7 +224,9 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
       });
       return;
     }
-    final recent = widget.tabs.recent(widget.current.host);
+    final host = _host;
+    if (host == null) return;
+    final recent = widget.tabs.recent(host);
     if (recent.length < 2) return;
     final start = reverse ? recent.length - 1 : 1;
     // A binding without Ctrl has no release to wait for: it switches at once.
@@ -200,7 +279,9 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   Future<void> _showRecent() async {
     // The sheet replaces a switcher open over it.
     _finishSwitcher(commit: false);
-    final recent = widget.tabs.recent(widget.current.host);
+    final host = _host;
+    if (host == null) return;
+    final recent = widget.tabs.recent(host);
     final chosen = await showModalBottomSheet<SessionRef>(
       context: context,
       showDragHandle: true,
@@ -214,6 +295,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
               ListTile(
                 key: ValueKey('session-tabs-recent-${tab.ref.storageKey}'),
                 selected: tab.ref == widget.current,
+                leading: SessionTabGlyph(tab: tab, tabs: widget.tabs),
                 title: Text(
                   _title(context, tab),
                   maxLines: 1,
@@ -230,53 +312,70 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
 
   @override
   Widget build(BuildContext context) {
-    final tab = _tab;
-    final project = tab == null ? widget.project : tab.project;
-    final visible = widget.tabs.visible(widget.current.host, project);
-    final switcher = _switcher;
-    return KeyboardActionScope(
-      handlers: {
-        ShortcutAction.cycleTabsForward: () => _cycle(reverse: false),
-        ShortcutAction.cycleTabsBackward: () => _cycle(reverse: true),
-        if (tab != null) ShortcutAction.closeApp: () => unawaited(_close(tab)),
-      },
-      // Keeps the keyboard inside the session when nothing in it has the
-      // focus, so the tab keys reach this scope.
-      child: Focus(
-        autofocus: true,
-        skipTraversal: true,
-        child: Column(
-          children: [
-            if (visible.isNotEmpty)
-              SafeArea(
-                bottom: false,
-                child: _Strip(
-                  tabs: visible,
-                  current: widget.current,
-                  onActivate: _activate,
-                  onClose: (tab) => unawaited(_close(tab)),
-                  onRecent: _showRecent,
-                ),
-              ),
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    // The strip already keeps clear of the status bar.
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeTop: visible.isNotEmpty,
-                      child: widget.child,
-                    ),
+    final catalog = context.watch<SessionsController?>();
+    final drafts = context.watch<WorkspaceDraftController?>();
+    return ListenableBuilder(
+      listenable: Listenable.merge([widget.tabs, ...widget.tabs.warmViews]),
+      builder: (context, _) {
+        final profile = catalog?.selectedProfile;
+        final host =
+            widget.current?.host ??
+            (profile == null ? null : HostId(profile.id));
+        if (host == null) return widget.child;
+        final tab = _tab;
+        final projection = widget.tabs.projection(host);
+        final drafting =
+            widget.current == null && drafts?.isDraftActive == true;
+        final directory = drafts?.currentKey?.canonicalDirectory;
+        final draftProject = directory == null
+            ? widget.project
+            : ProjectRef(host, directory);
+        final shown = projection.ordered.isNotEmpty || drafting;
+        final switcher = _switcher;
+        return KeyboardActionScope(
+          handlers: {
+            ShortcutAction.cycleTabsForward: () => _cycle(reverse: false),
+            ShortcutAction.cycleTabsBackward: () => _cycle(reverse: true),
+            if (tab != null)
+              ShortcutAction.closeApp: () => unawaited(_close(tab)),
+          },
+          child: Focus(
+            autofocus: true,
+            skipTraversal: true,
+            child: Column(
+              children: [
+                if (shown)
+                  _Strip(
+                    tabs: widget.tabs,
+                    projection: projection,
+                    current: widget.current,
+                    drafting: drafting,
+                    draftProject: draftProject,
+                    draftFailed: drafts?.status == WorkspaceDraftStatus.failed,
+                    onActivate: _activate,
+                    onClose: (tab) => unawaited(_close(tab)),
+                    onDraft: (project) => unawaited(_draft(project)),
+                    onRecent: _showRecent,
+                    onInteract: () => _finishSwitcher(commit: false),
                   ),
-                  if (switcher != null)
-                    _Switcher(tabs: switcher, highlight: _highlight),
-                ],
-              ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: widget.child),
+                      if (switcher != null)
+                        _Switcher(
+                          tabs: switcher,
+                          highlight: _highlight,
+                          icons: widget.tabs,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -284,29 +383,38 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
 String _title(BuildContext context, SessionTab tab) =>
     tab.title.trim().isEmpty ? context.v2L10n.sessionExportUntitled : tab.title;
 
-/// One row of tabs, scrolled sideways, with the recent tabs at its end.
+/// Pinned tabs scroll separately; ordinary groups keep a usable viewport.
 class _Strip extends StatefulWidget {
   const _Strip({
     required this.tabs,
+    required this.projection,
     required this.current,
+    required this.drafting,
+    required this.draftProject,
+    required this.draftFailed,
     required this.onActivate,
     required this.onClose,
+    required this.onDraft,
     required this.onRecent,
+    required this.onInteract,
   });
-
-  final List<SessionTab> tabs;
-  final SessionRef current;
+  final SessionTabsController tabs;
+  final SessionTabProjection projection;
+  final SessionRef? current;
+  final bool drafting;
+  final ProjectRef? draftProject;
+  final bool draftFailed;
   final ValueChanged<SessionRef> onActivate;
   final ValueChanged<SessionTab> onClose;
+  final ValueChanged<ProjectRef> onDraft;
   final VoidCallback onRecent;
-
+  final VoidCallback onInteract;
   @override
   State<_Strip> createState() => _StripState();
 }
 
 class _StripState extends State<_Strip> {
   final _shown = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -316,11 +424,28 @@ class _StripState extends State<_Strip> {
   @override
   void didUpdateWidget(_Strip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.current != widget.current) _reveal();
+    // Insertion, regrouping, pinning and changed titles can move the current
+    // tab even when its identity did not change.
+    if (oldWidget.current != widget.current ||
+        oldWidget.drafting != widget.drafting ||
+        !listEquals(
+          oldWidget.projection.ordered.map((t) => (t.ref, t.title)).toList(),
+          widget.projection.ordered.map((t) => (t.ref, t.title)).toList(),
+        ) ||
+        !listEquals(
+          oldWidget.projection.pinned.map((t) => t.ref).toList(),
+          widget.projection.pinned.map((t) => t.ref).toList(),
+        )) {
+      _reveal();
+    }
   }
 
-  /// Scrolls the shown tab into view, after a switch from the keys or the
-  /// sheet say.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reveal();
+  }
+
   void _reveal() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final target = _shown.currentContext;
@@ -328,113 +453,160 @@ class _StripState extends State<_Strip> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final scheme = Theme.of(context).colorScheme;
-    final widget = this.widget;
-    return Material(
-      key: const ValueKey('session-tabs'),
-      color: scheme.surfaceContainer,
-      child: Semantics(
-        label: l10n.chatSessionTabsToggle,
-        container: true,
-        child: Row(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsetsDirectional.only(start: 4),
-                child: Row(
-                  children: [
-                    for (final tab in widget.tabs)
-                      _Tab(
-                        key: tab.ref == widget.current ? _shown : null,
-                        tab: tab,
-                        selected: tab.ref == widget.current,
-                        onTap: () => widget.onActivate(tab.ref),
-                        onClose: () => widget.onClose(tab),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            IconButton(
-              key: const ValueKey('session-tabs-recent-button'),
-              tooltip: l10n.sessionTabSwitcherTitle,
-              icon: const Icon(Icons.swap_horiz),
-              onPressed: widget.onRecent,
-            ),
-          ],
+  Widget _tab(SessionTab tab, double maxWidth, {required bool pinned}) =>
+      KeyedSubtree(
+        key: tab.ref == widget.current
+            ? _shown
+            : ValueKey(('session-tab-slot', tab.ref)),
+        child: SessionTabMenu(
+          tabs: widget.tabs,
+          tab: tab,
+          child: SessionTabChip(
+            tabs: widget.tabs,
+            tab: tab,
+            selected: tab.ref == widget.current,
+            pinned: pinned,
+            maxWidth: maxWidth,
+            onTap: () => widget.onActivate(tab.ref),
+            onClose: () => widget.onClose(tab),
+            onPointerIntent: widget.onInteract,
+          ),
         ),
-      ),
-    );
-  }
-}
+      );
 
-class _Tab extends StatelessWidget {
-  const _Tab({
-    super.key,
-    required this.tab,
-    required this.selected,
-    required this.onTap,
-    required this.onClose,
-  });
-
-  final SessionTab tab;
-  final bool selected;
-  final VoidCallback onTap;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final title = _title(context, tab);
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(end: 4, top: 4, bottom: 4),
-      child: Material(
-        key: ValueKey('session-tab-${tab.ref.storageKey}'),
-        color: selected ? scheme.secondaryContainer : Colors.transparent,
-        shape: const StadiumBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Semantics(
-            selected: selected,
-            button: true,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 220, minHeight: 48),
+  Widget _draft(double maxWidth) => ConstrainedBox(
+    key: _shown,
+    constraints: BoxConstraints(maxWidth: math.max(1, maxWidth)),
+    child: Semantics(
+      selected: true,
+      button: true,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(end: 2, top: 3),
+        child: Material(
+          key: const ValueKey('session-tab-draft'),
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SizedBox(
+              height: 48,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 12),
-                      child: Tooltip(
-                        message: title,
-                        child: Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: selected
-                                ? scheme.onSecondaryContainer
-                                : scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
+                  Icon(
+                    widget.draftFailed ? Icons.error_outline : Icons.add,
+                    size: 19,
                   ),
-                  IconButton(
-                    key: ValueKey('session-tab-close-${tab.ref.storageKey}'),
-                    tooltip: context.v2L10n.chatClose,
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: onClose,
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      context.v2L10n.chatNewChat,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _scroll(List<Widget> children, {Key? key}) => ScrollConfiguration(
+    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+    child: SingleChildScrollView(
+      key: key,
+      scrollDirection: Axis.horizontal,
+      child: Row(children: children),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final projection = widget.projection;
+    final hasRegular = projection.groups.isNotEmpty || widget.drafting;
+    return Material(
+      key: const ValueKey('session-tabs'),
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Semantics(
+        label: context.v2L10n.chatSessionTabsToggle,
+        container: true,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final usable = math.max(1.0, box.maxWidth - 48);
+            final compact = MediaQuery.sizeOf(context).width < 600;
+            final selectedPin = projection.pinned.any(
+              (t) => t.ref == widget.current,
+            );
+            final wanted =
+                projection.pinned.length * 38.0 + (selectedPin ? 124 : 0);
+            final cap = hasRegular
+                ? math.max(
+                    0.0,
+                    usable - math.min(compact ? 100.0 : 120.0, usable / 2),
+                  )
+                : usable;
+            final pinnedWidth = math.min(
+              wanted,
+              math.min(
+                cap,
+                selectedPin
+                    ? math.max(usable * .5, math.min(180.0, cap))
+                    : usable * .45,
+              ),
+            );
+            final regular = <Widget>[];
+            var draftAdded = false;
+            for (final entry in projection.groups.entries) {
+              if (regular.isNotEmpty) regular.add(const SizedBox(width: 8));
+              for (final tab in entry.value) {
+                regular.add(
+                  _tab(tab, math.max(1.0, usable - pinnedWidth), pinned: false),
+                );
+              }
+              final project = entry.key;
+              if (widget.drafting && project == widget.draftProject) {
+                regular.add(_draft(usable));
+                draftAdded = true;
+              } else if (project != null) {
+                regular.add(
+                  IconButton(
+                    key: ValueKey('session-tab-add-${project.storageKey}'),
+                    tooltip: context.v2L10n.chatNewChat,
+                    icon: const Icon(Icons.add),
+                    onPressed: () => widget.onDraft(project),
+                  ),
+                );
+              }
+            }
+            if (widget.drafting && !draftAdded) regular.add(_draft(usable));
+            return Row(
+              children: [
+                if (projection.pinned.isNotEmpty && pinnedWidth > 0)
+                  SizedBox(
+                    width: pinnedWidth,
+                    child: _scroll([
+                      for (final tab in projection.pinned)
+                        _tab(tab, pinnedWidth, pinned: true),
+                    ], key: const ValueKey('session-tabs-pinned')),
+                  ),
+                Expanded(
+                  child: _scroll(
+                    regular,
+                    key: const ValueKey('session-tabs-regular'),
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('session-tabs-recent-button'),
+                  tooltip: context.v2L10n.sessionTabSwitcherTitle,
+                  icon: const Icon(Icons.swap_horiz),
+                  onPressed: widget.onRecent,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -443,10 +615,15 @@ class _Tab extends StatelessWidget {
 
 /// The recent tabs while Ctrl is held; the highlighted one opens on release.
 class _Switcher extends StatefulWidget {
-  const _Switcher({required this.tabs, required this.highlight});
+  const _Switcher({
+    required this.tabs,
+    required this.highlight,
+    required this.icons,
+  });
 
   final List<SessionTab> tabs;
   final int highlight;
+  final SessionTabsController icons;
 
   @override
   State<_Switcher> createState() => _SwitcherState();
@@ -502,6 +679,10 @@ class _SwitcherState extends State<_Switcher> {
                         ListTile(
                           key: i == widget.highlight ? _highlighted : null,
                           selected: i == widget.highlight,
+                          leading: SessionTabGlyph(
+                            tab: tab,
+                            tabs: widget.icons,
+                          ),
                           title: Text(
                             _title(context, tab),
                             maxLines: 1,

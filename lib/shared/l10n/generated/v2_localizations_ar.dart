@@ -1770,4 +1770,55 @@ class V2LocalizationsAr extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'إزالة $name من السجل';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'تغيير الأيقونة';
+
+  @override
+  String get sessionTabIconPickerTitle => 'اختر أيقونة التبويب';
+
+  @override
+  String get sessionTabIconPresetBug => 'خلل';
+
+  @override
+  String get sessionTabIconPresetCloud => 'سحابة';
+
+  @override
+  String get sessionTabIconPresetCode => 'الكود';
+
+  @override
+  String get sessionTabIconPresetData => 'البيانات';
+
+  @override
+  String get sessionTabIconPresetDesign => 'التصميم';
+
+  @override
+  String get sessionTabIconPresetIdea => 'فكرة';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'إطلاق';
+
+  @override
+  String get sessionTabIconPresetResearch => 'بحث';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'الأمان';
+
+  @override
+  String get sessionTabIconPresetTasks => 'المهام';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'الطرفية';
+
+  @override
+  String get sessionTabIconPresetTools => 'الأدوات';
+
+  @override
+  String get sessionTabIconSaveFailed => 'تعذر حفظ أيقونة التبويب.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'استخدام أيقونة المشروع';
+
+  @override
+  String get sessionTabRestoreFailed => 'تعذر استعادة التبويب.';
 }

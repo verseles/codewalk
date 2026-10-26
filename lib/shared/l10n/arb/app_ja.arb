@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "ディレクトリをフィルター",
   "workspaceOpenFolder": "フォルダーを開く",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "履歴から {name} を削除"
+  "workspaceRemoveFromHistory": "履歴から {name} を削除",
+  "sessionTabChangeIconAction": "アイコンを変更",
+  "sessionTabIconPickerTitle": "タブのアイコンを選択",
+  "sessionTabIconPresetBug": "バグ",
+  "sessionTabIconPresetCloud": "クラウド",
+  "sessionTabIconPresetCode": "コード",
+  "sessionTabIconPresetData": "データ",
+  "sessionTabIconPresetDesign": "デザイン",
+  "sessionTabIconPresetIdea": "アイデア",
+  "sessionTabIconPresetLaunch": "起動",
+  "sessionTabIconPresetResearch": "調査",
+  "sessionTabIconPresetSecurity": "セキュリティ",
+  "sessionTabIconPresetTasks": "タスク",
+  "sessionTabIconPresetTerminal": "ターミナル",
+  "sessionTabIconPresetTools": "ツール",
+  "sessionTabIconSaveFailed": "タブのアイコンを保存できませんでした。",
+  "sessionTabIconUseProjectIcon": "プロジェクトのアイコンを使用",
+  "sessionTabRestoreFailed": "タブを復元できませんでした。"
 }

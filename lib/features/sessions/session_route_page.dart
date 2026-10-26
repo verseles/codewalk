@@ -236,17 +236,9 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     // A live page that leaves the tree disposes its controller, so a later
     // return makes a new one.
     if (page is! SessionLivePage) _live = null;
-    final tabs = context.read<SessionTabsController?>();
     final live = _live;
     if (live == null || page is! SessionLivePage) return page;
-    final delivery = _withFirstPrompt(context, live, page);
-    if (tabs == null) return delivery;
-    return SessionTabsFrame(
-      tabs: tabs,
-      current: _ref,
-      project: live.summary.info.project,
-      child: delivery,
-    );
+    return _withFirstPrompt(context, live, page);
   }
 
   Widget _resolve(BuildContext context, Widget? leading) {
@@ -324,6 +316,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         controller: live,
         leading: leading,
         workspaceChrome: true,
+        bodyFrame: tabs == null
+            ? null
+            : (context, body) => SessionTabsFrame(
+                tabs: tabs,
+                current: _ref,
+                project: live.summary.info.project,
+                child: body,
+              ),
         ownsController: context.read<SessionTabsController?>() == null,
       );
     }
@@ -411,6 +411,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         leading: leading,
         ownsController: tabs == null,
         workspaceChrome: true,
+        bodyFrame: tabs == null
+            ? null
+            : (context, body) => SessionTabsFrame(
+                tabs: tabs,
+                current: ref,
+                project: summary.info.project,
+                child: body,
+              ),
       );
     }
     if (catalog.failure == SessionCatalogFailure.authenticationRequired) {

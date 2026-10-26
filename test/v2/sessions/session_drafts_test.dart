@@ -9,6 +9,7 @@ import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/platform/storage/preferences_backend.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,9 +165,20 @@ Future<void> _type(WidgetTester tester, String text) async {
   await tester.pump(const Duration(milliseconds: 600));
 }
 
+/// Closes the tab of [ref] with a middle click; tabs have no close button.
 Future<void> _close(WidgetTester tester, SessionRef ref) async {
-  await tester.tap(find.byKey(ValueKey('session-tab-close-${ref.storageKey}')));
+  await _middleClick(tester, ref);
   await _settle(tester);
+}
+
+Future<void> _middleClick(WidgetTester tester, SessionRef ref) async {
+  final tab = find.byKey(ValueKey('session-tab-${ref.storageKey}'));
+  await tester.ensureVisible(tab);
+  await tester.tap(
+    tab,
+    kind: PointerDeviceKind.mouse,
+    buttons: kMiddleMouseButton,
+  );
 }
 
 Future<void> _press(WidgetTester tester, LogicalKeyboardKey key) async {
@@ -253,9 +265,7 @@ void main() {
     await tester.pump();
 
     // The tab closes, and its live view with it, while the send is pending.
-    await tester.tap(
-      find.byKey(ValueKey('session-tab-close-${one.storageKey}')),
-    );
+    await _middleClick(tester, one);
     await _settle(tester);
     hold.complete();
     await _settle(tester);
@@ -395,11 +405,10 @@ void main() {
   testWidgets('Up waits until the saved draft was read', (tester) async {
     _useMemoryPreferences();
     late final _SlowPayloads slow;
-    final app = await _launch(
-      tester,
-      ['one', 'two'],
-      drafts: _device(payloads: (device) => slow = _SlowPayloads(device)),
-    );
+    final app = await _launch(tester, [
+      'one',
+      'two',
+    ], drafts: _device(payloads: (device) => slow = _SlowPayloads(device)));
     final one = _ref(app, 'one');
     final seed = _device();
     await seed.read(one);

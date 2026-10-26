@@ -1802,4 +1802,55 @@ class V2LocalizationsRu extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Удалить $name из истории';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Сменить значок';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Выбрать значок вкладки';
+
+  @override
+  String get sessionTabIconPresetBug => 'Ошибка';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Облако';
+
+  @override
+  String get sessionTabIconPresetCode => 'Код';
+
+  @override
+  String get sessionTabIconPresetData => 'Данные';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Дизайн';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Идея';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Запуск';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Исследование';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Безопасность';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Задачи';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Терминал';
+
+  @override
+  String get sessionTabIconPresetTools => 'Инструменты';
+
+  @override
+  String get sessionTabIconSaveFailed => 'Не удалось сохранить значок вкладки.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Использовать значок проекта';
+
+  @override
+  String get sessionTabRestoreFailed => 'Не удалось восстановить вкладку.';
 }

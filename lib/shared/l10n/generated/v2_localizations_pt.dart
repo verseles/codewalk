@@ -1810,4 +1810,56 @@ class V2LocalizationsPt extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Remover $name do histórico';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Alterar ícone';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Escolher ícone da aba';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Nuvem';
+
+  @override
+  String get sessionTabIconPresetCode => 'Código';
+
+  @override
+  String get sessionTabIconPresetData => 'Dados';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Ideia';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Lançamento';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Pesquisa';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Segurança';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Tarefas';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetTools => 'Ferramentas';
+
+  @override
+  String get sessionTabIconSaveFailed =>
+      'Não foi possível salvar o ícone da aba.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Usar ícone do projeto';
+
+  @override
+  String get sessionTabRestoreFailed => 'Não foi possível restaurar a aba.';
 }

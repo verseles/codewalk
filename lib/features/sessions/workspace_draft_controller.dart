@@ -99,6 +99,23 @@ class WorkspaceDraftController extends ChangeNotifier {
       ? _activeDraftContexts.contains(_currentKey)
       : _profile != null && _unscopedProfiles.contains(_profile);
   bool get needsDirectory => _currentKey == null;
+  bool _focusPending = false;
+
+  /// Asks the draft composer for focus once, even when its page is built
+  /// only after the request; a launch on a draft never raises the keyboard.
+  void focusComposer() {
+    if (_disposed) return;
+    _focusPending = true;
+    _notify();
+  }
+
+  /// Takes the pending focus request, so it is honoured once.
+  bool takeFocusRequest() {
+    final pending = _focusPending;
+    _focusPending = false;
+    return pending;
+  }
+
   bool get canSend =>
       isDraftActive &&
       _currentKey != null &&

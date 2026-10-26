@@ -1790,4 +1790,55 @@ class V2LocalizationsEn extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Remove $name from history';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Change icon';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Choose tab icon';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Cloud';
+
+  @override
+  String get sessionTabIconPresetCode => 'Code';
+
+  @override
+  String get sessionTabIconPresetData => 'Data';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idea';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Launch';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Research';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Security';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Tasks';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetTools => 'Tools';
+
+  @override
+  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Use project icon';
+
+  @override
+  String get sessionTabRestoreFailed => 'Tab could not be restored.';
 }

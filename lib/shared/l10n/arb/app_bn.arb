@@ -1476,5 +1476,22 @@
   "workspaceFilterDirs": "ফিল্টার ডিরেক্টরি",
   "workspaceOpenFolder": "ফোল্ডার খুলুন",
   "workspaceProjectHint": "/repo/my-project",
-  "workspaceRemoveFromHistory": "ইতিহাস থেকে {name} সরান"
+  "workspaceRemoveFromHistory": "ইতিহাস থেকে {name} সরান",
+  "sessionTabChangeIconAction": "আইকন পরিবর্তন করুন",
+  "sessionTabIconPickerTitle": "ট্যাব আইকন চয়ন করুন",
+  "sessionTabIconPresetBug": "বাগ",
+  "sessionTabIconPresetCloud": "ক্লাউড",
+  "sessionTabIconPresetCode": "কোড",
+  "sessionTabIconPresetData": "ডেটা",
+  "sessionTabIconPresetDesign": "ডিজাইন",
+  "sessionTabIconPresetIdea": "আইডিয়া",
+  "sessionTabIconPresetLaunch": "চালু করুন",
+  "sessionTabIconPresetResearch": "গবেষণা",
+  "sessionTabIconPresetSecurity": "নিরাপত্তা",
+  "sessionTabIconPresetTasks": "কাজ",
+  "sessionTabIconPresetTerminal": "টার্মিনাল",
+  "sessionTabIconPresetTools": "টুলস",
+  "sessionTabIconSaveFailed": "ট্যাব আইকন সংরক্ষণ করা যায়নি।",
+  "sessionTabIconUseProjectIcon": "প্রজেক্ট আইকন ব্যবহার করুন",
+  "sessionTabRestoreFailed": "ট্যাব পুনরুদ্ধার করা যায়নি।"
 }

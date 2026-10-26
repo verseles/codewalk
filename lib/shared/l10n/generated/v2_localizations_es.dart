@@ -1812,4 +1812,56 @@ class V2LocalizationsEs extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Eliminar $name del historial';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Cambiar icono';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Elegir icono de pestaña';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Nube';
+
+  @override
+  String get sessionTabIconPresetCode => 'Código';
+
+  @override
+  String get sessionTabIconPresetData => 'Datos';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Diseño';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idea';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Inicio';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Investigación';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Seguridad';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Tareas';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetTools => 'Herramientas';
+
+  @override
+  String get sessionTabIconSaveFailed =>
+      'No se pudo guardar el icono de la pestaña.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Usar icono del proyecto';
+
+  @override
+  String get sessionTabRestoreFailed => 'No se pudo restaurar la pestaña.';
 }

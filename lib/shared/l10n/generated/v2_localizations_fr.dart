@@ -1821,4 +1821,56 @@ class V2LocalizationsFr extends V2Localizations {
   String workspaceRemoveFromHistory(String name) {
     return 'Retirer $name de l\'historique';
   }
+
+  @override
+  String get sessionTabChangeIconAction => 'Changer l\'icône';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Choisir une icône d\'onglet';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Cloud';
+
+  @override
+  String get sessionTabIconPresetCode => 'Code';
+
+  @override
+  String get sessionTabIconPresetData => 'Données';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idée';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Lancement';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Recherche';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Sécurité';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Tâches';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetTools => 'Outils';
+
+  @override
+  String get sessionTabIconSaveFailed =>
+      'L\'icône d\'onglet n\'a pas pu être enregistrée.';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Utiliser l\'icône du projet';
+
+  @override
+  String get sessionTabRestoreFailed => 'L\'onglet n\'a pas pu être restauré.';
 }
