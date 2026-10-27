@@ -8,6 +8,7 @@ import '../../shared/theme/brand_colors.dart';
 import '../../shared/theme/opencode_theme_preferences.dart';
 import '../../shared/theme/opencode_theme_presets.dart';
 import '../../shared/theme/theme_preferences.dart';
+import '../../shared/widgets/searchable_picker.dart';
 
 enum _ThemeFamily { classic, presets }
 
@@ -63,6 +64,7 @@ class AppearanceSettingsPage extends StatelessWidget {
               const SizedBox(height: 12),
               _choice<ThemeMode>(
                 key: const ValueKey('settings_theme_mode_segmented'),
+                label: l.settingsAppearanceTheme,
                 value: p.themeMode,
                 options: {
                   ThemeMode.system: l.settingsAppearanceSystem,
@@ -74,6 +76,7 @@ class AppearanceSettingsPage extends StatelessWidget {
               const SizedBox(height: 12),
               _choice<_ThemeFamily>(
                 key: const ValueKey('settings_theme_family_segmented'),
+                label: l.settingsAppearancePresetPalette,
                 value: presetActive
                     ? _ThemeFamily.presets
                     : _ThemeFamily.classic,
@@ -110,6 +113,7 @@ class AppearanceSettingsPage extends StatelessWidget {
               const SizedBox(height: 8),
               _choice<VisualStyle>(
                 key: const ValueKey('settings_visual_style_segmented'),
+                label: l.settingsAppearanceVisualStyle,
                 value: p.visualStyle,
                 options: {
                   VisualStyle.classic: l.settingsAppearanceVisualStyleClassic,
@@ -195,24 +199,43 @@ class AppearanceSettingsPage extends StatelessWidget {
             _card(context, l.settingsAppearanceDensity, [
               Text(l.settingsAppearanceDensityDescription),
               const SizedBox(height: 12),
-              DropdownButtonFormField<AppDensity>(
+              SearchablePickerField<AppDensity>(
                 key: ValueKey('settings_density_${p.density.name}'),
-                initialValue: p.density,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: l.settingsAppearanceDensity,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
+                label: l.settingsAppearanceDensity,
+                value: p.density,
+                options: {
                   for (final density in AppDensity.values)
-                    DropdownMenuItem(
-                      value: density,
-                      child: Text(densityLabels[density.index]),
-                    ),
-                ],
-                onChanged: (value) {
-                  if (value != null) p.setDensity(value);
+                    density: densityLabels[density.index],
                 },
+                onChanged: p.setDensity,
+              ),
+            ]),
+            _card(context, l.settingsAppearanceFontSize, [
+              _scale(
+                context,
+                key: const ValueKey('settings_system_text_scale'),
+                title: l.settingsAppearanceSystemFontScale,
+                description: l.settingsAppearanceSystemFontScaleDescription,
+                value: p.systemTextScale,
+                onChanged: p.setSystemTextScale,
+              ),
+              const SizedBox(height: 12),
+              _scale(
+                context,
+                key: const ValueKey('settings_conversation_text_scale'),
+                title: l.settingsAppearanceChatFontScale,
+                description: l.settingsAppearanceChatFontScaleDescription,
+                value: p.conversationTextScale,
+                onChanged: p.setConversationTextScale,
+              ),
+            ]),
+            _card(context, l.settingsAppearanceMathRendering, [
+              SwitchListTile.adaptive(
+                key: const ValueKey('settings_toggle_math_rendering'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.settingsAppearanceMathRenderingDescription),
+                value: p.mathRendering,
+                onChanged: p.setMathRendering,
               ),
             ]),
           ],
@@ -236,13 +259,45 @@ class AppearanceSettingsPage extends StatelessWidget {
         ),
       );
 
+  Widget _scale(
+    BuildContext context, {
+    required Key key,
+    required String title,
+    required String description,
+    required double value,
+    required ValueChanged<double> onChanged,
+  }) {
+    final percent = '${(value * 100).round()}%';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('$title: $percent', style: Theme.of(context).textTheme.titleSmall),
+        Text(description),
+        Slider(
+          key: key,
+          min: AppPreferencesController.textScaleMin,
+          max: AppPreferencesController.textScaleMax,
+          divisions: 16,
+          value: value,
+          label: percent,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
   Future<void> _pickPreset(
     BuildContext context,
     AppPreferencesController p,
   ) async {
-    final selected = await showDialog<OpenCodeThemePreset>(
-      context: context,
-      builder: (context) => const _PresetPicker(),
+    final selected = await showSearchablePicker<OpenCodeThemePreset>(
+      context,
+      title: context.v2L10n.settingsAppearancePresetPalette,
+      options: {
+        for (final preset in openCodeThemePresetOptions())
+          preset: openCodeThemePresetLabel(preset),
+      },
+      selected: p.themePreset,
     );
     if (selected != null && !p.isDisposed) p.setThemePreset(selected);
   }
@@ -250,6 +305,7 @@ class AppearanceSettingsPage extends StatelessWidget {
 
 Widget _choice<T extends Object>({
   required Key key,
+  required String label,
   required T value,
   required Map<T, String> options,
   required ValueChanged<T> onChanged,
@@ -258,17 +314,12 @@ Widget _choice<T extends Object>({
     // Long translations and enlarged text retain usable controls on phones.
     if (constraints.maxWidth < 380 ||
         MediaQuery.textScalerOf(context).scale(14) > 18) {
-      return DropdownButtonFormField<T>(
+      return SearchablePickerField<T>(
         key: ValueKey((key, value)),
-        initialValue: value,
-        isExpanded: true,
-        items: [
-          for (final option in options.entries)
-            DropdownMenuItem(value: option.key, child: Text(option.value)),
-        ],
-        onChanged: (next) {
-          if (next != null) onChanged(next);
-        },
+        label: label,
+        value: value,
+        options: options,
+        onChanged: onChanged,
       );
     }
     return SegmentedButton<T>(
@@ -290,62 +341,4 @@ String _contrastLabel(V2Localizations l, double value) {
   if (value <= 0.58) return l.settingsAppearanceContrastMedium;
   if (value <= 0.83) return l.settingsAppearanceContrastMediumHigh;
   return l.settingsAppearanceContrastHigh;
-}
-
-class _PresetPicker extends StatefulWidget {
-  const _PresetPicker();
-  @override
-  State<_PresetPicker> createState() => _PresetPickerState();
-}
-
-class _PresetPickerState extends State<_PresetPicker> {
-  String _query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.v2L10n;
-    final presets = openCodeThemePresetOptions()
-        .where(
-          (preset) =>
-              '${openCodeThemePresetLabel(preset)} ${openCodeThemePresetKey(preset)}'
-                  .toLowerCase()
-                  .contains(_query.toLowerCase()),
-        )
-        .toList();
-    return AlertDialog(
-      title: Text(l.settingsAppearancePresetPalette),
-      content: SizedBox(
-        width: 480,
-        height: 400,
-        child: Column(
-          children: [
-            TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: l.settingsAppearanceSearchPreset,
-              ),
-              onChanged: (value) => setState(() => _query = value),
-            ),
-            Expanded(
-              child: presets.isEmpty
-                  ? Center(child: Text(l.settingsAppearanceNoPresets))
-                  : ListView.builder(
-                      itemCount: presets.length,
-                      itemBuilder: (context, index) => ListTile(
-                        title: Text(openCodeThemePresetLabel(presets[index])),
-                        onTap: () => Navigator.pop(context, presets[index]),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l.commonCancel),
-        ),
-      ],
-    );
-  }
 }

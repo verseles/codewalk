@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "Беседы",
   "chatHideConversationsSidebar": "Скрыть боковую панель бесед",
   "chatOpenSidebar": "Открыть боковую панель",
-  "chatProjectContext": "Контекст проекта"
+  "chatProjectContext": "Контекст проекта",
+  "settingsAppearanceChatFontScale": "Размер текста беседы",
+  "settingsAppearanceChatFontScaleDescription": "Масштабирует текст сообщений чата и редактора поверх системного размера текста.",
+  "settingsAppearanceFontSize": "Размер текста",
+  "settingsAppearanceMathRendering": "Отображение формул",
+  "settingsAppearanceMathRenderingDescription": "Отображать математические выражения LaTeX (\\$…\\$ и \\$\\$…\\$\\$) в виде отформатированных формул в сообщениях чата.",
+  "settingsAppearanceSystemFontScale": "Системный размер текста",
+  "settingsAppearanceSystemFontScaleDescription": "Масштабирует весь текст оболочки приложения, включая меню, диалоги и боковые панели.",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "Не удалось открыть ссылку",
+  "searchableDropdownEmptyText": "Совпадений не найдено",
+  "searchableDropdownSearchHint": "Поиск",
+  "settingsAboutDescription": "Версия, обновления, справка и данные приложения",
+  "settingsAboutOurGroup": "Наша группа",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "О программе"
 }

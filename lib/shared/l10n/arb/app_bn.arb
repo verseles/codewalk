@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "কথোপকথন",
   "chatHideConversationsSidebar": "কথোপকথন সাইডবার লুকান",
   "chatOpenSidebar": "সাইডবার খুলুন",
-  "chatProjectContext": "প্রকল্প প্রসঙ্গ"
+  "chatProjectContext": "প্রকল্প প্রসঙ্গ",
+  "settingsAppearanceChatFontScale": "কথোপকথনের টেক্সটের আকার",
+  "settingsAppearanceChatFontScaleDescription": "সিস্টেম টেক্সটের আকারের উপর চ্যাট বার্তা এবং কম্পোজার টেক্সটের আকার বাড়ান বা কমান।",
+  "settingsAppearanceFontSize": "টেক্সটের আকার",
+  "settingsAppearanceMathRendering": "গণিত রেন্ডারিং",
+  "settingsAppearanceMathRenderingDescription": "চ্যাট বার্তায় LaTeX গণিত রাশিগুলিকে টাইপসেট সমীকরণ হিসেবে রেন্ডার করুন।",
+  "settingsAppearanceSystemFontScale": "সিস্টেম টেক্সটের আকার",
+  "settingsAppearanceSystemFontScaleDescription": "অ্যাপ শেলের সব টেক্সটের আকার বাড়ান বা কমান, মেনু, ডায়ালগ এবং সাইডবারসহ।",
+  "aboutGitHub": "গিটহাব",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "লিংক খোলা যাচ্ছে না",
+  "searchableDropdownEmptyText": "কোনো মিল পাওয়া যায়নি",
+  "searchableDropdownSearchHint": "অনুসন্ধান",
+  "settingsAboutDescription": "সংস্করণ, আপডেট, সহায়তা এবং অ্যাপের তথ্য",
+  "settingsAboutOurGroup": "আমাদের গ্রুপ",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "সম্পর্কে"
 }

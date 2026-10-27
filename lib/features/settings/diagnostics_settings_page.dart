@@ -6,6 +6,10 @@ import '../../app/app_preferences_controller.dart';
 import '../../shared/diagnostics/diagnostics_controller.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/searchable_picker.dart';
+
+/// The "all operations" choice of the operation filter.
+const _allOperations = 'all';
 
 class DiagnosticsSettingsPage extends StatefulWidget {
   const DiagnosticsSettingsPage({super.key});
@@ -96,22 +100,18 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
           ),
           Text(l.logsLoggingDisabledDescription),
         ] else ...[
-          DropdownButtonFormField<DiagnosticOperation>(
+          SearchablePickerField<Object>(
             key: const ValueKey('logs_operation_filter'),
-            isExpanded: true,
-            itemHeight: null,
-            hint: Text(l.logsFilterAll),
-            initialValue: _operation,
-            decoration: InputDecoration(labelText: l.logsAppLogs),
-            items: [
-              DropdownMenuItem(value: null, child: Text(l.logsFilterAll)),
+            label: l.logsAppLogs,
+            value: _operation ?? _allOperations,
+            options: {
+              _allOperations: l.logsFilterAll,
               for (final operation in DiagnosticOperation.values)
-                DropdownMenuItem(
-                  value: operation,
-                  child: Text(diagnosticOperationLabel(l, operation)),
-                ),
-            ],
-            onChanged: (value) => setState(() => _operation = value),
+                operation: diagnosticOperationLabel(l, operation),
+            },
+            onChanged: (value) => setState(
+              () => _operation = value is DiagnosticOperation ? value : null,
+            ),
           ),
           const SizedBox(height: 12),
           Text(l.logsLevel),

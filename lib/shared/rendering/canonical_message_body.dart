@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n_context.dart';
+import '../theme/chat_appearance.dart';
 import 'markdown_content.dart';
 import 'message_render_budget.dart';
 import 'render_stream_throttle.dart';
@@ -39,18 +40,15 @@ class CanonicalMessageBody extends StatelessWidget {
     return MarkdownContent(
       source: verbatimSource,
       allowBasicHtml: allowBasicHtml,
-      enableMath: true,
+      enableMath: ChatAppearance.mathRenderingOf(context),
       enableMermaid: true,
       enableCodeHighlight: true,
       onLink: onTapLink != null
           ? (text, href, title) => onTapLink!(text, href, title)
           : null,
       onFile: onTapFilePath != null
-          ? (match) => onTapFilePath!(
-              match.path,
-              match.lineNumber,
-              match.columnNumber,
-            )
+          ? (match) =>
+                onTapFilePath!(match.path, match.lineNumber, match.columnNumber)
           : null,
       onCopyCode: onCopyCode,
     );
@@ -81,10 +79,7 @@ class CanonicalMessageBody extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              l10n.chatMessageTruncatedChars(
-                decision.truncatedChars,
-                '',
-              ),
+              l10n.chatMessageTruncatedChars(decision.truncatedChars, ''),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

@@ -1858,4 +1858,53 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get chatProjectContext => 'প্রকল্প প্রসঙ্গ';
+
+  @override
+  String get settingsAppearanceChatFontScale => 'কথোপকথনের টেক্সটের আকার';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      'সিস্টেম টেক্সটের আকারের উপর চ্যাট বার্তা এবং কম্পোজার টেক্সটের আকার বাড়ান বা কমান।';
+
+  @override
+  String get settingsAppearanceFontSize => 'টেক্সটের আকার';
+
+  @override
+  String get settingsAppearanceMathRendering => 'গণিত রেন্ডারিং';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      'চ্যাট বার্তায় LaTeX গণিত রাশিগুলিকে টাইপসেট সমীকরণ হিসেবে রেন্ডার করুন।';
+
+  @override
+  String get settingsAppearanceSystemFontScale => 'সিস্টেম টেক্সটের আকার';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      'অ্যাপ শেলের সব টেক্সটের আকার বাড়ান বা কমান, মেনু, ডায়ালগ এবং সাইডবারসহ।';
+
+  @override
+  String get aboutGitHub => 'গিটহাব';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'লিংক খোলা যাচ্ছে না';
+
+  @override
+  String get searchableDropdownEmptyText => 'কোনো মিল পাওয়া যায়নি';
+
+  @override
+  String get searchableDropdownSearchHint => 'অনুসন্ধান';
+
+  @override
+  String get settingsAboutDescription =>
+      'সংস্করণ, আপডেট, সহায়তা এবং অ্যাপের তথ্য';
+
+  @override
+  String get settingsAboutOurGroup => 'আমাদের গ্রুপ';
+
+  @override
+  String get settingsAboutTitle => 'সম্পর্কে';
 }

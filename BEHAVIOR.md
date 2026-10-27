@@ -471,7 +471,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
-- **Then** Servers opens the existing hosts route; Help exposes App Logs and Release history, while other unimplemented feature settings remain with their owning Issues
+- **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, and Appearance by text size or math rendering
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited
@@ -496,8 +497,22 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the user opens Settings > Appearance in the explicit v2 app
 - **When** appearance controls are displayed
 - **Then** the user can choose system/light/dark mode, classic/refined visual style, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
-- **Then** the searchable preset picker and five density tiers work in compact and wide layouts, with dropdown alternatives for narrow screens or enlarged text
+- **Then** the searchable preset picker and five density tiers work in compact and wide layouts; on narrow screens or enlarged text the segmented choices become fields that open the same searchable picker
 - **Then** the controls use the scoped 14-language catalog, including right-to-left layout
+
+- **Given** the user changes Settings > Appearance > Text size
+- **When** the System or Conversation slider moves (80–160 %, 5 % steps)
+- **Then** System multiplies the platform text scaler once for every app surface, and Conversation multiplies it again only inside timeline message cards (live and history) and the live and new-chat composer inputs; headers, chips, pills, drawers, settings and dialogs keep the System size
+- **Then** highlighted code follows both sizes, and changes apply immediately without restarting the response
+- **Then** the values persist under `cw2.settings.systemTextScale` and `cw2.settings.conversationTextScale` (100 % is not written) and a stored value outside the range is clamped on load
+
+- **Given** the user turns off Settings > Appearance > Math rendering
+- **When** a message contains `$...$` or `$$...$$`
+- **Then** the delimiters render as literal text; turning it back on typesets them on the next rebuild; the choice persists under `cw2.settings.mathRendering` (on by default)
+
+- **Given** any v2 settings select field (theme preset, density, narrow theme choices, App Logs operation filter)
+- **When** the user opens it
+- **Then** a dialog with a search field filters the options locally, shows "No matches found" when nothing matches, marks the current value and returns the tapped option; the dialog scrolls when the keyboard leaves too little room
 
 - **Given** a preset or platform dynamic palette is available
 - **When** the v2 app resolves its light and dark themes

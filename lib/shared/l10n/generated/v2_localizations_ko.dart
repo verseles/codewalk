@@ -1782,4 +1782,52 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get chatProjectContext => '프로젝트 컨텍스트';
+
+  @override
+  String get settingsAppearanceChatFontScale => '대화 텍스트 크기';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      '시스템 텍스트 크기에 더해 채팅 메시지와 작성기 텍스트의 크기를 조정합니다.';
+
+  @override
+  String get settingsAppearanceFontSize => '텍스트 크기';
+
+  @override
+  String get settingsAppearanceMathRendering => '수식 렌더링';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      '채팅 메시지에서 LaTeX 수학 표현식을 조판된 방정식으로 렌더링합니다.';
+
+  @override
+  String get settingsAppearanceSystemFontScale => '시스템 텍스트 크기';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      '메뉴, 대화상자, 사이드바를 포함한 앱 셸의 모든 텍스트 크기를 조정합니다.';
+
+  @override
+  String get aboutGitHub => 'GitHub';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => '링크를 열 수 없습니다';
+
+  @override
+  String get searchableDropdownEmptyText => '일치하는 항목 없음';
+
+  @override
+  String get searchableDropdownSearchHint => '검색';
+
+  @override
+  String get settingsAboutDescription => '버전, 업데이트, 도움말 및 앱 데이터';
+
+  @override
+  String get settingsAboutOurGroup => '공식 그룹';
+
+  @override
+  String get settingsAboutTitle => '정보';
 }

@@ -9,13 +9,21 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../hosts/hosts_filter_target.dart';
+import 'about_settings_page.dart';
 import 'appearance_settings_page.dart';
 import 'diagnostics_settings_page.dart';
 import 'release_history_settings_page.dart';
 import 'shortcuts_settings_page.dart';
 import 'updates_settings_page.dart';
 
-enum SettingsSection { appearance, shortcuts, logs, updates, releaseHistory }
+enum SettingsSection {
+  appearance,
+  shortcuts,
+  logs,
+  updates,
+  releaseHistory,
+  about,
+}
 
 class SettingsShellPage extends StatefulWidget {
   const SettingsShellPage({super.key});
@@ -115,6 +123,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         SettingsSection.logs => const DiagnosticsSettingsPage(),
         SettingsSection.updates => const UpdatesSettingsPage(),
         SettingsSection.releaseHistory => const ReleaseHistorySettingsPage(),
+        SettingsSection.about => const AboutSettingsPage(),
         _ => const AppearanceSettingsPage(),
       },
     );
@@ -178,7 +187,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     );
     final appearance = matches(
       l.settingsAppearanceTitle,
-      appearanceDescription,
+      '$appearanceDescription ${l.settingsAppearanceFontSize} '
+      '${l.settingsAppearanceMathRendering}',
       l.settingsNavigationGroupExperience,
     );
     final shortcuts =
@@ -201,6 +211,11 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     final history = matches(
       l.releaseHistoryTitle,
       l.releaseHistoryDescription,
+      l.settingsGroupHelp,
+    );
+    final about = matches(
+      l.settingsAboutTitle,
+      '${l.settingsAboutDescription} ${l.aboutGitHub} ${l.aboutTelegram}',
       l.settingsGroupHelp,
     );
     return ListView(
@@ -231,7 +246,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             !shortcuts &&
             !logs &&
             !updates &&
-            !history)
+            !history &&
+            !about)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(l.settingsNavigationNoResults),
@@ -267,7 +283,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             Icons.keyboard_outlined,
           ),
         ],
-        if (logs || updates || history) _group(context, l.settingsGroupHelp),
+        if (logs || updates || history || about)
+          _group(context, l.settingsGroupHelp),
         if (logs)
           _destination(
             SettingsSection.logs,
@@ -288,6 +305,13 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             l.releaseHistoryTitle,
             l.releaseHistoryDescription,
             Icons.history_outlined,
+          ),
+        if (about)
+          _destination(
+            SettingsSection.about,
+            l.settingsAboutTitle,
+            l.settingsAboutDescription,
+            Icons.info_outline,
           ),
       ],
     );

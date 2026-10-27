@@ -1868,4 +1868,52 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get chatProjectContext => 'परियोजना संदर्भ (Project Context)';
+
+  @override
+  String get settingsAppearanceChatFontScale => 'बातचीत टेक्स्ट आकार';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      'सिस्टम टेक्स्ट आकार के ऊपर चैट संदेश और कंपोज़र टेक्स्ट को स्केल करें।';
+
+  @override
+  String get settingsAppearanceFontSize => 'टेक्स्ट आकार';
+
+  @override
+  String get settingsAppearanceMathRendering => 'गणित रेंडरिंग';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      'चैट संदेशों में LaTeX गणितीय अभिव्यक्तियों को टाइपसेट समीकरणों के रूप में प्रस्तुत करें।';
+
+  @override
+  String get settingsAppearanceSystemFontScale => 'सिस्टम टेक्स्ट आकार';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      'मेनू, डायलॉग और साइडबार सहित ऐप शेल के सभी टेक्स्ट को स्केल करें।';
+
+  @override
+  String get aboutGitHub => 'GitHub';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'लिंक खोलने में असमर्थ';
+
+  @override
+  String get searchableDropdownEmptyText => 'कोई मेल नहीं मिला';
+
+  @override
+  String get searchableDropdownSearchHint => 'खोजें';
+
+  @override
+  String get settingsAboutDescription => 'संस्करण, अपडेट, सहायता और ऐप डेटा';
+
+  @override
+  String get settingsAboutOurGroup => 'हमारा ग्रुप';
+
+  @override
+  String get settingsAboutTitle => 'के बारे में';
 }

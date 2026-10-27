@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "会话",
   "chatHideConversationsSidebar": "隐藏会话侧边栏",
   "chatOpenSidebar": "打开侧边栏",
-  "chatProjectContext": "项目上下文"
+  "chatProjectContext": "项目上下文",
+  "settingsAppearanceChatFontScale": "对话文字大小",
+  "settingsAppearanceChatFontScaleDescription": "在系统文字大小之上缩放聊天消息和输入框文字。",
+  "settingsAppearanceFontSize": "文字大小",
+  "settingsAppearanceMathRendering": "数学公式渲染",
+  "settingsAppearanceMathRenderingDescription": "在聊天消息中将 LaTeX 数学表达式渲染为排版公式。",
+  "settingsAppearanceSystemFontScale": "系统文字大小",
+  "settingsAppearanceSystemFontScaleDescription": "缩放应用外壳中的所有文字，包括菜单、对话框和侧边栏。",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "无法打开链接",
+  "searchableDropdownEmptyText": "未找到匹配项",
+  "searchableDropdownSearchHint": "搜索",
+  "settingsAboutDescription": "版本、更新、帮助和应用数据",
+  "settingsAboutOurGroup": "我们的群组",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "关于"
 }

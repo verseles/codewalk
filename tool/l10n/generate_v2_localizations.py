@@ -84,6 +84,10 @@ APPEARANCE_KEYS = {
     "settingsAppearanceDensityExtraDense", "settingsAppearanceDensityDense",
     "settingsAppearanceDensityNormal", "settingsAppearanceDensitySpacious",
     "settingsAppearanceDensityExtraSpacious", "chatRetry",
+    "settingsAppearanceMathRendering", "settingsAppearanceMathRenderingDescription",
+    "settingsAppearanceFontSize", "settingsAppearanceSystemFontScale",
+    "settingsAppearanceSystemFontScaleDescription", "settingsAppearanceChatFontScale",
+    "settingsAppearanceChatFontScaleDescription",
 }
 KEYS |= APPEARANCE_KEYS | {"appearanceStorageError"}
 SETTINGS_KEYS = {
@@ -101,6 +105,9 @@ SETTINGS_KEYS = {
     "shortcutsConflictConflict", "shortcutGroupSession",
     "shortcutGroupGeneral", "shortcutGroupPrompt", "shortcutGroupNavigation",
     "shortcutGroupModelAndAgent", "shortcutGroupApplication",
+    "settingsAboutTitle", "settingsAboutDescription", "aboutGitHub",
+    "aboutTelegram", "settingsAboutOurGroup", "searchableDropdownSearchHint",
+    "searchableDropdownEmptyText", "chatMessageUnableToOpenLink",
 }
 for name in (
     "NewConversation", "RefreshData", "FocusInput", "ToggleVoiceInput",

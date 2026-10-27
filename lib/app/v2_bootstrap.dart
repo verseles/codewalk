@@ -20,6 +20,7 @@ import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import '../shared/theme/app_theme.dart';
 import '../shared/theme/appearance_theme_resolver.dart';
+import '../shared/theme/chat_appearance.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
@@ -179,23 +180,39 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
             localeListResolutionCallback: resolveV2LocaleList,
             builder: (context, child) {
               dependencies.localizations.update(V2Localizations.of(context));
-              return Theme(
-                data: AppTheme.withResponsiveSnackBars(
-                  Theme.of(context),
-                  MediaQuery.of(context),
-                  textDirection: Directionality.of(context),
-                ),
-                child: AppKeyboardShortcuts(
-                  preferences: preferences,
-                  // Opened over the current page, like the gear, so the
-                  // system back returns to it; never twice in a row.
-                  openSettings: () {
-                    final router = dependencies.router;
-                    if (router.state.uri.path != '/settings') {
-                      router.push('/settings');
-                    }
-                  },
-                  child: child ?? const SizedBox.shrink(),
+              final media = MediaQuery.of(context);
+              final systemScale = preferences.systemTextScale;
+              return MediaQuery(
+                data: systemScale == 1
+                    ? media
+                    : media.copyWith(
+                        textScaler: MultipliedTextScaler(
+                          media.textScaler,
+                          systemScale,
+                        ),
+                      ),
+                child: ChatAppearance(
+                  mathRendering: preferences.mathRendering,
+                  conversationTextScale: preferences.conversationTextScale,
+                  child: Theme(
+                    data: AppTheme.withResponsiveSnackBars(
+                      Theme.of(context),
+                      media,
+                      textDirection: Directionality.of(context),
+                    ),
+                    child: AppKeyboardShortcuts(
+                      preferences: preferences,
+                      // Opened over the current page, like the gear, so the
+                      // system back returns to it; never twice in a row.
+                      openSettings: () {
+                        final router = dependencies.router;
+                        if (router.state.uri.path != '/settings') {
+                          router.push('/settings');
+                        }
+                      },
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               );
             },

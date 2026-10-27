@@ -2312,5 +2312,65 @@
   "chatProjectContext": "Project Context",
   "@chatProjectContext": {
     "description": "CodeWalk UI string — chatProjectContext"
+  },
+  "settingsAppearanceChatFontScale": "Conversation text size",
+  "@settingsAppearanceChatFontScale": {
+    "description": "CodeWalk UI string — settingsAppearanceChatFontScale"
+  },
+  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "@settingsAppearanceChatFontScaleDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceChatFontScaleDescription"
+  },
+  "settingsAppearanceFontSize": "Text size",
+  "@settingsAppearanceFontSize": {
+    "description": "CodeWalk UI string — settingsAppearanceFontSize"
+  },
+  "settingsAppearanceMathRendering": "Math rendering",
+  "@settingsAppearanceMathRendering": {
+    "description": "CodeWalk UI string — settingsAppearanceMathRendering"
+  },
+  "settingsAppearanceMathRenderingDescription": "Render LaTeX math expressions ($…$ and $$…$$) as typeset equations in chat messages.",
+  "@settingsAppearanceMathRenderingDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceMathRenderingDescription"
+  },
+  "settingsAppearanceSystemFontScale": "System text size",
+  "@settingsAppearanceSystemFontScale": {
+    "description": "CodeWalk UI string — settingsAppearanceSystemFontScale"
+  },
+  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "@settingsAppearanceSystemFontScaleDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceSystemFontScaleDescription"
+  },
+  "aboutGitHub": "GitHub",
+  "@aboutGitHub": {
+    "description": "CodeWalk UI string — aboutGitHub"
+  },
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string — aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "Unable to open link",
+  "@chatMessageUnableToOpenLink": {
+    "description": "CodeWalk UI string — chatMessageUnableToOpenLink"
+  },
+  "searchableDropdownEmptyText": "No matches found",
+  "@searchableDropdownEmptyText": {
+    "description": "CodeWalk UI string — searchableDropdownEmptyText"
+  },
+  "searchableDropdownSearchHint": "Search",
+  "@searchableDropdownSearchHint": {
+    "description": "CodeWalk UI string — searchableDropdownSearchHint"
+  },
+  "settingsAboutDescription": "Version, updates, help, and app data",
+  "@settingsAboutDescription": {
+    "description": "CodeWalk UI string — settingsAboutDescription"
+  },
+  "settingsAboutOurGroup": "Our group",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string — settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "About",
+  "@settingsAboutTitle": {
+    "description": "CodeWalk UI string — settingsAboutTitle"
   }
 }

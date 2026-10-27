@@ -1881,4 +1881,53 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get chatProjectContext => 'Контекст проекта';
+
+  @override
+  String get settingsAppearanceChatFontScale => 'Размер текста беседы';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      'Масштабирует текст сообщений чата и редактора поверх системного размера текста.';
+
+  @override
+  String get settingsAppearanceFontSize => 'Размер текста';
+
+  @override
+  String get settingsAppearanceMathRendering => 'Отображение формул';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      'Отображать математические выражения LaTeX (\\\$…\\\$ и \\\$\\\$…\\\$\\\$) в виде отформатированных формул в сообщениях чата.';
+
+  @override
+  String get settingsAppearanceSystemFontScale => 'Системный размер текста';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      'Масштабирует весь текст оболочки приложения, включая меню, диалоги и боковые панели.';
+
+  @override
+  String get aboutGitHub => 'GitHub';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'Не удалось открыть ссылку';
+
+  @override
+  String get searchableDropdownEmptyText => 'Совпадений не найдено';
+
+  @override
+  String get searchableDropdownSearchHint => 'Поиск';
+
+  @override
+  String get settingsAboutDescription =>
+      'Версия, обновления, справка и данные приложения';
+
+  @override
+  String get settingsAboutOurGroup => 'Наша группа';
+
+  @override
+  String get settingsAboutTitle => 'О программе';
 }

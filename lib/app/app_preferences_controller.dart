@@ -115,6 +115,40 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('sessionPaneHidden');
   }
 
+  /// System and conversation text sizes stay within
+  /// [textScaleMin]..[textScaleMax]; the conversation size multiplies the
+  /// system size inside the chat timeline and composer only.
+  static const textScaleMin = 0.8;
+  static const textScaleMax = 1.6;
+  double _systemTextScale = 1;
+  double _conversationTextScale = 1;
+  bool _mathRendering = true;
+  double get systemTextScale => _systemTextScale;
+  double get conversationTextScale => _conversationTextScale;
+  bool get mathRendering => _mathRendering;
+
+  void setSystemTextScale(double value) {
+    if (!value.isFinite) return;
+    value = value.clamp(textScaleMin, textScaleMax).toDouble();
+    if (_disposed || _systemTextScale == value) return;
+    _systemTextScale = value;
+    _changed('systemTextScale');
+  }
+
+  void setConversationTextScale(double value) {
+    if (!value.isFinite) return;
+    value = value.clamp(textScaleMin, textScaleMax).toDouble();
+    if (_disposed || _conversationTextScale == value) return;
+    _conversationTextScale = value;
+    _changed('conversationTextScale');
+  }
+
+  void setMathRendering(bool value) {
+    if (_disposed || _mathRendering == value) return;
+    _mathRendering = value;
+    _changed('mathRendering');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -203,6 +237,11 @@ class AppPreferencesController extends ChangeNotifier {
     'appBarPins': jsonEncode(_appBarPins.map((action) => action.name).toList()),
     'sessionPaneWidth': _sessionPaneWidth,
     'sessionPaneHidden': _sessionPaneHidden ? true : null,
+    'systemTextScale': _systemTextScale == 1 ? null : _systemTextScale,
+    'conversationTextScale': _conversationTextScale == 1
+        ? null
+        : _conversationTextScale,
+    'mathRendering': _mathRendering ? null : false,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -279,6 +318,19 @@ class AppPreferencesController extends ChangeNotifier {
       }
       final paneHidden = value('sessionPaneHidden');
       if (paneHidden is bool) _sessionPaneHidden = paneHidden;
+      // A stale or edited snapshot never hands the UI an illegal scale.
+      double? scale(String key) {
+        final stored = value(key);
+        return stored is num && stored.isFinite
+            ? stored.toDouble().clamp(textScaleMin, textScaleMax)
+            : null;
+      }
+
+      _systemTextScale = scale('systemTextScale') ?? _systemTextScale;
+      _conversationTextScale =
+          scale('conversationTextScale') ?? _conversationTextScale;
+      final math = value('mathRendering');
+      if (math is bool) _mathRendering = math;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

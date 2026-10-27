@@ -1744,4 +1744,52 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get chatProjectContext => '项目上下文';
+
+  @override
+  String get settingsAppearanceChatFontScale => '对话文字大小';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      '在系统文字大小之上缩放聊天消息和输入框文字。';
+
+  @override
+  String get settingsAppearanceFontSize => '文字大小';
+
+  @override
+  String get settingsAppearanceMathRendering => '数学公式渲染';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      '在聊天消息中将 LaTeX 数学表达式渲染为排版公式。';
+
+  @override
+  String get settingsAppearanceSystemFontScale => '系统文字大小';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      '缩放应用外壳中的所有文字，包括菜单、对话框和侧边栏。';
+
+  @override
+  String get aboutGitHub => 'GitHub';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => '无法打开链接';
+
+  @override
+  String get searchableDropdownEmptyText => '未找到匹配项';
+
+  @override
+  String get searchableDropdownSearchHint => '搜索';
+
+  @override
+  String get settingsAboutDescription => '版本、更新、帮助和应用数据';
+
+  @override
+  String get settingsAboutOurGroup => '我们的群组';
+
+  @override
+  String get settingsAboutTitle => '关于';
 }

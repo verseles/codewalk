@@ -1500,5 +1500,26 @@
   "chatConversationsPane": "المحادثات",
   "chatHideConversationsSidebar": "إخفاء شريط المحادثات الجانبي",
   "chatOpenSidebar": "فتح الشريط الجانبي",
-  "chatProjectContext": "سياق المشروع"
+  "chatProjectContext": "سياق المشروع",
+  "settingsAppearanceChatFontScale": "حجم نص المحادثة",
+  "settingsAppearanceChatFontScaleDescription": "غيّر حجم نص الرسائل والمحرر في الدردشة بالإضافة إلى حجم نص النظام.",
+  "settingsAppearanceFontSize": "حجم النص",
+  "settingsAppearanceMathRendering": "عرض الرياضيات",
+  "settingsAppearanceMathRenderingDescription": "عرض تعبيرات LaTeX الرياضية كمعادلات منسقة في رسائل الدردشة.",
+  "settingsAppearanceSystemFontScale": "حجم نص النظام",
+  "settingsAppearanceSystemFontScaleDescription": "غيّر حجم جميع النصوص في واجهة التطبيق، بما في ذلك القوائم والحوارات والأشرطة الجانبية.",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "تعذّر فتح الرابط",
+  "searchableDropdownEmptyText": "لا توجد نتائج مطابقة",
+  "searchableDropdownSearchHint": "بحث",
+  "settingsAboutDescription": "الإصدار والتحديثات والمساعدة وبيانات التطبيق",
+  "settingsAboutOurGroup": "مجموعتنا",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "حول"
 }

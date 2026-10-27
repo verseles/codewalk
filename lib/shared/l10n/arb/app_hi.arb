@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "बातचीत",
   "chatHideConversationsSidebar": "बातचीत साइडबार छुपाएं",
   "chatOpenSidebar": "साइडबार खोलें",
-  "chatProjectContext": "परियोजना संदर्भ (Project Context)"
+  "chatProjectContext": "परियोजना संदर्भ (Project Context)",
+  "settingsAppearanceChatFontScale": "बातचीत टेक्स्ट आकार",
+  "settingsAppearanceChatFontScaleDescription": "सिस्टम टेक्स्ट आकार के ऊपर चैट संदेश और कंपोज़र टेक्स्ट को स्केल करें।",
+  "settingsAppearanceFontSize": "टेक्स्ट आकार",
+  "settingsAppearanceMathRendering": "गणित रेंडरिंग",
+  "settingsAppearanceMathRenderingDescription": "चैट संदेशों में LaTeX गणितीय अभिव्यक्तियों को टाइपसेट समीकरणों के रूप में प्रस्तुत करें।",
+  "settingsAppearanceSystemFontScale": "सिस्टम टेक्स्ट आकार",
+  "settingsAppearanceSystemFontScaleDescription": "मेनू, डायलॉग और साइडबार सहित ऐप शेल के सभी टेक्स्ट को स्केल करें।",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "लिंक खोलने में असमर्थ",
+  "searchableDropdownEmptyText": "कोई मेल नहीं मिला",
+  "searchableDropdownSearchHint": "खोजें",
+  "settingsAboutDescription": "संस्करण, अपडेट, सहायता और ऐप डेटा",
+  "settingsAboutOurGroup": "हमारा ग्रुप",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "के बारे में"
 }

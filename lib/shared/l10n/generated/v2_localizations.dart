@@ -3482,6 +3482,96 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Project Context'**
   String get chatProjectContext;
+
+  /// CodeWalk UI string — settingsAppearanceChatFontScale
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation text size'**
+  String get settingsAppearanceChatFontScale;
+
+  /// CodeWalk UI string — settingsAppearanceChatFontScaleDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Scale the chat message and composer text on top of the system text size.'**
+  String get settingsAppearanceChatFontScaleDescription;
+
+  /// CodeWalk UI string — settingsAppearanceFontSize
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get settingsAppearanceFontSize;
+
+  /// CodeWalk UI string — settingsAppearanceMathRendering
+  ///
+  /// In en, this message translates to:
+  /// **'Math rendering'**
+  String get settingsAppearanceMathRendering;
+
+  /// CodeWalk UI string — settingsAppearanceMathRenderingDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Render LaTeX math expressions (\$…\$ and \$\$…\$\$) as typeset equations in chat messages.'**
+  String get settingsAppearanceMathRenderingDescription;
+
+  /// CodeWalk UI string — settingsAppearanceSystemFontScale
+  ///
+  /// In en, this message translates to:
+  /// **'System text size'**
+  String get settingsAppearanceSystemFontScale;
+
+  /// CodeWalk UI string — settingsAppearanceSystemFontScaleDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Scale all text in the app shell, including menus, dialogs, and sidebars.'**
+  String get settingsAppearanceSystemFontScaleDescription;
+
+  /// CodeWalk UI string — aboutGitHub
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub'**
+  String get aboutGitHub;
+
+  /// CodeWalk UI string — aboutTelegram
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get aboutTelegram;
+
+  /// CodeWalk UI string — chatMessageUnableToOpenLink
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open link'**
+  String get chatMessageUnableToOpenLink;
+
+  /// CodeWalk UI string — searchableDropdownEmptyText
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found'**
+  String get searchableDropdownEmptyText;
+
+  /// CodeWalk UI string — searchableDropdownSearchHint
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchableDropdownSearchHint;
+
+  /// CodeWalk UI string — settingsAboutDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Version, updates, help, and app data'**
+  String get settingsAboutDescription;
+
+  /// CodeWalk UI string — settingsAboutOurGroup
+  ///
+  /// In en, this message translates to:
+  /// **'Our group'**
+  String get settingsAboutOurGroup;
+
+  /// CodeWalk UI string — settingsAboutTitle
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAboutTitle;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

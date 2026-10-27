@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
+import '../../shared/theme/chat_appearance.dart';
 import 'session_error_card.dart';
 import 'session_tool_result.dart';
 
@@ -44,9 +45,11 @@ class SessionTimelineTile extends StatelessWidget {
     if (item is TurnOutcome && item.kind.known == OutcomeKind.failed) {
       final error = item.error;
       if (error != null) {
-        return SessionErrorCard(
-          error: error,
-          recovery: errorRecovery?.call(error),
+        return ConversationTextScale(
+          child: SessionErrorCard(
+            error: error,
+            recovery: errorRecovery?.call(error),
+          ),
         );
       }
     }
@@ -92,15 +95,17 @@ class SessionTimelineTile extends StatelessWidget {
         ],
       ),
     );
-    if (child == null) return Card(child: body);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Semantics(
-        button: true,
-        child: InkWell(
-          key: ValueKey('subagent-open-${item.id.value}'),
-          onTap: () => child(item as ToolCall),
-          child: body,
+    if (child == null) return ConversationTextScale(child: Card(child: body));
+    return ConversationTextScale(
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Semantics(
+          button: true,
+          child: InkWell(
+            key: ValueKey('subagent-open-${item.id.value}'),
+            onTap: () => child(item as ToolCall),
+            child: body,
+          ),
         ),
       ),
     );

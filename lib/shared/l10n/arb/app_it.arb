@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "Conversazioni",
   "chatHideConversationsSidebar": "Nascondi barra laterale Conversazioni",
   "chatOpenSidebar": "Apri barra laterale",
-  "chatProjectContext": "Contesto del progetto"
+  "chatProjectContext": "Contesto del progetto",
+  "settingsAppearanceChatFontScale": "Dimensione del testo delle conversazioni",
+  "settingsAppearanceChatFontScaleDescription": "Scala il testo dei messaggi della chat e del composer oltre alla dimensione del testo di sistema.",
+  "settingsAppearanceFontSize": "Dimensione del testo",
+  "settingsAppearanceMathRendering": "Rendering matematico",
+  "settingsAppearanceMathRenderingDescription": "Mostra espressioni matematiche LaTeX come equazioni composte nei messaggi di chat.",
+  "settingsAppearanceSystemFontScale": "Dimensione del testo di sistema",
+  "settingsAppearanceSystemFontScaleDescription": "Scala tutto il testo dell''interfaccia dell''app, inclusi menu, finestre di dialogo e barre laterali.",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "Impossibile aprire il link",
+  "searchableDropdownEmptyText": "Nessuna corrispondenza trovata",
+  "searchableDropdownSearchHint": "Cerca",
+  "settingsAboutDescription": "Versione, aggiornamenti, assistenza e dati dell''app",
+  "settingsAboutOurGroup": "Il nostro gruppo",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "Informazioni"
 }

@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "بات چیت",
   "chatHideConversationsSidebar": "گفتگو کا سائڈبار چھپائیں۔",
   "chatOpenSidebar": "سائیڈ بار کھولیں",
-  "chatProjectContext": "پروجیکٹ کا سیاق و سباق"
+  "chatProjectContext": "پروجیکٹ کا سیاق و سباق",
+  "settingsAppearanceChatFontScale": "گفتگو کے متن کا سائز",
+  "settingsAppearanceChatFontScaleDescription": "سسٹم متن کے سائز کے علاوہ چیٹ پیغام اور کمپوزر متن کا سائز بڑھائیں یا گھٹائیں۔",
+  "settingsAppearanceFontSize": "متن کا سائز",
+  "settingsAppearanceMathRendering": "ریاضی رینڈرنگ",
+  "settingsAppearanceMathRenderingDescription": "چیٹ پیغامات میں LaTeX ریاضی اظہار کو ٹائپ سیٹ مساوات کے طور پر رینڈر کریں۔",
+  "settingsAppearanceSystemFontScale": "سسٹم متن کا سائز",
+  "settingsAppearanceSystemFontScaleDescription": "ایپ شیل کے تمام متن کا سائز بڑھائیں یا گھٹائیں، بشمول مینیوز، ڈائیلاگز اور سائیڈ بارز۔",
+  "aboutGitHub": "گٹ ہب",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "لنک کھولنے سے قاصر",
+  "searchableDropdownEmptyText": "کوئی مماثلت نہیں ملی",
+  "searchableDropdownSearchHint": "تلاش کریں",
+  "settingsAboutDescription": "ورژن، اپ ڈیٹس، مدد اور ایپ کا ڈیٹا",
+  "settingsAboutOurGroup": "ہمارا گروپ",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "کے بارے میں"
 }

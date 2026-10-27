@@ -1891,4 +1891,55 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get chatProjectContext => 'Contexto del Proyecto';
+
+  @override
+  String get settingsAppearanceChatFontScale =>
+      'Tamaño del texto de la conversación';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      'Escala el texto de los mensajes del chat y del compositor además del tamaño de texto del sistema.';
+
+  @override
+  String get settingsAppearanceFontSize => 'Tamaño del texto';
+
+  @override
+  String get settingsAppearanceMathRendering => 'Renderizado de matemáticas';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      'Renderizar expresiones matemáticas LaTeX como ecuaciones tipografiadas en mensajes de chat.';
+
+  @override
+  String get settingsAppearanceSystemFontScale =>
+      'Tamaño del texto del sistema';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      'Escala todo el texto del shell de la aplicación, incluidos menús, diálogos y barras laterales.';
+
+  @override
+  String get aboutGitHub => 'GitHub';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'No se puede abrir el enlace';
+
+  @override
+  String get searchableDropdownEmptyText => 'No se encontraron coincidencias';
+
+  @override
+  String get searchableDropdownSearchHint => 'Buscar';
+
+  @override
+  String get settingsAboutDescription =>
+      'Versión, actualizaciones, ayuda y datos de la app';
+
+  @override
+  String get settingsAboutOurGroup => 'Nuestro grupo';
+
+  @override
+  String get settingsAboutTitle => 'Acerca de';
 }

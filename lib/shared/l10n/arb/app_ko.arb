@@ -1512,5 +1512,26 @@
   "chatConversationsPane": "대화",
   "chatHideConversationsSidebar": "대화 사이드바 숨기기",
   "chatOpenSidebar": "사이드바 열기",
-  "chatProjectContext": "프로젝트 컨텍스트"
+  "chatProjectContext": "프로젝트 컨텍스트",
+  "settingsAppearanceChatFontScale": "대화 텍스트 크기",
+  "settingsAppearanceChatFontScaleDescription": "시스템 텍스트 크기에 더해 채팅 메시지와 작성기 텍스트의 크기를 조정합니다.",
+  "settingsAppearanceFontSize": "텍스트 크기",
+  "settingsAppearanceMathRendering": "수식 렌더링",
+  "settingsAppearanceMathRenderingDescription": "채팅 메시지에서 LaTeX 수학 표현식을 조판된 방정식으로 렌더링합니다.",
+  "settingsAppearanceSystemFontScale": "시스템 텍스트 크기",
+  "settingsAppearanceSystemFontScaleDescription": "메뉴, 대화상자, 사이드바를 포함한 앱 셸의 모든 텍스트 크기를 조정합니다.",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "링크를 열 수 없습니다",
+  "searchableDropdownEmptyText": "일치하는 항목 없음",
+  "searchableDropdownSearchHint": "검색",
+  "settingsAboutDescription": "버전, 업데이트, 도움말 및 앱 데이터",
+  "settingsAboutOurGroup": "공식 그룹",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "정보"
 }

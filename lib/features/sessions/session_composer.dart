@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
+import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
@@ -479,18 +480,20 @@ class _SessionComposerState extends State<SessionComposer> {
                     child: Focus(
                       onKeyEvent: _key,
                       onFocusChange: (_) => _escapeAt = null,
-                      child: TextField(
-                        key: const ValueKey('live-composer-input'),
-                        controller: _text,
-                        focusNode: widget.focusNode,
-                        // A text that a failed resend hands back needs the field
-                        // untouched until the send ends.
-                        readOnly: c.sending || c.live.endpointOffline,
-                        minLines: 1,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          hintText: l10n.composerHint,
-                          border: const OutlineInputBorder(),
+                      child: ConversationTextScale(
+                        child: TextField(
+                          key: const ValueKey('live-composer-input'),
+                          controller: _text,
+                          focusNode: widget.focusNode,
+                          // A text that a failed resend hands back needs the field
+                          // untouched until the send ends.
+                          readOnly: c.sending || c.live.endpointOffline,
+                          minLines: 1,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: l10n.composerHint,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
                       ),
                     ),

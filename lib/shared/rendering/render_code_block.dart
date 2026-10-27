@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:highlight/highlight.dart' show Node, highlight;
 import 'package:markdown/markdown.dart' as md;
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -18,7 +18,7 @@ import 'render_mermaid_block.dart';
 ///
 /// V2 port without legacy imports. Routes `language == 'mermaid'` (or
 /// mermaid-looking source) to [RenderMermaidBlock]; renders blocks <=
-/// [MessageRenderBudget.codeHighlightMaxChars] with [HighlightView] and
+/// [MessageRenderBudget.codeHighlightMaxChars] with [_HighlightedCode] and
 /// larger blocks as plain monospace to protect frame times.
 class RenderCodeBlockBuilder extends MarkdownElementBuilder {
   RenderCodeBlockBuilder({
@@ -92,11 +92,11 @@ class RenderCodeBlockBuilder extends MarkdownElementBuilder {
       code: code,
       onCopy: () => onCopyCode(code),
       child: useHighlight
-          ? HighlightView(
+          ? _HighlightedCode(
               code,
               language: language,
               theme: highlightTheme!,
-              textStyle: style,
+              style: style,
             )
           : Text(code, style: style),
     );
@@ -344,6 +344,53 @@ class _RenderScrollableCodeBlockState extends State<RenderScrollableCodeBlock> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Syntax-highlighted code that follows the inherited text scaler.
+///
+/// Mirrors flutter_highlight's HighlightView, whose RichText ignores both the
+/// platform and the app text sizes.
+class _HighlightedCode extends StatelessWidget {
+  _HighlightedCode(
+    String code, {
+    required this.language,
+    required this.theme,
+    required this.style,
+  }) : code = code.replaceAll('\t', ' ' * 8);
+
+  final String code;
+  final String? language;
+  final Map<String, TextStyle> theme;
+  final TextStyle style;
+
+  List<TextSpan> _spans(List<Node> nodes) => [
+    for (final node in nodes)
+      TextSpan(
+        text: node.value,
+        style: node.className == null ? null : theme[node.className!],
+        children: node.value == null ? _spans(node.children ?? const []) : null,
+      ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final root = theme['root'];
+    return Container(
+      color: root?.backgroundColor ?? const Color(0xffffffff),
+      child: RichText(
+        textScaler: MediaQuery.textScalerOf(context),
+        text: TextSpan(
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: root?.color ?? const Color(0xff000000),
+          ).merge(style),
+          children: _spans(
+            highlight.parse(code, language: language).nodes ?? const [],
+          ),
+        ),
       ),
     );
   }

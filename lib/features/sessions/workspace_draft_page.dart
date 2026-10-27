@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
@@ -199,19 +200,21 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Expanded(
-                              child: TextField(
-                                key: const ValueKey('workspace-draft-text'),
-                                controller: c.draft,
-                                focusNode: _composerFocus,
-                                enabled: !c.sending,
-                                readOnly: c.endpointOffline,
-                                minLines: 1,
-                                maxLines: 6,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                decoration: InputDecoration(
-                                  hintText: l10n.composerHint,
-                                  border: const OutlineInputBorder(),
+                              child: ConversationTextScale(
+                                child: TextField(
+                                  key: const ValueKey('workspace-draft-text'),
+                                  controller: c.draft,
+                                  focusNode: _composerFocus,
+                                  enabled: !c.sending,
+                                  readOnly: c.endpointOffline,
+                                  minLines: 1,
+                                  maxLines: 6,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.composerHint,
+                                    border: const OutlineInputBorder(),
+                                  ),
                                 ),
                               ),
                             ),

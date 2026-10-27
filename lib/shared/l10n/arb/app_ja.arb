@@ -1501,5 +1501,26 @@
   "chatConversationsPane": "会話一覧",
   "chatHideConversationsSidebar": "会話サイドバーを非表示",
   "chatOpenSidebar": "サイドバーを開く",
-  "chatProjectContext": "プロジェクトコンテキスト"
+  "chatProjectContext": "プロジェクトコンテキスト",
+  "settingsAppearanceChatFontScale": "会話の文字サイズ",
+  "settingsAppearanceChatFontScaleDescription": "システムの文字サイズに加えて、チャットメッセージとコンポーザーのテキストを拡大縮小します。",
+  "settingsAppearanceFontSize": "文字サイズ",
+  "settingsAppearanceMathRendering": "数式レンダリング",
+  "settingsAppearanceMathRenderingDescription": "チャットメッセージでLaTeX数式を組版済み方程式としてレンダリングします。",
+  "settingsAppearanceSystemFontScale": "システムの文字サイズ",
+  "settingsAppearanceSystemFontScaleDescription": "メニュー、ダイアログ、サイドバーを含むアプリシェル全体の文字を拡大縮小します。",
+  "aboutGitHub": "GitHub",
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "chatMessageUnableToOpenLink": "リンクを開けません",
+  "searchableDropdownEmptyText": "一致する項目はありません",
+  "searchableDropdownSearchHint": "検索",
+  "settingsAboutDescription": "バージョン、更新、ヘルプ、アプリのデータ",
+  "settingsAboutOurGroup": "公式グループ",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "settingsAboutTitle": "情報"
 }

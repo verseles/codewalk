@@ -1862,4 +1862,52 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get chatProjectContext => 'پروجیکٹ کا سیاق و سباق';
+
+  @override
+  String get settingsAppearanceChatFontScale => 'گفتگو کے متن کا سائز';
+
+  @override
+  String get settingsAppearanceChatFontScaleDescription =>
+      'سسٹم متن کے سائز کے علاوہ چیٹ پیغام اور کمپوزر متن کا سائز بڑھائیں یا گھٹائیں۔';
+
+  @override
+  String get settingsAppearanceFontSize => 'متن کا سائز';
+
+  @override
+  String get settingsAppearanceMathRendering => 'ریاضی رینڈرنگ';
+
+  @override
+  String get settingsAppearanceMathRenderingDescription =>
+      'چیٹ پیغامات میں LaTeX ریاضی اظہار کو ٹائپ سیٹ مساوات کے طور پر رینڈر کریں۔';
+
+  @override
+  String get settingsAppearanceSystemFontScale => 'سسٹم متن کا سائز';
+
+  @override
+  String get settingsAppearanceSystemFontScaleDescription =>
+      'ایپ شیل کے تمام متن کا سائز بڑھائیں یا گھٹائیں، بشمول مینیوز، ڈائیلاگز اور سائیڈ بارز۔';
+
+  @override
+  String get aboutGitHub => 'گٹ ہب';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'لنک کھولنے سے قاصر';
+
+  @override
+  String get searchableDropdownEmptyText => 'کوئی مماثلت نہیں ملی';
+
+  @override
+  String get searchableDropdownSearchHint => 'تلاش کریں';
+
+  @override
+  String get settingsAboutDescription => 'ورژن، اپ ڈیٹس، مدد اور ایپ کا ڈیٹا';
+
+  @override
+  String get settingsAboutOurGroup => 'ہمارا گروپ';
+
+  @override
+  String get settingsAboutTitle => 'کے بارے میں';
 }
