@@ -13,6 +13,7 @@ import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/hidden_session_store.dart';
+import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/session_draft_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
@@ -51,6 +52,7 @@ class AppDependencies {
     this.sessionTabs,
     this.workspace,
     this.sessionDrafts,
+    this.modelPreferences,
     this.workspaceDrafts,
     this.projectContexts,
   }) {
@@ -107,6 +109,9 @@ class AppDependencies {
 
   /// The unsent prompt of each session, saved on this device.
   final SessionDraftStore? sessionDrafts;
+
+  /// The favorite and recent models, kept on this device.
+  final ModelPreferenceStore? modelPreferences;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -146,6 +151,7 @@ class AppDependencies {
     preferences.dispose();
     permissionModes?.dispose();
     hiddenSessions?.dispose();
+    modelPreferences?.dispose();
     releaseHistory?.dispose();
     updates?.dispose();
     diagnostics?.dispose();

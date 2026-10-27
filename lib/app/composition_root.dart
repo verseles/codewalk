@@ -21,6 +21,7 @@ import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/hidden_session_store.dart';
+import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/project_workspace_store.dart';
 import '../platform/sessions/session_action_source.dart';
@@ -74,6 +75,7 @@ AppDependencies createAppDependencies({
   HiddenSessionStore? hiddenStore,
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
+  ModelPreferenceStore? modelPreferenceStore,
   WorkspaceStore? workspaceStore,
   ProjectWorkspaceStore? projectWorkspaceStore,
   WorkspaceDraftStore? workspaceDraftStore,
@@ -266,6 +268,8 @@ AppDependencies createAppDependencies({
     projectContexts: projectContexts,
     sessionDrafts:
         draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
+    modelPreferences:
+        modelPreferenceStore ?? ModelPreferenceStore(store: metadata),
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
@@ -301,6 +305,7 @@ Future<AppDependencies> loadAppDependencies({
   await dependencies.permissionModes?.initialize();
   await dependencies.unrestrictedOwnership?.initialize();
   await dependencies.hiddenSessions?.initialize();
+  await dependencies.modelPreferences?.initialize();
   await dependencies.sessionTabs?.initialize();
   await dependencies.workspace?.initialize();
   if (listenNativeLinks) {

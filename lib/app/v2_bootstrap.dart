@@ -11,6 +11,7 @@ import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
+import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/session_draft_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
@@ -114,6 +115,9 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           value: dependencies.liveDirectory,
         ),
         Provider<SessionDraftStore?>.value(value: dependencies.sessionDrafts),
+        ListenableProvider<ModelPreferenceStore?>.value(
+          value: dependencies.modelPreferences,
+        ),
         if (dependencies.permissionModes case final modes?)
           ChangeNotifierProvider<EditablePermissionModePolicy>.value(
             value: modes,

@@ -1595,5 +1595,41 @@
   "chatChooseModel": "मॉडल चुनें",
   "chatPermissionAutoApproveOff": "अनुमति स्वतः-अनुमोदन बंद है",
   "chatPermissionAutoApproveOn": "अनुमति स्वतः-अनुमोदन चालू है",
-  "modelChooseAgent": "एजेंट चुनें"
+  "modelChooseAgent": "एजेंट चुनें",
+  "liveSelectionAuto": "ऑटो",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "मॉडल या प्रदाता खोजें",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "पसंदीदा",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "हालिया",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "मुफ़्त",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "कोई मॉडल नहीं मिला",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "पसंदीदा में जोड़ें",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "पसंदीदा से हटाएँ",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

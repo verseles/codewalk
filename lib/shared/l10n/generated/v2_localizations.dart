@@ -3967,6 +3967,60 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Choose agent'**
   String get modelChooseAgent;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get liveSelectionAuto;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Search model or provider'**
+  String get liveModelSearch;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get liveModelFavorites;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get liveModelRecent;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get liveModelFree;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'No models found'**
+  String get liveModelNoMatch;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get liveModelFavoriteAdd;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get liveModelFavoriteRemove;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites and recent models cannot be saved on this device right now.'**
+  String get liveModelPreferencesUnsaved;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

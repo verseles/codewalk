@@ -2047,4 +2047,31 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get modelChooseAgent => '选择智能体';
+
+  @override
+  String get liveSelectionAuto => '自动';
+
+  @override
+  String get liveModelSearch => '搜索模型或提供商';
+
+  @override
+  String get liveModelFavorites => '收藏夹';
+
+  @override
+  String get liveModelRecent => '最近';
+
+  @override
+  String get liveModelFree => '免费';
+
+  @override
+  String get liveModelNoMatch => '未找到模型';
+
+  @override
+  String get liveModelFavoriteAdd => '添加到收藏夹';
+
+  @override
+  String get liveModelFavoriteRemove => '从收藏夹移除';
+
+  @override
+  String get liveModelPreferencesUnsaved => '目前无法在此设备上保存收藏和最近使用的模型。';
 }

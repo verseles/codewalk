@@ -2165,4 +2165,32 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'اختر الوكيل';
+
+  @override
+  String get liveSelectionAuto => 'تلقائي';
+
+  @override
+  String get liveModelSearch => 'البحث عن نموذج أو مزوّد';
+
+  @override
+  String get liveModelFavorites => 'المفضلة';
+
+  @override
+  String get liveModelRecent => 'الأخيرة';
+
+  @override
+  String get liveModelFree => 'مجاني';
+
+  @override
+  String get liveModelNoMatch => 'لم يتم العثور على نماذج';
+
+  @override
+  String get liveModelFavoriteAdd => 'إضافة إلى المفضلة';
+
+  @override
+  String get liveModelFavoriteRemove => 'إزالة من المفضلة';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.';
 }

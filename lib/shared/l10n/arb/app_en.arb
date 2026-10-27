@@ -2706,5 +2706,41 @@
   "modelChooseAgent": "Choose agent",
   "@modelChooseAgent": {
     "description": "CodeWalk UI string — modelChooseAgent"
+  },
+  "liveSelectionAuto": "Auto",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "Search model or provider",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "Favorites",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "Recent",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "Free",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "No models found",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "Add to favorites",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "Remove from favorites",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "Favorites and recent models cannot be saved on this device right now.",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
   }
 }

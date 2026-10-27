@@ -2088,4 +2088,31 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'エージェントを選択';
+
+  @override
+  String get liveSelectionAuto => '自動';
+
+  @override
+  String get liveModelSearch => 'モデルまたはプロバイダーを検索';
+
+  @override
+  String get liveModelFavorites => 'お気に入り';
+
+  @override
+  String get liveModelRecent => '最近';
+
+  @override
+  String get liveModelFree => '無料';
+
+  @override
+  String get liveModelNoMatch => 'モデルが見つかりません';
+
+  @override
+  String get liveModelFavoriteAdd => 'お気に入りに追加';
+
+  @override
+  String get liveModelFavoriteRemove => 'お気に入りから削除';
+
+  @override
+  String get liveModelPreferencesUnsaved => '現在、このデバイスにお気に入りと最近のモデルを保存できません。';
 }

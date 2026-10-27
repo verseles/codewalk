@@ -138,7 +138,9 @@ class SessionComposerControls extends StatelessWidget {
                     ? const Icon(Icons.info_outline, size: 16)
                     : null,
                 onPressed: picks && !live.isChild
-                    ? () => unawaited(showSessionSelection(context, live))
+                    ? () => unawaited(
+                        showSessionSelection(context, live, agents: false),
+                      )
                     : null,
               ),
             if (selects &&
@@ -146,7 +148,7 @@ class SessionComposerControls extends StatelessWidget {
               Builder(
                 builder: (anchor) => chip(
                   'live-variant-chip',
-                  variant ?? l10n.liveSelectionDefault,
+                  variant ?? l10n.liveSelectionAuto,
                   tooltip: l10n.shortcutNextVariant,
                   maxWidth: 180,
                   onPressed:
@@ -165,8 +167,9 @@ class SessionComposerControls extends StatelessWidget {
   );
 }
 
-/// The variant menu under the variant chip: the model's own variants, and
-/// the server's default.
+/// The variant menu under the variant chip: Auto, which leaves the variant to
+/// the server, and the model's own variants. Dismissing it keeps the variant;
+/// only an explicit Auto clears it (#176).
 Future<void> _pickVariant(
   BuildContext anchor,
   SessionLiveController live,
@@ -184,12 +187,10 @@ Future<void> _pickVariant(
     items: [
       for (final variant in [none, ...model.variants])
         CheckedPopupMenuItem<String>(
-          key: ValueKey(
-            'live-variant-${variant.isEmpty ? 'default' : variant}',
-          ),
+          key: ValueKey('live-variant-${variant.isEmpty ? 'auto' : variant}'),
           value: variant,
           checked: (current ?? none) == variant,
-          child: Text(variant.isEmpty ? l10n.liveSelectionDefault : variant),
+          child: Text(variant.isEmpty ? l10n.liveSelectionAuto : variant),
         ),
     ],
   );

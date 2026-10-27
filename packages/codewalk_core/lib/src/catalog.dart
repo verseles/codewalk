@@ -52,11 +52,13 @@ final class ModelEntry {
     this.contextLimit,
     this.outputLimit,
     Iterable<String> variants = const [],
+    Iterable<ModelCost>? cost,
     this.metadata,
   }) : id = requireText(id),
        providerId = requireText(providerId),
        inputModalities = immutableMap(inputModalities),
-       variants = immutableList(variants.map(requireText)) {
+       variants = immutableList(variants.map(requireText)),
+       cost = cost == null ? null : immutableList(cost) {
     if ((contextLimit != null && contextLimit! < 0) ||
         (outputLimit != null && outputLimit! < 0)) {
       throw ArgumentError('Model limits must not be negative');
@@ -71,7 +73,43 @@ final class ModelEntry {
 
   /// Variant ids in catalog order; the variant settings are never copied.
   final List<String> variants;
+
+  /// The catalog's prices, or null when it did not state them readably.
+  final List<ModelCost>? cost;
   final CanonicalValue? metadata;
+
+  /// Free only when the catalog states one untiered price and it is zero:
+  /// an unknown, empty or tiered price is not called free.
+  bool get free =>
+      cost != null &&
+      cost!.isNotEmpty &&
+      cost!.every((price) => price.contextTier == null && price.zero);
+}
+
+/// One price of a model in US dollars per million tokens. A tiered price
+/// applies from [contextTier] context tokens on.
+final class ModelCost {
+  ModelCost({
+    required this.input,
+    required this.output,
+    required this.cacheRead,
+    required this.cacheWrite,
+    this.contextTier,
+  }) {
+    if ([input, output, cacheRead, cacheWrite].any((v) => !v.isFinite) ||
+        [input, output, cacheRead, cacheWrite].any((v) => v < 0) ||
+        (contextTier != null && contextTier! < 0)) {
+      throw ArgumentError('Model prices must be finite and not negative');
+    }
+  }
+  final double input;
+  final double output;
+  final double cacheRead;
+  final double cacheWrite;
+  final int? contextTier;
+
+  bool get zero =>
+      input == 0 && output == 0 && cacheRead == 0 && cacheWrite == 0;
 }
 
 abstract interface class CatalogFacet {

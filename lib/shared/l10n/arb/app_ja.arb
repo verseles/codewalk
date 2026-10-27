@@ -1595,5 +1595,41 @@
   "chatChooseModel": "モデルを選択",
   "chatPermissionAutoApproveOff": "権限の自動承認がオフ",
   "chatPermissionAutoApproveOn": "権限の自動承認がオン",
-  "modelChooseAgent": "エージェントを選択"
+  "modelChooseAgent": "エージェントを選択",
+  "liveSelectionAuto": "自動",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "モデルまたはプロバイダーを検索",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "お気に入り",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "最近",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "無料",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "モデルが見つかりません",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "お気に入りに追加",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "お気に入りから削除",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "現在、このデバイスにお気に入りと最近のモデルを保存できません。",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

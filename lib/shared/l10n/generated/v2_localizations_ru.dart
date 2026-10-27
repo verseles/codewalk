@@ -2207,4 +2207,32 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'Выбрать агента';
+
+  @override
+  String get liveSelectionAuto => 'Авто';
+
+  @override
+  String get liveModelSearch => 'Поиск модели или провайдера';
+
+  @override
+  String get liveModelFavorites => 'Избранное';
+
+  @override
+  String get liveModelRecent => 'Недавние';
+
+  @override
+  String get liveModelFree => 'Бесплатно';
+
+  @override
+  String get liveModelNoMatch => 'Модели не найдены';
+
+  @override
+  String get liveModelFavoriteAdd => 'Добавить в избранное';
+
+  @override
+  String get liveModelFavoriteRemove => 'Удалить из избранного';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.';
 }

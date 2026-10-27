@@ -1595,5 +1595,41 @@
   "chatChooseModel": "选择模型",
   "chatPermissionAutoApproveOff": "权限自动批准已关闭",
   "chatPermissionAutoApproveOn": "权限自动批准已开启",
-  "modelChooseAgent": "选择智能体"
+  "modelChooseAgent": "选择智能体",
+  "liveSelectionAuto": "自动",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "搜索模型或提供商",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "收藏夹",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "最近",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "免费",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "未找到模型",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "添加到收藏夹",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "从收藏夹移除",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "目前无法在此设备上保存收藏和最近使用的模型。",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

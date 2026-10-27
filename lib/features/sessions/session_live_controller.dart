@@ -3,6 +3,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart'
     show TextEditingController, TextEditingValue, TextSelection;
+import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/permission_mode.dart';
@@ -29,6 +30,7 @@ class SessionLiveController extends ChangeNotifier {
     this.health,
     this.permissionModes,
     this.drafts,
+    this.modelPreferences,
     DateTime Function()? now,
     CommandId Function()? commandIds,
   }) : _summary = summary,
@@ -37,6 +39,7 @@ class SessionLiveController extends ChangeNotifier {
     hosts.addListener(_hostsChanged);
     health?.addListener(_notify);
     permissionModes?.addListener(_policyChanged);
+    modelPreferences?.addListener(_notify);
     draft.addListener(_draftChanged);
     drafts?.attach(session, _draftForgotten);
     unawaited(_restoreDraft());
@@ -376,15 +379,64 @@ class SessionLiveController extends ChangeNotifier {
       _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
 
   /// The command id is taken with the gesture, for this lease's session.
-  Future<void> selectModel(ModelEntry model, {String? variant}) => _act(
-    canChangeSelection,
-    (handle) => handle.selectModel(
-      modelId: model.id,
-      providerId: model.providerId,
-      variant: variant,
-      id: _commandIds(),
-    ),
-  );
+  /// A switch the server took makes the model this project's most recent.
+  Future<void> selectModel(ModelEntry model, {String? variant}) async {
+    await _act(
+      canChangeSelection,
+      (handle) => handle.selectModel(
+        modelId: model.id,
+        providerId: model.providerId,
+        variant: variant,
+        id: _commandIds(),
+      ),
+    );
+    final state = selectionState;
+    final project = _project;
+    if (_disposed ||
+        project == null ||
+        state.phase != SessionSelectionPhase.idle ||
+        state.notice != SessionSelectionNotice.none ||
+        state.selection?.modelId != model.id ||
+        state.selection?.modelProviderId != model.providerId) {
+      return;
+    }
+    await modelPreferences?.recordRecent(profile.id, project, modelKey(model));
+  }
+
+  /// Where the favorite and recent models are kept on this device, when the
+  /// app graph provides it. The controller never owns or disposes it.
+  final ModelPreferenceStore? modelPreferences;
+
+  /// How [modelPreferences] names a model.
+  static String modelKey(ModelEntry model) => '${model.providerId}/${model.id}';
+
+  /// Recents are kept per project of this server.
+  String? get _project =>
+      state?.info?.project?.canonicalDirectory ??
+      _summary.info.project?.canonicalDirectory;
+
+  /// This server's favorite models, in the order they were starred.
+  List<String> get favoriteModels =>
+      modelPreferences?.favorites(profile.id) ?? const [];
+
+  /// This project's recent models, newest first.
+  List<String> get recentModels => switch (_project) {
+    final project? =>
+      modelPreferences?.recents(profile.id, project) ?? const [],
+    null => const [],
+  };
+
+  /// A star can be saved now.
+  bool get canFavoriteModels => modelPreferences?.writable ?? false;
+
+  /// Stars or unstars [model] for this server; false when it was not saved.
+  Future<bool> setFavoriteModel(ModelEntry model, {required bool favorite}) =>
+      modelPreferences?.setFavorite(
+        profile.id,
+        modelKey(model),
+        favorite: favorite,
+      ) ??
+      Future.value(false);
 
   Future<void> selectAgent(CatalogEntry agent) => _act(
     canChangeSelection,
@@ -716,6 +768,7 @@ class SessionLiveController extends ChangeNotifier {
     hosts.removeListener(_hostsChanged);
     health?.removeListener(_notify);
     permissionModes?.removeListener(_policyChanged);
+    modelPreferences?.removeListener(_notify);
     _detach();
     scroll.dispose();
     _composer?.dispose();

@@ -676,5 +676,33 @@ void main() {
         throwsArgumentError,
       );
     });
+    test('a price is free only when stated, untiered and zero', () {
+      ModelCost price(double value, {int? tier}) => ModelCost(
+        input: value,
+        output: value,
+        cacheRead: value,
+        cacheWrite: value,
+        contextTier: tier,
+      );
+      ModelEntry model(List<ModelCost>? cost) => ModelEntry(
+        id: 'model',
+        providerId: 'provider',
+        label: 'Model',
+        cost: cost,
+      );
+      expect(model(null).free, isFalse);
+      expect(model([]).free, isFalse);
+      expect(model([price(0)]).free, isTrue);
+      expect(model([price(0), price(0, tier: 1000)]).free, isFalse);
+      expect(model([price(1)]).free, isFalse);
+      expect(
+        () => model([price(0)]).cost!.add(price(0)),
+        throwsUnsupportedError,
+      );
+      for (final value in [-1.0, double.nan, double.infinity]) {
+        expect(() => price(value), throwsArgumentError);
+      }
+      expect(() => price(0, tier: -1), throwsArgumentError);
+    });
   });
 }

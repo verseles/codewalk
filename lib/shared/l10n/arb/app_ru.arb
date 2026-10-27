@@ -1595,5 +1595,41 @@
   "chatChooseModel": "Выбрать модель",
   "chatPermissionAutoApproveOff": "Автоматическое одобрение разрешений выключено",
   "chatPermissionAutoApproveOn": "Автоматическое одобрение разрешений включено",
-  "modelChooseAgent": "Выбрать агента"
+  "modelChooseAgent": "Выбрать агента",
+  "liveSelectionAuto": "Авто",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "Поиск модели или провайдера",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "Избранное",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "Недавние",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "Бесплатно",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "Модели не найдены",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "Добавить в избранное",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "Удалить из избранного",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

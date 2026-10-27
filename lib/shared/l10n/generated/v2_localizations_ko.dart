@@ -2088,4 +2088,32 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get modelChooseAgent => '에이전트 선택';
+
+  @override
+  String get liveSelectionAuto => '자동';
+
+  @override
+  String get liveModelSearch => '모델 또는 제공자 검색';
+
+  @override
+  String get liveModelFavorites => '즐겨찾기';
+
+  @override
+  String get liveModelRecent => '최근';
+
+  @override
+  String get liveModelFree => '무료';
+
+  @override
+  String get liveModelNoMatch => '모델을 찾을 수 없음';
+
+  @override
+  String get liveModelFavoriteAdd => '즐겨찾기에 추가';
+
+  @override
+  String get liveModelFavoriteRemove => '즐겨찾기에서 제거';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      '지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.';
 }

@@ -1606,5 +1606,41 @@
   "chatChooseModel": "모델 선택",
   "chatPermissionAutoApproveOff": "권한 자동 승인 꺼짐",
   "chatPermissionAutoApproveOn": "권한 자동 승인 켜짐",
-  "modelChooseAgent": "에이전트 선택"
+  "modelChooseAgent": "에이전트 선택",
+  "liveSelectionAuto": "자동",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "모델 또는 제공자 검색",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "즐겨찾기",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "최근",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "무료",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "모델을 찾을 수 없음",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "즐겨찾기에 추가",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "즐겨찾기에서 제거",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

@@ -352,6 +352,65 @@ void main() {
       expect(models.single.variants, ['high']);
     });
 
+    test('a model keeps its stated prices; only an untiered zero is free', () {
+      Future<ModelEntry> read(Object? cost, {bool omit = false}) async {
+        final row = {..._modelFixture()};
+        if (omit) {
+          row.remove('cost');
+        } else {
+          row['cost'] = cost;
+        }
+        final transport = _Transport((_) => _response(_catalog([row])));
+        return (await _reader(transport).readModels('/work/app')).single;
+      }
+
+      Map<String, Object?> price(num value, {Object? tier}) => {
+        'tier': ?tier,
+        'input': value,
+        'output': value,
+        'cache': {'read': value, 'write': value},
+      };
+      return Future.wait([
+        // The observed 2.0.22 free model states one zero price.
+        read(null, omit: true).then((m) => expect(m.cost, isNull)),
+        read(_modelFixture()['cost']).then((m) {
+          expect(m.cost!.single.zero, isTrue);
+          expect(m.free, isTrue);
+        }),
+        read([price(0.5)]).then((m) {
+          expect(m.cost!.single.input, 0.5);
+          expect(m.free, isFalse);
+        }),
+        read([
+          price(0),
+          price(0, tier: {'type': 'context', 'size': 200000}),
+        ]).then((m) {
+          expect(m.cost!.last.contextTier, 200000);
+          expect(m.free, isFalse);
+        }),
+        read(<Object?>[]).then((m) {
+          expect(m.cost, isEmpty);
+          expect(m.free, isFalse);
+        }),
+        // An unreadable price is unknown; the model is still offered.
+        for (final unreadable in <Object?>[
+          'free',
+          [price(-1)],
+          [
+            {...price(0), 'cache': null},
+          ],
+          [
+            price(0, tier: {'type': 'request', 'size': 1}),
+          ],
+          [for (var i = 0; i < 17; i++) price(0)],
+        ])
+          read(unreadable).then((m) {
+            expect(m.cost, isNull);
+            expect(m.free, isFalse);
+          }),
+      ]);
+    });
+
     test('a disabled model is not offered', () async {
       final transport = _Transport(
         (_) => _response(

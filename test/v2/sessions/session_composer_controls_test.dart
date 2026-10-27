@@ -8,6 +8,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../storage/storage_fakes.dart';
@@ -216,20 +217,33 @@ void main() {
     expect(find.byKey(const ValueKey('live-agent-menu')), findsNothing);
   });
 
-  testWidgets('the variant menu picks a variant or the default', (
+  testWidgets('the variant menu picks a variant or an explicit Auto', (
     tester,
   ) async {
     final (_, handle) = await open(tester);
     await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
     await tester.pumpAndSettle();
+    expect(
+      find.text(lookupV2Localizations(const Locale('en')).liveSelectionAuto),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const ValueKey('live-variant-low')));
     await tester.pumpAndSettle();
     expect(handle.selectionCalls, contains('model:prov/alpha:low'));
+    // Dismissing the menu keeps the variant (#176).
+    final calls = handle.selectionCalls.length;
     await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('live-variant-default')));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
-    expect(handle.selectionCalls, contains('model:prov/alpha'));
+    expect(find.byKey(const ValueKey('live-variant-auto')), findsNothing);
+    expect(handle.selectionCalls, hasLength(calls));
+    // Only an explicit Auto clears it.
+    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-variant-auto')));
+    await tester.pumpAndSettle();
+    expect(handle.selectionCalls.last, 'model:prov/alpha');
   });
 
   testWidgets('a sub-conversation keeps its parent\'s choice', (tester) async {

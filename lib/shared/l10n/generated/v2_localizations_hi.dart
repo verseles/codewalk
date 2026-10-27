@@ -2187,4 +2187,32 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'एजेंट चुनें';
+
+  @override
+  String get liveSelectionAuto => 'ऑटो';
+
+  @override
+  String get liveModelSearch => 'मॉडल या प्रदाता खोजें';
+
+  @override
+  String get liveModelFavorites => 'पसंदीदा';
+
+  @override
+  String get liveModelRecent => 'हालिया';
+
+  @override
+  String get liveModelFree => 'मुफ़्त';
+
+  @override
+  String get liveModelNoMatch => 'कोई मॉडल नहीं मिला';
+
+  @override
+  String get liveModelFavoriteAdd => 'पसंदीदा में जोड़ें';
+
+  @override
+  String get liveModelFavoriteRemove => 'पसंदीदा से हटाएँ';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।';
 }

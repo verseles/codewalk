@@ -2180,4 +2180,32 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'ایجنٹ کا انتخاب کریں۔';
+
+  @override
+  String get liveSelectionAuto => 'آٹو';
+
+  @override
+  String get liveModelSearch => 'ماڈل یا فراہم کنندہ تلاش کریں';
+
+  @override
+  String get liveModelFavorites => 'پسندیدہ';
+
+  @override
+  String get liveModelRecent => 'حالیہ';
+
+  @override
+  String get liveModelFree => 'مفت';
+
+  @override
+  String get liveModelNoMatch => 'کوئی ماڈل نہیں ملا';
+
+  @override
+  String get liveModelFavoriteAdd => 'پسندیدہ میں شامل کریں';
+
+  @override
+  String get liveModelFavoriteRemove => 'پسندیدہ سے ہٹائیں';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'ابھی اس آلے پر پسندیدہ اور حالیہ ماڈلز محفوظ نہیں کیے جا سکتے۔';
 }

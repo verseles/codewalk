@@ -2211,4 +2211,32 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'Escolher agente';
+
+  @override
+  String get liveSelectionAuto => 'Automático';
+
+  @override
+  String get liveModelSearch => 'Buscar modelo ou provedor';
+
+  @override
+  String get liveModelFavorites => 'Favoritos';
+
+  @override
+  String get liveModelRecent => 'Recentes';
+
+  @override
+  String get liveModelFree => 'Grátis';
+
+  @override
+  String get liveModelNoMatch => 'Nenhum modelo encontrado';
+
+  @override
+  String get liveModelFavoriteAdd => 'Adicionar aos favoritos';
+
+  @override
+  String get liveModelFavoriteRemove => 'Remover dos favoritos';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'Não é possível salvar favoritos e modelos recentes neste dispositivo agora.';
 }

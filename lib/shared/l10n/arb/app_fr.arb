@@ -1595,5 +1595,41 @@
   "chatChooseModel": "Choisir le modèle",
   "chatPermissionAutoApproveOff": "Approbation automatique des permissions désactivée",
   "chatPermissionAutoApproveOn": "Approbation automatique des permissions activée",
-  "modelChooseAgent": "Choisir l''agent"
+  "modelChooseAgent": "Choisir l''agent",
+  "liveSelectionAuto": "Auto",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "Rechercher un modèle ou un fournisseur",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "Favoris",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "Récents",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "Gratuit",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "Aucun modèle trouvé",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "Ajouter aux favoris",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "Retirer des favoris",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "Les favoris et les modèles récents ne peuvent pas être enregistrés sur cet appareil pour le moment.",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

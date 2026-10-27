@@ -2178,4 +2178,32 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'এজেন্ট নির্বাচন করুন';
+
+  @override
+  String get liveSelectionAuto => 'অটো';
+
+  @override
+  String get liveModelSearch => 'মডেল বা প্রদানকারী খুঁজুন';
+
+  @override
+  String get liveModelFavorites => 'প্রিয়';
+
+  @override
+  String get liveModelRecent => 'সাম্প্রতিক';
+
+  @override
+  String get liveModelFree => 'বিনামূল্যে';
+
+  @override
+  String get liveModelNoMatch => 'কোনো মডেল পাওয়া যায়নি';
+
+  @override
+  String get liveModelFavoriteAdd => 'প্রিয়তে যোগ করুন';
+
+  @override
+  String get liveModelFavoriteRemove => 'প্রিয় থেকে সরান';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'এই মুহূর্তে এই ডিভাইসে প্রিয় ও সাম্প্রতিক মডেল সংরক্ষণ করা যাচ্ছে না।';
 }

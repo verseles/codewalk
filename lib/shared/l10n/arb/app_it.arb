@@ -1595,5 +1595,41 @@
   "chatChooseModel": "Scegli modello",
   "chatPermissionAutoApproveOff": "Approvazione automatica dei permessi disattiva",
   "chatPermissionAutoApproveOn": "Approvazione automatica dei permessi attiva",
-  "modelChooseAgent": "Scegli agente"
+  "modelChooseAgent": "Scegli agente",
+  "liveSelectionAuto": "Auto",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "Cerca modello o provider",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "Preferiti",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "Recenti",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "Gratis",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "Nessun modello trovato",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "Aggiungi ai preferiti",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "Rimuovi dai preferiti",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "Al momento non è possibile salvare preferiti e modelli recenti su questo dispositivo.",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

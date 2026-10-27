@@ -370,6 +370,7 @@ final class OpenCodeSessionReader {
           for (final variant in variants)
             _catalogText(_catalogObject(variant)['id'], empty: true),
         ].where((id) => id.isNotEmpty),
+        cost: _catalogCost(model['cost']),
       );
     },
     (model) => '${model.providerId}/${model.id}',
@@ -1246,6 +1247,44 @@ String _catalogText(Object? value, {bool empty = false}) {
     throw const FormatException('Malformed catalog text.');
   }
   return value;
+}
+
+/// A model's prices, or null when they cannot be read: a price is shown
+/// only as stated, and an unreadable one never fails the catalog.
+List<ModelCost>? _catalogCost(Object? value) {
+  if (value is! List || value.length > 16) return null;
+  double? money(Object? value) =>
+      value is num && value.isFinite && value >= 0 ? value.toDouble() : null;
+  final prices = <ModelCost>[];
+  for (final row in value) {
+    if (row is! Map<String, Object?>) return null;
+    final cache = row['cache'];
+    final tier = row['tier'];
+    if (cache is! Map<String, Object?>) return null;
+    final size = switch (tier) {
+      null => null,
+      {'type': 'context', 'size': final int size} when size >= 0 => size,
+      _ => -1,
+    };
+    if (size == -1) return null;
+    final input = money(row['input']);
+    final output = money(row['output']);
+    final read = money(cache['read']);
+    final write = money(cache['write']);
+    if (input == null || output == null || read == null || write == null) {
+      return null;
+    }
+    prices.add(
+      ModelCost(
+        input: input,
+        output: output,
+        cacheRead: read,
+        cacheWrite: write,
+        contextTier: size,
+      ),
+    );
+  }
+  return prices;
 }
 
 int _catalogCount(Object? value) {

@@ -1595,5 +1595,41 @@
   "chatChooseModel": "মডেল নির্বাচন করুন",
   "chatPermissionAutoApproveOff": "অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে",
   "chatPermissionAutoApproveOn": "অনুমতি স্বয়ংক্রিয়-অনুমোদন চালু আছে",
-  "modelChooseAgent": "এজেন্ট নির্বাচন করুন"
+  "modelChooseAgent": "এজেন্ট নির্বাচন করুন",
+  "liveSelectionAuto": "অটো",
+  "@liveSelectionAuto": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelSearch": "মডেল বা প্রদানকারী খুঁজুন",
+  "@liveModelSearch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavorites": "প্রিয়",
+  "@liveModelFavorites": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelRecent": "সাম্প্রতিক",
+  "@liveModelRecent": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFree": "বিনামূল্যে",
+  "@liveModelFree": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelNoMatch": "কোনো মডেল পাওয়া যায়নি",
+  "@liveModelNoMatch": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteAdd": "প্রিয়তে যোগ করুন",
+  "@liveModelFavoriteAdd": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemove": "প্রিয় থেকে সরান",
+  "@liveModelFavoriteRemove": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelPreferencesUnsaved": "এই মুহূর্তে এই ডিভাইসে প্রিয় ও সাম্প্রতিক মডেল সংরক্ষণ করা যাচ্ছে না।",
+  "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  }
 }

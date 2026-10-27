@@ -2230,4 +2230,32 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get modelChooseAgent => 'Agenten auswählen';
+
+  @override
+  String get liveSelectionAuto => 'Auto';
+
+  @override
+  String get liveModelSearch => 'Modell oder Anbieter suchen';
+
+  @override
+  String get liveModelFavorites => 'Favoriten';
+
+  @override
+  String get liveModelRecent => 'Zuletzt verwendet';
+
+  @override
+  String get liveModelFree => 'Kostenlos';
+
+  @override
+  String get liveModelNoMatch => 'Keine Modelle gefunden';
+
+  @override
+  String get liveModelFavoriteAdd => 'Zu Favoriten hinzufügen';
+
+  @override
+  String get liveModelFavoriteRemove => 'Aus Favoriten entfernen';
+
+  @override
+  String get liveModelPreferencesUnsaved =>
+      'Favoriten und zuletzt verwendete Modelle können auf diesem Gerät gerade nicht gespeichert werden.';
 }
