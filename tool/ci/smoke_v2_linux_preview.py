@@ -178,6 +178,15 @@ def smoke(archive_path, evidence):
             run(["xdotool", "mousemove", "--sync", "--window", window, str(position[0]), str(position[1])])
             run(["xdotool", "click", "--clearmodifiers", "1"])
 
+        def reveal(window, label):
+            # The settings rail grows with its destinations; one below the
+            # window is scrolled into view before it is clicked.
+            if locate(capture(window, snapshot), label) is None:
+                run(["xdotool", "mousemove", "--sync", "--window", window, "160", "500"])
+                for _ in range(5):
+                    run(["xdotool", "click", "--clearmodifiers", "5"])
+                time.sleep(0.3)
+
         def luminance(window):
             run(["import", "-silent", "-window", window, str(snapshot)])
             return float(run(["convert", str(snapshot), "-gravity", "southeast", "-crop", "32x32+24+24",
@@ -241,13 +250,10 @@ def smoke(archive_path, evidence):
             expect(window, ["Search shortcuts"], "07-shortcuts")
             click(window, "App Logs")
             expect(window, ["Enable app logging", "Logging is disabled"], "08-logs")
+            reveal(window, "Version and updates")
             click(window, "Version and updates")
             expect(window, ["Check for updates"], "08b-updates")
-            if locate(capture(window, snapshot), "Release history") is None:
-                run(["xdotool", "mousemove", "--sync", "--window", window, "160", "500"])
-                for _ in range(5):
-                    run(["xdotool", "click", "--clearmodifiers", "5"])
-                time.sleep(0.3)
+            reveal(window, "Release history")
             click(window, "Release history")
             expect(window, ["Refresh"], "09-history")
             report["public_changelog_read"] = "page activated; fixed public read-only source; loaded notes not claimed"
