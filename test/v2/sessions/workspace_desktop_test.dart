@@ -46,6 +46,43 @@ Future<void> _focusControl(WidgetTester tester, Finder control) async {
 }
 
 void main() {
+  for (final reverse in [false, true]) {
+    testWidgets('Tab leaves the app bar in reverse=$reverse', (tester) async {
+      final app = await launchWorkspace(tester);
+      await openLiveSession(tester, app);
+      await _focusControl(
+        tester,
+        find.byKey(const ValueKey('workspace-pane-toggle')),
+      );
+      bool inAppBar() =>
+          FocusManager.instance.primaryFocus?.context
+              ?.findAncestorWidgetOfExactType<AppBar>() !=
+          null;
+      expect(inAppBar(), isTrue);
+      Future<void> tab() async {
+        if (reverse) {
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+        }
+        await _press(tester, LogicalKeyboardKey.tab);
+        if (reverse) {
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+        }
+      }
+
+      for (var i = 0; i < 12 && inAppBar(); i++) {
+        await tab();
+      }
+      expect(inAppBar(), isFalse);
+      // Traversal also returns from the body, rather than trapping focus
+      // in a second isolated loop after leaving the bar.
+      for (var i = 0; i < 40 && !inAppBar(); i++) {
+        await tab();
+      }
+      expect(inAppBar(), isTrue);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   for (final control in ['workspace-pane-toggle', 'sessions-search']) {
     testWidgets('mod+W from $control closes the shown tab', (tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.linux;

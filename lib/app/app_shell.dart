@@ -285,7 +285,8 @@ class _WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => bar.preferredSize;
 
   @override
-  Widget build(BuildContext context) => _WorkspaceEscape(child: bar);
+  Widget build(BuildContext context) =>
+      _WorkspaceEscape(keepFocus: false, child: bar);
 }
 
 /// A single Escape in the workspace: it closes the list drawer when it is
@@ -293,9 +294,10 @@ class _WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
 /// composer keep their own Escape; a field inside that lets the focus go
 /// leaves it in this scope, so Escape still arrives.
 class _WorkspaceEscape extends StatelessWidget {
-  const _WorkspaceEscape({required this.child});
+  const _WorkspaceEscape({required this.child, this.keepFocus = true});
 
   final Widget child;
+  final bool keepFocus;
 
   @override
   Widget build(BuildContext context) => KeyboardActionScope(
@@ -309,7 +311,9 @@ class _WorkspaceEscape extends StatelessWidget {
         }
       },
     },
-    child: FocusScope(child: child),
+    // Fields in the body keep a fallback when they unfocus. The app bar's
+    // controls keep their own focus and must let Tab leave the bar.
+    child: keepFocus ? FocusScope(child: child) : child,
   );
 }
 
