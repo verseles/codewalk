@@ -18,6 +18,8 @@ import '../hosts/hosts_controller.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
 import 'session_live_scroll.dart';
+import 'session_selection_cycle.dart';
+import 'session_selection_memory.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
 /// observing, reconnecting and closing never mutate the server.
@@ -381,46 +383,175 @@ class SessionLiveController extends ChangeNotifier {
       _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
 
   /// The command id is taken with the gesture, for this lease's session.
-  /// A switch the server took makes the model this project's most recent,
+  /// A switch the server took is remembered (recents, each agent's model),
   /// also when an unconfirmed switch is settled later.
-  Future<void> selectModel(ModelEntry model, {String? variant}) async {
+  Future<void> selectModel(ModelEntry model, {String? variant}) => _switch(
+    (project, before) => PendingSelectionSwitch.model(
+      model,
+      variant,
+      project: project,
+      before: before,
+    ),
+    (handle) => handle.selectModel(
+      modelId: model.id,
+      providerId: model.providerId,
+      variant: variant,
+      id: _commandIds(),
+    ),
+  );
+
+  /// Switching to an agent restores the model it last used in this project,
+  /// with its variant when the model still lists it (#181), unless the
+  /// switch also changed the model, as the server or another client did.
+  Future<void> selectAgent(CatalogEntry agent) async {
+    final before = selectionState.selection;
+    final attempt = await _switch(
+      (project, before) =>
+          PendingSelectionSwitch.agent(agent, project: project, before: before),
+      (handle) => handle.selectAgent(agentId: agent.id, id: _commandIds()),
+    );
+    final project = _project;
+    final memory = project == null
+        ? null
+        : modelPreferences?.agentModel(profile.id, project, agent.id);
+    final now = selectionState.selection;
+    // A newer pick, another lease or a model changed meanwhile cancels it.
+    if (attempt == null ||
+        attempt != _switchAttempt ||
+        memory == null ||
+        now?.agentId != agent.id ||
+        selectionState.holdsSend ||
+        selectionState.notice != SessionSelectionNotice.none ||
+        now?.modelId != before?.modelId ||
+        now?.modelProviderId != before?.modelProviderId ||
+        now?.modelVariant != before?.modelVariant) {
+      return;
+    }
+    final (key, remembered) = memory;
+    final model = selectionState.models
+        .where((m) => modelPreferenceKey(m.providerId, m.id) == key)
+        .firstOrNull;
+    if (model == null) return;
+    final variant = remembered != null && model.variants.contains(remembered)
+        ? remembered
+        : null;
+    if (selectionModelKey(now) == key && now?.modelVariant == variant) return;
+    await selectModel(model, variant: variant);
+  }
+
+  /// Sends one switch; returns its attempt when it was sent and settled
+  /// accepted at once, null otherwise.
+  Future<int?> _switch(
+    PendingSelectionSwitch Function(String project, Selection? before) pending,
+    Future<void> Function(SessionLiveHandle) action,
+  ) async {
     final allowed = canChangeSelection;
     // Only a pick that sends a switch replaces the one waiting to settle,
     // and an earlier pick that ends after a newer one replaces nothing.
-    final attempt = allowed ? ++_recentAttempt : _recentAttempt;
+    final attempt = allowed ? ++_switchAttempt : _switchAttempt;
     final project = _project;
-    final sent = await _act(
-      allowed,
-      (handle) => handle.selectModel(
-        modelId: model.id,
-        providerId: model.providerId,
-        variant: variant,
-        id: _commandIds(),
-      ),
-    );
-    if (sent && attempt == _recentAttempt) {
-      _pendingRecent = project == null ? null : (model, project);
-    }
-    await _settleRecent();
+    final before = selectionState.selection;
+    final sent = await _act(allowed, action);
+    if (!sent || attempt != _switchAttempt) return null;
+    _pending = project == null ? null : pending(project, before);
+    return await _settleSwitch() ? attempt : null;
   }
 
   /// The last switch this lease sent, until it settles.
-  (ModelEntry, String)? _pendingRecent;
-  int _recentAttempt = 0;
+  PendingSelectionSwitch? _pending;
+  int _switchAttempt = 0;
 
-  Future<void> _settleRecent() async {
-    final pending = _pendingRecent;
-    if (pending == null || _disposed) return;
+  /// True when the waiting switch settled as the server taking it.
+  Future<bool> _settleSwitch() async {
+    final pending = _pending;
+    if (pending == null || _disposed) return false;
     final state = selectionState;
-    if (state.holdsSend) return;
-    _pendingRecent = null;
-    final (model, project) = pending;
+    if (state.holdsSend) return false;
+    _pending = null;
+    final selection = state.selection;
     if (state.notice != SessionSelectionNotice.none ||
-        state.selection?.modelId != model.id ||
-        state.selection?.modelProviderId != model.providerId) {
-      return;
+        selection == null ||
+        !pending.settledIn(selection)) {
+      return false;
     }
-    await modelPreferences?.recordRecent(profile.id, project, modelKey(model));
+    final store = modelPreferences;
+    if (store != null) await pending.remember(store, profile.id, selection);
+    return true;
+  }
+
+  /// Alt+Tab-style cycling of the model, agent and variant (#178, #179).
+  late final _cycle = SelectionCycle(now: _now);
+
+  /// The next model: favorites, then recents, then the current provider's
+  /// models, like the retained reference's `mod+m`.
+  Future<void> cycleModel() async {
+    if (!canChangeSelection) return;
+    final state = selectionState;
+    final current = selectionModelKey(state.selection);
+    final provider = state.selection?.modelProviderId;
+    final offered = {
+      for (final m in state.models) modelPreferenceKey(m.providerId, m.id): m,
+    };
+    final own = state.models.where((m) => m.providerId == provider).toList()
+      ..sort((a, b) => a.id.toLowerCase().compareTo(b.id.toLowerCase()));
+    final next = _cycle.next(
+      SelectionCycleDomain.model,
+      current: current,
+      candidates: [
+        ...favoriteModels,
+        ...recentModels,
+        for (final m in own) modelPreferenceKey(m.providerId, m.id),
+      ].where(offered.containsKey).toList(),
+      history: recentModels,
+    );
+    final model = offered[next];
+    if (model == null || next == current) return;
+    await selectModel(model);
+  }
+
+  /// The next variant of the current model, Auto among them (`mod+t`).
+  Future<void> cycleVariant() async {
+    if (!canChangeSelection) return;
+    final state = selectionState;
+    final key = selectionModelKey(state.selection);
+    final model = state.models
+        .where((m) => modelPreferenceKey(m.providerId, m.id) == key)
+        .firstOrNull;
+    final project = _project;
+    if (model == null || key == null || model.variants.isEmpty) return;
+    const auto = ModelPreferenceStore.autoVariant;
+    final current = state.selection?.modelVariant ?? auto;
+    final next = _cycle.next(
+      SelectionCycleDomain.variant,
+      current: current,
+      candidates: [auto, ...model.variants],
+      history: project == null
+          ? const []
+          : modelPreferences?.variantRecents(profile.id, project, key) ??
+                const [],
+    );
+    if (next == null || next == current) return;
+    await selectModel(model, variant: next == auto ? null : next);
+  }
+
+  /// The next agent, or the previous one with [reverse].
+  Future<void> cycleAgent({bool reverse = false}) async {
+    if (!canChangeSelection) return;
+    final state = selectionState;
+    final project = _project;
+    final current = state.selection?.agentId;
+    final next = _cycle.next(
+      SelectionCycleDomain.agent,
+      current: current,
+      candidates: [for (final a in state.agents) a.id],
+      history: project == null
+          ? const []
+          : modelPreferences?.agentRecents(profile.id, project) ?? const [],
+      reverse: reverse,
+    );
+    final agent = state.agents.where((a) => a.id == next).firstOrNull;
+    if (agent == null || next == current) return;
+    await selectAgent(agent);
   }
 
   /// Where the favorite and recent models are kept on this device, when the
@@ -428,7 +559,8 @@ class SessionLiveController extends ChangeNotifier {
   final ModelPreferenceStore? modelPreferences;
 
   /// How [modelPreferences] names a model.
-  static String modelKey(ModelEntry model) => '${model.providerId}/${model.id}';
+  static String modelKey(ModelEntry model) =>
+      modelPreferenceKey(model.providerId, model.id);
 
   /// Recents are kept per project of this server.
   String? get _project =>
@@ -457,11 +589,6 @@ class SessionLiveController extends ChangeNotifier {
         favorite: favorite,
       ) ??
       Future.value(false);
-
-  Future<void> selectAgent(CatalogEntry agent) => _act(
-    canChangeSelection,
-    (handle) => handle.selectAgent(agentId: agent.id, id: _commandIds()),
-  );
 
   Future<void> refreshSelection() => _act(
     _liveCurrent && supportsSelection,
@@ -680,7 +807,7 @@ class SessionLiveController extends ChangeNotifier {
   void _detach() {
     _generation++;
     // Another lease starts without this one's switch: it settles nothing.
-    _pendingRecent = null;
+    _pending = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     _handle?.close();
@@ -760,7 +887,7 @@ class SessionLiveController extends ChangeNotifier {
         _pruneFormDrafts(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
-        unawaited(_settleRecent());
+        unawaited(_settleSwitch());
         _notify();
       });
     } on Object catch (error) {

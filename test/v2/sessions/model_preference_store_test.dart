@@ -172,6 +172,21 @@ void main() {
     final store = await load();
     await store.setFavorite('server-a', 'p/one', favorite: true);
     await store.recordRecent('server-a', '/work/app', 'p/two');
+    await store.recordAgent('server-a', '/work/app', 'plan', previous: 'build');
+    await store.recordVariant(
+      'server-a',
+      '/work/app',
+      'p/two',
+      'high',
+      previous: ModelPreferenceStore.autoVariant,
+    );
+    await store.rememberAgentModel(
+      'server-a',
+      '/work/app',
+      'plan',
+      'p/two',
+      null,
+    );
     final raw = backend.values[ModelPreferenceStore.key]! as String;
     expect(jsonDecode(raw), {
       'favorites': {
@@ -184,10 +199,146 @@ void main() {
           ['p/two'],
         ],
       ],
+      'history': [
+        [
+          'agent',
+          'server-a',
+          '/work/app',
+          '',
+          ['plan', 'build'],
+        ],
+        [
+          'variant',
+          'server-a',
+          '/work/app',
+          'p/two',
+          ['high', ''],
+        ],
+      ],
+      'agentModels': [
+        ['server-a', '/work/app', 'plan', 'p/two', null],
+      ],
     });
     final reloaded = await load();
     expect(reloaded.unreadable, isFalse);
     expect(reloaded.favorites('server-a'), ['p/one']);
     expect(reloaded.recents('server-a', '/work/app'), ['p/two']);
+    expect(reloaded.agentRecents('server-a', '/work/app'), ['plan', 'build']);
+    expect(reloaded.variantRecents('server-a', '/work/app', 'p/two'), [
+      'high',
+      ModelPreferenceStore.autoVariant,
+    ]);
+    expect(reloaded.agentModel('server-a', '/work/app', 'plan'), (
+      'p/two',
+      null,
+    ));
+  });
+
+  test('a record without the later lists still reads', () async {
+    backend.values[ModelPreferenceStore.key] = jsonEncode({
+      'favorites': {
+        'server-a': ['p/one'],
+      },
+      'recents': [
+        [
+          'server-a',
+          '/work/app',
+          ['p/two'],
+        ],
+      ],
+    });
+    final store = await load();
+    expect(store.unreadable, isFalse);
+    expect(store.recents('server-a', '/work/app'), ['p/two']);
+    expect(store.agentRecents('server-a', '/work/app'), isEmpty);
+    expect(store.agentModel('server-a', '/work/app', 'plan'), isNull);
+  });
+
+  test('the previous pick follows the new one, so cycling goes back', () async {
+    final store = await load();
+    await store.recordRecent('server-a', '/work', 'p/b', previous: 'p/a');
+    expect(store.recents('server-a', '/work'), ['p/b', 'p/a']);
+    await store.recordRecent('server-a', '/work', 'p/a', previous: 'p/b');
+    expect(store.recents('server-a', '/work'), ['p/a', 'p/b']);
+    await store.recordAgent('server-a', '/work', 'plan');
+    await store.recordAgent('server-a', '/work', 'build', previous: 'plan');
+    expect(store.agentRecents('server-a', '/work'), ['build', 'plan']);
+    // A variant's history is per model.
+    await store.recordVariant('server-a', '/work', 'p/a', 'low');
+    expect(store.variantRecents('server-a', '/work', 'p/a'), ['low']);
+    expect(store.variantRecents('server-a', '/work', 'p/b'), isEmpty);
+  });
+
+  test('an agent keeps one model per project, the latest', () async {
+    final store = await load();
+    await store.rememberAgentModel('server-a', '/work', 'plan', 'p/a', 'high');
+    await store.rememberAgentModel('server-a', '/work', 'plan', 'p/b', null);
+    expect(store.agentModel('server-a', '/work', 'plan'), ('p/b', null));
+    expect(store.agentModel('server-a', '/other', 'plan'), isNull);
+    expect(store.agentModel('server-b', '/work', 'plan'), isNull);
+    // The same memory again writes nothing.
+    final writes = backend.writes.length;
+    expect(
+      await store.rememberAgentModel('server-a', '/work', 'plan', 'p/b', null),
+      isFalse,
+    );
+    expect(backend.writes, hasLength(writes));
+    for (var i = 0; i <= ModelPreferenceStore.maxProjects; i++) {
+      await store.rememberAgentModel('server-a', '/w$i', 'plan', 'p/a', null);
+    }
+    expect(store.agentModel('server-a', '/work', 'plan'), isNull);
+  });
+
+  test('history rows that are not this store\'s make it unreadable', () async {
+    for (final extra in <Map<String, Object?>>[
+      {'unknown': <Object?>[]},
+      {
+        'history': [
+          [
+            'model',
+            'server-a',
+            '/w',
+            '',
+            ['p/a'],
+          ],
+        ],
+      },
+      {
+        'history': [
+          [
+            'agent',
+            'server-a',
+            '/w',
+            'scope',
+            ['plan'],
+          ],
+        ],
+      },
+      {
+        'history': [
+          [
+            'agent',
+            'server-a',
+            '/w',
+            '',
+            [''],
+          ],
+        ],
+      },
+      {
+        'agentModels': [
+          ['server-a', '/w', 'plan', '', null],
+        ],
+      },
+    ]) {
+      final raw = jsonEncode({
+        'favorites': <String, Object?>{},
+        'recents': <Object?>[],
+        ...extra,
+      });
+      backend = FakeMetadataBackend()..values[ModelPreferenceStore.key] = raw;
+      final store = await load();
+      expect(store.unreadable, isTrue, reason: raw);
+    }
   });
 }

@@ -6,31 +6,36 @@ import '../storage/metadata_store.dart';
 import '../storage/storage_support.dart';
 
 /// Favorite and recent models, kept on this device like the retained
-/// reference's (#177): favorites per server, shared by its projects; recents
-/// per server and project, newest first. The server never sees them.
+/// reference's (#177–#181): favorites per server, shared by its projects;
+/// recent models, agents and variants per server and project, newest first;
+/// and each agent's last model there. The server never sees them.
 ///
 /// Models are named `provider/model`. A record that could not be read is
 /// never overwritten, because dropping it would lose the user's favorites.
 final class ModelPreferenceStore extends ChangeNotifier {
   ModelPreferenceStore({required V2MetadataStore store}) : _store = store;
 
-  /// `{"favorites": {server: [model]}, "recents": [[server, project, [model]]]}`,
-  /// the recents' projects least recently used first.
+  /// `{"favorites": {server: [model]}, "recents": [[server, project, [model]]],
+  /// "history": [[kind, server, project, scope, [value]]],
+  /// "agentModels": [[server, project, agent, model, variant]]}`, each list
+  /// least recently used first. The last two are absent from older records.
   static const key = 'cw2.models.preferences';
 
-  /// The retained reference keeps eight recent models.
+  /// The retained reference keeps eight recent models, agents and variants.
   static const maxRecents = 8;
   static const maxFavorites = 64;
   static const maxServers = 64;
 
-  /// Projects with recents; the least recently used one is dropped first.
+  /// Rows of each kind; the least recently used one is dropped first.
   static const maxProjects = 64;
+
+  /// The recent variant that leaves the choice to the server.
+  static const autoVariant = '';
   static const _maxText = 8193;
 
   final V2MetadataStore _store;
   final _executor = KeySerialExecutor();
-  Map<String, List<String>> _favorites = const {};
-  List<_Recents> _recents = const [];
+  _Saved _saved = const _Saved();
   bool _loaded = false;
   bool _unreadable = false;
   bool _persistenceError = false;
@@ -59,26 +64,62 @@ final class ModelPreferenceStore extends ChangeNotifier {
       }
       final parsed = failed ? null : _parse(raw);
       _unreadable = parsed == null;
-      _favorites = parsed?.$1 ?? const {};
-      _recents = parsed?.$2 ?? const [];
+      _saved = parsed ?? const _Saved();
       _loaded = true;
       notifyListeners();
     });
   }
 
   /// The server's favorites, in the order they were starred.
-  List<String> favorites(String server) => _favorites[server] ?? const [];
-
-  /// The project's recent models on this server, newest first.
-  List<String> recents(String server, String project) =>
-      _recents
-          .where((r) => r.server == server && r.project == project)
-          .firstOrNull
-          ?.models ??
-      const [];
+  List<String> favorites(String server) => _saved.favorites[server] ?? const [];
 
   bool isFavorite(String server, String model) =>
       favorites(server).contains(model);
+
+  /// The project's recent models on this server, newest first.
+  List<String> recents(String server, String project) =>
+      _values(_Kind.model, server, project, '');
+
+  /// The project's recent agents on this server, newest first.
+  List<String> agentRecents(String server, String project) =>
+      _values(_Kind.agent, server, project, '');
+
+  /// The variants recently used with [model], newest first; [autoVariant]
+  /// stands for Auto.
+  List<String> variantRecents(String server, String project, String model) =>
+      _values(_Kind.variant, server, project, model);
+
+  /// The model and variant [agent] last used in the project.
+  (String model, String? variant)? agentModel(
+    String server,
+    String project,
+    String agent,
+  ) {
+    final row = _saved.agentModels
+        .where(
+          (r) => r.server == server && r.project == project && r.agent == agent,
+        )
+        .firstOrNull;
+    return row == null ? null : (row.model, row.variant);
+  }
+
+  List<String> _values(
+    _Kind kind,
+    String server,
+    String project,
+    String scope,
+  ) =>
+      _saved.history
+          .where(
+            (r) =>
+                r.kind == kind &&
+                r.server == server &&
+                r.project == project &&
+                r.scope == scope,
+          )
+          .firstOrNull
+          ?.values ??
+      const [];
 
   /// Stars or unstars [model] for every project of [server]. False when it
   /// was not saved, which leaves the favorites as they were.
@@ -89,66 +130,136 @@ final class ModelPreferenceStore extends ChangeNotifier {
   }) => _change(() {
     final current = favorites(server);
     if (current.contains(model) == favorite) return null;
+    final all = _saved.favorites;
     if (favorite &&
         (current.length >= maxFavorites ||
-            (current.isEmpty && _favorites.length >= maxServers))) {
+            (current.isEmpty && all.length >= maxServers))) {
       return null;
     }
     final next = favorite
         ? [...current, model]
         : current.where((m) => m != model).toList();
-    final saved = {..._favorites};
+    final saved = {...all};
     if (next.isEmpty) {
       saved.remove(server);
     } else {
       saved[server] = List.unmodifiable(next);
     }
-    return (saved, _recents);
+    return _saved.copyWith(favorites: Map.unmodifiable(saved));
   }, valid: _valid(server) && _valid(model));
 
-  /// Puts [model] first among the project's recents, which keep
-  /// [maxRecents]. False when it was not saved.
-  Future<bool> recordRecent(String server, String project, String model) =>
-      _change(() {
-        final current = recents(server, project);
-        if (current.firstOrNull == model) return null;
-        final entry = _Recents(
-          server,
-          project,
-          [
-            model,
-            ...current.where((m) => m != model),
-          ].take(maxRecents).toList(growable: false),
-        );
-        final saved = [
-          ..._recents.where((r) => r.server != server || r.project != project),
-          entry,
-        ];
-        while (saved.length > maxProjects) {
-          saved.removeAt(0);
-        }
-        return (_favorites, List<_Recents>.unmodifiable(saved));
-      }, valid: _valid(server) && _valid(project) && _valid(model));
+  /// Puts [model] first among the project's recents, then the [previous]
+  /// one, so the first cycling press goes back to it. False when nothing
+  /// was saved.
+  Future<bool> recordRecent(
+    String server,
+    String project,
+    String model, {
+    String? previous,
+  }) => _record(_Kind.model, server, project, '', model, previous);
 
-  Future<bool> _change(
-    (Map<String, List<String>>, List<_Recents>)? Function() next, {
-    required bool valid,
-  }) async {
+  /// Puts [agent] first among the project's recent agents, then [previous].
+  Future<bool> recordAgent(
+    String server,
+    String project,
+    String agent, {
+    String? previous,
+  }) => _record(_Kind.agent, server, project, '', agent, previous);
+
+  /// Puts [variant] first among the variants used with [model], then
+  /// [previous]; [autoVariant] stands for Auto.
+  Future<bool> recordVariant(
+    String server,
+    String project,
+    String model,
+    String variant, {
+    String? previous,
+  }) => _record(_Kind.variant, server, project, model, variant, previous);
+
+  /// Remembers the model and variant [agent] used in the project.
+  Future<bool> rememberAgentModel(
+    String server,
+    String project,
+    String agent,
+    String model,
+    String? variant,
+  ) => _change(
+    () {
+      final current = agentModel(server, project, agent);
+      if (current != null && current == (model, variant)) return null;
+      final rows = [
+        ..._saved.agentModels.where(
+          (r) => r.server != server || r.project != project || r.agent != agent,
+        ),
+        _AgentModel(server, project, agent, model, variant),
+      ];
+      while (rows.length > maxProjects) {
+        rows.removeAt(0);
+      }
+      return _saved.copyWith(agentModels: List.unmodifiable(rows));
+    },
+    valid:
+        _valid(server) &&
+        _valid(project) &&
+        _valid(agent) &&
+        _valid(model) &&
+        (variant == null || _valid(variant)),
+  );
+
+  Future<bool> _record(
+    _Kind kind,
+    String server,
+    String project,
+    String scope,
+    String value,
+    String? previous,
+  ) => _change(
+    () {
+      final current = _values(kind, server, project, scope);
+      final next = <String>[
+        value,
+        if (previous != null && previous != value) previous,
+        ...current.where((v) => v != value && v != previous),
+      ].take(maxRecents).toList(growable: false);
+      if (listEquals(next, current)) return null;
+      final rows = [
+        ..._saved.history.where(
+          (r) =>
+              r.kind != kind ||
+              r.server != server ||
+              r.project != project ||
+              r.scope != scope,
+        ),
+        _History(kind, server, project, scope, next),
+      ];
+      // Each kind keeps its own bound, dropping its least recent row.
+      while (rows.where((r) => r.kind == kind).length > maxProjects) {
+        rows.remove(rows.firstWhere((r) => r.kind == kind));
+      }
+      return _saved.copyWith(history: List.unmodifiable(rows));
+    },
+    valid:
+        _valid(server) &&
+        _valid(project) &&
+        (kind == _Kind.variant ? _valid(scope) : scope.isEmpty) &&
+        kind.allows(value) &&
+        (previous == null || kind.allows(previous)),
+  );
+
+  Future<bool> _change(_Saved? Function() next, {required bool valid}) async {
     if (!valid || !writable) return false;
     return _executor.run(key, () async {
       if (!writable) return false;
       final state = next();
       if (state == null) return false;
-      final (favorites, recents) = state;
       try {
-        await _store.write(key, _encode(favorites, recents));
+        await _store.write(key, state.encode());
       } on Object {
         _persistenceError = true;
         notifyListeners();
         return false;
       }
-      _favorites = Map.unmodifiable(favorites);
-      _recents = recents;
+      _saved = state;
       _persistenceError = false;
       notifyListeners();
       return true;
@@ -157,19 +268,9 @@ final class ModelPreferenceStore extends ChangeNotifier {
 
   static bool _valid(String text) => text.isNotEmpty && text.length <= _maxText;
 
-  static String _encode(
-    Map<String, List<String>> favorites,
-    List<_Recents> recents,
-  ) => jsonEncode({
-    'favorites': favorites,
-    'recents': [
-      for (final r in recents) [r.server, r.project, r.models],
-    ],
-  });
-
   /// Null when [raw] is not a record this store wrote.
-  static (Map<String, List<String>>, List<_Recents>)? _parse(Object? raw) {
-    if (raw == null) return (const {}, const []);
+  static _Saved? _parse(Object? raw) {
+    if (raw == null) return const _Saved();
     if (raw is! String || raw.length > V2MetadataStore.maxPreferenceChars) {
       return null;
     }
@@ -179,20 +280,23 @@ final class ModelPreferenceStore extends ChangeNotifier {
     } on FormatException {
       return null;
     }
+    const known = {'favorites', 'recents', 'history', 'agentModels'};
     if (decoded is! Map<String, Object?> ||
-        decoded.length != 2 ||
+        !decoded.keys.every(known.contains) ||
         decoded['favorites'] is! Map<String, Object?> ||
-        decoded['recents'] is! List<Object?>) {
+        decoded['recents'] is! List<Object?> ||
+        (decoded['history'] ?? const <Object?>[]) is! List<Object?> ||
+        (decoded['agentModels'] ?? const <Object?>[]) is! List<Object?>) {
       return null;
     }
-    List<String>? models(Object? value, int max) {
-      if (value is! List<Object?> || value.length > max) return null;
+    List<String>? values(Object? value, int max, bool Function(String) ok) {
+      if (value is! List<Object?> || value.isEmpty || value.length > max) {
+        return null;
+      }
       final list = <String>[];
-      for (final model in value) {
-        if (model is! String || !_valid(model) || list.contains(model)) {
-          return null;
-        }
-        list.add(model);
+      for (final item in value) {
+        if (item is! String || !ok(item) || list.contains(item)) return null;
+        list.add(item);
       }
       return List.unmodifiable(list);
     }
@@ -201,37 +305,166 @@ final class ModelPreferenceStore extends ChangeNotifier {
     final favoriteRows = decoded['favorites']! as Map<String, Object?>;
     if (favoriteRows.length > maxServers) return null;
     for (final MapEntry(key: server, value: value) in favoriteRows.entries) {
-      final list = models(value, maxFavorites);
-      if (!_valid(server) || list == null || list.isEmpty) return null;
+      final list = values(value, maxFavorites, _valid);
+      if (!_valid(server) || list == null) return null;
       favorites[server] = list;
     }
-    final recents = <_Recents>[];
+    final history = <_History>[];
+    bool add(
+      _Kind kind,
+      Object? server,
+      Object? project,
+      Object? scope,
+      Object? value,
+    ) {
+      if (server is! String ||
+          project is! String ||
+          scope is! String ||
+          !_valid(server) ||
+          !_valid(project) ||
+          (kind == _Kind.variant ? !_valid(scope) : scope.isNotEmpty)) {
+        return false;
+      }
+      final list = values(value, maxRecents, kind.allows);
+      if (list == null ||
+          history.any(
+            (r) =>
+                r.kind == kind &&
+                r.server == server &&
+                r.project == project &&
+                r.scope == scope,
+          )) {
+        return false;
+      }
+      history.add(_History(kind, server, project, scope, list));
+      return true;
+    }
+
     final recentRows = decoded['recents']! as List<Object?>;
     if (recentRows.length > maxProjects) return null;
     for (final row in recentRows) {
-      if (row case [
-        final String server,
-        final String project,
-        final Object? value,
-      ] when _valid(server) && _valid(project)) {
-        final list = models(value, maxRecents);
-        if (list == null ||
-            list.isEmpty ||
-            recents.any((r) => r.server == server && r.project == project)) {
-          return null;
-        }
-        recents.add(_Recents(server, project, list));
+      if (row is! List<Object?> || row.length != 3) return null;
+      if (!add(_Kind.model, row[0], row[1], '', row[2])) return null;
+    }
+    final historyRows = (decoded['history'] ?? const <Object?>[]) as List;
+    for (final row in historyRows) {
+      if (row is! List<Object?> || row.length != 5) return null;
+      final kind = switch (row[0]) {
+        'agent' => _Kind.agent,
+        'variant' => _Kind.variant,
+        _ => null,
+      };
+      if (kind == null || !add(kind, row[1], row[2], row[3], row[4])) {
+        return null;
+      }
+    }
+    for (final kind in _Kind.values) {
+      if (history.where((r) => r.kind == kind).length > maxProjects) {
+        return null;
+      }
+    }
+    final agentModels = <_AgentModel>[];
+    final agentRows = (decoded['agentModels'] ?? const <Object?>[]) as List;
+    if (agentRows.length > maxProjects) return null;
+    for (final row in agentRows) {
+      if (row
+          case [
+            final String server,
+            final String project,
+            final String agent,
+            final String model,
+            final String? variant,
+          ]
+          when [server, project, agent, model, ?variant].every(_valid) &&
+              !agentModels.any(
+                (r) =>
+                    r.server == server &&
+                    r.project == project &&
+                    r.agent == agent,
+              )) {
+        agentModels.add(_AgentModel(server, project, agent, model, variant));
       } else {
         return null;
       }
     }
-    return (favorites, List.unmodifiable(recents));
+    return _Saved(
+      favorites: Map.unmodifiable(favorites),
+      history: List.unmodifiable(history),
+      agentModels: List.unmodifiable(agentModels),
+    );
   }
 }
 
-final class _Recents {
-  const _Recents(this.server, this.project, this.models);
+enum _Kind {
+  model,
+  agent,
+  variant;
+
+  /// A variant's history holds Auto as [ModelPreferenceStore.autoVariant].
+  bool allows(String value) => this == _Kind.variant && value.isEmpty
+      ? true
+      : ModelPreferenceStore._valid(value);
+}
+
+final class _Saved {
+  const _Saved({
+    this.favorites = const {},
+    this.history = const [],
+    this.agentModels = const [],
+  });
+  final Map<String, List<String>> favorites;
+  final List<_History> history;
+  final List<_AgentModel> agentModels;
+
+  _Saved copyWith({
+    Map<String, List<String>>? favorites,
+    List<_History>? history,
+    List<_AgentModel>? agentModels,
+  }) => _Saved(
+    favorites: favorites ?? this.favorites,
+    history: history ?? this.history,
+    agentModels: agentModels ?? this.agentModels,
+  );
+
+  String encode() => jsonEncode({
+    'favorites': favorites,
+    'recents': [
+      for (final r in history.where((r) => r.kind == _Kind.model))
+        [r.server, r.project, r.values],
+    ],
+    'history': [
+      for (final r in history.where((r) => r.kind != _Kind.model))
+        [r.kind.name, r.server, r.project, r.scope, r.values],
+    ],
+    'agentModels': [
+      for (final r in agentModels)
+        [r.server, r.project, r.agent, r.model, r.variant],
+    ],
+  });
+}
+
+final class _History {
+  const _History(this.kind, this.server, this.project, this.scope, this.values);
+  final _Kind kind;
   final String server;
   final String project;
-  final List<String> models;
+
+  /// A variant's model; empty for models and agents.
+  final String scope;
+  final List<String> values;
+}
+
+final class _AgentModel {
+  const _AgentModel(
+    this.server,
+    this.project,
+    this.agent,
+    this.model,
+    this.variant,
+  );
+  final String server;
+  final String project;
+  final String agent;
+  final String model;
+  final String? variant;
 }

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/workspace_actions.dart';
 import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -14,6 +15,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/shortcuts/shortcut_action.dart';
 import '../hosts/server_switcher.dart';
 import 'session_composer.dart';
 import 'session_error_card.dart';
@@ -395,6 +397,29 @@ class _SessionLivePageState extends State<SessionLivePage>
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
+    listenable: widget.controller,
+    // The cycling shortcuts reach this session while it can switch.
+    builder: (context, page) {
+      final c = widget.controller;
+      return KeyboardActionScope(
+        handlers: c.supportsSelection && !c.isChild
+            ? {
+                ShortcutAction.cycleRecentModels: () =>
+                    unawaited(c.cycleModel()),
+                ShortcutAction.cycleVariant: () => unawaited(c.cycleVariant()),
+                ShortcutAction.cycleAgentForward: () =>
+                    unawaited(c.cycleAgent()),
+                ShortcutAction.cycleAgentBackward: () =>
+                    unawaited(c.cycleAgent(reverse: true)),
+              }
+            : const {},
+        child: page!,
+      );
+    },
+    child: _page(context),
+  );
+
+  Widget _page(BuildContext context) => ListenableBuilder(
     listenable: widget.controller,
     builder: (context, child) {
       final c = widget.controller;

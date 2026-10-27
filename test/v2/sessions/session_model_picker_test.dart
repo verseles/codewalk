@@ -255,6 +255,8 @@ void main() {
     expect(switches(handle), ['model:prov/beta']);
     expect(preferences.recents(_server, _project), [
       'prov/beta',
+      // The model switched away from follows it.
+      'prov/alpha',
       'other/gamma',
     ]);
     // A refused switch is not recorded.
@@ -312,7 +314,7 @@ void main() {
       )
       ..emit(handle.current);
     await tester.pumpAndSettle();
-    expect(preferences.recents(_server, _project), ['prov/beta']);
+    expect(preferences.recents(_server, _project), ['prov/beta', 'prov/alpha']);
     // One settled as not applied records nothing.
     handle.selectionAction = (change) async => SessionSelectionState(
       selection: _selection(_beta),
@@ -328,7 +330,7 @@ void main() {
       )
       ..emit(handle.current);
     await tester.pumpAndSettle();
-    expect(preferences.recents(_server, _project), ['prov/beta']);
+    expect(preferences.recents(_server, _project), ['prov/beta', 'prov/alpha']);
   });
 
   testWidgets('a pick that is not sent leaves an earlier one waiting', (
@@ -367,7 +369,7 @@ void main() {
         ),
       );
     await tester.pumpAndSettle();
-    expect(preferences.recents(_server, _project), ['prov/beta']);
+    expect(preferences.recents(_server, _project), ['prov/beta', 'prov/alpha']);
   });
 
   testWidgets('an earlier pick ending after a newer one replaces nothing', (
@@ -405,7 +407,10 @@ void main() {
       )
       ..emit(handle.current);
     await tester.pumpAndSettle();
-    expect(preferences.recents(_server, _project), ['other/gamma']);
+    expect(preferences.recents(_server, _project), [
+      'other/gamma',
+      'prov/alpha',
+    ]);
   });
 
   testWidgets('a new lease settles nothing the old one sent', (tester) async {
