@@ -1504,5 +1504,9 @@
   "sessionTabIconPresetTools": "도구",
   "sessionTabIconSaveFailed": "탭 아이콘을 저장할 수 없습니다.",
   "sessionTabIconUseProjectIcon": "프로젝트 아이콘 사용",
-  "sessionTabRestoreFailed": "탭을 복원할 수 없습니다."
+  "sessionTabRestoreFailed": "탭을 복원할 수 없습니다.",
+  "chatEffortLockedSubConversation": "하위 대화에서 노력 수준이 잠김",
+  "chatModelLockedSubConversation": "하위 대화에서 모델 잠김",
+  "chatNoSubConversationFound": "이 작업에 대한 하위 대화를 찾을 수 없습니다.",
+  "chatReturnToParentConversation": "상위 대화로 돌아가기"
 }

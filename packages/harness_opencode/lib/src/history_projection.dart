@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import 'error_projection.dart';
 import 'shell_projection.dart';
+import 'subagent_child.dart';
 
 /// Atomic, flat HTTP history projection. These are selected-content limits,
 /// not OS memory limits: 128 blocks/message, 2000 items/page, depth 16,
@@ -440,8 +441,13 @@ List<TimelineItem> projectOpenCodeHistory(
                 }
                 output = manifest(selected);
               }
+              ({bool present, SessionRef? child})? named;
               if (state['metadata'] is Map<String, Object?>) {
                 final metadata = state['metadata'] as Map<String, Object?>;
+                // Only the child this read names, with this read's source.
+                if (name == openCodeSubagentTool) {
+                  named = openCodeSubagentChild(metadata, ref);
+                }
                 if (metadata.containsKey('truncated')) {
                   if (metadata['truncated'] is! bool) malformed();
                   extra['truncated'] = metadata['truncated'];
@@ -478,15 +484,33 @@ List<TimelineItem> projectOpenCodeHistory(
                 );
               }
               if (redacted) extra['inputRedacted'] = true;
+              final itemMeta = meta(
+                'tool',
+                callId,
+                status: status,
+                extra: extra,
+              );
+              final observed = named != null && named.present
+                  ? openCodeChildEvidence(
+                      named: named.child,
+                      prior: null,
+                      origin: itemMeta.source,
+                      generation: itemMeta.generation,
+                    )
+                  : null;
               add(
                 ToolCall(
-                  meta: meta('tool', callId, status: status, extra: extra),
-                  kind: OpenValue.known(
-                    name == 'read' ? ToolKind.read : ToolKind.other,
-                  ),
+                  meta: itemMeta,
+                  kind: OpenValue.known(switch (name) {
+                    'read' => ToolKind.read,
+                    openCodeSubagentTool => ToolKind.subagent,
+                    _ => ToolKind.other,
+                  }),
                   rawName: name,
                   input: canonicalInput,
                   output: output,
+                  child: observed?.child,
+                  childEvidence: observed?.evidence,
                   error: error,
                 ),
               );

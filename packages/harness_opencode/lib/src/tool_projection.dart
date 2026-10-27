@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import 'shell_projection.dart';
 import 'version_policy.dart';
+import 'subagent_child.dart';
 
 enum OpenCodeToolProjectionFailure {
   malformed,
@@ -138,10 +139,9 @@ SessionEvent? projectOpenCodeToolEvent(
     _text(data['text'], cap: _argumentLimit);
     return null;
   }
-  if (type == 'session.tool.progress') {
-    _object(data['metadata']);
-    return null;
-  }
+  final progress = type == 'session.tool.progress';
+  // Progress replaces live metadata; only a subagent's child is kept.
+  final progressMetadata = progress ? _object(data['metadata']) : null;
 
   final budget = _SelectedBudget();
   var inputRedacted = false;
@@ -165,13 +165,11 @@ SessionEvent? projectOpenCodeToolEvent(
   }
   if (called) input = selectedInput(data['input']);
   if (success || (failed && data.containsKey('content'))) {
-    (output, outputOmitted, outputRedacted) = _content(
-      data['content'],
-      budget,
-    );
+    (output, outputOmitted, outputRedacted) = _content(data['content'], budget);
   }
+  Map<String, Object?>? terminalMetadata;
   if (terminal && data.containsKey('metadata')) {
-    final metadata = _object(data['metadata']);
+    final metadata = terminalMetadata = _object(data['metadata']);
     if (metadata.containsKey('truncated')) {
       truncated = _boolean(metadata['truncated']);
     }
@@ -251,25 +249,91 @@ SessionEvent? projectOpenCodeToolEvent(
   if (resident != null && resident is! ToolCall) {
     _fail(OpenCodeToolProjectionFailure.itemKindMismatch);
   }
-  if (resident is ToolCall) {
+  bool compatible(ToolCall resident) {
     final extra = resident.source.extra?.value;
-    if (resident.generation != generation ||
-        resident.source.harness != current.ref.harnessRef ||
-        OpenCodeCompatibility.parse(resident.source.version)?.toString() !=
-            '2.0.22' ||
-        !const {
+    return resident.generation == generation &&
+        resident.source.harness == current.ref.harnessRef &&
+        OpenCodeCompatibility.parse(resident.source.version)?.toString() ==
+            '2.0.22' &&
+        const {
           'session.tool.input.started',
           'session.tool.called',
           'session.tool.success',
           'session.tool.failed',
-        }.contains(resident.source.nativeType) ||
-        resident.source.nativeEventId?.startsWith('evt_') != true ||
-        resident.source.durability.known != Durability.durable ||
-        resident.source.aggregateId != sessionId ||
-        resident.source.aggregateSeq == null ||
-        extra is! Map<String, Object?> ||
-        extra['nativeMessageId'] != messageId ||
-        extra['nativeToolCallId'] != callId) {
+        }.contains(resident.source.nativeType) &&
+        resident.source.nativeEventId?.startsWith('evt_') == true &&
+        resident.source.durability.known == Durability.durable &&
+        resident.source.aggregateId == sessionId &&
+        resident.source.aggregateSeq != null &&
+        extra is Map<String, Object?> &&
+        extra['nativeMessageId'] == messageId &&
+        extra['nativeToolCallId'] == callId;
+  }
+
+  if (progressMetadata != null) {
+    // Only the live call of this generation learns its child; an unknown,
+    // stale or settled call is left to its durable events.
+    if (resident is! ToolCall ||
+        !compatible(resident) ||
+        _settled(resident) ||
+        resident.kind.known != ToolKind.subagent) {
+      return null;
+    }
+    final (:present, child: named) = openCodeSubagentChild(
+      progressMetadata,
+      current.ref,
+    );
+    if (!present) return null;
+    final origin = SourceProvenance(
+      harness: current.ref.harnessRef,
+      version: sourceVersion,
+      nativeType: type,
+      nativeEventId: nativeId,
+      durability: const OpenValue.known(Durability.ephemeral),
+      extra: CanonicalValue({
+        'nativeCreated': created,
+        'nativeMessageId': messageId,
+        'nativeToolCallId': callId,
+      }),
+    );
+    final (:child, :evidence) = openCodeChildEvidence(
+      named: named,
+      prior: resident,
+      origin: origin,
+      generation: generation,
+    );
+    // Nothing new: the same child already observed, or a refusal already
+    // recorded.
+    if (child == resident.child &&
+        evidence.kind == resident.childEvidence?.kind) {
+      return null;
+    }
+    // The row keeps its own revalidated durable source and fields; only the
+    // child carries the progress observation.
+    return ItemUpserted(
+      meta: EventMeta(
+        owner: SessionOwner(current.ref),
+        position: position,
+        receivedAt: receivedAt,
+        source: origin,
+      ),
+      item: ToolCall(
+        meta: resident.meta,
+        kind: resident.kind,
+        rawName: resident.rawName,
+        input: resident.input == null
+            ? null
+            : selectedInput(resident.input!.value),
+        output: resident.output,
+        outputRef: resident.outputRef,
+        child: child,
+        childEvidence: evidence,
+        error: resident.error,
+      ),
+    );
+  }
+  if (resident is ToolCall) {
+    if (!compatible(resident)) {
       return ResyncRequired(meta: meta(), reason: 'toolResidentIncompatible');
     }
     final residentName = _text(resident.rawName, cap: _idLimit);
@@ -292,6 +356,27 @@ SessionEvent? projectOpenCodeToolEvent(
     return ResyncRequired(meta: meta(), reason: 'toolStartMissing');
   }
   final eventMeta = meta();
+  final prior = resident is ToolCall ? resident : null;
+  // A terminal that names the child is its own observation; one that does
+  // not keeps what this generation already observed.
+  var child = prior?.child;
+  var evidence = prior?.childEvidence;
+  if (terminal &&
+      _kind(name) == ToolKind.subagent &&
+      terminalMetadata != null) {
+    final (:present, child: named) = openCodeSubagentChild(
+      terminalMetadata,
+      current.ref,
+    );
+    if (present) {
+      (child: child, evidence: evidence) = openCodeChildEvidence(
+        named: named,
+        prior: prior,
+        origin: eventMeta.source,
+        generation: generation,
+      );
+    }
+  }
   return ItemUpserted(
     meta: eventMeta,
     item: ToolCall(
@@ -305,22 +390,25 @@ SessionEvent? projectOpenCodeToolEvent(
       rawName: name,
       input: input,
       output: output,
+      child: child,
+      childEvidence: evidence,
       error: error,
     ),
   );
 }
 
-ToolKind _kind(String name) => name == 'read' ? ToolKind.read : ToolKind.other;
+ToolKind _kind(String name) => switch (name) {
+  'read' => ToolKind.read,
+  openCodeSubagentTool => ToolKind.subagent,
+  _ => ToolKind.other,
+};
 bool _settled(ToolCall item) => const {
   ItemStatus.completed,
   ItemStatus.failed,
   ItemStatus.interrupted,
 }.contains(item.status.known);
 
-(CanonicalValue, bool, bool) _content(
-  Object? value,
-  _SelectedBudget budget,
-) {
+(CanonicalValue, bool, bool) _content(Object? value, _SelectedBudget budget) {
   if (value is! List<Object?> || value.isEmpty) {
     _fail(OpenCodeToolProjectionFailure.malformed);
   }

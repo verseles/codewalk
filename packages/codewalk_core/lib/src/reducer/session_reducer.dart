@@ -170,6 +170,7 @@ SessionState beginHydration(
   draft.connection = const ConnectionState(
     kind: OpenValue.known(ConnectionKind.hydrating),
   );
+  draft.timeline = [for (final item in draft.timeline) _forgetEphemeral(item)];
   return draft.freeze();
 }
 
@@ -180,7 +181,9 @@ SessionState disconnect(SessionState state) {
   draft.connection = const ConnectionState(
     kind: OpenValue.known(ConnectionKind.reconnecting),
   );
-  draft.timeline = [for (final item in draft.timeline) _markGap(item)];
+  draft.timeline = [
+    for (final item in draft.timeline) _forgetEphemeral(_markGap(item)),
+  ];
   return draft.freeze();
 }
 
@@ -206,6 +209,8 @@ Reduction reduce(SessionState state, SessionEvent event) {
     case ItemUpserted(:final item):
       if (item.source.harness != state.ref.harnessRef) {
         draft.refetch(SessionCollection.timeline, 'itemSourceMismatch');
+      } else if (item is ToolCall && !item.childEvidenceValid) {
+        draft.refetch(SessionCollection.timeline, 'toolChildEvidenceMismatch');
       } else {
         draft.upsert(item, position);
       }
@@ -778,6 +783,7 @@ final class _Draft {
           output: item.output,
           outputRef: item.outputRef,
           child: item.child,
+          childEvidence: item.childEvidence,
           error: item.error,
         ),
       _ => null,
@@ -1074,6 +1080,23 @@ bool _completed(TimelineItem item) =>
     item.status.known == ItemStatus.interrupted ||
     (item is AssistantText && item.complete) ||
     (item is Reasoning && item.complete);
+
+/// A child seen only by a live observation expires with the stream that
+/// carried it, settled or not; a durable or history-derived one stays.
+TimelineItem _forgetEphemeral(TimelineItem item) => switch (item) {
+  ToolCall(:final childEvidence?)
+      when childEvidence.origin.durability.known == Durability.ephemeral =>
+    ToolCall(
+      meta: item.meta,
+      kind: item.kind,
+      rawName: item.rawName,
+      input: item.input,
+      output: item.output,
+      outputRef: item.outputRef,
+      error: item.error,
+    ),
+  _ => item,
+};
 
 TimelineItem _markGap(TimelineItem item) => switch (item) {
   AssistantText() when !_completed(item) => AssistantText(

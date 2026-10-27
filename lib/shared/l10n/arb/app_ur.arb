@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "ٹولز",
   "sessionTabIconSaveFailed": "ٹیب آئیکن محفوظ نہیں ہو سکا۔",
   "sessionTabIconUseProjectIcon": "پروجیکٹ آئیکن استعمال کریں",
-  "sessionTabRestoreFailed": "ٹیب بحال نہیں ہو سکا۔"
+  "sessionTabRestoreFailed": "ٹیب بحال نہیں ہو سکا۔",
+  "chatEffortLockedSubConversation": "ذیلی گفتگو میں کوشش مقفل ہے",
+  "chatModelLockedSubConversation": "ذیلی گفتگو میں ماڈل مقفل ہے",
+  "chatNoSubConversationFound": "اس کام کے لیے کوئی ذیلی گفتگو نہیں ملی۔",
+  "chatReturnToParentConversation": "والد گفتگو پر واپس جائیں۔"
 }

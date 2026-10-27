@@ -113,3 +113,9 @@ PORT_KEYS |= {
     "sessionTabIconPresetSecurity",
     "sessionTabIconPresetTools",
 }
+
+# Sub-conversation navigation from a subagent card (#453 S6).
+PORT_KEYS |= {
+    "chatReturnToParentConversation", "chatNoSubConversationFound",
+    "chatModelLockedSubConversation", "chatEffortLockedSubConversation",
+}

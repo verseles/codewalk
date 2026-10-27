@@ -194,11 +194,26 @@ final class OpenCodeSessionReader {
     // A project scopes the list to the sessions of exactly its directory,
     // the directory the endpoint records for each session.
     final directory = query.project?.canonicalDirectory;
-    if (query.project != null && query.project!.host != harness.host) {
+    // A parent scopes the list to its direct children across its whole
+    // family, whatever their directory.
+    final parent = query.parent;
+    if ((query.project != null && query.project!.host != harness.host) ||
+        (parent != null &&
+            (parent.harnessRef != harness || query.project != null))) {
       throw const OpenCodeSessionReadException(
         OpenCodeSessionReadFailure.invalidScope,
       );
     }
+    if (parent != null) {
+      try {
+        openCodeSessionId(parent.nativeId);
+      } on FormatException {
+        throw const OpenCodeSessionReadException(
+          OpenCodeSessionReadFailure.invalidRequest,
+        );
+      }
+    }
+    final scope = parent == null ? directory : 'parent:${parent.nativeId}';
     if (directory != null &&
         (directory.isEmpty || utf8.encode(directory).length > 4096)) {
       throw const OpenCodeSessionReadException(
@@ -207,7 +222,7 @@ final class OpenCodeSessionReader {
     }
     final cursor = query.cursor == null
         ? null
-        : _decodeCursor(query.cursor!, directory);
+        : _decodeCursor(query.cursor!, scope);
     // The native cursor carries its original filters, so a continuation
     // sends the cursor and the page size only, never the order or directory.
     final path = Uri(
@@ -219,6 +234,7 @@ final class OpenCodeSessionReader {
         else ...{
           'order': 'desc',
           'directory': ?directory,
+          'parentID': ?parent?.nativeId,
         },
       },
     ).toString();
@@ -244,6 +260,13 @@ final class OpenCodeSessionReader {
           )) {
         throw const FormatException('Session of another directory.');
       }
+      if (parent != null &&
+          items.any(
+            (row) =>
+                row.info.lineage.parent != parent || row.info.ref == parent,
+          )) {
+        throw const FormatException('Child row names another parent.');
+      }
       final cursors = value['cursor'] as Map<String, Object?>;
       _nativeCursor(cursors['previous']);
       final next = _nativeCursor(cursors['next']);
@@ -252,7 +275,7 @@ final class OpenCodeSessionReader {
       }
       return Page(
         items: items,
-        nextCursor: next == null ? null : _encodeCursor(next, directory),
+        nextCursor: next == null ? null : _encodeCursor(next, scope),
       );
     }, cancellation);
   }

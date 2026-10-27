@@ -1758,4 +1758,16 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'タブを復元できませんでした。';
+
+  @override
+  String get chatEffortLockedSubConversation => 'サブ会話で努力設定がロックされています';
+
+  @override
+  String get chatModelLockedSubConversation => 'サブ会話でモデルがロックされています';
+
+  @override
+  String get chatNoSubConversationFound => 'このタスクのサブ会話は見つかりませんでした。';
+
+  @override
+  String get chatReturnToParentConversation => '親の会話に戻る';
 }

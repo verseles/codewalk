@@ -128,6 +128,7 @@ final class SessionViewMarker {
 final class SessionQuery {
   SessionQuery({
     this.project,
+    this.parent,
     this.cursor,
     this.limit = 50,
     this.activeOnly = false,
@@ -135,6 +136,9 @@ final class SessionQuery {
     if (limit <= 0) throw ArgumentError('Session page limit must be positive');
   }
   final ProjectRef? project;
+
+  /// Only the direct children of this session, across its whole family.
+  final SessionRef? parent;
   final String? cursor;
   final int limit;
   final bool activeOnly;

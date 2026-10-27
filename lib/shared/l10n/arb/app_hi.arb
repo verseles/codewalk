@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "टूल्स",
   "sessionTabIconSaveFailed": "टैब आइकन सहेजा नहीं जा सका।",
   "sessionTabIconUseProjectIcon": "प्रोजेक्ट आइकन का उपयोग करें",
-  "sessionTabRestoreFailed": "टैब पुनर्स्थापित नहीं किया जा सका।"
+  "sessionTabRestoreFailed": "टैब पुनर्स्थापित नहीं किया जा सका।",
+  "chatEffortLockedSubConversation": "उप-वार्तालाप में प्रयास लॉक है",
+  "chatModelLockedSubConversation": "उप-वार्तालाप में मॉडल लॉक है",
+  "chatNoSubConversationFound": "इस कार्य के लिए कोई उप-वार्तालाप नहीं मिला।",
+  "chatReturnToParentConversation": "पैरेंट बातचीत पर लौटें"
 }

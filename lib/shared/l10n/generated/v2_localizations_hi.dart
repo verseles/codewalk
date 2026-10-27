@@ -1842,4 +1842,18 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'टैब पुनर्स्थापित नहीं किया जा सका।';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'उप-वार्तालाप में प्रयास लॉक है';
+
+  @override
+  String get chatModelLockedSubConversation => 'उप-वार्तालाप में मॉडल लॉक है';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'इस कार्य के लिए कोई उप-वार्तालाप नहीं मिला।';
+
+  @override
+  String get chatReturnToParentConversation => 'पैरेंट बातचीत पर लौटें';
 }

@@ -189,6 +189,25 @@ final class Reasoning extends TimelineItem {
   final bool prefixMissing;
 }
 
+/// Whether a tool call's child session was observed or refused.
+enum ToolChildEvidenceKind { observed, rejected }
+
+/// The observation behind a [ToolCall.child], kept apart from the row's own
+/// source: an ephemeral observation never claims the row's durability.
+final class ToolChildEvidence {
+  ToolChildEvidence({
+    required this.kind,
+    required this.origin,
+    required String generation,
+  }) : generation = requireText(generation, 'generation');
+
+  final ToolChildEvidenceKind kind;
+  final SourceProvenance origin;
+
+  /// The item generation the observation belongs to.
+  final String generation;
+}
+
 final class ToolCall extends TimelineItem {
   const ToolCall({
     required super.meta,
@@ -198,6 +217,7 @@ final class ToolCall extends TimelineItem {
     this.output,
     this.outputRef,
     this.child,
+    this.childEvidence,
     this.error,
   });
 
@@ -208,8 +228,30 @@ final class ToolCall extends TimelineItem {
   final CanonicalValue? input;
   final CanonicalValue? output;
   final OutputRef? outputRef;
+
+  /// The session this call runs. Without [childEvidence] it is unproven and
+  /// must still be verified before it is opened.
   final SessionRef? child;
+
+  /// Where [child] came from, or that an explicit child was refused.
+  final ToolChildEvidence? childEvidence;
   final ErrorInfo? error;
+
+  /// Whether [childEvidence] fits this call: an observation names a child of
+  /// this call's harness and generation, and a refusal names none.
+  bool get childEvidenceValid {
+    final evidence = childEvidence;
+    if (evidence == null) return true;
+    if (evidence.generation != generation ||
+        evidence.origin.harness != source.harness) {
+      return false;
+    }
+    return switch (evidence.kind) {
+      ToolChildEvidenceKind.observed =>
+        child != null && child!.harnessRef == source.harness,
+      ToolChildEvidenceKind.rejected => child == null,
+    };
+  }
 }
 
 final class ShellRun extends TimelineItem {

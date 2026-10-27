@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "Herramientas",
   "sessionTabIconSaveFailed": "No se pudo guardar el icono de la pestaña.",
   "sessionTabIconUseProjectIcon": "Usar icono del proyecto",
-  "sessionTabRestoreFailed": "No se pudo restaurar la pestaña."
+  "sessionTabRestoreFailed": "No se pudo restaurar la pestaña.",
+  "chatEffortLockedSubConversation": "Esfuerzo bloqueado en subconversación",
+  "chatModelLockedSubConversation": "Modelo bloqueado en subconversación",
+  "chatNoSubConversationFound": "No se encontró subconversación.",
+  "chatReturnToParentConversation": "Volver a la conversación superior"
 }

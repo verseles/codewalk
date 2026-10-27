@@ -3434,6 +3434,30 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Tab could not be restored.'**
   String get sessionTabRestoreFailed;
+
+  /// CodeWalk UI string — chatEffortLockedSubConversation
+  ///
+  /// In en, this message translates to:
+  /// **'Effort locked in sub-conversation'**
+  String get chatEffortLockedSubConversation;
+
+  /// CodeWalk UI string — chatModelLockedSubConversation
+  ///
+  /// In en, this message translates to:
+  /// **'Model locked in sub-conversation'**
+  String get chatModelLockedSubConversation;
+
+  /// CodeWalk UI string — chatNoSubConversationFound
+  ///
+  /// In en, this message translates to:
+  /// **'No sub-conversation found for this task.'**
+  String get chatNoSubConversationFound;
+
+  /// CodeWalk UI string — chatReturnToParentConversation
+  ///
+  /// In en, this message translates to:
+  /// **'Return to parent conversation'**
+  String get chatReturnToParentConversation;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

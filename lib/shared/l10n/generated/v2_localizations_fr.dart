@@ -1873,4 +1873,19 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'L\'onglet n\'a pas pu être restauré.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Effort verrouillé dans la sous-conversation';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Modèle verrouillé dans la sous-conversation';
+
+  @override
+  String get chatNoSubConversationFound => 'Aucune sous-conversation trouvée.';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Retourner à la conversation parente';
 }

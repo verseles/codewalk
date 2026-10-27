@@ -1870,4 +1870,20 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'Impossibile ripristinare la scheda.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Impegno bloccato nella sottoconversazione';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Modello bloccato nella sottoconversazione';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'Nessuna sottoconversazione trovata.';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Torna alla conversazione precedente';
 }

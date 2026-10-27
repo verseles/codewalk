@@ -25,6 +25,7 @@ import 'session_permission_mode_chip.dart';
 import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'sessions_controller.dart';
+import 'subconversation_navigation.dart';
 
 /// Minimum height the prompt composer keeps beside a resident permission card.
 const double _composerFloor = 56;
@@ -60,6 +61,21 @@ class _SessionLivePageState extends State<SessionLivePage>
   /// The list told which session this page shows, so the endpoint's unread
   /// mark of that session is cleared while the user sees it.
   SessionsController? _catalog;
+
+  /// The latest sub-conversation tap; an older one opens nothing.
+  int _childTap = 0;
+
+  void _openChild(ToolCall tool) {
+    final tap = ++_childTap;
+    unawaited(
+      openSubconversation(
+        context,
+        widget.controller,
+        tool,
+        current: () => mounted && tap == _childTap,
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -426,6 +442,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                   c.stopState.phase != SessionStopPhase.ready;
               final chrome =
                   (c.loading ? 4.0 : 0.0) +
+                  (c.summary.info.lineage.parent != null ? 48.0 : 0.0) +
                   MediaQuery.paddingOf(context).bottom +
                   (stopButton ? 56.0 : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
@@ -453,8 +470,11 @@ class _SessionLivePageState extends State<SessionLivePage>
                         LinearProgressIndicator(
                           semanticsLabel: l10n.liveConnecting,
                         ),
+                      if (c.summary.info.lineage.parent case final parent?)
+                        ReturnToParentConversation(parent: parent),
                       Expanded(
                         child: SessionLiveTimeline(
+                          onOpenChild: _openChild,
                           items: items,
                           scroll: widget.controller.scroll,
                           settled: settled,

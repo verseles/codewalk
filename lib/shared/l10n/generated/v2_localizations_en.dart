@@ -1841,4 +1841,19 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'Tab could not be restored.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Effort locked in sub-conversation';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Model locked in sub-conversation';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'No sub-conversation found for this task.';
+
+  @override
+  String get chatReturnToParentConversation => 'Return to parent conversation';
 }

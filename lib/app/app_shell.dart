@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -183,7 +184,12 @@ class _WorkspaceBack extends StatelessWidget {
     onPopInvokedWithResult: (didPop, _) {
       if (didPop) return;
       final shell = Scaffold.maybeOf(context);
-      if (shell != null && shell.hasDrawer && !shell.isDrawerOpen) {
+      final drawerOpen = shell?.isDrawerOpen ?? false;
+      // A sub-conversation goes back to its immediate parent first.
+      final parent = drawerOpen ? null : _shownParent(context);
+      if (parent != null) {
+        context.go(sessionTabLocation(parent));
+      } else if (shell != null && shell.hasDrawer && !drawerOpen) {
         shell.openDrawer();
       } else {
         unawaited(SystemNavigator.pop());
@@ -191,6 +197,21 @@ class _WorkspaceBack extends StatelessWidget {
     },
     child: child,
   );
+
+  /// The parent of the session the route shows, when its view knows one.
+  static SessionRef? _shownParent(BuildContext context) {
+    final path = GoRouter.of(context).routeInformationProvider.value.uri;
+    final segments = path.pathSegments;
+    if (segments.length != 3 || segments.first != 's') return null;
+    final views = context.read<SessionTabsController?>()?.warmViews ?? [];
+    for (final view in views) {
+      final shown = view.session;
+      if (shown.host.value == segments[1] && shown.nativeId == segments[2]) {
+        return view.summary.info.lineage.parent;
+      }
+    }
+    return null;
+  }
 }
 
 /// The chat of the workspace when no session is open: the way to start one,

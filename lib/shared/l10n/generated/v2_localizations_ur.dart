@@ -1837,4 +1837,17 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'ٹیب بحال نہیں ہو سکا۔';
+
+  @override
+  String get chatEffortLockedSubConversation => 'ذیلی گفتگو میں کوشش مقفل ہے';
+
+  @override
+  String get chatModelLockedSubConversation => 'ذیلی گفتگو میں ماڈل مقفل ہے';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'اس کام کے لیے کوئی ذیلی گفتگو نہیں ملی۔';
+
+  @override
+  String get chatReturnToParentConversation => 'والد گفتگو پر واپس جائیں۔';
 }

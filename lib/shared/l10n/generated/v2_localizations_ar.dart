@@ -1821,4 +1821,17 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'تعذر استعادة التبويب.';
+
+  @override
+  String get chatEffortLockedSubConversation => 'الجهد مقفل في محادثة فرعية';
+
+  @override
+  String get chatModelLockedSubConversation => 'النموذج مقفل في محادثة فرعية';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'لم يتم العثور على محادثة فرعية لهذه المهمة.';
+
+  @override
+  String get chatReturnToParentConversation => 'العودة إلى المحادثة الأصلية';
 }

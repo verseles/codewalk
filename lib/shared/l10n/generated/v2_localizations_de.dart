@@ -1879,4 +1879,19 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get sessionTabRestoreFailed =>
       'Tab konnte nicht wiederhergestellt werden.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Aufwand in Unterkonversation gesperrt';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Modell in Unterhaltung gesperrt';
+
+  @override
+  String get chatNoSubConversationFound => 'Keine Unterkonversation gefunden.';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Zur übergeordneten Unterhaltung zurückkehren';
 }

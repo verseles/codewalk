@@ -1832,4 +1832,18 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'ট্যাব পুনরুদ্ধার করা যায়নি।';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'উপ-কথোপকথনে প্রচেষ্টা লক করা আছে';
+
+  @override
+  String get chatModelLockedSubConversation => 'উপ-কথোপকথনে মডেল লক করা আছে';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'এই টাস্কের জন্য কোনো উপ-কথোপকথন পাওয়া যায়নি।';
+
+  @override
+  String get chatReturnToParentConversation => 'প্যারেন্ট কথোপকথনে ফিরে যান';
 }

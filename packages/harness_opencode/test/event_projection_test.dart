@@ -325,10 +325,11 @@ void main() {
     // 917 frames reach the shared walker: every session type is owned, the
     // only unowned type is the session-free `server.connected`, and no
     // tracked frame becomes a diagnostic. The four failed steps without usage
-    // emit nothing: their error reaches the turn's outcome.
+    // emit nothing: their error reaches the turn's outcome. The three D
+    // subagent progress frames that name their child session now upsert it.
     expect(categories, {
-      'routed-events': 712,
-      'routed-empty': 179,
+      'routed-events': 715,
+      'routed-empty': 176,
       'noop:server.connected': 26,
     });
   });

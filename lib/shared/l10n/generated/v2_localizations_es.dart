@@ -1864,4 +1864,19 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'No se pudo restaurar la pestaña.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Esfuerzo bloqueado en subconversación';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Modelo bloqueado en subconversación';
+
+  @override
+  String get chatNoSubConversationFound => 'No se encontró subconversación.';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Volver a la conversación superior';
 }

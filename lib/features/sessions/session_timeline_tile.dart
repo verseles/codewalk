@@ -22,6 +22,7 @@ class SessionTimelineTile extends StatelessWidget {
     this.onTapFilePath,
     this.onCopyCode,
     this.errorRecovery,
+    this.onOpenChild,
   });
   final TimelineItem item;
   final void Function(String text, String href, String? title)? onTapLink;
@@ -31,6 +32,10 @@ class SessionTimelineTile extends StatelessWidget {
   /// The recovery an error card offers here; null in the read-only history,
   /// whose cards show no button.
   final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
+
+  /// Opens the sub-conversation a subagent call runs; the whole card is the
+  /// way in, and its own controls keep their taps. Null for none.
+  final ValueChanged<ToolCall>? onOpenChild;
 
   @override
   Widget build(BuildContext context) {
@@ -58,30 +63,44 @@ class SessionTimelineTile extends StatelessWidget {
       TurnOutcome() => (l10n.historyDetails, Icons.flag_outlined),
       UnknownItem() => (l10n.historyDetails, Icons.info_outline),
     };
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(icon),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
+    final open = onOpenChild;
+    final child = item is ToolCall && item.kind.known == ToolKind.subagent
+        ? open
+        : null;
+    final body = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(icon),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            _buildBody(context, l10n),
-          ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildBody(context, l10n),
+        ],
+      ),
+    );
+    if (child == null) return Card(child: body);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Semantics(
+        button: true,
+        child: InkWell(
+          key: ValueKey('subagent-open-${item.id.value}'),
+          onTap: () => child(item as ToolCall),
+          child: body,
         ),
       ),
     );

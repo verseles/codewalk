@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "টুলস",
   "sessionTabIconSaveFailed": "ট্যাব আইকন সংরক্ষণ করা যায়নি।",
   "sessionTabIconUseProjectIcon": "প্রজেক্ট আইকন ব্যবহার করুন",
-  "sessionTabRestoreFailed": "ট্যাব পুনরুদ্ধার করা যায়নি।"
+  "sessionTabRestoreFailed": "ট্যাব পুনরুদ্ধার করা যায়নি।",
+  "chatEffortLockedSubConversation": "উপ-কথোপকথনে প্রচেষ্টা লক করা আছে",
+  "chatModelLockedSubConversation": "উপ-কথোপকথনে মডেল লক করা আছে",
+  "chatNoSubConversationFound": "এই টাস্কের জন্য কোনো উপ-কথোপকথন পাওয়া যায়নি।",
+  "chatReturnToParentConversation": "প্যারেন্ট কথোপকথনে ফিরে যান"
 }

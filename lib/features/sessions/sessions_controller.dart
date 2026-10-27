@@ -521,7 +521,11 @@ class SessionsController extends ChangeNotifier {
 
   /// Reads one session of the selected server directly, for a link to a
   /// session outside the loaded rows. Null while that server has no source.
-  SessionReadTask? read(SessionRef ref) {
+  SessionReadTask? read(SessionRef ref) => sourceFor(ref)?.read(ref);
+
+  /// The selected server's source for reads about [ref], such as its
+  /// children; null while that server has none or is changing.
+  SessionCatalogSource? sourceFor(SessionRef ref) {
     final source = _source;
     if (_disposed ||
         source == null ||
@@ -531,7 +535,7 @@ class SessionsController extends ChangeNotifier {
         ref.harnessRef != source.harness) {
       return null;
     }
-    return source.read(ref);
+    return source;
   }
 
   SessionCatalogFailure? failure;

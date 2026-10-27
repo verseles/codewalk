@@ -1720,4 +1720,16 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => '无法恢复标签页。';
+
+  @override
+  String get chatEffortLockedSubConversation => '子对话中已锁定努力程度';
+
+  @override
+  String get chatModelLockedSubConversation => '模型在子对话中已锁定';
+
+  @override
+  String get chatNoSubConversationFound => '未找到此任务的子对话。';
+
+  @override
+  String get chatReturnToParentConversation => '返回父会话';
 }

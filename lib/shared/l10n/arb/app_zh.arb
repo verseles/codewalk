@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "工具",
   "sessionTabIconSaveFailed": "无法保存标签页图标。",
   "sessionTabIconUseProjectIcon": "使用项目图标",
-  "sessionTabRestoreFailed": "无法恢复标签页。"
+  "sessionTabRestoreFailed": "无法恢复标签页。",
+  "chatEffortLockedSubConversation": "子对话中已锁定努力程度",
+  "chatModelLockedSubConversation": "模型在子对话中已锁定",
+  "chatNoSubConversationFound": "未找到此任务的子对话。",
+  "chatReturnToParentConversation": "返回父会话"
 }

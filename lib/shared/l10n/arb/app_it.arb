@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "Strumenti",
   "sessionTabIconSaveFailed": "Icona della scheda non salvata.",
   "sessionTabIconUseProjectIcon": "Usa icona del progetto",
-  "sessionTabRestoreFailed": "Impossibile ripristinare la scheda."
+  "sessionTabRestoreFailed": "Impossibile ripristinare la scheda.",
+  "chatEffortLockedSubConversation": "Impegno bloccato nella sottoconversazione",
+  "chatModelLockedSubConversation": "Modello bloccato nella sottoconversazione",
+  "chatNoSubConversationFound": "Nessuna sottoconversazione trovata.",
+  "chatReturnToParentConversation": "Torna alla conversazione precedente"
 }

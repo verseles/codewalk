@@ -33,6 +33,7 @@ class SessionSelectionChip extends StatelessWidget {
         final semantics = [
           l10n.liveSelection,
           if (state.selection != null) label,
+          if (live.isChild) l10n.chatModelLockedSubConversation,
           ?_status(state, l10n),
         ].join(': ');
         final busy =
@@ -56,7 +57,13 @@ class SessionSelectionChip extends StatelessWidget {
                     dimension: 14,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(attention ? Icons.info_outline : Icons.tune),
+                : Icon(
+                    live.isChild
+                        ? Icons.lock_outline
+                        : attention
+                        ? Icons.info_outline
+                        : Icons.tune,
+                  ),
             // On compact widths the AppBar has no room for the label; the
             // icon plus the tooltip and semantics carry it.
             label: narrow

@@ -367,8 +367,13 @@ class SessionLiveController extends ChangeNotifier {
   SessionSelectionState get selectionState =>
       _handle?.selectionState ??
       SessionSelectionState(selection: state?.selection);
+
+  /// A sub-conversation runs with what its parent chose: its own selection
+  /// is shown, never changed here.
+  bool get isChild => _summary.info.lineage.parent != null;
+
   bool get canChangeSelection =>
-      _liveCurrent && (_handle?.canChangeSelection ?? false);
+      _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
 
   /// The command id is taken with the gesture, for this lease's session.
   Future<void> selectModel(ModelEntry model, {String? variant}) => _act(

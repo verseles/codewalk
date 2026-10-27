@@ -2280,5 +2280,21 @@
   "sessionTabRestoreFailed": "Tab could not be restored.",
   "@sessionTabRestoreFailed": {
     "description": "Snackbar shown when undo cannot restore a closed session tab"
+  },
+  "chatEffortLockedSubConversation": "Effort locked in sub-conversation",
+  "@chatEffortLockedSubConversation": {
+    "description": "CodeWalk UI string — chatEffortLockedSubConversation"
+  },
+  "chatModelLockedSubConversation": "Model locked in sub-conversation",
+  "@chatModelLockedSubConversation": {
+    "description": "CodeWalk UI string — chatModelLockedSubConversation"
+  },
+  "chatNoSubConversationFound": "No sub-conversation found for this task.",
+  "@chatNoSubConversationFound": {
+    "description": "CodeWalk UI string — chatNoSubConversationFound"
+  },
+  "chatReturnToParentConversation": "Return to parent conversation",
+  "@chatReturnToParentConversation": {
+    "description": "CodeWalk UI string — chatReturnToParentConversation"
   }
 }

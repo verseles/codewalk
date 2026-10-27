@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "Инструменты",
   "sessionTabIconSaveFailed": "Не удалось сохранить значок вкладки.",
   "sessionTabIconUseProjectIcon": "Использовать значок проекта",
-  "sessionTabRestoreFailed": "Не удалось восстановить вкладку."
+  "sessionTabRestoreFailed": "Не удалось восстановить вкладку.",
+  "chatEffortLockedSubConversation": "Параметр effort заблокирован в суб-беседе",
+  "chatModelLockedSubConversation": "Модель заблокирована в суб-беседе",
+  "chatNoSubConversationFound": "Суб-беседа для этой задачи не найдена.",
+  "chatReturnToParentConversation": "Вернуться к родительской беседе"
 }

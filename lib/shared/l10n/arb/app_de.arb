@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "Werkzeuge",
   "sessionTabIconSaveFailed": "Tab-Symbol konnte nicht gespeichert werden.",
   "sessionTabIconUseProjectIcon": "Projektsymbol verwenden",
-  "sessionTabRestoreFailed": "Tab konnte nicht wiederhergestellt werden."
+  "sessionTabRestoreFailed": "Tab konnte nicht wiederhergestellt werden.",
+  "chatEffortLockedSubConversation": "Aufwand in Unterkonversation gesperrt",
+  "chatModelLockedSubConversation": "Modell in Unterhaltung gesperrt",
+  "chatNoSubConversationFound": "Keine Unterkonversation gefunden.",
+  "chatReturnToParentConversation": "Zur übergeordneten Unterhaltung zurückkehren"
 }

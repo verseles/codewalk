@@ -30,6 +30,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.onLoadOlder,
     this.topBuilder,
     this.errorRecovery,
+    this.onOpenChild,
   });
 
   /// The resident items, in the server's order.
@@ -56,6 +57,9 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// The recovery a failed turn's error card offers; null for none.
   final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
+
+  /// Opens the sub-conversation of a subagent card; null for none.
+  final ValueChanged<ToolCall>? onOpenChild;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -559,6 +563,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
         return SessionTimelineTile(
           item: item,
           errorRecovery: widget.errorRecovery,
+          onOpenChild: widget.onOpenChild,
         );
       },
     );

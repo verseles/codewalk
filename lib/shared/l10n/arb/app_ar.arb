@@ -1492,5 +1492,9 @@
   "sessionTabIconPresetTools": "الأدوات",
   "sessionTabIconSaveFailed": "تعذر حفظ أيقونة التبويب.",
   "sessionTabIconUseProjectIcon": "استخدام أيقونة المشروع",
-  "sessionTabRestoreFailed": "تعذر استعادة التبويب."
+  "sessionTabRestoreFailed": "تعذر استعادة التبويب.",
+  "chatEffortLockedSubConversation": "الجهد مقفل في محادثة فرعية",
+  "chatModelLockedSubConversation": "النموذج مقفل في محادثة فرعية",
+  "chatNoSubConversationFound": "لم يتم العثور على محادثة فرعية لهذه المهمة.",
+  "chatReturnToParentConversation": "العودة إلى المحادثة الأصلية"
 }

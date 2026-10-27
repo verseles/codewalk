@@ -1758,4 +1758,16 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => '탭을 복원할 수 없습니다.';
+
+  @override
+  String get chatEffortLockedSubConversation => '하위 대화에서 노력 수준이 잠김';
+
+  @override
+  String get chatModelLockedSubConversation => '하위 대화에서 모델 잠김';
+
+  @override
+  String get chatNoSubConversationFound => '이 작업에 대한 하위 대화를 찾을 수 없습니다.';
+
+  @override
+  String get chatReturnToParentConversation => '상위 대화로 돌아가기';
 }

@@ -1493,5 +1493,9 @@
   "sessionTabIconPresetTools": "Outils",
   "sessionTabIconSaveFailed": "L''icône d''onglet n''a pas pu être enregistrée.",
   "sessionTabIconUseProjectIcon": "Utiliser l''icône du projet",
-  "sessionTabRestoreFailed": "L''onglet n''a pas pu être restauré."
+  "sessionTabRestoreFailed": "L''onglet n''a pas pu être restauré.",
+  "chatEffortLockedSubConversation": "Effort verrouillé dans la sous-conversation",
+  "chatModelLockedSubConversation": "Modèle verrouillé dans la sous-conversation",
+  "chatNoSubConversationFound": "Aucune sous-conversation trouvée.",
+  "chatReturnToParentConversation": "Retourner à la conversation parente"
 }

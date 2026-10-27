@@ -1853,4 +1853,20 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionTabRestoreFailed => 'Не удалось восстановить вкладку.';
+
+  @override
+  String get chatEffortLockedSubConversation =>
+      'Параметр effort заблокирован в суб-беседе';
+
+  @override
+  String get chatModelLockedSubConversation =>
+      'Модель заблокирована в суб-беседе';
+
+  @override
+  String get chatNoSubConversationFound =>
+      'Суб-беседа для этой задачи не найдена.';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Вернуться к родительской беседе';
 }
