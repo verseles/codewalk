@@ -398,12 +398,26 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** this server's **Favorites** come first, then this project's **Recent** models, then every model grouped by provider; a favorite or recent the session's location does not offer is not shown, a favorite is not repeated among the recents, and outside its provider's group a row names its provider
 - **Then** a model is marked **Free** only when the catalog states one untiered price of zero (`Model.Info.cost`, USD per million tokens); a priced, tiered, empty, absent or unreadable price shows no badge, and an unreadable price never fails the catalog
 - **Then** the star on a row adds or removes a favorite without picking the model; favorites are kept on this device per server (shared by its projects, at most 64 per server), and recents per server and project, newest first, at most eight
-- **Then** a model joins the recents only after a switch this view sent and the server took, including an unconfirmed switch once a later read or report on the same connection confirms it; a switch that was not sent, a refused or not-applied one, or one replaced by a newer pick records nothing, and stars or recents never send a switch
+- **Then** a model joins the recents (followed by the model switched away from) only after a switch this view sent and the server took, including an unconfirmed switch once a later read or report on the same connection confirms it; a switch that was not sent, a refused or not-applied one, or one replaced by a newer pick records nothing, and stars or recents never send a switch
 - **Then** a record that cannot be read is never overwritten: the stars stay disabled and the picker says favorites and recent models cannot be saved; a failed save changes nothing and says the same
 - **When** the user picks a model or a variant
 - **Then** tapping the session's current model keeps its variant and sends nothing; another model is switched to with the server's default variant; a variant chip picks that variant, and **Auto** is the one choice that clears a chosen variant
 - **Then** the composer's variant chip reads **Auto** when no variant is chosen, and its menu offers Auto and the model's variants; dismissing the menu (barrier tap or Escape) keeps the current variant; a chosen variant the model no longer lists can still be cleared with Auto, from the menu or beside the current model in the picker
-- **Then** technical coverage includes adapter price-projection tests on the 2.0.22 fixture, store persistence/bounds/unreadable tests, picker widget tests, and compact, RTL and wide picker goldens; cycling (`mod+m`), burst cycling and per-agent model memory remain the next stage (S7), and installed native acceptance remains separate
+- **Then** technical coverage includes adapter price-projection tests on the 2.0.22 fixture, store persistence/bounds/unreadable tests, picker widget tests, and compact, RTL and wide picker goldens; installed native acceptance remains separate
+
+### V2 model, agent and variant cycling
+
+- **Given** an open native v2 session that can switch its selection, with the composer or another control of its page focused
+- **When** the user presses `mod+m`, `mod+t`, `alt+shift+j` or `alt+shift+k` (the existing bindings, unchanged)
+- **Then** `mod+m` moves through this server's favorite models, then this project's recent models, then the current provider's models; `mod+t` through Auto and the current model's variants; `alt+shift+j` and `alt+shift+k` through the agents forward and backward
+- **Then** the first press goes back to the item used before the current one, like Alt+Tab; presses within 3 seconds continue through the order taken at the first press, most recent first and not limited to two; a longer pause starts over; without two remembered items the press steps through the items in order
+- **Then** each press sends one ordinary switch through the session's selection fence; a press while a switch is pending or the lease cannot switch does nothing, and a sub-conversation offers no cycling
+- **Then** the recents remember the item switched away from after the new one (models and agents per server and project, variants per model), so the first press can go back to it
+- **Given** the user switches to an agent that last used another model in this project (on this server)
+- **When** the server takes the agent switch without changing the model itself
+- **Then** once the server has reported the agent switch and a next switch can be sent, that model is switched to as well, with its variant only when the model still lists it; a model the location no longer offers is not restored
+- **Then** any model change seen since the agent switch began (by the server with the agent or by another client, even one set and then set back), a refused or not-yet-confirmed agent switch, a newer pick or a new connection cancels the restore; the agent left keeps the model it was using
+- **Then** technical coverage includes the cycle state machine with an injected clock, controller tests for each domain and for the agent memory, and a `ctrl+m` composer shortcut test; installed native acceptance remains separate
 
 ### V2 typed turn error cards
 
