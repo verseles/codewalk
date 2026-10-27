@@ -23,15 +23,21 @@ class ModalPrimaryActionShortcuts extends StatelessWidget {
   /// Whether the primary action can run now, as its button would.
   final bool enabled;
 
+  // A focused control's own activation comes first. Only Enter confirms:
+  // Space, which also activates, never reaches the primary action.
+  static const _confirm = PrioritizedIntents(
+    orderedIntents: [ActivateIntent(), _ConfirmIntent()],
+  );
+
   @override
   Widget build(BuildContext context) => Shortcuts(
     shortcuts: const {
-      SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-      SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
+      SingleActivator(LogicalKeyboardKey.enter): _confirm,
+      SingleActivator(LogicalKeyboardKey.numpadEnter): _confirm,
     },
     child: Actions(
       actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(
+        _ConfirmIntent: CallbackAction<_ConfirmIntent>(
           onInvoke: (_) {
             if (enabled) onPrimaryAction();
             return null;
@@ -43,4 +49,9 @@ class ModalPrimaryActionShortcuts extends StatelessWidget {
       child: Focus(autofocus: true, skipTraversal: true, child: child),
     ),
   );
+}
+
+/// Enter's confirmation of the dialog's primary action.
+class _ConfirmIntent extends Intent {
+  const _ConfirmIntent();
 }

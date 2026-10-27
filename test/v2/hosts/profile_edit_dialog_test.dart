@@ -113,6 +113,15 @@ void main() {
     expect(rig.saved, isTrue);
   });
 
+  testWidgets('Space never confirms the dialog', (tester) async {
+    final rig = _Rig();
+    await rig.mount(tester, width: 1280);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(rig.saved, isNull);
+    expect(find.byType(AlertDialog), findsOneWidget);
+  });
+
   testWidgets('Enter on a focused Cancel cancels instead of saving', (
     tester,
   ) async {
