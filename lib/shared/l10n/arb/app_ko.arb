@@ -1580,5 +1580,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "OpenCode가 이벤트를 스트리밍할 때 어시스턴트 텍스트, 추론, 도구 활동을 표시합니다.",
   "settingsBehaviorTitle": "동작",
   "chatBlockResponsePendingDescription": "이 턴이 끝나면 답변이 단일 블록으로 표시됩니다.",
-  "chatBlockResponsePendingTitle": "응답 생성 중"
+  "chatBlockResponsePendingTitle": "응답 생성 중",
+  "settingsBehaviorComposerSpellCheck": "작성기 맞춤법 검사",
+  "settingsBehaviorComposerSpellCheckDescription": "채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다."
 }

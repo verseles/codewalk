@@ -2134,4 +2134,12 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'Antwort wird generiert';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck =>
+      'Rechtschreibprüfung im Composer';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'Native Rechtschreibprüfung, Vorschläge und Autokorrektur der Plattform im Chat-Composer verwenden.';
 }

@@ -491,6 +491,26 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the first item shown of a harness message keeps its elapsed chip and details; hidden items that arrive do not move the reader, and showing hidden items again or changing the render mode is not an arrival either, while content that arrived meanwhile (even while the session was hidden) is still followed or marked; the history page is unaffected
 - **Then** the choices persist under `cw2.settings.showReasoning` and `cw2.settings.showToolCalls` (shown by default, only `false` is written)
 
+### V2 composer input
+
+- **Given** a live session's composer or a new chat's draft
+- **When** it renders
+- **Then** the field sits in a rounded bubble without an outline, with a round Send beside it (filled while there is text to send) and, while the session responds and the field is empty, a round dark Stop in its place
+- **Then** the field uses the platform's native spell check, suggestions and autocorrection unless Settings > Behavior > Composer spell check is off; the choice persists under `cw2.settings.composerSpellCheck` (on by default, only `false` is written) and nothing is sent to another service
+- **When** the on-screen keyboard opens
+- **Then** the field and its Send stay whole above it, on a phone and in landscape
+
+- **Given** a desktop or Web window with the field focused
+- **When** the user presses Enter (or keypad Enter) without a modifier and outside an IME composition
+- **Then** the text is sent and the field keeps its focus; an empty field sends nothing and gets no new line; Shift+Enter breaks the line; prompt recall and the double-Escape Stop keep working
+- **When** the user clicks Send
+- **Then** the field keeps its focus too; on a phone Enter keeps breaking the line
+
+- **Given** a live session the server reports idle, with an empty field
+- **When** the user double-taps or double-clicks the empty Send
+- **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, or reports no execution state
+- **Then** the field stays editable while the continue is sent, and text typed meanwhile stays, also when the session's tab closes before the send ends
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
@@ -524,7 +544,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
-- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering or the thinking and tool call bubbles, and Behavior by its render modes
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering or the thinking and tool call bubbles, and Behavior by its render modes or composer spell check
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited

@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "在 OpenCode 流式传输事件时显示助手文本、推理和工具活动。",
   "settingsBehaviorTitle": "行为",
   "chatBlockResponsePendingDescription": "本轮结束后，答案将以单个块的形式显示。",
-  "chatBlockResponsePendingTitle": "正在生成回复"
+  "chatBlockResponsePendingTitle": "正在生成回复",
+  "settingsBehaviorComposerSpellCheck": "输入框拼写检查",
+  "settingsBehaviorComposerSpellCheckDescription": "在聊天输入框中使用平台原生拼写检查、建议和自动更正。"
 }

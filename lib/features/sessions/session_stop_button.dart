@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_stop.dart';
+import 'composer_input.dart';
 import 'session_live_controller.dart';
 
 class SessionStopButton extends StatelessWidget {
@@ -12,21 +13,38 @@ class SessionStopButton extends StatelessWidget {
     final l10n = context.v2L10n;
     if (live.stopping) {
       return SizedBox.square(
-        dimension: 48,
+        dimension: composerActionSize,
         child: Center(
-          child: CircularProgressIndicator(semanticsLabel: l10n.liveStopping),
+          child: SizedBox.square(
+            dimension: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              semanticsLabel: l10n.liveStopping,
+            ),
+          ),
         ),
       );
     }
-    return IconButton.filled(
-      key: const ValueKey('live-stop'),
-      tooltip: l10n.liveStop,
-      onPressed: live.canStop ? live.stopCurrentTurn : null,
-      style: IconButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.errorContainer,
-        foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+    // Round and dark with the stop glyph in the error color, like the
+    // retained reference's Stop in place of Send.
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox.square(
+      dimension: composerActionSize,
+      child: IconButton.filled(
+        key: const ValueKey('live-stop'),
+        tooltip: l10n.liveStop,
+        onPressed: live.canStop ? live.stopCurrentTurn : null,
+        padding: EdgeInsets.zero,
+        style: IconButton.styleFrom(
+          fixedSize: const Size.square(composerActionSize),
+          minimumSize: const Size.square(composerActionSize),
+          shape: const CircleBorder(),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: const Color(0xFF424242),
+          foregroundColor: scheme.error,
+        ),
+        icon: const Icon(Icons.stop_rounded, size: 20),
       ),
-      icon: const Icon(Icons.stop_rounded),
     );
   }
 }

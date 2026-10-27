@@ -2008,4 +2008,11 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => '응답 생성 중';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => '작성기 맞춤법 검사';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      '채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다.';
 }

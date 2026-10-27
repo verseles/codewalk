@@ -1568,5 +1568,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "اعرض نص المساعد واستدلالاته ونشاط الأدوات أثناء بث الأحداث من OpenCode.",
   "settingsBehaviorTitle": "السلوك",
   "chatBlockResponsePendingDescription": "سيظهر الرد في كتلة واحدة عند اكتمال هذه الجولة.",
-  "chatBlockResponsePendingTitle": "جارٍ إنشاء الرد"
+  "chatBlockResponsePendingTitle": "جارٍ إنشاء الرد",
+  "settingsBehaviorComposerSpellCheck": "التدقيق الإملائي في المحرر",
+  "settingsBehaviorComposerSpellCheckDescription": "استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة."
 }

@@ -201,7 +201,9 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       '${l.settingsBehaviorChatRenderMode} '
       '${l.settingsBehaviorChatRenderModeDescription} '
       '${l.settingsBehaviorChatRenderModeLive} '
-      '${l.settingsBehaviorChatRenderModeBlock}',
+      '${l.settingsBehaviorChatRenderModeBlock} '
+      '${l.settingsBehaviorComposerSpellCheck} '
+      '${l.settingsBehaviorComposerSpellCheckDescription}',
       l.settingsNavigationGroupExperience,
     );
     final shortcuts =

@@ -43,11 +43,13 @@ void main() {
       first
         ..setChatRenderMode(ChatRenderMode.block)
         ..setShowReasoning(false)
-        ..setShowToolCalls(false);
+        ..setShowToolCalls(false)
+        ..setComposerSpellCheck(false);
       await first.flush();
       expect(backend.values['cw2.settings.chatRenderMode'], 'block');
       expect(backend.values['cw2.settings.showReasoning'], false);
       expect(backend.values['cw2.settings.showToolCalls'], false);
+      expect(backend.values['cw2.settings.composerSpellCheck'], false);
 
       final second = controller(backend);
       addTearDown(second.dispose);
@@ -55,13 +57,20 @@ void main() {
       expect(second.chatRenderMode, ChatRenderMode.block);
       expect(second.showReasoning, isFalse);
       expect(second.showToolCalls, isFalse);
+      expect(second.composerSpellCheck, isFalse);
 
       second
         ..setChatRenderMode(ChatRenderMode.live)
         ..setShowReasoning(true)
-        ..setShowToolCalls(true);
+        ..setShowToolCalls(true)
+        ..setComposerSpellCheck(true);
       await second.flush();
-      for (final key in ['chatRenderMode', 'showReasoning', 'showToolCalls']) {
+      for (final key in [
+        'chatRenderMode',
+        'showReasoning',
+        'showToolCalls',
+        'composerSpellCheck',
+      ]) {
         expect(backend.values, isNot(contains('cw2.settings.$key')));
       }
     });
@@ -73,6 +82,7 @@ void main() {
           'cw2.settings.chatRenderMode': 'stream',
           'cw2.settings.showReasoning': 'no',
           'cw2.settings.showToolCalls': 0,
+          'cw2.settings.composerSpellCheck': 'off',
         });
       final p = controller(backend);
       addTearDown(p.dispose);
@@ -80,6 +90,7 @@ void main() {
       expect(p.chatRenderMode, ChatRenderMode.live);
       expect(p.showReasoning, isTrue);
       expect(p.showToolCalls, isTrue);
+      expect(p.composerSpellCheck, isTrue);
       expect(backend.writes, isEmpty);
     });
   });
@@ -108,6 +119,12 @@ void main() {
         find.text(l10n.settingsBehaviorChatRenderModeBlockDescription),
         findsOneWidget,
       );
+      await tester.tap(
+        find.byKey(const ValueKey('settings_toggle_composer_spell_check')),
+      );
+      await tester.pumpAndSettle();
+      expect(graph.preferences.composerSpellCheck, isFalse);
+      expect(_appearance(tester).composerSpellCheck, isFalse);
     });
 
     testWidgets('Appearance hides reasoning and tool calls', (tester) async {

@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "Muestra el texto del asistente, el razonamiento y la actividad de las herramientas mientras OpenCode transmite eventos.",
   "settingsBehaviorTitle": "Comportamiento",
   "chatBlockResponsePendingDescription": "La respuesta aparecerá como un solo bloque cuando termine este turno.",
-  "chatBlockResponsePendingTitle": "Generando respuesta"
+  "chatBlockResponsePendingTitle": "Generando respuesta",
+  "settingsBehaviorComposerSpellCheck": "Corrección ortográfica del compositor",
+  "settingsBehaviorComposerSpellCheckDescription": "Usa la corrección ortográfica, las sugerencias y la autocorrección nativas de la plataforma en el compositor del chat."
 }

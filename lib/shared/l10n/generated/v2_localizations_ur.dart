@@ -2088,4 +2088,11 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'جواب تیار ہو رہا ہے';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'کمپوزر ہجے کی جانچ';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔';
 }

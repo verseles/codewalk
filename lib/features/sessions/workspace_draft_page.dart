@@ -10,6 +10,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
+import 'composer_input.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
 
@@ -58,6 +59,21 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
     setState(() => _invalidPath = false);
     unawaited(widget.controller.openDraft(directory: path));
   }
+
+  /// Sends the first prompt, then opens the session it created.
+  void _send(WorkspaceDraftController c) => unawaited(
+    c.sendFirstPrompt(
+      onBound: (ref, _, _) {
+        if (mounted) {
+          context.go(
+            Uri(
+              pathSegments: ['', 's', ref.host.value, ref.nativeId],
+            ).toString(),
+          );
+        }
+      },
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -197,54 +213,60 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                       Padding(
                         padding: const EdgeInsets.only(top: 24),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Expanded(
-                              child: ConversationTextScale(
-                                child: TextField(
-                                  key: const ValueKey('workspace-draft-text'),
-                                  controller: c.draft,
-                                  focusNode: _composerFocus,
-                                  enabled: !c.sending,
-                                  readOnly: c.endpointOffline,
-                                  minLines: 1,
-                                  maxLines: 6,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.composerHint,
-                                    border: const OutlineInputBorder(),
+                              child: Focus(
+                                // A physical Enter sends; Shift+Enter breaks
+                                // the line (#174).
+                                onKeyEvent: (_, event) {
+                                  if (!isComposerSendKey(
+                                    event,
+                                    c.draft.value,
+                                  )) {
+                                    return KeyEventResult.ignored;
+                                  }
+                                  if (c.canSend) _send(c);
+                                  return KeyEventResult.handled;
+                                },
+                                child: ComposerBubble(
+                                  child: ConversationTextScale(
+                                    child: TextField(
+                                      key: const ValueKey(
+                                        'workspace-draft-text',
+                                      ),
+                                      controller: c.draft,
+                                      focusNode: _composerFocus,
+                                      enabled: !c.sending,
+                                      readOnly: c.endpointOffline,
+                                      minLines: 1,
+                                      maxLines: 6,
+                                      keyboardType: TextInputType.multiline,
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      autocorrect: composerSuggests(context),
+                                      enableSuggestions: composerSuggests(
+                                        context,
+                                      ),
+                                      spellCheckConfiguration:
+                                          composerSpellCheckConfiguration(
+                                            context,
+                                          ),
+                                      decoration: composerDecoration(
+                                        context,
+                                        l10n.composerHint,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            IconButton.filled(
-                              key: const ValueKey('workspace-draft-send'),
+                            ComposerSendButton(
+                              buttonKey: const ValueKey('workspace-draft-send'),
                               tooltip: c.sending
                                   ? l10n.composerSending
                                   : l10n.composerSend,
-                              onPressed: c.canSend
-                                  ? () => unawaited(
-                                      c.sendFirstPrompt(
-                                        onBound: (ref, _, _) {
-                                          if (context.mounted) {
-                                            context.go(
-                                              Uri(
-                                                pathSegments: [
-                                                  '',
-                                                  's',
-                                                  ref.host.value,
-                                                  ref.nativeId,
-                                                ],
-                                              ).toString(),
-                                            );
-                                          }
-                                        },
-                                      ),
-                                    )
-                                  : null,
-                              icon: const Icon(Icons.arrow_upward),
+                              onPressed: c.canSend ? () => _send(c) : null,
                             ),
                           ],
                         ),

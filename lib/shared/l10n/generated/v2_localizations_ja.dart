@@ -2008,4 +2008,11 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => '応答を生成中';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'コンポーザーのスペルチェック';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'チャットコンポーザーでプラットフォーム標準のスペルチェック、候補、自動修正を使用します。';
 }

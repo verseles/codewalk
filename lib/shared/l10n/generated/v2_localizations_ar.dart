@@ -2074,4 +2074,11 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'جارٍ إنشاء الرد';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'التدقيق الإملائي في المحرر';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة.';
 }

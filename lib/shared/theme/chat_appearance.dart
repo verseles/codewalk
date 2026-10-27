@@ -7,7 +7,8 @@ enum ChatRenderMode { live, block }
 /// Conversation display preferences for timeline and composer surfaces.
 ///
 /// Absent in isolated widgets, where math renders, text keeps its scale,
-/// responses render live and reasoning and tool calls show.
+/// responses render live, reasoning and tool calls show and composers spell
+/// check.
 class ChatAppearance extends InheritedWidget {
   const ChatAppearance({
     super.key,
@@ -16,6 +17,7 @@ class ChatAppearance extends InheritedWidget {
     this.renderMode = ChatRenderMode.live,
     this.showReasoning = true,
     this.showToolCalls = true,
+    this.composerSpellCheck = true,
     required super.child,
   });
 
@@ -26,6 +28,9 @@ class ChatAppearance extends InheritedWidget {
   /// Whether reasoning and tool-call rows show in the timeline.
   final bool showReasoning;
   final bool showToolCalls;
+
+  /// Whether composer fields use the platform's native spell check.
+  final bool composerSpellCheck;
 
   static ChatAppearance? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ChatAppearance>();
@@ -39,7 +44,8 @@ class ChatAppearance extends InheritedWidget {
       conversationTextScale != oldWidget.conversationTextScale ||
       renderMode != oldWidget.renderMode ||
       showReasoning != oldWidget.showReasoning ||
-      showToolCalls != oldWidget.showToolCalls;
+      showToolCalls != oldWidget.showToolCalls ||
+      composerSpellCheck != oldWidget.composerSpellCheck;
 }
 
 /// Scales only its subtree by the conversation text size, on top of the

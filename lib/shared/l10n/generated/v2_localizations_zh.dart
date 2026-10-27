@@ -1968,4 +1968,11 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => '正在生成回复';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => '输入框拼写检查';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      '在聊天输入框中使用平台原生拼写检查、建议和自动更正。';
 }

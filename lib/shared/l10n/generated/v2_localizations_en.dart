@@ -2094,4 +2094,11 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'Generating response';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'Composer spell check';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
 }

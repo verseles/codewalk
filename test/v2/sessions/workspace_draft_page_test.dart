@@ -14,6 +14,7 @@ import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../hosts/fakes.dart';
@@ -646,4 +647,66 @@ void main() {
       });
     }
   }
+
+  testWidgets(
+    'a physical Enter sends the first prompt (#174)',
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+    (tester) async {
+      await open(tester);
+      await tester.pump(const Duration(milliseconds: 300));
+      if (!source.tasks.last.completion.isCompleted) {
+        source.respond([source.row('old', directory: '/work/alpha')]);
+        await tester.pumpAndSettle();
+      }
+      actions.createdSessionRef = source
+          .row('created', directory: '/work/alpha')
+          .info
+          .ref;
+      final field = find.byKey(const ValueKey('workspace-draft-text'));
+      await tester.tap(field);
+      await tester.enterText(field, 'first prompt');
+      await tester.pump();
+      // Shift+Enter breaks the line instead.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+      expect(actions.calls.where((call) => call == 'create'), isEmpty);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await waitFor(tester, () => actions.calls.contains('create'));
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('the draft composer stays whole above the keyboard (#278)', (
+    tester,
+  ) async {
+    const size = Size(360, 640);
+    await open(tester, size: size);
+    app.workspaceDrafts!.focusComposer();
+    await tester.pumpAndSettle();
+    // The keyboard opens: the harness's own media query carries it.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: CodeWalkV2Bootstrap(dependencies: app),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final visible = Rect.fromLTRB(0, 0, size.width, size.height - 300);
+    for (final key in ['workspace-draft-text', 'workspace-draft-send']) {
+      final box = tester.getRect(find.byKey(ValueKey(key)));
+      expect(visible.contains(box.topLeft), isTrue, reason: key);
+      expect(
+        visible.contains(box.bottomRight - const Offset(1, 1)),
+        isTrue,
+        reason: key,
+      );
+    }
+    await tester.pumpWidget(const SizedBox());
+  });
 }

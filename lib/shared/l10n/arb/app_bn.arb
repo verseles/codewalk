@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "OpenCode ইভেন্ট স্ট্রিম করার সময় সহায়কের টেক্সট, যুক্তি ও টুলের কার্যকলাপ দেখান।",
   "settingsBehaviorTitle": "আচরণ",
   "chatBlockResponsePendingDescription": "এই টার্ন শেষ হলে উত্তরটি একটি একক ব্লক হিসেবে প্রদর্শিত হবে।",
-  "chatBlockResponsePendingTitle": "উত্তর তৈরি হচ্ছে"
+  "chatBlockResponsePendingTitle": "উত্তর তৈরি হচ্ছে",
+  "settingsBehaviorComposerSpellCheck": "কম্পোজার বানান পরীক্ষা",
+  "settingsBehaviorComposerSpellCheckDescription": "চ্যাট কম্পোজারে প্ল্যাটফর্মের নেটিভ বানান পরীক্ষা, পরামর্শ এবং স্বয়ংক্রিয় সংশোধন ব্যবহার করুন।"
 }

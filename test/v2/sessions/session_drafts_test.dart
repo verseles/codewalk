@@ -122,6 +122,7 @@ Future<void> _visit(
   _App app,
   List<String> ids, {
   Map<String, List<String>> prompts = const {},
+  ExecutionKind? execution,
 }) async {
   for (final id in ids) {
     app.dependencies.router.go('/s/profile_a/ses_$id');
@@ -138,6 +139,9 @@ Future<void> _visit(
           phase: SessionLivePhase.live,
           state: liveState(
             ref,
+            execution: execution == null
+                ? null
+                : ExecutionState(kind: OpenValue.known(execution)),
             items: [
               for (final (i, text) in (prompts[id] ?? const []).indexed)
                 UserInput(
@@ -277,6 +281,42 @@ void main() {
 
     await _visit(tester, app, ['one']);
     expect(_text(tester), isEmpty);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a continue that ends after its tab closed keeps the draft', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, ['one', 'two']);
+    await _visit(tester, app, [
+      'one',
+      'two',
+      'one',
+    ], execution: ExecutionKind.idle);
+    final one = _ref(app, 'one');
+    final outbox = app.outboxes['one']!;
+    final hold = outbox.holdSubmit = Completer<void>();
+    final send = find.byKey(const ValueKey('live-composer-send'));
+    await tester.tap(send);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(send);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(
+      outbox.calls.where((call) => call.startsWith('submit')).single,
+      endsWith(' continue'),
+    );
+    // The user writes the same word while the continue is pending.
+    await _type(tester, 'continue');
+    expect(await _device().read(one), 'continue');
+    await _middleClick(tester, one);
+    await _settle(tester);
+    hold.complete();
+    await _settle(tester);
+    expect(await _device().read(one), 'continue');
+
+    await _visit(tester, app, ['one']);
+    expect(_text(tester), 'continue');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

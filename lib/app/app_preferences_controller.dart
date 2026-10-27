@@ -177,6 +177,17 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('showToolCalls');
   }
 
+  /// Whether the composer uses the platform's native spell check,
+  /// suggestions and autocorrection; on by default.
+  bool _composerSpellCheck = true;
+  bool get composerSpellCheck => _composerSpellCheck;
+
+  void setComposerSpellCheck(bool value) {
+    if (_disposed || _composerSpellCheck == value) return;
+    _composerSpellCheck = value;
+    _changed('composerSpellCheck');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -275,6 +286,7 @@ class AppPreferencesController extends ChangeNotifier {
         : _chatRenderMode.name,
     'showReasoning': _showReasoning ? null : false,
     'showToolCalls': _showToolCalls ? null : false,
+    'composerSpellCheck': _composerSpellCheck ? null : false,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -375,6 +387,8 @@ class AppPreferencesController extends ChangeNotifier {
       if (reasoning is bool) _showReasoning = reasoning;
       final tools = value('showToolCalls');
       if (tools is bool) _showToolCalls = tools;
+      final spellCheck = value('composerSpellCheck');
+      if (spellCheck is bool) _composerSpellCheck = spellCheck;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

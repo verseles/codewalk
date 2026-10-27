@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "اسسٹنٹ کا متن، استدلال اور ٹول کی سرگرمی دکھائیں جب OpenCode ایونٹس سٹریم کرتا ہے۔",
   "settingsBehaviorTitle": "رویہ",
   "chatBlockResponsePendingDescription": "یہ ٹرن مکمل ہونے پر جواب ایک ہی بلاک کے طور پر ظاہر ہوگا۔",
-  "chatBlockResponsePendingTitle": "جواب تیار ہو رہا ہے"
+  "chatBlockResponsePendingTitle": "جواب تیار ہو رہا ہے",
+  "settingsBehaviorComposerSpellCheck": "کمپوزر ہجے کی جانچ",
+  "settingsBehaviorComposerSpellCheckDescription": "چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔"
 }

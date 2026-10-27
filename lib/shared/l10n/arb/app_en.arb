@@ -2602,5 +2602,13 @@
   "chatBlockResponsePendingTitle": "Generating response",
   "@chatBlockResponsePendingTitle": {
     "description": "CodeWalk UI string — chatBlockResponsePendingTitle"
+  },
+  "settingsBehaviorComposerSpellCheck": "Composer spell check",
+  "@settingsBehaviorComposerSpellCheck": {
+    "description": "CodeWalk UI string — settingsBehaviorComposerSpellCheck"
+  },
+  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "@settingsBehaviorComposerSpellCheckDescription": {
+    "description": "CodeWalk UI string — settingsBehaviorComposerSpellCheckDescription"
   }
 }

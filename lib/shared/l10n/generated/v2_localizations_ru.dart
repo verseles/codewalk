@@ -2110,4 +2110,12 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'Генерация ответа';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck =>
+      'Проверка орфографии в редакторе';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'Использовать встроенную проверку орфографии платформы, подсказки и автозамену в редакторе чата.';
 }

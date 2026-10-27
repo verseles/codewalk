@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "Показывает текст ассистента, рассуждения и активность инструментов по мере передачи событий OpenCode.",
   "settingsBehaviorTitle": "Поведение",
   "chatBlockResponsePendingDescription": "Ответ появится единым блоком, когда этот ход завершится.",
-  "chatBlockResponsePendingTitle": "Генерация ответа"
+  "chatBlockResponsePendingTitle": "Генерация ответа",
+  "settingsBehaviorComposerSpellCheck": "Проверка орфографии в редакторе",
+  "settingsBehaviorComposerSpellCheckDescription": "Использовать встроенную проверку орфографии платформы, подсказки и автозамену в редакторе чата."
 }

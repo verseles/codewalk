@@ -179,11 +179,14 @@ class SessionComposerController extends ChangeNotifier {
   }
 
   /// Returns whether the field may be cleared: only once the prompt belongs
-  /// to a recorded admitted or uncertain entry.
+  /// to a recorded admitted or uncertain entry. A [fromDraft] false send,
+  /// such as a continue, takes nothing from the draft, so a session closed
+  /// meanwhile keeps its saved draft even when it reads the same.
   Future<bool> send(
     String text, {
     CommandId? commandId,
     bool Function()? isCurrent,
+    bool fromDraft = true,
   }) async {
     final outbox = _outbox;
     if (!canSend || outbox == null || text.trim().isEmpty) return false;
@@ -192,6 +195,7 @@ class SessionComposerController extends ChangeNotifier {
       text,
       delivery,
       fromChoice: true,
+      fromDraft: fromDraft,
       commandId: commandId,
       isCurrent: isCurrent,
     );
@@ -204,6 +208,7 @@ class SessionComposerController extends ChangeNotifier {
     String text,
     Delivery as, {
     bool fromChoice = false,
+    bool fromDraft = true,
     CommandId? commandId,
     bool Function()? isCurrent,
   }) async {
@@ -222,7 +227,7 @@ class SessionComposerController extends ChangeNotifier {
         // The session closed meanwhile: a prompt the outbox took must not
         // come back as its draft.
         if (result.entry case final entry?
-            when entry.state != SubmissionKind.rejected) {
+            when fromDraft && entry.state != SubmissionKind.rejected) {
           live.forgetDraft(text);
         }
         return false;
@@ -244,7 +249,7 @@ class SessionComposerController extends ChangeNotifier {
         if (current) await _refresh();
         return false;
       }
-      if (!current) return _sent(text, fromChoice, as);
+      if (!current) return _sent(text, fromChoice, fromDraft, as);
       if (entry.state == SubmissionKind.uncertain) {
         notice = ComposerNotice.unconfirmed;
         await _refresh();
@@ -256,10 +261,10 @@ class SessionComposerController extends ChangeNotifier {
           await _refresh();
           return false;
         }
-        return _sent(text, fromChoice, as);
+        return _sent(text, fromChoice, fromDraft, as);
       }
       await _refresh();
-      return _sent(text, fromChoice, as);
+      return _sent(text, fromChoice, fromDraft, as);
     } finally {
       sending = false;
       _notify();
@@ -268,11 +273,11 @@ class SessionComposerController extends ChangeNotifier {
 
   /// A choice changed while this send was in flight is the next one's; a
   /// send that did not go keeps it for the retry.
-  bool _sent(String text, bool fromChoice, Delivery as) {
+  bool _sent(String text, bool fromChoice, bool fromDraft, Delivery as) {
     // A session closed meanwhile has disposed the draft this would clear;
     // the prompt it sent must not come back as its saved draft.
     if (_disposed) {
-      live.forgetDraft(text);
+      if (fromDraft) live.forgetDraft(text);
       return false;
     }
     if (fromChoice && delivery == as) delivery = Delivery.steer;

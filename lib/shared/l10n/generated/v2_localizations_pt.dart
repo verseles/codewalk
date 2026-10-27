@@ -2117,4 +2117,11 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'Gerando resposta';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'Corretor do composer';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'Usa o corretor ortográfico, sugestões e autocorreção nativos da plataforma no composer do chat.';
 }

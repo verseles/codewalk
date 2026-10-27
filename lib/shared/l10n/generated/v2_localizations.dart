@@ -3811,6 +3811,18 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Generating response'**
   String get chatBlockResponsePendingTitle;
+
+  /// CodeWalk UI string — settingsBehaviorComposerSpellCheck
+  ///
+  /// In en, this message translates to:
+  /// **'Composer spell check'**
+  String get settingsBehaviorComposerSpellCheck;
+
+  /// CodeWalk UI string — settingsBehaviorComposerSpellCheckDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Use native platform spell check, suggestions, and autocorrect in the chat composer.'**
+  String get settingsBehaviorComposerSpellCheckDescription;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

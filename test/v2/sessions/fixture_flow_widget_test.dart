@@ -836,7 +836,7 @@ void main() {
         tester,
         () =>
             tester
-                .widget<ButtonStyleButton>(
+                .widget<IconButton>(
                   find.byKey(const ValueKey('live-composer-send')),
                 )
                 .onPressed !=

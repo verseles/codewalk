@@ -2085,4 +2085,11 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'উত্তর তৈরি হচ্ছে';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'কম্পোজার বানান পরীক্ষা';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'চ্যাট কম্পোজারে প্ল্যাটফর্মের নেটিভ বানান পরীক্ষা, পরামর্শ এবং স্বয়ংক্রিয় সংশোধন ব্যবহার করুন।';
 }

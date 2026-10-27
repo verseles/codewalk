@@ -118,6 +118,8 @@ SETTINGS_KEYS = {
     "settingsBehaviorChatRenderModeLiveDescription",
     "settingsBehaviorChatRenderModeBlock",
     "settingsBehaviorChatRenderModeBlockDescription",
+    "settingsBehaviorComposerSpellCheck",
+    "settingsBehaviorComposerSpellCheckDescription",
 }
 for name in (
     "NewConversation", "RefreshData", "FocusInput", "ToggleVoiceInput",

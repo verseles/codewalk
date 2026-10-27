@@ -2130,4 +2130,12 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'Génération de la réponse';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck =>
+      'Vérification orthographique du composer';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'Utilisez la vérification orthographique, les suggestions et la correction automatique natives de la plateforme dans le composer de discussion.';
 }

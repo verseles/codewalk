@@ -2095,4 +2095,11 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get chatBlockResponsePendingTitle => 'प्रतिक्रिया बनाई जा रही है';
+
+  @override
+  String get settingsBehaviorComposerSpellCheck => 'कंपोज़र वर्तनी जांच';
+
+  @override
+  String get settingsBehaviorComposerSpellCheckDescription =>
+      'चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।';
 }

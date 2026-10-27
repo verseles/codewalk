@@ -6,7 +6,8 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/chat_appearance.dart';
 
 /// How the chat behaves, like the retained reference's Behavior section:
-/// whether assistant responses render live or each block once finished.
+/// whether assistant responses render live or each block once finished, and
+/// whether the composer spell checks.
 class BehaviorSettingsPage extends StatelessWidget {
   const BehaviorSettingsPage({super.key});
 
@@ -73,6 +74,16 @@ class BehaviorSettingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: SwitchListTile.adaptive(
+                key: const ValueKey('settings_toggle_composer_spell_check'),
+                title: Text(l.settingsBehaviorComposerSpellCheck),
+                subtitle: Text(l.settingsBehaviorComposerSpellCheckDescription),
+                value: p.composerSpellCheck,
+                onChanged: p.setComposerSpellCheck,
               ),
             ),
           ],

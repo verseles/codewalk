@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "OpenCode इवेंट स्ट्रीम करते समय असिस्टेंट टेक्स्ट, तर्क और टूल गतिविधि दिखाएं।",
   "settingsBehaviorTitle": "व्यवहार",
   "chatBlockResponsePendingDescription": "जब यह टर्न समाप्त होगा, तो उत्तर एक ही ब्लॉक के रूप में दिखाई देगा।",
-  "chatBlockResponsePendingTitle": "प्रतिक्रिया बनाई जा रही है"
+  "chatBlockResponsePendingTitle": "प्रतिक्रिया बनाई जा रही है",
+  "settingsBehaviorComposerSpellCheck": "कंपोज़र वर्तनी जांच",
+  "settingsBehaviorComposerSpellCheckDescription": "चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।"
 }

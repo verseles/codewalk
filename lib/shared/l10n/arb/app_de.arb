@@ -1569,5 +1569,7 @@
   "settingsBehaviorChatRenderModeLiveDescription": "Assistententext, Reasoning und Tool-Aktivität anzeigen, während OpenCode Ereignisse streamt.",
   "settingsBehaviorTitle": "Verhalten",
   "chatBlockResponsePendingDescription": "Die Antwort erscheint als einzelner Block, sobald dieser Schritt abgeschlossen ist.",
-  "chatBlockResponsePendingTitle": "Antwort wird generiert"
+  "chatBlockResponsePendingTitle": "Antwort wird generiert",
+  "settingsBehaviorComposerSpellCheck": "Rechtschreibprüfung im Composer",
+  "settingsBehaviorComposerSpellCheckDescription": "Native Rechtschreibprüfung, Vorschläge und Autokorrektur der Plattform im Chat-Composer verwenden."
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
@@ -10,6 +11,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
+import 'composer_input.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
 import 'session_stop_button.dart';
@@ -57,6 +59,12 @@ class _SessionComposerState extends State<SessionComposer> {
       }.contains(defaultTargetPlatform);
 
   KeyEventResult _key(FocusNode node, KeyEvent event) {
+    if (isComposerSendKey(event, _text.value)) {
+      // The key never breaks the line; with nothing to send it does nothing,
+      // and the field keeps its focus either way (#174).
+      if (_canSend) unawaited(_send());
+      return KeyEventResult.handled;
+    }
     final keyboard = HardwareKeyboard.instance;
     if (event is! KeyUpEvent &&
         (event.logicalKey == LogicalKeyboardKey.arrowUp ||
@@ -161,6 +169,30 @@ class _SessionComposerState extends State<SessionComposer> {
   }
 
   void _textChanged() => setState(() {});
+
+  bool get _canSend =>
+      widget.controller.canSend && _text.text.trim().isNotEmpty;
+
+  /// A double tap on the empty Send of a session the server reports idle
+  /// continues it, once, through the same send as typed text (#82).
+  bool get _canContinue =>
+      widget.controller.canSend &&
+      _text.text.trim().isEmpty &&
+      widget.controller.live.state?.execution?.kind.known == ExecutionKind.idle;
+
+  /// Whether a continue is being sent: the field stays editable meanwhile,
+  /// since the send does not take its text.
+  bool _continuing = false;
+
+  Future<void> _continue() async {
+    if (!_canContinue) return;
+    setState(() => _continuing = true);
+    try {
+      await widget.controller.send('continue', fromDraft: false);
+    } finally {
+      if (mounted) setState(() => _continuing = false);
+    }
+  }
 
   Future<void> _send() async {
     final draft = _text;
@@ -383,7 +415,7 @@ class _SessionComposerState extends State<SessionComposer> {
       final rows = c.rows(state, chips);
       final notice = _notice(l10n, c.notice);
       final wide = MediaQuery.sizeOf(context).width >= 840;
-      final canSend = c.canSend && _text.text.trim().isNotEmpty;
+      final canSend = _canSend;
       return ConstrainedBox(
         constraints: BoxConstraints(maxHeight: max(0, widget.maxHeight)),
         child: SingleChildScrollView(
@@ -480,19 +512,28 @@ class _SessionComposerState extends State<SessionComposer> {
                     child: Focus(
                       onKeyEvent: _key,
                       onFocusChange: (_) => _escapeAt = null,
-                      child: ConversationTextScale(
-                        child: TextField(
-                          key: const ValueKey('live-composer-input'),
-                          controller: _text,
-                          focusNode: widget.focusNode,
-                          // A text that a failed resend hands back needs the field
-                          // untouched until the send ends.
-                          readOnly: c.sending || c.live.endpointOffline,
-                          minLines: 1,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            hintText: l10n.composerHint,
-                            border: const OutlineInputBorder(),
+                      child: ComposerBubble(
+                        child: ConversationTextScale(
+                          child: TextField(
+                            key: const ValueKey('live-composer-input'),
+                            controller: _text,
+                            focusNode: widget.focusNode,
+                            // A text that a failed resend hands back needs the
+                            // field untouched until the send ends.
+                            readOnly:
+                                (c.sending && !_continuing) ||
+                                c.live.endpointOffline,
+                            minLines: 1,
+                            maxLines: 4,
+                            keyboardType: TextInputType.multiline,
+                            autocorrect: composerSuggests(context),
+                            enableSuggestions: composerSuggests(context),
+                            spellCheckConfiguration:
+                                composerSpellCheckConfiguration(context),
+                            decoration: composerDecoration(
+                              context,
+                              l10n.composerHint,
+                            ),
                           ),
                         ),
                       ),
@@ -501,29 +542,26 @@ class _SessionComposerState extends State<SessionComposer> {
                   const SizedBox(width: 8),
                   if (c.sending)
                     SizedBox.square(
-                      dimension: 48,
+                      dimension: composerActionSize,
                       child: Center(
-                        child: CircularProgressIndicator(
-                          semanticsLabel: l10n.composerSending,
+                        child: SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            semanticsLabel: l10n.composerSending,
+                          ),
                         ),
                       ),
                     )
                   else if (c.live.stopping ||
                       (c.live.canStop && _text.text.trim().isEmpty))
                     SessionStopButton(live: c.live)
-                  else if (wide)
-                    FilledButton.icon(
-                      key: const ValueKey('live-composer-send'),
-                      onPressed: canSend ? _send : null,
-                      icon: const Icon(Icons.send),
-                      label: Text(l10n.composerSend),
-                    )
                   else
-                    IconButton.filled(
-                      key: const ValueKey('live-composer-send'),
-                      onPressed: canSend ? _send : null,
-                      icon: const Icon(Icons.send),
+                    ComposerSendButton(
+                      buttonKey: const ValueKey('live-composer-send'),
                       tooltip: l10n.composerSend,
+                      onPressed: canSend ? _send : null,
+                      onDoubleTap: _canContinue ? _continue : null,
                     ),
                 ],
               ),
