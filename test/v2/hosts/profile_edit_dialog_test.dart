@@ -113,6 +113,30 @@ void main() {
     expect(rig.saved, isTrue);
   });
 
+  testWidgets('Enter on a focused Cancel cancels instead of saving', (
+    tester,
+  ) async {
+    final rig = _Rig();
+    await rig.mount(tester, width: 1280);
+    await tester.enterText(
+      find.byKey(const ValueKey('edit-endpoint-label')),
+      'Not saved',
+    );
+    final cancel = find.widgetWithText(
+      TextButton,
+      lookupV2Localizations(const Locale('en')).commonCancel,
+    );
+    Focus.of(
+      tester.element(find.descendant(of: cancel, matching: find.byType(Text))),
+    ).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(rig.saved, isNull);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(rig.repository.profiles.single.label, 'Original');
+  });
+
   testWidgets('stale editor keeps typed values and reconciles before retry', (
     tester,
   ) async {

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
-import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import 'sessions_controller.dart';
 
 /// The dialog that chooses the project a new session is created in.
@@ -154,113 +153,109 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
     final directories = widget.controller.knownDirectories;
     final selected = _selection;
     final problem = selected == null ? _pathProblem() : null;
-    return ModalPrimaryActionShortcuts(
-      enabled: _canSubmit,
-      onPrimaryAction: _create,
-      child: AlertDialog(
-        scrollable: true,
-        title: Text(l10n.sessionsCreateTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (directories.isNotEmpty) ...[
-              Text(
-                l10n.sessionsCreateProject,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              for (final directory in directories)
-                ListTile(
-                  key: ValueKey('sessions-create-project-$directory'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    selected == directory
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
-                  ),
-                  title: Text(
-                    _name(directory),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  // The path is always read left-to-right, so the separators do
-                  // not reorder in a right-to-left locale.
-                  subtitle: Text(
-                    directory,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textDirection: TextDirection.ltr,
-                  ),
-                  onTap: () => setState(() => _selected = directory),
-                ),
-            ],
-            const SizedBox(height: 8),
+    return AlertDialog(
+      scrollable: true,
+      title: Text(l10n.sessionsCreateTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (directories.isNotEmpty) ...[
             Text(
-              l10n.sessionsCreateOtherDirectory,
+              l10n.sessionsCreateProject,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            if (problem != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  problem,
-                  key: const ValueKey('sessions-create-invalid'),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+            for (final directory in directories)
+              ListTile(
+                key: ValueKey('sessions-create-project-$directory'),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  selected == directory
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
                 ),
-              ),
-            if (_listNotCurrent || _unavailable)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  l10n.sessionsActionUnavailableList,
-                  key: const ValueKey('sessions-create-unavailable'),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                title: Text(
+                  _name(directory),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            if (_failed)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  l10n.sessionsActionFailed,
-                  key: const ValueKey('sessions-create-failed'),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                // The path is always read left-to-right, so the separators do
+                // not reorder in a right-to-left locale.
+                subtitle: Text(
+                  directory,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: TextDirection.ltr,
                 ),
+                onTap: () => setState(() => _selected = directory),
               ),
-            TextField(
-              key: const ValueKey('sessions-create-directory'),
-              controller: _directory,
-              textDirection: TextDirection.ltr,
-              // The path is machine-typed, so the spell checker never rewrites
-              // a segment of it.
-              autocorrect: false,
-              enableSuggestions: false,
-              decoration: InputDecoration(
-                labelText: l10n.sessionsCreateDirectoryHint,
-              ),
-              onChanged: (_) => setState(() {
-                if (_selected != null) _selected = null;
-              }),
-            ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.commonCancel),
+          const SizedBox(height: 8),
+          Text(
+            l10n.sessionsCreateOtherDirectory,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-          FilledButton(
-            key: const ValueKey('sessions-create-confirm'),
-            onPressed: _canSubmit ? _create : null,
-            child: Text(l10n.sessionsCreateConfirm),
+          if (problem != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                problem,
+                key: const ValueKey('sessions-create-invalid'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          if (_listNotCurrent || _unavailable)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l10n.sessionsActionUnavailableList,
+                key: const ValueKey('sessions-create-unavailable'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                l10n.sessionsActionFailed,
+                key: const ValueKey('sessions-create-failed'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          TextField(
+            key: const ValueKey('sessions-create-directory'),
+            controller: _directory,
+            textDirection: TextDirection.ltr,
+            // The path is machine-typed, so the spell checker never rewrites
+            // a segment of it.
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              labelText: l10n.sessionsCreateDirectoryHint,
+            ),
+            onChanged: (_) => setState(() {
+              if (_selected != null) _selected = null;
+            }),
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('sessions-create-confirm'),
+          onPressed: _canSubmit ? _create : null,
+          child: Text(l10n.sessionsCreateConfirm),
+        ),
+      ],
     );
   }
 }
