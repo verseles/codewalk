@@ -44,12 +44,14 @@ void main() {
         ..setChatRenderMode(ChatRenderMode.block)
         ..setShowReasoning(false)
         ..setShowToolCalls(false)
-        ..setComposerSpellCheck(false);
+        ..setComposerSpellCheck(false)
+        ..setComposerTips(false);
       await first.flush();
       expect(backend.values['cw2.settings.chatRenderMode'], 'block');
       expect(backend.values['cw2.settings.showReasoning'], false);
       expect(backend.values['cw2.settings.showToolCalls'], false);
       expect(backend.values['cw2.settings.composerSpellCheck'], false);
+      expect(backend.values['cw2.settings.composerTips'], false);
 
       final second = controller(backend);
       addTearDown(second.dispose);
@@ -58,18 +60,21 @@ void main() {
       expect(second.showReasoning, isFalse);
       expect(second.showToolCalls, isFalse);
       expect(second.composerSpellCheck, isFalse);
+      expect(second.composerTips, isFalse);
 
       second
         ..setChatRenderMode(ChatRenderMode.live)
         ..setShowReasoning(true)
         ..setShowToolCalls(true)
-        ..setComposerSpellCheck(true);
+        ..setComposerSpellCheck(true)
+        ..setComposerTips(true);
       await second.flush();
       for (final key in [
         'chatRenderMode',
         'showReasoning',
         'showToolCalls',
         'composerSpellCheck',
+        'composerTips',
       ]) {
         expect(backend.values, isNot(contains('cw2.settings.$key')));
       }
@@ -83,6 +88,7 @@ void main() {
           'cw2.settings.showReasoning': 'no',
           'cw2.settings.showToolCalls': 0,
           'cw2.settings.composerSpellCheck': 'off',
+          'cw2.settings.composerTips': 1,
         });
       final p = controller(backend);
       addTearDown(p.dispose);
@@ -91,6 +97,7 @@ void main() {
       expect(p.showReasoning, isTrue);
       expect(p.showToolCalls, isTrue);
       expect(p.composerSpellCheck, isTrue);
+      expect(p.composerTips, isTrue);
       expect(backend.writes, isEmpty);
     });
   });
@@ -136,6 +143,7 @@ void main() {
       for (final key in [
         'settings_toggle_thinking_bubbles',
         'settings_toggle_tool_call_bubbles',
+        'settings_toggle_composer_tips',
       ]) {
         await tester.scrollUntilVisible(
           find.byKey(ValueKey(key)),
@@ -151,11 +159,18 @@ void main() {
         await tester.pumpAndSettle();
       }
       final p = graph.preferences;
-      expect([p.showReasoning, p.showToolCalls], [false, false]);
+      expect(
+        [p.showReasoning, p.showToolCalls, p.composerTips],
+        [false, false, false],
+      );
       final appearance = _appearance(tester);
       expect(
-        [appearance.showReasoning, appearance.showToolCalls],
-        [false, false],
+        [
+          appearance.showReasoning,
+          appearance.showToolCalls,
+          appearance.composerTips,
+        ],
+        [false, false, false],
       );
     });
 

@@ -2081,4 +2081,71 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة.';
+
+  @override
+  String get chatReasoning => 'تفكير...';
+
+  @override
+  String get chatRetryingModelRequest => 'إعادة محاولة طلب النموذج...';
+
+  @override
+  String get chatStatusThinking => 'جاري التفكير...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'نصيحة: أضف معايير قبول للتغييرات الكبيرة';
+
+  @override
+  String get chatTipAskForPlan => 'نصيحة: اطلب خطة أولا للمهام الكبيرة';
+
+  @override
+  String get chatTipBeSpecific =>
+      'نصيحة: كن محددًا - المطالبات الأقصر تحصل على إجابات أسرع';
+
+  @override
+  String get chatTipBreakTasks => 'نصيحة: قسم المهام الكبيرة إلى مطالبات أصغر';
+
+  @override
+  String get chatTipCompareOptions =>
+      'نصيحة: اطلب بدائل عندما تكون المفاضلات غير واضحة';
+
+  @override
+  String get chatTipDefineVerification =>
+      'نصيحة: قل أي اختبارات أو فحوصات يجب أن تنجح';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'نصيحة: اذكر الملفات أو الشاشات أو الأوامر ذات الصلة';
+
+  @override
+  String get chatTipProvideContext =>
+      'نصيحة: قدم سياقًا - الصق رسائل الخطأ والسجلات';
+
+  @override
+  String get chatTipRequestDocs => 'نصيحة: اطلب تحديث الوثائق عند تغير السلوك';
+
+  @override
+  String get chatTipShareAttempts => 'نصيحة: شارك ما جربته والخطأ الدقيق';
+
+  @override
+  String get chatTipStartWithGoal => 'نصيحة: ابدأ بالهدف النهائي';
+
+  @override
+  String get chatTipStateConstraints =>
+      'نصيحة: اذكر القيود التي يجب على الوكيل الحفاظ عليها';
+
+  @override
+  String get chatTipStepByStep =>
+      'نصيحة: اطلب خطوة بخطوة عند تصحيح المشكلات المعقدة';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'نصيحة: اختر وكيلا مركزا للتخطيط أو المراجعة أو البناء';
+
+  @override
+  String get settingsAppearanceComposerTips => 'نصائح الملحِّن';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.';
 }

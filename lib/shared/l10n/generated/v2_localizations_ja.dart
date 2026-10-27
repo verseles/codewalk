@@ -2015,4 +2015,62 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'チャットコンポーザーでプラットフォーム標準のスペルチェック、候補、自動修正を使用します。';
+
+  @override
+  String get chatReasoning => '推論中...';
+
+  @override
+  String get chatRetryingModelRequest => 'モデルリクエストを再試行中...';
+
+  @override
+  String get chatStatusThinking => '思考中...';
+
+  @override
+  String get chatTipAcceptanceCriteria => 'ヒント: 大きな変更には受け入れ条件を追加しましょう';
+
+  @override
+  String get chatTipAskForPlan => 'ヒント: 大きなタスクでは先に計画を依頼しましょう';
+
+  @override
+  String get chatTipBeSpecific => 'ヒント: 具体的に — 短いプロンプトほど早く回答が得られます';
+
+  @override
+  String get chatTipBreakTasks => 'ヒント: 大きなタスクを小さなプロンプトに分割します';
+
+  @override
+  String get chatTipCompareOptions => 'ヒント: トレードオフが不明なら代替案を依頼しましょう';
+
+  @override
+  String get chatTipDefineVerification => 'ヒント: 通すべきテストやチェックを伝えましょう';
+
+  @override
+  String get chatTipNameRelevantFiles => 'ヒント: 関連するファイル、画面、コマンドを伝えましょう';
+
+  @override
+  String get chatTipProvideContext => 'ヒント: コンテキストを提供 — エラーメッセージやログを貼り付けます';
+
+  @override
+  String get chatTipRequestDocs => 'ヒント: 挙動が変わるなら docs 更新を依頼しましょう';
+
+  @override
+  String get chatTipShareAttempts => 'ヒント: 試したことと正確なエラーを共有しましょう';
+
+  @override
+  String get chatTipStartWithGoal => 'ヒント: 最終目標から始めましょう';
+
+  @override
+  String get chatTipStateConstraints => 'ヒント: エージェントが守る制約を伝えましょう';
+
+  @override
+  String get chatTipStepByStep => 'ヒント: 複雑な問題のデバッグ時はステップバイステップで依頼します';
+
+  @override
+  String get chatTipUseFocusedAgents => 'ヒント: 計画、レビュー、実装に合うエージェントを選びましょう';
+
+  @override
+  String get settingsAppearanceComposerTips => 'コンポーザーヒント';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。';
 }

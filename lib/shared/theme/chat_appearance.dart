@@ -18,6 +18,7 @@ class ChatAppearance extends InheritedWidget {
     this.showReasoning = true,
     this.showToolCalls = true,
     this.composerSpellCheck = true,
+    this.composerTips = true,
     required super.child,
   });
 
@@ -32,6 +33,10 @@ class ChatAppearance extends InheritedWidget {
   /// Whether composer fields use the platform's native spell check.
   final bool composerSpellCheck;
 
+  /// Whether the composer's status slot rotates tips while the assistant
+  /// works.
+  final bool composerTips;
+
   static ChatAppearance? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ChatAppearance>();
 
@@ -45,7 +50,8 @@ class ChatAppearance extends InheritedWidget {
       renderMode != oldWidget.renderMode ||
       showReasoning != oldWidget.showReasoning ||
       showToolCalls != oldWidget.showToolCalls ||
-      composerSpellCheck != oldWidget.composerSpellCheck;
+      composerSpellCheck != oldWidget.composerSpellCheck ||
+      composerTips != oldWidget.composerTips;
 }
 
 /// Scales only its subtree by the conversation text size, on top of the

@@ -2095,4 +2095,74 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔';
+
+  @override
+  String get chatReasoning => 'استدلال...';
+
+  @override
+  String get chatRetryingModelRequest =>
+      'ماڈل کی درخواست کی دوبارہ کوشش کی جا رہی ہے...';
+
+  @override
+  String get chatStatusThinking => 'سوچ رہا ہے...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'مشورہ: بڑی تبدیلیوں کے لیے قبولیت کے معیار شامل کریں';
+
+  @override
+  String get chatTipAskForPlan => 'مشورہ: بڑے کاموں میں پہلے منصوبہ مانگیں';
+
+  @override
+  String get chatTipBeSpecific =>
+      'مشورہ: مخصوص بنیں — چھوٹے پرامپٹ کا جواب تیزی سے ملتا ہے';
+
+  @override
+  String get chatTipBreakTasks =>
+      'مشورہ: بڑے کاموں کو چھوٹے پرامپٹ میں تقسیم کریں';
+
+  @override
+  String get chatTipCompareOptions =>
+      'مشورہ: ٹریڈ آف واضح نہ ہوں تو متبادل مانگیں';
+
+  @override
+  String get chatTipDefineVerification =>
+      'مشورہ: بتائیں کون سے ٹیسٹ یا چیکس پاس ہونے چاہئیں';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'مشورہ: متعلقہ فائلیں، اسکرینیں یا کمانڈز بتائیں';
+
+  @override
+  String get chatTipProvideContext =>
+      'مشورہ: سیاق و سباق فراہم کریں — غلطی کے پیغامات اور لاگز پیسٹ کریں';
+
+  @override
+  String get chatTipRequestDocs => 'مشورہ: رویہ بدلے تو docs اپ ڈیٹ مانگیں';
+
+  @override
+  String get chatTipShareAttempts =>
+      'مشورہ: جو آزمایا اور درست خرابی شیئر کریں';
+
+  @override
+  String get chatTipStartWithGoal => 'مشورہ: آخری مقصد سے شروع کریں';
+
+  @override
+  String get chatTipStateConstraints =>
+      'مشورہ: وہ پابندیاں بتائیں جو ایجنٹ کو برقرار رکھنی ہیں';
+
+  @override
+  String get chatTipStepByStep =>
+      'مشورہ: پیچیدہ مسائل کو ڈیبگ کرتے وقت مرحلہ وار پوچھیں';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'مشورہ: پلان، ریویو یا بلڈ کے لیے مرکوز ایجنٹ چنیں';
+
+  @override
+  String get settingsAppearanceComposerTips => 'کمپوزر ٹپس';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔';
 }

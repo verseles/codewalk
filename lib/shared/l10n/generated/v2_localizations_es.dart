@@ -2129,4 +2129,75 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'Usa la corrección ortográfica, las sugerencias y la autocorrección nativas de la plataforma en el compositor del chat.';
+
+  @override
+  String get chatReasoning => 'Razonando...';
+
+  @override
+  String get chatRetryingModelRequest => 'Reintentando solicitud de modelo...';
+
+  @override
+  String get chatStatusThinking => 'Pensando...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'Consejo: Añade criterios de aceptación en cambios grandes';
+
+  @override
+  String get chatTipAskForPlan =>
+      'Consejo: Pide un plan primero en tareas grandes';
+
+  @override
+  String get chatTipBeSpecific =>
+      'Consejo: Sé específico — los mensajes cortos reciben respuestas más rápidas';
+
+  @override
+  String get chatTipBreakTasks =>
+      'Consejo: Divide tareas grandes en mensajes más pequeños';
+
+  @override
+  String get chatTipCompareOptions =>
+      'Consejo: Pide alternativas cuando los tradeoffs no estén claros';
+
+  @override
+  String get chatTipDefineVerification =>
+      'Consejo: Di qué pruebas o comprobaciones deben pasar';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'Consejo: Nombra archivos, pantallas o comandos relevantes';
+
+  @override
+  String get chatTipProvideContext =>
+      'Consejo: Proporciona contexto — pega mensajes de error y registros';
+
+  @override
+  String get chatTipRequestDocs =>
+      'Consejo: Pide actualizar docs cuando cambie el comportamiento';
+
+  @override
+  String get chatTipShareAttempts =>
+      'Consejo: Comparte lo que intentaste y el error exacto';
+
+  @override
+  String get chatTipStartWithGoal => 'Consejo: Empieza por el objetivo final';
+
+  @override
+  String get chatTipStateConstraints =>
+      'Consejo: Indica restricciones que el agente debe preservar';
+
+  @override
+  String get chatTipStepByStep =>
+      'Consejo: Pide paso a paso al depurar problemas complejos';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'Consejo: Elige un agente enfocado para plan, revisión o build';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Consejos del compositor';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'Mostrar u ocultar consejos rotativos mientras el asistente razona.';
 }

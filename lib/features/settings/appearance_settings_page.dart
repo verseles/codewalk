@@ -258,6 +258,15 @@ class AppearanceSettingsPage extends StatelessWidget {
                 onChanged: p.setShowToolCalls,
               ),
             ]),
+            _card(context, l.settingsAppearanceComposerTips, [
+              SwitchListTile.adaptive(
+                key: const ValueKey('settings_toggle_composer_tips'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.settingsAppearanceComposerTipsDescription),
+                value: p.composerTips,
+                onChanged: p.setComposerTips,
+              ),
+            ]),
           ],
         ),
       ),

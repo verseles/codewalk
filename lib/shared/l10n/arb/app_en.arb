@@ -2610,5 +2610,81 @@
   "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
   "@settingsBehaviorComposerSpellCheckDescription": {
     "description": "CodeWalk UI string — settingsBehaviorComposerSpellCheckDescription"
+  },
+  "chatReasoning": "Reasoning...",
+  "@chatReasoning": {
+    "description": "CodeWalk UI string — chatReasoning"
+  },
+  "chatRetryingModelRequest": "Retrying model request...",
+  "@chatRetryingModelRequest": {
+    "description": "CodeWalk UI string — chatRetryingModelRequest"
+  },
+  "chatStatusThinking": "Thinking...",
+  "@chatStatusThinking": {
+    "description": "CodeWalk UI string — chatStatusThinking"
+  },
+  "chatTipAcceptanceCriteria": "Tip: Add acceptance criteria for larger changes",
+  "@chatTipAcceptanceCriteria": {
+    "description": "CodeWalk UI string — chatTipAcceptanceCriteria"
+  },
+  "chatTipAskForPlan": "Tip: Ask for a plan first on large tasks",
+  "@chatTipAskForPlan": {
+    "description": "CodeWalk UI string — chatTipAskForPlan"
+  },
+  "chatTipBeSpecific": "Tip: Be specific — shorter prompts get faster answers",
+  "@chatTipBeSpecific": {
+    "description": "CodeWalk UI string — chatTipBeSpecific"
+  },
+  "chatTipBreakTasks": "Tip: Break large tasks into smaller prompts",
+  "@chatTipBreakTasks": {
+    "description": "CodeWalk UI string — chatTipBreakTasks"
+  },
+  "chatTipCompareOptions": "Tip: Ask for alternatives when tradeoffs are unclear",
+  "@chatTipCompareOptions": {
+    "description": "CodeWalk UI string — chatTipCompareOptions"
+  },
+  "chatTipDefineVerification": "Tip: Say which tests or checks should pass",
+  "@chatTipDefineVerification": {
+    "description": "CodeWalk UI string — chatTipDefineVerification"
+  },
+  "chatTipNameRelevantFiles": "Tip: Name relevant files, screens, or commands",
+  "@chatTipNameRelevantFiles": {
+    "description": "CodeWalk UI string — chatTipNameRelevantFiles"
+  },
+  "chatTipProvideContext": "Tip: Provide context — paste error messages and logs",
+  "@chatTipProvideContext": {
+    "description": "CodeWalk UI string — chatTipProvideContext"
+  },
+  "chatTipRequestDocs": "Tip: Ask for docs updates when behavior changes",
+  "@chatTipRequestDocs": {
+    "description": "CodeWalk UI string — chatTipRequestDocs"
+  },
+  "chatTipShareAttempts": "Tip: Share what you tried and the exact error",
+  "@chatTipShareAttempts": {
+    "description": "CodeWalk UI string — chatTipShareAttempts"
+  },
+  "chatTipStartWithGoal": "Tip: Start with the end goal",
+  "@chatTipStartWithGoal": {
+    "description": "CodeWalk UI string — chatTipStartWithGoal"
+  },
+  "chatTipStateConstraints": "Tip: State constraints the agent must preserve",
+  "@chatTipStateConstraints": {
+    "description": "CodeWalk UI string — chatTipStateConstraints"
+  },
+  "chatTipStepByStep": "Tip: Ask for step-by-step when debugging complex issues",
+  "@chatTipStepByStep": {
+    "description": "CodeWalk UI string — chatTipStepByStep"
+  },
+  "chatTipUseFocusedAgents": "Tip: Pick a focused agent for plan, review, or build",
+  "@chatTipUseFocusedAgents": {
+    "description": "CodeWalk UI string — chatTipUseFocusedAgents"
+  },
+  "settingsAppearanceComposerTips": "Composer tips",
+  "@settingsAppearanceComposerTips": {
+    "description": "CodeWalk UI string — settingsAppearanceComposerTips"
+  },
+  "settingsAppearanceComposerTipsDescription": "Show or hide rotating tips while the assistant is reasoning.",
+  "@settingsAppearanceComposerTipsDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceComposerTipsDescription"
   }
 }

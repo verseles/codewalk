@@ -188,6 +188,17 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('composerSpellCheck');
   }
 
+  /// Whether the composer's status slot rotates tips while the assistant
+  /// works; on by default.
+  bool _composerTips = true;
+  bool get composerTips => _composerTips;
+
+  void setComposerTips(bool value) {
+    if (_disposed || _composerTips == value) return;
+    _composerTips = value;
+    _changed('composerTips');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -287,6 +298,7 @@ class AppPreferencesController extends ChangeNotifier {
     'showReasoning': _showReasoning ? null : false,
     'showToolCalls': _showToolCalls ? null : false,
     'composerSpellCheck': _composerSpellCheck ? null : false,
+    'composerTips': _composerTips ? null : false,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -389,6 +401,8 @@ class AppPreferencesController extends ChangeNotifier {
       if (tools is bool) _showToolCalls = tools;
       final spellCheck = value('composerSpellCheck');
       if (spellCheck is bool) _composerSpellCheck = spellCheck;
+      final tips = value('composerTips');
+      if (tips is bool) _composerTips = tips;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

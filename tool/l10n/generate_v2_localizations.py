@@ -92,6 +92,8 @@ APPEARANCE_KEYS = {
     "settingsAppearanceThinkingBubblesDescription",
     "settingsAppearanceToolCallBubbles",
     "settingsAppearanceToolCallBubblesDescription",
+    "settingsAppearanceComposerTips",
+    "settingsAppearanceComposerTipsDescription",
 }
 KEYS |= APPEARANCE_KEYS | {"appearanceStorageError"}
 SETTINGS_KEYS = {

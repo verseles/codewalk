@@ -2102,4 +2102,74 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।';
+
+  @override
+  String get chatReasoning => 'तर्क कर रहा है...';
+
+  @override
+  String get chatRetryingModelRequest =>
+      'मॉडल अनुरोध का पुनः प्रयास किया जा रहा है...';
+
+  @override
+  String get chatStatusThinking => 'सोच रहा है...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'सुझाव: बड़े बदलावों के लिए स्वीकृति मानदंड जोड़ें';
+
+  @override
+  String get chatTipAskForPlan => 'सुझाव: बड़े कार्यों में पहले योजना मांगें';
+
+  @override
+  String get chatTipBeSpecific =>
+      'सुझाव: विशिष्ट बनें — छोटे प्रॉम्प्ट का उत्तर तेज़ी से मिलता है';
+
+  @override
+  String get chatTipBreakTasks =>
+      'सुझाव: बड़े कार्यों को छोटे प्रॉम्प्ट में विभाजित करें';
+
+  @override
+  String get chatTipCompareOptions =>
+      'सुझाव: ट्रेडऑफ अस्पष्ट हों तो विकल्प मांगें';
+
+  @override
+  String get chatTipDefineVerification =>
+      'सुझाव: बताएं कौन से टेस्ट या जांच पास होनी चाहिए';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'सुझाव: संबंधित फ़ाइलें, स्क्रीन या कमांड बताएं';
+
+  @override
+  String get chatTipProvideContext =>
+      'सुझाव: संदर्भ प्रदान करें — त्रुटि संदेश और लॉग पेस्ट करें';
+
+  @override
+  String get chatTipRequestDocs => 'सुझाव: व्यवहार बदलने पर डॉक्स अपडेट मांगें';
+
+  @override
+  String get chatTipShareAttempts =>
+      'सुझाव: आपने क्या आजमाया और सटीक त्रुटि बताएं';
+
+  @override
+  String get chatTipStartWithGoal => 'सुझाव: अंतिम लक्ष्य से शुरू करें';
+
+  @override
+  String get chatTipStateConstraints =>
+      'सुझाव: वे सीमाएं बताएं जिन्हें एजेंट को बचाए रखना है';
+
+  @override
+  String get chatTipStepByStep =>
+      'सुझाव: जटिल समस्याओं को डीबग करते समय चरण-दर-चरण पूछें';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'सुझाव: योजना, समीक्षा या बिल्ड के लिए केंद्रित एजेंट चुनें';
+
+  @override
+  String get settingsAppearanceComposerTips => 'कंपोज़र युक्तियाँ';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।';
 }

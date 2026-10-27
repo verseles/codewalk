@@ -2138,4 +2138,77 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'Usa il controllo ortografico, i suggerimenti e la correzione automatica nativi della piattaforma nel composer della chat.';
+
+  @override
+  String get chatReasoning => 'Ragionamento...';
+
+  @override
+  String get chatRetryingModelRequest =>
+      'Nuovo tentativo di richiesta del modello in corso...';
+
+  @override
+  String get chatStatusThinking => 'Pensando...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'Suggerimento: Aggiungi criteri di accettazione per cambi grandi';
+
+  @override
+  String get chatTipAskForPlan =>
+      'Suggerimento: Chiedi prima un piano per attività grandi';
+
+  @override
+  String get chatTipBeSpecific =>
+      'Suggerimento: Sii specifico — prompt brevi ottengono risposte più veloci';
+
+  @override
+  String get chatTipBreakTasks =>
+      'Suggerimento: Dividi compiti grandi in prompt più piccoli';
+
+  @override
+  String get chatTipCompareOptions =>
+      'Suggerimento: Chiedi alternative quando i tradeoff non sono chiari';
+
+  @override
+  String get chatTipDefineVerification =>
+      'Suggerimento: Dì quali test o controlli devono passare';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'Suggerimento: Indica file, schermate o comandi rilevanti';
+
+  @override
+  String get chatTipProvideContext =>
+      'Suggerimento: Fornisci contesto — incolla messaggi di errore e log';
+
+  @override
+  String get chatTipRequestDocs =>
+      'Suggerimento: Chiedi aggiornamenti docs quando cambia il comportamento';
+
+  @override
+  String get chatTipShareAttempts =>
+      'Suggerimento: Condividi cosa hai provato e il messaggio esatto';
+
+  @override
+  String get chatTipStartWithGoal =>
+      'Suggerimento: Inizia con il risultato finale';
+
+  @override
+  String get chatTipStateConstraints =>
+      'Suggerimento: Indica i vincoli da preservare';
+
+  @override
+  String get chatTipStepByStep =>
+      'Suggerimento: Chiedi passo-passo durante il debug di problemi complessi';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'Suggerimento: Scegli un agente mirato per piano, review o build';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Suggerimenti del composer';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'Mostra o nascondi i suggerimenti a rotazione mentre l\'assistente sta ragionando.';
 }

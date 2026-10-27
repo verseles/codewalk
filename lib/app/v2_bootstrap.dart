@@ -198,6 +198,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
                   showReasoning: preferences.showReasoning,
                   showToolCalls: preferences.showToolCalls,
                   composerSpellCheck: preferences.composerSpellCheck,
+                  composerTips: preferences.composerTips,
                   child: Theme(
                     data: AppTheme.withResponsiveSnackBars(
                       Theme.of(context),

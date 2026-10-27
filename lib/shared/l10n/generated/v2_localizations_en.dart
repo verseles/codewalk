@@ -2101,4 +2101,73 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
+
+  @override
+  String get chatReasoning => 'Reasoning...';
+
+  @override
+  String get chatRetryingModelRequest => 'Retrying model request...';
+
+  @override
+  String get chatStatusThinking => 'Thinking...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'Tip: Add acceptance criteria for larger changes';
+
+  @override
+  String get chatTipAskForPlan => 'Tip: Ask for a plan first on large tasks';
+
+  @override
+  String get chatTipBeSpecific =>
+      'Tip: Be specific — shorter prompts get faster answers';
+
+  @override
+  String get chatTipBreakTasks => 'Tip: Break large tasks into smaller prompts';
+
+  @override
+  String get chatTipCompareOptions =>
+      'Tip: Ask for alternatives when tradeoffs are unclear';
+
+  @override
+  String get chatTipDefineVerification =>
+      'Tip: Say which tests or checks should pass';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'Tip: Name relevant files, screens, or commands';
+
+  @override
+  String get chatTipProvideContext =>
+      'Tip: Provide context — paste error messages and logs';
+
+  @override
+  String get chatTipRequestDocs =>
+      'Tip: Ask for docs updates when behavior changes';
+
+  @override
+  String get chatTipShareAttempts =>
+      'Tip: Share what you tried and the exact error';
+
+  @override
+  String get chatTipStartWithGoal => 'Tip: Start with the end goal';
+
+  @override
+  String get chatTipStateConstraints =>
+      'Tip: State constraints the agent must preserve';
+
+  @override
+  String get chatTipStepByStep =>
+      'Tip: Ask for step-by-step when debugging complex issues';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'Tip: Pick a focused agent for plan, review, or build';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Composer tips';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'Show or hide rotating tips while the assistant is reasoning.';
 }

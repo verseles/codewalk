@@ -13,6 +13,7 @@ import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
 import 'session_composer_controller.dart';
+import 'session_composer_status.dart';
 import 'session_input_history.dart';
 import 'session_stop_button.dart';
 
@@ -505,7 +506,9 @@ class _SessionComposerState extends State<SessionComposer> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              SessionComposerStatus(
+                activity: composerActivity(c.live.state, l10n),
+              ),
               Row(
                 children: [
                   Expanded(

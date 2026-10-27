@@ -2124,4 +2124,74 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'Usa o corretor ortográfico, sugestões e autocorreção nativos da plataforma no composer do chat.';
+
+  @override
+  String get chatReasoning => 'Raciocinando...';
+
+  @override
+  String get chatRetryingModelRequest => 'Repetindo a solicitação do modelo...';
+
+  @override
+  String get chatStatusThinking => 'Pensando...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'Dica: Adicione critérios de aceite em mudanças maiores';
+
+  @override
+  String get chatTipAskForPlan =>
+      'Dica: Peça um plano primeiro em tarefas grandes';
+
+  @override
+  String get chatTipBeSpecific =>
+      'Dica: Seja específico — prompts curtos recebem respostas mais rápidas';
+
+  @override
+  String get chatTipBreakTasks =>
+      'Dica: Divida tarefas grandes em prompts menores';
+
+  @override
+  String get chatTipCompareOptions =>
+      'Dica: Peça alternativas quando houver tradeoffs';
+
+  @override
+  String get chatTipDefineVerification =>
+      'Dica: Diga quais testes ou checagens devem passar';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'Dica: Cite arquivos, telas ou comandos relevantes';
+
+  @override
+  String get chatTipProvideContext =>
+      'Dica: Forneça contexto — cole mensagens de erro e logs';
+
+  @override
+  String get chatTipRequestDocs =>
+      'Dica: Peça atualização de docs quando comportamento mudar';
+
+  @override
+  String get chatTipShareAttempts => 'Dica: Conte o que tentou e o erro exato';
+
+  @override
+  String get chatTipStartWithGoal => 'Dica: Comece pelo objetivo final';
+
+  @override
+  String get chatTipStateConstraints =>
+      'Dica: Informe restrições que o agente deve preservar';
+
+  @override
+  String get chatTipStepByStep =>
+      'Dica: Peça passo a passo ao depurar problemas complexos';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'Dica: Escolha um agente focado para plano, revisão ou build';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Dicas do composer';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'Mostrar ou ocultar dicas rotativas enquanto o assistente está raciocinando.';
 }

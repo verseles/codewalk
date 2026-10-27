@@ -2015,4 +2015,62 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       '채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다.';
+
+  @override
+  String get chatReasoning => '추론 중...';
+
+  @override
+  String get chatRetryingModelRequest => '모델 요청 재시도 중...';
+
+  @override
+  String get chatStatusThinking => '생각 중...';
+
+  @override
+  String get chatTipAcceptanceCriteria => '팁: 큰 변경에는 승인 기준을 추가하세요';
+
+  @override
+  String get chatTipAskForPlan => '팁: 큰 작업은 먼저 계획을 요청하세요';
+
+  @override
+  String get chatTipBeSpecific => '팁: 구체적으로 작성하세요 — 프롬프트가 짧을수록 답변이 빠릅니다';
+
+  @override
+  String get chatTipBreakTasks => '팁: 큰 작업은 작은 프롬프트로 나누세요';
+
+  @override
+  String get chatTipCompareOptions => '팁: 트레이드오프가 불명확하면 대안을 요청하세요';
+
+  @override
+  String get chatTipDefineVerification => '팁: 통과해야 할 테스트나 체크를 알려 주세요';
+
+  @override
+  String get chatTipNameRelevantFiles => '팁: 관련 파일, 화면, 명령을 알려 주세요';
+
+  @override
+  String get chatTipProvideContext => '팁: 컨텍스트를 제공하세요 — 오류 메시지와 로그를 붙여넣으세요';
+
+  @override
+  String get chatTipRequestDocs => '팁: 동작이 바뀌면 docs 업데이트를 요청하세요';
+
+  @override
+  String get chatTipShareAttempts => '팁: 시도한 내용과 정확한 오류를 공유하세요';
+
+  @override
+  String get chatTipStartWithGoal => '팁: 최종 목표부터 알려 주세요';
+
+  @override
+  String get chatTipStateConstraints => '팁: 에이전트가 지켜야 할 제약을 알려 주세요';
+
+  @override
+  String get chatTipStepByStep => '팁: 복잡한 문제 디버깅 시 단계별 설명을 요청하세요';
+
+  @override
+  String get chatTipUseFocusedAgents => '팁: 계획, 리뷰, 빌드에 맞는 에이전트를 선택하세요';
+
+  @override
+  String get settingsAppearanceComposerTips => '컴포저 팁';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      '어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.';
 }

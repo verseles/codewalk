@@ -44,6 +44,24 @@ PORT_KEYS = {
     # The Block render mode's placeholder.
     "chatBlockResponsePendingTitle",
     "chatBlockResponsePendingDescription",
+    # The composer's status slot: activity, then tips (#133).
+    "chatReasoning",
+    "chatStatusThinking",
+    "chatRetryingModelRequest",
+    "chatTipBeSpecific",
+    "chatTipStepByStep",
+    "chatTipProvideContext",
+    "chatTipBreakTasks",
+    "chatTipStartWithGoal",
+    "chatTipNameRelevantFiles",
+    "chatTipStateConstraints",
+    "chatTipAskForPlan",
+    "chatTipDefineVerification",
+    "chatTipShareAttempts",
+    "chatTipCompareOptions",
+    "chatTipRequestDocs",
+    "chatTipAcceptanceCriteria",
+    "chatTipUseFocusedAgents",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

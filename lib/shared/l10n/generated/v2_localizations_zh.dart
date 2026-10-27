@@ -1975,4 +1975,61 @@ class V2LocalizationsZh extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       '在聊天输入框中使用平台原生拼写检查、建议和自动更正。';
+
+  @override
+  String get chatReasoning => '推理中...';
+
+  @override
+  String get chatRetryingModelRequest => '正在重试模型请求...';
+
+  @override
+  String get chatStatusThinking => '正在思考...';
+
+  @override
+  String get chatTipAcceptanceCriteria => '提示：大型变更加入验收标准';
+
+  @override
+  String get chatTipAskForPlan => '提示：大任务先请求计划';
+
+  @override
+  String get chatTipBeSpecific => '提示：请具体一些 — 简短的提示词能获得更快的回答';
+
+  @override
+  String get chatTipBreakTasks => '提示：将大任务分解为更小的提示词';
+
+  @override
+  String get chatTipCompareOptions => '提示：权衡不清时请求替代方案';
+
+  @override
+  String get chatTipDefineVerification => '提示：说明哪些测试或检查必须通过';
+
+  @override
+  String get chatTipNameRelevantFiles => '提示：说明相关文件、界面或命令';
+
+  @override
+  String get chatTipProvideContext => '提示：提供上下文 — 粘贴错误消息和日志';
+
+  @override
+  String get chatTipRequestDocs => '提示：行为变化时请求更新文档';
+
+  @override
+  String get chatTipShareAttempts => '提示：分享已尝试的内容和准确错误';
+
+  @override
+  String get chatTipStartWithGoal => '提示：先说明最终目标';
+
+  @override
+  String get chatTipStateConstraints => '提示：说明代理必须保留的约束';
+
+  @override
+  String get chatTipStepByStep => '提示：在调试复杂问题时要求逐步进行';
+
+  @override
+  String get chatTipUseFocusedAgents => '提示：为计划、评审或构建选择专注代理';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Composer 提示';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription => '在助手进行推理时显示或隐藏循环提示。';
 }

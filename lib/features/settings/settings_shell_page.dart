@@ -193,7 +193,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       '$appearanceDescription ${l.settingsAppearanceFontSize} '
       '${l.settingsAppearanceMathRendering} '
       '${l.settingsAppearanceThinkingBubbles} '
-      '${l.settingsAppearanceToolCallBubbles}',
+      '${l.settingsAppearanceToolCallBubbles} '
+      '${l.settingsAppearanceComposerTips}',
       l.settingsNavigationGroupExperience,
     );
     final behavior = matches(

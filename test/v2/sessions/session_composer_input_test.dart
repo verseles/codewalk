@@ -203,6 +203,52 @@ void main() {
     expect(_submits(outbox), hasLength(1));
   });
 
+  testWidgets('the status slot reports the call in flight (#133)', (
+    tester,
+  ) async {
+    final outbox = FakeOutbox();
+    final opened = await _open(tester, outbox);
+    final ref = opened.ref;
+    opened.handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        lastSyncedAt: DateTime.utc(2026, 10, 15, 12),
+        state: liveState(
+          ref,
+          execution: _execution(ExecutionKind.running),
+          items: [
+            UserInput(
+              meta: liveMeta(ref, 'u1'),
+              text: 'go',
+              delivery: const OpenValue.known(DeliveryState.delivered),
+            ),
+            ToolCall(
+              meta: ItemMeta(
+                id: const ItemId('t1'),
+                generation: 'live',
+                status: const OpenValue.known(ItemStatus.streaming),
+                source: liveMeta(ref, 't1').source,
+              ),
+              kind: const OpenValue.known(ToolKind.search),
+              rawName: 'grep',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final slot = find.byKey(const ValueKey('composer-status'));
+    expect(find.descendant(of: slot, matching: find.text('grep')), findsOne);
+    await _report(tester, opened, ExecutionKind.idle);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: slot, matching: find.text('grep')),
+      findsNothing,
+    );
+  });
+
   testWidgets('the composer spell checks unless turned off (#88)', (
     tester,
   ) async {

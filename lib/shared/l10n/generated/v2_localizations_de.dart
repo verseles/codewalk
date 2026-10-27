@@ -2142,4 +2142,75 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'Native Rechtschreibprüfung, Vorschläge und Autokorrektur der Plattform im Chat-Composer verwenden.';
+
+  @override
+  String get chatReasoning => 'Denkt nach...';
+
+  @override
+  String get chatRetryingModelRequest => 'Modellanfrage wird wiederholt...';
+
+  @override
+  String get chatStatusThinking => 'Nachdenken...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'Tipp: Fügen Sie Akzeptanzkriterien für größere Änderungen hinzu';
+
+  @override
+  String get chatTipAskForPlan =>
+      'Tipp: Fragen Sie bei großen Aufgaben zuerst nach einem Plan';
+
+  @override
+  String get chatTipBeSpecific =>
+      'Tipp: Seien Sie spezifisch — kürzere Prompts erhalten schnellere Antworten';
+
+  @override
+  String get chatTipBreakTasks =>
+      'Tipp: Teilen Sie große Aufgaben in kleinere Prompts auf';
+
+  @override
+  String get chatTipCompareOptions =>
+      'Tipp: Fragen Sie nach Alternativen, wenn Tradeoffs unklar sind';
+
+  @override
+  String get chatTipDefineVerification =>
+      'Tipp: Sagen Sie, welche Tests oder Checks bestehen sollen';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'Tipp: Nennen Sie relevante Dateien, Screens oder Befehle';
+
+  @override
+  String get chatTipProvideContext =>
+      'Tipp: Geben Sie Kontext an — fügen Sie Fehlermeldungen und Logs ein';
+
+  @override
+  String get chatTipRequestDocs =>
+      'Tipp: Bitten Sie um Doku-Updates, wenn sich Verhalten ändert';
+
+  @override
+  String get chatTipShareAttempts =>
+      'Tipp: Teilen Sie mit, was Sie versucht haben und welcher Fehler erschien';
+
+  @override
+  String get chatTipStartWithGoal => 'Tipp: Beginnen Sie mit dem Endziel';
+
+  @override
+  String get chatTipStateConstraints =>
+      'Tipp: Nennen Sie Einschränkungen, die der Agent bewahren muss';
+
+  @override
+  String get chatTipStepByStep =>
+      'Tipp: Fragen Sie nach Schritt-für-Schritt beim Debuggen komplexer Probleme';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'Tipp: Wählen Sie einen fokussierten Agenten für Plan, Review oder Build';
+
+  @override
+  String get settingsAppearanceComposerTips => 'Composer-Tipps';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt.';
 }

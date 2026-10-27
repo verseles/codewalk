@@ -2092,4 +2092,73 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
       'চ্যাট কম্পোজারে প্ল্যাটফর্মের নেটিভ বানান পরীক্ষা, পরামর্শ এবং স্বয়ংক্রিয় সংশোধন ব্যবহার করুন।';
+
+  @override
+  String get chatReasoning => 'যুক্তি করছে...';
+
+  @override
+  String get chatRetryingModelRequest =>
+      'মডেল অনুরোধ পুনরায় চেষ্টা করা হচ্ছে...';
+
+  @override
+  String get chatStatusThinking => 'চিন্তা করছে...';
+
+  @override
+  String get chatTipAcceptanceCriteria =>
+      'পরামর্শ: বড় পরিবর্তনে গ্রহণযোগ্যতার শর্ত যোগ করুন';
+
+  @override
+  String get chatTipAskForPlan => 'পরামর্শ: বড় কাজের আগে একটি পরিকল্পনা চাইুন';
+
+  @override
+  String get chatTipBeSpecific =>
+      'পরামর্শ: সুনির্দিষ্ট হোন — ছোট প্রম্পট দ্রুত উত্তর পায়';
+
+  @override
+  String get chatTipBreakTasks =>
+      'পরামর্শ: বড় কাজগুলিকে ছোট প্রম্পটে ভাগ করুন';
+
+  @override
+  String get chatTipCompareOptions => 'পরামর্শ: ট্রেডঅফ অস্পষ্ট হলে বিকল্প চান';
+
+  @override
+  String get chatTipDefineVerification =>
+      'পরামর্শ: কোন পরীক্ষা বা চেক পাস করতে হবে বলুন';
+
+  @override
+  String get chatTipNameRelevantFiles =>
+      'পরামর্শ: প্রাসঙ্গিক ফাইল, স্ক্রিন বা কমান্ডের নাম দিন';
+
+  @override
+  String get chatTipProvideContext =>
+      'পরামর্শ: প্রসঙ্গ প্রদান করুন — ত্রুটি বার্তা এবং লগ পেস্ট করুন';
+
+  @override
+  String get chatTipRequestDocs => 'পরামর্শ: আচরণ বদলালে ডকস আপডেট চাইুন';
+
+  @override
+  String get chatTipShareAttempts =>
+      'পরামর্শ: কী চেষ্টা করেছেন এবং সঠিক ত্রুটি জানান';
+
+  @override
+  String get chatTipStartWithGoal => 'পরামর্শ: শেষ লক্ষ্য দিয়ে শুরু করুন';
+
+  @override
+  String get chatTipStateConstraints =>
+      'পরামর্শ: এজেন্টকে যে সীমা মানতে হবে তা বলুন';
+
+  @override
+  String get chatTipStepByStep =>
+      'পরামর্শ: জটিল সমস্যা ডিবাগ করার সময় ধাপে ধাপে জিজ্ঞাসা করুন';
+
+  @override
+  String get chatTipUseFocusedAgents =>
+      'পরামর্শ: পরিকল্পনা, রিভিউ বা বিল্ডের জন্য ফোকাসড এজেন্ট বেছে নিন';
+
+  @override
+  String get settingsAppearanceComposerTips => 'সুরকার টিপস';
+
+  @override
+  String get settingsAppearanceComposerTipsDescription =>
+      'সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷';
 }

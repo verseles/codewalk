@@ -511,6 +511,15 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, or reports no execution state
 - **Then** the field stays editable while the continue is sent, and text typed meanwhile stays, also when the session's tab closes before the send ends
 
+### V2 composer status slot
+
+- **Given** a live session's composer
+- **When** the server reports the session running or retrying
+- **Then** a fixed slot above the field reports what the assistant does: the last call of the message still in flight (its tool name or `$ command`) or its reasoning (by the `**Heading**` it opens with, else `Thinking...`), shown at once; a call outside any message, such as a shell run, counts only while it runs; a retry shows `Retrying model request...`
+- **Then** with nothing more specific it waits 2 seconds, then rotates a prompting tip every 15 seconds (start with the goal, name relevant files, state constraints, ask for a plan, say which checks should pass, share attempts and errors, ask for alternatives or docs updates, add acceptance criteria, pick a focused agent, and similar), or shows `Reasoning...` when Settings > Appearance > Composer tips is off; the choice persists under `cw2.settings.composerTips` (on by default, only `false` is written)
+- **When** the work ends, or the server reports the session waiting for an approval or an answer
+- **Then** the slot clears a second later and keeps its height, so the field does not move
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
@@ -544,7 +553,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
-- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering or the thinking and tool call bubbles, and Behavior by its render modes or composer spell check
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes or composer spell check
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited
