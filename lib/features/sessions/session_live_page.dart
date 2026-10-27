@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/shown_composer.dart';
+import '../../app/workspace_actions.dart';
 import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -67,7 +67,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   /// The composer field, which mod+L and a single Escape focus from anywhere
   /// in the workspace while this page is shown.
   final _composerFocus = FocusNode();
-  ShownComposer? _shown;
+  WorkspaceActions? _shown;
 
   void _focusComposer() => _composerFocus.requestFocus();
 
@@ -101,7 +101,7 @@ class _SessionLivePageState extends State<SessionLivePage>
       _catalog = context.read<SessionsController?>();
       if (_foreground(WidgetsBinding.instance.lifecycleState)) _show();
     });
-    _shown = context.read<ShownComposer?>()?..claim(_focusComposer);
+    _shown = context.read<WorkspaceActions?>()?..claimComposer(_focusComposer);
   }
 
   /// The page is seen unless the app is hidden or in the background.
@@ -136,7 +136,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _childLookup?.cancel();
-    _shown?.release(_focusComposer);
+    _shown?.releaseComposer(_focusComposer);
     _composerFocus.dispose();
     _catalog?.leave(widget.controller.session);
     if (widget.ownsController) widget.controller.dispose();

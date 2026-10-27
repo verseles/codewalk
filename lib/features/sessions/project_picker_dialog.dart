@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
@@ -10,6 +11,44 @@ import 'project_context_list.dart';
 import 'project_contexts_controller.dart';
 import 'project_picker_controller.dart';
 import 'sessions_controller.dart';
+
+/// Picks a context and shows its remembered conversation or workspace home.
+/// Navigation or a server change while the picker is open wins.
+Future<void> pickWorkspaceProject(
+  BuildContext context, {
+  required SessionsController catalog,
+  required ProjectContextsController contexts,
+}) async {
+  final profile = catalog.selectedProfile;
+  if (profile == null) return;
+  final before = contexts.active;
+  final router = GoRouter.of(context);
+  final routes = router.routeInformationProvider;
+  var moved = false;
+  void navigated() => moved = true;
+  routes.addListener(navigated);
+  try {
+    await showProjectPicker(context, catalog: catalog, contexts: contexts);
+  } finally {
+    routes.removeListener(navigated);
+  }
+  final after = contexts.active;
+  final currentProfile = catalog.selectedProfile;
+  if (!context.mounted ||
+      moved ||
+      currentProfile == null ||
+      !profile.sameBinding(currentProfile) ||
+      after == null ||
+      after == before) {
+    return;
+  }
+  final view = contexts.viewOf(after);
+  router.go(
+    view == null
+        ? '/sessions'
+        : Uri(pathSegments: ['', 's', profile.id, view.nativeId]).toString(),
+  );
+}
 
 /// Opens the project picker of the selected server: full screen on a
 /// compact window, a centered dialog otherwise. It closes itself once a

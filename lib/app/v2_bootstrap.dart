@@ -23,7 +23,7 @@ import '../shared/theme/appearance_theme_resolver.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
-import 'shown_composer.dart';
+import 'workspace_actions.dart';
 import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
 
@@ -44,7 +44,7 @@ class CodeWalkV2Bootstrap extends StatefulWidget {
 
 class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
     with WidgetsBindingObserver {
-  final _shownComposer = ShownComposer();
+  final _workspaceActions = WorkspaceActions();
 
   @override
   void initState() {
@@ -108,7 +108,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         Provider<SessionHistoryFactory?>.value(
           value: dependencies.historyFactory,
         ),
-        Provider.value(value: _shownComposer),
+        Provider.value(value: _workspaceActions),
         Provider<SessionLiveDirectory?>.value(
           value: dependencies.liveDirectory,
         ),

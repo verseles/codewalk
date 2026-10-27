@@ -34,7 +34,93 @@ List<AppExitType> _exits() {
   return exits;
 }
 
+Future<void> _focusControl(WidgetTester tester, Finder control) async {
+  final semantics = find.descendant(
+    of: control,
+    matching: find.byType(Semantics),
+  );
+  final node = Focus.of(tester.element(semantics.last));
+  node.requestFocus();
+  await tester.pump();
+  expect(node.hasFocus, isTrue);
+}
+
 void main() {
+  for (final control in ['workspace-pane-toggle', 'sessions-search']) {
+    testWidgets('mod+W from $control closes the shown tab', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final exits = _exits();
+      final app = await launchWorkspace(tester);
+      await openLiveSession(tester, app);
+      expect(app.dependencies.sessionTabs!.tabs, hasLength(1));
+      await _focusControl(tester, find.byKey(ValueKey(control)));
+      await _press(tester, LogicalKeyboardKey.keyW, control: true);
+      expect(exits, isEmpty);
+      expect(app.dependencies.sessionTabs!.tabs, isEmpty);
+      expect(
+        app.dependencies.router.routeInformationProvider.value.uri.path,
+        '/sessions',
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      debugDefaultTargetPlatformOverride = null;
+    });
+  }
+
+  testWidgets('Escape from the app bar focuses the shown composer', (
+    tester,
+  ) async {
+    final app = await launchWorkspace(tester);
+    await openLiveSession(tester, app);
+    await _focusControl(
+      tester,
+      find.byKey(const ValueKey('workspace-pane-toggle')),
+    );
+    await _press(tester, LogicalKeyboardKey.escape);
+    final input = find.byKey(const ValueKey('live-composer-input'));
+    expect(tester.widget<TextField>(input).focusNode!.hasFocus, isTrue);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  for (final locale in const [Locale('en'), Locale('ar'), Locale('ur')]) {
+    testWidgets('the minimum pane fits ${locale.languageCode} at 2x', (
+      tester,
+    ) async {
+      final app = await launchWorkspace(tester, locale: locale, textScale: 2);
+      app.dependencies.preferences.setSessionPaneWidth(160);
+      await settleWorkspace(tester);
+      expect(_paneWidth(tester), 160);
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('sessions-search')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sessions-filter')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sessions-create')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
+  testWidgets('the hidden pane project picker shows the chosen project', (
+    tester,
+  ) async {
+    final app = await launchWorkspace(tester);
+    await openLiveSession(tester, app);
+    final contexts = app.dependencies.projectContexts!;
+    expect(await contexts.openContext('/other'), isTrue);
+    expect(await contexts.activate('/w'), isTrue);
+    await settleWorkspace(tester);
+    await tester.tap(find.byKey(const ValueKey('workspace-pane-toggle')));
+    await settleWorkspace(tester);
+    await tester.tap(find.byKey(const ValueKey('workspace-project-context')));
+    await settleWorkspace(tester);
+    await tester.tap(find.byKey(const ValueKey('project-picker-/other')));
+    await settleWorkspace(tester);
+    expect(contexts.active, '/other');
+    expect(
+      app.dependencies.router.routeInformationProvider.value.uri.path,
+      '/sessions',
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('the pane resizes at once and saves when the drag ends', (
     tester,
   ) async {
@@ -109,7 +195,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('workspace-settings')));
     await settleWorkspace(tester);
     expect(
-      app.dependencies.router.routerDelegate.currentConfiguration.last
+      app
+          .dependencies
+          .router
+          .routerDelegate
+          .currentConfiguration
+          .last
           .matchedLocation,
       '/settings',
     );
@@ -165,7 +256,11 @@ void main() {
   testWidgets('Escape closes the drawer before it focuses the draft', (
     tester,
   ) async {
-    await launchWorkspace(tester, link: '/sessions', size: const Size(390, 844));
+    await launchWorkspace(
+      tester,
+      link: '/sessions',
+      size: const Size(390, 844),
+    );
     final scaffold = tester.firstState<ScaffoldState>(find.byType(Scaffold));
     scaffold.openDrawer();
     await settleWorkspace(tester);
@@ -209,7 +304,11 @@ void main() {
 
   testWidgets('on a phone mod+Q is left to the platform', (tester) async {
     final exits = _exits();
-    await launchWorkspace(tester, link: '/sessions', size: const Size(390, 844));
+    await launchWorkspace(
+      tester,
+      link: '/sessions',
+      size: const Size(390, 844),
+    );
     await _press(tester, LogicalKeyboardKey.keyQ, control: true);
     expect(exits, isEmpty);
     await tester.pumpWidget(const SizedBox.shrink());

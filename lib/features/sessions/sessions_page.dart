@@ -254,18 +254,9 @@ class _SessionsPageState extends State<SessionsPage> {
     final active = contexts.active;
     return InkWell(
       key: const ValueKey('project-title'),
-      onTap: () async {
-        final before = contexts.active;
-        await showProjectPicker(
-          context,
-          catalog: controller,
-          contexts: contexts,
-        );
-        final after = contexts.active;
-        if (context.mounted && after != null && after != before) {
-          _showContext(context, controller, contexts, after);
-        }
-      },
+      onTap: () => unawaited(
+        pickWorkspaceProject(context, catalog: controller, contexts: contexts),
+      ),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 4, 4),
         child: Row(

@@ -119,33 +119,45 @@ class _SessionDrawerHeaderState extends State<SessionDrawerHeader> {
         ),
       );
     }
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            l10n.chatConversations,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleLarge,
-          ),
+    final title = Text(
+      l10n.chatConversations,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.titleLarge,
+    );
+    final controls = <Widget>[
+      if (search)
+        IconButton(
+          key: const ValueKey('sessions-search'),
+          tooltip: l10n.chatSearchConversations,
+          onPressed: _expand,
+          icon: const Icon(Icons.search),
         ),
-        if (search)
-          IconButton(
-            key: const ValueKey('sessions-search'),
-            tooltip: l10n.chatSearchConversations,
-            onPressed: _expand,
-            icon: const Icon(Icons.search),
-          ),
-        _ListMenu(catalog: widget.catalog, contexts: contexts),
-        // The create is a compact control, so the header does not push the
-        // rows out of a small viewport.
-        IconButton.filled(
-          key: const ValueKey('sessions-create'),
-          tooltip: l10n.sessionsCreateNew,
-          onPressed: widget.onCreate,
-          icon: const Icon(Icons.add),
-        ),
-      ],
+      _ListMenu(catalog: widget.catalog, contexts: contexts),
+      // The create is a compact control, so the header does not push the
+      // rows out of a small viewport.
+      IconButton.filled(
+        key: const ValueKey('sessions-create'),
+        tooltip: l10n.sessionsCreateNew,
+        onPressed: widget.onCreate,
+        icon: const Icon(Icons.add),
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth < 240
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                title,
+                Wrap(alignment: WrapAlignment.end, children: controls),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: title),
+                ...controls,
+              ],
+            ),
     );
   }
 }

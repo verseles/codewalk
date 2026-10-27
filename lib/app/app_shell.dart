@@ -26,7 +26,7 @@ import '../shared/shortcuts/shortcut_action.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
 import 'resizable_session_pane.dart';
-import 'shown_composer.dart';
+import 'workspace_actions.dart';
 import 'workspace_chrome.dart';
 import 'workspace_controller.dart';
 
@@ -84,7 +84,11 @@ class AppShell extends StatelessWidget {
         ShortcutAction.newChat: () => _create(context),
         ShortcutAction.focusInput: () => _focusComposer(context),
         ShortcutAction.refresh: () => _refresh(context),
-        ShortcutAction.closeApp: _closeWindow,
+        ShortcutAction.closeApp: () {
+          if (!(context.read<WorkspaceActions?>()?.closeTab() ?? false)) {
+            _closeWindow();
+          }
+        },
         if (_desktop) ShortcutAction.quitApp: _quit,
       },
       // Keeps the keyboard inside the workspace when nothing in it has the
@@ -102,18 +106,20 @@ class AppShell extends StatelessWidget {
               // session brings its own bar.
               return Scaffold(
                 appBar: home
-                    ? AppBar(
-                        leading: Builder(
-                          builder: (context) => WorkspaceMenuButton(
-                            openDrawer: Scaffold.of(context).openDrawer,
+                    ? _WorkspaceAppBar(
+                        bar: AppBar(
+                          leading: Builder(
+                            builder: (context) => WorkspaceMenuButton(
+                              openDrawer: Scaffold.of(context).openDrawer,
+                            ),
                           ),
+                          title: hasServer
+                              ? const ServerSwitcher(
+                                  controlKey: ValueKey('workspace-server'),
+                                )
+                              : const Text('CodeWalk'),
+                          actions: const [WorkspaceAppBarActions()],
                         ),
-                        title: hasServer
-                            ? const ServerSwitcher(
-                                controlKey: ValueKey('workspace-server'),
-                              )
-                            : const Text('CodeWalk'),
-                        actions: const [WorkspaceAppBarActions()],
                       )
                     : null,
                 drawer: const Drawer(
@@ -130,26 +136,28 @@ class AppShell extends StatelessWidget {
             final hidden = preferences?.sessionPaneHidden ?? false;
             final chat = _WorkspaceBack(child: _homeTabs(context, tabs, home));
             return Scaffold(
-              appBar: AppBar(
-                leading: IconButton(
-                  key: const ValueKey('workspace-pane-toggle'),
-                  tooltip: hidden
-                      ? l10n.chatOpenSidebar
-                      : l10n.chatHideConversationsSidebar,
-                  icon: Icon(hidden ? Icons.menu : Icons.menu_open),
-                  onPressed: preferences == null
-                      ? null
-                      : () => preferences.setSessionPaneHidden(!hidden),
+              appBar: _WorkspaceAppBar(
+                bar: AppBar(
+                  leading: IconButton(
+                    key: const ValueKey('workspace-pane-toggle'),
+                    tooltip: hidden
+                        ? l10n.chatOpenSidebar
+                        : l10n.chatHideConversationsSidebar,
+                    icon: Icon(hidden ? Icons.menu : Icons.menu_open),
+                    onPressed: preferences == null
+                        ? null
+                        : () => preferences.setSessionPaneHidden(!hidden),
+                  ),
+                  title: hasServer
+                      ? const ServerSwitcher(
+                          controlKey: ValueKey('workspace-server'),
+                        )
+                      : const Text('CodeWalk'),
+                  actions: [
+                    if (hidden) ..._hiddenPaneActions(context, preferences),
+                    const WorkspaceAppBarActions(),
+                  ],
                 ),
-                title: hasServer
-                    ? const ServerSwitcher(
-                        controlKey: ValueKey('workspace-server'),
-                      )
-                    : const Text('CodeWalk'),
-                actions: [
-                  if (hidden) ..._hiddenPaneActions(context, preferences),
-                  const WorkspaceAppBarActions(),
-                ],
               ),
               body: _WorkspaceEscape(
                 child: hidden
@@ -208,7 +216,7 @@ class AppShell extends StatelessWidget {
           tooltip: l10n.chatProjectContext,
           icon: const Icon(Icons.folder_open_outlined),
           onPressed: () => unawaited(
-            showProjectPicker(context, catalog: catalog, contexts: contexts),
+            pickWorkspaceProject(context, catalog: catalog, contexts: contexts),
           ),
         ),
       if (!pins.contains(WorkspacePinnedAction.settings))
@@ -223,7 +231,7 @@ class AppShell extends StatelessWidget {
 
   /// Focuses the shown session's composer, else the New Chat draft's.
   static void _focusComposer(BuildContext context) {
-    if (context.read<ShownComposer?>()?.focus() ?? false) return;
+    if (context.read<WorkspaceActions?>()?.focusComposer() ?? false) return;
     context.read<WorkspaceDraftController?>()?.focusComposer();
   }
 
@@ -265,6 +273,19 @@ class AppShell extends StatelessWidget {
   /// Whether the workspace can open a local draft for the selected server.
   static bool canCreate(SessionsController controller) =>
       canOpenWorkspaceDraft(controller);
+}
+
+/// The bar shares the workspace Escape policy, including an open drawer.
+class _WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _WorkspaceAppBar({required this.bar});
+
+  final AppBar bar;
+
+  @override
+  Size get preferredSize => bar.preferredSize;
+
+  @override
+  Widget build(BuildContext context) => _WorkspaceEscape(child: bar);
 }
 
 /// A single Escape in the workspace: it closes the list drawer when it is

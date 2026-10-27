@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
+import '../../app/workspace_actions.dart';
 import '../../platform/sessions/session_tabs_store.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -57,6 +58,14 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   int _highlight = 0;
   bool _openingDraft = false;
   final _closing = <SessionRef>{};
+  WorkspaceActions? _workspaceActions;
+
+  bool _closeShown() {
+    final tab = _tab;
+    if (tab == null) return false;
+    unawaited(_close(tab));
+    return true;
+  }
 
   HostId? get _host {
     final profile = context.read<SessionsController?>()?.selectedProfile;
@@ -71,6 +80,8 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _workspaceActions = context.read<WorkspaceActions?>()
+      ?..claimTab(_closeShown);
   }
 
   @override
@@ -88,6 +99,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
 
   @override
   void dispose() {
+    _workspaceActions?.releaseTab(_closeShown);
     WidgetsBinding.instance.removeObserver(this);
     HardwareKeyboard.instance.removeHandler(_switcherKeys);
     super.dispose();
