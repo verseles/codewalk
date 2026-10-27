@@ -527,6 +527,103 @@ dependencies:
     }),
   );
 
+  test('mixed import and export cycles preserve locator aliases', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; final locator = GetIt.I;\n",
+        'lib/app/a.dart':
+            "import 'b.dart' show leak;\n"
+            "export 'composition_root.dart' show locator;\n"
+            'final alias = leak;\n',
+        'lib/app/b.dart':
+            "import 'a.dart' show locator;\nfinal leak = locator;\n",
+        'lib/app/page.dart':
+            "$widgetImports import 'a.dart'; "
+            'class Page extends StatelessWidget { '
+            'Object build() => alias<Object>(); }\n',
+      },
+    );
+    expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+    expect(
+      result.stderr.toString(),
+      contains(RegExp(r'lib/app/page\.dart(:\d+)? \[widget-locator\]')),
+    );
+  });
+
+  test('an importer on its own export cycle still sees the locator', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; final locator = GetIt.I;\n",
+        'lib/app/facade.dart': "export 'page.dart';\n",
+        'lib/app/page.dart':
+            "$widgetImports import 'facade.dart'; "
+            "export 'composition_root.dart' show locator; "
+            'class Page extends StatelessWidget { '
+            'Object build() => locator<Object>(); }\n',
+      },
+    );
+    expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+    expect(
+      result.stderr.toString(),
+      contains(RegExp(r'lib/app/page\.dart(:\d+)? \[widget-locator\]')),
+    );
+  });
+
+  test('an export cycle keeps each edge hide filter', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; final locator = GetIt.I;\n",
+        'lib/app/cycle_a.dart':
+            "export 'cycle_b.dart';\n"
+            "export 'composition_root.dart' show locator;\n",
+        'lib/app/cycle_b.dart': "export 'cycle_a.dart' hide locator;\n",
+        for (final entry in ['a', 'b'])
+          'lib/app/page_$entry.dart':
+              "$widgetImports import 'cycle_$entry.dart'; "
+              'class Page extends StatelessWidget { '
+              'Object build() => locator<Object>(); }\n',
+      },
+    );
+    expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+    expect(
+      result.stderr.toString(),
+      contains(RegExp(r'lib/app/page_a\.dart(:\d+)? \[widget-locator\]')),
+    );
+    expect(
+      result.stderr.toString(),
+      isNot(
+        contains(RegExp(r'lib/app/page_b\.dart(:\d+)? \[widget-locator\]')),
+      ),
+    );
+  });
+
+  test('mixed import and export cycles preserve harness aliases', () async {
+    final result = await run(
+      files: {
+        'lib/shared/names.dart': "const nativeHarness = 'opencode';\n",
+        'lib/shared/a.dart':
+            "import 'b.dart' show leak;\n"
+            "export 'names.dart' show nativeHarness;\nconst alias = leak;\n",
+        'lib/shared/b.dart':
+            "import 'a.dart' show nativeHarness;\n"
+            'const leak = nativeHarness;\n',
+        'lib/features/chat/page.dart':
+            "import '../../shared/a.dart';\n"
+            'bool show(dynamic kind) => kind == alias;\n',
+      },
+    );
+    expect(result.exitCode, 1, reason: '${result.stdout}\n${result.stderr}');
+    expect(
+      result.stderr.toString(),
+      contains(
+        RegExp(r'lib/features/chat/page\.dart(:\d+)? \[harness-branch\]'),
+      ),
+    );
+  });
+
   test('a locator behind an export cycle is detected from every entry', () async {
     // Each facade reaches the locator; whichever is traversed first sees the
     // other only through the cycle, so a closure cut there must not be

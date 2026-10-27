@@ -51,12 +51,16 @@ class FoundationsTests(unittest.TestCase):
         self.assertEqual(tested, {package["name"] for package in self.packages})
         self.assertIn(["flutter", "test", "--no-pub", "test/v2", "test/contract/chp"], commands)
         self.assertIn(["python3", "tool/l10n/generate_v2_localizations.py", "--check"], commands)
+        self.assertIn(["dart", "test", "tool/ci/test/import_rules_test.dart",
+                       "tool/ci/test/dependency_graph_test.dart"], commands)
         self.assertFalse(any("chrome" in command or "build" in command for command in commands))
         self.assertIn("5 discovered packages", self.output.getvalue())
 
     def test_full_default_still_runs_browser_and_explicit_web_build(self):
         self.check()
         commands = [command for command, _ in self.calls]
+        self.assertIn(["dart", "test", "tool/ci/test/import_rules_test.dart",
+                       "tool/ci/test/dependency_graph_test.dart"], commands)
         self.assertIn(["flutter", "test", "--no-pub", "--platform", "chrome", "test/v2"], commands)
         self.assertIn(["flutter", "build", "web", "--no-pub", "--target", "lib/main_v2.dart",
                        "--output", "build/v2/web"], commands)
@@ -103,6 +107,8 @@ class FoundationsTests(unittest.TestCase):
         for command in (
             ["dart", "run", "tool/ci/import_rules.dart"],
             ["dart", "analyze", "--fatal-infos"], ["dart", "test"],
+            ["dart", "test", "tool/ci/test/import_rules_test.dart",
+             "tool/ci/test/dependency_graph_test.dart"],
             ["python3", "tool/l10n/generate_v2_localizations.py", "--check"],
             ["flutter", "test", "--no-pub", "test/v2", "test/contract/chp"],
         ):

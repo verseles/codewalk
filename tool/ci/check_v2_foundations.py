@@ -64,7 +64,10 @@ def check(root=ROOT, *, profile="full", no_build=False, runner=run):
         runner(["dart", "analyze", "--fatal-infos"], path)
         runner(["dart", "test"], path)
 
-    runner(["dart", "test", "tool/ci/test/import_rules_test.dart"], root)
+    runner([
+        "dart", "test", "tool/ci/test/import_rules_test.dart",
+        "tool/ci/test/dependency_graph_test.dart",
+    ], root)
     runner(["python3", "tool/l10n/generate_v2_localizations.py", "--check"], root)
     app_paths = [
         path for path in ("lib/app", "lib/features", "lib/platform", "lib/shared")

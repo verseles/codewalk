@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -73,13 +74,15 @@ final class DependencyGraph {
   final Map<String, WorkspacePackage> workspace = {};
   final Map<String, String> packageLibraries = {};
   final Map<String, DartSource> _sources = {};
-  // Export closures that never reached the current import/export chain. The
-  // visited sets hold only that chain, so such a closure is the same under any
-  // chain that does not already contain its path; one that was cut short by a
-  // cycle depends on the chain and is recomputed.
-  final Map<(String, bool), Set<String>> _locatorClosures = {};
-  final Map<String, Set<String>> _harnessClosures = {};
-  var _cycleCuts = 0;
+  int _summaryEvaluations = 0;
+  int _summaryTransfers = 0;
+
+  /// Actual namespace work, for deterministic scalability regressions.
+  ({int evaluations, int transfers}) get summaryWork =>
+      (evaluations: _summaryEvaluations, transfers: _summaryTransfers);
+  final Map<String, _NamespaceLibrary> _namespaceLibraries = {};
+  final Map<String, Set<String>> _namespaceDependents = {};
+  final Map<_SummaryKind, Map<String, _SummaryFacts>> _summaries = {};
   late final WidgetTypes _widgetTypes = WidgetTypes(
     unit: (path) => source(path).unit,
     resolve: resolve,
@@ -97,105 +100,187 @@ final class DependencyGraph {
     () => DartSource(path, File(path).readAsStringSync()),
   );
 
-  Set<String> importedLocators(String path) => _importedLocators(path, {path});
+  Set<String> importedLocators(String path) =>
+      _importedSummary(path, _SummaryKind.locator);
 
   Set<String> importedLookupHelpers(String path) =>
-      _importedLocators(path, {path}, lookups: true);
+      _importedSummary(path, _SummaryKind.lookup);
 
-  Set<String> _importedLocators(
-    String path,
-    Set<String> visited, {
-    bool lookups = false,
-  }) {
-    final names = <String>{};
-    for (final directive in source(
-      path,
-    ).unit.directives.whereType<ImportDirective>()) {
-      for (final uri in [
-        directive.uri.stringValue,
-        ...directive.configurations.map((item) => item.uri.stringValue),
-      ]) {
-        if (uri == null) continue;
-        final resolved = resolve(path, uri);
-        if (resolved == null || !isLocal(resolved)) continue;
-        final exported = _locatorExports(resolved, {
-          ...visited,
-        }, lookups: lookups);
-        final visible = _visible(exported, directive.combinators);
-        final prefix = directive.prefix?.name;
-        names.addAll(
-          visible.map((name) => prefix == null ? name : '$prefix.$name'),
-        );
+  Set<String> importedHarnessNames(String path) =>
+      _importedSummary(path, _SummaryKind.harness);
+
+  Set<String> widgetDeclarationNames(String path) =>
+      _widgetTypes.declarations(path);
+
+  /// A library's dependencies are complete before its facts can be published.
+  /// A later root may depend on this component, but cannot add dependencies to
+  /// an already indexed library in the same static source snapshot.
+  void _discoverNamespaces(String origin) {
+    final discovered = <String, _NamespaceLibrary>{};
+    final pending = [origin];
+    while (pending.isNotEmpty) {
+      final path = pending.removeLast();
+      if (_namespaceLibraries.containsKey(path) ||
+          discovered.containsKey(path)) {
+        continue;
+      }
+      final unit = source(path).unit;
+      final imports = _namespaceEdges(
+        path,
+        unit.directives.whereType<ImportDirective>(),
+      );
+      final exports = _namespaceEdges(
+        path,
+        unit.directives.whereType<ExportDirective>(),
+      );
+      final typedLocators = <String>{};
+      final bindings = <String, AstNode>{};
+      final harnessBindings = <String, Expression>{};
+      for (final declaration in unit.declarations) {
+        if (declaration is TopLevelVariableDeclaration) {
+          for (final variable in declaration.variables.variables) {
+            if (variable.initializer case final initializer?) {
+              bindings[variable.name.lexeme] = initializer;
+              harnessBindings[variable.name.lexeme] = initializer;
+            }
+            if (declaration.variables.type case final NamedType type
+                when type.name.lexeme == 'GetIt') {
+              typedLocators.add(variable.name.lexeme);
+            }
+          }
+        } else if (declaration is FunctionDeclaration) {
+          bindings[declaration.name.lexeme] = declaration.functionExpression;
+        }
+      }
+      discovered[path] = _NamespaceLibrary(
+        unit: unit,
+        imports: imports,
+        exports: exports,
+        typedLocators: typedLocators,
+        bindings: bindings,
+        harnessBindings: harnessBindings,
+      );
+      pending.addAll([...imports, ...exports].map((edge) => edge.target));
+    }
+    // Keep a failed discovery from leaving a partially indexed component.
+    _namespaceLibraries.addAll(discovered);
+    for (final entry in discovered.entries) {
+      for (final edge in [...entry.value.imports, ...entry.value.exports]) {
+        _namespaceDependents
+            .putIfAbsent(edge.target, () => <String>{})
+            .add(entry.key);
       }
     }
-    return names;
   }
 
-  Set<String> _locatorExports(
+  List<_NamespaceEdge> _namespaceEdges(
     String path,
-    Set<String> visited, {
-    bool lookups = false,
-  }) {
-    if (!visited.add(path)) {
-      _cycleCuts++;
-      return {};
-    }
-    final cached = _locatorClosures[(path, lookups)];
-    if (cached != null) return cached;
-    final cuts = _cycleCuts;
-    final unit = source(path).unit;
-    final names = <String>{};
-    final imported = _importedLocators(path, visited, lookups: lookups);
-    final bindings = <String, AstNode>{};
-    for (final declaration in unit.declarations) {
-      if (declaration is TopLevelVariableDeclaration) {
-        for (final variable in declaration.variables.variables) {
-          if (variable.initializer != null) {
-            bindings[variable.name.lexeme] = variable.initializer!;
-          }
-          if (declaration.variables.type is NamedType &&
-              (declaration.variables.type! as NamedType).name.lexeme ==
-                  'GetIt') {
-            names.add(variable.name.lexeme);
-          }
-        }
-      } else if (declaration is FunctionDeclaration) {
-        bindings[declaration.name.lexeme] = declaration.functionExpression;
-      }
-    }
-    var changed = true;
-    while (changed) {
-      changed = false;
-      final values = LocatorValues(unit, {...names, ...imported});
-      for (final binding in bindings.entries) {
-        if (lookups
-            ? _referencesLocator(binding.value, {...names, ...imported})
-            : values.escapes(binding.value)) {
-          changed = names.add(binding.key) || changed;
-        }
-      }
-    }
-    for (final directive in unit.directives.whereType<ExportDirective>()) {
+    Iterable<NamespaceDirective> directives,
+  ) {
+    final edges = <_NamespaceEdge>[];
+    for (final directive in directives) {
       for (final uri in [
         directive.uri.stringValue,
         ...directive.configurations.map((item) => item.uri.stringValue),
       ]) {
         if (uri == null) continue;
-        final resolved = resolve(path, uri);
-        if (resolved == null || !isLocal(resolved)) continue;
-        names.addAll(
-          _visible(
-            _locatorExports(resolved, {...visited}, lookups: lookups),
-            directive.combinators,
+        final target = resolve(path, uri);
+        if (target == null || !isLocal(target)) continue;
+        edges.add(
+          _NamespaceEdge(
+            target,
+            directive.combinators.toList(),
+            prefix: directive is ImportDirective
+                ? directive.prefix?.name
+                : null,
           ),
         );
       }
     }
-    final result = Set<String>.unmodifiable(
-      names.where((name) => !name.startsWith('_')),
-    );
-    if (_cycleCuts == cuts) _locatorClosures[(path, lookups)] = result;
-    return result;
+    return edges;
+  }
+
+  Set<String> _importedSummary(String path, _SummaryKind kind) {
+    final completed = _summaries.putIfAbsent(kind, () => {});
+    final cached = completed[path];
+    if (cached != null) return cached.imported;
+    _discoverNamespaces(path);
+    final working = {...completed};
+    final queue = ListQueue<String>();
+    final queued = <String>{};
+    for (final library in _namespaceLibraries.keys) {
+      if (completed.containsKey(library)) continue;
+      working[library] = _SummaryFacts();
+      queue.add(library);
+      queued.add(library);
+    }
+    while (queue.isNotEmpty) {
+      final library = queue.removeFirst();
+      queued.remove(library);
+      final node = _namespaceLibraries[library]!;
+      final facts = working[library]!;
+      _summaryEvaluations++;
+      final imported = <String>{};
+      for (final edge in node.imports) {
+        _summaryTransfers++;
+        final visible = _visible(
+          working[edge.target]!.exported,
+          edge.combinators,
+        );
+        imported.addAll(
+          visible.map(
+            (name) => edge.prefix == null ? name : '${edge.prefix}.$name',
+          ),
+        );
+      }
+      if (kind != _SummaryKind.harness) {
+        facts.local.addAll(node.typedLocators);
+      }
+      var changed = true;
+      while (changed) {
+        changed = false;
+        final visible = {...facts.local, ...imported};
+        if (kind == _SummaryKind.harness) {
+          for (final binding in node.harnessBindings.entries) {
+            if (_referencesHarness(binding.value, visible)) {
+              changed = facts.local.add(binding.key) || changed;
+            }
+          }
+        } else {
+          final values = kind == _SummaryKind.locator
+              ? LocatorValues(node.unit, visible)
+              : null;
+          for (final binding in node.bindings.entries) {
+            if (kind == _SummaryKind.lookup
+                ? _referencesLocator(binding.value, visible)
+                : values!.escapes(binding.value)) {
+              changed = facts.local.add(binding.key) || changed;
+            }
+          }
+        }
+      }
+      // Re-exports form the public namespace; they never become local inputs.
+      final public = facts.local.where((name) => !name.startsWith('_')).toSet();
+      for (final edge in node.exports) {
+        _summaryTransfers++;
+        public.addAll(
+          _visible(working[edge.target]!.exported, edge.combinators),
+        );
+      }
+      facts.imported = Set<String>.unmodifiable(imported);
+      final before = facts.exported.length;
+      facts.exported.addAll(public);
+      if (facts.exported.length == before) continue;
+      for (final dependent
+          in _namespaceDependents[library] ?? const <String>{}) {
+        if (!completed.containsKey(dependent) && queued.add(dependent)) {
+          queue.add(dependent);
+        }
+      }
+    }
+    // No partial fixed point survives an exception as a usable cached answer.
+    completed.addAll(working);
+    return completed[path]!.imported;
   }
 
   bool _referencesLocator(AstNode node, Set<String> names) {
@@ -225,90 +310,6 @@ final class DependencyGraph {
       }
     }
     return visible;
-  }
-
-  Set<String> widgetDeclarationNames(String path) =>
-      _widgetTypes.declarations(path);
-
-  Set<String> importedHarnessNames(String path) =>
-      _importedHarnessNames(path, {path});
-
-  Set<String> _importedHarnessNames(String path, Set<String> visited) {
-    final names = <String>{};
-    for (final directive in source(
-      path,
-    ).unit.directives.whereType<ImportDirective>()) {
-      for (final uri in [
-        directive.uri.stringValue,
-        ...directive.configurations.map((item) => item.uri.stringValue),
-      ]) {
-        if (uri == null) continue;
-        final resolved = resolve(path, uri);
-        if (resolved == null || !isLocal(resolved)) continue;
-        final visible = _visible(
-          _harnessExports(resolved, {...visited}),
-          directive.combinators,
-        );
-        final prefix = directive.prefix?.name;
-        names.addAll(
-          visible.map((name) => prefix == null ? name : '$prefix.$name'),
-        );
-      }
-    }
-    return names;
-  }
-
-  Set<String> _harnessExports(String path, Set<String> visited) {
-    if (!visited.add(path)) {
-      _cycleCuts++;
-      return {};
-    }
-    final cached = _harnessClosures[path];
-    if (cached != null) return cached;
-    final cuts = _cycleCuts;
-    final unit = source(path).unit;
-    final names = <String>{};
-    final imported = _importedHarnessNames(path, visited);
-    final bindings = <String, Expression>{};
-    for (final declaration
-        in unit.declarations.whereType<TopLevelVariableDeclaration>()) {
-      for (final variable in declaration.variables.variables) {
-        if (variable.initializer != null) {
-          bindings[variable.name.lexeme] = variable.initializer!;
-        }
-      }
-    }
-    var changed = true;
-    while (changed) {
-      changed = false;
-      for (final binding in bindings.entries) {
-        if (_referencesHarness(binding.value, {...names, ...imported})) {
-          changed = names.add(binding.key) || changed;
-        }
-      }
-    }
-    for (final directive in unit.directives.whereType<ExportDirective>()) {
-      for (final uri in [
-        directive.uri.stringValue,
-        ...directive.configurations.map((item) => item.uri.stringValue),
-      ]) {
-        if (uri == null) continue;
-        final resolved = resolve(path, uri);
-        if (resolved != null && isLocal(resolved)) {
-          names.addAll(
-            _visible(
-              _harnessExports(resolved, {...visited}),
-              directive.combinators,
-            ),
-          );
-        }
-      }
-    }
-    final result = Set<String>.unmodifiable(
-      names.where((name) => !name.startsWith('_')),
-    );
-    if (_cycleCuts == cuts) _harnessClosures[path] = result;
-    return result;
   }
 
   bool _referencesHarness(AstNode node, Set<String> names) {
@@ -764,4 +765,36 @@ final class DependencyGraph {
       }
     }
   }
+}
+
+enum _SummaryKind { locator, lookup, harness }
+
+final class _NamespaceEdge {
+  const _NamespaceEdge(this.target, this.combinators, {this.prefix});
+  final String target;
+  final List<Combinator> combinators;
+  final String? prefix;
+}
+
+final class _NamespaceLibrary {
+  const _NamespaceLibrary({
+    required this.unit,
+    required this.imports,
+    required this.exports,
+    required this.typedLocators,
+    required this.bindings,
+    required this.harnessBindings,
+  });
+  final CompilationUnit unit;
+  final List<_NamespaceEdge> imports;
+  final List<_NamespaceEdge> exports;
+  final Set<String> typedLocators;
+  final Map<String, AstNode> bindings;
+  final Map<String, Expression> harnessBindings;
+}
+
+final class _SummaryFacts {
+  final local = <String>{};
+  final exported = <String>{};
+  Set<String> imported = const {};
 }
