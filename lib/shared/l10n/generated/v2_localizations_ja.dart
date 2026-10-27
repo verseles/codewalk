@@ -1871,4 +1871,96 @@ class V2LocalizationsJa extends V2Localizations {
   String msgInfoTokens(int total) {
     return 'トークン: $total';
   }
+
+  @override
+  String get chatHelloAssistant => 'こんにちは！私はあなたのAIアシスタントです';
+
+  @override
+  String get chatMessageHide => '非表示';
+
+  @override
+  String get chatMessageShow => '表示';
+
+  @override
+  String get chatMessageShowLessCompact => '閉じる';
+
+  @override
+  String get chatMessageShowMoreCompact => 'もっと見る';
+
+  @override
+  String get chatMessageThinking => '思考中';
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件が注意を要します',
+      one: '1件が注意を要します',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => 'ツール呼び出し';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回',
+      one: '1回',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count件',
+      one: '+1件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件完了',
+      one: '1件完了',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolQueuedCount(int count) {
+    return '$count キュー待ち';
+  }
+
+  @override
+  String chatMessageToolRunningCount(int count) {
+    return '$count 実行中';
+  }
+
+  @override
+  String get chatWelcomeSubmessage => '今日はどのようなご用件ですか？';
+
+  @override
+  String get chatWorkExpand => '展開';
+
+  @override
+  String get chatWorkHide => '非表示';
+
+  @override
+  String get chatWorkMessageOne => '1件の作業メッセージ';
+
+  @override
+  String chatWorkMessagesMultiple(int count) {
+    return '$count件の作業メッセージ';
+  }
 }

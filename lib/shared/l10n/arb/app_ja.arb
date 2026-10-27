@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "ステップ #{step} 開始",
   "msgInfoCost": "コスト: ${cost}",
   "msgInfoMessageInfo": "メッセージ情報",
-  "msgInfoTokens": "トークン: {total}"
+  "msgInfoTokens": "トークン: {total}",
+  "chatHelloAssistant": "こんにちは！私はあなたのAIアシスタントです",
+  "chatMessageHide": "非表示",
+  "chatMessageShow": "表示",
+  "chatMessageShowLessCompact": "閉じる",
+  "chatMessageShowMoreCompact": "もっと見る",
+  "chatMessageThinking": "思考中",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1件が注意を要します} other{{count}件が注意を要します}}",
+  "chatMessageToolCallsTitle": "ツール呼び出し",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1回} other{{count}回}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1件} other{+{count}件}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1件完了} other{{count}件完了}}",
+  "chatMessageToolQueuedCount": "{count} キュー待ち",
+  "chatMessageToolRunningCount": "{count} 実行中",
+  "chatWelcomeSubmessage": "今日はどのようなご用件ですか？",
+  "chatWorkExpand": "展開",
+  "chatWorkHide": "非表示",
+  "chatWorkMessageOne": "1件の作業メッセージ",
+  "chatWorkMessagesMultiple": "{count}件の作業メッセージ"
 }

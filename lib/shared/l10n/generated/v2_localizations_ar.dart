@@ -1936,4 +1936,97 @@ class V2LocalizationsAr extends V2Localizations {
   String msgInfoTokens(int total) {
     return 'الرموز (Tokens): $total';
   }
+
+  @override
+  String get chatHelloAssistant =>
+      'مرحباً! أنا مساعد الذكاء الاصطناعي الخاص بك';
+
+  @override
+  String get chatMessageHide => 'إخفاء';
+
+  @override
+  String get chatMessageShow => 'إظهار';
+
+  @override
+  String get chatMessageShowLessCompact => 'أقل';
+
+  @override
+  String get chatMessageShowMoreCompact => 'المزيد';
+
+  @override
+  String get chatMessageThinking => 'يفكر';
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count بحاجة إلى انتباه',
+      one: '1 بحاجة إلى انتباه',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => 'استدعاءات الأدوات';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count استدعاءات',
+      one: 'استدعاء واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count إضافي',
+      one: '+1 إضافي',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مكتملة',
+      one: '1 مكتمل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolQueuedCount(int count) {
+    return '$count في قائمة الانتظار';
+  }
+
+  @override
+  String chatMessageToolRunningCount(int count) {
+    return '$count قيد التشغيل';
+  }
+
+  @override
+  String get chatWelcomeSubmessage => 'كيف يمكنني مساعدتك اليوم؟';
+
+  @override
+  String get chatWorkExpand => 'توسيع';
+
+  @override
+  String get chatWorkHide => 'إخفاء';
+
+  @override
+  String get chatWorkMessageOne => 'رسالة عمل واحدة';
+
+  @override
+  String chatWorkMessagesMultiple(int count) {
+    return '$count رسائل عمل';
+  }
 }

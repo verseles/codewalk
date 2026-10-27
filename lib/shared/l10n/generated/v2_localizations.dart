@@ -3625,6 +3625,114 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Tokens: {total}'**
   String msgInfoTokens(int total);
+
+  /// CodeWalk UI string — chatHelloAssistant
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! I am your AI assistant'**
+  String get chatHelloAssistant;
+
+  /// CodeWalk UI string — chatMessageHide
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get chatMessageHide;
+
+  /// CodeWalk UI string — chatMessageShow
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get chatMessageShow;
+
+  /// CodeWalk UI string — chatMessageShowLessCompact
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get chatMessageShowLessCompact;
+
+  /// CodeWalk UI string — chatMessageShowMoreCompact
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get chatMessageShowMoreCompact;
+
+  /// CodeWalk UI string — chatMessageThinking
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get chatMessageThinking;
+
+  /// CodeWalk UI string — chatMessageToolAttentionCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 needs attention} other{{count} need attention}}'**
+  String chatMessageToolAttentionCount(int count);
+
+  /// CodeWalk UI string — chatMessageToolCallsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tool calls'**
+  String get chatMessageToolCallsTitle;
+
+  /// CodeWalk UI string — chatMessageToolChainCallsCompact
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 call} other{{count} calls}}'**
+  String chatMessageToolChainCallsCompact(int count);
+
+  /// CodeWalk UI string — chatMessageToolChainMore
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 more} other{+{count} more}}'**
+  String chatMessageToolChainMore(int count);
+
+  /// CodeWalk UI string — chatMessageToolDoneCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 done} other{{count} done}}'**
+  String chatMessageToolDoneCount(int count);
+
+  /// CodeWalk UI string — chatMessageToolQueuedCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count} queued'**
+  String chatMessageToolQueuedCount(int count);
+
+  /// CodeWalk UI string — chatMessageToolRunningCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count} running'**
+  String chatMessageToolRunningCount(int count);
+
+  /// CodeWalk UI string — chatWelcomeSubmessage
+  ///
+  /// In en, this message translates to:
+  /// **'How can I help you today?'**
+  String get chatWelcomeSubmessage;
+
+  /// CodeWalk UI string — chatWorkExpand
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get chatWorkExpand;
+
+  /// CodeWalk UI string — chatWorkHide
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get chatWorkHide;
+
+  /// CodeWalk UI string — chatWorkMessageOne
+  ///
+  /// In en, this message translates to:
+  /// **'1 work message'**
+  String get chatWorkMessageOne;
+
+  /// CodeWalk UI string — chatWorkMessagesMultiple
+  ///
+  /// In en, this message translates to:
+  /// **'{count} work messages'**
+  String chatWorkMessagesMultiple(int count);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

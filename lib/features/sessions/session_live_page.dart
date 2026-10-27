@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/workspace_actions.dart';
@@ -267,6 +268,50 @@ class _SessionLivePageState extends State<SessionLivePage>
     );
   }
 
+  /// What an empty timeline shows: a quiet loader while the session loads,
+  /// never the empty conversation (#69), and the empty conversation once a
+  /// read of the session reported no items. Nothing while the view cannot be
+  /// read.
+  WidgetBuilder? _empty(SessionLiveController c, V2Localizations l10n) {
+    if (c.loading) {
+      return (context) => SizedBox.square(
+        key: const ValueKey('live-hydrating'),
+        dimension: 28,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          semanticsLabel: l10n.liveHydrating,
+        ),
+      );
+    }
+    // Only a session synced at least once is known to be empty: a failed
+    // first read may still publish a state with no items.
+    if (c.state == null || c.view?.lastSyncedAt == null) return null;
+    return (context) {
+      final theme = Theme.of(context);
+      return Column(
+        key: const ValueKey('live-empty'),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Symbols.waving_hand, size: 64, color: theme.colorScheme.primary),
+          const SizedBox(height: 16),
+          Text(
+            l10n.chatHelloAssistant,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.chatWelcomeSubmessage,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    };
+  }
+
   bool _openingHistory = false;
 
   /// Opens the read-only history viewer of this session, the fallback once
@@ -496,6 +541,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                         child: SessionLiveTimeline(
                           onOpenChild: _openChild,
                           items: items,
+                          emptyBuilder: _empty(c, l10n),
                           scroll: widget.controller.scroll,
                           settled: settled,
                           olderLoading: c.olderHistory.loading,

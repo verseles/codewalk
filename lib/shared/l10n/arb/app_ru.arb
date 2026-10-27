@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "Шаг #{step} начат",
   "msgInfoCost": "Стоимость: ${cost}",
   "msgInfoMessageInfo": "Информация о сообщении",
-  "msgInfoTokens": "Токены: {total}"
+  "msgInfoTokens": "Токены: {total}",
+  "chatHelloAssistant": "Привет! Я ваш ИИ-ассистент",
+  "chatMessageHide": "Скрыть",
+  "chatMessageShow": "Показать",
+  "chatMessageShowLessCompact": "Меньше",
+  "chatMessageShowMoreCompact": "Больше",
+  "chatMessageThinking": "Размышление",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 требует внимания} other{{count} требуют внимания}}",
+  "chatMessageToolCallsTitle": "Вызовы инструментов",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 вызов} few{{count} вызова} many{{count} вызовов} other{{count} вызовов}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 еще} other{+{count} еще}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 готово} other{{count} готово}}",
+  "chatMessageToolQueuedCount": "В очереди: {count}",
+  "chatMessageToolRunningCount": "Выполняется: {count}",
+  "chatWelcomeSubmessage": "Чем я могу помочь вам сегодня?",
+  "chatWorkExpand": "Развернуть",
+  "chatWorkHide": "Скрыть",
+  "chatWorkMessageOne": "1 рабочее сообщение",
+  "chatWorkMessagesMultiple": "{count} рабочих сообщений"
 }

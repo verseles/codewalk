@@ -1833,4 +1833,96 @@ class V2LocalizationsZh extends V2Localizations {
   String msgInfoTokens(int total) {
     return 'Token数: $total';
   }
+
+  @override
+  String get chatHelloAssistant => '你好！我是你的 AI 助手';
+
+  @override
+  String get chatMessageHide => '隐藏';
+
+  @override
+  String get chatMessageShow => '显示';
+
+  @override
+  String get chatMessageShowLessCompact => '收起';
+
+  @override
+  String get chatMessageShowMoreCompact => '更多';
+
+  @override
+  String get chatMessageThinking => '思考中';
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项需要关注',
+      one: '1 项需要关注',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => '工具调用';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次',
+      one: '1 次',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count 更多',
+      one: '+1 更多',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项完成',
+      one: '1 项完成',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolQueuedCount(int count) {
+    return '$count 排队中';
+  }
+
+  @override
+  String chatMessageToolRunningCount(int count) {
+    return '$count 运行中';
+  }
+
+  @override
+  String get chatWelcomeSubmessage => '今天我能为您做些什么？';
+
+  @override
+  String get chatWorkExpand => '展开';
+
+  @override
+  String get chatWorkHide => '隐藏';
+
+  @override
+  String get chatWorkMessageOne => '1 条工作消息';
+
+  @override
+  String chatWorkMessagesMultiple(int count) {
+    return '$count 条工作消息';
+  }
 }

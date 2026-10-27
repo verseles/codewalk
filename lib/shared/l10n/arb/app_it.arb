@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "Passaggio avviato #{step}",
   "msgInfoCost": "Costo: ${cost}",
   "msgInfoMessageInfo": "Informazioni messaggio",
-  "msgInfoTokens": "Token: {total}"
+  "msgInfoTokens": "Token: {total}",
+  "chatHelloAssistant": "Ciao! Sono il tuo assistente IA",
+  "chatMessageHide": "Nascondi",
+  "chatMessageShow": "Mostra",
+  "chatMessageShowLessCompact": "Meno",
+  "chatMessageShowMoreCompact": "Altro",
+  "chatMessageThinking": "Sta pensando",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 richiede attenzione} other{{count} richiedono attenzione}}",
+  "chatMessageToolCallsTitle": "Chiamate a strumenti",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 chiamata} other{{count} chiamate}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 altro} other{+{count} altri}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 completata} other{{count} completate}}",
+  "chatMessageToolQueuedCount": "{count} in coda",
+  "chatMessageToolRunningCount": "{count} in esecuzione",
+  "chatWelcomeSubmessage": "Come posso aiutarti oggi?",
+  "chatWorkExpand": "Espandi",
+  "chatWorkHide": "Nascondi",
+  "chatWorkMessageOne": "1 messaggio di lavoro",
+  "chatWorkMessagesMultiple": "{count} messaggi di lavoro"
 }

@@ -1541,5 +1541,31 @@
   "chatMessageStepStarted": "#{step} 단계 시작됨",
   "msgInfoCost": "비용: ${cost}",
   "msgInfoMessageInfo": "메시지 정보",
-  "msgInfoTokens": "토큰: {total}"
+  "msgInfoTokens": "토큰: {total}",
+  "chatHelloAssistant": "안녕하세요! 저는 AI 어시스턴트입니다",
+  "chatMessageHide": "숨기기",
+  "chatMessageShow": "보기",
+  "chatMessageShowLessCompact": "접기",
+  "chatMessageShowMoreCompact": "더보기",
+  "chatMessageThinking": "생각 중",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1개에 주의 필요} other{{count}개에 주의 필요}}",
+  "chatMessageToolCallsTitle": "도구 호출",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1개} other{{count}개}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1개 더} other{+{count}개 더}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1개 완료} other{{count}개 완료}}",
+  "chatMessageToolQueuedCount": "{count}개 대기 중",
+  "chatMessageToolRunningCount": "{count}개 실행 중",
+  "chatWelcomeSubmessage": "오늘 무엇을 도와드릴까요?",
+  "chatWorkExpand": "펼치기",
+  "chatWorkHide": "숨기기",
+  "chatWorkMessageOne": "작업 메시지 1개",
+  "chatWorkMessagesMultiple": "작업 메시지 {count}개"
 }

@@ -21,6 +21,26 @@ PORT_KEYS = {
     "chatMessageStepStarted",
     "chatMessageStepFinished",
     "chatMessageMetadataAvailable",
+    # Work groups, tool runs, reasoning and the empty conversation carry the
+    # retained reference's own strings, compact forms included.
+    "chatMessageThinking",
+    "chatMessageShow",
+    "chatMessageHide",
+    "chatMessageShowMoreCompact",
+    "chatMessageShowLessCompact",
+    "chatWorkExpand",
+    "chatWorkHide",
+    "chatWorkMessageOne",
+    "chatWorkMessagesMultiple",
+    "chatMessageToolCallsTitle",
+    "chatMessageToolChainCallsCompact",
+    "chatMessageToolChainMore",
+    "chatMessageToolRunningCount",
+    "chatMessageToolQueuedCount",
+    "chatMessageToolAttentionCount",
+    "chatMessageToolDoneCount",
+    "chatHelloAssistant",
+    "chatWelcomeSubmessage",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

@@ -2443,5 +2443,112 @@
         "type": "int"
       }
     }
+  },
+  "chatHelloAssistant": "Hello! I am your AI assistant",
+  "@chatHelloAssistant": {
+    "description": "CodeWalk UI string — chatHelloAssistant"
+  },
+  "chatMessageHide": "Hide",
+  "@chatMessageHide": {
+    "description": "CodeWalk UI string — chatMessageHide"
+  },
+  "chatMessageShow": "Show",
+  "@chatMessageShow": {
+    "description": "CodeWalk UI string — chatMessageShow"
+  },
+  "chatMessageShowLessCompact": "Less",
+  "@chatMessageShowLessCompact": {
+    "description": "CodeWalk UI string — chatMessageShowLessCompact"
+  },
+  "chatMessageShowMoreCompact": "More",
+  "@chatMessageShowMoreCompact": {
+    "description": "CodeWalk UI string — chatMessageShowMoreCompact"
+  },
+  "chatMessageThinking": "Thinking",
+  "@chatMessageThinking": {
+    "description": "CodeWalk UI string — chatMessageThinking"
+  },
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 needs attention} other{{count} need attention}}",
+  "@chatMessageToolAttentionCount": {
+    "description": "CodeWalk UI string — chatMessageToolAttentionCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolCallsTitle": "Tool calls",
+  "@chatMessageToolCallsTitle": {
+    "description": "CodeWalk UI string — chatMessageToolCallsTitle"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 call} other{{count} calls}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 more} other{+{count} more}}",
+  "@chatMessageToolChainMore": {
+    "description": "CodeWalk UI string — chatMessageToolChainMore",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolDoneCount": "{count, plural, =1{1 done} other{{count} done}}",
+  "@chatMessageToolDoneCount": {
+    "description": "CodeWalk UI string — chatMessageToolDoneCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolQueuedCount": "{count} queued",
+  "@chatMessageToolQueuedCount": {
+    "description": "CodeWalk UI string — chatMessageToolQueuedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolRunningCount": "{count} running",
+  "@chatMessageToolRunningCount": {
+    "description": "CodeWalk UI string — chatMessageToolRunningCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWelcomeSubmessage": "How can I help you today?",
+  "@chatWelcomeSubmessage": {
+    "description": "CodeWalk UI string — chatWelcomeSubmessage"
+  },
+  "chatWorkExpand": "Expand",
+  "@chatWorkExpand": {
+    "description": "CodeWalk UI string — chatWorkExpand"
+  },
+  "chatWorkHide": "Hide",
+  "@chatWorkHide": {
+    "description": "CodeWalk UI string — chatWorkHide"
+  },
+  "chatWorkMessageOne": "1 work message",
+  "@chatWorkMessageOne": {
+    "description": "CodeWalk UI string — chatWorkMessageOne"
+  },
+  "chatWorkMessagesMultiple": "{count} work messages",
+  "@chatWorkMessagesMultiple": {
+    "description": "CodeWalk UI string — chatWorkMessagesMultiple",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

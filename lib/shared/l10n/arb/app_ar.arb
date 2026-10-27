@@ -1529,5 +1529,31 @@
   "chatMessageStepStarted": "بدأت الخطوة #{step}",
   "msgInfoCost": "التكلفة: ${cost}",
   "msgInfoMessageInfo": "معلومات الرسالة",
-  "msgInfoTokens": "الرموز (Tokens): {total}"
+  "msgInfoTokens": "الرموز (Tokens): {total}",
+  "chatHelloAssistant": "مرحباً! أنا مساعد الذكاء الاصطناعي الخاص بك",
+  "chatMessageHide": "إخفاء",
+  "chatMessageShow": "إظهار",
+  "chatMessageShowLessCompact": "أقل",
+  "chatMessageShowMoreCompact": "المزيد",
+  "chatMessageThinking": "يفكر",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 بحاجة إلى انتباه} other{{count} بحاجة إلى انتباه}}",
+  "chatMessageToolCallsTitle": "استدعاءات الأدوات",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{استدعاء واحد} other{{count} استدعاءات}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 إضافي} other{+{count} إضافي}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 مكتمل} other{{count} مكتملة}}",
+  "chatMessageToolQueuedCount": "{count} في قائمة الانتظار",
+  "chatMessageToolRunningCount": "{count} قيد التشغيل",
+  "chatWelcomeSubmessage": "كيف يمكنني مساعدتك اليوم؟",
+  "chatWorkExpand": "توسيع",
+  "chatWorkHide": "إخفاء",
+  "chatWorkMessageOne": "رسالة عمل واحدة",
+  "chatWorkMessagesMultiple": "{count} رسائل عمل"
 }

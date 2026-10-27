@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "步骤 #{step} 已开始",
   "msgInfoCost": "费用: ${cost}",
   "msgInfoMessageInfo": "消息信息",
-  "msgInfoTokens": "Token数: {total}"
+  "msgInfoTokens": "Token数: {total}",
+  "chatHelloAssistant": "你好！我是你的 AI 助手",
+  "chatMessageHide": "隐藏",
+  "chatMessageShow": "显示",
+  "chatMessageShowLessCompact": "收起",
+  "chatMessageShowMoreCompact": "更多",
+  "chatMessageThinking": "思考中",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 项需要关注} other{{count} 项需要关注}}",
+  "chatMessageToolCallsTitle": "工具调用",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 次} other{{count} 次}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 更多} other{+{count} 更多}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 项完成} other{{count} 项完成}}",
+  "chatMessageToolQueuedCount": "{count} 排队中",
+  "chatMessageToolRunningCount": "{count} 运行中",
+  "chatWelcomeSubmessage": "今天我能为您做些什么？",
+  "chatWorkExpand": "展开",
+  "chatWorkHide": "隐藏",
+  "chatWorkMessageOne": "1 条工作消息",
+  "chatWorkMessagesMultiple": "{count} 条工作消息"
 }

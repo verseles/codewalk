@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +8,9 @@ import 'package:flutter/rendering.dart';
 import '../../shared/l10n/l10n_context.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
-import 'session_message_info.dart';
+import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
+import 'session_work_group.dart';
 
 /// The live session timeline: the resident items, the header and the
 /// viewport rules that keep the newest content in view.
@@ -20,6 +23,10 @@ import 'session_timeline_tile.dart';
 /// rows open a center sliver: what comes before it grows upwards and what
 /// comes after it grows downwards, so a page added on top never moves the row
 /// the reader is reading, whatever the heights of the rows it adds.
+///
+/// The items are presented in rows ([SessionTimelinePresentation]): calls in
+/// runs, and a finished turn's work collapsed behind its final answer. The
+/// center and the arrivals are still measured on the items themselves.
 class SessionLiveTimeline extends StatefulWidget {
   const SessionLiveTimeline({
     super.key,
@@ -32,6 +39,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.topBuilder,
     this.errorRecovery,
     this.onOpenChild,
+    this.emptyBuilder,
   });
 
   /// The resident items, in the server's order.
@@ -61,6 +69,11 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// Opens the sub-conversation of a subagent card; null for none.
   final ValueChanged<ToolCall>? onOpenChild;
+
+  /// The block below the header while there is no item: a loader while the
+  /// session loads, or the empty conversation once it is known to be empty.
+  /// Null for none.
+  final WidgetBuilder? emptyBuilder;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -123,8 +136,14 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// The center sliver's key, which the scroll view anchors to.
   final _centerKey = UniqueKey();
 
-  /// What each row keeps while it is not built, such as an opened tool.
+  /// What each row keeps while it is not built.
   final _rowState = PageStorageBucket();
+
+  /// How the items are presented, and what the reader opened.
+  final _presentation = SessionTimelinePresentation();
+
+  /// The items, published after each build for the dialogs opened from rows.
+  final _liveItems = ValueNotifier<List<TimelineItem>>(const []);
 
   /// Whether reaching the top may ask for an older page: armed once the
   /// reader is far from the top, so a list that stays near the top asks once.
@@ -184,6 +203,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   @override
   void dispose() {
+    _liveItems.dispose();
     widget.scroll.controller.removeListener(widget.scroll.onViewportChanged);
     widget.scroll.timelineMemory = (
       pivot: _pivot,
@@ -264,6 +284,15 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       ScrollDirection.forward => position.pixels > position.minScrollExtent,
       ScrollDirection.idle => false,
     };
+  }
+
+  /// The reader opened or closed a row's content: the growth that makes is
+  /// the reader's own, so the follow does not chase it.
+  void _onReaderToggle() => _lastMaxScrollExtent = null;
+
+  void _toggle(String id) {
+    _onReaderToggle();
+    setState(() => _presentation.toggle(id));
   }
 
   /// The content dimensions changed. A growth is followed while the reader
@@ -387,10 +416,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     widget.scroll.reveal();
   }
 
-  /// The index of the last assistant answer among the resident items.
-  int? _lastAnswerIndex(List<TimelineItem> items) {
-    for (var i = items.length - 1; i >= 0; i--) {
-      if (items[i] is AssistantText) return i;
+  /// The index of the row of the last assistant answer.
+  int? _lastAnswerIndex(List<SessionTimelineRow> rows) {
+    for (var i = rows.length - 1; i >= 0; i--) {
+      if (rows[i] case SessionItemRow(item: AssistantText())) return i;
     }
     return null;
   }
@@ -425,14 +454,25 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     _lastItemCount = signature.length;
     _lastSignature = signature;
-    _placePivot(items);
+    if (!identical(_liveItems.value, items)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _liveItems.value = widget.items;
+      });
+    }
+    final rows = _presentation.project(items, settled: widget.settled);
+    final rowIndex = {for (final (i, row) in rows.indexed) row.key: i};
+    _placePivot(rows);
     // The answer row sets its context again when the list lays it out.
     _answerContext = null;
-    final answerIndex = _lastAnswerIndex(items);
+    final answerIndex = _lastAnswerIndex(rows);
     // With no older rows above, the top block opens the center, so a list
     // that fits the screen still shows it; otherwise it tops the older rows.
     final topInCenter = widget.topBuilder != null && _olderCount == 0;
-    final lead = topInCenter ? 2 : 1;
+    final leads = <WidgetBuilder>[
+      if (topInCenter) widget.topBuilder!,
+      widget.headerBuilder,
+    ];
+    final lead = leads.length;
     return ListenableBuilder(
       listenable: widget.scroll,
       builder: (context, _) => Stack(
@@ -444,69 +484,74 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 onNotification: _onScroll,
                 // Rows keep what the reader opened while they leave the
                 // lazily built list and come back.
-                child: PageStorage(
-                  bucket: _rowState,
-                  child: CustomScrollView(
-                    controller: widget.scroll.controller,
-                    center: _centerKey,
-                    slivers: [
-                      if (widget.topBuilder case final top?
-                          when _olderCount > 0)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                            child: top(context),
-                          ),
-                        ),
-                      // Older history, built from the center outwards: index
-                      // 0 is the row right above the center.
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => _row(
-                              items,
-                              _olderCount - 1 - index,
-                              answerIndex,
+                child: SessionTimelineScope(
+                  items: _liveItems,
+                  onReaderToggle: _onReaderToggle,
+                  child: PageStorage(
+                    bucket: _rowState,
+                    child: CustomScrollView(
+                      controller: widget.scroll.controller,
+                      center: _centerKey,
+                      slivers: [
+                        if (widget.topBuilder case final top?
+                            when _olderCount > 0)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: top(context),
                             ),
-                            childCount: _olderCount,
-                            findChildIndexCallback: (key) {
-                              final at = _indexOf(items, key);
-                              return at == null || at >= _olderCount
-                                  ? null
-                                  : _olderCount - 1 - at;
-                            },
                           ),
-                        ),
-                      ),
-                      SliverPadding(
-                        key: _centerKey,
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              if (index < lead) {
-                                return index == 0 && topInCenter
-                                    ? widget.topBuilder!(context)
-                                    : widget.headerBuilder(context);
-                              }
-                              return _row(
-                                items,
-                                _olderCount + index - lead,
+                        // Older history, built from the center outwards: index
+                        // 0 is the row right above the center.
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _row(
+                                rows,
+                                _olderCount - 1 - index,
                                 answerIndex,
-                              );
-                            },
-                            childCount: items.length - _olderCount + lead,
-                            findChildIndexCallback: (key) {
-                              final at = _indexOf(items, key);
-                              return at == null || at < _olderCount
-                                  ? null
-                                  : at - _olderCount + lead;
-                            },
+                              ),
+                              childCount: _olderCount,
+                              findChildIndexCallback: (key) {
+                                final at = rowIndex[key];
+                                return at == null || at >= _olderCount
+                                    ? null
+                                    : _olderCount - 1 - at;
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        SliverPadding(
+                          key: _centerKey,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                if (index < lead) return leads[index](context);
+                                return _row(
+                                  rows,
+                                  _olderCount + index - lead,
+                                  answerIndex,
+                                );
+                              },
+                              childCount: rows.length - _olderCount + lead,
+                              findChildIndexCallback: (key) {
+                                final at = rowIndex[key];
+                                return at == null || at < _olderCount
+                                    ? null
+                                    : at - _olderCount + lead;
+                              },
+                            ),
+                          ),
+                        ),
+                        if (rows.isEmpty && widget.emptyBuilder != null)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _EmptySpace(builder: widget.emptyBuilder!),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -531,42 +576,48 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   }
 
   /// Places the center: on the first rows the timeline shows, and again on
-  /// the window's first row when the center row left the window.
-  void _placePivot(List<TimelineItem> items) {
+  /// the window's first row when the center item left the window. The center
+  /// is an item, so it stays put while its row joins a run or a work group.
+  void _placePivot(List<SessionTimelineRow> rows) {
     final pivot = _pivot;
     final at = pivot == null
         ? -1
-        : items.indexWhere((item) => item.id == pivot);
+        : rows.indexWhere((row) => row.items.any((item) => item.id == pivot));
     if (at >= 0) {
       _olderCount = at;
       return;
     }
-    _pivot = items.firstOrNull?.id;
+    _pivot = rows.firstOrNull?.items.first.id;
     _olderCount = 0;
-  }
-
-  int? _indexOf(List<TimelineItem> items, Key key) {
-    if (key is! ValueKey<ItemId>) return null;
-    final at = items.indexWhere((item) => item.id == key.value);
-    return at < 0 ? null : at;
   }
 
   /// One row. Every row has the same shape, so a row keeps its element when
   /// the last answer moves; the answer row keeps its context, so it can be
   /// measured and aligned.
-  Widget _row(List<TimelineItem> items, int index, int? answerIndex) {
-    final item = items[index];
+  Widget _row(List<SessionTimelineRow> rows, int index, int? answerIndex) {
+    final row = rows[index];
     final isAnswer = index == answerIndex;
     return Builder(
-      key: ValueKey(item.id),
+      key: row.key,
       builder: (context) {
         if (isAnswer) _answerContext = context;
-        return SessionTimelineTile(
-          item: item,
-          errorRecovery: widget.errorRecovery,
-          onOpenChild: widget.onOpenChild,
-          messageHeader: opensMessage(items, index),
-        );
+        return switch (row) {
+          SessionItemRow(:final item, :final messageHeader) =>
+            SessionTimelineTile(
+              item: item,
+              errorRecovery: widget.errorRecovery,
+              onOpenChild: widget.onOpenChild,
+              messageHeader: messageHeader,
+            ),
+          SessionToolRunRow() => SessionToolRun(
+            row: row,
+            onToggle: () => _toggle(row.id),
+          ),
+          SessionWorkGroupRow() => SessionWorkGroupHeader(
+            row: row,
+            onToggle: () => _toggle(row.id),
+          ),
+        };
       },
     );
   }
@@ -623,6 +674,45 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       ),
     );
   }
+}
+
+/// The block an empty timeline shows, in the space the header leaves: it
+/// adds no scroll extent, so it never pushes the header away, and it scales
+/// down, or steps aside, when that space is small.
+class _EmptySpace extends SingleChildRenderObjectWidget {
+  _EmptySpace({required WidgetBuilder builder})
+    : super(
+        child: LayoutBuilder(
+          builder: (context, box) => box.maxHeight < 48
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: SizedBox(
+                        width: max(0, box.maxWidth - 32),
+                        child: Center(child: builder(context)),
+                      ),
+                    ),
+                  ),
+                ),
+        ),
+      );
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderNoIntrinsicHeight();
+}
+
+/// A box that asks for no height of its own, so the remaining space alone
+/// sizes it.
+class _RenderNoIntrinsicHeight extends RenderProxyBox {
+  @override
+  double computeMinIntrinsicHeight(double width) => 0;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => 0;
 }
 
 /// What the timeline keeps with its scroll while it is not shown: the center

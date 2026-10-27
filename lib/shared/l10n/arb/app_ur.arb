@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "مرحلہ #{step} شروع ہوا",
   "msgInfoCost": "لاگت: ${cost}",
   "msgInfoMessageInfo": "پیغام کی معلومات",
-  "msgInfoTokens": "ٹوکنز: {total}"
+  "msgInfoTokens": "ٹوکنز: {total}",
+  "chatHelloAssistant": "ہیلو! میں آپ کا AI اسسٹنٹ ہوں۔",
+  "chatMessageHide": "چھپائیں",
+  "chatMessageShow": "دکھائیں",
+  "chatMessageShowLessCompact": "کم",
+  "chatMessageShowMoreCompact": "مزید",
+  "chatMessageThinking": "سوچ رہا ہے",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 کو توجہ درکار ہے} other{{count} کو توجہ درکار ہے}}",
+  "chatMessageToolCallsTitle": "ٹول کالز",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 کال} other{{count} کالز}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 مزید} other{+{count} مزید}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 مکمل} other{{count} مکمل}}",
+  "chatMessageToolQueuedCount": "{count} قطار میں ہیں",
+  "chatMessageToolRunningCount": "{count} چل رہے ہیں",
+  "chatWelcomeSubmessage": "آج میں آپ کی کس طرح مدد کر سکتا ہوں؟",
+  "chatWorkExpand": "پھیلائیں۔",
+  "chatWorkHide": "چھپائیں",
+  "chatWorkMessageOne": "1 کام کا پیغام",
+  "chatWorkMessagesMultiple": "{count} کام کے پیغامات"
 }

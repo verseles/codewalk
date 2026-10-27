@@ -5,16 +5,18 @@ import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
 import 'session_error_card.dart';
 import 'session_message_info.dart';
+import 'session_reasoning_body.dart';
 import 'session_tool_result.dart';
 
 /// One read-only timeline item, shared by the history and live views.
 ///
 /// V2-071A: text-bearing canonical items render rich Markdown/math/HTML/
 /// Mermaid/code via [CanonicalMessageBody] bound to canonical fields only.
-/// V2-044D: tool and shell items show what ran and how it ended, collapsed,
-/// with their bounded, redacted input, output and error on demand
-/// ([SessionToolResult]). V2-055A: a failed turn that carries its typed error
-/// shows a [SessionErrorCard]. Other outcome and unknown items keep minimized
+/// V2-044D: tool and shell items show what ran and how it stands, with their
+/// bounded, redacted input, output and error in a dialog on demand
+/// ([SessionToolResult]). Reasoning shows a few lines and the rest on demand
+/// ([SessionReasoningBody]). V2-055A: a failed turn that carries its typed
+/// error shows a [SessionErrorCard]. Other outcome and unknown items keep minimized
 /// markers and never expose `raw` or fallback text. No legacy imports (G4).
 class SessionTimelineTile extends StatelessWidget {
   const SessionTimelineTile({
@@ -62,8 +64,11 @@ class SessionTimelineTile extends StatelessWidget {
     final (label, icon) = switch (item) {
       UserInput() => (l10n.chatMessageYou, Icons.person_outline),
       AssistantText() => (l10n.historyAssistant, Icons.chat_bubble_outline),
+      // Compact screens use the retained reference's short label.
       Reasoning() => (
-        l10n.chatMessageThinkingProcess,
+        MediaQuery.sizeOf(context).width < 600
+            ? l10n.chatMessageThinking
+            : l10n.chatMessageThinkingProcess,
         Icons.psychology_outlined,
       ),
       Notice() => (l10n.historyDetails, Icons.info_outline),
@@ -162,16 +167,20 @@ class SessionTimelineTile extends StatelessWidget {
           ),
         );
       case Reasoning(:final text, :final complete, :final prefixMissing):
-        return SelectionArea(
-          child: CanonicalMessageBody(
-            key: ValueKey('timeline-content-${item.id.value}'),
-            source: text,
-            complete: complete,
-            prefixMissing: prefixMissing,
-            allowBasicHtml: false,
-            onTapLink: onTapLink,
-            onTapFilePath: onTapFilePath,
-            onCopyCode: onCopyCode,
+        return SessionReasoningBody(
+          text: text,
+          complete: complete,
+          child: SelectionArea(
+            child: CanonicalMessageBody(
+              key: ValueKey('timeline-content-${item.id.value}'),
+              source: text,
+              complete: complete,
+              prefixMissing: prefixMissing,
+              allowBasicHtml: false,
+              onTapLink: onTapLink,
+              onTapFilePath: onTapFilePath,
+              onCopyCode: onCopyCode,
+            ),
           ),
         );
       case Notice(:final text):

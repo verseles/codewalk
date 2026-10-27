@@ -1,7 +1,9 @@
+import 'package:codewalk/features/sessions/session_timeline_projection.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 ItemMeta _meta(String id, ItemStatus status) => ItemMeta(
@@ -84,7 +86,8 @@ Future<V2Localizations> _pump(
   return V2Localizations.of(tester.element(find.byType(ListView)));
 }
 
-Future<void> _expand(WidgetTester tester, String id) async {
+/// Opens the details dialog of the row [id].
+Future<void> _open(WidgetTester tester, String id) async {
   final toggle = find.byKey(ValueKey('tool-toggle-$id'));
   await tester.scrollUntilVisible(
     toggle,
@@ -93,7 +96,23 @@ Future<void> _expand(WidgetTester tester, String id) async {
   );
   await tester.tap(toggle);
   await tester.pumpAndSettle();
+  expect(find.byKey(ValueKey('tool-details-$id')), findsOneWidget);
 }
+
+Future<void> _close(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('tool-details-close')));
+  await tester.pumpAndSettle();
+}
+
+ScrollPosition _sectionScroll(WidgetTester tester, String id, int index) =>
+    tester
+        .state<ScrollableState>(
+          find.descendant(
+            of: find.byKey(ValueKey('tool-section-$id-$index')),
+            matching: find.byType(Scrollable),
+          ),
+        )
+        .position;
 
 void main() {
   testWidgets('a tool row is collapsed and shows its result on demand', (
@@ -113,15 +132,34 @@ void main() {
     expect(find.text(l10n.liveToolDone), findsOneWidget);
     expect(find.textContaining('lib/main.dart'), findsNothing);
     expect(find.textContaining('line one'), findsNothing);
-    await _expand(tester, 'done');
+    // Compact screens use the retained reference's short label.
+    expect(find.text(l10n.chatMessageShow), findsOneWidget);
+    await _open(tester, 'done');
     expect(find.text(l10n.chatMessageToolInput), findsOneWidget);
     expect(find.textContaining('lib/main.dart'), findsOneWidget);
     expect(
       find.textContaining('line one\nline two\n[image/png]'),
       findsOneWidget,
     );
-    await _expand(tester, 'done');
+    await _close(tester);
     expect(find.textContaining('line one'), findsNothing);
+    // Escape closes it too.
+    await _open(tester, 'done');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tool-details-done')), findsNothing);
+  });
+
+  testWidgets('a wide screen offers the details by name', (tester) async {
+    final l10n = await _pump(tester, [
+      _tool('wide', ItemStatus.completed),
+    ], size: const Size(1280, 800));
+    final toggle = find.byKey(const ValueKey('tool-toggle-wide'));
+    expect(
+      find.descendant(of: toggle, matching: find.text(l10n.chatMessageDetails)),
+      findsOneWidget,
+    );
+    expect(find.text(l10n.chatMessageShow), findsNothing);
   });
 
   testWidgets('a running tool and a failed tool show their state', (
@@ -157,9 +195,10 @@ void main() {
     expect(find.byKey(const ValueKey('tool-toggle-run')), findsNothing);
     expect(find.text(l10n.statusFailed), findsOneWidget);
     expect(find.text(l10n.liveToolInterrupted), findsOneWidget);
-    await _expand(tester, 'fail');
+    await _open(tester, 'fail');
     expect(find.text('file not found'), findsOneWidget);
-    await _expand(tester, 'stop');
+    await _close(tester);
+    await _open(tester, 'stop');
     expect(find.text('aborted'), findsOneWidget);
   });
 
@@ -190,15 +229,14 @@ void main() {
     );
     expect(find.text(l10n.toolRunning), findsOneWidget);
     expect(find.textContaining('all passed'), findsNothing);
-    await _expand(tester, 'ok');
+    await _open(tester, 'ok');
     expect(find.text('all passed'), findsOneWidget);
-    await _expand(tester, 'slow');
+    await _close(tester);
+    await _open(tester, 'slow');
     expect(find.text(l10n.liveShellOutputPartial), findsOneWidget);
   });
 
-  testWidgets('an exit without a code is not called a failure', (
-    tester,
-  ) async {
+  testWidgets('an exit without a code is not called a failure', (tester) async {
     final l10n = await _pump(tester, [
       _shell('none', ShellStatus.exited),
       _shell('nan', ShellStatus.exited, token: 'NaN'),
@@ -211,45 +249,62 @@ void main() {
     expect(find.textContaining(l10n.statusFailed), findsNothing);
   });
 
-  testWidgets('an opened row stays open when it comes back into view', (
+  testWidgets('the dialog follows its item and keeps the reader in place', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final items = [
-      _shell('first', ShellStatus.exited, exit: 0, output: 'kept open'),
-      for (var i = 0; i < 40; i++)
-        _shell('n$i', ShellStatus.exited, exit: 0, output: 'x'),
-    ];
+    String lines(int count) =>
+        [for (var i = 0; i < count; i++) 'row $i'].join('\n');
+    final short = _shell('grow', ShellStatus.running, output: lines(2));
+    final long = _shell('read', ShellStatus.running, output: lines(30));
+    final live = ValueNotifier<List<TimelineItem>>([short, long]);
+    addTearDown(live.dispose);
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: V2Localizations.localizationsDelegates,
         supportedLocales: V2Localizations.supportedLocales,
         home: Scaffold(
-          body: PageStorage(
-            bucket: PageStorageBucket(),
-            child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) => SessionTimelineTile(
-                key: ValueKey(items[index].id),
-                item: items[index],
-              ),
+          body: SessionTimelineScope(
+            items: live,
+            onReaderToggle: () {},
+            child: ListView(
+              children: [
+                SessionTimelineTile(item: short),
+                SessionTimelineTile(item: long),
+              ],
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    await _expand(tester, 'first');
-    expect(find.text('kept open'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -6000));
+    // A value that fits follows its growth: the reader is at its end.
+    await _open(tester, 'grow');
+    live.value = [
+      _shell('grow', ShellStatus.exited, exit: 0, output: lines(30)),
+      long,
+    ];
     await tester.pumpAndSettle();
-    expect(find.text('kept open'), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0, 8000));
+    expect(find.textContaining('row 29'), findsOneWidget);
+    final grown = _sectionScroll(tester, 'grow', 1);
+    expect(grown.maxScrollExtent, greaterThan(0));
+    expect(grown.pixels, grown.maxScrollExtent);
+    await _close(tester);
+    // A value that opens longer than its area opens at its top, and stays
+    // there while it grows.
+    await _open(tester, 'read');
+    final top = _sectionScroll(tester, 'read', 1);
+    expect(top.pixels, 0);
+    live.value = [
+      short,
+      _shell('read', ShellStatus.running, output: lines(35)),
+    ];
     await tester.pumpAndSettle();
-    expect(find.text('kept open'), findsOneWidget);
+    expect(find.textContaining('row 34'), findsOneWidget);
+    expect(_sectionScroll(tester, 'read', 1).pixels, 0);
   });
 
   testWidgets('a long value shows its first part and the rest on demand', (
@@ -259,7 +314,7 @@ void main() {
     final l10n = await _pump(tester, [
       _shell('long', ShellStatus.exited, exit: 0, output: lines),
     ]);
-    await _expand(tester, 'long');
+    await _open(tester, 'long');
     expect(find.textContaining('row 39'), findsOneWidget);
     expect(find.textContaining('row 40'), findsNothing);
     expect(find.text(l10n.chatMessageToolOutputTruncated), findsOneWidget);
@@ -288,11 +343,13 @@ void main() {
         output: 'Authorization: Bearer abcdefgh12345678',
       ),
     ]);
-    await _expand(tester, 'secret');
-    await _expand(tester, 'secret2');
-    expect(find.textContaining('abcdefgh12345678'), findsNothing);
-    expect(find.textContaining('hunter2xyz'), findsNothing);
-    expect(find.textContaining('[redacted]'), findsWidgets);
+    for (final id in ['secret', 'secret2']) {
+      await _open(tester, id);
+      expect(find.textContaining('abcdefgh12345678'), findsNothing);
+      expect(find.textContaining('hunter2xyz'), findsNothing);
+      expect(find.textContaining('[redacted]'), findsWidgets);
+      await _close(tester);
+    }
   });
 
   for (final (name, size, locale, scale) in const [
@@ -323,8 +380,10 @@ void main() {
         locale: locale,
         scale: scale,
       );
-      await _expand(tester, 'a');
-      await _expand(tester, 'b');
+      await _open(tester, 'a');
+      expect(tester.takeException(), isNull);
+      await _close(tester);
+      await _open(tester, 'b');
       expect(tester.takeException(), isNull);
     });
   }

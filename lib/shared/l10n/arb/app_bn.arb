@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "ধাপ #{step} শুরু হয়েছে",
   "msgInfoCost": "খরচ: ${cost}",
   "msgInfoMessageInfo": "বার্তা তথ্য",
-  "msgInfoTokens": "টোকেন: {total}"
+  "msgInfoTokens": "টোকেন: {total}",
+  "chatHelloAssistant": "নমস্কার! আমি আপনার এআই সহকারী",
+  "chatMessageHide": "লুকান",
+  "chatMessageShow": "দেখান",
+  "chatMessageShowLessCompact": "কম",
+  "chatMessageShowMoreCompact": "আরও",
+  "chatMessageThinking": "চিন্তা করছে",
+  "chatMessageToolAttentionCount": "{count, plural, =1{১টিতে মনোযোগ প্রয়োজন} other{{count}টিতে মনোযোগ প্রয়োজন}}",
+  "chatMessageToolCallsTitle": "টুল কল",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{১টি কল} other{{count}টি কল}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+১টি আরও} other{+{count}টি আরও}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{১টি সম্পন্ন} other{{count}টি সম্পন্ন}}",
+  "chatMessageToolQueuedCount": "{count} সারিবদ্ধ",
+  "chatMessageToolRunningCount": "{count} চলছে",
+  "chatWelcomeSubmessage": "আজ আমি কিভাবে আপনাকে সাহায্য করতে পারি?",
+  "chatWorkExpand": "প্রসারিত করুন",
+  "chatWorkHide": "লুকান",
+  "chatWorkMessageOne": "1 কাজের বার্তা",
+  "chatWorkMessagesMultiple": "{count} কাজের বার্তা"
 }

@@ -1530,5 +1530,31 @@
   "chatMessageStepStarted": "चरण शुरू #{step}",
   "msgInfoCost": "लागत: ${cost}",
   "msgInfoMessageInfo": "संदेश की जानकारी",
-  "msgInfoTokens": "टोकन: {total}"
+  "msgInfoTokens": "टोकन: {total}",
+  "chatHelloAssistant": "नमस्कार! मैं आपका एआई सहायक हूँ",
+  "chatMessageHide": "छिपाएं",
+  "chatMessageShow": "दिखाएं",
+  "chatMessageShowLessCompact": "कम",
+  "chatMessageShowMoreCompact": "और",
+  "chatMessageThinking": "सोच रहा है",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 को ध्यान देने की आवश्यकता है} other{{count} को ध्यान देने की आवश्यकता है}}",
+  "chatMessageToolCallsTitle": "टूल कॉल",
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 कॉल} other{{count} कॉल}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 और} other{+{count} और}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 पूर्ण} other{{count} पूर्ण}}",
+  "chatMessageToolQueuedCount": "{count} कतार में हैं",
+  "chatMessageToolRunningCount": "{count} चल रहे हैं",
+  "chatWelcomeSubmessage": "आज मैं आपकी कैसे मदद कर सकता हूँ?",
+  "chatWorkExpand": "विस्तार करें",
+  "chatWorkHide": "छिपाएं",
+  "chatWorkMessageOne": "1 कार्य संदेश",
+  "chatWorkMessagesMultiple": "{count} कार्य संदेश"
 }

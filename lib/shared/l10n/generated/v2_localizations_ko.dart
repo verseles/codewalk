@@ -1871,4 +1871,96 @@ class V2LocalizationsKo extends V2Localizations {
   String msgInfoTokens(int total) {
     return '토큰: $total';
   }
+
+  @override
+  String get chatHelloAssistant => '안녕하세요! 저는 AI 어시스턴트입니다';
+
+  @override
+  String get chatMessageHide => '숨기기';
+
+  @override
+  String get chatMessageShow => '보기';
+
+  @override
+  String get chatMessageShowLessCompact => '접기';
+
+  @override
+  String get chatMessageShowMoreCompact => '더보기';
+
+  @override
+  String get chatMessageThinking => '생각 중';
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개에 주의 필요',
+      one: '1개에 주의 필요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => '도구 호출';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개',
+      one: '1개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count개 더',
+      one: '+1개 더',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 완료',
+      one: '1개 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolQueuedCount(int count) {
+    return '$count개 대기 중';
+  }
+
+  @override
+  String chatMessageToolRunningCount(int count) {
+    return '$count개 실행 중';
+  }
+
+  @override
+  String get chatWelcomeSubmessage => '오늘 무엇을 도와드릴까요?';
+
+  @override
+  String get chatWorkExpand => '펼치기';
+
+  @override
+  String get chatWorkHide => '숨기기';
+
+  @override
+  String get chatWorkMessageOne => '작업 메시지 1개';
+
+  @override
+  String chatWorkMessagesMultiple(int count) {
+    return '작업 메시지 $count개';
+  }
 }

@@ -292,10 +292,10 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** a v2 live or history timeline shows a tool call or a shell command the harness reported
 - **When** the row is shown
 - **Then** it is collapsed: the tool name, or the shell command after a `$`, and a status line - running, done, failed, interrupted; for a shell, timed out or killed, with the exit code when one was reported; an exit without a code is never called a failure, and a non-finite exit (`Infinity`, `-Infinity`, `NaN`) is shown as reported
-- **Then** a Details control shows the tool's input, output and error text, or the shell's command and captured output; each value shows its first 4,000 characters or 40 lines and a Show more control for the rest, inside a scroll area of at most 300 logical pixels or 40% of the screen; an output the server or the client cut says so
+- **Then** a `Details` control (`Show` on compact screens) opens a dialog with the tool's input, output and error text, or the shell's command and captured output; each value shows its first 4,000 characters or 40 lines and a Show more control for the rest, inside a scroll area of at most 300 logical pixels or 40% of the screen; an output the server or the client cut says so
 - **Then** a file in a tool's output is named by its type only and never fetched; a shell's captured output is the part the harness sent (at most 64 KiB), never read from the shell output route
 - **Then** credential-looking values - assignments, JSON properties and command flags named like a password, secret, token or key, authorization headers and variables, URL user info, private-key blocks and well-known token shapes - are replaced by `[redacted]` before a value is kept and again before it is shown; the rule is finite and best-effort
-- **Then** an opened row stays open while it leaves the lazily built list and comes back; a change in a tool's input or output, or in a shell's output or exit, is content that arrived, and an unchanged re-read is not
+- **Then** a change in a tool's input or output, or in a shell's output or exit, is content that arrived, and an unchanged re-read is not; in the live timeline an open dialog shows the change
 - **Then** an unknown shell status in history is one minimized unknown row; the rest of the page still shows
 
 ### V2 live session older history
@@ -451,6 +451,30 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the refined visual style
 - **When** timeline cards render
 - **Then** assistant-side cards (text, reasoning, tools, notices) have no border and slightly tighter vertical padding, while the user's turns keep the hairline frame; cards follow theme, density, text-size and width changes on rebuild
+
+### V2 work groups, tool runs and loading
+
+- **Given** an assistant turn in the live timeline uses tools
+- **When** two or more tool or shell calls follow each other in that turn
+- **Then** they show as one run: compact screens lead with the count (`3 calls`), wide screens name the first two calls (`read • grep • +1 more`); a second line counts what is running, queued or needs attention; `Show` (compact) or `Details` (wide) opens every call and `Hide` closes them; a call appended to an open run keeps the run open, and a sub-agent call keeps its own card
+- **Then** a message that opens inside a run keeps its elapsed chip and details: a closed run shows the first such message's chip on its header, an open run shows it on each call that opens a message
+- **Then** a call's input, output and error open in a details dialog from its `Show`/`Details` button, never inline; the dialog follows the call while it runs, opens at the top of each value, keeps a value's newest part in view only when the reader is already at its end, and closes with its button, the barrier or Escape
+
+- **Given** a turn finished: every item reached its end, the last answer text is complete and no failure is shown at or after it, and the session is settled or a newer prompt exists
+- **When** the timeline shows it
+- **Then** everything before the harness message that holds the final answer collapses to one header (`2 work messages`) with `Expand`/`Hide`; the final answer stays visible below it; nothing collapses while anything in the turn still streams, after a failure, or without the harness message of the answer
+- **Then** once collapsed, a status pulse that briefly reports the session busy, or a rehydration of the same items, keeps the same header and element; new content in that turn, or an item of it that streams again, reopens it
+- **Then** opening a group, a run or a reasoning is the reader's: the timeline does not follow the growth it makes; what the reader opened survives rebuilds and passive refreshes, and a session shown again starts with every finished turn collapsed
+
+- **Given** a reasoning part taller than four lines
+- **When** it renders
+- **Then** it shows four lines in a bounded area, twelve with `More`/`Show more` (with a scrollbar), back with `Less`/`Show less`; while it streams the area keeps its newest lines in view without moving the timeline; compact screens label it `Thinking`, wide screens `Thinking Process`
+
+- **Given** a live session has no items
+- **When** it is still being read (probing, connecting or hydrating)
+- **Then** a quiet loader shows in the space below the header instead of the empty conversation; resident items show at once, without the loader, even while a re-read runs
+- **When** a read of the session synced and reported no items
+- **Then** the empty conversation (`Hello! I am your AI assistant` / `How can I help you today?`) shows in the space the header leaves; it scales down or steps aside in a short viewport and never pushes the header away; a first read that failed shows neither the loader nor the empty conversation
 
 ### V2 navigation intents and locale
 
