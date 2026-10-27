@@ -58,7 +58,14 @@ Future<_App> _launch(
       index: metadata,
     ),
   );
-  await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+  // The same root as the relaunches with another text size, so those keep
+  // the app's controllers.
+  await tester.pumpWidget(
+    MediaQuery(
+      data: MediaQueryData.fromView(tester.view),
+      child: CodeWalkV2Bootstrap(dependencies: dependencies),
+    ),
+  );
   await _settle(tester);
   final source = rig.sources.single;
   source.respond([source.row('parent', title: 'Parent', directory: '/w')]);
@@ -288,6 +295,62 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a sibling that contradicts a pending pairing cancels it', (
+    tester,
+  ) async {
+    final app = await _launch(tester);
+    final first = _tool(app, 't1');
+    final second = _tool(app, 't2');
+    final children = [
+      _child(app, 'late', created: 9),
+      _child(app, 'early', created: 2),
+    ];
+    final handle = await _show(tester, app, 'parent', [first, second]);
+
+    await _tap(tester, second);
+    // While the children are read, the first call names the later child.
+    final parent = _ref(app, 'parent');
+    final contradicting = ToolCall(
+      meta: first.meta,
+      kind: first.kind,
+      rawName: first.rawName,
+      child: _ref(app, 'late'),
+      childEvidence: ToolChildEvidence(
+        kind: ToolChildEvidenceKind.observed,
+        origin: first.meta.source,
+        generation: first.generation,
+      ),
+    );
+    handle.emit(
+      SessionLiveView(
+        session: parent,
+        phase: SessionLivePhase.live,
+        state: liveState(parent, items: [contradicting, second]),
+      ),
+    );
+    await _settle(tester);
+    await _answerChildren(tester, app, children);
+    await _answerRead(tester, app, 'late', children.first);
+    expect(_location(app), '/s/profile_a/ses_parent');
+    expect(find.text(app.l10n.chatNoSubConversationFound), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('navigating away cancels the pending lookup', (tester) async {
+    final app = await _launch(tester);
+    final tool = _tool(app, 't1');
+    await _show(tester, app, 'parent', [tool, _tool(app, 't2')]);
+
+    await _tap(tester, tool);
+    final source = app.rig.sources.single;
+    final at = source.queries.lastIndexWhere((query) => query.parent != null);
+    app.dependencies.router.go('/settings');
+    await _settle(tester);
+    expect(source.tasks[at].cancelled, isTrue);
+    expect(_location(app), '/settings');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a child returns to its parent and keeps its choice locked', (
     tester,
   ) async {
@@ -362,6 +425,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(_location(app), '/s/profile_a/ses_parent');
     expect(tester.getTopLeft(find.text('row 10')).dy, reading);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('the return control fits a short phone at 2x text', (
+    tester,
+  ) async {
+    final app = await _launch(tester, size: const Size(360, 480));
+    final tool = _tool(
+      app,
+      't1',
+      child: 'kid',
+      evidence: ToolChildEvidenceKind.observed,
+    );
+    await _show(tester, app, 'parent', [tool]);
+    await _tap(tester, tool);
+    await _answerRead(tester, app, 'kid', _child(app, 'kid'));
+    for (final language in ['en', 'ar']) {
+      app.dependencies.preferences.setLocale(Locale(language));
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(
+            tester.view,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: CodeWalkV2Bootstrap(dependencies: app.dependencies),
+        ),
+      );
+      await _settle(tester);
+    }
+    await _show(tester, app, 'kid', const []);
+    expect(tester.takeException(), isNull);
+    expect(
+      find.byKey(const ValueKey('subconversation-return')),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

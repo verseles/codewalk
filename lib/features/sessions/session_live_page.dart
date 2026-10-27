@@ -26,6 +26,7 @@ import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'sessions_controller.dart';
 import 'subconversation_navigation.dart';
+import 'subconversation_resolver.dart';
 
 /// Minimum height the prompt composer keeps beside a resident permission card.
 const double _composerFloor = 56;
@@ -62,17 +63,22 @@ class _SessionLivePageState extends State<SessionLivePage>
   /// mark of that session is cleared while the user sees it.
   SessionsController? _catalog;
 
-  /// The latest sub-conversation tap; an older one opens nothing.
+  /// The latest sub-conversation tap; an older one opens nothing and its
+  /// reads are cancelled.
   int _childTap = 0;
+  SubconversationLookup? _childLookup;
 
   void _openChild(ToolCall tool) {
     final tap = ++_childTap;
+    _childLookup?.cancel();
+    final lookup = _childLookup = SubconversationLookup();
     unawaited(
       openSubconversation(
         context,
         widget.controller,
         tool,
         current: () => mounted && tap == _childTap,
+        lookup: lookup,
       ),
     );
   }
@@ -120,6 +126,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _childLookup?.cancel();
     _catalog?.leave(widget.controller.session);
     if (widget.ownsController) widget.controller.dispose();
     super.dispose();
@@ -442,7 +449,9 @@ class _SessionLivePageState extends State<SessionLivePage>
                   c.stopState.phase != SessionStopPhase.ready;
               final chrome =
                   (c.loading ? 4.0 : 0.0) +
-                  (c.summary.info.lineage.parent != null ? 48.0 : 0.0) +
+                  (c.summary.info.lineage.parent != null
+                      ? returnToParentHeight(context)
+                      : 0.0) +
                   MediaQuery.paddingOf(context).bottom +
                   (stopButton ? 56.0 : 0.0) +
                   (stopNotice ? 24.0 : 0.0);

@@ -10,6 +10,38 @@ const subconversationPageSize = 50;
 const subconversationMaxPages = 10;
 const subconversationTimeout = Duration(seconds: 20);
 
+/// The reads of one lookup, cancelled together once it is overtaken.
+final class SubconversationLookup {
+  final _cancels = <void Function()>[];
+  final _whenCancelled = Completer<void>();
+  bool _cancelled = false;
+
+  void _track(void Function() cancel) {
+    if (_cancelled) {
+      cancel();
+    } else {
+      _cancels.add(cancel);
+    }
+  }
+
+  void cancel() {
+    if (_cancelled) return;
+    _cancelled = true;
+    _whenCancelled.complete();
+    for (final cancel in _cancels) {
+      cancel();
+    }
+    _cancels.clear();
+  }
+}
+
+/// The child a lookup chose, with the children it listed when the choice
+/// came from that list rather than from the call's own observation.
+typedef SubconversationChoice = ({
+  SessionRef child,
+  List<SessionSummary>? listed,
+});
+
 /// The sub-conversation a tapped subagent call opens: a direct child of
 /// [parent], or null when none can be told apart, which is better than
 /// opening the wrong one.
@@ -22,27 +54,35 @@ const subconversationTimeout = Duration(seconds: 20);
 /// is read directly and opens only as an exact direct child. [current] is
 /// asked after every wait: a tap overtaken by another one or by navigation
 /// resolves to null.
-Future<SessionRef?> resolveSubconversation({
+Future<SubconversationChoice?> resolveSubconversation({
   required ToolCall tool,
   required SessionRef parent,
   required List<TimelineItem> timeline,
   required bool anchorsComplete,
   required SessionCatalogSource source,
   required bool Function() current,
+  SubconversationLookup? lookup,
 }) async {
-  final tasks = <void Function()>[];
+  final reads = lookup ?? SubconversationLookup();
+  // A cancelled lookup stops waiting at once, whatever its read does.
   Future<T> wait<T>(Future<T> future, void Function() cancel) {
-    tasks.add(cancel);
-    return future;
+    reads._track(cancel);
+    return Future.any([
+      future,
+      reads._whenCancelled.future.then<T>(
+        (_) => throw StateError('Sub-conversation lookup cancelled'),
+      ),
+    ]);
   }
 
-  Future<SessionRef?> resolve() async {
+  Future<SubconversationChoice?> resolve() async {
     if (tool.childEvidence?.kind == ToolChildEvidenceKind.rejected) {
       return null;
     }
     var candidate = tool.child;
+    List<SessionSummary>? listed;
     if (candidate == null) {
-      final children = <SessionSummary>[];
+      final children = listed = <SessionSummary>[];
       String? cursor;
       for (var page = 0; ; page++) {
         if (page == subconversationMaxPages) return null;
@@ -73,7 +113,7 @@ Future<SessionRef?> resolveSubconversation({
     final row = await wait(read.result, read.cancel);
     if (!current()) return null;
     return row.info.ref == candidate && row.info.lineage.parent == parent
-        ? candidate
+        ? (child: candidate, listed: listed)
         : null;
   }
 
@@ -81,9 +121,7 @@ Future<SessionRef?> resolveSubconversation({
     return await resolve().timeout(subconversationTimeout);
   } on Object {
     // A failed, cancelled or overdue read opens nothing.
-    for (final cancel in tasks) {
-      cancel();
-    }
+    reads.cancel();
     return null;
   }
 }
