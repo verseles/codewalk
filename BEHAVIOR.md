@@ -12,7 +12,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
 - **When** its root widget mounts
 - **Then** an independent Material3 app opens into the chat workspace, with no destination bar or rail
-- **Then** below 600 logical pixels the chat takes the window and the projects and sessions list lives in a drawer; from 600 the list stays beside the chat in a fixed pane, 260 wide below 840 and 300 from there
+- **Then** below 600 logical pixels the chat takes the window and the projects and sessions list lives in a drawer; from 600 the list stays beside the chat in a pane that can be hidden, fixed at 260 below 840 and resizable from there, 300 by default
 - **Then** settings and servers open as secondary pages; their back button and the system back return to the workspace, and a page opened by a link with nothing under it goes to the workspace home
 
 ### V2 workspace
@@ -48,6 +48,23 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** manual pagination requests 50 items per page, retaining at most 200 rows or ten accepted pages; empty or short pages with a continuation remain pageable and a local limit is explicitly identified
 - **Then** refresh invalidates the old continuation, while transient failures can retain clearly marked previous results; authentication failure or a changed server/credential clears the catalog
 - **Then** superseded, cancelled or disposed reads cannot publish old rows, errors or loading state; retries and pagination remain manual
+
+### V2 workspace panes and shortcuts
+
+- **Given** the workspace is at least 840 logical pixels wide
+- **When** the user drags the conversations pane's divider
+- **Then** its width follows the drag immediately within 160–500 logical pixels, saves when the drag ends and resets to 300 on a double tap; a narrower window reduces only the rendered width to keep at least 320 for chat, preserving the saved preference
+- **Then** below 840 the medium layout keeps its fixed 260-pixel pane without changing that preference, and the header keeps its controls usable at the 160-pixel minimum, including RTL and enlarged text
+- **When** the user hides the pane on a non-compact layout
+- **Then** the toolbar keeps the server switcher, Settings and Project Context accessible; Project Context uses the drawer's picker and shows the chosen project's remembered conversation or workspace home, unless another navigation or server change took place while it was open
+- **Then** showing the pane again restores its saved width, without replacing the conversation
+
+- **Given** a physical keyboard reaches the workspace
+- **When** a configured shortcut has an available handler
+- **Then** `mod+N` opens the project's local New Chat draft, `mod+L` focuses the shown composer and `mod+R` refreshes the list and wakes the existing live views, keeping the draft and conversation open
+- **Then** `mod+W` closes the shown eligible local tab with its usual neighbour, New Chat and Undo behavior, including when focus is in the toolbar or conversations pane; without an eligible tab it requests the ordinary platform window close, while `mod+Q` requests desktop app exit and stays unconsumed on mobile
+- **Then** a single Escape closes an open overlay or drawer first, else focuses the available composer; the focused composer keeps its own Escape behavior, and dialogs, IME composition and ordinary editing retain priority
+- **Then** Tab and Shift+Tab can leave the toolbar and return through the workspace controls
 
 ### V2 server health and workspace status
 
@@ -93,7 +110,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** only a local suppression is saved: refreshes and repeated updates keep it closed; an explicit open, a pin or a strictly newer authoritative update can bring it back, while the first update observed after an unknown close only establishes its baseline
 - **Then** closing a pinned tab removes its project pin first, and Undo restores the pin before the tab; a failed tab write compensates that pin once, and an unreadable or unloaded pin catalog refuses the close
 - **Then** a shown tab hands over to the next tab in the strip's displayed order, else the previous one, else its project's local New Chat draft with the composer focused; closing a tab that is not shown never navigates, and navigating elsewhere before the close is saved wins
-- **Then** a 3 s Undo puts the tab back in its place; a shown tab is shown again only while the reader is still where its close took them, otherwise it comes back like a background tab, without taking the selection
+- **Then** a 3 s Undo puts the tab back in its place without navigating or taking the selection
 - **When** the user long-presses a tab, right-clicks it (at the pointer), presses the Menu key or Shift+F10 on it, or uses its semantic action
 - **Then** its menu opens without selecting the tab, with the conversation list's actions under the same availability (Pin or Unpin, History, Mark as viewed, Rename, Fork, Hide or Unhide, Delete with confirmation), Change icon and a destructive `Close {project}`, which says that at least one context must remain open when it is the only one; server commands (Mark as viewed, Rename, Fork, Delete) appear only for a session of the shown list, so a tab of another project offers its local entries, and a tab whose session row is not loaded offers only Change icon and Close project; closing the shown project from its tab shows the project that takes its place
 - **Then** Change icon picks one of the curated icons or the project icon; the choice is kept locally for that session (at most 512) across closes, expiry and restarts, and leaves with its session's authoritative deletion or a deletion accepted from CodeWalk, its project's closure or its server's removal; an unreadable record is kept untouched
