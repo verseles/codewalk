@@ -444,8 +444,9 @@ class SessionLiveController extends ChangeNotifier {
   int _modelRevision = 0;
   (String?, String?, String?)? _seenModel;
 
-  void _observeModel() {
-    final selection = selectionState.selection;
+  /// Reads each delivered view's own selection: updates arrive after the
+  /// fact, so the latest state could hide a model set and set back.
+  void _observeModel(Selection? selection) {
     if (selection == null) return;
     final model = (
       selection.modelProviderId,
@@ -943,7 +944,7 @@ class SessionLiveController extends ChangeNotifier {
         _pruneFormDrafts(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
-        _observeModel();
+        _observeModel(next.state?.selection);
         unawaited(_settleSwitch());
         unawaited(_restoreAgentModel());
         _notify();

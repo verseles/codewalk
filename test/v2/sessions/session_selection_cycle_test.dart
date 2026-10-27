@@ -485,26 +485,27 @@ void main() {
       );
       final (live, handle) = await open();
       final serve = handle.selectionAction!;
-      SessionSelectionState withModel(String id, String provider) =>
-          SessionSelectionState(
-            selection: Selection(
-              modelId: id,
-              modelProviderId: provider,
-              agentId: 'build',
-            ),
-            models: handle.selectionState.models,
-            agents: handle.selectionState.agents,
-          );
+      SessionLiveView reported(String id, String provider) => SessionLiveView(
+        session: live.session,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          live.session,
+          selection: Selection(
+            modelId: id,
+            modelProviderId: provider,
+            agentId: 'build',
+          ),
+        ),
+      );
+      handle.emit(reported('alpha', 'prov'));
+      await pumpEventQueue();
       handle.selectionAction = (change) async {
         if (change.startsWith('agent:')) {
-          // Another client sets Gamma, then Alpha again, meanwhile.
+          // Another client sets Gamma, then Alpha again; both reports are
+          // delivered after the fact, back to back.
           handle
-            ..selectionState = withModel('gamma', 'other')
-            ..emit(handle.current);
-          await pumpEventQueue();
-          handle
-            ..selectionState = withModel('alpha', 'prov')
-            ..emit(handle.current);
+            ..emit(reported('gamma', 'other'))
+            ..emit(reported('alpha', 'prov'));
           await pumpEventQueue();
         }
         return serve(change);

@@ -438,6 +438,7 @@ SessionState liveState(
   List<WorkItem> work = const [],
   bool hasMore = false,
   String? cursor,
+  Selection? selection,
 }) {
   final start = beginHydration(
     SessionState(
@@ -466,6 +467,9 @@ SessionState liveState(
         boundary: _boundary(ref),
       ),
       work: SnapshotCollection(values: work, boundary: _boundary(ref)),
+      selection: selection == null
+          ? null
+          : SnapshotValue(value: selection, boundary: _boundary(ref)),
       nextHistoryCursor: cursor == null ? null : HistoryCursor(cursor),
       hasMoreHistory: hasMore || cursor != null,
     ),
