@@ -137,7 +137,8 @@ void main() {
       position: observedPosition(3),
       receivedAt: received,
     );
-    expect(step, isEmpty);
+    expect(step.whereType<ExecutionChanged>(), isEmpty);
+    expect(step.single, isA<StepChanged>());
 
     for (final (frame, kind) in [
       (executionFrame('succeeded'), ExecutionKind.idle),

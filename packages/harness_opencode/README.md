@@ -538,10 +538,10 @@ an unmodifiable `List<SessionEvent>` to reduce in order against the latest
 
 | Native event | Canonical result |
 |---|---|
-| `session.step.started` | Validated; ends a retry wait with `ExecutionChanged(running)`, otherwise nothing emitted |
+| `session.step.started` | `StepChanged` naming the running step (message, start, model, agent); resident parts of that message restart their message context; ends a retry wait with `ExecutionChanged(running)` |
 | `session.step.streamed` | Validated, nothing emitted |
-| `session.step.ended` | One step `UsageObserved` |
-| `session.step.failed` | Step usage only when both cost and tokens are present; the error reaches the failed turn's outcome from `session.execution.failed` |
+| `session.step.ended` | One step `UsageObserved`; the message's resident parts are re-upserted with completion, tokens, cost and finish; the running step is cleared |
+| `session.step.failed` | Step usage only when both cost and tokens are present; the error reaches the failed turn's outcome from `session.execution.failed`; resident parts get the completion time and the running step is cleared |
 | `session.usage.updated` (ephemeral) | One cumulative session `UsageObserved` |
 
 - Step usage follows Core's A convention: scope `turn`, partial, aggregation key

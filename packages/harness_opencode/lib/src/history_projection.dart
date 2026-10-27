@@ -28,6 +28,9 @@ List<TimelineItem> projectOpenCodeHistory(
   }
   var nodes = 0;
   var bytes = 0;
+  // Optional display labels have their own small budget, so they can never
+  // turn a page whose content fits into a rejected one.
+  var labelBytes = 0;
   final items = <TimelineItem>[];
   final messageIds = <String>{};
   const credentials = {
@@ -220,6 +223,24 @@ List<TimelineItem> projectOpenCodeHistory(
     if (!id.startsWith('msg_') || !messageIds.add(id)) malformed();
     final type = text(message['type'], cap: 4096, nonempty: true);
     final time = times(message['time']);
+    // Display-only labels are bounded apart from the content budget; an
+    // unexpected one is unknown instead of rejecting the page.
+    String? label(Object? value) {
+      if (value is! String ||
+          value.isEmpty ||
+          value.length > 256 ||
+          !_wellFormed(value)) {
+        return null;
+      }
+      final size = utf8.encode(value).length;
+      if (size > 256 || labelBytes + size > 64 * 1024) return null;
+      labelBytes += size;
+      return value;
+    }
+
+    final context = type == 'assistant'
+        ? _historyMessageContext(id, message, time, label)
+        : null;
     ItemMeta meta(
       String kind,
       Object discriminator, {
@@ -227,6 +248,7 @@ List<TimelineItem> projectOpenCodeHistory(
       int? ordinal,
       Map<String, Object?> extra = const {},
     }) => ItemMeta(
+      message: context,
       id: ItemId(jsonEncode([ref.storageKey, id, kind, discriminator])),
       generation: jsonEncode(['history', ref.storageKey, id]),
       status: status ?? OpenValue<ItemStatus>.unknown('completionUnverified'),
@@ -689,4 +711,66 @@ List<TimelineItem> projectOpenCodeHistory(
     }
   }
   return List<TimelineItem>.unmodifiable(items);
+}
+
+/// What an assistant record reports about itself. History stays readable when
+/// a display-only value is missing or unexpected: that value is unknown.
+MessageContext _historyMessageContext(
+  String id,
+  Map<String, Object?> message,
+  Map<String, Object?> time,
+  String? Function(Object?) label,
+) {
+  DateTime? at(Object? value) => value is num
+      ? DateTime.fromMillisecondsSinceEpoch(value.floor(), isUtc: true)
+      : null;
+  num? amount(Object? value) =>
+      value is num && value.isFinite && value >= 0 ? value : null;
+  final model = message['model'];
+  final tokens = message['tokens'];
+  final cache = tokens is Map<String, Object?> ? tokens['cache'] : null;
+  final cost = amount(message['cost']);
+  return MessageContext(
+    message: MessageRef(id),
+    created: at(time['created']),
+    completed: at(time['completed']),
+    modelId: model is Map<String, Object?> ? label(model['id']) : null,
+    modelProviderId: model is Map<String, Object?>
+        ? label(model['providerID'])
+        : null,
+    modelVariant: model is Map<String, Object?>
+        ? label(model['variant'])
+        : null,
+    agentId: label(message['agent']),
+    tokens: tokens is Map<String, Object?>
+        ? TokenBreakdown(
+            input: amount(tokens['input']),
+            output: amount(tokens['output']),
+            reasoning: amount(tokens['reasoning']),
+            cacheRead: cache is Map<String, Object?>
+                ? amount(cache['read'])
+                : null,
+            cacheWrite: cache is Map<String, Object?>
+                ? amount(cache['write'])
+                : null,
+          )
+        : null,
+    cost: cost == null ? null : Cost(amount: cost, currency: 'USD'),
+    finish: label(message['finish']),
+  );
+}
+
+/// Whether every UTF-16 surrogate in [value] is paired.
+bool _wellFormed(String value) {
+  for (var i = 0; i < value.length; i++) {
+    final c = value.codeUnitAt(i);
+    if (c >= 0xd800 && c <= 0xdbff) {
+      if (++i >= value.length) return false;
+      final low = value.codeUnitAt(i);
+      if (low < 0xdc00 || low > 0xdfff) return false;
+    } else if (c >= 0xdc00 && c <= 0xdfff) {
+      return false;
+    }
+  }
+  return true;
 }

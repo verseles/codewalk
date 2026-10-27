@@ -1910,4 +1910,45 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'کے بارے میں';
+
+  @override
+  String get chatMessageMetadataAvailable => 'کوئی میٹا ڈیٹا دستیاب نہیں ہے۔';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'ماڈل: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'فراہم کنندہ: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'مرحلہ #$step مکمل ہوا: $reason • ٹوکنز $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'مرحلہ #$step شروع ہوا';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'لاگت: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'پیغام کی معلومات';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'ٹوکنز: $total';
+  }
 }

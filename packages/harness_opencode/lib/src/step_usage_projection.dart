@@ -43,23 +43,28 @@ const _finishes = {
 ///
 /// Returns an unmodifiable list to reduce in order against the latest
 /// [current] state; unrelated types and foreign sessions return an empty list.
-/// `started` and `streamed` are validated and emit nothing: Core has no step
-/// state and execution lifecycle belongs to the execution producer. The one
-/// exception is a retry wait, which the contract clears on the next step
-/// start: `started` while the execution is retrying emits running.
+/// `started` names the running step ([StepChanged]: message, start, model,
+/// agent) and restarts the message context of that message's resident parts:
+/// a retry reuses the assistant message ID, so the earlier attempt's
+/// completion and usage must not survive it. `streamed` emits nothing, and
+/// execution lifecycle belongs to the execution producer, except for a retry
+/// wait, which the contract clears on the next step start: `started` while
+/// the execution is retrying emits running.
 ///
 /// `ended` emits a per-step [UsageObserved] (turn scope, partial, identified
 /// and keyed by the assistant message). `failed` emits step usage only when
 /// the frame carries both cost and tokens: its error reaches the timeline on
 /// the failed turn's outcome, from `session.execution.failed`, as the history
-/// does from the last assistant message. The ephemeral `usage.updated` emits
+/// does from the last assistant message. Both re-upsert the message's
+/// resident parts with its completion, tokens, cost and finish, and clear the
+/// running step. The ephemeral `usage.updated` emits
 /// the cumulative session total, which replaces earlier readings and must
 /// never be added to step observations. Observed zeros stay zeros; absent
 /// values stay absent.
 ///
 /// Error `message`, `status` and `response` and the frame location are never
-/// read; provider state, snapshots, file paths, model and agent are validated
-/// but never copied.
+/// read; provider state, snapshots and file paths are validated but never
+/// copied. Model and agent reach Core only as the running step's labels.
 List<SessionEvent> projectOpenCodeStepUsageEvent(
   Object? value,
   SessionState current, {
@@ -115,16 +120,30 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
   String? finish;
   String? errorType;
   _Usage? usage;
+  StepInfo? started;
   var resumes = false;
   switch (type) {
     case _started:
-      _text(data['agent']);
+      final agent = _text(data['agent']);
       final model = _object(data['model']);
-      _text(model['id']);
-      _text(model['providerID']);
-      if (model.containsKey('variant')) _text(model['variant']);
+      final modelId = _text(model['id']);
+      final providerId = _text(model['providerID']);
+      final variant = model.containsKey('variant')
+          ? _text(model['variant'])
+          : null;
       _optionalText(data, 'snapshot');
-      _integer(data['started']);
+      final at = _integer(data['started']);
+      if (at > _maxEpochMillis) {
+        _fail(OpenCodeStepUsageProjectionFailure.malformed);
+      }
+      started = StepInfo(
+        message: MessageRef(messageId!),
+        startedAt: DateTime.fromMillisecondsSinceEpoch(at, isUtc: true),
+        modelId: modelId,
+        modelProviderId: providerId,
+        modelVariant: variant,
+        agentId: agent,
+      );
       resumes = current.execution?.kind.known == ExecutionKind.retrying;
     case _streamed:
       break;
@@ -159,7 +178,8 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
       usage = _Usage(_amount(data['cost']), _tokens(data['tokens']));
   }
 
-  if (usage == null && !resumes) return const [];
+  final ends = type == _ended || type == _failed;
+  if (usage == null && !resumes && started == null && !ends) return const [];
 
   final source = SourceProvenance(
     harness: ref.harnessRef,
@@ -185,7 +205,55 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
     receivedAt: receivedAt,
     source: source,
   );
+  // The ended message's parts learn when it ended and what it cost.
+  final endedAt = DateTime.fromMillisecondsSinceEpoch(
+    created.floor(),
+    isUtc: true,
+  );
+  final message = messageId == null ? null : MessageRef(messageId);
+  final update = !ends
+      ? null
+      : MessageContext(
+          message: message!,
+          completed: endedAt,
+          tokens: usage?.tokens,
+          cost: usage == null
+              ? null
+              : Cost(amount: usage.cost, currency: 'USD'),
+          finish: finish,
+        );
   return List.unmodifiable(<SessionEvent>[
+    if (started != null) ...[
+      StepChanged(meta: eventMeta, step: started),
+      for (final item in current.timeline)
+        if (item.meta.message case final context?
+            when context.message == started.message)
+          ItemUpserted(
+            meta: eventMeta,
+            item: item.withMeta(
+              item.meta.withMessage(
+                MessageContext(
+                  message: started.message,
+                  created: started.startedAt,
+                  modelId: started.modelId,
+                  modelProviderId: started.modelProviderId,
+                  modelVariant: started.modelVariant,
+                  agentId: started.agentId,
+                ),
+              ),
+            ),
+          ),
+    ],
+    if (update != null)
+      for (final item in current.timeline)
+        if (item.meta.message case final context?
+            when context.message == message)
+          ItemUpserted(
+            meta: eventMeta,
+            item: item.withMeta(item.meta.withMessage(context.merge(update))),
+          ),
+    if (ends && current.currentStep?.message == message)
+      StepChanged(meta: eventMeta),
     if (resumes)
       ExecutionChanged(
         meta: eventMeta,

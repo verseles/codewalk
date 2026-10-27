@@ -1521,5 +1521,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "حول"
+  "settingsAboutTitle": "حول",
+  "chatMessageMetadataAvailable": "لا تتوفر بيانات تعريفية",
+  "chatMessageModelMessageModelId": "النموذج: {modelId}",
+  "chatMessageProviderMessageProviderId": "المزود: {providerId}",
+  "chatMessageStepFinished": "انتهت الخطوة #{step}: {reason} • رموز {tokens} • ${cost}",
+  "chatMessageStepStarted": "بدأت الخطوة #{step}",
+  "msgInfoCost": "التكلفة: ${cost}",
+  "msgInfoMessageInfo": "معلومات الرسالة",
+  "msgInfoTokens": "الرموز (Tokens): {total}"
 }

@@ -1522,5 +1522,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "के बारे में"
+  "settingsAboutTitle": "के बारे में",
+  "chatMessageMetadataAvailable": "कोई मेटाडेटा उपलब्ध नहीं है",
+  "chatMessageModelMessageModelId": "मॉडल: {modelId}",
+  "chatMessageProviderMessageProviderId": "प्रदाता: {providerId}",
+  "chatMessageStepFinished": "चरण समाप्त #{step}: {reason} • टोकन {tokens} • ${cost}",
+  "chatMessageStepStarted": "चरण शुरू #{step}",
+  "msgInfoCost": "लागत: ${cost}",
+  "msgInfoMessageInfo": "संदेश की जानकारी",
+  "msgInfoTokens": "टोकन: {total}"
 }

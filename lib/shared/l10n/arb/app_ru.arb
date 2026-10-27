@@ -1522,5 +1522,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "О программе"
+  "settingsAboutTitle": "О программе",
+  "chatMessageMetadataAvailable": "Метаданные недоступны",
+  "chatMessageModelMessageModelId": "Модель: {modelId}",
+  "chatMessageProviderMessageProviderId": "Провайдер: {providerId}",
+  "chatMessageStepFinished": "Шаг #{step} завершен: {reason} • токены {tokens} • ${cost}",
+  "chatMessageStepStarted": "Шаг #{step} начат",
+  "msgInfoCost": "Стоимость: ${cost}",
+  "msgInfoMessageInfo": "Информация о сообщении",
+  "msgInfoTokens": "Токены: {total}"
 }

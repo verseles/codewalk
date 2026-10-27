@@ -130,6 +130,16 @@ String stepUsageManifest(SessionEvent event) => jsonEncode({
   ...switch (event) {
     ItemUpserted(:final item) => {'item': semanticItem(item)},
     UsageObserved(:final observation) => {'usage': usageJson(observation)},
+    StepChanged(:final step) => {
+      'step': step == null
+          ? null
+          : {
+              'message': step.message.value,
+              'startedAt': step.startedAt?.toIso8601String(),
+              'model': [step.modelId, step.modelProviderId, step.modelVariant],
+              'agent': step.agentId,
+            },
+    },
     _ => throw StateError('Unexpected step/usage producer event.'),
   },
 });

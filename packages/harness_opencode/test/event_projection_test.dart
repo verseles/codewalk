@@ -324,12 +324,13 @@ void main() {
     }
     // 917 frames reach the shared walker: every session type is owned, the
     // only unowned type is the session-free `server.connected`, and no
-    // tracked frame becomes a diagnostic. The four failed steps without usage
-    // emit nothing: their error reaches the turn's outcome. The three D
-    // subagent progress frames that name their child session now upsert it.
+    // tracked frame becomes a diagnostic. Every step start names the running
+    // step and every step end clears it, so failed steps without usage still
+    // emit; their error reaches the turn's outcome. The three D subagent
+    // progress frames that name their child session now upsert it.
     expect(categories, {
-      'routed-events': 715,
-      'routed-empty': 176,
+      'routed-events': 775,
+      'routed-empty': 116,
       'noop:server.connected': 26,
     });
   });
@@ -341,36 +342,36 @@ void main() {
       'ses_target',
     );
 
-    test('projects valid session.permissions frame into OpenCodeSessionRules', () {
-      final frame = {
-        'id': 'evt_perm',
-        'type': 'session.permissions',
-        'data': {
-          'sessionID': 'ses_target',
-          'permissions': [
-            {'action': 'read', 'resource': 'src/a.txt', 'effect': 'allow'},
-            {'action': '*', 'resource': '*', 'effect': 'allow'},
-          ],
-        },
-      };
-      final rules = projectOpenCodeSessionPermissions(
-        frame,
-        ref,
-        sourceVersion: '2.0.22',
-      );
-      expect(rules.recognized, isTrue);
-      expect(rules.rules, hasLength(2));
-      expect(rules.endsWithWildcardAllow, isTrue);
-    });
+    test(
+      'projects valid session.permissions frame into OpenCodeSessionRules',
+      () {
+        final frame = {
+          'id': 'evt_perm',
+          'type': 'session.permissions',
+          'data': {
+            'sessionID': 'ses_target',
+            'permissions': [
+              {'action': 'read', 'resource': 'src/a.txt', 'effect': 'allow'},
+              {'action': '*', 'resource': '*', 'effect': 'allow'},
+            ],
+          },
+        };
+        final rules = projectOpenCodeSessionPermissions(
+          frame,
+          ref,
+          sourceVersion: '2.0.22',
+        );
+        expect(rules.recognized, isTrue);
+        expect(rules.rules, hasLength(2));
+        expect(rules.endsWithWildcardAllow, isTrue);
+      },
+    );
 
     test('projects empty permissions list or null into empty rules', () {
       final frame = {
         'id': 'evt_perm',
         'type': 'session.permissions',
-        'data': {
-          'sessionID': 'ses_target',
-          'permissions': null,
-        },
+        'data': {'sessionID': 'ses_target', 'permissions': null},
       };
       final rules = projectOpenCodeSessionPermissions(
         frame,
@@ -396,10 +397,7 @@ void main() {
         },
         {
           'type': 'session.permissions',
-          'data': {
-            'sessionID': 'ses_target',
-            'permissions': 'not a list',
-          },
+          'data': {'sessionID': 'ses_target', 'permissions': 'not a list'},
         },
       ]) {
         expect(

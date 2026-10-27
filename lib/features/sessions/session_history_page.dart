@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import 'session_history_controller.dart';
+import 'session_message_info.dart';
 import 'session_timeline_tile.dart';
 
 class SessionHistoryPage extends StatefulWidget {
@@ -122,6 +123,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         return SessionTimelineTile(
                           key: ValueKey(item.id),
                           item: item,
+                          messageHeader: opensMessage(c.items, index - 1),
                         );
                       },
                     ),

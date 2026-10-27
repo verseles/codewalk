@@ -1,5 +1,6 @@
 import 'errors.dart';
 import 'identity.dart';
+import 'timeline.dart';
 import 'values.dart';
 
 enum ConnectionKind {
@@ -43,6 +44,27 @@ final class ExecutionOutcome {
 }
 
 /// Connection confidence and child outcomes are not derived from this state.
+/// The harness step (one model request) running now and the message it writes.
+final class StepInfo {
+  const StepInfo({
+    required this.message,
+    this.startedAt,
+    this.modelId,
+    this.modelProviderId,
+    this.modelVariant,
+    this.agentId,
+  });
+
+  final MessageRef message;
+
+  /// When the harness dispatched the request.
+  final DateTime? startedAt;
+  final String? modelId;
+  final String? modelProviderId;
+  final String? modelVariant;
+  final String? agentId;
+}
+
 final class ExecutionState {
   const ExecutionState({
     required this.kind,

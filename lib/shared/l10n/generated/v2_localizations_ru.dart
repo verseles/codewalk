@@ -1930,4 +1930,45 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'О программе';
+
+  @override
+  String get chatMessageMetadataAvailable => 'Метаданные недоступны';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'Модель: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'Провайдер: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'Шаг #$step завершен: $reason • токены $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'Шаг #$step начат';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'Стоимость: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'Информация о сообщении';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'Токены: $total';
+  }
 }

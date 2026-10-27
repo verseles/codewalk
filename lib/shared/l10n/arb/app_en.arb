@@ -2372,5 +2372,76 @@
   "settingsAboutTitle": "About",
   "@settingsAboutTitle": {
     "description": "CodeWalk UI string — settingsAboutTitle"
+  },
+  "chatMessageMetadataAvailable": "No metadata available",
+  "@chatMessageMetadataAvailable": {
+    "description": "CodeWalk UI string — chatMessageMetadataAvailable"
+  },
+  "chatMessageModelMessageModelId": "Model: {modelId}",
+  "@chatMessageModelMessageModelId": {
+    "description": "CodeWalk UI string — chatMessageModelMessageModelId",
+    "placeholders": {
+      "modelId": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMessageProviderMessageProviderId": "Provider: {providerId}",
+  "@chatMessageProviderMessageProviderId": {
+    "description": "CodeWalk UI string — chatMessageProviderMessageProviderId",
+    "placeholders": {
+      "providerId": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMessageStepFinished": "Step finished #{step}: {reason} • tokens {tokens} • ${cost}",
+  "@chatMessageStepFinished": {
+    "description": "CodeWalk UI string — chatMessageStepFinished",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "step": {
+        "type": "int"
+      },
+      "tokens": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageStepStarted": "Step started #{step}",
+  "@chatMessageStepStarted": {
+    "description": "CodeWalk UI string — chatMessageStepStarted",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "msgInfoCost": "Cost: ${cost}",
+  "@msgInfoCost": {
+    "description": "CodeWalk UI string — msgInfoCost",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "msgInfoMessageInfo": "Message Info",
+  "@msgInfoMessageInfo": {
+    "description": "CodeWalk UI string — msgInfoMessageInfo"
+  },
+  "msgInfoTokens": "Tokens: {total}",
+  "@msgInfoTokens": {
+    "description": "CodeWalk UI string — msgInfoTokens",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
   }
 }

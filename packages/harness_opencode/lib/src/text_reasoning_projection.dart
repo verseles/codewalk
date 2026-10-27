@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'message_context.dart';
 import 'version_policy.dart';
 
 enum OpenCodeTextProjectionFailure {
@@ -187,6 +188,7 @@ SessionEvent? projectOpenCodeTextReasoningEvent(
     ),
     ordinal: ordinal,
     source: source,
+    message: liveMessageContext(current, id, messageId),
   );
   return ItemUpserted(
     meta: meta,

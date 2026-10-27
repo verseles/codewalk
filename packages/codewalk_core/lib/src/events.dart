@@ -185,6 +185,13 @@ final class PlanChanged extends SessionEvent {
   final PlanSnapshot plan;
 }
 
+/// The running step changed; [step] is null when none runs.
+final class StepChanged extends SessionEvent {
+  const StepChanged({required super.meta, this.step});
+
+  final StepInfo? step;
+}
+
 final class UsageObserved extends SessionEvent {
   const UsageObserved({required super.meta, required this.observation});
 

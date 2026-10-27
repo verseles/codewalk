@@ -1792,4 +1792,45 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get settingsAboutTitle => '关于';
+
+  @override
+  String get chatMessageMetadataAvailable => '无可用元数据';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return '模型: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return '提供者: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return '步骤 #$step 已完成：$reason • tokens $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return '步骤 #$step 已开始';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return '费用: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => '消息信息';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'Token数: $total';
+  }
 }

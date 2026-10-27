@@ -1950,4 +1950,45 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'Informazioni';
+
+  @override
+  String get chatMessageMetadataAvailable => 'Nessun metadato disponibile';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'Modello: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'Provider: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'Passaggio terminato #$step: $reason • token $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'Passaggio avviato #$step';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'Costo: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'Informazioni messaggio';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'Token: $total';
+  }
 }

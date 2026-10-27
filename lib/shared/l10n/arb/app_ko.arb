@@ -1533,5 +1533,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "정보"
+  "settingsAboutTitle": "정보",
+  "chatMessageMetadataAvailable": "사용 가능한 메타데이터가 없습니다",
+  "chatMessageModelMessageModelId": "모델: {modelId}",
+  "chatMessageProviderMessageProviderId": "제공자: {providerId}",
+  "chatMessageStepFinished": "#{step} 단계 완료: {reason} • 토큰 {tokens}개 • 비용 ${cost}",
+  "chatMessageStepStarted": "#{step} 단계 시작됨",
+  "msgInfoCost": "비용: ${cost}",
+  "msgInfoMessageInfo": "메시지 정보",
+  "msgInfoTokens": "토큰: {total}"
 }

@@ -23,6 +23,88 @@ List<TimelineItem> project(
 );
 
 void main() {
+  test('display labels never turn a readable near-cap page into a failure', () {
+    final label = 'x' * 250;
+    final items = project([
+      assistant(
+        'a',
+        // Four parts under the per-field cap that fill the page budget.
+        [for (var i = 0; i < 4; i++) textBlock('y' * (256 * 1024 - 150))],
+        completed: true,
+        fields: {
+          'agent': label,
+          'model': {'id': label, 'providerID': label, 'variant': label},
+          'finish': label,
+        },
+      ),
+    ]);
+    final context = items.first.meta.message!;
+    expect(
+      [context.modelId, context.agentId, context.finish],
+      [label, label, label],
+    );
+  });
+
+  test('assistant parts carry what their message reports', () {
+    final items = project([
+      message('u', 'user', {'text': 'hi'}),
+      assistant(
+        'a',
+        [textBlock('one'), textBlock('two')],
+        completed: true,
+        fields: {
+          'agent': 'build',
+          'model': {'id': 'model', 'providerID': 'provider', 'variant': 'high'},
+          'cost': 0.5,
+          'tokens': {
+            'input': 10,
+            'output': 2,
+            'reasoning': 1,
+            'cache': {'read': 3, 'write': 0},
+          },
+          'finish': 'stop',
+        },
+      ),
+      assistant(
+        'b',
+        [textBlock('odd')],
+        fields: {
+          'model': 'not-a-map',
+          'cost': -1,
+          'agent': 'x' * 257,
+          'finish': '\ud800',
+        },
+      ),
+    ]);
+    final user = items.first;
+    expect(user.meta.message, isNull);
+    final parts = items.whereType<AssistantText>().toList();
+    final first = parts[0].meta.message!;
+    expect(first.message, MessageRef('msg_a'));
+    expect(parts[1].meta.message!.message, first.message);
+    expect(
+      first.created,
+      DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
+    );
+    expect(
+      first.completed,
+      DateTime.fromMillisecondsSinceEpoch(2000, isUtc: true),
+    );
+    expect(
+      [first.modelId, first.modelProviderId, first.modelVariant, first.agentId],
+      ['model', 'provider', 'high', 'build'],
+    );
+    expect([first.cost?.amount, first.cost?.currency], [0.5, 'USD']);
+    expect([first.tokens?.input, first.tokens?.cacheRead], [10, 3]);
+    expect(first.finish, 'stop');
+    // A display-only value the record gets wrong is unknown, not an error.
+    final odd = parts[2].meta.message!;
+    expect(
+      [odd.modelId, odd.cost, odd.completed, odd.agentId, odd.finish],
+      [null, null, null, null, null],
+    );
+  });
+
   test(
     'review regression: streaming fragments do not retain credential-bearing JSON',
     () {

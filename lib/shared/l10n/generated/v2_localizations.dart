@@ -3572,6 +3572,59 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'About'**
   String get settingsAboutTitle;
+
+  /// CodeWalk UI string — chatMessageMetadataAvailable
+  ///
+  /// In en, this message translates to:
+  /// **'No metadata available'**
+  String get chatMessageMetadataAvailable;
+
+  /// CodeWalk UI string — chatMessageModelMessageModelId
+  ///
+  /// In en, this message translates to:
+  /// **'Model: {modelId}'**
+  String chatMessageModelMessageModelId(String modelId);
+
+  /// CodeWalk UI string — chatMessageProviderMessageProviderId
+  ///
+  /// In en, this message translates to:
+  /// **'Provider: {providerId}'**
+  String chatMessageProviderMessageProviderId(String providerId);
+
+  /// CodeWalk UI string — chatMessageStepFinished
+  ///
+  /// In en, this message translates to:
+  /// **'Step finished #{step}: {reason} • tokens {tokens} • \${cost}'**
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  );
+
+  /// CodeWalk UI string — chatMessageStepStarted
+  ///
+  /// In en, this message translates to:
+  /// **'Step started #{step}'**
+  String chatMessageStepStarted(int step);
+
+  /// CodeWalk UI string — msgInfoCost
+  ///
+  /// In en, this message translates to:
+  /// **'Cost: \${cost}'**
+  String msgInfoCost(String cost);
+
+  /// CodeWalk UI string — msgInfoMessageInfo
+  ///
+  /// In en, this message translates to:
+  /// **'Message Info'**
+  String get msgInfoMessageInfo;
+
+  /// CodeWalk UI string — msgInfoTokens
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens: {total}'**
+  String msgInfoTokens(int total);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

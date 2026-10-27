@@ -1938,4 +1938,45 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'Sobre';
+
+  @override
+  String get chatMessageMetadataAvailable => 'Nenhum metadado disponível';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'Modelo: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'Provedor: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'Etapa concluída #$step: $reason • tokens $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'Etapa iniciada #$step';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'Custo: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'Informações da Mensagem';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'Tokens: $total';
+  }
 }

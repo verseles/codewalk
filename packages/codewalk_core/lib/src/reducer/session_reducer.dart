@@ -67,6 +67,7 @@ final class SessionState {
       info = draft.info,
       plan = draft.plan,
       selection = draft.selection,
+      currentStep = draft.currentStep,
       revert = draft.revert,
       timeline = immutableList(draft.timeline),
       pending = immutableList(draft.pending),
@@ -100,6 +101,9 @@ final class SessionState {
   final SessionInfo? info;
   final PlanSnapshot? plan;
   final Selection? selection;
+
+  /// The step running now, from the live stream only.
+  final StepInfo? currentStep;
   final RevertState? revert;
   final List<TimelineItem> timeline;
   final List<PendingInput> pending;
@@ -298,6 +302,11 @@ Reduction reduce(SessionState state, SessionEvent event) {
       }
     case UsageObserved(:final observation):
       draft.observeUsage(observation, position);
+    case StepChanged(:final step):
+      if (draft.acceptField(SessionCollection.step, position)) {
+        draft.currentStep = step;
+        draft.changed = true;
+      }
     case SelectionChanged(:final selection):
       if (draft.acceptField(SessionCollection.selection, position)) {
         draft.selection = selection;
@@ -464,6 +473,7 @@ final class _Draft {
       info = state.info,
       plan = state.plan,
       selection = state.selection,
+      currentStep = state.currentStep,
       revert = state.revert,
       timeline = List.of(state.timeline),
       pending = List.of(state.pending),
@@ -499,6 +509,7 @@ final class _Draft {
   SessionInfo? info;
   PlanSnapshot? plan;
   Selection? selection;
+  StepInfo? currentStep;
   RevertState? revert;
   List<TimelineItem> timeline = [];
   List<PendingInput> pending = [];

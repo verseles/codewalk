@@ -1907,4 +1907,45 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'সম্পর্কে';
+
+  @override
+  String get chatMessageMetadataAvailable => 'কোন মেটাডেটা উপলব্ধ নেই';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'মডেল: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'প্রদানকারী: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'ধাপ #$step শেষ হয়েছে: $reason • টোকেন $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'ধাপ #$step শুরু হয়েছে';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'খরচ: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'বার্তা তথ্য';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'টোকেন: $total';
+  }
 }

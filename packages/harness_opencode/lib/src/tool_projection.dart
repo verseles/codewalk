@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'message_context.dart';
 import 'shell_projection.dart';
 import 'version_policy.dart';
 import 'subagent_child.dart';
@@ -385,6 +386,7 @@ SessionEvent? projectOpenCodeToolEvent(
         generation: generation,
         status: OpenValue.known(status),
         source: eventMeta.source,
+        message: liveMessageContext(current, id, messageId),
       ),
       kind: OpenValue.known(_kind(name)),
       rawName: name,

@@ -1895,4 +1895,45 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get settingsAboutTitle => 'حول';
+
+  @override
+  String get chatMessageMetadataAvailable => 'لا تتوفر بيانات تعريفية';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return 'النموذج: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return 'المزود: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'انتهت الخطوة #$step: $reason • رموز $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'بدأت الخطوة #$step';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return 'التكلفة: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => 'معلومات الرسالة';
+
+  @override
+  String msgInfoTokens(int total) {
+    return 'الرموز (Tokens): $total';
+  }
 }

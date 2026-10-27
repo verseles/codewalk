@@ -1830,4 +1830,45 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get settingsAboutTitle => '정보';
+
+  @override
+  String get chatMessageMetadataAvailable => '사용 가능한 메타데이터가 없습니다';
+
+  @override
+  String chatMessageModelMessageModelId(String modelId) {
+    return '모델: $modelId';
+  }
+
+  @override
+  String chatMessageProviderMessageProviderId(String providerId) {
+    return '제공자: $providerId';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return '#$step 단계 완료: $reason • 토큰 $tokens개 • 비용 \$$cost';
+  }
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return '#$step 단계 시작됨';
+  }
+
+  @override
+  String msgInfoCost(String cost) {
+    return '비용: \$$cost';
+  }
+
+  @override
+  String get msgInfoMessageInfo => '메시지 정보';
+
+  @override
+  String msgInfoTokens(int total) {
+    return '토큰: $total';
+  }
 }

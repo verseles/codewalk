@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import '../../shared/l10n/l10n_context.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
+import 'session_message_info.dart';
 import 'session_timeline_tile.dart';
 
 /// The live session timeline: the resident items, the header and the
@@ -564,6 +565,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
           item: item,
           errorRecovery: widget.errorRecovery,
           onOpenChild: widget.onOpenChild,
+          messageHeader: opensMessage(items, index),
         );
       },
     );

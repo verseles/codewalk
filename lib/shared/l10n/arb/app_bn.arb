@@ -1522,5 +1522,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "সম্পর্কে"
+  "settingsAboutTitle": "সম্পর্কে",
+  "chatMessageMetadataAvailable": "কোন মেটাডেটা উপলব্ধ নেই",
+  "chatMessageModelMessageModelId": "মডেল: {modelId}",
+  "chatMessageProviderMessageProviderId": "প্রদানকারী: {providerId}",
+  "chatMessageStepFinished": "ধাপ #{step} শেষ হয়েছে: {reason} • টোকেন {tokens} • ${cost}",
+  "chatMessageStepStarted": "ধাপ #{step} শুরু হয়েছে",
+  "msgInfoCost": "খরচ: ${cost}",
+  "msgInfoMessageInfo": "বার্তা তথ্য",
+  "msgInfoTokens": "টোকেন: {total}"
 }

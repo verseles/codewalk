@@ -162,10 +162,7 @@ void main() {
     final attempt = await client.dismiss(request: request, id: _id);
 
     expect(attempt.receipt.state.known, ReceiptState.accepted);
-    expect(
-      sent.path,
-      'api/session/global/form/frm_1053fc672001AtFDTcma2Hwsr4',
-    );
+    expect(sent.path, 'api/session/global/form/frm_1053fc672001AtFDTcma2Hwsr4');
   });
 
   test('maps error status codes correctly', () async {
@@ -186,34 +183,37 @@ void main() {
     }
   });
 
-  test('validates version, requestId, form answers, and cancellation', () async {
-    final transport = _Transport((_, _) => _response(204));
-    final client = _client(transport, version: '1.0.0');
-    final attempt = await client.dismiss(request: _formRequest(), id: _id);
-    expect(attempt.receipt.state.known, ReceiptState.unavailable);
-    expect(attempt.receipt.unavailable?.reason, 'unverifiedVersion');
+  test(
+    'validates version, requestId, form answers, and cancellation',
+    () async {
+      final transport = _Transport((_, _) => _response(204));
+      final client = _client(transport, version: '1.0.0');
+      final attempt = await client.dismiss(request: _formRequest(), id: _id);
+      expect(attempt.receipt.state.known, ReceiptState.unavailable);
+      expect(attempt.receipt.unavailable?.reason, 'unverifiedVersion');
 
-    final validClient = _client(transport);
-    final invalidId = await validClient.dismiss(
-      request: _formRequest(formId: 'not_a_form'),
-      id: _id,
-    );
-    expect(invalidId.receipt.unavailable?.reason, 'invalidRequestId');
+      final validClient = _client(transport);
+      final invalidId = await validClient.dismiss(
+        request: _formRequest(formId: 'not_a_form'),
+        id: _id,
+      );
+      expect(invalidId.receipt.unavailable?.reason, 'invalidRequestId');
 
-    final invalidAnswers = await validClient.reply(
-      request: _formRequest(),
-      response: FormResponse(FormAnswers({})), // missing required q0
-      id: _id,
-    );
-    expect(invalidAnswers.receipt.unavailable?.reason, 'invalidFormAnswers');
+      final invalidAnswers = await validClient.reply(
+        request: _formRequest(),
+        response: FormResponse(FormAnswers({})), // missing required q0
+        id: _id,
+      );
+      expect(invalidAnswers.receipt.unavailable?.reason, 'invalidFormAnswers');
 
-    final cancellation = RequestCancellation();
-    cancellation.cancel();
-    final cancelled = await validClient.dismiss(
-      request: _formRequest(),
-      id: _id,
-      cancellation: cancellation,
-    );
-    expect(cancelled.receipt.unavailable?.reason, 'cancelledBeforeSend');
-  });
+      final cancellation = RequestCancellation();
+      cancellation.cancel();
+      final cancelled = await validClient.dismiss(
+        request: _formRequest(),
+        id: _id,
+        cancellation: cancellation,
+      );
+      expect(cancelled.receipt.unavailable?.reason, 'cancelledBeforeSend');
+    },
+  );
 }

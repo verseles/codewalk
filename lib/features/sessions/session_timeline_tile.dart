@@ -4,6 +4,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
 import 'session_error_card.dart';
+import 'session_message_info.dart';
 import 'session_tool_result.dart';
 
 /// One read-only timeline item, shared by the history and live views.
@@ -24,6 +25,7 @@ class SessionTimelineTile extends StatelessWidget {
     this.onCopyCode,
     this.errorRecovery,
     this.onOpenChild,
+    this.messageHeader = false,
   });
   final TimelineItem item;
   final void Function(String text, String href, String? title)? onTapLink;
@@ -37,6 +39,10 @@ class SessionTimelineTile extends StatelessWidget {
   /// Opens the sub-conversation a subagent call runs; the whole card is the
   /// way in, and its own controls keep their taps. Null for none.
   final ValueChanged<ToolCall>? onOpenChild;
+
+  /// Whether this item opens its message, so its header shows the message's
+  /// elapsed time and details.
+  final bool messageHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +76,13 @@ class SessionTimelineTile extends StatelessWidget {
     final child = item is ToolCall && item.kind.known == ToolKind.subagent
         ? open
         : null;
+    final message = messageHeader ? item.meta.message : null;
+    final assistant = item is! UserInput;
     final body = Padding(
-      padding: const EdgeInsets.all(16),
+      // Assistant parts sit closer together; a user turn keeps its frame.
+      padding: assistant
+          ? const EdgeInsets.fromLTRB(16, 12, 16, 12)
+          : const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -88,6 +99,7 @@ class SessionTimelineTile extends StatelessWidget {
                   ),
                 ),
               ),
+              if (message != null) MessageElapsedChip(message: message),
             ],
           ),
           const SizedBox(height: 8),
@@ -95,9 +107,19 @@ class SessionTimelineTile extends StatelessWidget {
         ],
       ),
     );
-    if (child == null) return ConversationTextScale(child: Card(child: body));
+    // The refined style frames only the user's turns with a hairline.
+    final cardShape = Theme.of(context).cardTheme.shape;
+    final shape = assistant && cardShape is RoundedRectangleBorder
+        ? cardShape.copyWith(side: BorderSide.none)
+        : null;
+    if (child == null) {
+      return ConversationTextScale(
+        child: Card(shape: shape, child: body),
+      );
+    }
     return ConversationTextScale(
       child: Card(
+        shape: shape,
         clipBehavior: Clip.antiAlias,
         child: Semantics(
           button: true,

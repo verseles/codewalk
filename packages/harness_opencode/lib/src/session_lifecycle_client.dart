@@ -46,8 +46,7 @@ const _titleLimit = 256 * 1024;
 
 /// An absolute path: a POSIX root or a Windows drive.
 bool _absolutePath(String value) =>
-    value.startsWith('/') ||
-    RegExp(r'^[A-Za-z]:[\\/]').hasMatch(value);
+    value.startsWith('/') || RegExp(r'^[A-Za-z]:[\\/]').hasMatch(value);
 
 bool _boundedText(String value, int bytes) =>
     value.length <= bytes &&
@@ -95,7 +94,7 @@ final class OpenCodeSessionLifecycleClient {
     String? nativeSessionId,
     String? title,
     RequestCancellation? cancellation,
-  })async {
+  }) async {
     if (nativeSessionId != null) {
       try {
         openCodeSessionId(nativeSessionId);
@@ -123,7 +122,9 @@ final class OpenCodeSessionLifecycleClient {
     );
     // The optional keys are omitted, not set to null: the endpoint tells an
     // absent key from a null one.
-    final body = <String, Object?>{'location': {'directory': directory}};
+    final body = <String, Object?>{
+      'location': {'directory': directory},
+    };
     if (nativeSessionId != null) body['id'] = nativeSessionId;
     if (title != null) body['title'] = title;
     return _send(
@@ -151,18 +152,15 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     required String title,
     RequestCancellation? cancellation,
-  })async {
+  }) async {
     if (!_boundedText(title, _titleLimit)) {
       throw ArgumentError('The rename body carries a bounded title');
     }
     return _send(
       id: id,
       operation: MutationOperation.rename,
-    owner: SessionOwner(session),
-    intent: CanonicalValue({
-      'sessionID': session.nativeId,
-      'title': title,
-    }),
+      owner: SessionOwner(session),
+      intent: CanonicalValue({'sessionID': session.nativeId, 'title': title}),
       method: 'PATCH',
       pathSegments: ['api', 'session', session.nativeId],
       body: {'title': title},
@@ -203,7 +201,7 @@ final class OpenCodeSessionLifecycleClient {
     required CommandId id,
     String? before,
     RequestCancellation? cancellation,
-  })async {
+  }) async {
     if (before != null &&
         (!before.startsWith('msg_') || !_boundedText(before, _idLimit))) {
       throw ArgumentError('The fork body carries a bounded message boundary');
@@ -237,10 +235,7 @@ final class OpenCodeSessionLifecycleClient {
     id: id,
     operation: MutationOperation.markViewed,
     owner: SessionOwner(session),
-    intent: CanonicalValue({
-      'sessionID': session.nativeId,
-      'idle': idle,
-    }),
+    intent: CanonicalValue({'sessionID': session.nativeId, 'idle': idle}),
     method: 'POST',
     pathSegments: ['api', 'session', session.nativeId, 'view'],
     body: {'idle': idle},
@@ -366,9 +361,8 @@ final class OpenCodeSessionLifecycleClient {
         unavailable: CapabilityUnavailable(operation.name, reason: reason),
       ),
     );
-    OpenCodeSessionLifecycleAttempt uncertain(String reason) => finish(
-      CommandReceipt.uncertain(id: id, owner: owner, reason: reason),
-    );
+    OpenCodeSessionLifecycleAttempt uncertain(String reason) =>
+        finish(CommandReceipt.uncertain(id: id, owner: owner, reason: reason));
     OpenCodeSessionLifecycleAttempt rejected(
       ErrorKind kind,
       String type, {

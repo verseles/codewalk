@@ -88,10 +88,9 @@ void main() {
       final transport = _Transport(
         (_, _) => response({'data': sessionRecord(title: 'New')}),
       );
-      final attempt = await client(transport).create(
-        id: id,
-        directory: '/work/project',
-      );
+      final attempt = await client(
+        transport,
+      ).create(id: id, directory: '/work/project');
       expect(transport.requests, hasLength(1));
       final request = transport.requests.single;
       expect(request.method, 'POST');
@@ -130,12 +129,12 @@ void main() {
     });
 
     test('rename sends the title and answers 204', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'New title',
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
       );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'New title');
       final request = transport.requests.single;
       expect(request.method, 'PATCH');
       expect(request.path, endsWith('api/session/ses_one'));
@@ -146,7 +145,9 @@ void main() {
     });
 
     test('delete sends no body', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
       final attempt = await client(transport).delete(session: session, id: id);
       final request = transport.requests.single;
       expect(request.method, 'DELETE');
@@ -157,22 +158,23 @@ void main() {
       expect(attempt.command.operation.known, MutationOperation.delete);
     });
 
-    test('fork sends the optional boundary and answers with the session', () async {
-      final transport = _Transport(
-        (_, _) => response({'data': sessionRecord(nativeId: 'ses_fork')}),
-      );
-      final attempt = await client(transport).fork(
-        session: session,
-        id: id,
-        before: 'msg_one',
-      );
-      final request = transport.requests.single;
-      expect(request.method, 'POST');
-      expect(request.path, endsWith('api/session/ses_one/fork'));
-      expect(bodyOf(request), {'before': 'msg_one'});
-      expect(attempt.session?.info.ref.nativeId, 'ses_fork');
-      expect(attempt.command.operation.known, MutationOperation.fork);
-    });
+    test(
+      'fork sends the optional boundary and answers with the session',
+      () async {
+        final transport = _Transport(
+          (_, _) => response({'data': sessionRecord(nativeId: 'ses_fork')}),
+        );
+        final attempt = await client(
+          transport,
+        ).fork(session: session, id: id, before: 'msg_one');
+        final request = transport.requests.single;
+        expect(request.method, 'POST');
+        expect(request.path, endsWith('api/session/ses_one/fork'));
+        expect(bodyOf(request), {'before': 'msg_one'});
+        expect(attempt.session?.info.ref.nativeId, 'ses_fork');
+        expect(attempt.command.operation.known, MutationOperation.fork);
+      },
+    );
 
     test('fork without a boundary copies the whole history', () async {
       final transport = _Transport(
@@ -183,12 +185,12 @@ void main() {
     });
 
     test('mark viewed sends the observed idle', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
-      final attempt = await client(transport).markViewed(
-        session: session,
-        id: id,
-        idle: 1791087839951,
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
       );
+      final attempt = await client(
+        transport,
+      ).markViewed(session: session, id: id, idle: 1791087839951);
       final request = transport.requests.single;
       expect(request.method, 'POST');
       expect(request.path, endsWith('api/session/ses_one/view'));
@@ -199,7 +201,9 @@ void main() {
 
   group('the refusals', () {
     test('an unverified version sends nothing', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
       final attempt = await client(
         transport,
         version: '2.0.21',
@@ -221,11 +225,9 @@ void main() {
         final transport = _Transport(
           (_, _) => response(null, status: entry.key, empty: true),
         );
-        final attempt = await client(transport).rename(
-          session: session,
-          id: id,
-          title: 'T',
-        );
+        final attempt = await client(
+          transport,
+        ).rename(session: session, id: id, title: 'T');
         expect(
           attempt.receipt.state.known,
           ReceiptState.rejected,
@@ -242,11 +244,9 @@ void main() {
       final transport = _Transport(
         (_, _) => response({'data': sessionRecord()}, status: 200),
       );
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'T',
-      );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'T');
       expect(attempt.receipt.state.known, ReceiptState.uncertain);
       expect(attempt.receipt.reason, 'status200');
     });
@@ -282,21 +282,17 @@ void main() {
         final transport = _Transport(
           (_, _) => response(null, status: entry.key, empty: true),
         );
-        final attempt = await client(transport).rename(
-          session: session,
-          id: id,
-          title: 'T',
-        );
+        final attempt = await client(
+          transport,
+        ).rename(session: session, id: id, title: 'T');
         expect(attempt.receipt.error?.action?.known, entry.value);
       }
       final limited = _Transport(
         (_, _) => response(null, status: 429, empty: true),
       );
-      final attempt = await client(limited).rename(
-        session: session,
-        id: id,
-        title: 'T',
-      );
+      final attempt = await client(
+        limited,
+      ).rename(session: session, id: id, title: 'T');
       expect(attempt.receipt.error?.retryable, isTrue);
     });
 
@@ -304,11 +300,9 @@ void main() {
       final transport = _Transport(
         (_, _) => response(null, status: 400, empty: true),
       );
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'T',
-      );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'T');
       expect(attempt.payload, '{"title":"T"}');
     });
 
@@ -334,10 +328,9 @@ void main() {
       final forked = await client(transport).fork(session: session, id: id);
       expect(forked.receipt.error?.rawType, 'NotFoundError');
       expect(forked.receipt.error?.action?.known, ErrorAction.refresh);
-      final created = await client(transport).create(
-        id: id,
-        directory: '/work/project',
-      );
+      final created = await client(
+        transport,
+      ).create(id: id, directory: '/work/project');
       expect(created.receipt.error?.rawType, 'NotFoundError');
     });
 
@@ -368,11 +361,9 @@ void main() {
         (_, _) => response(null, status: 204, empty: true),
       );
       await expectLater(
-        client(transport).rename(
-          session: session,
-          id: id,
-          title: 'x' * (256 * 1024 + 1),
-        ),
+        client(
+          transport,
+        ).rename(session: session, id: id, title: 'x' * (256 * 1024 + 1)),
         throwsA(isA<ArgumentError>()),
       );
       expect(transport.requests, isEmpty);
@@ -398,10 +389,7 @@ void main() {
         (_, _) => response({'data': sessionRecord()}),
       );
       await expectLater(
-        client(transport).create(
-          id: id,
-          directory: '/work/${'x' * 5000}',
-        ),
+        client(transport).create(id: id, directory: '/work/${'x' * 5000}'),
         throwsA(isA<ArgumentError>()),
       );
       expect(transport.requests, isEmpty);
@@ -411,11 +399,9 @@ void main() {
       final transport = _Transport(
         (_, _) => response(null, status: 500, empty: true),
       );
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'T',
-      );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'T');
       expect(attempt.receipt.state.known, ReceiptState.uncertain);
       expect(attempt.receipt.reason, 'status500');
     });
@@ -444,17 +430,20 @@ void main() {
     });
 
     test('a malformed body is uncertain', () async {
-      final transport = _Transport((_, _) => response({'data': 'not a session'}));
-      final attempt = await client(transport).create(
-        id: id,
-        directory: '/work/project',
+      final transport = _Transport(
+        (_, _) => response({'data': 'not a session'}),
       );
+      final attempt = await client(
+        transport,
+      ).create(id: id, directory: '/work/project');
       expect(attempt.receipt.state.known, ReceiptState.uncertain);
       expect(attempt.receipt.reason, 'malformedSession');
     });
 
     test('an invalid session identifier is refused before the send', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
       final attempt = await client(transport).rename(
         session: const SessionRef(
           HostId('host'),
@@ -470,7 +459,9 @@ void main() {
     });
 
     test('a cancelled request sends nothing', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
       final cancellation = RequestCancellation()..cancel();
       final attempt = await client(transport).rename(
         session: session,
@@ -484,13 +475,12 @@ void main() {
     });
 
     test('a closed transport sends nothing', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true))
-        ..isClosed = true;
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'T',
-      );
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      )..isClosed = true;
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'T');
       expect(transport.requests, isEmpty);
       expect(attempt.receipt.state.known, ReceiptState.unavailable);
       expect(attempt.receipt.reason, 'closed');
@@ -502,11 +492,9 @@ void main() {
       final transport = _Transport(
         (_, _) => response(null, status: 400, empty: true),
       );
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'A secret title',
-      );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'A secret title');
       final reason = attempt.receipt.reason ?? '';
       expect(reason, isNot(contains('ses_one')));
       expect(reason, isNot(contains('secret')));
@@ -514,12 +502,12 @@ void main() {
     });
 
     test('the payload is the exact body that was sent', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
-      final attempt = await client(transport).rename(
-        session: session,
-        id: id,
-        title: 'New title',
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
       );
+      final attempt = await client(
+        transport,
+      ).rename(session: session, id: id, title: 'New title');
       expect(attempt.payload, '{"title":"New title"}');
       expect(attempt.session, isNull);
     });
@@ -567,12 +555,10 @@ void main() {
     });
 
     test('a deadline that passes is uncertain', () async {
-      final transport = _Transport(
-        (_, _) async {
-          await Future<void>.delayed(const Duration(seconds: 5));
-          return response(null, status: 204, empty: true);
-        },
-      );
+      final transport = _Transport((_, _) async {
+        await Future<void>.delayed(const Duration(seconds: 5));
+        return response(null, status: 204, empty: true);
+      });
       final attempt = await client(
         transport,
         deadline: const Duration(milliseconds: 50),
@@ -583,14 +569,12 @@ void main() {
 
     test('a cancellation in flight is uncertain', () async {
       final cancellation = RequestCancellation();
-      final transport = _Transport(
-        (_, _) async {
-          // The cancellation lands after the request was handed over.
-          cancellation.cancel();
-          await Future<void>.delayed(const Duration(seconds: 5));
-          return response(null, status: 204, empty: true);
-        },
-      );
+      final transport = _Transport((_, _) async {
+        // The cancellation lands after the request was handed over.
+        cancellation.cancel();
+        await Future<void>.delayed(const Duration(seconds: 5));
+        return response(null, status: 204, empty: true);
+      });
       final attempt = await client(transport).rename(
         session: session,
         id: id,
@@ -602,7 +586,9 @@ void main() {
     });
 
     test('the attempt never replays', () async {
-      final transport = _Transport((_, _) => response(null, status: 204, empty: true));
+      final transport = _Transport(
+        (_, _) => response(null, status: 204, empty: true),
+      );
       await client(transport).rename(session: session, id: id, title: 'T');
       expect(transport.requests, hasLength(1));
     });

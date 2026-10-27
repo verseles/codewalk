@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'history_test_data.dart';
 import 'step_usage_test_data.dart';
+import 'text_reasoning_test_data.dart' show applyText, textFrame;
 
 Matcher failsWith(OpenCodeStepUsageProjectionFailure failure) => throwsA(
   isA<OpenCodeStepUsageProjectionException>()
@@ -36,8 +37,18 @@ Map<String, Object?> dataOf(Map<String, Object?> frame) =>
 void main() {
   final empty = SessionState(historyRef);
 
-  test('started and streamed are validated and emit nothing', () {
-    expect(projectStepUsage(stepFrame('started')), isEmpty);
+  test('started names the running step; streamed emits nothing', () {
+    final step =
+        (projectStepUsage(stepFrame('started')).single as StepChanged).step!;
+    expect(step.message, MessageRef('msg_step'));
+    expect(
+      step.startedAt,
+      DateTime.fromMillisecondsSinceEpoch(900, isUtc: true),
+    );
+    expect(
+      [step.modelId, step.modelProviderId, step.modelVariant, step.agentId],
+      ['model', 'provider', null, 'build'],
+    );
     expect(projectStepUsage(stepFrame('streamed')), isEmpty);
     expect(
       () => projectStepUsage(
@@ -51,6 +62,154 @@ void main() {
       ),
       failsWith(OpenCodeStepUsageProjectionFailure.malformed),
     );
+  });
+
+  test('a step dates its parts and its end completes them', () {
+    var state = empty;
+    var seq = 0;
+    void apply(List<SessionEvent> events) {
+      for (final event in events) {
+        state = reduce(state, event).state;
+      }
+    }
+
+    apply(
+      projectStepUsage(
+        stepFrame('started', id: 'evt_start'),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    state = applyText(
+      textFrame('session.text.started', message: 'msg_step'),
+      state,
+      ++seq,
+    );
+    state = applyText(
+      textFrame('session.text.started', id: 'evt_other', message: 'msg_other'),
+      state,
+      ++seq,
+    );
+    final started = state.timeline.first.meta.message!;
+    expect(
+      started.created,
+      DateTime.fromMillisecondsSinceEpoch(900, isUtc: true),
+    );
+    expect(
+      [started.modelId, started.agentId, started.completed],
+      ['model', 'build', null],
+    );
+    expect(state.timeline.last.meta.message!.created, isNull);
+
+    final ended = projectStepUsage(
+      stepFrame('ended', id: 'evt_end'),
+      current: state,
+      seq: ++seq,
+    );
+    expect(
+      ended.whereType<ItemUpserted>().single.item.id,
+      state.timeline.first.id,
+    );
+    apply(ended);
+    final done = state.timeline.first.meta.message!;
+    expect(
+      done.completed,
+      DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
+    );
+    expect(
+      [done.modelId, done.finish, done.cost?.amount],
+      ['model', 'stop', 0.25],
+    );
+    expect(done.tokens, isNotNull);
+    expect(state.timeline.last.meta.message!.completed, isNull);
+    expect(state.currentStep, isNull);
+  });
+
+  test('a restarted step drops the earlier attempt from its parts', () {
+    var state = empty;
+    var seq = 0;
+    void apply(List<SessionEvent> events) {
+      for (final event in events) {
+        state = reduce(state, event).state;
+      }
+    }
+
+    apply(
+      projectStepUsage(
+        stepFrame('started', id: 'evt_start'),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    state = applyText(
+      textFrame('session.text.started', message: 'msg_step'),
+      state,
+      ++seq,
+    );
+    apply(
+      projectStepUsage(
+        stepFrame(
+          'failed',
+          id: 'evt_fail',
+          fields: {'cost': 1, 'tokens': tokenJson},
+        ),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    expect(state.timeline.single.meta.message!.completed, isNotNull);
+    final restart = projectStepUsage(
+      edit(
+        stepFrame('started', id: 'evt_restart'),
+        (f) => dataOf(f)['started'] = 1500,
+      ),
+      current: state,
+      seq: ++seq,
+    );
+    expect(restart.whereType<ItemUpserted>(), hasLength(1));
+    apply(restart);
+    final context = state.timeline.single.meta.message!;
+    expect(
+      context.created,
+      DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true),
+    );
+    expect(
+      [context.completed, context.cost, context.tokens, context.finish],
+      [null, null, null, null],
+    );
+    expect(context.modelId, 'model');
+    expect(state.currentStep?.message, MessageRef('msg_step'));
+  });
+
+  test('a failed step without usage still completes its parts', () {
+    var state = empty;
+    for (final event in projectStepUsage(
+      stepFrame('started', id: 'evt_start'),
+      current: state,
+    )) {
+      state = reduce(state, event).state;
+    }
+    state = applyText(
+      textFrame('session.text.started', message: 'msg_step'),
+      state,
+      2,
+    );
+    final failed = projectStepUsage(
+      stepFrame('failed', id: 'evt_end'),
+      current: state,
+      seq: 3,
+    );
+    expect(failed.whereType<UsageObserved>(), isEmpty);
+    for (final event in failed) {
+      state = reduce(state, event).state;
+    }
+    final context = state.timeline.single.meta.message!;
+    expect(
+      context.completed,
+      DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
+    );
+    expect(context.cost, isNull);
+    expect(state.currentStep, isNull);
   });
 
   test('an ended step is one partial turn usage observation', () {

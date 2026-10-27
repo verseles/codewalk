@@ -11,6 +11,7 @@ enum SessionCollection {
   info,
   selection,
   revert,
+  step,
 }
 
 /// Pure descriptions: executing reads or notifications belongs to the caller.

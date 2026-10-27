@@ -1522,5 +1522,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "关于"
+  "settingsAboutTitle": "关于",
+  "chatMessageMetadataAvailable": "无可用元数据",
+  "chatMessageModelMessageModelId": "模型: {modelId}",
+  "chatMessageProviderMessageProviderId": "提供者: {providerId}",
+  "chatMessageStepFinished": "步骤 #{step} 已完成：{reason} • tokens {tokens} • ${cost}",
+  "chatMessageStepStarted": "步骤 #{step} 已开始",
+  "msgInfoCost": "费用: ${cost}",
+  "msgInfoMessageInfo": "消息信息",
+  "msgInfoTokens": "Token数: {total}"
 }

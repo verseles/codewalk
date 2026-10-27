@@ -1,5 +1,6 @@
 import 'errors.dart';
 import 'identity.dart';
+import 'usage.dart';
 import 'values.dart';
 
 enum ItemStatus { pending, streaming, completed, failed, interrupted }
@@ -101,6 +102,65 @@ final class MentionRef {
   final String target;
 }
 
+/// Opaque, adapter-scoped identity of the harness message an item belongs to.
+final class MessageRef {
+  MessageRef(String value) : value = requireText(value, 'value');
+
+  final String value;
+
+  @override
+  bool operator ==(Object other) => other is MessageRef && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
+/// What the harness reported about the message an item belongs to.
+///
+/// Every field but [message] is optional: an absent value is unknown, never
+/// zero. Times are the harness's own, not local observation times.
+final class MessageContext {
+  const MessageContext({
+    required this.message,
+    this.created,
+    this.completed,
+    this.modelId,
+    this.modelProviderId,
+    this.modelVariant,
+    this.agentId,
+    this.tokens,
+    this.cost,
+    this.finish,
+  });
+
+  final MessageRef message;
+  final DateTime? created;
+  final DateTime? completed;
+  final String? modelId;
+  final String? modelProviderId;
+  final String? modelVariant;
+  final String? agentId;
+  final TokenBreakdown? tokens;
+  final Cost? cost;
+
+  /// The harness's finish reason, as reported.
+  final String? finish;
+
+  /// This context with every value [other] knows taking precedence.
+  MessageContext merge(MessageContext other) => MessageContext(
+    message: message,
+    created: other.created ?? created,
+    completed: other.completed ?? completed,
+    modelId: other.modelId ?? modelId,
+    modelProviderId: other.modelProviderId ?? modelProviderId,
+    modelVariant: other.modelVariant ?? modelVariant,
+    agentId: other.agentId ?? agentId,
+    tokens: other.tokens ?? tokens,
+    cost: other.cost ?? cost,
+    finish: other.finish ?? finish,
+  );
+}
+
 /// Stable identity and stream generation are assigned at the adapter boundary.
 ///
 /// [ordinal] retains a source block's ordinal. Text and reasoning may both have
@@ -114,6 +174,7 @@ final class ItemMeta {
     required this.source,
     this.turnId,
     this.ordinal,
+    this.message,
   }) : generation = requireText(generation, 'generation') {
     requireText(id.value, 'id');
     if (turnId != null) requireText(turnId!.value, 'turnId');
@@ -128,6 +189,20 @@ final class ItemMeta {
   final OpenValue<ItemStatus> status;
   final SourceProvenance source;
   final int? ordinal;
+
+  /// The harness message this item belongs to, when the harness reports one.
+  final MessageContext? message;
+
+  /// This metadata with [message] replaced.
+  ItemMeta withMessage(MessageContext? message) => ItemMeta(
+    id: id,
+    generation: generation,
+    status: status,
+    source: source,
+    turnId: turnId,
+    ordinal: ordinal,
+    message: message,
+  );
 }
 
 sealed class TimelineItem {
@@ -140,6 +215,68 @@ sealed class TimelineItem {
   String get generation => meta.generation;
   OpenValue<ItemStatus> get status => meta.status;
   SourceProvenance get source => meta.source;
+
+  /// This item with [meta] replaced and every other field kept.
+  TimelineItem withMeta(ItemMeta meta) => switch (this) {
+    final UserInput item => UserInput(
+      meta: meta,
+      text: item.text,
+      delivery: item.delivery,
+      attachments: item.attachments,
+      mentions: item.mentions,
+      commandId: item.commandId,
+    ),
+    final AssistantText item => AssistantText(
+      meta: meta,
+      text: item.text,
+      complete: item.complete,
+      prefixMissing: item.prefixMissing,
+    ),
+    final Reasoning item => Reasoning(
+      meta: meta,
+      text: item.text,
+      complete: item.complete,
+      prefixMissing: item.prefixMissing,
+    ),
+    final ToolCall item => ToolCall(
+      meta: meta,
+      kind: item.kind,
+      rawName: item.rawName,
+      input: item.input,
+      output: item.output,
+      outputRef: item.outputRef,
+      child: item.child,
+      childEvidence: item.childEvidence,
+      error: item.error,
+    ),
+    final ShellRun item => ShellRun(
+      meta: meta,
+      command: item.command,
+      exitCode: item.exitCode,
+      exitToken: item.exitToken,
+      output: item.output,
+      shellStatus: item.shellStatus,
+      outputText: item.outputText,
+    ),
+    final Notice item => Notice(
+      meta: meta,
+      kind: item.kind,
+      text: item.text,
+      relatedSession: item.relatedSession,
+    ),
+    final TurnOutcome item => TurnOutcome(
+      meta: meta,
+      kind: item.kind,
+      error: item.error,
+      reason: item.reason,
+    ),
+    final UnknownItem item => UnknownItem(
+      meta: meta,
+      rawType: item.rawType,
+      raw: item.raw,
+      fallbackText: item.fallbackText,
+    ),
+  };
 }
 
 final class UserInput extends TimelineItem {

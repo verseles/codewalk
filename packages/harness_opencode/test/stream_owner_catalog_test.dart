@@ -6,22 +6,25 @@ import 'stream_owner_test.dart' show Harness;
 /// The catalog observes the session lifecycle of every session of the
 /// endpoint, watched or not, and the signal carries only the kind.
 void main() {
-  test('a lifecycle frame of an unwatched session reaches the catalog', () async {
-    final harness = Harness('ses_a');
-    final changes = <OpenCodeCatalogChange>[];
-    harness.owner.catalogChanges.listen(changes.add);
-    await harness.connect(1);
-    await harness.send([
-      {
-        'id': 'evt_1',
-        'created': 1,
-        'type': 'session.created',
-        'data': {'sessionID': 'ses_b', 'projectID': 'global'},
-        'durable': {'aggregateID': 'ses_b', 'seq': 1, 'version': 1},
-      },
-    ]);
-    expect(changes, [OpenCodeCatalogChange.created]);
-  });
+  test(
+    'a lifecycle frame of an unwatched session reaches the catalog',
+    () async {
+      final harness = Harness('ses_a');
+      final changes = <OpenCodeCatalogChange>[];
+      harness.owner.catalogChanges.listen(changes.add);
+      await harness.connect(1);
+      await harness.send([
+        {
+          'id': 'evt_1',
+          'created': 1,
+          'type': 'session.created',
+          'data': {'sessionID': 'ses_b', 'projectID': 'global'},
+          'durable': {'aggregateID': 'ses_b', 'seq': 1, 'version': 1},
+        },
+      ]);
+      expect(changes, [OpenCodeCatalogChange.created]);
+    },
+  );
 
   test('every lifecycle kind is reported once', () async {
     final harness = Harness('ses_a');

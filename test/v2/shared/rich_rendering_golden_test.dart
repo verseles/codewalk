@@ -25,7 +25,7 @@ ItemMeta _meta(String id) => ItemMeta(
 /// before comparing pixels. Pinning the golden canvas to an integral height
 /// keeps the captured image size identical everywhere; the sub-pixel sliver is
 /// clipped, not lost.
-const double _goldenCanvasHeight = 568;
+const double _goldenCanvasHeight = 560;
 
 Widget _goldenBody() => SessionTimelineTile(
   item: AssistantText(

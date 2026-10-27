@@ -1522,5 +1522,13 @@
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
   },
-  "settingsAboutTitle": "Acerca de"
+  "settingsAboutTitle": "Acerca de",
+  "chatMessageMetadataAvailable": "No hay metadatos disponibles",
+  "chatMessageModelMessageModelId": "Modelo: {modelId}",
+  "chatMessageProviderMessageProviderId": "Proveedor: {providerId}",
+  "chatMessageStepFinished": "Paso finalizado #{step}: {reason} • tokens {tokens} • ${cost}",
+  "chatMessageStepStarted": "Paso iniciado #{step}",
+  "msgInfoCost": "Costo: ${cost}",
+  "msgInfoMessageInfo": "Información del Mensaje",
+  "msgInfoTokens": "Tokens: {total}"
 }

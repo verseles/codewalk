@@ -101,10 +101,7 @@ final class OpenCodeFormReplyClient {
           receipt: CommandReceipt.unavailable(
             id: id,
             owner: owner,
-            unavailable: CapabilityUnavailable(
-              'formReply',
-              reason: reason,
-            ),
+            unavailable: CapabilityUnavailable('formReply', reason: reason),
           ),
         );
     OpenCodeFormReplyAttempt uncertain(String reason) =>
@@ -166,9 +163,7 @@ final class OpenCodeFormReplyClient {
 
     final String? encoded = isDismiss
         ? null
-        : jsonEncode({
-            'answer': response!.answers.toJson(),
-          });
+        : jsonEncode({'answer': response!.answers.toJson()});
 
     final token = RequestCancellation();
     final expired = Completer<Never>();

@@ -12,6 +12,15 @@ PORT_KEYS = {
     "chatMessageToolOutputTruncated",
     "toolRunning",
     "statusFailed",
+    # The message details carry the retained reference's own strings.
+    "msgInfoMessageInfo",
+    "chatMessageModelMessageModelId",
+    "chatMessageProviderMessageProviderId",
+    "msgInfoTokens",
+    "msgInfoCost",
+    "chatMessageStepStarted",
+    "chatMessageStepFinished",
+    "chatMessageMetadataAvailable",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

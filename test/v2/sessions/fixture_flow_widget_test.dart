@@ -8,6 +8,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_error_card.dart';
 import 'package:codewalk/features/sessions/session_form_card.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
+import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/platform/endpoints/pairing_factory_io.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
@@ -815,9 +816,13 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('live-composer-send')));
       await pumpSpin(
         tester,
-        () => postedPrompts.length == 1 &&
-            !tester.widget<SessionLivePage>(find.byType(SessionLivePage))
-                .controller.composer.sending,
+        () =>
+            postedPrompts.length == 1 &&
+            !tester
+                .widget<SessionLivePage>(find.byType(SessionLivePage))
+                .controller
+                .composer
+                .sending,
         reason: 'first workspace prompt admitted',
       );
       expect(postedPrompts.first['text'], 'First prompt from workspace');
@@ -946,6 +951,17 @@ void main() {
       );
 
       // 8. Model switch (`model switch`): open selection dialog, pick variant.
+      // The selection chip heads the lazy timeline: scroll back up to it.
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('live-selection')),
+        -300,
+        scrollable: find
+            .descendant(
+              of: find.byType(SessionLiveTimeline),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       await tester.ensureVisible(find.byKey(const ValueKey('live-selection')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('live-selection')));

@@ -439,6 +439,19 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** compact/wide, 14 locales with RTL, SelectionArea, semantics headers, 200% text scaling, reduced-motion static progress and VM goldens (mobile/desktop light/dark + ar RTL) are covered by widget tests; keyboard focus on overflowing code remains pending and is not claimed as passing
 - **Then** `flutter analyze` passes with no new issues and focused v2 rendering/timeline/history/live tests pass; `dart run tool/ci/import_rules.dart` was not run for this stage (known >20 min, issue #375) with manual G4 verification (no legacy imports, no `part of`, new files <500 lines)
 
+### V2 message elapsed time and details
+
+- **Given** a live or history timeline shows the parts (text, reasoning, tools) of an assistant message
+- **When** the first part of that message is rendered
+- **Then** its header shows a compact elapsed chip from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way
+- **Then** the details dialog lists the elapsed time, model, provider, the reported token total (only when input and output are known), cost in USD, and "Step started #1" / "Step finished #1: reason • tokens • cost" (a v2 message is one model step); with nothing known it says "No metadata available"; it scrolls, closes with its button, the barrier or Escape
+- **Then** live parts learn the model, agent and start of the running step when it starts; when the step ends or fails they receive the completion time, usage and finish reason; a retried step on the same message resets them to the new attempt
+- **Then** history reads the same facts from the assistant record; an unexpected, oversized or malformed display value is unknown and never rejects the page
+
+- **Given** the refined visual style
+- **When** timeline cards render
+- **Then** assistant-side cards (text, reasoning, tools, notices) have no border and slightly tighter vertical padding, while the user's turns keep the hairline frame; cards follow theme, density, text-size and width changes on rebuild
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
