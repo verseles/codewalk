@@ -2550,5 +2550,57 @@
         "type": "int"
       }
     }
+  },
+  "settingsAppearanceThinkingBubbles": "Thinking bubbles",
+  "@settingsAppearanceThinkingBubbles": {
+    "description": "CodeWalk UI string — settingsAppearanceThinkingBubbles"
+  },
+  "settingsAppearanceThinkingBubblesDescription": "Show or hide reasoning blocks in assistant messages.",
+  "@settingsAppearanceThinkingBubblesDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceThinkingBubblesDescription"
+  },
+  "settingsAppearanceToolCallBubbles": "Tool call bubbles",
+  "@settingsAppearanceToolCallBubbles": {
+    "description": "CodeWalk UI string — settingsAppearanceToolCallBubbles"
+  },
+  "settingsAppearanceToolCallBubblesDescription": "Show or hide tool execution cards in assistant messages.",
+  "@settingsAppearanceToolCallBubblesDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceToolCallBubblesDescription"
+  },
+  "settingsBehaviorChatRenderMode": "Chat render mode",
+  "@settingsBehaviorChatRenderMode": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderMode"
+  },
+  "settingsBehaviorChatRenderModeBlock": "Block",
+  "@settingsBehaviorChatRenderModeBlock": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderModeBlock"
+  },
+  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
+  "@settingsBehaviorChatRenderModeBlockDescription": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderModeBlockDescription"
+  },
+  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
+  "@settingsBehaviorChatRenderModeDescription": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderModeDescription"
+  },
+  "settingsBehaviorChatRenderModeLive": "Live",
+  "@settingsBehaviorChatRenderModeLive": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderModeLive"
+  },
+  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
+  "@settingsBehaviorChatRenderModeLiveDescription": {
+    "description": "CodeWalk UI string — settingsBehaviorChatRenderModeLiveDescription"
+  },
+  "settingsBehaviorTitle": "Behavior",
+  "@settingsBehaviorTitle": {
+    "description": "CodeWalk UI string — settingsBehaviorTitle"
+  },
+  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
+  "@chatBlockResponsePendingDescription": {
+    "description": "CodeWalk UI string — chatBlockResponsePendingDescription"
+  },
+  "chatBlockResponsePendingTitle": "Generating response",
+  "@chatBlockResponsePendingTitle": {
+    "description": "CodeWalk UI string — chatBlockResponsePendingTitle"
   }
 }

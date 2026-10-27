@@ -1555,5 +1555,18 @@
   "chatWorkExpand": "توسيع",
   "chatWorkHide": "إخفاء",
   "chatWorkMessageOne": "رسالة عمل واحدة",
-  "chatWorkMessagesMultiple": "{count} رسائل عمل"
+  "chatWorkMessagesMultiple": "{count} رسائل عمل",
+  "settingsAppearanceThinkingBubbles": "فقاعات التفكير",
+  "settingsAppearanceThinkingBubblesDescription": "إظهار أو إخفاء كتل الاستدلال في رسائل المساعد.",
+  "settingsAppearanceToolCallBubbles": "فقاعات استدعاء الأدوات",
+  "settingsAppearanceToolCallBubblesDescription": "إظهار أو إخفاء بطاقات تنفيذ الأدوات في رسائل المساعد.",
+  "settingsBehaviorChatRenderMode": "وضع عرض الدردشة",
+  "settingsBehaviorChatRenderModeBlock": "كتلة",
+  "settingsBehaviorChatRenderModeBlockDescription": "أخفِ النص المباشر للمساعد والاستدلال وبطاقات الأدوات حتى يمكن عرض الجولة الحالية ككتلة واحدة.",
+  "settingsBehaviorChatRenderModeDescription": "اختر ما إذا كانت ردود المساعد تظهر أثناء البث أو تُعرض بعد اكتمال الجولة الحالية.",
+  "settingsBehaviorChatRenderModeLive": "مباشر",
+  "settingsBehaviorChatRenderModeLiveDescription": "اعرض نص المساعد واستدلالاته ونشاط الأدوات أثناء بث الأحداث من OpenCode.",
+  "settingsBehaviorTitle": "السلوك",
+  "chatBlockResponsePendingDescription": "سيظهر الرد في كتلة واحدة عند اكتمال هذه الجولة.",
+  "chatBlockResponsePendingTitle": "جارٍ إنشاء الرد"
 }

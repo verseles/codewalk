@@ -2040,4 +2040,49 @@ class V2LocalizationsBn extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count কাজের বার্তা';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'বুদবুদ চিন্তা';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'সহকারী বার্তাগুলিতে যুক্তি ব্লকগুলি দেখান বা লুকান৷';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'টুল কল বুদবুদ';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'সহকারী বার্তাগুলিতে টুল এক্সিকিউশন কার্ড দেখান বা লুকান।';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'চ্যাট রেন্ডার মোড';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'ব্লক';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'বর্তমান টার্ন একক ব্লক হিসেবে দেখানোর আগ পর্যন্ত লাইভ সহায়ক টেক্সট, যুক্তি এবং টুল কার্ড লুকিয়ে রাখুন।';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'সহায়কের উত্তর স্ট্রিম করার সময় দেখাবেন নাকি বর্তমান টার্ন শেষ হওয়ার পরে দেখাবেন তা চয়ন করুন।';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'লাইভ';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'OpenCode ইভেন্ট স্ট্রিম করার সময় সহায়কের টেক্সট, যুক্তি ও টুলের কার্যকলাপ দেখান।';
+
+  @override
+  String get settingsBehaviorTitle => 'আচরণ';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'এই টার্ন শেষ হলে উত্তরটি একটি একক ব্লক হিসেবে প্রদর্শিত হবে।';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'উত্তর তৈরি হচ্ছে';
 }

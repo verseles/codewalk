@@ -1963,4 +1963,49 @@ class V2LocalizationsJa extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count件の作業メッセージ';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => '思考プロセスバブル';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'アシスタントメッセージ内の推論ブロック（思考プロセス）の表示/非表示を切り替えます。';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'ツール呼び出しバブル';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'アシスタントメッセージ内のツール実行カードの表示/非表示を切り替えます。';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'チャット表示モード';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'ブロック';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      '現在のターンを1つのブロックとして表示できるまで、ライブのアシスタントテキスト、推論、ツールカードを非表示にします。';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'アシスタントの応答をストリーム中に表示するか、現在のターンが完了した後に表示するかを選択します。';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'ライブ';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'OpenCode がイベントをストリームする際に、アシスタントのテキスト、推論、ツールのアクティビティを表示します。';
+
+  @override
+  String get settingsBehaviorTitle => '動作';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'このターンが終了すると、回答が1つのブロックとして表示されます。';
+
+  @override
+  String get chatBlockResponsePendingTitle => '応答を生成中';
 }

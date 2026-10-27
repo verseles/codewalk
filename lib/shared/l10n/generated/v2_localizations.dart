@@ -3733,6 +3733,84 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'{count} work messages'**
   String chatWorkMessagesMultiple(int count);
+
+  /// CodeWalk UI string — settingsAppearanceThinkingBubbles
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking bubbles'**
+  String get settingsAppearanceThinkingBubbles;
+
+  /// CodeWalk UI string — settingsAppearanceThinkingBubblesDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide reasoning blocks in assistant messages.'**
+  String get settingsAppearanceThinkingBubblesDescription;
+
+  /// CodeWalk UI string — settingsAppearanceToolCallBubbles
+  ///
+  /// In en, this message translates to:
+  /// **'Tool call bubbles'**
+  String get settingsAppearanceToolCallBubbles;
+
+  /// CodeWalk UI string — settingsAppearanceToolCallBubblesDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide tool execution cards in assistant messages.'**
+  String get settingsAppearanceToolCallBubblesDescription;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderMode
+  ///
+  /// In en, this message translates to:
+  /// **'Chat render mode'**
+  String get settingsBehaviorChatRenderMode;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderModeBlock
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get settingsBehaviorChatRenderModeBlock;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderModeBlockDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.'**
+  String get settingsBehaviorChatRenderModeBlockDescription;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderModeDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether assistant responses appear as they stream or reveal after the current turn settles.'**
+  String get settingsBehaviorChatRenderModeDescription;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderModeLive
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get settingsBehaviorChatRenderModeLive;
+
+  /// CodeWalk UI string — settingsBehaviorChatRenderModeLiveDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Show assistant text, reasoning, and tool activity as OpenCode streams events.'**
+  String get settingsBehaviorChatRenderModeLiveDescription;
+
+  /// CodeWalk UI string — settingsBehaviorTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Behavior'**
+  String get settingsBehaviorTitle;
+
+  /// CodeWalk UI string — chatBlockResponsePendingDescription
+  ///
+  /// In en, this message translates to:
+  /// **'The answer will appear as a single block when this turn finishes.'**
+  String get chatBlockResponsePendingDescription;
+
+  /// CodeWalk UI string — chatBlockResponsePendingTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Generating response'**
+  String get chatBlockResponsePendingTitle;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -1925,4 +1925,47 @@ class V2LocalizationsZh extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count 条工作消息';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => '思考气泡';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription => '在助手消息中显示或隐藏推理块。';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => '工具调用气泡';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      '在助手消息中显示或隐藏工具执行卡片。';
+
+  @override
+  String get settingsBehaviorChatRenderMode => '聊天渲染模式';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => '块模式';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      '在当前回合能以单个块显示之前，隐藏实时助手文本、推理内容和工具卡片。';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      '选择助手回复是流式显示，还是在当前回合结束后显示。';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => '实时';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      '在 OpenCode 流式传输事件时显示助手文本、推理和工具活动。';
+
+  @override
+  String get settingsBehaviorTitle => '行为';
+
+  @override
+  String get chatBlockResponsePendingDescription => '本轮结束后，答案将以单个块的形式显示。';
+
+  @override
+  String get chatBlockResponsePendingTitle => '正在生成回复';
 }

@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "展開",
   "chatWorkHide": "非表示",
   "chatWorkMessageOne": "1件の作業メッセージ",
-  "chatWorkMessagesMultiple": "{count}件の作業メッセージ"
+  "chatWorkMessagesMultiple": "{count}件の作業メッセージ",
+  "settingsAppearanceThinkingBubbles": "思考プロセスバブル",
+  "settingsAppearanceThinkingBubblesDescription": "アシスタントメッセージ内の推論ブロック（思考プロセス）の表示/非表示を切り替えます。",
+  "settingsAppearanceToolCallBubbles": "ツール呼び出しバブル",
+  "settingsAppearanceToolCallBubblesDescription": "アシスタントメッセージ内のツール実行カードの表示/非表示を切り替えます。",
+  "settingsBehaviorChatRenderMode": "チャット表示モード",
+  "settingsBehaviorChatRenderModeBlock": "ブロック",
+  "settingsBehaviorChatRenderModeBlockDescription": "現在のターンを1つのブロックとして表示できるまで、ライブのアシスタントテキスト、推論、ツールカードを非表示にします。",
+  "settingsBehaviorChatRenderModeDescription": "アシスタントの応答をストリーム中に表示するか、現在のターンが完了した後に表示するかを選択します。",
+  "settingsBehaviorChatRenderModeLive": "ライブ",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode がイベントをストリームする際に、アシスタントのテキスト、推論、ツールのアクティビティを表示します。",
+  "settingsBehaviorTitle": "動作",
+  "chatBlockResponsePendingDescription": "このターンが終了すると、回答が1つのブロックとして表示されます。",
+  "chatBlockResponsePendingTitle": "応答を生成中"
 }

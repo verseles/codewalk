@@ -2083,4 +2083,51 @@ class V2LocalizationsIt extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count messaggi di lavoro';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'Bolle di pensiero';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'Mostra o nascondi i blocchi di ragionamento nei messaggi dell\'assistente.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles =>
+      'Bolle di chiamata dello strumento';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'Mostra o nascondi le schede di esecuzione dello strumento nei messaggi dell\'assistente.';
+
+  @override
+  String get settingsBehaviorChatRenderMode =>
+      'Modalità di rendering della chat';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'Blocco';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'Nascondi testo dell\'assistente, ragionamento e schede degli strumenti in tempo reale finché il turno attuale non può essere mostrato come un unico blocco.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'Scegli se le risposte dell\'assistente appaiono durante lo streaming o vengono rivelate al termine del turno attuale.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'In tempo reale';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'Mostra testo dell\'assistente, ragionamento e attività degli strumenti mentre OpenCode trasmette gli eventi.';
+
+  @override
+  String get settingsBehaviorTitle => 'Comportamento';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'La risposta apparirà come un unico blocco al termine di questo turno.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'Generazione della risposta';
 }

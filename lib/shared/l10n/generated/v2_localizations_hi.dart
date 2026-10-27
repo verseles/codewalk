@@ -2049,4 +2049,50 @@ class V2LocalizationsHi extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count कार्य संदेश';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles =>
+      'विचार करने वाले बुलबुले (Thinking bubbles)';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'सहायक संदेशों में तर्क ब्लॉकों को दिखाएं या छिपाएं।';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'टूल कॉल बुलबुले';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'सहायक संदेशों में टूल निष्पादन (tool execution) कार्ड दिखाएं या छिपाएं।';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'चैट रेंडर मोड';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'ब्लॉक';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'जब तक वर्तमान टर्न को एक ब्लॉक के रूप में नहीं दिखाया जा सकता, तब तक लाइव असिस्टेंट टेक्स्ट, तर्क और टूल कार्ड छिपाएं।';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'चुनें कि असिस्टेंट प्रतिक्रियाएं स्ट्रीम होते ही दिखें या वर्तमान टर्न पूरा होने के बाद प्रकट हों।';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'लाइव';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'OpenCode इवेंट स्ट्रीम करते समय असिस्टेंट टेक्स्ट, तर्क और टूल गतिविधि दिखाएं।';
+
+  @override
+  String get settingsBehaviorTitle => 'व्यवहार';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'जब यह टर्न समाप्त होगा, तो उत्तर एक ही ब्लॉक के रूप में दिखाई देगा।';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'प्रतिक्रिया बनाई जा रही है';
 }

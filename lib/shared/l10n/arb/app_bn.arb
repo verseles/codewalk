@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "প্রসারিত করুন",
   "chatWorkHide": "লুকান",
   "chatWorkMessageOne": "1 কাজের বার্তা",
-  "chatWorkMessagesMultiple": "{count} কাজের বার্তা"
+  "chatWorkMessagesMultiple": "{count} কাজের বার্তা",
+  "settingsAppearanceThinkingBubbles": "বুদবুদ চিন্তা",
+  "settingsAppearanceThinkingBubblesDescription": "সহকারী বার্তাগুলিতে যুক্তি ব্লকগুলি দেখান বা লুকান৷",
+  "settingsAppearanceToolCallBubbles": "টুল কল বুদবুদ",
+  "settingsAppearanceToolCallBubblesDescription": "সহকারী বার্তাগুলিতে টুল এক্সিকিউশন কার্ড দেখান বা লুকান।",
+  "settingsBehaviorChatRenderMode": "চ্যাট রেন্ডার মোড",
+  "settingsBehaviorChatRenderModeBlock": "ব্লক",
+  "settingsBehaviorChatRenderModeBlockDescription": "বর্তমান টার্ন একক ব্লক হিসেবে দেখানোর আগ পর্যন্ত লাইভ সহায়ক টেক্সট, যুক্তি এবং টুল কার্ড লুকিয়ে রাখুন।",
+  "settingsBehaviorChatRenderModeDescription": "সহায়কের উত্তর স্ট্রিম করার সময় দেখাবেন নাকি বর্তমান টার্ন শেষ হওয়ার পরে দেখাবেন তা চয়ন করুন।",
+  "settingsBehaviorChatRenderModeLive": "লাইভ",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode ইভেন্ট স্ট্রিম করার সময় সহায়কের টেক্সট, যুক্তি ও টুলের কার্যকলাপ দেখান।",
+  "settingsBehaviorTitle": "আচরণ",
+  "chatBlockResponsePendingDescription": "এই টার্ন শেষ হলে উত্তরটি একটি একক ব্লক হিসেবে প্রদর্শিত হবে।",
+  "chatBlockResponsePendingTitle": "উত্তর তৈরি হচ্ছে"
 }

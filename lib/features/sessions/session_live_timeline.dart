@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/theme/chat_appearance.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
 import 'session_timeline_projection.dart';
@@ -109,6 +110,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   int _lastItemCount = 0;
   List<_ItemSignature>? _lastSignature;
 
+  /// What the previous signature showed: a change of it is the reader's
+  /// choice, not an arrival.
+  _Display? _lastDisplay;
+
   /// Whether the timeline already landed on the newest content.
   bool _landed = false;
 
@@ -166,6 +171,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       _pivot = memory.pivot;
       _lastSignature = memory.signature;
       _lastItemCount = memory.signature?.length ?? 0;
+      _lastDisplay = memory.display;
       if (memory.settled != widget.settled) _settledChanged();
     } else {
       _revealPending = widget.settled;
@@ -208,6 +214,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     widget.scroll.timelineMemory = (
       pivot: _pivot,
       signature: _lastSignature,
+      display: _lastDisplay,
       settled: widget.settled,
     );
     super.dispose();
@@ -416,6 +423,30 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     widget.scroll.reveal();
   }
 
+  /// The rows of [items] as [display] shows them.
+  List<SessionTimelineRow> _project(
+    List<TimelineItem> items,
+    _Display display,
+  ) => _presentation.project(
+    items,
+    settled: widget.settled,
+    showReasoning: display.reasoning,
+    showToolCalls: display.tools,
+    renderMode: display.mode,
+  );
+
+  /// The signature of what [rows] show: a hidden call, or a response the
+  /// Block render mode still holds, does not arrive. An opened work group
+  /// lists its work twice, under its header and in its own rows.
+  static List<_ItemSignature> _shownSignature(List<SessionTimelineRow> rows) {
+    final shown = <ItemId>{};
+    return _contentSignature([
+      for (final row in rows)
+        for (final item in row.items)
+          if (shown.add(item.id)) item,
+    ]);
+  }
+
   /// The index of the row of the last assistant answer.
   int? _lastAnswerIndex(List<SessionTimelineRow> rows) {
     for (var i = rows.length - 1; i >= 0; i--) {
@@ -427,14 +458,29 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
-    final signature = _contentSignature(items);
+    final appearance = ChatAppearance.maybeOf(context);
+    final display = (
+      reasoning: appearance?.showReasoning ?? true,
+      tools: appearance?.showToolCalls ?? true,
+      mode: appearance?.renderMode ?? ChatRenderMode.live,
+    );
+    // What a new display choice shows or hides is not an arrival: the items
+    // are compared as the previous choice showed them, so what arrived
+    // meanwhile is still told.
+    final last = _lastDisplay;
+    final before = last == null || last == display
+        ? null
+        : _shownSignature(_project(items, last));
+    final rows = _project(items, display);
+    final signature = _shownSignature(rows);
+    final now = before ?? signature;
     // Rows that paged in above the rows the previous build saw are history,
     // not an arrival: only what follows them is compared.
     final previous = _lastSignature;
     final kept = previous == null || previous.isEmpty
         ? 0
-        : signature.indexWhere((s) => s.id == previous.first.id);
-    final compared = kept > 0 ? signature.sublist(kept) : signature;
+        : now.indexWhere((s) => s.id == previous.first.id);
+    final compared = kept > 0 ? now.sublist(kept) : now;
     if (previous != null &&
         (compared.length > _lastItemCount ||
             (compared.length == _lastItemCount &&
@@ -454,12 +500,12 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     _lastItemCount = signature.length;
     _lastSignature = signature;
+    _lastDisplay = display;
     if (!identical(_liveItems.value, items)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _liveItems.value = widget.items;
       });
     }
-    final rows = _presentation.project(items, settled: widget.settled);
     final rowIndex = {for (final (i, row) in rows.indexed) row.key: i};
     _placePivot(rows);
     // The answer row sets its context again when the list lays it out.
@@ -587,7 +633,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       _olderCount = at;
       return;
     }
-    _pivot = rows.firstOrNull?.items.first.id;
+    // The pending row holds no item.
+    _pivot = rows.expand((row) => row.items).firstOrNull?.id;
     _olderCount = 0;
   }
 
@@ -617,6 +664,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             row: row,
             onToggle: () => _toggle(row.id),
           ),
+          SessionPendingRow() => const SessionGenerationPlaceholder(),
         };
       },
     );
@@ -721,8 +769,12 @@ class _RenderNoIntrinsicHeight extends RenderProxyBox {
 typedef _Memory = ({
   ItemId? pivot,
   List<_ItemSignature>? signature,
+  _Display? display,
   bool settled,
 });
+
+/// What the reader chose to show: reasoning, tool calls and the render mode.
+typedef _Display = ({bool reasoning, bool tools, ChatRenderMode mode});
 
 /// A signature of one item: its identity, its known status, the content it
 /// carries that can change and the outcome it carries, when it has one. A

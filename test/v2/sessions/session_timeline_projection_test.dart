@@ -1,4 +1,5 @@
 import 'package:codewalk/features/sessions/session_timeline_projection.dart';
+import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -7,6 +8,7 @@ ItemMeta _meta(
   String? message,
   ItemStatus status = ItemStatus.completed,
   String generation = 'g1',
+  bool ended = false,
 }) => ItemMeta(
   id: ItemId(id),
   generation: generation,
@@ -18,7 +20,10 @@ ItemMeta _meta(
   ),
   message: message == null
       ? null
-      : MessageContext(message: MessageRef(message)),
+      : MessageContext(
+          message: MessageRef(message),
+          completed: ended ? DateTime.utc(2026, 10, 27) : null,
+        ),
 );
 
 UserInput _user(String id) => UserInput(
@@ -27,8 +32,8 @@ UserInput _user(String id) => UserInput(
   delivery: const OpenValue.known(DeliveryState.delivered),
 );
 
-Reasoning _think(String id, String message) => Reasoning(
-  meta: _meta(id, message: message),
+Reasoning _think(String id, String message, {bool ended = false}) => Reasoning(
+  meta: _meta(id, message: message, ended: ended),
   text: 'hmm',
   complete: true,
 );
@@ -39,8 +44,15 @@ ToolCall _tool(
   ItemStatus status = ItemStatus.completed,
   ToolKind kind = ToolKind.read,
   String generation = 'g1',
+  bool ended = false,
 }) => ToolCall(
-  meta: _meta(id, message: message, status: status, generation: generation),
+  meta: _meta(
+    id,
+    message: message,
+    status: status,
+    generation: generation,
+    ended: ended,
+  ),
   kind: OpenValue.known(kind),
   rawName: kind.name,
 );
@@ -70,6 +82,7 @@ List<String> _shape(List<SessionTimelineRow> rows) => [
         'run(${tools.map((t) => t.id.value).join(',')})',
       SessionWorkGroupRow(:final work, :final messageCount, :final expanded) =>
         'work(${work.length}/$messageCount${expanded ? ',open' : ''})',
+      SessionPendingRow(:final anchor) => 'pending(${anchor.value})',
     },
 ];
 
@@ -251,5 +264,112 @@ void main() {
       ],
       [false, true, true],
     );
+  });
+
+  test('hidden reasoning and calls leave no row and no empty group (#108)', () {
+    final presentation = SessionTimelinePresentation();
+    List<String> shape(
+      bool settled, {
+      bool reasoning = true,
+      bool tools = true,
+    }) => _shape(
+      presentation.project(
+        _turn(complete: settled),
+        settled: settled,
+        showReasoning: reasoning,
+        showToolCalls: tools,
+      ),
+    );
+    expect(shape(false, tools: false), ['u1', 'r1', 'a1']);
+    expect(shape(false, reasoning: false), ['u1', 'run(t1,t2,t3)', 'a1']);
+    expect(shape(true, tools: false), ['u1', 'work(1/1)', 'a1']);
+    expect(shape(true, reasoning: false), ['u1', 'work(3/2)', 'a1']);
+    expect(shape(true, reasoning: false, tools: false), ['u1', 'a1']);
+    // The first item shown of a message opens it, so its details stay
+    // reachable when the item that opened it is hidden.
+    final rows = presentation.project(
+      _turn(complete: false),
+      settled: false,
+      showReasoning: false,
+    );
+    expect((rows[1] as SessionToolRunRow).messageHeaders, [true, false, true]);
+  });
+
+  test('the Block render mode holds what did not finish (#284)', () {
+    final presentation = SessionTimelinePresentation();
+    List<String> block(List<TimelineItem> items, {bool settled = false}) =>
+        _shape(
+          presentation.project(
+            items,
+            settled: settled,
+            renderMode: ChatRenderMode.block,
+          ),
+        );
+    final inFlight = [
+      _user('u1'),
+      _think('r1', 'm1', ended: true),
+      _tool('t1', 'm1', ended: true),
+      _tool('t2', 'm1', ended: true),
+      _text('x1', 'm2', complete: false),
+      _tool('t3', 'm2'),
+      _tool('t4', 'm2', status: ItemStatus.streaming),
+    ];
+    // The messages that ended, then each call that ended, then the rest
+    // waits behind the pending row.
+    expect(block(inFlight), ['u1', 'r1', 'run(t1,t2)', 't3', 'pending(u1)']);
+    expect(_shape(presentation.project(inFlight, settled: false)), [
+      'u1',
+      'r1',
+      'run(t1,t2)',
+      'x1',
+      'run(t3,t4)',
+    ]);
+    // A prompt waiting for its first answer keeps the same pending row.
+    expect(block([_user('u1')]), ['u1', 'pending(u1)']);
+    // Only the turn in flight is held.
+    expect(
+      block([..._turn(), _user('u2'), _text('a2', 'm9', complete: false)]),
+      ['u1', 'work(4/2)', 'a1', 'u2', 'pending(u2)'],
+    );
+    // A settled session shows everything, collapsed as in Live.
+    expect(block(_turn(), settled: true), ['u1', 'work(4/2)', 'a1']);
+    // Ended calls join as Live would join them: a held call keeps them
+    // together, a held text or a shown reasoning between them does not.
+    List<TimelineItem> interleaved(TimelineItem between) => [
+      _user('u1'),
+      _tool('t1', 'm1'),
+      between,
+      _tool('t2', 'm1'),
+      _tool('t3', 'm1', status: ItemStatus.streaming),
+      _tool('t4', 'm1'),
+    ];
+    expect(block(interleaved(_text('x1', 'm1', complete: false))), [
+      'u1',
+      't1',
+      'run(t2,t4)',
+      'pending(u1)',
+    ]);
+    expect(block(interleaved(_think('r1', 'm1'))), [
+      'u1',
+      't1',
+      'run(t2,t4)',
+      'pending(u1)',
+    ]);
+    expect(
+      _shape(
+        presentation.project(
+          interleaved(_think('r1', 'm1')),
+          settled: false,
+          showReasoning: false,
+          renderMode: ChatRenderMode.block,
+        ),
+      ),
+      ['u1', 'run(t1,t2,t4)', 'pending(u1)'],
+    );
+    // A window that opens in the middle of the turn anchors on its first
+    // item.
+    expect(block([_tool('t9', 'm9', status: ItemStatus.streaming)]), [
+      'pending(t9)',
+    ]);
   });
 }

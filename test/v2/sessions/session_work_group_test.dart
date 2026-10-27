@@ -5,6 +5,7 @@ import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/features/sessions/session_reasoning_body.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,6 +84,10 @@ Future<SessionLiveScroll> _pump(
   Size size = const Size(390, 844),
   SessionLiveScroll? scroll,
   WidgetBuilder? empty,
+  ChatRenderMode renderMode = ChatRenderMode.live,
+  bool showReasoning = true,
+  bool showToolCalls = true,
+  bool settle = true,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -94,17 +99,25 @@ Future<SessionLiveScroll> _pump(
       localizationsDelegates: V2Localizations.localizationsDelegates,
       supportedLocales: V2Localizations.supportedLocales,
       home: Scaffold(
-        body: SessionLiveTimeline(
-          items: items,
-          headerBuilder: (_) => const SizedBox(height: 8),
-          scroll: rules,
-          settled: settled,
-          emptyBuilder: empty,
+        body: ChatAppearance(
+          mathRendering: true,
+          conversationTextScale: 1,
+          renderMode: renderMode,
+          showReasoning: showReasoning,
+          showToolCalls: showToolCalls,
+          child: SessionLiveTimeline(
+            items: items,
+            headerBuilder: (_) => const SizedBox(height: 8),
+            scroll: rules,
+            settled: settled,
+            emptyBuilder: empty,
+          ),
         ),
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  // A pending row's indicator never settles.
+  settle ? await tester.pumpAndSettle() : await tester.pump();
   return rules;
 }
 
@@ -532,4 +545,103 @@ void main() {
     expect(find.text(l10n.chatHelloAssistant), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the Block render mode shows a placeholder for the rest', (
+    tester,
+  ) async {
+    final items = _turn('1', complete: false);
+    await _pump(
+      tester,
+      items,
+      settled: false,
+      renderMode: ChatRenderMode.block,
+      settle: false,
+    );
+    final l10n = _l10n(tester);
+    expect(find.text(l10n.chatBlockResponsePendingTitle), findsOneWidget);
+    // Nothing of the turn ended in a message, but its calls did.
+    expect(find.textContaining('answer 1'), findsNothing);
+    expect(find.textContaining('thinking 1'), findsNothing);
+    expect(find.byKey(const ValueKey('tool-run-tools-t11')), findsOne);
+    // Once the session settles, the whole turn shows and the placeholder
+    // leaves.
+    await _pump(
+      tester,
+      _turn('1'),
+      settled: true,
+      renderMode: ChatRenderMode.block,
+    );
+    expect(find.text(l10n.chatBlockResponsePendingTitle), findsNothing);
+    expect(find.textContaining('answer 1'), findsOneWidget);
+  });
+
+  testWidgets('hidden tool calls leave the timeline (#108)', (tester) async {
+    await _pump(
+      tester,
+      _turn('1', complete: false),
+      settled: false,
+      showToolCalls: false,
+    );
+    expect(find.byKey(const ValueKey('tool-run-tools-t11')), findsNothing);
+    expect(find.textContaining('answer 1'), findsOneWidget);
+  });
+
+  testWidgets('showing hidden work again is not an arrival', (tester) async {
+    final scroll = SessionLiveScroll();
+    addTearDown(scroll.dispose);
+    final items = [for (var n = 0; n < 6; n++) ..._turn('$n')];
+    await _pump(
+      tester,
+      items,
+      settled: true,
+      scroll: scroll,
+      showReasoning: false,
+      showToolCalls: false,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 600));
+    await tester.pumpAndSettle();
+    expect(scroll.following, isFalse);
+    final at = scroll.controller.position.pixels;
+    await _pump(tester, items, settled: true, scroll: scroll);
+    expect(scroll.unreadBelow, isFalse);
+    expect(scroll.controller.position.pixels, at);
+    // New content is still told.
+    await _pump(
+      tester,
+      [...items, ..._turn('6')],
+      settled: true,
+      scroll: scroll,
+    );
+    expect(scroll.unreadBelow, isTrue);
+  });
+
+  for (final hidden in [false, true]) {
+    testWidgets('content that arrives with a display change is still told'
+        '${hidden ? ', while hidden' : ''}', (tester) async {
+      final scroll = SessionLiveScroll();
+      addTearDown(scroll.dispose);
+      final items = [for (var n = 0; n < 6; n++) ..._turn('$n')];
+      await _pump(
+        tester,
+        items,
+        settled: true,
+        scroll: scroll,
+        showToolCalls: false,
+      );
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, 600));
+      await tester.pumpAndSettle();
+      expect(scroll.following, isFalse);
+      if (hidden) {
+        // The session is shown again from the timeline's memory.
+        await tester.pumpWidget(const SizedBox());
+      }
+      await _pump(
+        tester,
+        [...items, ..._turn('6')],
+        settled: true,
+        scroll: scroll,
+      );
+      expect(scroll.unreadBelow, isTrue);
+    });
+  }
 }

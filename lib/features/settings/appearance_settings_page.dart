@@ -238,6 +238,26 @@ class AppearanceSettingsPage extends StatelessWidget {
                 onChanged: p.setMathRendering,
               ),
             ]),
+            // The retained reference's display toggles: reasoning and tool
+            // calls can leave the timeline without leaving the session.
+            _card(context, l.settingsAppearanceThinkingBubbles, [
+              SwitchListTile.adaptive(
+                key: const ValueKey('settings_toggle_thinking_bubbles'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.settingsAppearanceThinkingBubblesDescription),
+                value: p.showReasoning,
+                onChanged: p.setShowReasoning,
+              ),
+            ]),
+            _card(context, l.settingsAppearanceToolCallBubbles, [
+              SwitchListTile.adaptive(
+                key: const ValueKey('settings_toggle_tool_call_bubbles'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.settingsAppearanceToolCallBubblesDescription),
+                value: p.showToolCalls,
+                onChanged: p.setShowToolCalls,
+              ),
+            ]),
           ],
         ),
       ),

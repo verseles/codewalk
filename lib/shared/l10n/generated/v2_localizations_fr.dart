@@ -2085,4 +2085,49 @@ class V2LocalizationsFr extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count messages de travail';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'Bulles de réflexion';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'Afficher ou masquer les blocs de raisonnement dans les messages de l\'assistant.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'Bulles d\'appel d\'outil';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'Afficher ou masquer les cartes d\'exécution d\'outil dans les messages de l\'assistant.';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'Mode de rendu de la discussion';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'Bloc';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'Masquez le texte de l\'assistant, le raisonnement et les cartes d\'outils en direct jusqu\'à ce que le tour actuel puisse être affiché en un seul bloc.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'Choisissez si les réponses de l\'assistant apparaissent au fil de la diffusion ou se révèlent une fois le tour actuel terminé.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'En direct';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'Affichez le texte de l\'assistant, le raisonnement et l\'activité des outils pendant qu\'OpenCode diffuse les événements.';
+
+  @override
+  String get settingsBehaviorTitle => 'Comportement';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'La réponse apparaîtra en un seul bloc une fois ce tour terminé.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'Génération de la réponse';
 }

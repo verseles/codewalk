@@ -2089,4 +2089,49 @@ class V2LocalizationsDe extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count Arbeitsnachrichten';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'Denkblasen';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'Gedankengänge-Blöcke in Assistenten-Nachrichten anzeigen oder ausblenden.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'Toolaufruf-Blasen';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'Tool-Ausführungskarten in Assistenten-Nachrichten anzeigen oder ausblenden.';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'Darstellungsmodus des Chats';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'Block';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'Live-Assistententext, Reasoning und Tool-Karten ausblenden, bis der aktuelle Schritt als ein Block angezeigt werden kann.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'Wählen Sie, ob Antworten des Assistenten während des Streamens erscheinen oder erst nach Abschluss des aktuellen Schritts angezeigt werden.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'Live';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'Assistententext, Reasoning und Tool-Aktivität anzeigen, während OpenCode Ereignisse streamt.';
+
+  @override
+  String get settingsBehaviorTitle => 'Verhalten';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'Die Antwort erscheint als einzelner Block, sobald dieser Schritt abgeschlossen ist.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'Antwort wird generiert';
 }

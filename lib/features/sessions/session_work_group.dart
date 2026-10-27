@@ -234,3 +234,82 @@ class SessionToolRun extends StatelessWidget {
     return more > 0 ? '$shown • ${l10n.chatMessageToolChainMore(more)}' : shown;
   }
 }
+
+/// Where the Block render mode holds the rest of a turn in flight, like the
+/// retained reference's compact generation placeholder.
+class SessionGenerationPlaceholder extends StatelessWidget {
+  const SessionGenerationPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.v2L10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.visualStyleTokens;
+    return ConversationTextScale(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: tokens.isRefined
+                  ? tokens.cardSurface
+                  : scheme.surfaceContainerHigh,
+              borderRadius: tokens.isRefined
+                  ? tokens.cardRadius
+                  : AppShapes.borderLarge,
+              border: Border.all(
+                color: tokens.isRefined
+                    ? tokens.separator
+                    : scheme.outlineVariant.withValues(alpha: 0.35),
+                width: tokens.isRefined ? tokens.enabledBorderWidth : 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: scheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.chatBlockResponsePendingTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.chatBlockResponsePendingDescription,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

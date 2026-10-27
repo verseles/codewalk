@@ -2065,4 +2065,49 @@ class V2LocalizationsRu extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count рабочих сообщений';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'Размышления';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'Показывать или скрывать блоки рассуждений в сообщениях ассистента.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'Вызовы инструментов';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'Показывать или скрывать карточки выполнения инструментов в сообщениях ассистента.';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'Режим отображения чата';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'Блок';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'Скрывает живой текст ассистента, рассуждения и карточки инструментов, пока текущий ход не будет показан единым блоком.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'Выберите, появляются ли ответы ассистента по мере передачи или раскрываются после завершения текущего хода.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'В реальном времени';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'Показывает текст ассистента, рассуждения и активность инструментов по мере передачи событий OpenCode.';
+
+  @override
+  String get settingsBehaviorTitle => 'Поведение';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'Ответ появится единым блоком, когда этот ход завершится.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'Генерация ответа';
 }

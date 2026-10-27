@@ -1,18 +1,31 @@
 import 'package:flutter/widgets.dart';
 
+/// How assistant responses reach the timeline: as they stream, or each
+/// block once it is finished.
+enum ChatRenderMode { live, block }
+
 /// Conversation display preferences for timeline and composer surfaces.
 ///
-/// Absent in isolated widgets, where math renders and text keeps its scale.
+/// Absent in isolated widgets, where math renders, text keeps its scale,
+/// responses render live and reasoning and tool calls show.
 class ChatAppearance extends InheritedWidget {
   const ChatAppearance({
     super.key,
     required this.mathRendering,
     required this.conversationTextScale,
+    this.renderMode = ChatRenderMode.live,
+    this.showReasoning = true,
+    this.showToolCalls = true,
     required super.child,
   });
 
   final bool mathRendering;
   final double conversationTextScale;
+  final ChatRenderMode renderMode;
+
+  /// Whether reasoning and tool-call rows show in the timeline.
+  final bool showReasoning;
+  final bool showToolCalls;
 
   static ChatAppearance? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ChatAppearance>();
@@ -23,7 +36,10 @@ class ChatAppearance extends InheritedWidget {
   @override
   bool updateShouldNotify(ChatAppearance oldWidget) =>
       mathRendering != oldWidget.mathRendering ||
-      conversationTextScale != oldWidget.conversationTextScale;
+      conversationTextScale != oldWidget.conversationTextScale ||
+      renderMode != oldWidget.renderMode ||
+      showReasoning != oldWidget.showReasoning ||
+      showToolCalls != oldWidget.showToolCalls;
 }
 
 /// Scales only its subtree by the conversation text size, on top of the

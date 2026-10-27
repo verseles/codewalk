@@ -6,6 +6,7 @@ import '../platform/storage/metadata_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import '../shared/shortcuts/shortcut_binding_codec.dart';
+import '../shared/theme/chat_appearance.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
 import '../shared/theme/theme_preferences.dart';
 
@@ -149,6 +150,33 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('mathRendering');
   }
 
+  /// How assistant responses reach the timeline, and whether reasoning and
+  /// tool calls show there; live and both shown by default.
+  ChatRenderMode _chatRenderMode = ChatRenderMode.live;
+  bool _showReasoning = true;
+  bool _showToolCalls = true;
+  ChatRenderMode get chatRenderMode => _chatRenderMode;
+  bool get showReasoning => _showReasoning;
+  bool get showToolCalls => _showToolCalls;
+
+  void setChatRenderMode(ChatRenderMode value) {
+    if (_disposed || _chatRenderMode == value) return;
+    _chatRenderMode = value;
+    _changed('chatRenderMode');
+  }
+
+  void setShowReasoning(bool value) {
+    if (_disposed || _showReasoning == value) return;
+    _showReasoning = value;
+    _changed('showReasoning');
+  }
+
+  void setShowToolCalls(bool value) {
+    if (_disposed || _showToolCalls == value) return;
+    _showToolCalls = value;
+    _changed('showToolCalls');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -242,6 +270,11 @@ class AppPreferencesController extends ChangeNotifier {
         ? null
         : _conversationTextScale,
     'mathRendering': _mathRendering ? null : false,
+    'chatRenderMode': _chatRenderMode == ChatRenderMode.live
+        ? null
+        : _chatRenderMode.name,
+    'showReasoning': _showReasoning ? null : false,
+    'showToolCalls': _showToolCalls ? null : false,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -331,6 +364,17 @@ class AppPreferencesController extends ChangeNotifier {
           scale('conversationTextScale') ?? _conversationTextScale;
       final math = value('mathRendering');
       if (math is bool) _mathRendering = math;
+      // An unknown stored mode keeps the default.
+      final renderMode = value('chatRenderMode');
+      _chatRenderMode =
+          ChatRenderMode.values
+              .where((m) => m.name == renderMode)
+              .firstOrNull ??
+          _chatRenderMode;
+      final reasoning = value('showReasoning');
+      if (reasoning is bool) _showReasoning = reasoning;
+      final tools = value('showToolCalls');
+      if (tools is bool) _showToolCalls = tools;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

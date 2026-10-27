@@ -41,6 +41,9 @@ PORT_KEYS = {
     "chatMessageToolDoneCount",
     "chatHelloAssistant",
     "chatWelcomeSubmessage",
+    # The Block render mode's placeholder.
+    "chatBlockResponsePendingTitle",
+    "chatBlockResponsePendingDescription",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "Развернуть",
   "chatWorkHide": "Скрыть",
   "chatWorkMessageOne": "1 рабочее сообщение",
-  "chatWorkMessagesMultiple": "{count} рабочих сообщений"
+  "chatWorkMessagesMultiple": "{count} рабочих сообщений",
+  "settingsAppearanceThinkingBubbles": "Размышления",
+  "settingsAppearanceThinkingBubblesDescription": "Показывать или скрывать блоки рассуждений в сообщениях ассистента.",
+  "settingsAppearanceToolCallBubbles": "Вызовы инструментов",
+  "settingsAppearanceToolCallBubblesDescription": "Показывать или скрывать карточки выполнения инструментов в сообщениях ассистента.",
+  "settingsBehaviorChatRenderMode": "Режим отображения чата",
+  "settingsBehaviorChatRenderModeBlock": "Блок",
+  "settingsBehaviorChatRenderModeBlockDescription": "Скрывает живой текст ассистента, рассуждения и карточки инструментов, пока текущий ход не будет показан единым блоком.",
+  "settingsBehaviorChatRenderModeDescription": "Выберите, появляются ли ответы ассистента по мере передачи или раскрываются после завершения текущего хода.",
+  "settingsBehaviorChatRenderModeLive": "В реальном времени",
+  "settingsBehaviorChatRenderModeLiveDescription": "Показывает текст ассистента, рассуждения и активность инструментов по мере передачи событий OpenCode.",
+  "settingsBehaviorTitle": "Поведение",
+  "chatBlockResponsePendingDescription": "Ответ появится единым блоком, когда этот ход завершится.",
+  "chatBlockResponsePendingTitle": "Генерация ответа"
 }

@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "展开",
   "chatWorkHide": "隐藏",
   "chatWorkMessageOne": "1 条工作消息",
-  "chatWorkMessagesMultiple": "{count} 条工作消息"
+  "chatWorkMessagesMultiple": "{count} 条工作消息",
+  "settingsAppearanceThinkingBubbles": "思考气泡",
+  "settingsAppearanceThinkingBubblesDescription": "在助手消息中显示或隐藏推理块。",
+  "settingsAppearanceToolCallBubbles": "工具调用气泡",
+  "settingsAppearanceToolCallBubblesDescription": "在助手消息中显示或隐藏工具执行卡片。",
+  "settingsBehaviorChatRenderMode": "聊天渲染模式",
+  "settingsBehaviorChatRenderModeBlock": "块模式",
+  "settingsBehaviorChatRenderModeBlockDescription": "在当前回合能以单个块显示之前，隐藏实时助手文本、推理内容和工具卡片。",
+  "settingsBehaviorChatRenderModeDescription": "选择助手回复是流式显示，还是在当前回合结束后显示。",
+  "settingsBehaviorChatRenderModeLive": "实时",
+  "settingsBehaviorChatRenderModeLiveDescription": "在 OpenCode 流式传输事件时显示助手文本、推理和工具活动。",
+  "settingsBehaviorTitle": "行为",
+  "chatBlockResponsePendingDescription": "本轮结束后，答案将以单个块的形式显示。",
+  "chatBlockResponsePendingTitle": "正在生成回复"
 }

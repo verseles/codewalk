@@ -11,6 +11,7 @@ import '../../shared/shortcuts/shortcut_action.dart';
 import '../hosts/hosts_filter_target.dart';
 import 'about_settings_page.dart';
 import 'appearance_settings_page.dart';
+import 'behavior_settings_page.dart';
 import 'diagnostics_settings_page.dart';
 import 'release_history_settings_page.dart';
 import 'shortcuts_settings_page.dart';
@@ -18,6 +19,7 @@ import 'updates_settings_page.dart';
 
 enum SettingsSection {
   appearance,
+  behavior,
   shortcuts,
   logs,
   updates,
@@ -119,6 +121,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     final detail = KeyedSubtree(
       key: _detailKey,
       child: switch (section) {
+        SettingsSection.behavior => const BehaviorSettingsPage(),
         SettingsSection.shortcuts => const ShortcutsSettingsPage(),
         SettingsSection.logs => const DiagnosticsSettingsPage(),
         SettingsSection.updates => const UpdatesSettingsPage(),
@@ -188,7 +191,17 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     final appearance = matches(
       l.settingsAppearanceTitle,
       '$appearanceDescription ${l.settingsAppearanceFontSize} '
-      '${l.settingsAppearanceMathRendering}',
+      '${l.settingsAppearanceMathRendering} '
+      '${l.settingsAppearanceThinkingBubbles} '
+      '${l.settingsAppearanceToolCallBubbles}',
+      l.settingsNavigationGroupExperience,
+    );
+    final behavior = matches(
+      l.settingsBehaviorTitle,
+      '${l.settingsBehaviorChatRenderMode} '
+      '${l.settingsBehaviorChatRenderModeDescription} '
+      '${l.settingsBehaviorChatRenderModeLive} '
+      '${l.settingsBehaviorChatRenderModeBlock}',
       l.settingsNavigationGroupExperience,
     );
     final shortcuts =
@@ -243,6 +256,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         ),
         if (!servers &&
             !appearance &&
+            !behavior &&
             !shortcuts &&
             !logs &&
             !updates &&
@@ -265,15 +279,22 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             ),
           ),
         ],
-        if (appearance) ...[
+        if (appearance || behavior)
           _group(context, l.settingsNavigationGroupExperience),
+        if (appearance)
           _destination(
             SettingsSection.appearance,
             l.settingsAppearanceTitle,
             appearanceDescription,
             Icons.palette_outlined,
           ),
-        ],
+        if (behavior)
+          _destination(
+            SettingsSection.behavior,
+            l.settingsBehaviorTitle,
+            l.settingsBehaviorChatRenderModeDescription,
+            Icons.tune_outlined,
+          ),
         if (shortcuts) ...[
           _group(context, l.settingsNavigationGroupInput),
           _destination(

@@ -88,6 +88,10 @@ APPEARANCE_KEYS = {
     "settingsAppearanceFontSize", "settingsAppearanceSystemFontScale",
     "settingsAppearanceSystemFontScaleDescription", "settingsAppearanceChatFontScale",
     "settingsAppearanceChatFontScaleDescription",
+    "settingsAppearanceThinkingBubbles",
+    "settingsAppearanceThinkingBubblesDescription",
+    "settingsAppearanceToolCallBubbles",
+    "settingsAppearanceToolCallBubblesDescription",
 }
 KEYS |= APPEARANCE_KEYS | {"appearanceStorageError"}
 SETTINGS_KEYS = {
@@ -108,6 +112,12 @@ SETTINGS_KEYS = {
     "settingsAboutTitle", "settingsAboutDescription", "aboutGitHub",
     "aboutTelegram", "settingsAboutOurGroup", "searchableDropdownSearchHint",
     "searchableDropdownEmptyText", "chatMessageUnableToOpenLink",
+    "settingsBehaviorTitle", "settingsBehaviorChatRenderMode",
+    "settingsBehaviorChatRenderModeDescription",
+    "settingsBehaviorChatRenderModeLive",
+    "settingsBehaviorChatRenderModeLiveDescription",
+    "settingsBehaviorChatRenderModeBlock",
+    "settingsBehaviorChatRenderModeBlockDescription",
 }
 for name in (
     "NewConversation", "RefreshData", "FocusInput", "ToggleVoiceInput",

@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "Espandi",
   "chatWorkHide": "Nascondi",
   "chatWorkMessageOne": "1 messaggio di lavoro",
-  "chatWorkMessagesMultiple": "{count} messaggi di lavoro"
+  "chatWorkMessagesMultiple": "{count} messaggi di lavoro",
+  "settingsAppearanceThinkingBubbles": "Bolle di pensiero",
+  "settingsAppearanceThinkingBubblesDescription": "Mostra o nascondi i blocchi di ragionamento nei messaggi dell''assistente.",
+  "settingsAppearanceToolCallBubbles": "Bolle di chiamata dello strumento",
+  "settingsAppearanceToolCallBubblesDescription": "Mostra o nascondi le schede di esecuzione dello strumento nei messaggi dell''assistente.",
+  "settingsBehaviorChatRenderMode": "Modalità di rendering della chat",
+  "settingsBehaviorChatRenderModeBlock": "Blocco",
+  "settingsBehaviorChatRenderModeBlockDescription": "Nascondi testo dell''assistente, ragionamento e schede degli strumenti in tempo reale finché il turno attuale non può essere mostrato come un unico blocco.",
+  "settingsBehaviorChatRenderModeDescription": "Scegli se le risposte dell''assistente appaiono durante lo streaming o vengono rivelate al termine del turno attuale.",
+  "settingsBehaviorChatRenderModeLive": "In tempo reale",
+  "settingsBehaviorChatRenderModeLiveDescription": "Mostra testo dell''assistente, ragionamento e attività degli strumenti mentre OpenCode trasmette gli eventi.",
+  "settingsBehaviorTitle": "Comportamento",
+  "chatBlockResponsePendingDescription": "La risposta apparirà come un unico blocco al termine di questo turno.",
+  "chatBlockResponsePendingTitle": "Generazione della risposta"
 }

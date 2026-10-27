@@ -2043,4 +2043,49 @@ class V2LocalizationsUr extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count کام کے پیغامات';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'سوچنے والے بلبلے۔';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'اسسٹنٹ پیغامات میں ریجننگ بلاکس دکھائیں یا چھپائیں۔';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'ٹول کال بلبلے۔';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'معاون پیغامات میں ٹول ایگزیکیوشن کارڈز دکھائیں یا چھپائیں۔';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'چیٹ رینڈر موڈ';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'بلاک';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'لائیو اسسٹنٹ متن، استدلال اور ٹول کارڈز اس وقت تک چھپائیں جب تک موجودہ ٹرن ایک بلاک کے طور پر نہ دکھایا جا سکے۔';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'انتخاب کریں کہ اسسٹنٹ کے جوابات سٹریم ہوتے وقت ظاہر ہوں یا موجودہ ٹرن مکمل ہونے کے بعد۔';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'لائیو';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'اسسٹنٹ کا متن، استدلال اور ٹول کی سرگرمی دکھائیں جب OpenCode ایونٹس سٹریم کرتا ہے۔';
+
+  @override
+  String get settingsBehaviorTitle => 'رویہ';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'یہ ٹرن مکمل ہونے پر جواب ایک ہی بلاک کے طور پر ظاہر ہوگا۔';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'جواب تیار ہو رہا ہے';
 }

@@ -2049,4 +2049,49 @@ class V2LocalizationsEn extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count work messages';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'Thinking bubbles';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'Show or hide reasoning blocks in assistant messages.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'Tool call bubbles';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'Show or hide tool execution cards in assistant messages.';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'Chat render mode';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'Block';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'Choose whether assistant responses appear as they stream or reveal after the current turn settles.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'Live';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'Show assistant text, reasoning, and tool activity as OpenCode streams events.';
+
+  @override
+  String get settingsBehaviorTitle => 'Behavior';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'The answer will appear as a single block when this turn finishes.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'Generating response';
 }

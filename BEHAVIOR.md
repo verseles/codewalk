@@ -476,6 +476,21 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **When** a read of the session synced and reported no items
 - **Then** the empty conversation (`Hello! I am your AI assistant` / `How can I help you today?`) shows in the space the header leaves; it scales down or steps aside in a short viewport and never pushes the header away; a first read that failed shows neither the loader nor the empty conversation
 
+### V2 render mode and display filters
+
+- **Given** the user picks Settings > Behavior > Chat render mode
+- **When** it is Live (the default)
+- **Then** the live timeline shows assistant text, reasoning and tool activity as they stream
+- **When** it is Block and the session has a turn in flight
+- **Then** that turn shows only the messages the harness reports ended, in order, then each tool or shell call that ended, in runs broken only by held text or reasoning; a `Generating response` placeholder holds the rest, also while a prompt waits for its first answer; content it holds is not an arrival and does not move the reader
+- **Then** once the session settles the whole turn shows, with its work collapsed as in Live; earlier turns are never held; the choice persists under `cw2.settings.chatRenderMode` (`live` is not written; an unknown stored value keeps Live)
+
+- **Given** the user turns off Settings > Appearance > Thinking bubbles or Tool call bubbles
+- **When** the live timeline shows a turn
+- **Then** the reasoning or the tool and shell calls leave the timeline before anything is grouped: a run or a finished turn's work header shows only what remains, and a work header with nothing left to show disappears (#108)
+- **Then** the first item shown of a harness message keeps its elapsed chip and details; hidden items that arrive do not move the reader, and showing hidden items again or changing the render mode is not an arrival either, while content that arrived meanwhile (even while the session was hidden) is still followed or marked; the history page is unaffected
+- **Then** the choices persist under `cw2.settings.showReasoning` and `cw2.settings.showToolCalls` (shown by default, only `false` is written)
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened
@@ -502,14 +517,14 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** the user opens `/settings` in the explicit v2 app
 - **When** the viewport is below 840 logical pixels
-- **Then** a grouped, localized destination list opens first; selecting Appearance or Shortcuts opens its detail with a back action
+- **Then** a grouped, localized destination list opens first; selecting Appearance, Behavior or Shortcuts opens its detail with a back action
 - **Then** detail Back, system Back and the configured Escape action return to the list while retaining its search query
 - **When** the viewport is at least 840 logical pixels
 - **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
-- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, and Appearance by text size or math rendering
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering or the thinking and tool call bubbles, and Behavior by its render modes
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited

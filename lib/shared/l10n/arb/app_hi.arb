@@ -1556,5 +1556,18 @@
   "chatWorkExpand": "विस्तार करें",
   "chatWorkHide": "छिपाएं",
   "chatWorkMessageOne": "1 कार्य संदेश",
-  "chatWorkMessagesMultiple": "{count} कार्य संदेश"
+  "chatWorkMessagesMultiple": "{count} कार्य संदेश",
+  "settingsAppearanceThinkingBubbles": "विचार करने वाले बुलबुले (Thinking bubbles)",
+  "settingsAppearanceThinkingBubblesDescription": "सहायक संदेशों में तर्क ब्लॉकों को दिखाएं या छिपाएं।",
+  "settingsAppearanceToolCallBubbles": "टूल कॉल बुलबुले",
+  "settingsAppearanceToolCallBubblesDescription": "सहायक संदेशों में टूल निष्पादन (tool execution) कार्ड दिखाएं या छिपाएं।",
+  "settingsBehaviorChatRenderMode": "चैट रेंडर मोड",
+  "settingsBehaviorChatRenderModeBlock": "ब्लॉक",
+  "settingsBehaviorChatRenderModeBlockDescription": "जब तक वर्तमान टर्न को एक ब्लॉक के रूप में नहीं दिखाया जा सकता, तब तक लाइव असिस्टेंट टेक्स्ट, तर्क और टूल कार्ड छिपाएं।",
+  "settingsBehaviorChatRenderModeDescription": "चुनें कि असिस्टेंट प्रतिक्रियाएं स्ट्रीम होते ही दिखें या वर्तमान टर्न पूरा होने के बाद प्रकट हों।",
+  "settingsBehaviorChatRenderModeLive": "लाइव",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode इवेंट स्ट्रीम करते समय असिस्टेंट टेक्स्ट, तर्क और टूल गतिविधि दिखाएं।",
+  "settingsBehaviorTitle": "व्यवहार",
+  "chatBlockResponsePendingDescription": "जब यह टर्न समाप्त होगा, तो उत्तर एक ही ब्लॉक के रूप में दिखाई देगा।",
+  "chatBlockResponsePendingTitle": "प्रतिक्रिया बनाई जा रही है"
 }

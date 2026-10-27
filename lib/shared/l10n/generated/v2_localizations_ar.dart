@@ -2029,4 +2029,49 @@ class V2LocalizationsAr extends V2Localizations {
   String chatWorkMessagesMultiple(int count) {
     return '$count رسائل عمل';
   }
+
+  @override
+  String get settingsAppearanceThinkingBubbles => 'فقاعات التفكير';
+
+  @override
+  String get settingsAppearanceThinkingBubblesDescription =>
+      'إظهار أو إخفاء كتل الاستدلال في رسائل المساعد.';
+
+  @override
+  String get settingsAppearanceToolCallBubbles => 'فقاعات استدعاء الأدوات';
+
+  @override
+  String get settingsAppearanceToolCallBubblesDescription =>
+      'إظهار أو إخفاء بطاقات تنفيذ الأدوات في رسائل المساعد.';
+
+  @override
+  String get settingsBehaviorChatRenderMode => 'وضع عرض الدردشة';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlock => 'كتلة';
+
+  @override
+  String get settingsBehaviorChatRenderModeBlockDescription =>
+      'أخفِ النص المباشر للمساعد والاستدلال وبطاقات الأدوات حتى يمكن عرض الجولة الحالية ككتلة واحدة.';
+
+  @override
+  String get settingsBehaviorChatRenderModeDescription =>
+      'اختر ما إذا كانت ردود المساعد تظهر أثناء البث أو تُعرض بعد اكتمال الجولة الحالية.';
+
+  @override
+  String get settingsBehaviorChatRenderModeLive => 'مباشر';
+
+  @override
+  String get settingsBehaviorChatRenderModeLiveDescription =>
+      'اعرض نص المساعد واستدلالاته ونشاط الأدوات أثناء بث الأحداث من OpenCode.';
+
+  @override
+  String get settingsBehaviorTitle => 'السلوك';
+
+  @override
+  String get chatBlockResponsePendingDescription =>
+      'سيظهر الرد في كتلة واحدة عند اكتمال هذه الجولة.';
+
+  @override
+  String get chatBlockResponsePendingTitle => 'جارٍ إنشاء الرد';
 }
