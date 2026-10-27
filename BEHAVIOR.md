@@ -390,6 +390,21 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** a sub-conversation hides its agent chip and shows its inherited model and variant disabled, with a lock on the model
 - **Then** technical coverage includes contract-derived loopback race tests, the chip in 14 locales at compact and wide sizes, 2x text at 360 dp, and the bottom sheet and dialog; no live 2.0.22 switch capture exists yet (#425), switches are not shown in the timeline (#426), and installed native acceptance remains separate
 
+### V2 model picker, favorites and recents
+
+- **Given** an open native v2 session on verified OpenCode 2.0.22 that can switch its selection
+- **When** the user taps the composer's model chip
+- **Then** a models-only picker opens (a bottom sheet below 600 dp, a dialog otherwise) with a search field that narrows the models by name, id or provider; while searching, each match shows once in its provider's group, and no match says "No models found"
+- **Then** this server's **Favorites** come first, then this project's **Recent** models, then every model grouped by provider; a favorite or recent the session's location does not offer is not shown, a favorite is not repeated among the recents, and outside its provider's group a row names its provider
+- **Then** a model is marked **Free** only when the catalog states one untiered price of zero (`Model.Info.cost`, USD per million tokens); a priced, tiered, empty, absent or unreadable price shows no badge, and an unreadable price never fails the catalog
+- **Then** the star on a row adds or removes a favorite without picking the model; favorites are kept on this device per server (shared by its projects, at most 64 per server), and recents per server and project, newest first, at most eight
+- **Then** a model joins the recents only after a switch this view sent and the server took, including an unconfirmed switch once a later read or report on the same connection confirms it; a switch that was not sent, a refused or not-applied one, or one replaced by a newer pick records nothing, and stars or recents never send a switch
+- **Then** a record that cannot be read is never overwritten: the stars stay disabled and the picker says favorites and recent models cannot be saved; a failed save changes nothing and says the same
+- **When** the user picks a model or a variant
+- **Then** tapping the session's current model keeps its variant and sends nothing; another model is switched to with the server's default variant; a variant chip picks that variant, and **Auto** is the one choice that clears a chosen variant
+- **Then** the composer's variant chip reads **Auto** when no variant is chosen, and its menu offers Auto and the model's variants; dismissing the menu (barrier tap or Escape) keeps the current variant; a chosen variant the model no longer lists can still be cleared with Auto, from the menu or beside the current model in the picker
+- **Then** technical coverage includes adapter price-projection tests on the 2.0.22 fixture, store persistence/bounds/unreadable tests, picker widget tests, and compact, RTL and wide picker goldens; cycling (`mod+m`), burst cycling and per-agent model memory remain the next stage (S7), and installed native acceptance remains separate
+
 ### V2 typed turn error cards
 
 - **Given** a native v2 session on verified OpenCode 2.0.22 whose turn ended with `session.execution.failed`, live or in the read-only history
