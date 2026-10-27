@@ -1508,5 +1508,9 @@
   "chatEffortLockedSubConversation": "하위 대화에서 노력 수준이 잠김",
   "chatModelLockedSubConversation": "하위 대화에서 모델 잠김",
   "chatNoSubConversationFound": "이 작업에 대한 하위 대화를 찾을 수 없습니다.",
-  "chatReturnToParentConversation": "상위 대화로 돌아가기"
+  "chatReturnToParentConversation": "상위 대화로 돌아가기",
+  "chatConversationsPane": "대화",
+  "chatHideConversationsSidebar": "대화 사이드바 숨기기",
+  "chatOpenSidebar": "사이드바 열기",
+  "chatProjectContext": "프로젝트 컨텍스트"
 }

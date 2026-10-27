@@ -1856,4 +1856,16 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => 'पैरेंट बातचीत पर लौटें';
+
+  @override
+  String get chatConversationsPane => 'बातचीत';
+
+  @override
+  String get chatHideConversationsSidebar => 'बातचीत साइडबार छुपाएं';
+
+  @override
+  String get chatOpenSidebar => 'साइडबार खोलें';
+
+  @override
+  String get chatProjectContext => 'परियोजना संदर्भ (Project Context)';
 }

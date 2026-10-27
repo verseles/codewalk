@@ -1834,4 +1834,16 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => 'العودة إلى المحادثة الأصلية';
+
+  @override
+  String get chatConversationsPane => 'المحادثات';
+
+  @override
+  String get chatHideConversationsSidebar => 'إخفاء شريط المحادثات الجانبي';
+
+  @override
+  String get chatOpenSidebar => 'فتح الشريط الجانبي';
+
+  @override
+  String get chatProjectContext => 'سياق المشروع';
 }

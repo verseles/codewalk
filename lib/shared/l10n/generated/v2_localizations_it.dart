@@ -1886,4 +1886,17 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get chatReturnToParentConversation =>
       'Torna alla conversazione precedente';
+
+  @override
+  String get chatConversationsPane => 'Conversazioni';
+
+  @override
+  String get chatHideConversationsSidebar =>
+      'Nascondi barra laterale Conversazioni';
+
+  @override
+  String get chatOpenSidebar => 'Apri barra laterale';
+
+  @override
+  String get chatProjectContext => 'Contesto del progetto';
 }

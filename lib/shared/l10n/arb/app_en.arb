@@ -2296,5 +2296,21 @@
   "chatReturnToParentConversation": "Return to parent conversation",
   "@chatReturnToParentConversation": {
     "description": "CodeWalk UI string — chatReturnToParentConversation"
+  },
+  "chatConversationsPane": "Conversations",
+  "@chatConversationsPane": {
+    "description": "CodeWalk UI string — chatConversationsPane"
+  },
+  "chatHideConversationsSidebar": "Hide Conversations sidebar",
+  "@chatHideConversationsSidebar": {
+    "description": "CodeWalk UI string — chatHideConversationsSidebar"
+  },
+  "chatOpenSidebar": "Open sidebar",
+  "@chatOpenSidebar": {
+    "description": "CodeWalk UI string — chatOpenSidebar"
+  },
+  "chatProjectContext": "Project Context",
+  "@chatProjectContext": {
+    "description": "CodeWalk UI string — chatProjectContext"
   }
 }

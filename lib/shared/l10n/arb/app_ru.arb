@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "Параметр effort заблокирован в суб-беседе",
   "chatModelLockedSubConversation": "Модель заблокирована в суб-беседе",
   "chatNoSubConversationFound": "Суб-беседа для этой задачи не найдена.",
-  "chatReturnToParentConversation": "Вернуться к родительской беседе"
+  "chatReturnToParentConversation": "Вернуться к родительской беседе",
+  "chatConversationsPane": "Беседы",
+  "chatHideConversationsSidebar": "Скрыть боковую панель бесед",
+  "chatOpenSidebar": "Открыть боковую панель",
+  "chatProjectContext": "Контекст проекта"
 }

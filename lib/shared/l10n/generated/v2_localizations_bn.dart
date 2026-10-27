@@ -1846,4 +1846,16 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => 'প্যারেন্ট কথোপকথনে ফিরে যান';
+
+  @override
+  String get chatConversationsPane => 'কথোপকথন';
+
+  @override
+  String get chatHideConversationsSidebar => 'কথোপকথন সাইডবার লুকান';
+
+  @override
+  String get chatOpenSidebar => 'সাইডবার খুলুন';
+
+  @override
+  String get chatProjectContext => 'প্রকল্প প্রসঙ্গ';
 }

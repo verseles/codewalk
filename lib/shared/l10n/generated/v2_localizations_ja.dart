@@ -1770,4 +1770,16 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => '親の会話に戻る';
+
+  @override
+  String get chatConversationsPane => '会話一覧';
+
+  @override
+  String get chatHideConversationsSidebar => '会話サイドバーを非表示';
+
+  @override
+  String get chatOpenSidebar => 'サイドバーを開く';
+
+  @override
+  String get chatProjectContext => 'プロジェクトコンテキスト';
 }

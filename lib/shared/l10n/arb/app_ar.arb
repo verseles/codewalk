@@ -1496,5 +1496,9 @@
   "chatEffortLockedSubConversation": "الجهد مقفل في محادثة فرعية",
   "chatModelLockedSubConversation": "النموذج مقفل في محادثة فرعية",
   "chatNoSubConversationFound": "لم يتم العثور على محادثة فرعية لهذه المهمة.",
-  "chatReturnToParentConversation": "العودة إلى المحادثة الأصلية"
+  "chatReturnToParentConversation": "العودة إلى المحادثة الأصلية",
+  "chatConversationsPane": "المحادثات",
+  "chatHideConversationsSidebar": "إخفاء شريط المحادثات الجانبي",
+  "chatOpenSidebar": "فتح الشريط الجانبي",
+  "chatProjectContext": "سياق المشروع"
 }

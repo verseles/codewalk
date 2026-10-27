@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "Aufwand in Unterkonversation gesperrt",
   "chatModelLockedSubConversation": "Modell in Unterhaltung gesperrt",
   "chatNoSubConversationFound": "Keine Unterkonversation gefunden.",
-  "chatReturnToParentConversation": "Zur übergeordneten Unterhaltung zurückkehren"
+  "chatReturnToParentConversation": "Zur übergeordneten Unterhaltung zurückkehren",
+  "chatConversationsPane": "Konversationen",
+  "chatHideConversationsSidebar": "Konversations-Seitenleiste ausblenden",
+  "chatOpenSidebar": "Seitenleiste öffnen",
+  "chatProjectContext": "Projektkontext"
 }

@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "Esfuerzo bloqueado en subconversación",
   "chatModelLockedSubConversation": "Modelo bloqueado en subconversación",
   "chatNoSubConversationFound": "No se encontró subconversación.",
-  "chatReturnToParentConversation": "Volver a la conversación superior"
+  "chatReturnToParentConversation": "Volver a la conversación superior",
+  "chatConversationsPane": "Conversaciones",
+  "chatHideConversationsSidebar": "Ocultar barra de Conversaciones",
+  "chatOpenSidebar": "Abrir barra lateral",
+  "chatProjectContext": "Contexto del Proyecto"
 }

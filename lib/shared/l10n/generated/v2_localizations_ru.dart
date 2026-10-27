@@ -1869,4 +1869,16 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get chatReturnToParentConversation =>
       'Вернуться к родительской беседе';
+
+  @override
+  String get chatConversationsPane => 'Беседы';
+
+  @override
+  String get chatHideConversationsSidebar => 'Скрыть боковую панель бесед';
+
+  @override
+  String get chatOpenSidebar => 'Открыть боковую панель';
+
+  @override
+  String get chatProjectContext => 'Контекст проекта';
 }

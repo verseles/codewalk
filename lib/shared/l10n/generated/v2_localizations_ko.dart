@@ -1770,4 +1770,16 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => '상위 대화로 돌아가기';
+
+  @override
+  String get chatConversationsPane => '대화';
+
+  @override
+  String get chatHideConversationsSidebar => '대화 사이드바 숨기기';
+
+  @override
+  String get chatOpenSidebar => '사이드바 열기';
+
+  @override
+  String get chatProjectContext => '프로젝트 컨텍스트';
 }

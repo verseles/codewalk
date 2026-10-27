@@ -23,6 +23,7 @@ class SessionComposer extends StatefulWidget {
     required this.controller,
     required this.text,
     required this.maxHeight,
+    this.focusNode,
   });
   final SessionComposerController controller;
 
@@ -33,6 +34,9 @@ class SessionComposer extends StatefulWidget {
   /// The most the composer may take of the page body, which already
   /// excludes the keyboard; past it the composer scrolls.
   final double maxHeight;
+
+  /// The field's focus, so the page's shortcuts can focus it.
+  final FocusNode? focusNode;
   @override
   State<SessionComposer> createState() => _SessionComposerState();
 }
@@ -478,6 +482,7 @@ class _SessionComposerState extends State<SessionComposer> {
                       child: TextField(
                         key: const ValueKey('live-composer-input'),
                         controller: _text,
+                        focusNode: widget.focusNode,
                         // A text that a failed resend hands back needs the field
                         // untouched until the send ends.
                         readOnly: c.sending || c.live.endpointOffline,

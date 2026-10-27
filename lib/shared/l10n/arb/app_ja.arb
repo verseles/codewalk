@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "サブ会話で努力設定がロックされています",
   "chatModelLockedSubConversation": "サブ会話でモデルがロックされています",
   "chatNoSubConversationFound": "このタスクのサブ会話は見つかりませんでした。",
-  "chatReturnToParentConversation": "親の会話に戻る"
+  "chatReturnToParentConversation": "親の会話に戻る",
+  "chatConversationsPane": "会話一覧",
+  "chatHideConversationsSidebar": "会話サイドバーを非表示",
+  "chatOpenSidebar": "サイドバーを開く",
+  "chatProjectContext": "プロジェクトコンテキスト"
 }

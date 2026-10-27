@@ -89,6 +89,32 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('appBarPins');
   }
 
+  /// The conversations pane beside the chat: its width stays within
+  /// [sessionPaneMin]..[sessionPaneMax]; null is [sessionPaneDefault].
+  static const sessionPaneMin = 160.0;
+  static const sessionPaneMax = 500.0;
+  static const sessionPaneDefault = 300.0;
+  double? _sessionPaneWidth;
+  bool _sessionPaneHidden = false;
+  double? get sessionPaneWidth => _sessionPaneWidth;
+  bool get sessionPaneHidden => _sessionPaneHidden;
+
+  void setSessionPaneWidth(double? value) {
+    if (value != null) {
+      if (!value.isFinite) return;
+      value = value.clamp(sessionPaneMin, sessionPaneMax).toDouble();
+    }
+    if (_disposed || _sessionPaneWidth == value) return;
+    _sessionPaneWidth = value;
+    _changed('sessionPaneWidth');
+  }
+
+  void setSessionPaneHidden(bool value) {
+    if (_disposed || _sessionPaneHidden == value) return;
+    _sessionPaneHidden = value;
+    _changed('sessionPaneHidden');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -175,6 +201,8 @@ class AppPreferencesController extends ChangeNotifier {
     'useDynamicColor': _useDynamicColor,
     'loggingEnabled': _loggingEnabled,
     'appBarPins': jsonEncode(_appBarPins.map((action) => action.name).toList()),
+    'sessionPaneWidth': _sessionPaneWidth,
+    'sessionPaneHidden': _sessionPaneHidden ? true : null,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -242,6 +270,15 @@ class AppPreferencesController extends ChangeNotifier {
       if (dynamic is bool) _useDynamicColor = dynamic;
       final logging = value('loggingEnabled');
       if (logging is bool) _loggingEnabled = logging;
+      final paneWidth = value('sessionPaneWidth');
+      if (paneWidth is num && paneWidth.isFinite) {
+        _sessionPaneWidth = paneWidth.toDouble().clamp(
+          sessionPaneMin,
+          sessionPaneMax,
+        );
+      }
+      final paneHidden = value('sessionPaneHidden');
+      if (paneHidden is bool) _sessionPaneHidden = paneHidden;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

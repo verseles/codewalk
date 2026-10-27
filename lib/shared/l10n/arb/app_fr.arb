@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "Effort verrouillé dans la sous-conversation",
   "chatModelLockedSubConversation": "Modèle verrouillé dans la sous-conversation",
   "chatNoSubConversationFound": "Aucune sous-conversation trouvée.",
-  "chatReturnToParentConversation": "Retourner à la conversation parente"
+  "chatReturnToParentConversation": "Retourner à la conversation parente",
+  "chatConversationsPane": "Conversations",
+  "chatHideConversationsSidebar": "Masquer la barre latérale des conversations",
+  "chatOpenSidebar": "Ouvrir la barre latérale",
+  "chatProjectContext": "Contexte du projet"
 }

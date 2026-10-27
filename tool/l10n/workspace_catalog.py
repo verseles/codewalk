@@ -119,3 +119,9 @@ PORT_KEYS |= {
     "chatReturnToParentConversation", "chatNoSubConversationFound",
     "chatModelLockedSubConversation", "chatEffortLockedSubConversation",
 }
+
+# Desktop conversations pane and its hidden-pane toolbar access (#453 S7).
+PORT_KEYS |= {
+    "chatConversationsPane", "chatHideConversationsSidebar", "chatOpenSidebar",
+    "chatProjectContext",
+}

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ui' show AppExitType;
 
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,8 @@ import 'package:provider/provider.dart';
 import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/endpoint_health_view.dart';
 import '../features/hosts/server_switcher.dart';
+import '../features/sessions/project_contexts_controller.dart';
+import '../features/sessions/project_picker_dialog.dart';
 import '../features/sessions/session_tab_strip.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
@@ -17,8 +21,12 @@ import '../features/sessions/workspace_draft_controller.dart';
 import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
+import '../shared/sessions/session_live_source.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import 'app_keyboard_shortcuts.dart';
+import 'app_preferences_controller.dart';
+import 'resizable_session_pane.dart';
+import 'shown_composer.dart';
 import 'workspace_chrome.dart';
 import 'workspace_controller.dart';
 
@@ -27,9 +35,11 @@ import 'workspace_controller.dart';
 ///
 /// A compact window gives the chat the whole window, the open session or the
 /// workspace home, and keeps the list in a drawer; from 600 dp the list stays
-/// beside the chat in a fixed pane, 260 dp wide below 840 dp and 300 dp from
-/// there, which leaves the chat at least 339 dp. Servers, settings and
-/// pairing are secondary pages with a way back to the workspace.
+/// beside the chat in a pane that can be hidden, its project and settings
+/// then reached from the bar. A medium window keeps the pane at 260 dp; from
+/// 840 dp it is resizable (160–500 dp, 300 by default) and leaves the chat
+/// at least 320 dp. Servers, settings and pairing are
+/// secondary pages with a way back to the workspace.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.location, required this.child});
 
@@ -70,10 +80,17 @@ class AppShell extends StatelessWidget {
         context.watch<SessionsController?>()?.selectedProfile != null;
     final tabs = context.read<SessionTabsController?>();
     final workspace = KeyboardActionScope(
-      handlers: {ShortcutAction.newChat: () => _create(context)},
+      handlers: {
+        ShortcutAction.newChat: () => _create(context),
+        ShortcutAction.focusInput: () => _focusComposer(context),
+        ShortcutAction.refresh: () => _refresh(context),
+        ShortcutAction.closeApp: _closeWindow,
+        if (_desktop) ShortcutAction.quitApp: _quit,
+      },
       // Keeps the keyboard inside the workspace when nothing in it has the
-      // focus, so its shortcuts reach this scope.
-      child: Focus(
+      // focus, or a field in it lets the focus go, so its shortcuts reach
+      // this scope.
+      child: FocusScope(
         autofocus: true,
         skipTraversal: true,
         child: LayoutBuilder(
@@ -99,34 +116,50 @@ class AppShell extends StatelessWidget {
                         actions: const [WorkspaceAppBarActions()],
                       )
                     : null,
-                drawer: const Drawer(child: SafeArea(child: SessionsPage())),
-                body: _WorkspaceBack(child: _homeTabs(context, tabs, home)),
+                drawer: const Drawer(
+                  child: _WorkspaceEscape(
+                    child: SafeArea(child: SessionsPage()),
+                  ),
+                ),
+                body: _WorkspaceEscape(
+                  child: _WorkspaceBack(child: _homeTabs(context, tabs, home)),
+                ),
               );
             }
-            final pane = size == WindowSizeClass.medium ? 260.0 : 300.0;
+            final preferences = context.watch<AppPreferencesController?>();
+            final hidden = preferences?.sessionPaneHidden ?? false;
+            final chat = _WorkspaceBack(child: _homeTabs(context, tabs, home));
             return Scaffold(
               appBar: AppBar(
+                leading: IconButton(
+                  key: const ValueKey('workspace-pane-toggle'),
+                  tooltip: hidden
+                      ? l10n.chatOpenSidebar
+                      : l10n.chatHideConversationsSidebar,
+                  icon: Icon(hidden ? Icons.menu : Icons.menu_open),
+                  onPressed: preferences == null
+                      ? null
+                      : () => preferences.setSessionPaneHidden(!hidden),
+                ),
                 title: hasServer
                     ? const ServerSwitcher(
                         controlKey: ValueKey('workspace-server'),
                       )
                     : const Text('CodeWalk'),
-                actions: const [WorkspaceAppBarActions()],
-              ),
-              body: Row(
-                children: [
-                  SizedBox(
-                    key: const ValueKey('workspace-sidebar'),
-                    width: pane,
-                    child: const SessionsPage(),
-                  ),
-                  const VerticalDivider(width: 1),
-                  Expanded(
-                    child: _WorkspaceBack(
-                      child: _homeTabs(context, tabs, home),
-                    ),
-                  ),
+                actions: [
+                  if (hidden) ..._hiddenPaneActions(context, preferences),
+                  const WorkspaceAppBarActions(),
                 ],
+              ),
+              body: _WorkspaceEscape(
+                child: hidden
+                    ? chat
+                    : ResizableSessionPane(
+                        preferences: preferences,
+                        resizable: size.isAtLeastExpanded,
+                        pane: const SessionsPage(),
+                        chat: chat,
+                      ),
               ),
             );
           },
@@ -159,6 +192,70 @@ class AppShell extends StatelessWidget {
     );
   }
 
+  /// With the pane hidden, its project and the settings stay one tap away.
+  List<Widget> _hiddenPaneActions(
+    BuildContext context,
+    AppPreferencesController? preferences,
+  ) {
+    final l10n = context.v2L10n;
+    final catalog = context.read<SessionsController?>();
+    final contexts = context.read<ProjectContextsController?>();
+    final pins = preferences?.appBarPins ?? const [];
+    return [
+      if (catalog != null && contexts != null && contexts.available)
+        IconButton(
+          key: const ValueKey('workspace-project-context'),
+          tooltip: l10n.chatProjectContext,
+          icon: const Icon(Icons.folder_open_outlined),
+          onPressed: () => unawaited(
+            showProjectPicker(context, catalog: catalog, contexts: contexts),
+          ),
+        ),
+      if (!pins.contains(WorkspacePinnedAction.settings))
+        IconButton(
+          key: const ValueKey('workspace-settings'),
+          tooltip: l10n.settingsTitle,
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () => context.push('/settings'),
+        ),
+    ];
+  }
+
+  /// Focuses the shown session's composer, else the New Chat draft's.
+  static void _focusComposer(BuildContext context) {
+    if (context.read<ShownComposer?>()?.focus() ?? false) return;
+    context.read<WorkspaceDraftController?>()?.focusComposer();
+  }
+
+  /// Reads the list and wakes the live views again, keeping what is open.
+  static void _refresh(BuildContext context) {
+    final catalog = context.read<SessionsController?>();
+    if (catalog == null || catalog.loading) return;
+    context.read<SessionLiveDirectory?>()?.wake();
+    unawaited(catalog.refresh());
+  }
+
+  static bool get _desktop =>
+      !kIsWeb &&
+      const {
+        TargetPlatform.linux,
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }.contains(defaultTargetPlatform);
+
+  /// How a shortcut asks the platform to exit; tests stand in for it.
+  @visibleForTesting
+  static Future<void> Function(AppExitType type) exitApp = (type) =>
+      ServicesBinding.instance.exitApplication(type);
+
+  /// mod+W without a tab to close: the window's ordinary close.
+  static void _closeWindow() => unawaited(
+    _desktop ? exitApp(AppExitType.cancelable) : SystemNavigator.pop(),
+  );
+
+  /// mod+Q on a desktop: the app quits.
+  static void _quit() => unawaited(exitApp(AppExitType.required));
+
   void _create(BuildContext context) {
     final controller = context.read<SessionsController?>();
     if (controller == null || !canCreate(controller)) return;
@@ -168,6 +265,31 @@ class AppShell extends StatelessWidget {
   /// Whether the workspace can open a local draft for the selected server.
   static bool canCreate(SessionsController controller) =>
       canOpenWorkspaceDraft(controller);
+}
+
+/// A single Escape in the workspace: it closes the list drawer when it is
+/// open, else it focuses the composer. Overlays, dialogs and a focused
+/// composer keep their own Escape; a field inside that lets the focus go
+/// leaves it in this scope, so Escape still arrives.
+class _WorkspaceEscape extends StatelessWidget {
+  const _WorkspaceEscape({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => KeyboardActionScope(
+    handlers: {
+      ShortcutAction.escape: () {
+        final shell = Scaffold.maybeOf(context);
+        if (shell != null && shell.isDrawerOpen) {
+          shell.closeDrawer();
+        } else {
+          AppShell._focusComposer(context);
+        }
+      },
+    },
+    child: FocusScope(child: child),
+  );
 }
 
 /// The system back at the root of the workspace, as in the legacy client: it

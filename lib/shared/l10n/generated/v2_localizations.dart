@@ -3458,6 +3458,30 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Return to parent conversation'**
   String get chatReturnToParentConversation;
+
+  /// CodeWalk UI string — chatConversationsPane
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get chatConversationsPane;
+
+  /// CodeWalk UI string — chatHideConversationsSidebar
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Conversations sidebar'**
+  String get chatHideConversationsSidebar;
+
+  /// CodeWalk UI string — chatOpenSidebar
+  ///
+  /// In en, this message translates to:
+  /// **'Open sidebar'**
+  String get chatOpenSidebar;
+
+  /// CodeWalk UI string — chatProjectContext
+  ///
+  /// In en, this message translates to:
+  /// **'Project Context'**
+  String get chatProjectContext;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

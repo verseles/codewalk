@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "उप-वार्तालाप में प्रयास लॉक है",
   "chatModelLockedSubConversation": "उप-वार्तालाप में मॉडल लॉक है",
   "chatNoSubConversationFound": "इस कार्य के लिए कोई उप-वार्तालाप नहीं मिला।",
-  "chatReturnToParentConversation": "पैरेंट बातचीत पर लौटें"
+  "chatReturnToParentConversation": "पैरेंट बातचीत पर लौटें",
+  "chatConversationsPane": "बातचीत",
+  "chatHideConversationsSidebar": "बातचीत साइडबार छुपाएं",
+  "chatOpenSidebar": "साइडबार खोलें",
+  "chatProjectContext": "परियोजना संदर्भ (Project Context)"
 }

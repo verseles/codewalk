@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "উপ-কথোপকথনে প্রচেষ্টা লক করা আছে",
   "chatModelLockedSubConversation": "উপ-কথোপকথনে মডেল লক করা আছে",
   "chatNoSubConversationFound": "এই টাস্কের জন্য কোনো উপ-কথোপকথন পাওয়া যায়নি।",
-  "chatReturnToParentConversation": "প্যারেন্ট কথোপকথনে ফিরে যান"
+  "chatReturnToParentConversation": "প্যারেন্ট কথোপকথনে ফিরে যান",
+  "chatConversationsPane": "কথোপকথন",
+  "chatHideConversationsSidebar": "কথোপকথন সাইডবার লুকান",
+  "chatOpenSidebar": "সাইডবার খুলুন",
+  "chatProjectContext": "প্রকল্প প্রসঙ্গ"
 }

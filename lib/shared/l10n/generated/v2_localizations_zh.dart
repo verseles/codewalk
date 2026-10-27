@@ -1732,4 +1732,16 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => '返回父会话';
+
+  @override
+  String get chatConversationsPane => '会话';
+
+  @override
+  String get chatHideConversationsSidebar => '隐藏会话侧边栏';
+
+  @override
+  String get chatOpenSidebar => '打开侧边栏';
+
+  @override
+  String get chatProjectContext => '项目上下文';
 }

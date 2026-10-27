@@ -1850,4 +1850,16 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get chatReturnToParentConversation => 'والد گفتگو پر واپس جائیں۔';
+
+  @override
+  String get chatConversationsPane => 'بات چیت';
+
+  @override
+  String get chatHideConversationsSidebar => 'گفتگو کا سائڈبار چھپائیں۔';
+
+  @override
+  String get chatOpenSidebar => 'سائیڈ بار کھولیں';
+
+  @override
+  String get chatProjectContext => 'پروجیکٹ کا سیاق و سباق';
 }

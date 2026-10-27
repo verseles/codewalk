@@ -1497,5 +1497,9 @@
   "chatEffortLockedSubConversation": "ذیلی گفتگو میں کوشش مقفل ہے",
   "chatModelLockedSubConversation": "ذیلی گفتگو میں ماڈل مقفل ہے",
   "chatNoSubConversationFound": "اس کام کے لیے کوئی ذیلی گفتگو نہیں ملی۔",
-  "chatReturnToParentConversation": "والد گفتگو پر واپس جائیں۔"
+  "chatReturnToParentConversation": "والد گفتگو پر واپس جائیں۔",
+  "chatConversationsPane": "بات چیت",
+  "chatHideConversationsSidebar": "گفتگو کا سائڈبار چھپائیں۔",
+  "chatOpenSidebar": "سائیڈ بار کھولیں",
+  "chatProjectContext": "پروجیکٹ کا سیاق و سباق"
 }
