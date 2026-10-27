@@ -2165,4 +2165,19 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔';
+
+  @override
+  String get chatChooseAgent => 'ایجنٹ منتخب کریں';
+
+  @override
+  String get chatChooseModel => 'ماڈل منتخب کریں';
+
+  @override
+  String get chatPermissionAutoApproveOff => 'اجازت خودکار منظوری آف ہے';
+
+  @override
+  String get chatPermissionAutoApproveOn => 'اجازت خودکار منظوری آن ہے';
+
+  @override
+  String get modelChooseAgent => 'ایجنٹ کا انتخاب کریں۔';
 }

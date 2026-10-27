@@ -2032,4 +2032,19 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get settingsAppearanceComposerTipsDescription => '在助手进行推理时显示或隐藏循环提示。';
+
+  @override
+  String get chatChooseAgent => '选择代理';
+
+  @override
+  String get chatChooseModel => '选择模型';
+
+  @override
+  String get chatPermissionAutoApproveOff => '权限自动批准已关闭';
+
+  @override
+  String get chatPermissionAutoApproveOn => '权限自动批准已开启';
+
+  @override
+  String get modelChooseAgent => '选择智能体';
 }

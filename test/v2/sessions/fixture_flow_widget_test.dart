@@ -8,7 +8,6 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_error_card.dart';
 import 'package:codewalk/features/sessions/session_form_card.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
-import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/platform/endpoints/pairing_factory_io.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
@@ -951,20 +950,10 @@ void main() {
       );
 
       // 8. Model switch (`model switch`): open selection dialog, pick variant.
-      // The selection chip heads the lazy timeline: scroll back up to it.
-      await tester.scrollUntilVisible(
-        find.byKey(const ValueKey('live-selection')),
-        -300,
-        scrollable: find
-            .descendant(
-              of: find.byType(SessionLiveTimeline),
-              matching: find.byType(Scrollable),
-            )
-            .first,
-      );
-      await tester.ensureVisible(find.byKey(const ValueKey('live-selection')));
+      // The model chip sits in the composer.
+      await tester.ensureVisible(find.byKey(const ValueKey('live-model-chip')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('live-selection')));
+      await tester.tap(find.byKey(const ValueKey('live-model-chip')));
       await tester.pumpAndSettle();
       final variantFinder = find.byKey(
         const ValueKey(
@@ -985,15 +974,18 @@ void main() {
           'variant': 'high',
         },
       });
-      // Compact chips carry the selected model in their accessible tooltip.
+      // The composer's model and variant chips show the new selection.
       await emitFrames(tester, rig.server, 0, count: 1);
+      bool chipShows(String key, String text) => find
+          .descendant(of: find.byKey(ValueKey(key)), matching: find.text(text))
+          .evaluate()
+          .isNotEmpty;
       await pumpSpin(
         tester,
-        () => find
-            .byTooltip(RegExp('Fledge Alpha Free#high'))
-            .evaluate()
-            .isNotEmpty,
-        reason: 'selection chip label updated to Fledge Alpha Free#high',
+        () =>
+            chipShows('live-model-chip', 'Fledge Alpha Free') &&
+            chipShows('live-variant-chip', 'high'),
+        reason: 'selection chips updated to Fledge Alpha Free, high',
       );
       await tester.tap(find.byKey(const ValueKey('live-jump-latest')));
       await tester.pumpAndSettle();

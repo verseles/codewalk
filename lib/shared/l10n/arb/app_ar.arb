@@ -1589,5 +1589,10 @@
   "chatTipStepByStep": "نصيحة: اطلب خطوة بخطوة عند تصحيح المشكلات المعقدة",
   "chatTipUseFocusedAgents": "نصيحة: اختر وكيلا مركزا للتخطيط أو المراجعة أو البناء",
   "settingsAppearanceComposerTips": "نصائح الملحِّن",
-  "settingsAppearanceComposerTipsDescription": "إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد."
+  "settingsAppearanceComposerTipsDescription": "إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.",
+  "chatChooseAgent": "اختيار الوكيل",
+  "chatChooseModel": "اختيار النموذج",
+  "chatPermissionAutoApproveOff": "الموافقة التلقائية على الأذونات غير مفعلة",
+  "chatPermissionAutoApproveOn": "الموافقة التلقائية على الأذونات مفعلة",
+  "modelChooseAgent": "اختر الوكيل"
 }

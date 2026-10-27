@@ -2190,4 +2190,21 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.';
+
+  @override
+  String get chatChooseAgent => 'Выбрать агента';
+
+  @override
+  String get chatChooseModel => 'Выбрать модель';
+
+  @override
+  String get chatPermissionAutoApproveOff =>
+      'Автоматическое одобрение разрешений выключено';
+
+  @override
+  String get chatPermissionAutoApproveOn =>
+      'Автоматическое одобрение разрешений включено';
+
+  @override
+  String get modelChooseAgent => 'Выбрать агента';
 }

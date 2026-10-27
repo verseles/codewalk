@@ -2211,4 +2211,21 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'Afficher ou masquer les conseils rotatifs pendant que l\'assistant réfléchit.';
+
+  @override
+  String get chatChooseAgent => 'Sélectionner l\'agent';
+
+  @override
+  String get chatChooseModel => 'Choisir le modèle';
+
+  @override
+  String get chatPermissionAutoApproveOff =>
+      'Approbation automatique des permissions désactivée';
+
+  @override
+  String get chatPermissionAutoApproveOn =>
+      'Approbation automatique des permissions activée';
+
+  @override
+  String get modelChooseAgent => 'Choisir l\'agent';
 }

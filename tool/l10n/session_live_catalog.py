@@ -62,6 +62,12 @@ PORT_KEYS = {
     "chatTipRequestDocs",
     "chatTipAcceptanceCriteria",
     "chatTipUseFocusedAgents",
+    # The composer's selection chips and the agent menu's footer (#153).
+    "chatChooseModel",
+    "chatChooseAgent",
+    "modelChooseAgent",
+    "chatPermissionAutoApproveOn",
+    "chatPermissionAutoApproveOff",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

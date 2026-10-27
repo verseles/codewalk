@@ -13,6 +13,7 @@ import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
 import 'session_composer_controller.dart';
+import 'session_composer_controls.dart';
 import 'session_composer_status.dart';
 import 'session_input_history.dart';
 import 'session_stop_button.dart';
@@ -488,26 +489,29 @@ class _SessionComposerState extends State<SessionComposer> {
                   ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: [
+              SessionComposerStatus(
+                activity: composerActivity(c.live.state, l10n),
+              ),
+              // The steer/queue choice shares the selection chips' row, so
+              // the composer stays short above a landscape keyboard.
+              SessionComposerControls(
+                live: c.live,
+                trailing: [
                   ChoiceChip(
                     key: const ValueKey('live-delivery-steer'),
                     label: Text(l10n.composerSteer),
                     selected: c.delivery == Delivery.steer,
+                    visualDensity: VisualDensity.compact,
                     onSelected: (_) => c.setDelivery(Delivery.steer),
                   ),
                   ChoiceChip(
                     key: const ValueKey('live-delivery-queue'),
                     label: Text(l10n.composerQueue),
                     selected: c.delivery == Delivery.queue,
+                    visualDensity: VisualDensity.compact,
                     onSelected: (_) => c.setDelivery(Delivery.queue),
                   ),
                 ],
-              ),
-              SessionComposerStatus(
-                activity: composerActivity(c.live.state, l10n),
               ),
               Row(
                 children: [

@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "مشورہ: پیچیدہ مسائل کو ڈیبگ کرتے وقت مرحلہ وار پوچھیں",
   "chatTipUseFocusedAgents": "مشورہ: پلان، ریویو یا بلڈ کے لیے مرکوز ایجنٹ چنیں",
   "settingsAppearanceComposerTips": "کمپوزر ٹپس",
-  "settingsAppearanceComposerTipsDescription": "اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔"
+  "settingsAppearanceComposerTipsDescription": "اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔",
+  "chatChooseAgent": "ایجنٹ منتخب کریں",
+  "chatChooseModel": "ماڈل منتخب کریں",
+  "chatPermissionAutoApproveOff": "اجازت خودکار منظوری آف ہے",
+  "chatPermissionAutoApproveOn": "اجازت خودکار منظوری آن ہے",
+  "modelChooseAgent": "ایجنٹ کا انتخاب کریں۔"
 }

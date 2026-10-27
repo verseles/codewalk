@@ -168,8 +168,7 @@ class _SessionLivePageState extends State<SessionLivePage>
           spacing: 8,
           runSpacing: 4,
           children: [
-            if (c.supportsSelection)
-              SessionSelectionChip(live: c, compact: true),
+            // The model and agent are picked from the composer's chips.
             if (c.permissionModes != null)
               SessionPermissionModeChip(live: c, compact: true),
           ],
@@ -446,11 +445,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                 leading: widget.leading,
                 actions: [
                   if (widget.workspaceChrome) const WorkspaceAppBarActions(),
-                  if (!widget.workspaceChrome && c.supportsSelection)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 8),
-                      child: SessionSelectionChip(live: c, compact: compact),
-                    ),
                   if (!widget.workspaceChrome && c.permissionModes != null)
                     Padding(
                       padding: const EdgeInsetsDirectional.only(end: 8),

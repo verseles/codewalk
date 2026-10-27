@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "Conseil : Demandez étape par étape lors du débogage de problèmes complexes",
   "chatTipUseFocusedAgents": "Conseil : Choisissez un agent ciblé pour planifier, relire ou construire",
   "settingsAppearanceComposerTips": "Conseils de l''éditeur de message",
-  "settingsAppearanceComposerTipsDescription": "Afficher ou masquer les conseils rotatifs pendant que l''assistant réfléchit."
+  "settingsAppearanceComposerTipsDescription": "Afficher ou masquer les conseils rotatifs pendant que l''assistant réfléchit.",
+  "chatChooseAgent": "Sélectionner l''agent",
+  "chatChooseModel": "Choisir le modèle",
+  "chatPermissionAutoApproveOff": "Approbation automatique des permissions désactivée",
+  "chatPermissionAutoApproveOn": "Approbation automatique des permissions activée",
+  "modelChooseAgent": "Choisir l''agent"
 }

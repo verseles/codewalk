@@ -2686,5 +2686,25 @@
   "settingsAppearanceComposerTipsDescription": "Show or hide rotating tips while the assistant is reasoning.",
   "@settingsAppearanceComposerTipsDescription": {
     "description": "CodeWalk UI string — settingsAppearanceComposerTipsDescription"
+  },
+  "chatChooseAgent": "Select agent",
+  "@chatChooseAgent": {
+    "description": "CodeWalk UI string — chatChooseAgent"
+  },
+  "chatChooseModel": "Choose model",
+  "@chatChooseModel": {
+    "description": "CodeWalk UI string — chatChooseModel"
+  },
+  "chatPermissionAutoApproveOff": "Permission auto-approve is off",
+  "@chatPermissionAutoApproveOff": {
+    "description": "CodeWalk UI string — chatPermissionAutoApproveOff"
+  },
+  "chatPermissionAutoApproveOn": "Permission auto-approve is on",
+  "@chatPermissionAutoApproveOn": {
+    "description": "CodeWalk UI string — chatPermissionAutoApproveOn"
+  },
+  "modelChooseAgent": "Choose agent",
+  "@modelChooseAgent": {
+    "description": "CodeWalk UI string — modelChooseAgent"
   }
 }

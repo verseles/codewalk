@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "Tipp: Fragen Sie nach Schritt-für-Schritt beim Debuggen komplexer Probleme",
   "chatTipUseFocusedAgents": "Tipp: Wählen Sie einen fokussierten Agenten für Plan, Review oder Build",
   "settingsAppearanceComposerTips": "Composer-Tipps",
-  "settingsAppearanceComposerTipsDescription": "Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt."
+  "settingsAppearanceComposerTipsDescription": "Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt.",
+  "chatChooseAgent": "Agent auswählen",
+  "chatChooseModel": "Modell auswählen",
+  "chatPermissionAutoApproveOff": "Automatische Genehmigung ist deaktiviert",
+  "chatPermissionAutoApproveOn": "Automatische Genehmigung ist aktiviert",
+  "modelChooseAgent": "Agenten auswählen"
 }

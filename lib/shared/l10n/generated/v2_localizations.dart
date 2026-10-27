@@ -3937,6 +3937,36 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Show or hide rotating tips while the assistant is reasoning.'**
   String get settingsAppearanceComposerTipsDescription;
+
+  /// CodeWalk UI string — chatChooseAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Select agent'**
+  String get chatChooseAgent;
+
+  /// CodeWalk UI string — chatChooseModel
+  ///
+  /// In en, this message translates to:
+  /// **'Choose model'**
+  String get chatChooseModel;
+
+  /// CodeWalk UI string — chatPermissionAutoApproveOff
+  ///
+  /// In en, this message translates to:
+  /// **'Permission auto-approve is off'**
+  String get chatPermissionAutoApproveOff;
+
+  /// CodeWalk UI string — chatPermissionAutoApproveOn
+  ///
+  /// In en, this message translates to:
+  /// **'Permission auto-approve is on'**
+  String get chatPermissionAutoApproveOn;
+
+  /// CodeWalk UI string — modelChooseAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Choose agent'**
+  String get modelChooseAgent;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

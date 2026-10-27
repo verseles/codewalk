@@ -160,6 +160,13 @@ String? _notice(SessionSelectionNotice notice, V2Localizations l10n) =>
 String _label(String? label, String id) =>
     label == null || label.trim().isEmpty ? id : label;
 
+/// A catalog entry's label, or its id when it has none.
+String catalogLabel(String? label, String id) => _label(label, id);
+
+/// The catalog model the session's selection names, when it is offered.
+ModelEntry? offeredSessionModel(SessionSelectionState state) =>
+    _offeredModel(state, state.selection);
+
 ModelEntry? _offeredModel(SessionSelectionState state, Selection? selection) =>
     state.models
         .where(
@@ -205,7 +212,15 @@ Future<void> showSessionSelection(
         );
   if (pick == null || !context.mounted) return;
   await pick.apply(live);
-  if (!context.mounted) return;
+  if (context.mounted) announceSessionSelection(context, live);
+}
+
+/// Tells the reader how a pick ended when it did not simply apply: refused,
+/// not applied, changed elsewhere, or not confirmed yet.
+void announceSessionSelection(
+  BuildContext context,
+  SessionLiveController live,
+) {
   final l10n = context.v2L10n;
   final state = live.selectionState;
   final unconfirmed = state.phase == SessionSelectionPhase.unconfirmed;

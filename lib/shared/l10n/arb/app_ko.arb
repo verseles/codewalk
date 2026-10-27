@@ -1601,5 +1601,10 @@
   "chatTipStepByStep": "팁: 복잡한 문제 디버깅 시 단계별 설명을 요청하세요",
   "chatTipUseFocusedAgents": "팁: 계획, 리뷰, 빌드에 맞는 에이전트를 선택하세요",
   "settingsAppearanceComposerTips": "컴포저 팁",
-  "settingsAppearanceComposerTipsDescription": "어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다."
+  "settingsAppearanceComposerTipsDescription": "어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.",
+  "chatChooseAgent": "에이전트 선택",
+  "chatChooseModel": "모델 선택",
+  "chatPermissionAutoApproveOff": "권한 자동 승인 꺼짐",
+  "chatPermissionAutoApproveOn": "권한 자동 승인 켜짐",
+  "modelChooseAgent": "에이전트 선택"
 }

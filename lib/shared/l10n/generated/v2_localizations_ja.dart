@@ -2073,4 +2073,19 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。';
+
+  @override
+  String get chatChooseAgent => 'エージェントを選択';
+
+  @override
+  String get chatChooseModel => 'モデルを選択';
+
+  @override
+  String get chatPermissionAutoApproveOff => '権限の自動承認がオフ';
+
+  @override
+  String get chatPermissionAutoApproveOn => '権限の自動承認がオン';
+
+  @override
+  String get modelChooseAgent => 'エージェントを選択';
 }

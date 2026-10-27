@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "提示：在调试复杂问题时要求逐步进行",
   "chatTipUseFocusedAgents": "提示：为计划、评审或构建选择专注代理",
   "settingsAppearanceComposerTips": "Composer 提示",
-  "settingsAppearanceComposerTipsDescription": "在助手进行推理时显示或隐藏循环提示。"
+  "settingsAppearanceComposerTipsDescription": "在助手进行推理时显示或隐藏循环提示。",
+  "chatChooseAgent": "选择代理",
+  "chatChooseModel": "选择模型",
+  "chatPermissionAutoApproveOff": "权限自动批准已关闭",
+  "chatPermissionAutoApproveOn": "权限自动批准已开启",
+  "modelChooseAgent": "选择智能体"
 }

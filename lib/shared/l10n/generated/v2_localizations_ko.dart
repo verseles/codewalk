@@ -2073,4 +2073,19 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       '어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.';
+
+  @override
+  String get chatChooseAgent => '에이전트 선택';
+
+  @override
+  String get chatChooseModel => '모델 선택';
+
+  @override
+  String get chatPermissionAutoApproveOff => '권한 자동 승인 꺼짐';
+
+  @override
+  String get chatPermissionAutoApproveOn => '권한 자동 승인 켜짐';
+
+  @override
+  String get modelChooseAgent => '에이전트 선택';
 }

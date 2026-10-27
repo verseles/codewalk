@@ -2161,4 +2161,21 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷';
+
+  @override
+  String get chatChooseAgent => 'এজেন্ট নির্বাচন করুন';
+
+  @override
+  String get chatChooseModel => 'মডেল নির্বাচন করুন';
+
+  @override
+  String get chatPermissionAutoApproveOff =>
+      'অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে';
+
+  @override
+  String get chatPermissionAutoApproveOn =>
+      'অনুমতি স্বয়ংক্রিয়-অনুমোদন চালু আছে';
+
+  @override
+  String get modelChooseAgent => 'এজেন্ট নির্বাচন করুন';
 }

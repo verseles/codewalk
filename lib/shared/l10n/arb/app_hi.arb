@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "सुझाव: जटिल समस्याओं को डीबग करते समय चरण-दर-चरण पूछें",
   "chatTipUseFocusedAgents": "सुझाव: योजना, समीक्षा या बिल्ड के लिए केंद्रित एजेंट चुनें",
   "settingsAppearanceComposerTips": "कंपोज़र युक्तियाँ",
-  "settingsAppearanceComposerTipsDescription": "जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।"
+  "settingsAppearanceComposerTipsDescription": "जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।",
+  "chatChooseAgent": "एजेंट चुनें",
+  "chatChooseModel": "मॉडल चुनें",
+  "chatPermissionAutoApproveOff": "अनुमति स्वतः-अनुमोदन बंद है",
+  "chatPermissionAutoApproveOn": "अनुमति स्वतः-अनुमोदन चालू है",
+  "modelChooseAgent": "एजेंट चुनें"
 }

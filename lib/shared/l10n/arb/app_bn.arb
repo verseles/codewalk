@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "পরামর্শ: জটিল সমস্যা ডিবাগ করার সময় ধাপে ধাপে জিজ্ঞাসা করুন",
   "chatTipUseFocusedAgents": "পরামর্শ: পরিকল্পনা, রিভিউ বা বিল্ডের জন্য ফোকাসড এজেন্ট বেছে নিন",
   "settingsAppearanceComposerTips": "সুরকার টিপস",
-  "settingsAppearanceComposerTipsDescription": "সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷"
+  "settingsAppearanceComposerTipsDescription": "সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷",
+  "chatChooseAgent": "এজেন্ট নির্বাচন করুন",
+  "chatChooseModel": "মডেল নির্বাচন করুন",
+  "chatPermissionAutoApproveOff": "অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে",
+  "chatPermissionAutoApproveOn": "অনুমতি স্বয়ংক্রিয়-অনুমোদন চালু আছে",
+  "modelChooseAgent": "এজেন্ট নির্বাচন করুন"
 }

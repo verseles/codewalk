@@ -48,7 +48,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     final ref = row.info.ref;
-    final handle = directory.grant(ref)
+    final handle = directory.grant(ref, outbox: FakeOutbox())
       ..selectionAvailable = true
       ..selectionState = const SessionSelectionState(
         selection: Selection(modelId: 'a-long-model-name', agentId: 'build'),
@@ -63,9 +63,16 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.byKey(const ValueKey('live-selection')), findsOneWidget);
-    // The page is narrow, so the chip is icon-only although the window is not.
-    expect(find.text('a-long-model-name · build'), findsNothing);
+    // The model and agent are the composer's chips, not the app bar's.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const ValueKey('live-model-chip')),
+      ),
+      findsNothing,
+    );
+    expect(find.byKey(const ValueKey('live-model-chip')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-agent-chip')), findsOneWidget);
   });
 
   testWidgets('a failed turn\'s error card opens its one recovery (V2-055A)', (
@@ -293,8 +300,9 @@ void main() {
           expect(find.byType(TextField), findsNothing);
           expect(find.byKey(const ValueKey('live-composer')), findsOneWidget);
           expect(find.byKey(const ValueKey('live-retry')), findsNothing);
-          // V2-054A: the model and agent fit the AppBar in every locale.
-          expect(find.byKey(const ValueKey('live-selection')), findsOneWidget);
+          // Without prompt sending there is no next prompt to pick a model
+          // or agent for: the composer's chips are absent.
+          expect(find.byKey(const ValueKey('live-model-chip')), findsNothing);
           final status = find.byKey(const ValueKey('live-status'));
           expect(tester.getSemantics(status), isNotNull);
           // The clock changes on every event; only phase changes announce.

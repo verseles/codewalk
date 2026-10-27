@@ -2148,4 +2148,21 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.';
+
+  @override
+  String get chatChooseAgent => 'اختيار الوكيل';
+
+  @override
+  String get chatChooseModel => 'اختيار النموذج';
+
+  @override
+  String get chatPermissionAutoApproveOff =>
+      'الموافقة التلقائية على الأذونات غير مفعلة';
+
+  @override
+  String get chatPermissionAutoApproveOn =>
+      'الموافقة التلقائية على الأذونات مفعلة';
+
+  @override
+  String get modelChooseAgent => 'اختر الوكيل';
 }

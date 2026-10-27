@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "Совет: Запрашивайте пошаговые инструкции при отладке сложных проблем",
   "chatTipUseFocusedAgents": "Совет: Выберите фокусного агента для плана, ревью или сборки",
   "settingsAppearanceComposerTips": "Подсказки в редакторе",
-  "settingsAppearanceComposerTipsDescription": "Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает."
+  "settingsAppearanceComposerTipsDescription": "Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.",
+  "chatChooseAgent": "Выбрать агента",
+  "chatChooseModel": "Выбрать модель",
+  "chatPermissionAutoApproveOff": "Автоматическое одобрение разрешений выключено",
+  "chatPermissionAutoApproveOn": "Автоматическое одобрение разрешений включено",
+  "modelChooseAgent": "Выбрать агента"
 }

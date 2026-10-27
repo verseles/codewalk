@@ -2172,4 +2172,19 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get settingsAppearanceComposerTipsDescription =>
       'जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।';
+
+  @override
+  String get chatChooseAgent => 'एजेंट चुनें';
+
+  @override
+  String get chatChooseModel => 'मॉडल चुनें';
+
+  @override
+  String get chatPermissionAutoApproveOff => 'अनुमति स्वतः-अनुमोदन बंद है';
+
+  @override
+  String get chatPermissionAutoApproveOn => 'अनुमति स्वतः-अनुमोदन चालू है';
+
+  @override
+  String get modelChooseAgent => 'एजेंट चुनें';
 }

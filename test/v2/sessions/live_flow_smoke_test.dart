@@ -19,8 +19,7 @@ import 'package:codewalk/platform/sessions/session_live_factory_io.dart';
 import 'package:codewalk/platform/storage/endpoint_credentials.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
-import 'package:codewalk/shared/sessions/command_ids.dart'
-    show mintCommandId;
+import 'package:codewalk/shared/sessions/command_ids.dart' show mintCommandId;
 import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -45,8 +44,7 @@ import 'outbox_fakes.dart' show OutboxStore;
 void main() {
   final upstream = io.Platform.environment['CODEWALK_LIVE_SMOKE_UPSTREAM'];
   final password = io.Platform.environment['CODEWALK_LIVE_SMOKE_PASSWORD'];
-  final projectDir =
-      io.Platform.environment['CODEWALK_LIVE_SMOKE_PROJECT_DIR'];
+  final projectDir = io.Platform.environment['CODEWALK_LIVE_SMOKE_PROJECT_DIR'];
   final workspaceSmoke =
       io.Platform.environment['CODEWALK_LIVE_SMOKE_UNIT'] == 'V2-060C';
 
@@ -159,9 +157,7 @@ void main() {
             ),
           );
           try {
-            final raw = utf8.decode(
-              await response.readBytes(maxBytes: 65536),
-            );
+            final raw = utf8.decode(await response.readBytes(maxBytes: 65536));
             final data = jsonDecode(raw);
             return (response.statusCode, (data as Map)['code'] as String);
           } finally {
@@ -177,12 +173,9 @@ void main() {
       final (pairStatus, code) = await real(() => mintPairCode(password!));
       expect(pairStatus, 200);
       final receipt = await real(
-        () =>
-            pairing
-                .redeem(
-                  PairingCandidate(endpoint: endpoint, challenge: code),
-                )
-                .result,
+        () => pairing
+            .redeem(PairingCandidate(endpoint: endpoint, challenge: code))
+            .result,
       );
       expect(receipt.status, PairingStatus.ready);
       final token = receipt.credential!;
@@ -213,10 +206,9 @@ void main() {
       );
       final profile = (await real(repository.load)).single;
       final second = await real(
-        () =>
-            pairing
-                .redeem(PairingCandidate(endpoint: endpoint, challenge: code))
-                .result,
+        () => pairing
+            .redeem(PairingCandidate(endpoint: endpoint, challenge: code))
+            .result,
       );
       expect(second.status, PairingStatus.rejected);
       qaMark('pairing', 'passed');
@@ -224,10 +216,8 @@ void main() {
       final probe = NativeProbe(endpoint: endpoint, secret: password!);
       addTearDown(probe.close);
       final nativeId = await real(
-        () => probe.createSession(
-          title: 'cw060b smoke',
-          directory: projectDir!,
-        ),
+        () =>
+            probe.createSession(title: 'cw060b smoke', directory: projectDir!),
       );
       await real(() => probe.selectModel(nativeId));
       await real(() => probe.selectAgent(nativeId, 'build'));
@@ -241,12 +231,14 @@ void main() {
         store: V2MetadataStore(backend: Metadata()),
       );
       await real(modes.initialize);
-      expect(await real(() => modes.setSessionMode(ref, PermissionMode.ask)), isTrue);
-      final directory =
-          createSessionLiveDirectory(
-            payloads: OutboxStore(),
-            permissionModes: modes,
-          )!;
+      expect(
+        await real(() => modes.setSessionMode(ref, PermissionMode.ask)),
+        isTrue,
+      );
+      final directory = createSessionLiveDirectory(
+        payloads: OutboxStore(),
+        permissionModes: modes,
+      )!;
       // The live lease is closed at the end of the test: the graceful path
       // cancels the SSE recovery (and with it the fake-zone watchdog timer)
       // and settles on real async. Leaving it to the teardown keeps a
@@ -302,11 +294,10 @@ void main() {
         reason: 'stub streamed text',
         timeout: const Duration(seconds: 60),
       );
-      final userRows =
-          (live.state?.timeline ?? const [])
-              .whereType<UserInput>()
-              .where((item) => item.text.contains('CW060B_SCENARIO_SEND'))
-              .toList();
+      final userRows = (live.state?.timeline ?? const [])
+          .whereType<UserInput>()
+          .where((item) => item.text.contains('CW060B_SCENARIO_SEND'))
+          .toList();
       expect(userRows, hasLength(1));
       final wire = await real(() => probe.listMessages(nativeId));
       final assistant = wire.where((item) {
@@ -337,10 +328,9 @@ void main() {
       await send('CW060B_SCENARIO_APPROVAL');
       await pumpSpin(
         tester,
-        () =>
-            (live.state?.interactions ?? const []).any(
-              (request) => request.kind.known == InteractionKind.permission,
-            ),
+        () => (live.state?.interactions ?? const []).any(
+          (request) => request.kind.known == InteractionKind.permission,
+        ),
         reason: 'permission card',
         timeout: const Duration(seconds: 60),
       );
@@ -348,7 +338,9 @@ void main() {
       expect(live.canReply(toolRequest), isTrue);
       await tester.tap(
         find.byKey(
-          ValueKey('live-permission-allow-${permissionKeyOf(ref, toolRequest)}'),
+          ValueKey(
+            'live-permission-allow-${permissionKeyOf(ref, toolRequest)}',
+          ),
         ),
       );
       await tester.pump();
@@ -371,10 +363,9 @@ void main() {
       await real(() => probe.createPermission(nativeId, 'manual-marker'));
       await pumpSpin(
         tester,
-        () =>
-            (live.state?.interactions ?? const []).any(
-              (request) => request.kind.known == InteractionKind.permission,
-            ),
+        () => (live.state?.interactions ?? const []).any(
+          (request) => request.kind.known == InteractionKind.permission,
+        ),
         reason: 'manual permission card',
         timeout: const Duration(seconds: 30),
       );
@@ -392,7 +383,9 @@ void main() {
       );
       await tester.tap(
         find.byKey(
-          ValueKey('live-permission-allow-${permissionKeyOf(ref, manualRequest)}'),
+          ValueKey(
+            'live-permission-allow-${permissionKeyOf(ref, manualRequest)}',
+          ),
         ),
       );
       await tester.pump();
@@ -507,6 +500,7 @@ void main() {
         }
         cleanedUp = true;
       }
+
       addTearDown(cleanUp);
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
       await tester.pumpAndSettle();
@@ -534,7 +528,8 @@ void main() {
       // precedes that reload; selectProfile intentionally refuses while busy.
       await pumpSpin(
         tester,
-        () => !dependencies.hosts.loading &&
+        () =>
+            !dependencies.hosts.loading &&
             !dependencies.pairing!.busy &&
             dependencies.hosts.credentialFor(profile) != null,
         reason: 'paired host credential reload complete',
@@ -567,18 +562,15 @@ void main() {
       dependencies.router.go('/sessions');
       await tester.pump();
       final selecting = dependencies.sessions!.selectProfile(profile.id);
-      await pumpSpin(
-        tester,
-        () {
-          final catalog = dependencies.sessions!;
-          if (catalog.failure != null) {
-            fail('Native catalog failed: ${catalog.failure}');
-          }
-          return nativeIds.every((id) => catalog.sessions
-              .any((row) => row.info.ref.nativeId == id));
-        },
-        reason: 'native workspace catalog',
-      );
+      await pumpSpin(tester, () {
+        final catalog = dependencies.sessions!;
+        if (catalog.failure != null) {
+          fail('Native catalog failed: ${catalog.failure}');
+        }
+        return nativeIds.every(
+          (id) => catalog.sessions.any((row) => row.info.ref.nativeId == id),
+        );
+      }, reason: 'native workspace catalog');
       await selecting;
       expect(find.byKey(const ValueKey('workspace-sidebar')), findsOneWidget);
       expect(find.byKey(const ValueKey('workspace-empty')), findsOneWidget);
@@ -649,9 +641,7 @@ void main() {
         timeout: const Duration(seconds: 30),
       );
       final messages = await real(() => probe.listMessages(primary.nativeId));
-      final assistants = messages.where(
-        (row) => row['type'] == 'assistant',
-      );
+      final assistants = messages.where((row) => row['type'] == 'assistant');
       expect(assistants, isNotEmpty);
       for (final message in assistants) {
         expect(message['cost'], 0);
@@ -764,7 +754,7 @@ void main() {
       expect((nativeForm['state'] as Map)['answer'], {'choice': 'alpha'});
       qaMark('workspace-form', 'passed');
 
-      await tester.tap(find.byKey(const ValueKey('live-selection')));
+      await tester.tap(find.byKey(const ValueKey('live-model-chip')));
       await tester.pumpAndSettle();
       final alternate = find.byKey(
         const ValueKey('live-selection-model-cw060b/stub-alt'),
@@ -830,7 +820,8 @@ void main() {
             .firstWhere(matches)
             .timeout(
               budget,
-              onTimeout: () => throw StateError('timed out waiting for $reason'),
+              onTimeout: () =>
+                  throw StateError('timed out waiting for $reason'),
             );
       }
 
@@ -869,11 +860,10 @@ void main() {
             const HarnessInstanceId('live_direct'),
             nativeId,
           );
-          final directDirectory =
-              createSessionLiveDirectory(
-                payloads: OutboxStore(),
-                permissionModes: modes,
-              )!;
+          final directDirectory = createSessionLiveDirectory(
+            payloads: OutboxStore(),
+            permissionModes: modes,
+          )!;
           final directHandle = await directDirectory.open(
             profile: directProfile,
             credential: EndpointCredential(
@@ -885,8 +875,7 @@ void main() {
           try {
             await waitView(
               directHandle,
-              (view) =>
-                  view.phase == SessionLivePhase.live && !view.stale,
+              (view) => view.phase == SessionLivePhase.live && !view.stale,
               const Duration(seconds: 30),
               'live lease (direct)',
             );
@@ -921,11 +910,10 @@ void main() {
             label: 'Native QA recovery',
             endpoint: endpoint,
           );
-          final directory =
-              createSessionLiveDirectory(
-                payloads: OutboxStore(),
-                permissionModes: modes,
-              )!;
+          final directory = createSessionLiveDirectory(
+            payloads: OutboxStore(),
+            permissionModes: modes,
+          )!;
           final handle = await directory.open(
             profile: profile,
             credential: EndpointCredential(
@@ -937,8 +925,7 @@ void main() {
           try {
             await waitView(
               handle,
-              (view) =>
-                  view.phase == SessionLivePhase.live && !view.stale,
+              (view) => view.phase == SessionLivePhase.live && !view.stale,
               const Duration(seconds: 30),
               'live lease',
             );
@@ -983,8 +970,7 @@ void main() {
             // turn still running; Stop then settles it.
             await waitView(
               handle,
-              (view) =>
-                  view.phase == SessionLivePhase.live && !view.stale,
+              (view) => view.phase == SessionLivePhase.live && !view.stale,
               const Duration(seconds: 45),
               'live again after restore',
             );

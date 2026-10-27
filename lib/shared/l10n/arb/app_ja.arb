@@ -1590,5 +1590,10 @@
   "chatTipStepByStep": "ヒント: 複雑な問題のデバッグ時はステップバイステップで依頼します",
   "chatTipUseFocusedAgents": "ヒント: 計画、レビュー、実装に合うエージェントを選びましょう",
   "settingsAppearanceComposerTips": "コンポーザーヒント",
-  "settingsAppearanceComposerTipsDescription": "アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。"
+  "settingsAppearanceComposerTipsDescription": "アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。",
+  "chatChooseAgent": "エージェントを選択",
+  "chatChooseModel": "モデルを選択",
+  "chatPermissionAutoApproveOff": "権限の自動承認がオフ",
+  "chatPermissionAutoApproveOn": "権限の自動承認がオン",
+  "modelChooseAgent": "エージェントを選択"
 }
