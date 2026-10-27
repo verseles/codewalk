@@ -34,7 +34,7 @@ class SessionSelectionChip extends StatelessWidget {
           l10n.liveSelection,
           if (state.selection != null) label,
           if (live.isChild) l10n.chatModelLockedSubConversation,
-          ?_status(state, l10n),
+          ?sessionSelectionStatus(state, l10n),
         ].join(': ');
         final busy =
             state.phase == SessionSelectionPhase.pending || state.loading;
@@ -93,22 +93,26 @@ class SessionSelectionChip extends StatelessWidget {
         !closed(state.modelUnavailable) ||
         !closed(state.agentUnavailable);
   }
+}
 
-  static String? _status(SessionSelectionState state, V2Localizations l10n) {
-    if (state.phase == SessionSelectionPhase.pending) {
-      return l10n.liveSelectionPending;
-    }
-    if (state.phase == SessionSelectionPhase.unconfirmed) {
-      return l10n.liveSelectionUnconfirmed;
-    }
-    if (_notice(state.notice, l10n) case final notice?) return notice;
-    if (state.loading) return l10n.liveSelectionLoading;
-    // A half that can still be picked is no reason to report; the pick
-    // explains each half on its own.
-    final model = state.modelUnavailable;
-    if (model == null || state.agentUnavailable == null) return null;
-    return sessionSelectionReason(model, l10n);
+/// The persistent explanation for a selection still settling or unavailable.
+String? sessionSelectionStatus(
+  SessionSelectionState state,
+  V2Localizations l10n,
+) {
+  if (state.phase == SessionSelectionPhase.pending) {
+    return l10n.liveSelectionPending;
   }
+  if (state.phase == SessionSelectionPhase.unconfirmed) {
+    return l10n.liveSelectionUnconfirmed;
+  }
+  if (_notice(state.notice, l10n) case final notice?) return notice;
+  if (state.loading) return l10n.liveSelectionLoading;
+  // A half that can still be picked is no reason to report; the pick
+  // explains each half on its own.
+  final model = state.modelUnavailable;
+  if (model == null || state.agentUnavailable == null) return null;
+  return sessionSelectionReason(model, l10n);
 }
 
 /// `model#variant · agent`, by catalog label when the catalog names them.

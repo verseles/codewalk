@@ -51,6 +51,12 @@ class SessionComposerControls extends StatelessWidget {
           state.phase == SessionSelectionPhase.unconfirmed ||
           state.notice != SessionSelectionNotice.none;
       final picks = live.canChangeSelection && canShowSessionSelection(live);
+      final modelDescription = [
+        l10n.chatChooseModel,
+        if (selection != null) sessionSelectionLabel(state, l10n),
+        if (live.isChild) l10n.chatModelLockedSubConversation,
+        ?sessionSelectionStatus(state, l10n),
+      ].join(': ');
       Widget chip(
         String key,
         String label, {
@@ -58,23 +64,29 @@ class SessionComposerControls extends StatelessWidget {
         required VoidCallback? onPressed,
         Widget? avatar,
         double maxWidth = 200,
-      }) => Tooltip(
-        message: tooltip,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: compact ? 160 : maxWidth),
-          child: ActionChip(
-            key: ValueKey(key),
-            side: BorderSide.none,
-            shape: const StadiumBorder(),
-            visualDensity: VisualDensity.compact,
-            avatar: avatar,
-            label: Text(
-              label,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
+        String? semantics,
+      }) => Semantics(
+        label: semantics,
+        button: semantics == null ? null : true,
+        enabled: semantics == null ? null : onPressed != null,
+        child: Tooltip(
+          message: tooltip,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: compact ? 160 : maxWidth),
+            child: ActionChip(
+              key: ValueKey(key),
+              side: BorderSide.none,
+              shape: const StadiumBorder(),
+              visualDensity: VisualDensity.compact,
+              avatar: avatar,
+              label: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onPressed: onPressed,
             ),
-            onPressed: onPressed,
           ),
         ),
       );
@@ -112,9 +124,8 @@ class SessionComposerControls extends StatelessWidget {
                   final modelId? => catalogLabel(model?.label, modelId),
                   null => l10n.chatChooseModel,
                 },
-                tooltip: live.isChild
-                    ? l10n.chatModelLockedSubConversation
-                    : l10n.chatChooseModel,
+                tooltip: modelDescription,
+                semantics: modelDescription,
                 maxWidth: 240,
                 avatar: busy
                     ? const SizedBox.square(
@@ -197,18 +208,41 @@ Future<void> showAgentMenu(
 ) async {
   if (live.supportsSelection) unawaited(live.refreshSelection());
   final box = anchor.findRenderObject()! as RenderBox;
-  final overlay = Overlay.of(anchor).context.findRenderObject()! as RenderBox;
+  final rootOverlay = Overlay.of(anchor, rootOverlay: true);
+  final overlay = rootOverlay.context.findRenderObject()! as RenderBox;
   final top = box.localToGlobal(Offset.zero, ancestor: overlay);
   final rect = top & box.size;
   const margin = 8.0;
-  final width = min(260.0, overlay.size.width - margin * 2);
+  // Scaffold removes the keyboard inset from its body after consuming it.
+  // The root dialog needs the full viewport's inset instead.
+  final media = MediaQuery.of(rootOverlay.context);
+  final width = min(
+    media.textScaler.scale(260),
+    overlay.size.width - margin * 2,
+  );
   final directionality = Directionality.of(anchor);
   final start =
       (directionality == TextDirection.rtl ? rect.right - width : rect.left)
           .clamp(margin, max(margin, overlay.size.width - width - margin))
           .toDouble();
-  final bottom = overlay.size.height - rect.top + 4;
-  final maxHeight = max(120.0, rect.top - margin * 2);
+  final safeTop = media.padding.top + margin;
+  final safeBottom =
+      overlay.size.height -
+      max(media.padding.bottom, media.viewInsets.bottom) -
+      margin;
+  final available = max(0.0, safeBottom - safeTop);
+  final above = (rect.top - 4 - safeTop).clamp(0.0, available);
+  final below = (safeBottom - rect.bottom - 4).clamp(0.0, available);
+  // Keep the menu above the chip when it fits. Short keyboard-reduced
+  // windows can instead use the space below or the whole safe viewport.
+  final preferredHeight = media.textScaler.scale(120);
+  final opensAbove = above >= preferredHeight;
+  final opensBelow = !opensAbove && below >= preferredHeight;
+  final maxHeight = opensAbove
+      ? above
+      : opensBelow
+      ? below
+      : available;
   final agent = await showGeneralDialog<CatalogEntry>(
     context: anchor,
     barrierDismissible: true,
@@ -220,7 +254,12 @@ Future<void> showAgentMenu(
         Positioned(
           left: start,
           width: width,
-          bottom: bottom,
+          top: opensAbove
+              ? null
+              : opensBelow
+              ? rect.bottom + 4
+              : safeTop,
+          bottom: opensAbove ? overlay.size.height - rect.top + 4 : null,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxHeight: maxHeight),
             child: Material(
@@ -297,7 +336,9 @@ class _AgentMenu extends StatelessWidget {
             SwitchListTile(
               key: const ValueKey('live-auto-approve'),
               title: Text(
-                on
+                !unrestricted && mode == null
+                    ? l10n.livePermissionModeUnavailable
+                    : on
                     ? l10n.chatPermissionAutoApproveOn
                     : l10n.chatPermissionAutoApproveOff,
               ),
