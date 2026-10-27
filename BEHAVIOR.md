@@ -106,6 +106,17 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** sessions merely absent from the loaded rows, unreadable or behind a login keep their tabs; known background-project rows need no full history read, tabs of a removed server leave with it, and a failed automatic tab write waits for later external input rather than immediately retrying itself
 - **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
 
+### V2 sub-conversations
+
+- **Given** a v2 session whose timeline shows a subagent call
+- **When** the user taps anywhere on that call's card (its own expand and copy controls keep their taps)
+- **Then** only a direct child of the session on screen opens: the child the call itself named while it ran or when it ended, else the only child the server lists for the session, else the call paired with the children by creation time, but only when the whole history is in view, both counts match, every creation time is known and distinct and no call contradicts the pairing
+- **Then** the chosen session is read first and opens only when it is exactly that child of the session on screen; a refused or contradictory name never falls back to another rule, a newer tap or any navigation meanwhile cancels the lookup, and when nothing can be told apart the session stays and a notice says no sub-conversation was found
+- **Then** a child named only by a live progress update is forgotten when the stream reconnects or the history is read again, until the server names it again; a name carried by the call's final event or by the history stays
+- **When** a sub-conversation is shown
+- **Then** it keeps the full composer and Stop, a `Return to parent conversation` control stays visible above its timeline, and its model, agent and variant show the child's own choice, locked
+- **Then** returning (the control, or the system back on a phone before the drawer/background order) goes to the immediate parent, one level at a time, and the parent shows the same rows where the reader left them, or its newest content when it was following, even after it grew meanwhile
+
 ### V2 project contexts
 
 - **Given** a v2 server whose saved project contexts can be read
