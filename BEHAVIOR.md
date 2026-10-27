@@ -378,7 +378,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** an open native v2 session on verified OpenCode 2.0.22
 - **When** its live page opens
-- **Then** the app bar shows a model-and-agent chip with the session's own selection (`model#variant · agent`, by the list's label when it names them; a missing half is the server default), icon-only below 600 dp with the selection and its status in the tooltip and semantics
+- **Then** the composer shows separate agent, model and variant chips above its field, wrapping on a narrow window; catalog labels name the session's own selection, and a missing half is the server default; the model's tooltip and semantics retain the whole selection and any pending, unconfirmed or changed-elsewhere status
 - **Then** the session record supplies the selection, and `session.model.selected` / `session.agent.selected` keep it current; the model reference keeps its provider and variant together
 - **Then** the location's models and agents are read once per live period with `GET /api/model` and `GET /api/agent` scoped to the session's directory, and again on an explicit refresh or when the pick opens; only enabled models, their variant ids (never their settings) and non-hidden primary or all-mode agents are offered, and a value the list does not hold stays visible as not offered here
 - **Then** a missing route, required authentication, an unreadable or oversized answer, a failed read, an empty list or a session without a location is reported per half; when neither half can be offered for a reason a retry would not change, the chip stays as a non-interactive affordance whose tooltip and semantics give the reason, and nothing is faked
@@ -387,6 +387,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an accepted switch shows at once and holds until the server reports a newer selection, and the next pick waits for that report; a refused switch changes nothing and says so; a switch reported and then replaced by another client, before or after its answer, says it was changed elsewhere
 - **Then** an uncertain answer is never resent: a switch the server already reported settles at once, otherwise one read of the session record settles it as applied or not applied; a failed read keeps it unconfirmed, and the session's sends wait until Check again, a newer server selection or a new pick settles it
 - **Then** closing or releasing the lease never switches anything
+- **Then** a sub-conversation hides its agent chip and shows its inherited model and variant disabled, with a lock on the model
 - **Then** technical coverage includes contract-derived loopback race tests, the chip in 14 locales at compact and wide sizes, 2x text at 360 dp, and the bottom sheet and dialog; no live 2.0.22 switch capture exists yet (#425), switches are not shown in the timeline (#426), and installed native acceptance remains separate
 
 ### V2 typed turn error cards
@@ -519,6 +520,16 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** with nothing more specific it waits 2 seconds, then rotates a prompting tip every 15 seconds (start with the goal, name relevant files, state constraints, ask for a plan, say which checks should pass, share attempts and errors, ask for alternatives or docs updates, add acceptance criteria, pick a focused agent, and similar), or shows `Reasoning...` when Settings > Appearance > Composer tips is off; the choice persists under `cw2.settings.composerTips` (on by default, only `false` is written)
 - **When** the work ends, or the server reports the session waiting for an approval or an answer
 - **Then** the slot clears a second later and keeps its height, so the field does not move
+
+### V2 agent menu and permission quick switch
+
+- **Given** a live session's composer offers an agent menu
+- **When** the user opens its agent chip
+- **Then** a floating list shows its offered agents and opens above the chip when there is room, below it or inside the safe viewport otherwise; it uses the root window's coordinates, keeps outside the keyboard and adapts its width to enlarged text, including RTL
+- **Then** picking an agent closes the menu and uses the existing session-selection fence; unreadable agent choices explain why instead of inventing a catalog
+- **Then** the agent chip's badge counts only the session's pending permission requests, capped at 99, and clears as those requests resolve
+- **Then** a fixed footer switches this session between acknowledged Allow all and Ask while keeping the menu open; it stays disabled during the write, and a failed write reports the failure without changing the acknowledged mode
+- **Then** an unreadable or unknown policy says Unavailable and disables the switch; an active Unrestricted rule shows it on and disabled, with its explanation; the header's permission chip retains Use default and the separate Unrestricted controls
 
 ### V2 navigation intents and locale
 
