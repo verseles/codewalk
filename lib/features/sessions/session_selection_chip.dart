@@ -573,7 +573,12 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                 ),
                 for (final entry in models) ...[
                   model(entry),
-                  if (entry.variants.isNotEmpty) variants(entry),
+                  // A chosen variant the model no longer lists can still be
+                  // cleared with Auto.
+                  if (entry.variants.isNotEmpty ||
+                      (identical(entry, offeredModel) &&
+                          currentVariant != null))
+                    variants(entry),
                 ],
               ],
             ],

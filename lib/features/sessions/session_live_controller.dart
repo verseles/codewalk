@@ -347,20 +347,22 @@ class SessionLiveController extends ChangeNotifier {
   Future<void> refreshUnrestricted() =>
       _act(canRefreshUnrestricted, (handle) => handle.refreshUnrestricted());
 
-  Future<void> _act(
+  /// True when [action] ran and its lease is still this view's.
+  Future<bool> _act(
     bool allowed,
     Future<void> Function(SessionLiveHandle) action,
   ) async {
     final handle = _handle;
-    if (!allowed || handle == null) return;
+    if (!allowed || handle == null) return false;
     final generation = _generation;
     final running = action(handle);
     _notify();
     await running;
     if (_disposed || generation != _generation || !identical(handle, _handle)) {
-      return;
+      return false;
     }
     _notify();
+    return true;
   }
 
   /// The session's model and agent. A pending or unconfirmed change holds
@@ -379,9 +381,11 @@ class SessionLiveController extends ChangeNotifier {
       _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
 
   /// The command id is taken with the gesture, for this lease's session.
-  /// A switch the server took makes the model this project's most recent.
+  /// A switch the server took makes the model this project's most recent,
+  /// also when an unconfirmed switch is settled later.
   Future<void> selectModel(ModelEntry model, {String? variant}) async {
-    await _act(
+    final project = _project;
+    final sent = await _act(
       canChangeSelection,
       (handle) => handle.selectModel(
         modelId: model.id,
@@ -390,12 +394,23 @@ class SessionLiveController extends ChangeNotifier {
         id: _commandIds(),
       ),
     );
+    // A switch that was never sent records nothing, nor does a later one
+    // leave an earlier one waiting.
+    _pendingRecent = sent && project != null ? (model, project) : null;
+    await _settleRecent();
+  }
+
+  /// The switch this view sent, until it settles.
+  (ModelEntry, String)? _pendingRecent;
+
+  Future<void> _settleRecent() async {
+    final pending = _pendingRecent;
+    if (pending == null || _disposed) return;
     final state = selectionState;
-    final project = _project;
-    if (_disposed ||
-        project == null ||
-        state.phase != SessionSelectionPhase.idle ||
-        state.notice != SessionSelectionNotice.none ||
+    if (state.holdsSend) return;
+    _pendingRecent = null;
+    final (model, project) = pending;
+    if (state.notice != SessionSelectionNotice.none ||
         state.selection?.modelId != model.id ||
         state.selection?.modelProviderId != model.providerId) {
       return;
@@ -738,6 +753,7 @@ class SessionLiveController extends ChangeNotifier {
         _pruneFormDrafts(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
+        unawaited(_settleRecent());
         _notify();
       });
     } on Object catch (error) {

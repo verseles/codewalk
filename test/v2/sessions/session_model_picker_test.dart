@@ -10,6 +10,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../storage/storage_fakes.dart';
@@ -267,6 +268,91 @@ void main() {
     await tester.pumpAndSettle();
     expect(switches(handle).last, 'model:opencode/zen');
     expect(preferences.recents(_server, _project).first, 'prov/beta');
+  });
+
+  testWidgets('a switch that was not sent records nothing', (tester) async {
+    final (live, handle) = await open(tester);
+    // A stale lease cannot switch: picking the current model sends nothing
+    // and must not make it recent.
+    handle.emit(
+      SessionLiveView(
+        session: live.session,
+        phase: SessionLivePhase.live,
+        stale: true,
+        state: liveState(live.session),
+      ),
+    );
+    await tester.pump();
+    expect(live.canChangeSelection, isFalse);
+    await live.selectModel(_alpha);
+    expect(switches(handle), isEmpty);
+    expect(preferences.recents(_server, _project), isEmpty);
+  });
+
+  testWidgets('an unconfirmed switch becomes recent once it is confirmed', (
+    tester,
+  ) async {
+    final (live, handle) = await open(tester);
+    final models = [_alpha, _beta, _zen, _gamma];
+    handle.selectionAction = (change) async => SessionSelectionState(
+      selection: _selection(_alpha, 'high'),
+      models: models,
+      phase: SessionSelectionPhase.unconfirmed,
+    );
+    await live.selectModel(_beta);
+    expect(switches(handle), ['model:prov/beta']);
+    expect(preferences.recents(_server, _project), isEmpty);
+    // A later read settles it as applied.
+    handle
+      ..selectionState = SessionSelectionState(
+        selection: _selection(_beta),
+        models: models,
+      )
+      ..emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(preferences.recents(_server, _project), ['prov/beta']);
+    // One settled as not applied records nothing.
+    handle.selectionAction = (change) async => SessionSelectionState(
+      selection: _selection(_beta),
+      models: models,
+      phase: SessionSelectionPhase.unconfirmed,
+    );
+    await live.selectModel(_gamma);
+    handle
+      ..selectionState = SessionSelectionState(
+        selection: _selection(_beta),
+        models: models,
+        notice: SessionSelectionNotice.notApplied,
+      )
+      ..emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(preferences.recents(_server, _project), ['prov/beta']);
+  });
+
+  testWidgets('Auto still clears a variant the model no longer lists', (
+    tester,
+  ) async {
+    final (_, handle) = await open(tester);
+    final plain = ModelEntry(id: 'alpha', providerId: 'prov', label: 'Alpha');
+    handle
+      ..selectionState = SessionSelectionState(
+        selection: _selection(plain, 'high'),
+        models: [plain, _beta],
+      )
+      ..emit(handle.current);
+    await tester.pumpAndSettle();
+    // The composer's variant menu offers Auto.
+    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-variant-auto')), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(switches(handle), isEmpty);
+    // So does the picker, beside the current model.
+    await openPicker(tester);
+    await tester.tap(row('auto-prov/alpha'));
+    await tester.pumpAndSettle();
+    expect(switches(handle), ['model:prov/alpha']);
   });
 
   testWidgets('the current model keeps its variant; only Auto clears it', (

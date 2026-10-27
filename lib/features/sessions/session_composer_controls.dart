@@ -151,11 +151,14 @@ class SessionComposerControls extends StatelessWidget {
                   variant ?? l10n.liveSelectionAuto,
                   tooltip: l10n.shortcutNextVariant,
                   maxWidth: 180,
+                  // A chosen variant the model no longer lists can still be
+                  // cleared with Auto.
                   onPressed:
                       picks &&
                           !live.isChild &&
-                          (model?.variants.isNotEmpty ?? false)
-                      ? () => unawaited(_pickVariant(anchor, live, model!))
+                          model != null &&
+                          (model.variants.isNotEmpty || variant != null)
+                      ? () => unawaited(_pickVariant(anchor, live, model))
                       : null,
                 ),
               ),
