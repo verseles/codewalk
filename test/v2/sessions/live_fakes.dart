@@ -311,9 +311,14 @@ class LiveHandle implements SessionLiveHandle {
 
   @override
   bool get supportsSelection => selectionAvailable && closes == 0;
+
+  /// A switch the server took and has not reported yet: like the lane, the
+  /// next pick waits for that report.
+  bool awaitingEcho = false;
   @override
   bool get canChangeSelection =>
       supportsSelection &&
+      !awaitingEcho &&
       selectionState.phase != SessionSelectionPhase.pending &&
       current.phase == SessionLivePhase.live &&
       !current.stale;

@@ -405,6 +405,115 @@ void main() {
       expect(preferences.agentRecents(_server, _project), isEmpty);
     });
 
+    test('the restore waits for the server to report the agent', () async {
+      await preferences.rememberAgentModel(
+        _server,
+        _project,
+        'plan',
+        'prov/beta',
+        null,
+      );
+      final (live, handle) = await open();
+      final serve = handle.selectionAction!;
+      // The answer arrives before session.agent.selected: the next pick
+      // waits for that report, as the selection lane does.
+      handle.selectionAction = (change) async {
+        final next = await serve(change);
+        if (change.startsWith('agent:')) handle.awaitingEcho = true;
+        return next;
+      };
+      await live.selectAgent(_agent('plan'));
+      expect(switches(handle), ['agent:plan']);
+      handle
+        ..awaitingEcho = false
+        ..emit(handle.current);
+      await pumpEventQueue();
+      expect(switches(handle), ['agent:plan', 'model:prov/beta']);
+    });
+
+    test('a new lease drops a restore still waiting', () async {
+      await preferences.rememberAgentModel(
+        _server,
+        _project,
+        'plan',
+        'prov/beta',
+        null,
+      );
+      final (live, handle) = await open();
+      final serve = handle.selectionAction!;
+      handle.selectionAction = (change) async {
+        final next = await serve(change);
+        if (change.startsWith('agent:')) handle.awaitingEcho = true;
+        return next;
+      };
+      await live.selectAgent(_agent('plan'));
+      handle.emit(
+        SessionLiveView(
+          session: live.session,
+          phase: SessionLivePhase.degraded,
+        ),
+      );
+      await pumpEventQueue();
+      final retry = live.retry();
+      final next = directory.grant(live.session)
+        ..selectionAvailable = true
+        ..selectionState = SessionSelectionState(
+          selection: handle.selectionState.selection,
+          models: handle.selectionState.models,
+          agents: handle.selectionState.agents,
+        );
+      await retry;
+      next.emit(
+        SessionLiveView(
+          session: live.session,
+          phase: SessionLivePhase.live,
+          state: liveState(live.session),
+        ),
+      );
+      await pumpEventQueue();
+      expect(next.selectionCalls.where((c) => c != 'refresh'), isEmpty);
+      expect(switches(handle), ['agent:plan']);
+    });
+
+    test('a model set and set back during the switch still wins', () async {
+      await preferences.rememberAgentModel(
+        _server,
+        _project,
+        'plan',
+        'prov/beta',
+        null,
+      );
+      final (live, handle) = await open();
+      final serve = handle.selectionAction!;
+      SessionSelectionState withModel(String id, String provider) =>
+          SessionSelectionState(
+            selection: Selection(
+              modelId: id,
+              modelProviderId: provider,
+              agentId: 'build',
+            ),
+            models: handle.selectionState.models,
+            agents: handle.selectionState.agents,
+          );
+      handle.selectionAction = (change) async {
+        if (change.startsWith('agent:')) {
+          // Another client sets Gamma, then Alpha again, meanwhile.
+          handle
+            ..selectionState = withModel('gamma', 'other')
+            ..emit(handle.current);
+          await pumpEventQueue();
+          handle
+            ..selectionState = withModel('alpha', 'prov')
+            ..emit(handle.current);
+          await pumpEventQueue();
+        }
+        return serve(change);
+      };
+      await live.selectAgent(_agent('plan'));
+      await pumpEventQueue();
+      expect(switches(handle), ['agent:plan']);
+    });
+
     testWidgets('the shortcut reaches the session from its composer', (
       tester,
     ) async {

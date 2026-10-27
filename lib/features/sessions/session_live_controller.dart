@@ -401,34 +401,88 @@ class SessionLiveController extends ChangeNotifier {
   );
 
   /// Switching to an agent restores the model it last used in this project,
-  /// with its variant when the model still lists it (#181), unless the
-  /// switch also changed the model, as the server or another client did.
+  /// with its variant when the model still lists it (#181), once the server
+  /// reports the switch and a next one can be sent. A model changed since
+  /// the switch began (by the server with the agent, or by another client),
+  /// a refusal, another lease or a newer pick cancels it.
   Future<void> selectAgent(CatalogEntry agent) async {
     final before = selectionState.selection;
+    final revision = _modelRevision;
+    final generation = _generation;
     final attempt = await _switch(
       (project, before) =>
           PendingSelectionSwitch.agent(agent, project: project, before: before),
       (handle) => handle.selectAgent(agentId: agent.id, id: _commandIds()),
     );
-    final project = _project;
-    final memory = project == null
-        ? null
-        : modelPreferences?.agentModel(profile.id, project, agent.id);
-    final now = selectionState.selection;
-    // A newer pick, another lease or a model changed meanwhile cancels it.
     if (attempt == null ||
         attempt != _switchAttempt ||
-        memory == null ||
-        now?.agentId != agent.id ||
-        selectionState.holdsSend ||
-        selectionState.notice != SessionSelectionNotice.none ||
+        generation != _generation) {
+      return;
+    }
+    _restore = (
+      agent: agent.id,
+      before: before,
+      revision: revision,
+      attempt: attempt,
+      generation: generation,
+    );
+    await _restoreAgentModel();
+  }
+
+  /// An agent switch the server took, until its model is restored.
+  ({
+    String agent,
+    Selection? before,
+    int revision,
+    int attempt,
+    int generation,
+  })?
+  _restore;
+
+  /// Counts the model changes this view observed, so a model set and then
+  /// set back during an agent switch still cancels its restore.
+  int _modelRevision = 0;
+  (String?, String?, String?)? _seenModel;
+
+  void _observeModel() {
+    final selection = selectionState.selection;
+    if (selection == null) return;
+    final model = (
+      selection.modelProviderId,
+      selection.modelId,
+      selection.modelVariant,
+    );
+    if (_seenModel != null && _seenModel != model) _modelRevision++;
+    _seenModel = model;
+  }
+
+  Future<void> _restoreAgentModel() async {
+    final restore = _restore;
+    if (restore == null || _disposed) return;
+    final state = selectionState;
+    final now = state.selection;
+    final before = restore.before;
+    if (restore.attempt != _switchAttempt ||
+        restore.generation != _generation ||
+        restore.revision != _modelRevision ||
+        state.notice != SessionSelectionNotice.none ||
+        now?.agentId != restore.agent ||
         now?.modelId != before?.modelId ||
         now?.modelProviderId != before?.modelProviderId ||
         now?.modelVariant != before?.modelVariant) {
+      _restore = null;
       return;
     }
+    // A switch the server took waits for its report before the next one.
+    if (!canChangeSelection) return;
+    _restore = null;
+    final project = _project;
+    final memory = project == null
+        ? null
+        : modelPreferences?.agentModel(profile.id, project, restore.agent);
+    if (memory == null) return;
     final (key, remembered) = memory;
-    final model = selectionState.models
+    final model = state.models
         .where((m) => modelPreferenceKey(m.providerId, m.id) == key)
         .firstOrNull;
     if (model == null) return;
@@ -808,6 +862,8 @@ class SessionLiveController extends ChangeNotifier {
     _generation++;
     // Another lease starts without this one's switch: it settles nothing.
     _pending = null;
+    _restore = null;
+    _seenModel = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     _handle?.close();
@@ -887,7 +943,9 @@ class SessionLiveController extends ChangeNotifier {
         _pruneFormDrafts(next.state);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
+        _observeModel();
         unawaited(_settleSwitch());
+        unawaited(_restoreAgentModel());
         _notify();
       });
     } on Object catch (error) {
