@@ -419,6 +419,19 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** any model change seen since the agent switch began (by the server with the agent or by another client, even one set and then set back), a refused or not-yet-confirmed agent switch, a newer pick or a new connection cancels the restore; the agent left keeps the model it was using
 - **Then** technical coverage includes the cycle state machine with an injected clock, controller tests for each domain and for the agent memory, and a `ctrl+m` composer shortcut test; installed native acceptance remains separate
 
+### V2 in-app messages and safe Enter in dialogs
+
+- **Given** the v2 app shows an in-app message (a copy confirmation, a failed action, an undo offer, a server warning)
+- **When** it appears
+- **Then** every v2 message goes through one snackbar path, so the same event is never shown twice as a toast and a box
+- **Then** on a compact window it is a floating toast without a close icon; on a wide window it floats beside the end edge (at most 420 dp wide, 24 dp from the edge, on the left in right-to-left languages) with a close icon
+- **Then** a message without an action closes as soon as it is tapped; a message with an action (Undo, Check again, Servers) keeps that action, and its text, duration and placement are unchanged
+- **Given** the server edit or add-server dialog is open with a physical keyboard
+- **When** the user presses `Enter` or `NumpadEnter`
+- **Then** a focused control that activates itself (Cancel, Check connection, a row) does so; otherwise the dialog's Save runs, only when Save itself is enabled
+- **Then** delete confirmations, the Unrestricted confirmation, shortcut capture, pickers and selectors never map Enter to their action; renaming a session already confirms with Enter in its field
+- **Then** technical coverage includes snackbar tests at compact and wide widths in both directions, a source check that keeps one snackbar path, and Enter, NumpadEnter and focused-Cancel dialog tests; installed native acceptance remains separate
+
 ### V2 typed turn error cards
 
 - **Given** a native v2 session on verified OpenCode 2.0.22 whose turn ended with `session.execution.failed`, live or in the read-only history
