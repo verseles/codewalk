@@ -14,6 +14,7 @@ import '../../platform/sessions/session_tabs_store.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'project_contexts_controller.dart';
 import 'session_tab_chip.dart';
 import 'session_tab_menu.dart';
@@ -132,9 +133,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
     if (!removed) {
       if (tabs.tabs.any((t) => t.ref == tab.ref) &&
           (messenger?.mounted ?? false)) {
-        messenger!.showSnackBar(
-          SnackBar(content: Text(l10n.sessionsActionFailed)),
-        );
+        showAppSnackBar(messenger, l10n.sessionsActionFailed);
       }
       return;
     }
@@ -156,36 +155,29 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
       }
     }
     if (!(messenger?.mounted ?? false)) return;
-    messenger
-      ?..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.sessionTabClosedMessage(title),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: l10n.sessionTabUndo,
-            onPressed: () async {
-              // Undo restores only local state, without taking navigation.
-              if (!await tabs.reopen(
-                tab,
-                index: index,
-                select: false,
-                pin: unpinned,
-              )) {
-                if (messenger.mounted) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(l10n.sessionTabRestoreFailed)),
-                  );
-                }
-              }
-            },
-          ),
-        ),
-      );
+    messenger?.clearSnackBars();
+    showAppSnackBar(
+      messenger,
+      l10n.sessionTabClosedMessage(title),
+      maxLines: 1,
+      duration: const Duration(seconds: 3),
+      action: SnackBarAction(
+        label: l10n.sessionTabUndo,
+        onPressed: () async {
+          // Undo restores only local state, without taking navigation.
+          if (!await tabs.reopen(
+            tab,
+            index: index,
+            select: false,
+            pin: unpinned,
+          )) {
+            if (messenger?.mounted ?? false) {
+              showAppSnackBar(messenger, l10n.sessionTabRestoreFailed);
+            }
+          }
+        },
+      ),
+    );
   }
 
   Future<void> _draft(ProjectRef project) async {
@@ -212,8 +204,9 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
       routes.removeListener(navigated);
       if (!opened) {
         if (mounted) {
-          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-            SnackBar(content: Text(context.v2L10n.projectsUnavailable)),
+          showAppSnackBar(
+            ScaffoldMessenger.maybeOf(context),
+            context.v2L10n.projectsUnavailable,
           );
         }
         return;
@@ -786,10 +779,11 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
     if (messenger != null &&
         _notice == null &&
         widget.tabs.takeRemoved().isNotEmpty) {
-      final notice = _notice = messenger.showSnackBar(
-        SnackBar(content: Text(context.v2L10n.sessionTabsRemoved)),
+      final notice = _notice = showAppSnackBar(
+        messenger,
+        context.v2L10n.sessionTabsRemoved,
       );
-      notice.closed.whenComplete(() {
+      notice?.closed.whenComplete(() {
         if (!identical(_notice, notice)) return;
         _notice = null;
         _changed();

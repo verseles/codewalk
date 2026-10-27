@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/releases/update_selector.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'update_check_controller.dart';
 
 Future<bool> _openExternally(Uri uri) =>
@@ -43,7 +44,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final copied = context.v2L10n.updatesCommandCopied;
     await Clipboard.setData(ClipboardData(text: command));
-    messenger?.showSnackBar(SnackBar(content: Text(copied)));
+    showAppSnackBar(messenger, copied);
   }
 
   @override

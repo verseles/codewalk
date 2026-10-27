@@ -12,6 +12,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/server_path.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'project_contexts_controller.dart';
 import 'session_actions_menu.dart';
 import 'session_history_controller.dart';
@@ -58,9 +59,7 @@ class _SessionTabMenuState extends State<SessionTabMenu> {
 
   void _notice(String text) {
     if (!mounted) return;
-    ScaffoldMessenger.maybeOf(
-      context,
-    )?.showSnackBar(SnackBar(content: Text(text)));
+    showAppSnackBar(ScaffoldMessenger.maybeOf(context), text);
   }
 
   Future<void> _icon() async {
@@ -100,7 +99,7 @@ class _SessionTabMenuState extends State<SessionTabMenu> {
     // captured still finish the close.
     if (!saved) {
       if (messenger?.mounted ?? false) {
-        messenger!.showSnackBar(SnackBar(content: Text(failed)));
+        showAppSnackBar(messenger, failed);
       }
     } else if (shown && router.routeInformationProvider.value.uri == before) {
       final next = contexts.active;

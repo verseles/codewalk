@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../sessions/sessions_controller.dart';
 import 'endpoint_health_controller.dart';
 import 'endpoint_health_view.dart';
@@ -53,9 +54,7 @@ Future<bool> selectWorkspaceServer(
     final reason = result == ServerSwitchResult.unhealthy && health != null
         ? endpointHealthReason(l, health.view(profile))
         : l.hostsProfileStorageError;
-    messenger?.showSnackBar(
-      SnackBar(content: Text(reason ?? l.hostsTransportHelp)),
-    );
+    showAppSnackBar(messenger, reason ?? l.hostsTransportHelp);
   }
   return false;
 }

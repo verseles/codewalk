@@ -7,6 +7,7 @@ import '../../app/app_preferences_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/shortcuts/shortcut_binding_codec.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 
 class ShortcutsSettingsPage extends StatefulWidget {
   const ShortcutsSettingsPage({super.key});
@@ -194,14 +195,9 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage> {
     if (!mounted || p.isDisposed || binding == null) return;
     final conflict = p.shortcutConflict(action, binding);
     if (conflict != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.v2L10n.shortcutsErrorConflict(
-              conflict.label(context.v2L10n),
-            ),
-          ),
-        ),
+      showAppSnackBar(
+        ScaffoldMessenger.of(context),
+        context.v2L10n.shortcutsErrorConflict(conflict.label(context.v2L10n)),
       );
       return;
     }

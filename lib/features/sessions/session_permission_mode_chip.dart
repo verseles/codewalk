@@ -4,6 +4,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 import 'session_unrestricted_dialog.dart';
 
@@ -194,8 +195,9 @@ class SessionPermissionModeChip extends StatelessWidget {
         ? await live.setPermissionMode(value)
         : true;
     if (applied || !context.mounted) return;
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(content: Text(context.v2L10n.livePermissionModeFailed)),
+    showAppSnackBar(
+      ScaffoldMessenger.maybeOf(context),
+      context.v2L10n.livePermissionModeFailed,
     );
   }
 
@@ -226,8 +228,6 @@ class SessionPermissionModeChip extends StatelessWidget {
       SessionUnrestrictedNotice.none => null,
     };
     if (message == null) return;
-    ScaffoldMessenger.maybeOf(
-      context,
-    )?.showSnackBar(SnackBar(content: Text(message)));
+    showAppSnackBar(ScaffoldMessenger.maybeOf(context), message);
   }
 }

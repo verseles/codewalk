@@ -6,6 +6,7 @@ import '../../app/app_preferences_controller.dart';
 import '../../shared/diagnostics/diagnostics_controller.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/searchable_picker.dart';
 
 /// The "all operations" choice of the operation filter.
@@ -44,9 +45,7 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
       DiagnosticCopyResult.invalidated => null,
     };
     if (message != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      showAppSnackBar(ScaffoldMessenger.of(context), message);
     }
   }
 

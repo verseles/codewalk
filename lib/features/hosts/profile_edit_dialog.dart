@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import 'hosts_controller.dart';
 
 class ProfileEditDialog extends StatefulWidget {
@@ -110,84 +111,90 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
     final l = context.v2L10n;
     return PopScope(
       canPop: !_busy,
-      child: AlertDialog(
-        title: Text(l.serversEdit),
-        scrollable: true,
-        content: SizedBox(
-          width: 480,
-          child: Form(
-            key: _form,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  key: const ValueKey('edit-endpoint-label'),
-                  controller: _label,
-                  enabled: !_busy,
-                  maxLength: 160,
-                  decoration: InputDecoration(labelText: l.onboardingLabel),
-                  validator: (value) {
-                    final label = value?.trim() ?? '';
-                    return label.isEmpty ||
-                            label.length > 160 ||
-                            label.runes.any((c) => c < 32 || c == 127)
-                        ? l.hostsEditInvalidLabel
-                        : null;
-                  },
-                ),
-                TextFormField(
-                  key: const ValueKey('edit-endpoint-url'),
-                  controller: _url,
-                  enabled: !_busy,
-                  keyboardType: TextInputType.url,
-                  textDirection: TextDirection.ltr,
-                  autocorrect: false,
-                  decoration: InputDecoration(labelText: l.onboardingServerUrl),
-                  validator: (value) {
-                    try {
-                      EndpointProfile.validateEndpoint(
-                        Uri.parse((value ?? '').trim()),
-                      );
-                      return null;
-                    } on FormatException {
-                      return l.onboardingInvalidUrl;
-                    }
-                  },
-                ),
-                if (_busy) const LinearProgressIndicator(),
-                if (_failed) ...[
-                  Text(l.hostsEditChanged),
-                  TextButton(
-                    key: const ValueKey('edit-endpoint-reload'),
-                    onPressed: _busy ? null : _reload,
-                    child: Text(l.chatRetry),
+      child: ModalPrimaryActionShortcuts(
+        enabled: !_busy && _exists,
+        onPrimaryAction: _save,
+        child: AlertDialog(
+          title: Text(l.serversEdit),
+          scrollable: true,
+          content: SizedBox(
+            width: 480,
+            child: Form(
+              key: _form,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    key: const ValueKey('edit-endpoint-label'),
+                    controller: _label,
+                    enabled: !_busy,
+                    maxLength: 160,
+                    decoration: InputDecoration(labelText: l.onboardingLabel),
+                    validator: (value) {
+                      final label = value?.trim() ?? '';
+                      return label.isEmpty ||
+                              label.length > 160 ||
+                              label.runes.any((c) => c < 32 || c == 127)
+                          ? l.hostsEditInvalidLabel
+                          : null;
+                    },
                   ),
-                ],
-                if (_reconciled) ...[
-                  const SizedBox(height: 12),
-                  Text(l.hostsEditSavedProfile),
-                  Text('${l.onboardingLabel}: ${_expected.label}'),
-                  SelectableText(
-                    _expected.endpoint.toString(),
+                  TextFormField(
+                    key: const ValueKey('edit-endpoint-url'),
+                    controller: _url,
+                    enabled: !_busy,
+                    keyboardType: TextInputType.url,
                     textDirection: TextDirection.ltr,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: l.onboardingServerUrl,
+                    ),
+                    validator: (value) {
+                      try {
+                        EndpointProfile.validateEndpoint(
+                          Uri.parse((value ?? '').trim()),
+                        );
+                        return null;
+                      } on FormatException {
+                        return l.onboardingInvalidUrl;
+                      }
+                    },
                   ),
+                  if (_busy) const LinearProgressIndicator(),
+                  if (_failed) ...[
+                    Text(l.hostsEditChanged),
+                    TextButton(
+                      key: const ValueKey('edit-endpoint-reload'),
+                      onPressed: _busy ? null : _reload,
+                      child: Text(l.chatRetry),
+                    ),
+                  ],
+                  if (_reconciled) ...[
+                    const SizedBox(height: 12),
+                    Text(l.hostsEditSavedProfile),
+                    Text('${l.onboardingLabel}: ${_expected.label}'),
+                    SelectableText(
+                      _expected.endpoint.toString(),
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: _busy ? null : () => Navigator.of(context).pop(),
+              child: Text(l.commonCancel),
+            ),
+            FilledButton(
+              key: const ValueKey('edit-endpoint-save'),
+              onPressed: _busy || !_exists ? null : _save,
+              child: Text(l.commonSave),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: _busy ? null : () => Navigator.of(context).pop(),
-            child: Text(l.commonCancel),
-          ),
-          FilledButton(
-            key: const ValueKey('edit-endpoint-save'),
-            onPressed: _busy || !_exists ? null : _save,
-            child: Text(l.commonSave),
-          ),
-        ],
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 
 Future<bool> _openExternally(Uri uri) =>
     launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -26,7 +27,7 @@ class AboutSettingsPage extends StatelessWidget {
     } on Object {
       opened = false;
     }
-    if (!opened) messenger?.showSnackBar(SnackBar(content: Text(failed)));
+    if (!opened) showAppSnackBar(messenger, failed);
   }
 
   @override

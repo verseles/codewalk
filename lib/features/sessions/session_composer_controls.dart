@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 import 'session_selection_chip.dart';
 
@@ -371,8 +372,9 @@ class _AgentMenu extends StatelessWidget {
       value ? PermissionMode.allowAll : PermissionMode.ask,
     );
     if (applied || !anchor.mounted) return;
-    ScaffoldMessenger.maybeOf(anchor)?.showSnackBar(
-      SnackBar(content: Text(anchor.v2L10n.livePermissionModeFailed)),
+    showAppSnackBar(
+      ScaffoldMessenger.maybeOf(anchor),
+      anchor.v2L10n.livePermissionModeFailed,
     );
   }
 }

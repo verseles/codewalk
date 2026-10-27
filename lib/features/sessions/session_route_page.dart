@@ -12,6 +12,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_controller.dart';
 import 'project_contexts_controller.dart';
 import 'session_live_controller.dart';
@@ -227,7 +228,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final full = context.v2L10n.sessionTabsFull;
     if (await tabs.open(summary) == SessionTabOpen.full) {
-      messenger?.showSnackBar(SnackBar(content: Text(full)));
+      showAppSnackBar(messenger, full);
     }
   }
 

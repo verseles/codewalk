@@ -10,6 +10,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
 import 'session_composer_controller.dart';
@@ -93,11 +94,10 @@ class _SessionComposerState extends State<SessionComposer> {
       ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
       widget.controller.live.stopCurrentTurn();
     } else {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(context.v2L10n.liveStopEscapeHint),
-          duration: const Duration(seconds: 1),
-        ),
+      showAppSnackBar(
+        ScaffoldMessenger.maybeOf(context),
+        context.v2L10n.liveStopEscapeHint,
+        duration: const Duration(seconds: 1),
       );
     }
     return KeyEventResult.handled;

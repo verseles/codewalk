@@ -3,6 +3,7 @@ import 'package:codewalk/features/hosts/profile_edit_dialog.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
@@ -89,6 +90,29 @@ class _Rig {
 }
 
 void main() {
+  testWidgets('Enter saves like the primary button (#171)', (tester) async {
+    final rig = _Rig();
+    await rig.mount(tester, width: 1280);
+    await tester.enterText(
+      find.byKey(const ValueKey('edit-endpoint-label')),
+      'Entered name',
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(rig.saved, isTrue);
+    expect(rig.repository.profiles.single.label, 'Entered name');
+  });
+
+  testWidgets('NumpadEnter saves too, before any field is focused', (
+    tester,
+  ) async {
+    final rig = _Rig();
+    await rig.mount(tester, width: 1280);
+    await tester.sendKeyEvent(LogicalKeyboardKey.numpadEnter);
+    await tester.pumpAndSettle();
+    expect(rig.saved, isTrue);
+  });
+
   testWidgets('stale editor keeps typed values and reconciles before retry', (
     tester,
   ) async {

@@ -10,6 +10,7 @@ import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/sessions/session_live_source.dart';
+import '../shared/widgets/app_snack_bar.dart';
 import 'app_preferences_controller.dart';
 import 'workspace_chrome_controller.dart';
 
@@ -247,13 +248,12 @@ class _WorkspaceWarningObserverState extends State<WorkspaceWarningObserver> {
       final l = context.v2L10n;
       final reason = endpointHealthReason(l, controller.health.view(profile));
       if (reason == null) return;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(reason),
-          action: SnackBarAction(
-            label: l.settingsServersTitle,
-            onPressed: () => context.push('/hosts'),
-          ),
+      showAppSnackBar(
+        ScaffoldMessenger.maybeOf(context),
+        reason,
+        action: SnackBarAction(
+          label: l.settingsServersTitle,
+          onPressed: () => context.push('/hosts'),
         ),
       );
     });

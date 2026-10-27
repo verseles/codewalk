@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 
 /// The live session's model and agent (V2-054A). The label is the server's
@@ -253,16 +254,15 @@ void announceSessionSelection(
           _ => null,
         };
   if (message == null) return;
-  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-    SnackBar(
-      content: Text(message),
-      action: unconfirmed
-          ? SnackBarAction(
-              label: l10n.liveSelectionCheckAgain,
-              onPressed: () => unawaited(live.refreshSelection()),
-            )
-          : null,
-    ),
+  showAppSnackBar(
+    ScaffoldMessenger.maybeOf(context),
+    message,
+    action: unconfirmed
+        ? SnackBarAction(
+            label: l10n.liveSelectionCheckAgain,
+            onPressed: () => unawaited(live.refreshSelection()),
+          )
+        : null,
   );
 }
 

@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_snack_bar.dart';
+import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import '../pairing/pairing_controller.dart';
 import '../sessions/sessions_controller.dart';
 import 'endpoint_health_controller.dart';
@@ -145,8 +147,9 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
             );
             if (!mounted) return;
             if (saved != true) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l.hostsProfileStorageError)),
+              showAppSnackBar(
+                ScaffoldMessenger.of(context),
+                l.hostsProfileStorageError,
               );
             }
         }
@@ -560,90 +563,94 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final l = context.v2L10n;
-    return AlertDialog(
-      title: Text(l.serversAddServer),
-      scrollable: true,
-      content: SizedBox(
-        width: 480,
-        child: Form(
-          key: _form,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                key: const ValueKey('endpoint-url'),
-                controller: _url,
-                keyboardType: TextInputType.url,
-                autocorrect: false,
-                enabled: !_saving && widget.repair == null,
-                decoration: InputDecoration(labelText: l.onboardingServerUrl),
-                onChanged: (_) => _invalidate(),
-                validator: (text) {
-                  try {
-                    EndpointProfile.validateEndpoint(Uri.parse(text!.trim()));
-                    return null;
-                  } on Object {
-                    return l.onboardingInvalidUrl;
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                key: const ValueKey('endpoint-label'),
-                controller: _label,
-                enabled: !_saving && widget.repair == null,
-                maxLength: 160,
-                decoration: InputDecoration(labelText: l.onboardingLabel),
-              ),
-              TextFormField(
-                key: const ValueKey('endpoint-secret'),
-                controller: _secret,
-                enabled: !_saving,
-                obscureText: true,
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: InputDecoration(labelText: l.onboardingPassword),
-                onChanged: (_) => _invalidate(),
-                validator: (text) => text?.isNotEmpty == true
-                    ? null
-                    : l.onboardingPasswordRequired,
-              ),
-              if (_checking || _saving)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: LinearProgressIndicator(),
+    return ModalPrimaryActionShortcuts(
+      enabled: !_saving && _assessment?.canUse == true,
+      onPrimaryAction: _save,
+      child: AlertDialog(
+        title: Text(l.serversAddServer),
+        scrollable: true,
+        content: SizedBox(
+          width: 480,
+          child: Form(
+            key: _form,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  key: const ValueKey('endpoint-url'),
+                  controller: _url,
+                  keyboardType: TextInputType.url,
+                  autocorrect: false,
+                  enabled: !_saving && widget.repair == null,
+                  decoration: InputDecoration(labelText: l.onboardingServerUrl),
+                  onChanged: (_) => _invalidate(),
+                  validator: (text) {
+                    try {
+                      EndpointProfile.validateEndpoint(Uri.parse(text!.trim()));
+                      return null;
+                    } on Object {
+                      return l.onboardingInvalidUrl;
+                    }
+                  },
                 ),
-              if (_assessment case final assessment?)
-                EndpointStatusView(assessment: assessment),
-              if (_saveFailed) Text(l.hostsProfileStorageError),
-            ],
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: const ValueKey('endpoint-label'),
+                  controller: _label,
+                  enabled: !_saving && widget.repair == null,
+                  maxLength: 160,
+                  decoration: InputDecoration(labelText: l.onboardingLabel),
+                ),
+                TextFormField(
+                  key: const ValueKey('endpoint-secret'),
+                  controller: _secret,
+                  enabled: !_saving,
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(labelText: l.onboardingPassword),
+                  onChanged: (_) => _invalidate(),
+                  validator: (text) => text?.isNotEmpty == true
+                      ? null
+                      : l.onboardingPasswordRequired,
+                ),
+                if (_checking || _saving)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: LinearProgressIndicator(),
+                  ),
+                if (_assessment case final assessment?)
+                  EndpointStatusView(assessment: assessment),
+                if (_saveFailed) Text(l.hostsProfileStorageError),
+              ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: _saving ? null : () => Navigator.of(context).pop(),
+            child: Text(l.commonCancel),
+          ),
+          TextButton(
+            key: const ValueKey('probe-endpoint'),
+            onPressed:
+                _checking ||
+                    _saving ||
+                    _assessment?.retryDeferred == true ||
+                    (_assessment?.retryAt?.isAfter(DateTime.now().toUtc()) ??
+                        false)
+                ? null
+                : _check,
+            child: Text(l.hostsCheckConnection),
+          ),
+          FilledButton(
+            key: const ValueKey('save-endpoint'),
+            onPressed: !_saving && _assessment?.canUse == true ? _save : null,
+            child: Text(l.commonSave),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: Text(l.commonCancel),
-        ),
-        TextButton(
-          key: const ValueKey('probe-endpoint'),
-          onPressed:
-              _checking ||
-                  _saving ||
-                  _assessment?.retryDeferred == true ||
-                  (_assessment?.retryAt?.isAfter(DateTime.now().toUtc()) ??
-                      false)
-              ? null
-              : _check,
-          child: Text(l.hostsCheckConnection),
-        ),
-        FilledButton(
-          key: const ValueKey('save-endpoint'),
-          onPressed: !_saving && _assessment?.canUse == true ? _save : null,
-          child: Text(l.commonSave),
-        ),
-      ],
     );
   }
 }

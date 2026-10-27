@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../l10n/l10n_context.dart';
 import '../theme/app_shapes.dart';
+import '../widgets/app_snack_bar.dart';
 
 /// Renders a LaTeX math expression using flutter_math_fork (pure Dart
 /// KaTeX port). Falls back to a styled raw-source view when parsing fails.
@@ -107,9 +108,7 @@ class RenderMathExpression extends StatelessWidget {
               }
               final messenger = ScaffoldMessenger.maybeOf(context);
               messenger?.hideCurrentSnackBar();
-              messenger?.showSnackBar(
-                SnackBar(content: Text(l10n.commonCopiedToClipboard)),
-              );
+              showAppSnackBar(messenger, l10n.commonCopiedToClipboard);
             },
           ),
         ],

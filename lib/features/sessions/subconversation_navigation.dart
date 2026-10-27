@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 import 'session_tab_strip.dart';
 import 'sessions_controller.dart';
@@ -88,7 +89,7 @@ Future<void> openSubconversation(
               ) !=
               child)) {
     if (messenger?.mounted ?? false) {
-      messenger!.showSnackBar(SnackBar(content: Text(missing)));
+      showAppSnackBar(messenger, missing);
     }
     return;
   }
