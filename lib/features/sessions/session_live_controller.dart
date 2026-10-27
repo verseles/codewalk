@@ -384,9 +384,13 @@ class SessionLiveController extends ChangeNotifier {
   /// A switch the server took makes the model this project's most recent,
   /// also when an unconfirmed switch is settled later.
   Future<void> selectModel(ModelEntry model, {String? variant}) async {
+    final allowed = canChangeSelection;
+    // Only a pick that sends a switch replaces the one waiting to settle,
+    // and an earlier pick that ends after a newer one replaces nothing.
+    final attempt = allowed ? ++_recentAttempt : _recentAttempt;
     final project = _project;
     final sent = await _act(
-      canChangeSelection,
+      allowed,
       (handle) => handle.selectModel(
         modelId: model.id,
         providerId: model.providerId,
@@ -394,14 +398,15 @@ class SessionLiveController extends ChangeNotifier {
         id: _commandIds(),
       ),
     );
-    // A switch that was never sent records nothing, nor does a later one
-    // leave an earlier one waiting.
-    _pendingRecent = sent && project != null ? (model, project) : null;
+    if (sent && attempt == _recentAttempt) {
+      _pendingRecent = project == null ? null : (model, project);
+    }
     await _settleRecent();
   }
 
-  /// The switch this view sent, until it settles.
+  /// The last switch this lease sent, until it settles.
   (ModelEntry, String)? _pendingRecent;
+  int _recentAttempt = 0;
 
   Future<void> _settleRecent() async {
     final pending = _pendingRecent;
@@ -674,6 +679,8 @@ class SessionLiveController extends ChangeNotifier {
 
   void _detach() {
     _generation++;
+    // Another lease starts without this one's switch: it settles nothing.
+    _pendingRecent = null;
     unawaited(_subscription?.cancel());
     _subscription = null;
     _handle?.close();

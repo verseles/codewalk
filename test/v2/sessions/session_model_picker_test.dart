@@ -1,6 +1,8 @@
 @TestOn('vm')
 library;
 
+import 'dart:async';
+
 import 'package:codewalk/features/sessions/session_composer_controls.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/platform/sessions/model_preference_store.dart';
@@ -327,6 +329,116 @@ void main() {
       ..emit(handle.current);
     await tester.pumpAndSettle();
     expect(preferences.recents(_server, _project), ['prov/beta']);
+  });
+
+  testWidgets('a pick that is not sent leaves an earlier one waiting', (
+    tester,
+  ) async {
+    final (live, handle) = await open(tester);
+    final models = [_alpha, _beta, _zen, _gamma];
+    handle.selectionAction = (change) async => SessionSelectionState(
+      selection: _selection(_alpha, 'high'),
+      models: models,
+      phase: SessionSelectionPhase.unconfirmed,
+    );
+    await live.selectModel(_beta);
+    // A stale lease cannot send the next pick.
+    handle.emit(
+      SessionLiveView(
+        session: live.session,
+        phase: SessionLivePhase.live,
+        stale: true,
+        state: liveState(live.session),
+      ),
+    );
+    await tester.pump();
+    await live.selectModel(_gamma);
+    expect(switches(handle), ['model:prov/beta']);
+    handle
+      ..selectionState = SessionSelectionState(
+        selection: _selection(_beta),
+        models: models,
+      )
+      ..emit(
+        SessionLiveView(
+          session: live.session,
+          phase: SessionLivePhase.live,
+          state: liveState(live.session),
+        ),
+      );
+    await tester.pumpAndSettle();
+    expect(preferences.recents(_server, _project), ['prov/beta']);
+  });
+
+  testWidgets('an earlier pick ending after a newer one replaces nothing', (
+    tester,
+  ) async {
+    final (live, handle) = await open(tester);
+    final models = [_alpha, _beta, _zen, _gamma];
+    final late = Completer<SessionSelectionState>();
+    handle.selectionAction = (change) => change == 'model:prov/beta'
+        ? late.future
+        : Future.value(
+            SessionSelectionState(
+              selection: _selection(_alpha, 'high'),
+              models: models,
+              phase: SessionSelectionPhase.unconfirmed,
+            ),
+          );
+    // Beta's answer is still being verified when Gamma is picked.
+    final beta = live.selectModel(_beta);
+    await tester.pump();
+    await live.selectModel(_gamma);
+    late.complete(
+      SessionSelectionState(
+        selection: _selection(_alpha, 'high'),
+        models: models,
+        phase: SessionSelectionPhase.unconfirmed,
+      ),
+    );
+    await beta;
+    // Gamma, the newer pick, is the one confirmed.
+    handle
+      ..selectionState = SessionSelectionState(
+        selection: _selection(_gamma),
+        models: models,
+      )
+      ..emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(preferences.recents(_server, _project), ['other/gamma']);
+  });
+
+  testWidgets('a new lease settles nothing the old one sent', (tester) async {
+    final (live, handle) = await open(tester);
+    final models = [_alpha, _beta, _zen, _gamma];
+    handle.selectionAction = (change) async => SessionSelectionState(
+      selection: _selection(_alpha, 'high'),
+      models: models,
+      phase: SessionSelectionPhase.unconfirmed,
+    );
+    await live.selectModel(_beta);
+    handle.emit(
+      SessionLiveView(session: live.session, phase: SessionLivePhase.degraded),
+    );
+    await tester.pump();
+    expect(live.canRetry, isTrue);
+    final retry = live.retry();
+    final next = directory.grant(live.session)
+      ..selectionAvailable = true
+      ..selectionState = SessionSelectionState(
+        selection: _selection(_beta),
+        models: models,
+      );
+    await retry;
+    next.emit(
+      SessionLiveView(
+        session: live.session,
+        phase: SessionLivePhase.live,
+        state: liveState(live.session),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(preferences.recents(_server, _project), isEmpty);
   });
 
   testWidgets('Auto still clears a variant the model no longer lists', (
