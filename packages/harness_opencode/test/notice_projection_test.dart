@@ -328,8 +328,8 @@ void main() {
           }
         }
       }
-      // Includes four baselines from the V2-071G owned-session capture.
-      expect(counts, {'session.instructions.updated': 36});
+      // Includes eight baselines from the two V2-071G owned-session captures.
+      expect(counts, {'session.instructions.updated': 40});
     },
   );
 }

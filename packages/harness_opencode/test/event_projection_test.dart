@@ -326,7 +326,7 @@ void main() {
         }
       }
     }
-    // 1079 observed frames include V2-071G success and negative compaction.
+    // 1233 observed frames include both V2-071G success captures and the negative.
     // Unowned types are session-free catalog updates and intentionally
     // unrendered compaction deltas; no tracked frame becomes a diagnostic.
     // Every step start names the running
@@ -334,22 +334,22 @@ void main() {
     // emit; their error reaches the turn's outcome. The three D subagent
     // progress frames that name their child session now upsert it.
     expect(categories, {
-      'routed-events': 857,
-      'routed-empty': 129,
-      'noop:server.connected': 27,
-      'noop:worktree.resolved': 1,
-      'noop:project.updated': 1,
-      'noop:integration.updated': 1,
-      'noop:provider.updated': 1,
-      'noop:model.updated': 1,
-      'noop:vcs.branch.updated': 1,
-      'noop:agent.updated': 1,
-      'noop:command.updated': 1,
-      'noop:skill.updated': 1,
-      'noop:websearch.updated': 1,
-      'noop:reference.updated': 1,
-      'noop:plugin.updated': 1,
-      'noop:session.compaction.delta': 54,
+      'routed-events': 935,
+      'routed-empty': 142,
+      'noop:server.connected': 28,
+      'noop:worktree.resolved': 2,
+      'noop:project.updated': 2,
+      'noop:integration.updated': 2,
+      'noop:provider.updated': 2,
+      'noop:model.updated': 2,
+      'noop:vcs.branch.updated': 2,
+      'noop:agent.updated': 2,
+      'noop:command.updated': 2,
+      'noop:skill.updated': 2,
+      'noop:websearch.updated': 2,
+      'noop:reference.updated': 2,
+      'noop:plugin.updated': 2,
+      'noop:session.compaction.delta': 104,
     });
   });
 

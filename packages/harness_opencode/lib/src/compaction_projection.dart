@@ -11,6 +11,7 @@ enum OpenCodeCompactionProjectionFailure {
   unsupportedVersion,
   limitExceeded,
   itemKindMismatch,
+  identityUnproven,
 }
 
 final class OpenCodeCompactionProjectionException implements Exception {
@@ -83,14 +84,24 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
 
   Notice? active;
   Notice? duplicate;
+  var residentCompaction = false;
   for (final item in current.timeline) {
     if (item is! Notice || item.kind.known != NoticeKind.compaction) continue;
+    residentCompaction = true;
     if (item.status.known == ItemStatus.streaming) active = item;
     if (item.meta.source.nativeEventId == nativeId) duplicate = item;
   }
   // The official reference reducer uses inputID on start, then the last
-  // running compaction on terminal. A terminal without a start uses its event
-  // message ID; duplicate terminals keep their previously resolved identity.
+  // running compaction on terminal. Failed frames can retain inputID without
+  // a start. A snapshot may already contain a completed notice without its
+  // native event ID: repair an ambiguous terminal rather than append a guess.
+  if (type != _started &&
+      input == null &&
+      active == null &&
+      duplicate == null &&
+      residentCompaction) {
+    _fail(OpenCodeCompactionProjectionFailure.identityUnproven);
+  }
   String residentMessage(Notice item) {
     final message = openCodeMessageIdOf(item.id, ref);
     if (message == null) _fail(OpenCodeCompactionProjectionFailure.malformed);

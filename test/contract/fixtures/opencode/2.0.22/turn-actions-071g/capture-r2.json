@@ -1,0 +1,3806 @@
+{
+  "version": "2.0.22",
+  "complete": true,
+  "calls": [
+    {
+      "label": "redo",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G redo",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193117520
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "first-turn",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/prompt",
+      "request": {
+        "text": "CW071G first turn",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a387ac0010bCL2wQSdjfN70",
+          "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "time": {
+            "created": 1793193118130
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G first turn"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "second-turn",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/prompt",
+      "request": {
+        "text": "CW071G second turn",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a38a21001z40qel07rTZ811",
+          "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "time": {
+            "created": 1793193118243
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G second turn"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "before-stage",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193118243,
+            "idle": 1793193118303
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "before-stage/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a387ac0010bCL2wQSdjfN70",
+            "time": {
+              "created": 1793193118150
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a389d4001WGo3HhxOwhYnv4",
+            "time": {
+              "created": 1793193118184,
+              "streamed": 1793193118208,
+              "completed": 1793193118211
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a07001WJ5DlC6SXk5Qph",
+            "time": {
+              "created": 1793193118215
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_182a38a21001z40qel07rTZ811",
+            "time": {
+              "created": 1793193118254
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a38a36001OEin3PhZmO2yTM",
+            "time": {
+              "created": 1793193118280,
+              "streamed": 1793193118297,
+              "completed": 1793193118299
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a5f001oG8slcI7krLf9o",
+            "time": {
+              "created": 1793193118303
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhMzg3YWMwMDEwYkNMMndRU2RqZk43MCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhMzhhNWYwMDFvRzhzbGNJN2tyTGY5byIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "before-stage/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "undo-both",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/revert/stage",
+      "request": {
+        "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "after-undo",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193118376,
+            "idle": 1793193118303
+          },
+          "title": "CW071G redo",
+          "revert": {
+            "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+            "files": []
+          },
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-undo/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a387ac0010bCL2wQSdjfN70",
+            "time": {
+              "created": 1793193118150
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a389d4001WGo3HhxOwhYnv4",
+            "time": {
+              "created": 1793193118184,
+              "streamed": 1793193118208,
+              "completed": 1793193118211
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a07001WJ5DlC6SXk5Qph",
+            "time": {
+              "created": 1793193118215
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_182a38a21001z40qel07rTZ811",
+            "time": {
+              "created": 1793193118254
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a38a36001OEin3PhZmO2yTM",
+            "time": {
+              "created": 1793193118280,
+              "streamed": 1793193118297,
+              "completed": 1793193118299
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a5f001oG8slcI7krLf9o",
+            "time": {
+              "created": 1793193118303
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhMzg3YWMwMDEwYkNMMndRU2RqZk43MCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhMzhhNWYwMDFvRzhzbGNJN2tyTGY5byIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-undo/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "redo-one",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/revert/stage",
+      "request": {
+        "messageID": "msg_182a38a21001z40qel07rTZ811",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_182a38a21001z40qel07rTZ811",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "after-redo-one",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193118390,
+            "idle": 1793193118303
+          },
+          "title": "CW071G redo",
+          "revert": {
+            "messageID": "msg_182a38a21001z40qel07rTZ811",
+            "files": []
+          },
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-redo-one/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a387ac0010bCL2wQSdjfN70",
+            "time": {
+              "created": 1793193118150
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a389d4001WGo3HhxOwhYnv4",
+            "time": {
+              "created": 1793193118184,
+              "streamed": 1793193118208,
+              "completed": 1793193118211
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a07001WJ5DlC6SXk5Qph",
+            "time": {
+              "created": 1793193118215
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_182a38a21001z40qel07rTZ811",
+            "time": {
+              "created": 1793193118254
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a38a36001OEin3PhZmO2yTM",
+            "time": {
+              "created": 1793193118280,
+              "streamed": 1793193118297,
+              "completed": 1793193118299
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38a5f001oG8slcI7krLf9o",
+            "time": {
+              "created": 1793193118303
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhMzg3YWMwMDEwYkNMMndRU2RqZk43MCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhMzhhNWYwMDFvRzhzbGNJN2tyTGY5byIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-redo-one/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "redo-all",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/revert",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "branch-stage",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/revert/stage",
+      "request": {
+        "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "branch-commit",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/revert/commit",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "after-commit",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193118422,
+            "idle": 1793193118410
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-commit/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "label": "after-commit/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "branch-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/prompt",
+      "request": {
+        "text": "CW071G replacement branch",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a38ae1001MB9amQKP8apL9O",
+          "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "time": {
+            "created": 1793193118434
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G replacement branch"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-branch",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c78ceffecRXaFafdQZLo96",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193117520,
+            "updated": 1793193118434,
+            "idle": 1793193118491
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-branch/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a38ae1001MB9amQKP8apL9O",
+            "time": {
+              "created": 1793193118446
+            },
+            "text": "CW071G replacement branch",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a38af5001IkHLX00tShFzxR",
+            "time": {
+              "created": 1793193118470,
+              "streamed": 1793193118485,
+              "completed": 1793193118487
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a38b1b001K6PTPP5ioU9ajS",
+            "time": {
+              "created": 1793193118491
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhMzhhZTEwMDFNQjlhbVFLUDhhcEw5TyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhMzhiMWIwMDFLNlBUUFA1aW9VOWFqUyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-branch/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "busy",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G busy",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793193118570,
+            "updated": 1793193118570
+          },
+          "title": "CW071G busy",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "busy-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/prompt",
+      "request": {
+        "text": "CW-SLOW8 CW071G busy",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a38b70001QYptBXisY4Y4ts",
+          "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+          "time": {
+            "created": 1793193118577
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW-SLOW8 CW071G busy"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "busy-stage",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/revert/stage",
+      "request": {
+        "messageID": "msg_182a38b70001QYptBXisY4Y4ts",
+        "files": true
+      },
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "message": "Session is busy: ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      }
+    },
+    {
+      "label": "busy-clear",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/revert",
+      "request": null,
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "message": "Session is busy: ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      }
+    },
+    {
+      "label": "busy-commit",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/revert/commit",
+      "request": null,
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "message": "Session is busy: ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      }
+    },
+    {
+      "label": "busy-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a38ba80017qQRcRGJOa2KRR",
+          "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+          "time": {
+            "created": 1793193118633
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-busy",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193118570,
+            "updated": 1793193118633,
+            "idle": 1793193125694
+          },
+          "title": "CW071G busy",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-busy/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a38b70001QYptBXisY4Y4ts",
+            "time": {
+              "created": 1793193118588
+            },
+            "text": "CW-SLOW8 CW071G busy",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a38b83001MiEWYgs16okBP7",
+            "time": {
+              "created": 1793193118611,
+              "streamed": 1793193125621,
+              "completed": 1793193125624
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "tick 1 tick 2 tick 3 tick 4 tick 5 tick 6 tick 7 tick 8 "
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "type": "compaction",
+            "id": "msg_182a38ba80017qQRcRGJOa2KRR",
+            "time": {
+              "created": 1793193125628
+            },
+            "status": "completed",
+            "reason": "manual",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "summary": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+            "recent": "",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a3a73e001s0lZN5UClmC2yX",
+            "time": {
+              "created": 1793193125694
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhMzhiNzAwMDFRWXB0Qlhpc1k0WTR0cyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhM2E3M2UwMDFzMGxaTjVVQ2xtQzJ5WCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-busy/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "compact",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G compact",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793193125768,
+            "updated": 1793193125768
+          },
+          "title": "CW071G compact",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "compact-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB/prompt",
+      "request": {
+        "text": "CW071G context to compact",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a3a78e001T8eW8gwgGuXKQ5",
+          "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+          "time": {
+            "created": 1793193125776
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G context to compact"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "idle-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_182a3a7fb001q7LL6kFBkPikRc",
+          "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+          "time": {
+            "created": 1793193125884
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-compact",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+          "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793193125768,
+            "updated": 1793193125884,
+            "idle": 1793193125944
+          },
+          "title": "CW071G compact",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-compact/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_182a3a78e001T8eW8gwgGuXKQ5",
+            "time": {
+              "created": 1793193125787
+            },
+            "text": "CW071G context to compact",
+            "type": "user"
+          },
+          {
+            "id": "msg_182a3a7a3001sriXhCKBeZdXzN",
+            "time": {
+              "created": 1793193125811,
+              "streamed": 1793193125824,
+              "completed": 1793193125826
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a3a7c6001BUIim14r4x3d2m",
+            "time": {
+              "created": 1793193125830
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "type": "compaction",
+            "id": "msg_182a3a7fb001q7LL6kFBkPikRc",
+            "time": {
+              "created": 1793193125891
+            },
+            "status": "completed",
+            "reason": "manual",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "summary": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+            "recent": "",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_182a3a8380010Rfp7d2gZ7tFJn",
+            "time": {
+              "created": 1793193125944
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODJhM2E3OGUwMDFUOGVXOGd3Z0d1WEtRNSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODJhM2E4MzgwMDEwUmZwN2QyZ1o3dEZKbiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-compact/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c78ceffecRXaFafdQZLo96",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "message": "Session not found: ses_e7d5c78ceffecRXaFafdQZLo96"
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "message": "Session not found: ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7d5c5885ffe7EpXlo3VElY5DB",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "message": "Session not found: ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      }
+    },
+    {
+      "label": "cleanup-active",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {}
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_182a3872b0015fRogJiQOmhTXb",
+      "type": "server.connected",
+      "data": {}
+    },
+    {
+      "id": "evt_182a3874c001raAQ9kzR5cj471",
+      "created": 1793193117516,
+      "type": "worktree.resolved",
+      "data": {
+        "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "directory": "<owned-root>/project",
+        "previous": "global"
+      },
+      "durable": {
+        "aggregateID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38750001P3SqgZmuF812Ks",
+      "created": 1793193117520,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "slug": "mighty-wizard",
+        "version": "2.0.22",
+        "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G redo"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3876e001ajIQlfK6Q1awXK",
+      "created": 1793193117550,
+      "type": "project.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "id": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "canonical": "<owned-root>/project",
+        "vcs": "git",
+        "time": {
+          "created": 1793193117514,
+          "updated": 1793193117514,
+          "active": 1793193117549
+        },
+        "sandboxes": []
+      }
+    },
+    {
+      "id": "evt_182a3895c001F2wv75AQFCylja",
+      "created": 1793193118044,
+      "type": "integration.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a38964001CzHpMPslEMBDtr",
+      "created": 1793193118052,
+      "type": "provider.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a3896a001E9ib8lldL3v8Du",
+      "created": 1793193118058,
+      "type": "model.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a3897d001udlxIA2RXdVPu5",
+      "created": 1793193118077,
+      "type": "vcs.branch.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "branch": "master"
+      }
+    },
+    {
+      "id": "evt_182a3897e001yRJssrVopcB7bJ",
+      "created": 1793193118078,
+      "type": "agent.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a3897f001hpIvfOQSEYgTk2",
+      "created": 1793193118079,
+      "type": "command.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a38980001cO3l8vcX5EiJOn",
+      "created": 1793193118080,
+      "type": "skill.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a38986001MekOMVEzNvW4Jf",
+      "created": 1793193118086,
+      "type": "websearch.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a389a900136kwPs4NIQNC5g",
+      "created": 1793193118121,
+      "type": "reference.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a389b0001eEQVeTueEeie52",
+      "created": 1793193118128,
+      "type": "plugin.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_182a389b2001iw632TwWZ6CHeu",
+      "created": 1793193118130,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a387ac0010bCL2wQSdjfN70",
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G first turn"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a389b7001ZgzFaVh7qmU2QG",
+      "created": 1793193118135,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a389c20016Xjwxf3U66441s",
+      "created": 1793193118146,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "1b4326dc396d931f4f67a3d73adf20ff76ee13e08cf7c41a8d1aa8735c43756e"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a389c6001oBC7tS68dlfoL7",
+      "created": 1793193118150,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "inboxID": "msg_182a387ac0010bCL2wQSdjfN70"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a389f2001No23IN0cHPv4rJ",
+      "created": 1793193118195,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4",
+        "started": 1793193118184
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a389f6001suOur2bUa3DTK7",
+      "created": 1793193118198,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a389fc001M8IaTDMCOtLKaZ",
+      "created": 1793193118204,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_182a389fd001QVqnbsF5EG2aBX",
+      "created": 1793193118205,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a000012TWv5A2WViJAur",
+      "created": 1793193118208,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a03001XKzfOLfgjo1R21",
+      "created": 1793193118211,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a389d4001WGo3HhxOwhYnv4",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a06001ARsscpd3EnL2US",
+      "created": 1793193118214,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a38a07001WJ5DlC6SXk5Qph",
+      "created": 1793193118215,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a23001OGpn5s6CVt47jr",
+      "created": 1793193118243,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a38a21001z40qel07rTZ811",
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G second turn"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a26001S1aHOqMynBmMqN",
+      "created": 1793193118246,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a2e001ZgdgVzT4MHfSzT",
+      "created": 1793193118254,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "inboxID": "msg_182a38a21001z40qel07rTZ811"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 13,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a4f001satg1y1pfpBOOR",
+      "created": 1793193118287,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM",
+        "started": 1793193118280
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a52001kM6oeeECdFVtTB",
+      "created": 1793193118290,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 15,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a56001zQn2wjzgXixww4",
+      "created": 1793193118294,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_182a38a56002fJg9mHecGbBm0C",
+      "created": 1793193118294,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 16,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a59001SwCqbZHOGFUmdF",
+      "created": 1793193118297,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 17,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a5b001gCK0gm5ttMF2aY",
+      "created": 1793193118299,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38a36001OEin3PhZmO2yTM",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 18,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38a5e001ahM10VB4clpFAA",
+      "created": 1793193118302,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a38a5f001oG8slcI7krLf9o",
+      "created": 1793193118303,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 19,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38aa80014tf2wYmkPF6DE8",
+      "created": 1793193118376,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "revert": {
+          "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 20,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ab6001f4NC0WQ2zkmeeh",
+      "created": 1793193118390,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "revert": {
+          "messageID": "msg_182a38a21001z40qel07rTZ811",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 21,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ac50015KFfTeNzk6sXu6",
+      "created": 1793193118405,
+      "type": "session.revert.cleared",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 22,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ac80017q2PnHdMcYaF1L",
+      "created": 1793193118408,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 23,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38aca001rnnBevn50mkOaB",
+      "created": 1793193118410,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 24,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ad1001W1CcM13f83EvFQ",
+      "created": 1793193118417,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "revert": {
+          "messageID": "msg_182a387ac0010bCL2wQSdjfN70",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 25,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ad6001TRhblY7GuQpahH",
+      "created": 1793193118422,
+      "type": "session.revert.committed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "to": "msg_182a387ac0010bCL2wQSdjfN70"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 26,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ae20012uIC9rDegtpFIR",
+      "created": 1793193118434,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a38ae1001MB9amQKP8apL9O",
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G replacement branch"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 27,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ae5001b3oRJ8d3ikr766",
+      "created": 1793193118437,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 28,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38aeb001ZNOzy3vD37pJNF",
+      "created": 1793193118443,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "1b4326dc396d931f4f67a3d73adf20ff76ee13e08cf7c41a8d1aa8735c43756e"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 29,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a38aee001IQ42jocGwMiXA6",
+      "created": 1793193118446,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "inboxID": "msg_182a38ae1001MB9amQKP8apL9O"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 30,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b0c001IOe35CHHev2qIA",
+      "created": 1793193118477,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR",
+        "started": 1793193118470
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 31,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b0f001gOGOzC7R11wha0",
+      "created": 1793193118479,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 32,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b12001piqEdaCUmRkmmG",
+      "created": 1793193118482,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_182a38b130016YsFjRQMlxAEYI",
+      "created": 1793193118483,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 33,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b15001eFn3bR2tphAt3s",
+      "created": 1793193118485,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 34,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b170013JLRfHrMTei6uR",
+      "created": 1793193118487,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "assistantMessageID": "msg_182a38af5001IkHLX00tShFzxR",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 35,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b1a001b1R3uWHeQvnOnb",
+      "created": 1793193118490,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a38b1b001K6PTPP5ioU9ajS",
+      "created": 1793193118491,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 36,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b6a001F4aN5VyFT0434W",
+      "created": 1793193118570,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "slug": "tidy-engine",
+        "version": "2.0.22",
+        "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G busy"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b710019epbRHRuyJv7Qo",
+      "created": 1793193118577,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a38b70001QYptBXisY4Y4ts",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW-SLOW8 CW071G busy"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b74001FE4fv1mCj2S2r9",
+      "created": 1793193118580,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b7a001z3w0yipjS6St0Q",
+      "created": 1793193118586,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "1b4326dc396d931f4f67a3d73adf20ff76ee13e08cf7c41a8d1aa8735c43756e"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a38b7c001JBgqiWmUrWefQJ",
+      "created": 1793193118588,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "inboxID": "msg_182a38b70001QYptBXisY4Y4ts"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b98001nkjdXfcZ5io4VG",
+      "created": 1793193118616,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "started": 1793193118611
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38b9a001UHcKX0N1Z094HF",
+      "created": 1793193118618,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38ba9001Vgc03roneaBy68",
+      "created": 1793193118633,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a38ba80017qQRcRGJOa2KRR",
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "item": {
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a38c01001FpOQ53AIlb6v6L",
+      "created": 1793193118721,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 1 "
+      }
+    },
+    {
+      "id": "evt_182a38fe3001RkO5oR3iVm6ExG",
+      "created": 1793193119715,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 2 "
+      }
+    },
+    {
+      "id": "evt_182a393cb001XujZeYJSqtcyiJ",
+      "created": 1793193120715,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 3 "
+      }
+    },
+    {
+      "id": "evt_182a397b4001QaoXbu4bZxEvat",
+      "created": 1793193121716,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 4 "
+      }
+    },
+    {
+      "id": "evt_182a39b9c001xfsqBgyExclbhK",
+      "created": 1793193122716,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 5 "
+      }
+    },
+    {
+      "id": "evt_182a39f840010XfDrYiDBv7k94",
+      "created": 1793193123717,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 6 "
+      }
+    },
+    {
+      "id": "evt_182a3a36c001XIEEB8jtSqpqAn",
+      "created": 1793193124717,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 7 "
+      }
+    },
+    {
+      "id": "evt_182a3a6f20016ZUiKe21lXbnPk",
+      "created": 1793193125618,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "delta": "tick 8 "
+      }
+    },
+    {
+      "id": "evt_182a3a6f20025z7VV5nKHUud1k",
+      "created": 1793193125618,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "ordinal": 0,
+        "text": "tick 1 tick 2 tick 3 tick 4 tick 5 tick 6 tick 7 tick 8 "
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a6f5001NavR1bGu2SHVPX",
+      "created": 1793193125621,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a6f800114SS6Vxf7vO1CL",
+      "created": 1793193125624,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "assistantMessageID": "msg_182a38b83001MiEWYgs16okBP7",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a6fa001A8PvuGANIn7EEI",
+      "created": 1793193125626,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a3a6fc001D3VHC8JdfUhity",
+      "created": 1793193125628,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "inboxID": "msg_182a38ba80017qQRcRGJOa2KRR"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a6fc002zjBY2aZjD1TH4Z",
+      "created": 1793193125628,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_182a38ba80017qQRcRGJOa2KRR"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a724001nupJzvbT4S5fOe",
+      "created": 1793193125668,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Objective\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72500161oZy76LRzuJM1",
+      "created": 1793193125669,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- Exercise the disposable CodeWalk native contract.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a726001UGMGELWk7sOnqU",
+      "created": 1793193125670,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a727001zpUkU3jl9u4mmK",
+      "created": 1793193125671,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Requirements\n"
+      }
+    },
+    {
+      "id": "evt_182a3a727002JTvkENYfFTtURh",
+      "created": 1793193125671,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- Use the local zero-cost provider only.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a7280017VC0NEinmMkAsh",
+      "created": 1793193125672,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a729001h7wBP06yx3P623",
+      "created": 1793193125673,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Decisions\n"
+      }
+    },
+    {
+      "id": "evt_182a3a729002yy538PgSMYM9bv",
+      "created": 1793193125673,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- Keep all work in the owned temporary project.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72a0012FkyB8dE4Lam6X",
+      "created": 1793193125674,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72a0022h6EWhdEZmOuzC",
+      "created": 1793193125674,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Work State\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72b001bKJtLpv9iWhLNl",
+      "created": 1793193125675,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "### Completed\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72c0012K4EmULpxDPJLv",
+      "created": 1793193125676,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- Answered the owned marker prompts.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72c0027BjAntBSpTrlGP",
+      "created": 1793193125676,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "### Active\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72d001UDU3XvWLCLiX31",
+      "created": 1793193125677,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- Native contract verification.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72d002dQJ9v2vLZNFeor",
+      "created": 1793193125677,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "### Blocked\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72e001B5j7x46W7wX52b",
+      "created": 1793193125678,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_182a3a72f001krpPU0x5YmeQQI",
+      "created": 1793193125679,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a730001ucTbijO0dA0gab",
+      "created": 1793193125680,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Next Move\n"
+      }
+    },
+    {
+      "id": "evt_182a3a7310018FqM3lZbTdN0P4",
+      "created": 1793193125681,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "1. Continue the owned verification.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a731002ATb9Y7z0iRLKvj",
+      "created": 1793193125681,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a732001j7mjx6MHMexu5M",
+      "created": 1793193125682,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Relevant Files\n"
+      }
+    },
+    {
+      "id": "evt_182a3a733001TY99H0SrOreOOa",
+      "created": 1793193125683,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_182a3a7330026oeGvwpX1YQW2P",
+      "created": 1793193125683,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a734001BCP2SmiJ5chl5s",
+      "created": 1793193125684,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "## Important Context\n"
+      }
+    },
+    {
+      "id": "evt_182a3a735001Z4A0EZeUyq6mF3",
+      "created": 1793193125685,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "text": "- All provider output is deterministic test data.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a738001g6C3ClAo8goFEP",
+      "created": 1793193125688,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a3a7390017LP18pKCxChmyT",
+      "created": 1793193125689,
+      "type": "session.compaction.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "reason": "manual",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "text": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+        "recent": "",
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "cost": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a73e001s0lZN5UClmC2yX",
+      "created": 1793193125694,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 15,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7880013bVx3HBhkzGWD5",
+      "created": 1793193125768,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "slug": "brave-panda",
+        "version": "2.0.22",
+        "projectID": "74c053ad4b8266e91ee17282f2670f5d5d8955f1",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G compact"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a790001ZlhwdK7knpZWpj",
+      "created": 1793193125776,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a3a78e001T8eW8gwgGuXKQ5",
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G context to compact"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a793001jDhAMuudCGz3bx",
+      "created": 1793193125779,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a799001r0JSm0GeP4TQu1",
+      "created": 1793193125785,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "1b4326dc396d931f4f67a3d73adf20ff76ee13e08cf7c41a8d1aa8735c43756e"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a3a79b001Kxp84IbYI3paMx",
+      "created": 1793193125787,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "inboxID": "msg_182a3a78e001T8eW8gwgGuXKQ5"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7b7001eGfU0rTn17O1uF",
+      "created": 1793193125815,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN",
+        "started": 1793193125811
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7ba001HI79omMUVtegA4",
+      "created": 1793193125818,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7bc001qSWcTLpRH43rd1",
+      "created": 1793193125820,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_182a3a7bd001cmxqT3CgsruRxS",
+      "created": 1793193125821,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7c0001ApBsY4Ka501Raz",
+      "created": 1793193125824,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7c2001DhTvT6QQAppNrv",
+      "created": 1793193125826,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "assistantMessageID": "msg_182a3a7a3001sriXhCKBeZdXzN",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7c40018QQjaCrfrTuG6e",
+      "created": 1793193125828,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a3a7c6001BUIim14r4x3d2m",
+      "created": 1793193125830,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7fc001NcbocGYF22YbYz",
+      "created": 1793193125884,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_182a3a7fb001q7LL6kFBkPikRc",
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "item": {
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a7ff001zeRZgk2QkadIXb",
+      "created": 1793193125887,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a802001g2U5YTYYpEsMma",
+      "created": 1793193125890,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "inboxID": "msg_182a3a7fb001q7LL6kFBkPikRc"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 13,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a8030013TnlCLCAeA7xsG",
+      "created": 1793193125891,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_182a3a7fb001q7LL6kFBkPikRc"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a8230014hv4KrMM5gvw5m",
+      "created": 1793193125923,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Objective\n"
+      }
+    },
+    {
+      "id": "evt_182a3a824001UfnMf6fuErWwZe",
+      "created": 1793193125924,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- Exercise the disposable CodeWalk native contract.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a824002LUt6SRTjANCycP",
+      "created": 1793193125924,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a825001hHC7zytky7DMug",
+      "created": 1793193125925,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Requirements\n"
+      }
+    },
+    {
+      "id": "evt_182a3a825002V3m4seAeJDXZpY",
+      "created": 1793193125926,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- Use the local zero-cost provider only.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82600105iX0VaJNdp3Mc",
+      "created": 1793193125926,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a827001zvZON0qXstxNo9",
+      "created": 1793193125927,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Decisions\n"
+      }
+    },
+    {
+      "id": "evt_182a3a827002Gi2k2kLJJI2mSe",
+      "created": 1793193125927,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- Keep all work in the owned temporary project.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a828001rJhXHlUncq4aHg",
+      "created": 1793193125928,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a828002PC65rrs7B1ebfd",
+      "created": 1793193125928,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Work State\n"
+      }
+    },
+    {
+      "id": "evt_182a3a829001U2MVoOgRftc7LS",
+      "created": 1793193125929,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "### Completed\n"
+      }
+    },
+    {
+      "id": "evt_182a3a829002ZTMwujHRGaDLhj",
+      "created": 1793193125929,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- Answered the owned marker prompts.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82a0012tQ36g4047UnOj",
+      "created": 1793193125930,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "### Active\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82b001QiCWPb3xYSNIH5",
+      "created": 1793193125931,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- Native contract verification.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82b002leU67y83lnZyT3",
+      "created": 1793193125931,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "### Blocked\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82c001umBDOxTM34prnV",
+      "created": 1793193125932,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82c002wHleM7weGRCdDN",
+      "created": 1793193125932,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82d001wig6FfrrOC5jDJ",
+      "created": 1793193125933,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Next Move\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82d002dlnQA7u5sNX58p",
+      "created": 1793193125933,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "1. Continue the owned verification.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82e0017CBupgBvjku1YM",
+      "created": 1793193125934,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82f001ucBQxeIiOio7qu",
+      "created": 1793193125935,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Relevant Files\n"
+      }
+    },
+    {
+      "id": "evt_182a3a82f002nt5bJhpjR385xr",
+      "created": 1793193125935,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_182a3a830001tnoMZXQYb3Z4T6",
+      "created": 1793193125936,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_182a3a830002ctCnLCFPVy3GGJ",
+      "created": 1793193125936,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "## Important Context\n"
+      }
+    },
+    {
+      "id": "evt_182a3a831001C5wSjKCxMA6hll",
+      "created": 1793193125937,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "text": "- All provider output is deterministic test data.\n"
+      }
+    },
+    {
+      "id": "evt_182a3a8340015achQ762szFOII",
+      "created": 1793193125940,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_182a3a8350014GJ2N8u7pj3X5v",
+      "created": 1793193125941,
+      "type": "session.compaction.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "reason": "manual",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "text": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+        "recent": "",
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "cost": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 16,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a8380010Rfp7d2gZ7tFJn",
+      "created": 1793193125944,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 17,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_182a3a87a001Rtpg572Cb8IZm5",
+      "created": 1793193126010,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7d5c78ceffecRXaFafdQZLo96"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c78ceffecRXaFafdQZLo96",
+        "seq": 37,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a3a881001SJz3cauSY68fXl",
+      "created": 1793193126017,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c74a2ffei4Wo0JOUcTpxum",
+        "seq": 16,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_182a3a887001TxxgByIql3likZ",
+      "created": 1793193126023,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7d5c5885ffe7EpXlo3VElY5DB"
+      },
+      "durable": {
+        "aggregateID": "ses_e7d5c5885ffe7EpXlo3VElY5DB",
+        "seq": 18,
+        "version": 2
+      }
+    }
+  ],
+  "repo_commit": "746d5177b9ca1f85d84d08b3e9baf58bebb994e9",
+  "producer_sha256": {
+    "capture_v2_turn_actions.py": "dd90f0a059afdbcb6bd46e9a48cb4ac56a97e1f22eaa371ba3335c4a307b1e80",
+    "v2_device_server.py": "299615f831f6dc8b8e418b966d3304beca019b23e75d3b64e523913f71d5ef6d"
+  },
+  "zero_spend_configuration": true,
+  "binary_sha256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "platform": "aarch64",
+  "egress": {
+    "violation": null,
+    "nonLoopbackPeers": 0,
+    "socketsObserved": 11,
+    "auditRuns": 6,
+    "firstAuditAt": "2026-10-28T13:11:57.500799+00:00",
+    "lastAuditAt": "2026-10-28T13:12:06.044748+00:00",
+    "auditedAt": "2026-10-28T13:12:06.044766+00:00"
+  },
+  "provider_requests": 7,
+  "user_servers_unchanged": true
+}

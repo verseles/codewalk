@@ -1,5 +1,15 @@
 # V2-071G: native turn actions (Seq 5.4c, #455)
 
+`capture-r2.json` is a second immutable successful run after review strengthened
+the collector. It waits for the busy-session compaction terminal and verifies
+its admitted control ID against the start and subsequent successful end; an
+ordinary execution terminal cannot stand in for that lifecycle. It records
+46 calls, 154 events, seven native starts and seven zero-cost provider requests.
+The latest producer-hash check uses this run; the original `capture.json` and
+negative diagnostic remain unchanged. Their producer is preserved in commit
+`746d5177`; the newer run records that commit as its base plus its exact dirty
+producer hashes.
+
 Observed Linux ARM64 responses and global SSE from the official, project-pinned
 OpenCode **2.0.22** binary. The provider is the deterministic loopback stub in
 `tool/ci/v2_device_server.py`, with advertised costs zero, all external providers
@@ -49,6 +59,7 @@ Offline checks (no server or model):
 
 ```sh
 python3 tool/ci/capture_v2_turn_actions.py --validate test/contract/fixtures/opencode/2.0.22/turn-actions-071g/capture.json
+python3 tool/ci/capture_v2_turn_actions.py --validate test/contract/fixtures/opencode/2.0.22/turn-actions-071g/capture-r2.json
 python3 -m unittest tool.ci.test_v2_turn_actions_capture
 python3 test/contract/fixtures/opencode/2.0.22/d/validate.py
 ```

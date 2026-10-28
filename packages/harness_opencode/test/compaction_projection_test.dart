@@ -44,6 +44,77 @@ SessionState apply(SessionState state, List<SessionEvent> events) {
 }
 
 void main() {
+  test(
+    'ended after hydration requires repair rather than a duplicate notice',
+    () {
+      final empty = SessionState(historyRef);
+      final hydrated = projectOpenCodeHistory(
+        [
+          message('input', 'compaction', {
+            'status': 'completed',
+            'reason': 'manual',
+            'summary': 'Checkpoint',
+            'recent': '',
+          }),
+        ],
+        historyRef,
+        sourceVersion: '2.0.22',
+      ).single;
+      final seed = project(frame('started'), empty).single.meta;
+      final state = apply(empty, [ItemUpserted(meta: seed, item: hydrated)]);
+      expect(
+        () => project(
+          frame('ended', id: 'evt_held_end', data: {'text': 'Checkpoint'}),
+          state,
+          seq: 2,
+        ),
+        throwsA(
+          isA<OpenCodeCompactionProjectionException>().having(
+            (e) => e.failure.name,
+            'repair reason',
+            'identityUnproven',
+          ),
+        ),
+      );
+      expect(state.timeline.single.id, hydrated.id);
+    },
+  );
+
+  test('failed without start retains the official input identity', () {
+    final state = SessionState(historyRef);
+    final failed = project(
+      frame(
+        'failed',
+        data: {
+          'inputID': 'msg_input',
+          'error': {'type': 'compaction.failed', 'message': 'No summary'},
+        },
+      ),
+      state,
+    );
+    final notice = (failed.first as ItemUpserted).item as Notice;
+    expect(openCodeMessageIdOf(notice.id, historyRef), 'msg_input');
+  });
+
+  test('unpaired surrogates produce finite malformed diagnostics', () {
+    final state = SessionState(historyRef);
+    for (final bad in [
+      String.fromCharCodes([0xD800]),
+      String.fromCharCodes([0xDC00]),
+    ]) {
+      expect(
+        () => project(frame('ended', data: {'text': bad}), state),
+        throwsA(
+          isA<OpenCodeCompactionProjectionException>().having(
+            (e) => e.failure,
+            'failure',
+            OpenCodeCompactionProjectionFailure.malformed,
+          ),
+        ),
+      );
+    }
+  });
+
   test('an old terminal replay never completes a newer compaction', () {
     var state = SessionState(historyRef);
     state = apply(
@@ -233,6 +304,7 @@ void main() {
       var failed = 0;
       for (final name in [
         'capture.json',
+        'capture-r2.json',
         'compaction-failed-diagnostic.json',
       ]) {
         final raw = jsonDecode(
@@ -269,7 +341,7 @@ void main() {
           }
         }
       }
-      expect(completed, 2);
+      expect(completed, 4);
       expect(failed, 2);
     },
   );

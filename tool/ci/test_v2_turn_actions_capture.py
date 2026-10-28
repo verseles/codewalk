@@ -17,7 +17,7 @@ FIXTURES = Path(__file__).resolve().parents[2] / (
 
 class CapturedTurnActionsTests(unittest.TestCase):
     def setUp(self):
-        self.data = json.loads((FIXTURES / "capture.json").read_text())
+        self.data = json.loads((FIXTURES / "capture-r2.json").read_text())
 
     def call(self, label):
         return next(c for c in self.data["calls"] if c["label"] == label)
@@ -63,6 +63,27 @@ class CapturedTurnActionsTests(unittest.TestCase):
     def test_admission_alone_never_passes_compaction_completion(self):
         self.data["events"] = [e for e in self.data["events"] if e["type"] != "session.compaction.ended"]
         self.assertIn("compact successful completion", capture.problems(self.data))
+
+    def test_busy_compact_requires_its_own_matching_lifecycle(self):
+        sid = self.call("busy-compact")["response"]["data"]["sessionID"]
+        self.data["events"] = [e for e in self.data["events"] if not (
+            e["type"].startswith("session.compaction.") and e.get("data", {}).get("sessionID") == sid
+        )]
+        self.assertIn("busy compact lifecycle", capture.problems(self.data))
+
+    def test_busy_compact_start_must_match_the_admitted_control(self):
+        sid = self.call("busy-compact")["response"]["data"]["sessionID"]
+        for event in self.data["events"]:
+            if event["type"] == "session.compaction.started" and event["data"]["sessionID"] == sid:
+                event["data"]["inputID"] = "msg_other"
+        self.assertIn("busy compact lifecycle", capture.problems(self.data))
+
+    def test_busy_compact_admission_and_start_do_not_prove_completion(self):
+        sid = self.call("busy-compact")["response"]["data"]["sessionID"]
+        self.data["events"] = [e for e in self.data["events"] if not (
+            e["type"] == "session.compaction.ended" and e.get("data", {}).get("sessionID") == sid
+        )]
+        self.assertIn("busy compact lifecycle", capture.problems(self.data))
 
     def test_wrong_busy_tag_and_missing_busy_call_are_rejected(self):
         self.call("busy-stage")["response"] = {"_tag": "ConflictError"}

@@ -186,11 +186,14 @@ class Capture:
                   {"messageID": target, "files": True}, 409)
         self.call("busy-clear", "DELETE", f"/api/session/{busy}/revert", expected=409)
         self.call("busy-commit", "POST", f"/api/session/{busy}/revert/commit", expected=409)
-        self.call("busy-compact", "POST", f"/api/session/{busy}/compact", {"delivery": "steer"})
+        self.call("busy-compact", "POST", f"/api/session/{busy}/compact", {"delivery": "steer"}, 200)
         self.wait(lambda: any(e["type"] in TERMINALS and
                              e.get("data", {}).get("sessionID") == busy
                              for e in self.events.values), "busy completion")
         self.idle(busy)
+        self.wait(lambda: any(e["type"] in {"session.compaction.ended", "session.compaction.failed"}
+                             and e.get("data", {}).get("sessionID") == busy
+                             for e in self.events.values), "busy compaction terminal")
         self.snapshot("after-busy", busy)
 
         compact = self.create("compact")
@@ -261,6 +264,19 @@ def problems(data: dict) -> list[str]:
         require(any(e["type"] == "session.compaction.ended" and
                     e.get("data", {}).get("sessionID") == admission["sessionID"] for e in events),
                 "compact successful completion")
+        busy_admission = calls["busy-compact"]["response"]["data"]
+        require(calls["busy-compact"]["status"] == 200
+                and busy_admission["type"] == "compaction"
+                and busy_admission["delivery"] == "steer", "busy compact admission")
+        busy_starts = [i for i, e in enumerate(events)
+                       if e["type"] == "session.compaction.started"
+                       and e.get("data", {}).get("sessionID") == busy_admission["sessionID"]
+                       and e.get("data", {}).get("inputID") == busy_admission["id"]]
+        require(len(busy_starts) == 1 and any(
+            e["type"] == "session.compaction.ended"
+            and e.get("data", {}).get("sessionID") == busy_admission["sessionID"]
+            for e in events[busy_starts[0] + 1:]
+        ), "busy compact lifecycle")
         require(calls["cleanup-active"]["response"]["data"] == {}, "owned execution remains")
         require(len([c for c in data["calls"] if c["label"] == "cleanup-absent" and
                      c["status"] == 404]) == 3, "sessions not disposed")
