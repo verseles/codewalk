@@ -581,6 +581,19 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **When** the work ends, or the server reports the session waiting for an approval or an answer
 - **Then** the slot clears a second later and keeps its height, so the field does not move
 
+### V2 composer commands
+
+- **Given** a live session's composer or a new chat's draft
+- **When** the field holds only `/` and a word
+- **Then** a list of the local commands that match the word by name or description opens above the field: `/new`, `/model` (also `/models`), `/agent`, `/sessions`, `/help`, `/thinking`, `/undo`, `/redo` and `/compact`; command names read left to right in every language
+- **Then** the list is at most 240 dp (or 30% of the window) tall and never taller than the room the composer leaves above its field; it scrolls and keeps the highlighted command in view, so with the on-screen keyboard open the field, its Send and the highlight stay visible; when not even one row fits, the list stays shut and the keys stay the field's, so no command runs unseen
+- **Then** on a physical keyboard Up and Down move the highlight, Enter or Tab runs it, and Escape closes the list until the text changes; with a modifier or during an IME composition the keys keep their usual meaning
+- **When** the user taps a command, picks it with the keyboard, or sends a builtin's name (any case) with Send or Enter
+- **Then** the command runs locally, the field is cleared, and nothing is sent to the server; words after the name are ignored
+- **Then** `/new` opens the New Chat draft; `/model` opens the model picker and `/agent` the agent menu on its chip; `/sessions` opens the list drawer on a phone, or shows the hidden list pane on a wider window; `/help` lists the commands in a dialog that Enter closes; `/thinking` shows or hides reasoning (the Appearance switch) and says which
+- **Then** `/undo`, `/redo` and `/compact` say they are not available in this version yet; on the New Chat draft the commands that need a conversation (`/model`, `/agent`, `/undo`, `/redo`, `/compact`) say to send a first message; a sub-conversation's `/model` says its model is its parent's
+- **Then** any other `/word` is sent as an ordinary prompt; the server's own commands are not listed
+
 ### V2 agent menu and permission quick switch
 
 - **Given** a live session's composer offers an agent menu
