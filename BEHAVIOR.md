@@ -432,6 +432,24 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** delete confirmations, the Unrestricted confirmation, shortcut capture, pickers and selectors never map Enter to their action; renaming a session already confirms with Enter in its field
 - **Then** technical coverage includes snackbar tests at compact and wide widths in both directions, a source check that keeps one snackbar path, and Enter, NumpadEnter and focused-Cancel dialog tests; installed native acceptance remains separate
 
+### V2 loading indicators and code scrolling
+
+- **Given** the v2 app shows progress whose amount is unknown
+- **When** it runs on Linux, macOS or Windows
+- **Then** rings in slots of at most 20 dp stay static; larger rings and bars advance in shared 125 ms steps without continuous desktop animation
+- **Then** an indicator hidden by its route stops holding or listening to that clock, even while another visible indicator keeps it running; the clock stops when its last visible user leaves
+- **Then** Android, iOS and Web keep their native indeterminate animation, while reduced motion makes every platform static
+- **Then** screen readers receive a loading role and the indicator's label without a made-up percentage; unknown HTML progress follows the same rule, and HTML progress with a known value keeps its real value
+
+- **Given** a fenced code block is wider than its viewport
+- **When** the user reads it on desktop
+- **Then** its horizontal scrollbar appears on hover, focus or scrolling and supports thumb dragging; unmodified Left/Right move by a bounded step and Home/End reach its limits, while modified selection shortcuts keep their meaning
+- **Then** only overflowing code adds a tab stop and bottom gutter; each block keeps its offset through content changes and clamps it when the content shrinks
+- **When** a vertical wheel reaches tall code inside a chat that can scroll
+- **Then** the chat scrolls vertically, a diagonal wheel also moves the code horizontally, and mouse axis modifiers such as Shift keep their normal horizontal-wheel behavior
+- **Then** standalone tall code keeps its own vertical wheel and mobile touch scrolling, and the code height remains bounded
+- **Then** technical coverage includes clock lifecycle and hidden-listener tests, Linux/Android loading semantics with and without reduced motion, HTML progress, and real parent-chat, mouse-thumb, keyboard, modifier, diagonal and standalone scroll tests; installed native acceptance remains separate
+
 ### V2 typed turn error cards
 
 - **Given** a native v2 session on verified OpenCode 2.0.22 whose turn ended with `session.execution.failed`, live or in the read-only history
