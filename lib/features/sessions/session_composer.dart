@@ -58,6 +58,15 @@ class _SessionComposerState extends State<SessionComposer> {
   /// The agent chip, where `/agent` opens its menu.
   final _agentAnchor = GlobalKey();
 
+  /// The field row's height, which the `/` picker above it leaves free.
+  double _fieldHeight = composerActionSize;
+
+  void _fieldMeasured(double height) {
+    if (mounted && height != _fieldHeight) {
+      setState(() => _fieldHeight = height);
+    }
+  }
+
   /// Up and Down recall the session's prompts on a desktop keyboard, as in
   /// v1; a phone has no recall gesture.
   static bool get _desktop =>
@@ -545,63 +554,72 @@ class _SessionComposerState extends State<SessionComposer> {
                   ),
                 ],
               ),
-              SessionCommandPicker(menu: _commands, onRun: _pick),
-              Row(
-                children: [
-                  Expanded(
-                    child: Focus(
-                      onKeyEvent: _key,
-                      onFocusChange: (_) => _escapeAt = null,
-                      child: ComposerBubble(
-                        child: ConversationTextScale(
-                          child: TextField(
-                            key: const ValueKey('live-composer-input'),
-                            controller: _text,
-                            focusNode: widget.focusNode,
-                            // A text that a failed resend hands back needs the
-                            // field untouched until the send ends.
-                            readOnly:
-                                (c.sending && !_continuing) ||
-                                c.live.endpointOffline,
-                            minLines: 1,
-                            maxLines: 4,
-                            keyboardType: TextInputType.multiline,
-                            autocorrect: composerSuggests(context),
-                            enableSuggestions: composerSuggests(context),
-                            spellCheckConfiguration:
-                                composerSpellCheckConfiguration(context),
-                            decoration: composerDecoration(
-                              context,
-                              l10n.composerHint,
+              // Within the budget the field leaves: the scroll above keeps the
+              // field, so a taller list would be clipped at its top.
+              SessionCommandPicker(
+                menu: _commands,
+                onRun: _pick,
+                maxHeight: widget.maxHeight - _fieldHeight - 4,
+              ),
+              SessionFieldHeightReporter(
+                onHeight: _fieldMeasured,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Focus(
+                        onKeyEvent: _key,
+                        onFocusChange: (_) => _escapeAt = null,
+                        child: ComposerBubble(
+                          child: ConversationTextScale(
+                            child: TextField(
+                              key: const ValueKey('live-composer-input'),
+                              controller: _text,
+                              focusNode: widget.focusNode,
+                              // A text that a failed resend hands back needs the
+                              // field untouched until the send ends.
+                              readOnly:
+                                  (c.sending && !_continuing) ||
+                                  c.live.endpointOffline,
+                              minLines: 1,
+                              maxLines: 4,
+                              keyboardType: TextInputType.multiline,
+                              autocorrect: composerSuggests(context),
+                              enableSuggestions: composerSuggests(context),
+                              spellCheckConfiguration:
+                                  composerSpellCheckConfiguration(context),
+                              decoration: composerDecoration(
+                                context,
+                                l10n.composerHint,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (c.sending)
-                    SizedBox.square(
-                      dimension: composerActionSize,
-                      child: Center(
-                        child: AppIndeterminateRing(
-                          size: 18,
-                          strokeWidth: 2,
-                          semanticsLabel: l10n.composerSending,
+                    const SizedBox(width: 8),
+                    if (c.sending)
+                      SizedBox.square(
+                        dimension: composerActionSize,
+                        child: Center(
+                          child: AppIndeterminateRing(
+                            size: 18,
+                            strokeWidth: 2,
+                            semanticsLabel: l10n.composerSending,
+                          ),
                         ),
+                      )
+                    else if (c.live.stopping ||
+                        (c.live.canStop && _text.text.trim().isEmpty))
+                      SessionStopButton(live: c.live)
+                    else
+                      ComposerSendButton(
+                        buttonKey: const ValueKey('live-composer-send'),
+                        tooltip: l10n.composerSend,
+                        onPressed: canSend ? _send : null,
+                        onDoubleTap: _canContinue ? _continue : null,
                       ),
-                    )
-                  else if (c.live.stopping ||
-                      (c.live.canStop && _text.text.trim().isEmpty))
-                    SessionStopButton(live: c.live)
-                  else
-                    ComposerSendButton(
-                      buttonKey: const ValueKey('live-composer-send'),
-                      tooltip: l10n.composerSend,
-                      onPressed: canSend ? _send : null,
-                      onDoubleTap: _canContinue ? _continue : null,
-                    ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

@@ -326,18 +326,41 @@ void main() {
       await tester.enterText(_input, '/');
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      final visible = Rect.fromLTRB(0, 0, size.width, size.height - keyboard);
-      final picker = tester.getRect(_picker);
-      expect(picker.height, lessThanOrEqualTo(240));
-      for (final finder in [_input, _send, _command('new')]) {
-        final box = tester.getRect(finder);
-        expect(visible.contains(box.topLeft), isTrue, reason: '$finder');
-        expect(
-          visible.contains(box.bottomRight - const Offset(1, 1)),
-          isTrue,
-          reason: '$finder',
+      expect(tester.getRect(_picker).height, lessThanOrEqualTo(240));
+      // Hit tests honour the composer's clip, unlike screen rectangles: the
+      // field, Send and the highlighted command are really shown.
+      void shown() {
+        for (final finder in [_input, _send]) {
+          expect(finder.hitTestable(), findsOneWidget, reason: '$finder');
+        }
+        final active = find.byWidgetPredicate(
+          (widget) => widget is ListTile && widget.selected,
         );
+        expect(active.hitTestable(), findsOneWidget);
       }
+
+      shown();
+      expect(_command('new').hitTestable(), findsOneWidget);
+      for (var i = 0; i < 3; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+        shown();
+      }
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      shown();
+
+      // The command help fits the phone above the keyboard and closes.
+      await _sendTyped(tester, '/help');
+      expect(tester.takeException(), isNull);
+      final close = find.descendant(
+        of: find.byKey(const ValueKey('live-command-help')),
+        matching: find.byType(TextButton),
+      );
+      expect(close.hitTestable(), findsOneWidget);
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('live-command-help')), findsNothing);
     });
   }
 }

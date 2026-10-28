@@ -42,6 +42,16 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
   final _directory = TextEditingController();
   final _composerFocus = FocusNode();
   late final _commands = SessionCommandMenu(widget.controller.draft);
+
+  /// The field row's height, which the `/` picker above it leaves free.
+  double _fieldHeight = composerActionSize;
+
+  void _fieldMeasured(double height) {
+    if (mounted && height != _fieldHeight) {
+      setState(() => _fieldHeight = height);
+    }
+  }
+
   bool _invalidPath = false;
   @override
   void dispose() {
@@ -235,78 +245,93 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            SessionCommandPicker(menu: _commands, onRun: _run),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Focus(
-                                    // A physical Enter sends; Shift+Enter breaks
-                                    // the line (#174).
-                                    onKeyEvent: (_, event) {
-                                      if (_commands.handleKey(
-                                            event,
-                                            l10n,
-                                            _run,
-                                          ) ==
-                                          KeyEventResult.handled) {
+                            // The field scrolls into view with the keyboard
+                            // open; the list keeps above it in what is left
+                            // (its 20 dp scroll margin and the page's 16).
+                            SessionCommandPicker(
+                              menu: _commands,
+                              onRun: _run,
+                              maxHeight:
+                                  box.maxHeight -
+                                  MediaQuery.paddingOf(context).bottom -
+                                  _fieldHeight -
+                                  40,
+                            ),
+                            SessionFieldHeightReporter(
+                              onHeight: _fieldMeasured,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Focus(
+                                      // A physical Enter sends; Shift+Enter breaks
+                                      // the line (#174).
+                                      onKeyEvent: (_, event) {
+                                        if (_commands.handleKey(
+                                              event,
+                                              l10n,
+                                              _run,
+                                            ) ==
+                                            KeyEventResult.handled) {
+                                          return KeyEventResult.handled;
+                                        }
+                                        if (!isComposerSendKey(
+                                          event,
+                                          c.draft.value,
+                                        )) {
+                                          return KeyEventResult.ignored;
+                                        }
+                                        if (_canSend(c)) _send(c);
                                         return KeyEventResult.handled;
-                                      }
-                                      if (!isComposerSendKey(
-                                        event,
-                                        c.draft.value,
-                                      )) {
-                                        return KeyEventResult.ignored;
-                                      }
-                                      if (_canSend(c)) _send(c);
-                                      return KeyEventResult.handled;
-                                    },
-                                    child: ComposerBubble(
-                                      child: ConversationTextScale(
-                                        child: TextField(
-                                          key: const ValueKey(
-                                            'workspace-draft-text',
-                                          ),
-                                          controller: c.draft,
-                                          focusNode: _composerFocus,
-                                          enabled: !c.sending,
-                                          readOnly: c.endpointOffline,
-                                          minLines: 1,
-                                          maxLines: 6,
-                                          keyboardType: TextInputType.multiline,
-                                          textCapitalization:
-                                              TextCapitalization.sentences,
-                                          autocorrect: composerSuggests(
-                                            context,
-                                          ),
-                                          enableSuggestions: composerSuggests(
-                                            context,
-                                          ),
-                                          spellCheckConfiguration:
-                                              composerSpellCheckConfiguration(
-                                                context,
-                                              ),
-                                          decoration: composerDecoration(
-                                            context,
-                                            l10n.composerHint,
+                                      },
+                                      child: ComposerBubble(
+                                        child: ConversationTextScale(
+                                          child: TextField(
+                                            key: const ValueKey(
+                                              'workspace-draft-text',
+                                            ),
+                                            controller: c.draft,
+                                            focusNode: _composerFocus,
+                                            enabled: !c.sending,
+                                            readOnly: c.endpointOffline,
+                                            minLines: 1,
+                                            maxLines: 6,
+                                            keyboardType:
+                                                TextInputType.multiline,
+                                            textCapitalization:
+                                                TextCapitalization.sentences,
+                                            autocorrect: composerSuggests(
+                                              context,
+                                            ),
+                                            enableSuggestions: composerSuggests(
+                                              context,
+                                            ),
+                                            spellCheckConfiguration:
+                                                composerSpellCheckConfiguration(
+                                                  context,
+                                                ),
+                                            decoration: composerDecoration(
+                                              context,
+                                              l10n.composerHint,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                ComposerSendButton(
-                                  buttonKey: const ValueKey(
-                                    'workspace-draft-send',
+                                  const SizedBox(width: 8),
+                                  ComposerSendButton(
+                                    buttonKey: const ValueKey(
+                                      'workspace-draft-send',
+                                    ),
+                                    tooltip: c.sending
+                                        ? l10n.composerSending
+                                        : l10n.composerSend,
+                                    onPressed: _canSend(c)
+                                        ? () => _send(c)
+                                        : null,
                                   ),
-                                  tooltip: c.sending
-                                      ? l10n.composerSending
-                                      : l10n.composerSend,
-                                  onPressed: _canSend(c)
-                                      ? () => _send(c)
-                                      : null,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),

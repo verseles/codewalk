@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -107,10 +108,15 @@ class SessionCommandPicker extends StatefulWidget {
     super.key,
     required this.menu,
     required this.onRun,
+    this.maxHeight = double.infinity,
   });
 
   final SessionCommandMenu menu;
   final ValueChanged<SessionBuiltinCommand> onRun;
+
+  /// The room the composer leaves above its field; a keyboard-reduced
+  /// composer clips anything taller, highlighted command included.
+  final double maxHeight;
 
   @override
   State<SessionCommandPicker> createState() => _SessionCommandPickerState();
@@ -169,7 +175,13 @@ class _SessionCommandPickerState extends State<SessionCommandPicker> {
             clipBehavior: Clip.antiAlias,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: min(240, MediaQuery.sizeOf(context).height * 0.3),
+                maxHeight: max(
+                  0,
+                  min(
+                    min(240, MediaQuery.sizeOf(context).height * 0.3),
+                    widget.maxHeight,
+                  ),
+                ),
               ),
               child: ListView(
                 controller: _scroll,
@@ -194,4 +206,43 @@ class _SessionCommandPickerState extends State<SessionCommandPicker> {
       );
     },
   );
+}
+
+/// Reports its child's height after each layout that changed it, so the
+/// picker above a composer field leaves that field whole (#278).
+class SessionFieldHeightReporter extends SingleChildRenderObjectWidget {
+  const SessionFieldHeightReporter({
+    super.key,
+    required this.onHeight,
+    super.child,
+  });
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _HeightReporterBox(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) =>
+      (renderObject as _HeightReporterBox).onHeight = onHeight;
+}
+
+class _HeightReporterBox extends RenderProxyBox {
+  _HeightReporterBox(this.onHeight);
+
+  ValueChanged<double> onHeight;
+  double? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final height = size.height;
+    if (height == _reported) return;
+    _reported = height;
+    // A layout cannot rebuild its ancestors; the next frame takes it.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (attached) onHeight(height);
+    });
+  }
 }

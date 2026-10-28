@@ -763,12 +763,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('live-command-picker')), findsOneWidget);
-    final visible = Rect.fromLTRB(0, 0, size.width, size.height - 300);
-    final field = tester.getRect(
-      find.byKey(const ValueKey('workspace-draft-text')),
-    );
-    expect(visible.contains(field.topLeft), isTrue);
-    expect(visible.contains(field.bottomRight - const Offset(1, 1)), isTrue);
+    // Hit tests honour the page's clip: the field and the highlighted
+    // command are really shown.
+    for (final key in ['workspace-draft-text', 'live-command-new']) {
+      expect(
+        find.byKey(ValueKey(key)).hitTestable(),
+        findsOneWidget,
+        reason: key,
+      );
+    }
     await tester.pumpWidget(const SizedBox());
   });
 }
