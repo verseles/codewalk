@@ -3,6 +3,7 @@ import 'package:codewalk/features/sessions/session_selection_chip.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
+import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -273,7 +274,7 @@ void main() {
       find.byKey(const ValueKey('live-selection')),
     );
     expect(chip.onPressed, isNull);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(AppIndeterminateRing), findsOneWidget);
   });
 
   testWidgets('an unconfirmed switch offers Check again', (tester) async {

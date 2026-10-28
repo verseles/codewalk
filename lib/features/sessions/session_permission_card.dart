@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_permission_reply.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_live_controller.dart';
 
 /// Manual permission cards for the live session's resident requests. Each
@@ -444,7 +445,7 @@ class _PermissionCardState extends State<_PermissionCard> {
             if (busy)
               const Padding(
                 padding: EdgeInsets.only(top: 8),
-                child: LinearProgressIndicator(),
+                child: AppIndeterminateBar(),
               ),
             if (notice != null)
               Semantics(

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 import 'session_selection_chip.dart';
@@ -129,10 +130,7 @@ class SessionComposerControls extends StatelessWidget {
                 semantics: modelDescription,
                 maxWidth: 240,
                 avatar: busy
-                    ? const SizedBox.square(
-                        dimension: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                     : live.isChild
                     ? const Icon(Icons.lock_outline, size: 16)
                     : attention

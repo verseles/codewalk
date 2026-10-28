@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'release_history_controller.dart';
 
 class ReleaseHistorySettingsPage extends StatefulWidget {
@@ -60,7 +61,7 @@ class _ReleaseHistorySettingsPageState
             label: Text(l.chatRefresh),
           ),
         ),
-        if (controller?.loading == true) const LinearProgressIndicator(),
+        if (controller?.loading == true) const AppIndeterminateBar(),
         if (controller == null || controller.failed) ...[
           Text(
             controller?.savedCopyAvailable == true

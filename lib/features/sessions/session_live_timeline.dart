@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
 import 'session_timeline_projection.dart';
@@ -681,12 +682,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(8),
-        child: SizedBox.square(
-          dimension: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            semanticsLabel: context.v2L10n.liveOlderLoading,
-          ),
+        child: AppIndeterminateRing(
+          size: 20,
+          strokeWidth: 2.5,
+          semanticsLabel: context.v2L10n.liveOlderLoading,
         ),
       ),
     );

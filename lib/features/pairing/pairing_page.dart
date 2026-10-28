@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_navigation_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/hosts_page.dart';
 import 'pairing_controller.dart';
 
@@ -93,7 +94,7 @@ class _PairingPageState extends State<PairingPage> {
                 (profile?.endpoint ?? candidate!.endpoint).toString(),
               ),
             ],
-            if (pairing.busy) const LinearProgressIndicator(),
+            if (pairing.busy) const AppIndeterminateBar(),
             if (pairing.captureError != null) Text(l.pairingCaptureError),
             if (pairing.storageError) Text(l.hostsProfileStorageError),
             if (pairing.receipt case final receipt?) ...[

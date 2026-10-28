@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/releases/update_selector.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'update_check_controller.dart';
 
@@ -103,7 +104,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        if (checking) const LinearProgressIndicator(),
+        if (checking) const AppIndeterminateBar(),
         if (controller.status == UpdateCheckStatus.upToDate)
           Text(l.updatesUpToDate, key: const ValueKey('updates_up_to_date')),
         if (controller.status == UpdateCheckStatus.failed)

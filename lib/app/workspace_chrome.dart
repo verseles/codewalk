@@ -10,6 +10,7 @@ import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/sessions/session_live_source.dart';
+import '../shared/widgets/app_indeterminate_progress.dart';
 import '../shared/widgets/app_snack_bar.dart';
 import 'app_preferences_controller.dart';
 import 'workspace_chrome_controller.dart';
@@ -50,10 +51,7 @@ class WorkspaceMenuButton extends StatelessWidget {
               child: Semantics(
                 label: workspaceBadgeText(context.v2L10n, badge),
                 child: badge.kind == WorkspaceBadgeKind.syncing
-                    ? const SizedBox.square(
-                        dimension: 12,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const AppIndeterminateRing(size: 12, strokeWidth: 2)
                     : Icon(
                         Icons.circle,
                         key: ValueKey('workspace-badge-${badge.kind.name}'),

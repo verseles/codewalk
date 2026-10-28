@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 
@@ -54,10 +55,7 @@ class SessionSelectionChip extends StatelessWidget {
                 ? () => showSessionSelection(context, live)
                 : null,
             avatar: busy
-                ? const SizedBox.square(
-                    dimension: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                 : Icon(
                     live.isChild
                         ? Icons.lock_outline
@@ -481,7 +479,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
               ),
             ),
             if (state.loading || state.phase == SessionSelectionPhase.pending)
-              const LinearProgressIndicator(),
+              const AppIndeterminateBar(),
             if (notice != null)
               ListTile(
                 key: const ValueKey('live-selection-notice'),

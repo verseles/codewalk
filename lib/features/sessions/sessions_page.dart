@@ -17,6 +17,7 @@ import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/server_switcher.dart';
 import 'project_context_list.dart';
 import 'project_contexts_controller.dart';
@@ -192,7 +193,7 @@ class _SessionsPageState extends State<SessionsPage> {
       children: [
         const WorkspaceDrawerNotice(),
         if (hosts.loading || controller.loading)
-          LinearProgressIndicator(semanticsLabel: l10n.sessionsLoading),
+          AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
         const ServerSwitcher(),
         if (contexts != null && ready)
           _projectTitle(context, controller, contexts),

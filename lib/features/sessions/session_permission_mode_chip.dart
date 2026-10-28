@@ -4,6 +4,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
 import 'session_unrestricted_dialog.dart';
@@ -120,10 +121,7 @@ class SessionPermissionModeChip extends StatelessWidget {
             ],
             child: Chip(
               avatar: busy
-                  ? const SizedBox.square(
-                      dimension: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                  ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                   : Icon(
                       inEffect
                           ? Icons.lock_open

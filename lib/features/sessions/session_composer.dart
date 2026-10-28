@@ -10,6 +10,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
@@ -551,12 +552,10 @@ class _SessionComposerState extends State<SessionComposer> {
                     SizedBox.square(
                       dimension: composerActionSize,
                       child: Center(
-                        child: SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            semanticsLabel: l10n.composerSending,
-                          ),
+                        child: AppIndeterminateRing(
+                          size: 18,
+                          strokeWidth: 2,
+                          semanticsLabel: l10n.composerSending,
                         ),
                       ),
                     )

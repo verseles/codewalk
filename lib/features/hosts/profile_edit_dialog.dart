@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import 'hosts_controller.dart';
 
@@ -161,7 +162,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog> {
                       }
                     },
                   ),
-                  if (_busy) const LinearProgressIndicator(),
+                  if (_busy) const AppIndeterminateBar(),
                   if (_failed) ...[
                     Text(l.hostsEditChanged),
                     TextButton(

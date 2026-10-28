@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import '../pairing/pairing_controller.dart';
@@ -246,7 +247,7 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                 ),
               ],
             ),
-            if (hosts.loading) const LinearProgressIndicator(),
+            if (hosts.loading) const AppIndeterminateBar(),
             Padding(
               key: _searchAnchor,
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -413,7 +414,7 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                               case final assessment?)
                             EndpointStatusView(assessment: assessment),
                           if (hosts.isChecking(profile))
-                            LinearProgressIndicator(
+                            AppIndeterminateBar(
                               key: ValueKey('endpoint-check-${profile.id}'),
                               semanticsLabel: l.hostsCheckConnection,
                             ),
@@ -618,7 +619,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 if (_checking || _saving)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    child: LinearProgressIndicator(),
+                    child: AppIndeterminateBar(),
                   ),
                 if (_assessment case final assessment?)
                   EndpointStatusView(assessment: assessment),

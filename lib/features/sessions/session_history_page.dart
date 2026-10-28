@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_history_controller.dart';
 import 'session_message_info.dart';
 import 'session_timeline_tile.dart';
@@ -61,7 +62,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
             child: Column(
               children: [
                 if (c.loading)
-                  LinearProgressIndicator(semanticsLabel: l10n.sessionsLoading),
+                  AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
                 Expanded(
                   child: PageStorage(
                     bucket: _rowState,

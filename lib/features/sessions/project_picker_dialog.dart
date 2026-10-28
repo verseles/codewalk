@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/sessions/server_path.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'project_context_list.dart';
 import 'project_contexts_controller.dart';
 import 'project_picker_controller.dart';
@@ -290,7 +291,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                     _picker.browseLoading)
                   const Padding(
                     padding: EdgeInsets.only(top: 8),
-                    child: LinearProgressIndicator(),
+                    child: AppIndeterminateBar(),
                   ),
                 if (failure != null)
                   Padding(

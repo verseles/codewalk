@@ -16,6 +16,7 @@ import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/server_switcher.dart';
 import 'session_composer.dart';
 import 'session_error_card.dart';
@@ -275,13 +276,11 @@ class _SessionLivePageState extends State<SessionLivePage>
   /// read.
   WidgetBuilder? _empty(SessionLiveController c, V2Localizations l10n) {
     if (c.loading) {
-      return (context) => SizedBox.square(
+      return (context) => AppIndeterminateRing(
         key: const ValueKey('live-hydrating'),
-        dimension: 28,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          semanticsLabel: l10n.liveHydrating,
-        ),
+        size: 28,
+        strokeWidth: 2.5,
+        semanticsLabel: l10n.liveHydrating,
       );
     }
     // Only a session synced at least once is known to be empty: a failed
@@ -551,7 +550,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                   child: Column(
                     children: [
                       if (c.loading)
-                        LinearProgressIndicator(
+                        AppIndeterminateBar(
                           semanticsLabel: l10n.liveConnecting,
                         ),
                       if (c.summary.info.lineage.parent case final parent?)

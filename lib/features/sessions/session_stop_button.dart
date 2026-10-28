@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'composer_input.dart';
 import 'session_live_controller.dart';
 
@@ -15,12 +16,10 @@ class SessionStopButton extends StatelessWidget {
       return SizedBox.square(
         dimension: composerActionSize,
         child: Center(
-          child: SizedBox.square(
-            dimension: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              semanticsLabel: l10n.liveStopping,
-            ),
+          child: AppIndeterminateRing(
+            size: 18,
+            strokeWidth: 2,
+            semanticsLabel: l10n.liveStopping,
           ),
         ),
       );

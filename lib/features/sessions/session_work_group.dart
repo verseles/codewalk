@@ -7,6 +7,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/app_shapes.dart';
 import '../../shared/theme/app_visual_style_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_message_info.dart';
 import 'session_timeline_projection.dart';
 import 'session_tool_details_dialog.dart';
@@ -271,12 +272,10 @@ class SessionGenerationPlaceholder extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: scheme.primary,
-                    ),
+                  AppIndeterminateRing(
+                    size: 18,
+                    strokeWidth: 2,
+                    color: scheme.primary,
                   ),
                   const SizedBox(width: 10),
                   Flexible(

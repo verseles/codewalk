@@ -3,6 +3,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
 
 import '../l10n/l10n_context.dart';
+import '../widgets/app_indeterminate_progress.dart';
 import 'render_math_syntax.dart';
 
 const basicHtmlTextTag = 'cwHtmlText';
@@ -392,21 +393,28 @@ class BasicHtmlProgressBuilder extends MarkdownElementBuilder {
     // Reduced-motion: indeterminate animation becomes static; fallback to
     // localized in-progress label when no explicit label exists.
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final label = rawLabel.isEmpty
-        ? _inProgressLabel(context)
-        : rawLabel;
+    final label = rawLabel.isEmpty ? _inProgressLabel(context) : rawLabel;
     final effectiveValue = (value == null && reduceMotion) ? 0.35 : value;
     return SizedBox(
       width: 160,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: LinearProgressIndicator(
-          value: effectiveValue,
-          minHeight: 6,
-          color: colors.primary,
-          backgroundColor: colors.surfaceContainerHighest,
-          semanticsLabel: label.isEmpty ? null : label,
-        ),
+        // A progress without a value is bounded like every indeterminate
+        // indicator (#117).
+        child: effectiveValue == null
+            ? AppIndeterminateBar(
+                minHeight: 6,
+                color: colors.primary,
+                backgroundColor: colors.surfaceContainerHighest,
+                semanticsLabel: label.isEmpty ? null : label,
+              )
+            : LinearProgressIndicator(
+                value: effectiveValue,
+                minHeight: 6,
+                color: colors.primary,
+                backgroundColor: colors.surfaceContainerHighest,
+                semanticsLabel: label.isEmpty ? null : label,
+              ),
       ),
     );
   }
