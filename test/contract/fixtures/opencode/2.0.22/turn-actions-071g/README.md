@@ -28,7 +28,7 @@ the runtime directory. The owned root is replaced with `<owned-root>` and opaque
 The producer hashes identify the actual dirty-tree collector and stub at run
 time; `repo_commit` is their base, `0d15eed1`, not a claim that these new tools
 were already committed. The binary SHA-256 is checked against the existing
-architecture-specific pin. `SHA256SUMS` covers both JSON artifacts.
+architecture-specific pin. `SHA256SUMS` covers all three JSON artifacts.
 
 | Observation | Evidence |
 | --- | --- |

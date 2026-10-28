@@ -500,6 +500,16 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** compact/wide, 14 locales with RTL, SelectionArea, semantics headers, 200% text scaling, reduced-motion static progress and VM goldens (mobile/desktop light/dark + ar RTL) are covered by widget tests; keyboard focus on overflowing code remains pending and is not claimed as passing
 - **Then** `flutter analyze` passes with no new issues and focused v2 rendering/timeline/history/live tests pass; `dart run tool/ci/import_rules.dart` was not run for this stage (known >20 min, issue #375) with manual G4 verification (no legacy imports, no `part of`, new files <500 lines)
 
+### V2 compaction notices
+
+- **Given** a verified OpenCode 2.0.22 session compacts its context, including a compaction started from another client
+- **When** history or the durable stream reports its state
+- **Then** one canonical compaction notice keeps its identity from running to completed or failed; completion shows the complete summary, and failure uses the bounded, redacted error message
+- **Then** partial summary deltas, opaque provider state and the recent-context copy never appear in that notice; a future status stays an explicit unknown item
+- **Then** replaying an old terminal never completes a newer notice with a known different event identity; a terminal whose target cannot be proven after hydration triggers a bounded authoritative re-read without a guessed duplicate or transient overwrite
+- **Then** an admitted compaction leaves the pending list when its matching start is observed; HTTP admission alone never proves completion
+- **Then** native zero-cost fixtures cover idle and busy admission, successful and failed terminal events and busy revert refusals; projection and stream-owner regressions cover duplicate delivery and hydration races; in-app undo, redo and compact controls remain separate work
+
 ### V2 message elapsed time and details
 
 - **Given** a live or history timeline shows the parts (text, reasoning, tools) of an assistant message
