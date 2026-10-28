@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show SemanticsRole;
 
 import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:flutter/material.dart';
@@ -203,6 +204,43 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.linux),
   );
+
+  for (final reduced in [false, true]) {
+    testWidgets(
+      'busy indicators keep their loading role without a percentage '
+      '(reduced motion: $reduced)',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        await show(
+          tester,
+          const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppIndeterminateRing(size: 36, semanticsLabel: 'Loading ring'),
+              SizedBox(
+                width: 200,
+                child: AppIndeterminateBar(semanticsLabel: 'Loading bar'),
+              ),
+            ],
+          ),
+          reducedMotion: reduced,
+        );
+        for (final label in ['Loading ring', 'Loading bar']) {
+          final data = tester
+              .getSemantics(find.bySemanticsLabel(label))
+              .getSemanticsData();
+          expect(data.role, SemanticsRole.loadingSpinner);
+          expect(data.value, isEmpty);
+        }
+        await tester.pumpWidget(const SizedBox());
+        semantics.dispose();
+      },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.linux,
+        TargetPlatform.android,
+      }),
+    );
+  }
 
   test('every v2 indeterminate indicator is the bounded one', () {
     final offenders = <String>[];

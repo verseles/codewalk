@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -222,6 +223,42 @@ class _RenderScrollableCodeBlockState extends State<RenderScrollableCodeBlock> {
     return KeyEventResult.handled;
   }
 
+  void _routeWheelToChat(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || event.scrollDelta.dy == 0) return;
+    final modifiers = ScrollConfiguration.of(context).pointerAxisModifiers;
+    if (event.kind == PointerDeviceKind.mouse &&
+        HardwareKeyboard.instance.logicalKeysPressed.any(modifiers.contains)) {
+      return;
+    }
+    final chat = Scrollable.maybeOf(context, axis: Axis.vertical)?.position;
+    if (chat == null) return;
+    final code = _controller.hasClients ? _controller.position : null;
+    double delta(ScrollPosition position, double amount) =>
+        switch (position.axisDirection) {
+          AxisDirection.up || AxisDirection.left => -amount,
+          _ => amount,
+        };
+    bool canMove(ScrollPosition position, double amount) =>
+        position.physics.shouldAcceptUserOffset(position) &&
+        (position.pixels + amount).clamp(
+              position.minScrollExtent,
+              position.maxScrollExtent,
+            ) !=
+            position.pixels;
+    final dy = delta(chat, event.scrollDelta.dy);
+    final dx = code == null ? 0.0 : delta(code, event.scrollDelta.dx);
+    final moveChat = canMove(chat, dy);
+    final moveCode = code != null && dx != 0 && canMove(code, dx);
+    if (!moveChat && !moveCode) return;
+    // Reserve the wheel before the tall code's vertical viewport claims it.
+    // With no scrollable chat, keep the code's own reading gestures intact.
+    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+      if (moveChat) chat.pointerScroll(dy);
+      if (moveCode) code.pointerScroll(dx);
+      event.respond(allowPlatformDefault: false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final platform = Theme.of(context).platform;
@@ -302,7 +339,10 @@ class _RenderScrollableCodeBlockState extends State<RenderScrollableCodeBlock> {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             primary: false,
-                            child: widget.child,
+                            child: Listener(
+                              onPointerSignal: _routeWheelToChat,
+                              child: widget.child,
+                            ),
                           ),
                         ),
                       ),

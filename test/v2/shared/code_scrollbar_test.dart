@@ -60,6 +60,17 @@ void main() {
     ),
   );
 
+  ScrollPosition vertical(WidgetTester tester) => tester
+      .state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(RenderScrollableCodeBlock),
+              matching: find.byType(Scrollable),
+            )
+            .last,
+      )
+      .position;
+
   testWidgets('an overflowing block scrolls from the keyboard', (tester) async {
     await show(tester, longCode);
     final node = codeFocus(tester);
@@ -173,4 +184,112 @@ void main() {
     await tester.pump();
     expect(position.pixels, 60);
   });
+
+  testWidgets(
+    'a vertical wheel over tall code scrolls its parent chat',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final chat = ScrollController();
+      addTearDown(chat.dispose);
+      final line = List.filled(
+        4,
+        'final value = computeSomethingLong();',
+      ).join(' ');
+      final code = List.filled(120, line).join('\n');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              controller: chat,
+              child: Column(
+                children: [
+                  const SizedBox(height: 50),
+                  RenderScrollableCodeBlock(
+                    themeTokens: tokens,
+                    language: 'dart',
+                    code: code,
+                    onCopy: () {},
+                    child: Text(code, softWrap: false),
+                  ),
+                  const SizedBox(height: 800),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final inner = vertical(tester);
+      expect(inner.maxScrollExtent, greaterThan(0));
+      tester.binding.handlePointerEvent(
+        PointerScrollEvent(
+          position: tester.getCenter(find.byType(RenderScrollableCodeBlock)),
+          scrollDelta: const Offset(0, 80),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(chat.offset, 80);
+      expect(inner.pixels, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      tester.binding.handlePointerEvent(
+        PointerScrollEvent(
+          position: tester.getCenter(find.byType(RenderScrollableCodeBlock)),
+          scrollDelta: const Offset(0, 60),
+        ),
+      );
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+      expect(chat.offset, 80);
+      expect(horizontal(tester).pixels, 60);
+      tester.binding.handlePointerEvent(
+        PointerScrollEvent(
+          position: tester.getCenter(find.byType(RenderScrollableCodeBlock)),
+          scrollDelta: const Offset(40, 30),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(chat.offset, 110);
+      expect(horizontal(tester).pixels, 100);
+      expect(inner.pixels, 0);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+  );
+
+  testWidgets(
+    'standalone tall code keeps its vertical wheel',
+    (tester) async {
+      await show(tester, List.filled(120, 'code').join('\n'));
+      final inner = vertical(tester);
+      expect(inner.maxScrollExtent, greaterThan(0));
+      tester.binding.handlePointerEvent(
+        PointerScrollEvent(
+          // Short lines leave empty space beside the narrow vertical viewport.
+          position: tester.getCenter(find.byType(Scrollable).last),
+          scrollDelta: const Offset(0, 80),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(inner.pixels, 80);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+  );
+
+  testWidgets(
+    'standalone tall code keeps mobile touch scrolling',
+    (tester) async {
+      await show(tester, List.filled(120, 'code').join('\n'));
+      final inner = vertical(tester);
+      await tester.dragFrom(
+        tester.getCenter(find.byType(Scrollable).last),
+        const Offset(0, -120),
+      );
+      await tester.pumpAndSettle();
+      expect(inner.pixels, greaterThan(0));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 }

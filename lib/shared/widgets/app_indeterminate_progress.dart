@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -147,6 +148,7 @@ class _AppIndeterminateRingState extends State<AppIndeterminateRing>
     final label = _label(context, widget.semanticsLabel);
     Widget slot(Widget child) => Semantics(
       label: label,
+      role: SemanticsRole.loadingSpinner,
       child: SizedBox.square(
         dimension: widget.size,
         child: Center(child: child),
@@ -221,6 +223,7 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar>
     final label = _label(context, widget.semanticsLabel);
     Widget bar(double? value) => Semantics(
       label: label,
+      role: SemanticsRole.loadingSpinner,
       child: ExcludeSemantics(
         child: LinearProgressIndicator(
           value: value,

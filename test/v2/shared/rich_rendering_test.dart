@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsRole;
+
 import 'package:codewalk/shared/rendering/canonical_message_body.dart';
 import 'package:codewalk/shared/rendering/markdown_content.dart';
 import 'package:codewalk/shared/rendering/message_render_budget.dart';
@@ -252,7 +254,8 @@ void main() {
     testWidgets('reduced-motion indeterminate progress is static', (
       tester,
     ) async {
-      const source = '<progress></progress>';
+      final semantics = tester.ensureSemantics();
+      const source = '<progress aria-label="Loading"></progress>';
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
@@ -266,7 +269,13 @@ void main() {
         find.byType(LinearProgressIndicator),
       );
       expect(bar.value, 0.35);
+      final data = tester
+          .getSemantics(find.bySemanticsLabel('Loading'))
+          .getSemanticsData();
+      expect(data.role, SemanticsRole.loadingSpinner);
+      expect(data.value, isEmpty);
       expect(tester.takeException(), isNull);
+      semantics.dispose();
     });
   });
 }

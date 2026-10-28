@@ -390,18 +390,14 @@ class BasicHtmlProgressBuilder extends MarkdownElementBuilder {
                 element.attributes['fallback'] ??
                 '')
             .trim();
-    // Reduced-motion: indeterminate animation becomes static; fallback to
-    // localized in-progress label when no explicit label exists.
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final label = rawLabel.isEmpty ? _inProgressLabel(context) : rawLabel;
-    final effectiveValue = (value == null && reduceMotion) ? 0.35 : value;
     return SizedBox(
       width: 160,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         // A progress without a value is bounded like every indeterminate
         // indicator (#117).
-        child: effectiveValue == null
+        child: value == null
             ? AppIndeterminateBar(
                 minHeight: 6,
                 color: colors.primary,
@@ -409,7 +405,7 @@ class BasicHtmlProgressBuilder extends MarkdownElementBuilder {
                 semanticsLabel: label.isEmpty ? null : label,
               )
             : LinearProgressIndicator(
-                value: effectiveValue,
+                value: value,
                 minHeight: 6,
                 color: colors.primary,
                 backgroundColor: colors.surfaceContainerHighest,
