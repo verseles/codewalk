@@ -2193,4 +2193,53 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.';
+
+  @override
+  String get chatSlashCommandAgent => 'فتح محدد الوكلاء';
+
+  @override
+  String get chatSlashCommandCompact => 'ضغط سياق الجلسة الحالية';
+
+  @override
+  String get chatSlashCommandHelp => 'إظهار تعليمات الأمر';
+
+  @override
+  String get chatSlashCommandModels => 'فتح محدد النماذج';
+
+  @override
+  String get chatSlashCommandNew => 'إنشاء جلسة دردشة جديدة';
+
+  @override
+  String get chatSlashCommandRedo => 'إعادة إجراء آخر دور تم التراجع عنه';
+
+  @override
+  String get chatSlashCommandSessions => 'فتح قائمة المحادثات';
+
+  @override
+  String get chatSlashCommandThinking => 'تبديل فقاعات التفكير';
+
+  @override
+  String get chatSlashCommandUndo => 'التراجع عن آخر دور ظاهر للمستخدم';
+
+  @override
+  String get commandsTitle => 'الأوامر';
+
+  @override
+  String get commandsHint => 'اكتب / في حقل الرسالة لاختيار أمر.';
+
+  @override
+  String get commandNotYetAvailable => 'هذا الأمر غير متاح بعد في هذا الإصدار.';
+
+  @override
+  String get commandNeedsConversation =>
+      'يعمل هذا الأمر داخل محادثة. أرسل رسالة أولى لبدء محادثة.';
+
+  @override
+  String get commandUnavailableHere => 'هذا الأمر غير متاح لهذه المحادثة.';
+
+  @override
+  String get commandThinkingShown => 'تم إظهار التفكير';
+
+  @override
+  String get commandThinkingHidden => 'تم إخفاء التفكير';
 }

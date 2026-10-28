@@ -2235,4 +2235,58 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.';
+
+  @override
+  String get chatSlashCommandAgent => 'Открыть выбор агента';
+
+  @override
+  String get chatSlashCommandCompact => 'Сжать контекст текущей сессии';
+
+  @override
+  String get chatSlashCommandHelp => 'Показать справку по командам';
+
+  @override
+  String get chatSlashCommandModels => 'Открыть выбор модели';
+
+  @override
+  String get chatSlashCommandNew => 'Создать новую сессию чата';
+
+  @override
+  String get chatSlashCommandRedo => 'Повторить последний отмененный ход';
+
+  @override
+  String get chatSlashCommandSessions => 'Открыть список диалогов';
+
+  @override
+  String get chatSlashCommandThinking =>
+      'Показать или скрыть пузырьки размышлений';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Отменить последний видимый ход пользователя';
+
+  @override
+  String get commandsTitle => 'Команды';
+
+  @override
+  String get commandsHint =>
+      'Введите / в поле сообщения, чтобы выбрать команду.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'Эта команда пока недоступна в этой версии.';
+
+  @override
+  String get commandNeedsConversation =>
+      'Эта команда работает внутри беседы. Отправьте первое сообщение, чтобы начать её.';
+
+  @override
+  String get commandUnavailableHere =>
+      'Эта команда недоступна для этой беседы.';
+
+  @override
+  String get commandThinkingShown => 'Рассуждения показаны';
+
+  @override
+  String get commandThinkingHidden => 'Рассуждения скрыты';
 }

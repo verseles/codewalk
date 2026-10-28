@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "Não é possível salvar favoritos e modelos recentes neste dispositivo agora.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "Abrir seletor de agentes",
+  "chatSlashCommandCompact": "Compactar o contexto da sessão atual",
+  "chatSlashCommandHelp": "Mostrar ajuda de comandos",
+  "chatSlashCommandModels": "Abrir seletor de modelos",
+  "chatSlashCommandNew": "Criar uma nova sessão de chat",
+  "chatSlashCommandRedo": "Refazer o último turno desfeito",
+  "chatSlashCommandSessions": "Abrir lista de conversas",
+  "chatSlashCommandThinking": "Alternar balões de pensamento",
+  "chatSlashCommandUndo": "Desfazer o último turno visível do usuário",
+  "commandsTitle": "Comandos",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "Digite / no campo de mensagem para escolher um comando.",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "Este comando ainda não está disponível nesta versão.",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "Este comando funciona dentro de uma conversa. Envie uma primeira mensagem para começar uma.",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "Este comando não está disponível para esta conversa.",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "Raciocínio exibido",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "Raciocínio oculto",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

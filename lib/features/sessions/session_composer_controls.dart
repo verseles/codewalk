@@ -21,9 +21,13 @@ class SessionComposerControls extends StatelessWidget {
     super.key,
     required this.live,
     this.trailing = const [],
+    this.agentAnchor,
   });
 
   final SessionLiveController live;
+
+  /// Marks the agent chip, so a `/agent` command opens its menu there.
+  final GlobalKey? agentAnchor;
 
   /// More controls on the same row, after the selection.
   final List<Widget> trailing;
@@ -105,6 +109,7 @@ class SessionComposerControls extends StatelessWidget {
           children: [
             if (agentMenu)
               Builder(
+                key: agentAnchor,
                 builder: (anchor) => Badge.count(
                   key: const ValueKey('live-agent-badge'),
                   isLabelVisible: pending > 0,

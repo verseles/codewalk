@@ -2256,4 +2256,60 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Al momento non è possibile salvare preferiti e modelli recenti su questo dispositivo.';
+
+  @override
+  String get chatSlashCommandAgent => 'Apri il selettore dell\'agente';
+
+  @override
+  String get chatSlashCommandCompact =>
+      'Compatta il contesto della sessione corrente';
+
+  @override
+  String get chatSlashCommandHelp => 'Mostra la guida dei comandi';
+
+  @override
+  String get chatSlashCommandModels => 'Apri il selettore dei modelli';
+
+  @override
+  String get chatSlashCommandNew => 'Crea una nuova sessione di chat';
+
+  @override
+  String get chatSlashCommandRedo =>
+      'Ripristina l\'ultimo intervento annullato';
+
+  @override
+  String get chatSlashCommandSessions => 'Apri l\'elenco delle conversazioni';
+
+  @override
+  String get chatSlashCommandThinking =>
+      'Attiva/disattiva le bolle di pensiero';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Annulla l\'ultimo intervento utente visibile';
+
+  @override
+  String get commandsTitle => 'Comandi';
+
+  @override
+  String get commandsHint =>
+      'Digita / nel campo del messaggio per scegliere un comando.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'Questo comando non è ancora disponibile in questa versione.';
+
+  @override
+  String get commandNeedsConversation =>
+      'Questo comando funziona all’interno di una conversazione. Invia un primo messaggio per iniziarne una.';
+
+  @override
+  String get commandUnavailableHere =>
+      'Questo comando non è disponibile per questa conversazione.';
+
+  @override
+  String get commandThinkingShown => 'Ragionamento visibile';
+
+  @override
+  String get commandThinkingHidden => 'Ragionamento nascosto';
 }

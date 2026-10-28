@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "Favoriten und zuletzt verwendete Modelle können auf diesem Gerät gerade nicht gespeichert werden.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "Agentenauswahl öffnen",
+  "chatSlashCommandCompact": "Kontext der aktuellen Sitzung komprimieren",
+  "chatSlashCommandHelp": "Befehlshilfe anzeigen",
+  "chatSlashCommandModels": "Modellauswahl öffnen",
+  "chatSlashCommandNew": "Neue Chat-Sitzung erstellen",
+  "chatSlashCommandRedo": "Letzten rückgängig gemachten Schritt wiederholen",
+  "chatSlashCommandSessions": "Konversationsliste öffnen",
+  "chatSlashCommandThinking": "Denkblasen umschalten",
+  "chatSlashCommandUndo": "Letzten sichtbaren Benutzer-Schritt rückgängig machen",
+  "commandsTitle": "Befehle",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "Gib / in das Nachrichtenfeld ein, um einen Befehl zu wählen.",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "Dieser Befehl ist in dieser Version noch nicht verfügbar.",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "Dieser Befehl funktioniert in einer Unterhaltung. Sende eine erste Nachricht, um eine zu beginnen.",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "Dieser Befehl ist für diese Unterhaltung nicht verfügbar.",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "Denkprozess eingeblendet",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "Denkprozess ausgeblendet",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

@@ -2206,4 +2206,57 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'এই মুহূর্তে এই ডিভাইসে প্রিয় ও সাম্প্রতিক মডেল সংরক্ষণ করা যাচ্ছে না।';
+
+  @override
+  String get chatSlashCommandAgent => 'এজেন্ট নির্বাচক খুলুন';
+
+  @override
+  String get chatSlashCommandCompact =>
+      'বর্তমান সেশনের প্রসঙ্গ কম্প্যাক্ট করুন';
+
+  @override
+  String get chatSlashCommandHelp => 'কমান্ড সাহায্য দেখান';
+
+  @override
+  String get chatSlashCommandModels => 'মডেল নির্বাচক খুলুন';
+
+  @override
+  String get chatSlashCommandNew => 'নতুন চ্যাট সেশন তৈরি করুন';
+
+  @override
+  String get chatSlashCommandRedo =>
+      'শেষ পূর্বাবস্থায় ফেরানো পালা পুনরায় করুন';
+
+  @override
+  String get chatSlashCommandSessions => 'কথোপকথনের তালিকা খুলুন';
+
+  @override
+  String get chatSlashCommandThinking => 'চিন্তার বুদবুদ টগল করুন';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'শেষ দৃশ্যমান ব্যবহারকারীর পালা পূর্বাবস্থায় ফেরান';
+
+  @override
+  String get commandsTitle => 'কমান্ড';
+
+  @override
+  String get commandsHint => 'কমান্ড বেছে নিতে বার্তার ঘরে / লিখুন।';
+
+  @override
+  String get commandNotYetAvailable => 'এই কমান্ড এই সংস্করণে এখনও উপলব্ধ নয়।';
+
+  @override
+  String get commandNeedsConversation =>
+      'এই কমান্ড কথোপকথনের ভেতরে কাজ করে। একটি শুরু করতে প্রথম বার্তা পাঠান।';
+
+  @override
+  String get commandUnavailableHere =>
+      'এই কথোপকথনের জন্য এই কমান্ড উপলব্ধ নয়।';
+
+  @override
+  String get commandThinkingShown => 'চিন্তা দেখানো হচ্ছে';
+
+  @override
+  String get commandThinkingHidden => 'চিন্তা লুকানো হয়েছে';
 }

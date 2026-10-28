@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "Открыть выбор агента",
+  "chatSlashCommandCompact": "Сжать контекст текущей сессии",
+  "chatSlashCommandHelp": "Показать справку по командам",
+  "chatSlashCommandModels": "Открыть выбор модели",
+  "chatSlashCommandNew": "Создать новую сессию чата",
+  "chatSlashCommandRedo": "Повторить последний отмененный ход",
+  "chatSlashCommandSessions": "Открыть список диалогов",
+  "chatSlashCommandThinking": "Показать или скрыть пузырьки размышлений",
+  "chatSlashCommandUndo": "Отменить последний видимый ход пользователя",
+  "commandsTitle": "Команды",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "Введите / в поле сообщения, чтобы выбрать команду.",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "Эта команда пока недоступна в этой версии.",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "Эта команда работает внутри беседы. Отправьте первое сообщение, чтобы начать её.",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "Эта команда недоступна для этой беседы.",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "Рассуждения показаны",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "Рассуждения скрыты",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

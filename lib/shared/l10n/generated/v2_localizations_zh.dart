@@ -2074,4 +2074,52 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveModelPreferencesUnsaved => '目前无法在此设备上保存收藏和最近使用的模型。';
+
+  @override
+  String get chatSlashCommandAgent => '打开智能体选择器';
+
+  @override
+  String get chatSlashCommandCompact => '压缩当前会话上下文';
+
+  @override
+  String get chatSlashCommandHelp => '显示命令帮助';
+
+  @override
+  String get chatSlashCommandModels => '打开模型选择器';
+
+  @override
+  String get chatSlashCommandNew => '创建新的聊天会话';
+
+  @override
+  String get chatSlashCommandRedo => '重做上一个已撤销的操作';
+
+  @override
+  String get chatSlashCommandSessions => '打开会话列表';
+
+  @override
+  String get chatSlashCommandThinking => '切换思考气泡';
+
+  @override
+  String get chatSlashCommandUndo => '撤销上一条可见的用户消息';
+
+  @override
+  String get commandsTitle => '命令';
+
+  @override
+  String get commandsHint => '在消息框中输入 / 以选择命令。';
+
+  @override
+  String get commandNotYetAvailable => '此版本尚不支持该命令。';
+
+  @override
+  String get commandNeedsConversation => '该命令需在对话中使用。发送第一条消息以开始对话。';
+
+  @override
+  String get commandUnavailableHere => '该命令不适用于此对话。';
+
+  @override
+  String get commandThinkingShown => '已显示思考过程';
+
+  @override
+  String get commandThinkingHidden => '已隐藏思考过程';
 }

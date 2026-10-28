@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "এই মুহূর্তে এই ডিভাইসে প্রিয় ও সাম্প্রতিক মডেল সংরক্ষণ করা যাচ্ছে না।",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "এজেন্ট নির্বাচক খুলুন",
+  "chatSlashCommandCompact": "বর্তমান সেশনের প্রসঙ্গ কম্প্যাক্ট করুন",
+  "chatSlashCommandHelp": "কমান্ড সাহায্য দেখান",
+  "chatSlashCommandModels": "মডেল নির্বাচক খুলুন",
+  "chatSlashCommandNew": "নতুন চ্যাট সেশন তৈরি করুন",
+  "chatSlashCommandRedo": "শেষ পূর্বাবস্থায় ফেরানো পালা পুনরায় করুন",
+  "chatSlashCommandSessions": "কথোপকথনের তালিকা খুলুন",
+  "chatSlashCommandThinking": "চিন্তার বুদবুদ টগল করুন",
+  "chatSlashCommandUndo": "শেষ দৃশ্যমান ব্যবহারকারীর পালা পূর্বাবস্থায় ফেরান",
+  "commandsTitle": "কমান্ড",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "কমান্ড বেছে নিতে বার্তার ঘরে / লিখুন।",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "এই কমান্ড এই সংস্করণে এখনও উপলব্ধ নয়।",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "এই কমান্ড কথোপকথনের ভেতরে কাজ করে। একটি শুরু করতে প্রথম বার্তা পাঠান।",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "এই কথোপকথনের জন্য এই কমান্ড উপলব্ধ নয়।",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "চিন্তা দেখানো হচ্ছে",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "চিন্তা লুকানো হয়েছে",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

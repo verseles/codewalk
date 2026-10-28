@@ -2213,4 +2213,55 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Favorites and recent models cannot be saved on this device right now.';
+
+  @override
+  String get chatSlashCommandAgent => 'Open agent selector';
+
+  @override
+  String get chatSlashCommandCompact => 'Compact current session context';
+
+  @override
+  String get chatSlashCommandHelp => 'Show command help';
+
+  @override
+  String get chatSlashCommandModels => 'Open model selector';
+
+  @override
+  String get chatSlashCommandNew => 'Create a new chat session';
+
+  @override
+  String get chatSlashCommandRedo => 'Redo the last undone turn';
+
+  @override
+  String get chatSlashCommandSessions => 'Open conversations list';
+
+  @override
+  String get chatSlashCommandThinking => 'Toggle thinking bubbles';
+
+  @override
+  String get chatSlashCommandUndo => 'Undo the last visible user turn';
+
+  @override
+  String get commandsTitle => 'Commands';
+
+  @override
+  String get commandsHint => 'Type / in the message field to pick a command.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'This command is not available in this version yet.';
+
+  @override
+  String get commandNeedsConversation =>
+      'This command works inside a conversation. Send a first message to start one.';
+
+  @override
+  String get commandUnavailableHere =>
+      'This command is not available for this conversation.';
+
+  @override
+  String get commandThinkingShown => 'Thinking shown';
+
+  @override
+  String get commandThinkingHidden => 'Thinking hidden';
 }

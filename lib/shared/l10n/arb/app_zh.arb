@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "目前无法在此设备上保存收藏和最近使用的模型。",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "打开智能体选择器",
+  "chatSlashCommandCompact": "压缩当前会话上下文",
+  "chatSlashCommandHelp": "显示命令帮助",
+  "chatSlashCommandModels": "打开模型选择器",
+  "chatSlashCommandNew": "创建新的聊天会话",
+  "chatSlashCommandRedo": "重做上一个已撤销的操作",
+  "chatSlashCommandSessions": "打开会话列表",
+  "chatSlashCommandThinking": "切换思考气泡",
+  "chatSlashCommandUndo": "撤销上一条可见的用户消息",
+  "commandsTitle": "命令",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "在消息框中输入 / 以选择命令。",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "此版本尚不支持该命令。",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "该命令需在对话中使用。发送第一条消息以开始对话。",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "该命令不适用于此对话。",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "已显示思考过程",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "已隐藏思考过程",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

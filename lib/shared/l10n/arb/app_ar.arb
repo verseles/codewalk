@@ -1630,5 +1630,42 @@
   "liveModelPreferencesUnsaved": "يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "فتح محدد الوكلاء",
+  "chatSlashCommandCompact": "ضغط سياق الجلسة الحالية",
+  "chatSlashCommandHelp": "إظهار تعليمات الأمر",
+  "chatSlashCommandModels": "فتح محدد النماذج",
+  "chatSlashCommandNew": "إنشاء جلسة دردشة جديدة",
+  "chatSlashCommandRedo": "إعادة إجراء آخر دور تم التراجع عنه",
+  "chatSlashCommandSessions": "فتح قائمة المحادثات",
+  "chatSlashCommandThinking": "تبديل فقاعات التفكير",
+  "chatSlashCommandUndo": "التراجع عن آخر دور ظاهر للمستخدم",
+  "commandsTitle": "الأوامر",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "اكتب / في حقل الرسالة لاختيار أمر.",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "هذا الأمر غير متاح بعد في هذا الإصدار.",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "يعمل هذا الأمر داخل محادثة. أرسل رسالة أولى لبدء محادثة.",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "هذا الأمر غير متاح لهذه المحادثة.",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "تم إظهار التفكير",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "تم إخفاء التفكير",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

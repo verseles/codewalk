@@ -2115,4 +2115,53 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveModelPreferencesUnsaved => '現在、このデバイスにお気に入りと最近のモデルを保存できません。';
+
+  @override
+  String get chatSlashCommandAgent => 'エージェント選択を開く';
+
+  @override
+  String get chatSlashCommandCompact => '現在のセッションのコンテキストを圧縮';
+
+  @override
+  String get chatSlashCommandHelp => 'コマンドのヘルプを表示';
+
+  @override
+  String get chatSlashCommandModels => 'モデル選択を開く';
+
+  @override
+  String get chatSlashCommandNew => '新しいチャットセッションを作成';
+
+  @override
+  String get chatSlashCommandRedo => '元に戻した最後のターンをやり直す';
+
+  @override
+  String get chatSlashCommandSessions => '会話一覧を開く';
+
+  @override
+  String get chatSlashCommandThinking => '思考プロセスバブルの表示を切り替え';
+
+  @override
+  String get chatSlashCommandUndo => '最後に表示されたユーザーターンを元に戻す';
+
+  @override
+  String get commandsTitle => 'コマンド';
+
+  @override
+  String get commandsHint => 'メッセージ欄に / を入力してコマンドを選びます。';
+
+  @override
+  String get commandNotYetAvailable => 'このコマンドはこのバージョンではまだ使えません。';
+
+  @override
+  String get commandNeedsConversation =>
+      'このコマンドは会話の中で使えます。最初のメッセージを送って会話を始めてください。';
+
+  @override
+  String get commandUnavailableHere => 'このコマンドはこの会話では使えません。';
+
+  @override
+  String get commandThinkingShown => '思考を表示しました';
+
+  @override
+  String get commandThinkingHidden => '思考を非表示にしました';
 }

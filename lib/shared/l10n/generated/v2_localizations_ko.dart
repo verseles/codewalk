@@ -2116,4 +2116,53 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       '지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.';
+
+  @override
+  String get chatSlashCommandAgent => '에이전트 선택기 열기';
+
+  @override
+  String get chatSlashCommandCompact => '현재 세션 컨텍스트 압축';
+
+  @override
+  String get chatSlashCommandHelp => '명령 도움말 표시';
+
+  @override
+  String get chatSlashCommandModels => '모델 선택기 열기';
+
+  @override
+  String get chatSlashCommandNew => '새 채팅 세션 만들기';
+
+  @override
+  String get chatSlashCommandRedo => '실행 취소한 마지막 턴 다시 실행';
+
+  @override
+  String get chatSlashCommandSessions => '대화 목록 열기';
+
+  @override
+  String get chatSlashCommandThinking => '생각 풍선 표시 전환';
+
+  @override
+  String get chatSlashCommandUndo => '마지막으로 표시된 사용자 턴 실행 취소';
+
+  @override
+  String get commandsTitle => '명령';
+
+  @override
+  String get commandsHint => '메시지 입력란에 /를 입력해 명령을 선택하세요.';
+
+  @override
+  String get commandNotYetAvailable => '이 명령은 이 버전에서 아직 사용할 수 없습니다.';
+
+  @override
+  String get commandNeedsConversation =>
+      '이 명령은 대화 안에서 작동합니다. 첫 메시지를 보내 대화를 시작하세요.';
+
+  @override
+  String get commandUnavailableHere => '이 명령은 이 대화에서 사용할 수 없습니다.';
+
+  @override
+  String get commandThinkingShown => '사고 과정 표시됨';
+
+  @override
+  String get commandThinkingHidden => '사고 과정 숨겨짐';
 }

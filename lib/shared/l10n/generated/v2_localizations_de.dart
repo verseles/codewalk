@@ -2258,4 +2258,59 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Favoriten und zuletzt verwendete Modelle können auf diesem Gerät gerade nicht gespeichert werden.';
+
+  @override
+  String get chatSlashCommandAgent => 'Agentenauswahl öffnen';
+
+  @override
+  String get chatSlashCommandCompact =>
+      'Kontext der aktuellen Sitzung komprimieren';
+
+  @override
+  String get chatSlashCommandHelp => 'Befehlshilfe anzeigen';
+
+  @override
+  String get chatSlashCommandModels => 'Modellauswahl öffnen';
+
+  @override
+  String get chatSlashCommandNew => 'Neue Chat-Sitzung erstellen';
+
+  @override
+  String get chatSlashCommandRedo =>
+      'Letzten rückgängig gemachten Schritt wiederholen';
+
+  @override
+  String get chatSlashCommandSessions => 'Konversationsliste öffnen';
+
+  @override
+  String get chatSlashCommandThinking => 'Denkblasen umschalten';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Letzten sichtbaren Benutzer-Schritt rückgängig machen';
+
+  @override
+  String get commandsTitle => 'Befehle';
+
+  @override
+  String get commandsHint =>
+      'Gib / in das Nachrichtenfeld ein, um einen Befehl zu wählen.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'Dieser Befehl ist in dieser Version noch nicht verfügbar.';
+
+  @override
+  String get commandNeedsConversation =>
+      'Dieser Befehl funktioniert in einer Unterhaltung. Sende eine erste Nachricht, um eine zu beginnen.';
+
+  @override
+  String get commandUnavailableHere =>
+      'Dieser Befehl ist für diese Unterhaltung nicht verfügbar.';
+
+  @override
+  String get commandThinkingShown => 'Denkprozess eingeblendet';
+
+  @override
+  String get commandThinkingHidden => 'Denkprozess ausgeblendet';
 }

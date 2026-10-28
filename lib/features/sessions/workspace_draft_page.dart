@@ -11,6 +11,8 @@ import '../../shared/sessions/session_actions.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
+import 'session_builtin_commands.dart';
+import 'session_command_picker.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
 
@@ -39,11 +41,13 @@ class WorkspaceDraftPage extends StatefulWidget {
 class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
   final _directory = TextEditingController();
   final _composerFocus = FocusNode();
+  late final _commands = SessionCommandMenu(widget.controller.draft);
   bool _invalidPath = false;
   @override
   void dispose() {
     _directory.dispose();
     _composerFocus.dispose();
+    _commands.dispose();
     super.dispose();
   }
 
@@ -60,8 +64,24 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
     unawaited(widget.controller.openDraft(directory: path));
   }
 
+  /// A local command runs whenever no send is pending.
+  static bool _canSend(WorkspaceDraftController c) =>
+      parseSessionBuiltinCommand(c.draft.text) != null ? !c.sending : c.canSend;
+
+  /// Runs a local `/` command, which never becomes the first prompt (#137).
+  void _run(SessionBuiltinCommand command) {
+    widget.controller.draft.clear();
+    unawaited(runSessionBuiltinCommand(context, command));
+  }
+
   /// Sends the first prompt, then opens the session it created.
-  void _send(WorkspaceDraftController c) => unawaited(
+  void _send(WorkspaceDraftController c) {
+    final command = parseSessionBuiltinCommand(c.draft.text);
+    if (command != null) return _run(command);
+    _sendPrompt(c);
+  }
+
+  void _sendPrompt(WorkspaceDraftController c) => unawaited(
     c.sendFirstPrompt(
       onBound: (ref, _, _) {
         if (mounted) {
@@ -212,61 +232,81 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 24),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              child: Focus(
-                                // A physical Enter sends; Shift+Enter breaks
-                                // the line (#174).
-                                onKeyEvent: (_, event) {
-                                  if (!isComposerSendKey(
-                                    event,
-                                    c.draft.value,
-                                  )) {
-                                    return KeyEventResult.ignored;
-                                  }
-                                  if (c.canSend) _send(c);
-                                  return KeyEventResult.handled;
-                                },
-                                child: ComposerBubble(
-                                  child: ConversationTextScale(
-                                    child: TextField(
-                                      key: const ValueKey(
-                                        'workspace-draft-text',
-                                      ),
-                                      controller: c.draft,
-                                      focusNode: _composerFocus,
-                                      enabled: !c.sending,
-                                      readOnly: c.endpointOffline,
-                                      minLines: 1,
-                                      maxLines: 6,
-                                      keyboardType: TextInputType.multiline,
-                                      textCapitalization:
-                                          TextCapitalization.sentences,
-                                      autocorrect: composerSuggests(context),
-                                      enableSuggestions: composerSuggests(
-                                        context,
-                                      ),
-                                      spellCheckConfiguration:
-                                          composerSpellCheckConfiguration(
+                            SessionCommandPicker(menu: _commands, onRun: _run),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Focus(
+                                    // A physical Enter sends; Shift+Enter breaks
+                                    // the line (#174).
+                                    onKeyEvent: (_, event) {
+                                      if (_commands.handleKey(
+                                            event,
+                                            l10n,
+                                            _run,
+                                          ) ==
+                                          KeyEventResult.handled) {
+                                        return KeyEventResult.handled;
+                                      }
+                                      if (!isComposerSendKey(
+                                        event,
+                                        c.draft.value,
+                                      )) {
+                                        return KeyEventResult.ignored;
+                                      }
+                                      if (_canSend(c)) _send(c);
+                                      return KeyEventResult.handled;
+                                    },
+                                    child: ComposerBubble(
+                                      child: ConversationTextScale(
+                                        child: TextField(
+                                          key: const ValueKey(
+                                            'workspace-draft-text',
+                                          ),
+                                          controller: c.draft,
+                                          focusNode: _composerFocus,
+                                          enabled: !c.sending,
+                                          readOnly: c.endpointOffline,
+                                          minLines: 1,
+                                          maxLines: 6,
+                                          keyboardType: TextInputType.multiline,
+                                          textCapitalization:
+                                              TextCapitalization.sentences,
+                                          autocorrect: composerSuggests(
                                             context,
                                           ),
-                                      decoration: composerDecoration(
-                                        context,
-                                        l10n.composerHint,
+                                          enableSuggestions: composerSuggests(
+                                            context,
+                                          ),
+                                          spellCheckConfiguration:
+                                              composerSpellCheckConfiguration(
+                                                context,
+                                              ),
+                                          decoration: composerDecoration(
+                                            context,
+                                            l10n.composerHint,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ComposerSendButton(
-                              buttonKey: const ValueKey('workspace-draft-send'),
-                              tooltip: c.sending
-                                  ? l10n.composerSending
-                                  : l10n.composerSend,
-                              onPressed: c.canSend ? () => _send(c) : null,
+                                const SizedBox(width: 8),
+                                ComposerSendButton(
+                                  buttonKey: const ValueKey(
+                                    'workspace-draft-send',
+                                  ),
+                                  tooltip: c.sending
+                                      ? l10n.composerSending
+                                      : l10n.composerSend,
+                                  onPressed: _canSend(c)
+                                      ? () => _send(c)
+                                      : null,
+                                ),
+                              ],
                             ),
                           ],
                         ),

@@ -2256,4 +2256,59 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Les favoris et les modèles récents ne peuvent pas être enregistrés sur cet appareil pour le moment.';
+
+  @override
+  String get chatSlashCommandAgent => 'Ouvrir le sélecteur d\'agents';
+
+  @override
+  String get chatSlashCommandCompact =>
+      'Compacter le contexte de la session en cours';
+
+  @override
+  String get chatSlashCommandHelp => 'Afficher l\'aide des commandes';
+
+  @override
+  String get chatSlashCommandModels => 'Ouvrir le sélecteur de modèles';
+
+  @override
+  String get chatSlashCommandNew => 'Créer une nouvelle session de chat';
+
+  @override
+  String get chatSlashCommandRedo => 'Rétablir le dernier tour annulé';
+
+  @override
+  String get chatSlashCommandSessions => 'Ouvrir la liste des conversations';
+
+  @override
+  String get chatSlashCommandThinking =>
+      'Afficher ou masquer les bulles de réflexion';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Annuler le dernier tour visible de l\'utilisateur';
+
+  @override
+  String get commandsTitle => 'Commandes';
+
+  @override
+  String get commandsHint =>
+      'Tapez / dans le champ de message pour choisir une commande.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'Cette commande n’est pas encore disponible dans cette version.';
+
+  @override
+  String get commandNeedsConversation =>
+      'Cette commande fonctionne dans une conversation. Envoyez un premier message pour en démarrer une.';
+
+  @override
+  String get commandUnavailableHere =>
+      'Cette commande n’est pas disponible pour cette conversation.';
+
+  @override
+  String get commandThinkingShown => 'Raisonnement affiché';
+
+  @override
+  String get commandThinkingHidden => 'Raisonnement masqué';
 }

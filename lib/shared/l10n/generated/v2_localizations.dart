@@ -4021,6 +4021,102 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Favorites and recent models cannot be saved on this device right now.'**
   String get liveModelPreferencesUnsaved;
+
+  /// CodeWalk UI string — chatSlashCommandAgent
+  ///
+  /// In en, this message translates to:
+  /// **'Open agent selector'**
+  String get chatSlashCommandAgent;
+
+  /// CodeWalk UI string — chatSlashCommandCompact
+  ///
+  /// In en, this message translates to:
+  /// **'Compact current session context'**
+  String get chatSlashCommandCompact;
+
+  /// CodeWalk UI string — chatSlashCommandHelp
+  ///
+  /// In en, this message translates to:
+  /// **'Show command help'**
+  String get chatSlashCommandHelp;
+
+  /// CodeWalk UI string — chatSlashCommandModels
+  ///
+  /// In en, this message translates to:
+  /// **'Open model selector'**
+  String get chatSlashCommandModels;
+
+  /// CodeWalk UI string — chatSlashCommandNew
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new chat session'**
+  String get chatSlashCommandNew;
+
+  /// CodeWalk UI string — chatSlashCommandRedo
+  ///
+  /// In en, this message translates to:
+  /// **'Redo the last undone turn'**
+  String get chatSlashCommandRedo;
+
+  /// CodeWalk UI string — chatSlashCommandSessions
+  ///
+  /// In en, this message translates to:
+  /// **'Open conversations list'**
+  String get chatSlashCommandSessions;
+
+  /// CodeWalk UI string — chatSlashCommandThinking
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle thinking bubbles'**
+  String get chatSlashCommandThinking;
+
+  /// CodeWalk UI string — chatSlashCommandUndo
+  ///
+  /// In en, this message translates to:
+  /// **'Undo the last visible user turn'**
+  String get chatSlashCommandUndo;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'Commands'**
+  String get commandsTitle;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'Type / in the message field to pick a command.'**
+  String get commandsHint;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'This command is not available in this version yet.'**
+  String get commandNotYetAvailable;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'This command works inside a conversation. Send a first message to start one.'**
+  String get commandNeedsConversation;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'This command is not available for this conversation.'**
+  String get commandUnavailableHere;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking shown'**
+  String get commandThinkingShown;
+
+  /// V2 local composer commands
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking hidden'**
+  String get commandThinkingHidden;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -2215,4 +2215,55 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।';
+
+  @override
+  String get chatSlashCommandAgent => 'एजेंट चयनकर्ता खोलें';
+
+  @override
+  String get chatSlashCommandCompact => 'वर्तमान सत्र संदर्भ संक्षिप्त करें';
+
+  @override
+  String get chatSlashCommandHelp => 'कमांड सहायता दिखाएँ';
+
+  @override
+  String get chatSlashCommandModels => 'मॉडल चयनकर्ता खोलें';
+
+  @override
+  String get chatSlashCommandNew => 'नया चैट सत्र बनाएँ';
+
+  @override
+  String get chatSlashCommandRedo => 'अंतिम अनडू किया गया टर्न रीडू करें';
+
+  @override
+  String get chatSlashCommandSessions => 'बातचीत सूची खोलें';
+
+  @override
+  String get chatSlashCommandThinking => 'थिंकिंग बबल्स टॉगल करें';
+
+  @override
+  String get chatSlashCommandUndo => 'अंतिम दृश्यमान उपयोगकर्ता टर्न अनडू करें';
+
+  @override
+  String get commandsTitle => 'कमांड';
+
+  @override
+  String get commandsHint => 'कमांड चुनने के लिए संदेश फ़ील्ड में / लिखें।';
+
+  @override
+  String get commandNotYetAvailable =>
+      'यह कमांड इस संस्करण में अभी उपलब्ध नहीं है।';
+
+  @override
+  String get commandNeedsConversation =>
+      'यह कमांड बातचीत के अंदर काम करती है। बातचीत शुरू करने के लिए पहला संदेश भेजें।';
+
+  @override
+  String get commandUnavailableHere =>
+      'यह कमांड इस बातचीत के लिए उपलब्ध नहीं है।';
+
+  @override
+  String get commandThinkingShown => 'सोच दिखाई गई';
+
+  @override
+  String get commandThinkingHidden => 'सोच छिपाई गई';
 }

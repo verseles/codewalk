@@ -2239,4 +2239,57 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Não é possível salvar favoritos e modelos recentes neste dispositivo agora.';
+
+  @override
+  String get chatSlashCommandAgent => 'Abrir seletor de agentes';
+
+  @override
+  String get chatSlashCommandCompact => 'Compactar o contexto da sessão atual';
+
+  @override
+  String get chatSlashCommandHelp => 'Mostrar ajuda de comandos';
+
+  @override
+  String get chatSlashCommandModels => 'Abrir seletor de modelos';
+
+  @override
+  String get chatSlashCommandNew => 'Criar uma nova sessão de chat';
+
+  @override
+  String get chatSlashCommandRedo => 'Refazer o último turno desfeito';
+
+  @override
+  String get chatSlashCommandSessions => 'Abrir lista de conversas';
+
+  @override
+  String get chatSlashCommandThinking => 'Alternar balões de pensamento';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Desfazer o último turno visível do usuário';
+
+  @override
+  String get commandsTitle => 'Comandos';
+
+  @override
+  String get commandsHint =>
+      'Digite / no campo de mensagem para escolher um comando.';
+
+  @override
+  String get commandNotYetAvailable =>
+      'Este comando ainda não está disponível nesta versão.';
+
+  @override
+  String get commandNeedsConversation =>
+      'Este comando funciona dentro de uma conversa. Envie uma primeira mensagem para começar uma.';
+
+  @override
+  String get commandUnavailableHere =>
+      'Este comando não está disponível para esta conversa.';
+
+  @override
+  String get commandThinkingShown => 'Raciocínio exibido';
+
+  @override
+  String get commandThinkingHidden => 'Raciocínio oculto';
 }

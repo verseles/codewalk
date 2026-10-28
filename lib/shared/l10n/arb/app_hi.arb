@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "एजेंट चयनकर्ता खोलें",
+  "chatSlashCommandCompact": "वर्तमान सत्र संदर्भ संक्षिप्त करें",
+  "chatSlashCommandHelp": "कमांड सहायता दिखाएँ",
+  "chatSlashCommandModels": "मॉडल चयनकर्ता खोलें",
+  "chatSlashCommandNew": "नया चैट सत्र बनाएँ",
+  "chatSlashCommandRedo": "अंतिम अनडू किया गया टर्न रीडू करें",
+  "chatSlashCommandSessions": "बातचीत सूची खोलें",
+  "chatSlashCommandThinking": "थिंकिंग बबल्स टॉगल करें",
+  "chatSlashCommandUndo": "अंतिम दृश्यमान उपयोगकर्ता टर्न अनडू करें",
+  "commandsTitle": "कमांड",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "कमांड चुनने के लिए संदेश फ़ील्ड में / लिखें।",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "यह कमांड इस संस्करण में अभी उपलब्ध नहीं है।",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "यह कमांड बातचीत के अंदर काम करती है। बातचीत शुरू करने के लिए पहला संदेश भेजें।",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "यह कमांड इस बातचीत के लिए उपलब्ध नहीं है।",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "सोच दिखाई गई",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "सोच छिपाई गई",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

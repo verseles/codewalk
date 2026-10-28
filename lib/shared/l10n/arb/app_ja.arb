@@ -1631,5 +1631,42 @@
   "liveModelPreferencesUnsaved": "現在、このデバイスにお気に入りと最近のモデルを保存できません。",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "エージェント選択を開く",
+  "chatSlashCommandCompact": "現在のセッションのコンテキストを圧縮",
+  "chatSlashCommandHelp": "コマンドのヘルプを表示",
+  "chatSlashCommandModels": "モデル選択を開く",
+  "chatSlashCommandNew": "新しいチャットセッションを作成",
+  "chatSlashCommandRedo": "元に戻した最後のターンをやり直す",
+  "chatSlashCommandSessions": "会話一覧を開く",
+  "chatSlashCommandThinking": "思考プロセスバブルの表示を切り替え",
+  "chatSlashCommandUndo": "最後に表示されたユーザーターンを元に戻す",
+  "commandsTitle": "コマンド",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "メッセージ欄に / を入力してコマンドを選びます。",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "このコマンドはこのバージョンではまだ使えません。",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "このコマンドは会話の中で使えます。最初のメッセージを送って会話を始めてください。",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "このコマンドはこの会話では使えません。",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "思考を表示しました",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "思考を非表示にしました",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

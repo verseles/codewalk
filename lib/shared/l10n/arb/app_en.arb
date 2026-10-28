@@ -2742,5 +2742,69 @@
   "liveModelPreferencesUnsaved": "Favorites and recent models cannot be saved on this device right now.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
+  },
+  "chatSlashCommandAgent": "Open agent selector",
+  "@chatSlashCommandAgent": {
+    "description": "CodeWalk UI string — chatSlashCommandAgent"
+  },
+  "chatSlashCommandCompact": "Compact current session context",
+  "@chatSlashCommandCompact": {
+    "description": "CodeWalk UI string — chatSlashCommandCompact"
+  },
+  "chatSlashCommandHelp": "Show command help",
+  "@chatSlashCommandHelp": {
+    "description": "CodeWalk UI string — chatSlashCommandHelp"
+  },
+  "chatSlashCommandModels": "Open model selector",
+  "@chatSlashCommandModels": {
+    "description": "CodeWalk UI string — chatSlashCommandModels"
+  },
+  "chatSlashCommandNew": "Create a new chat session",
+  "@chatSlashCommandNew": {
+    "description": "CodeWalk UI string — chatSlashCommandNew"
+  },
+  "chatSlashCommandRedo": "Redo the last undone turn",
+  "@chatSlashCommandRedo": {
+    "description": "CodeWalk UI string — chatSlashCommandRedo"
+  },
+  "chatSlashCommandSessions": "Open conversations list",
+  "@chatSlashCommandSessions": {
+    "description": "CodeWalk UI string — chatSlashCommandSessions"
+  },
+  "chatSlashCommandThinking": "Toggle thinking bubbles",
+  "@chatSlashCommandThinking": {
+    "description": "CodeWalk UI string — chatSlashCommandThinking"
+  },
+  "chatSlashCommandUndo": "Undo the last visible user turn",
+  "@chatSlashCommandUndo": {
+    "description": "CodeWalk UI string — chatSlashCommandUndo"
+  },
+  "commandsTitle": "Commands",
+  "@commandsTitle": {
+    "description": "V2 local composer commands"
+  },
+  "commandsHint": "Type / in the message field to pick a command.",
+  "@commandsHint": {
+    "description": "V2 local composer commands"
+  },
+  "commandNotYetAvailable": "This command is not available in this version yet.",
+  "@commandNotYetAvailable": {
+    "description": "V2 local composer commands"
+  },
+  "commandNeedsConversation": "This command works inside a conversation. Send a first message to start one.",
+  "@commandNeedsConversation": {
+    "description": "V2 local composer commands"
+  },
+  "commandUnavailableHere": "This command is not available for this conversation.",
+  "@commandUnavailableHere": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingShown": "Thinking shown",
+  "@commandThinkingShown": {
+    "description": "V2 local composer commands"
+  },
+  "commandThinkingHidden": "Thinking hidden",
+  "@commandThinkingHidden": {
+    "description": "V2 local composer commands"
   }
 }

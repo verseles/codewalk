@@ -14,6 +14,8 @@ import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
+import 'session_builtin_commands.dart';
+import 'session_command_picker.dart';
 import 'session_composer_controller.dart';
 import 'session_composer_controls.dart';
 import 'session_composer_status.dart';
@@ -51,6 +53,10 @@ class SessionComposer extends StatefulWidget {
 class _SessionComposerState extends State<SessionComposer> {
   TextEditingController get _text => widget.text;
   DateTime? _escapeAt;
+  late final SessionCommandMenu _commands = SessionCommandMenu(_text);
+
+  /// The agent chip, where `/agent` opens its menu.
+  final _agentAnchor = GlobalKey();
 
   /// Up and Down recall the session's prompts on a desktop keyboard, as in
   /// v1; a phone has no recall gesture.
@@ -63,6 +69,10 @@ class _SessionComposerState extends State<SessionComposer> {
       }.contains(defaultTargetPlatform);
 
   KeyEventResult _key(FocusNode node, KeyEvent event) {
+    if (_commands.handleKey(event, context.v2L10n, _pick) ==
+        KeyEventResult.handled) {
+      return KeyEventResult.handled;
+    }
     if (isComposerSendKey(event, _text.value)) {
       // The key never breaks the line; with nothing to send it does nothing,
       // and the field keeps its focus either way (#174).
@@ -160,6 +170,7 @@ class _SessionComposerState extends State<SessionComposer> {
   @override
   void dispose() {
     _text.removeListener(_textChanged);
+    _commands.dispose();
     super.dispose();
   }
 
@@ -173,8 +184,25 @@ class _SessionComposerState extends State<SessionComposer> {
 
   void _textChanged() => setState(() {});
 
-  bool get _canSend =>
-      widget.controller.canSend && _text.text.trim().isNotEmpty;
+  /// A local command runs whenever no send is pending; text needs a
+  /// session that can take it.
+  bool get _canSend => parseSessionBuiltinCommand(_text.text) != null
+      ? !widget.controller.sending
+      : widget.controller.canSend && _text.text.trim().isNotEmpty;
+
+  void _pick(SessionBuiltinCommand command) => unawaited(_run(command));
+
+  /// Runs a local `/` command in place of a send; the command leaves the
+  /// field, as in v1 (#137).
+  Future<void> _run(SessionBuiltinCommand command) {
+    _text.clear();
+    return runSessionBuiltinCommand(
+      context,
+      command,
+      live: widget.controller.live,
+      agentAnchor: _agentAnchor,
+    );
+  }
 
   /// A double tap on the empty Send of a session the server reports idle
   /// continues it, once, through the same send as typed text (#82).
@@ -200,6 +228,8 @@ class _SessionComposerState extends State<SessionComposer> {
   Future<void> _send() async {
     final draft = _text;
     final sent = draft.text;
+    final command = parseSessionBuiltinCommand(sent);
+    if (command != null) return _run(command);
     final clear = await widget.controller.send(sent);
     // Text typed while the send was pending is the user's, never cleared.
     if (clear && draft.text == sent) draft.clear();
@@ -497,6 +527,7 @@ class _SessionComposerState extends State<SessionComposer> {
               // the composer stays short above a landscape keyboard.
               SessionComposerControls(
                 live: c.live,
+                agentAnchor: _agentAnchor,
                 trailing: [
                   ChoiceChip(
                     key: const ValueKey('live-delivery-steer'),
@@ -514,6 +545,7 @@ class _SessionComposerState extends State<SessionComposer> {
                   ),
                 ],
               ),
+              SessionCommandPicker(menu: _commands, onRun: _pick),
               Row(
                 children: [
                   Expanded(

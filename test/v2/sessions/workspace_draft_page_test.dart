@@ -709,4 +709,66 @@ void main() {
     }
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('a / command on the draft runs locally, never as the first '
+      'prompt (#137)', (tester) async {
+    await open(tester);
+    final text = find.byKey(const ValueKey('workspace-draft-text'));
+    final send = find.byKey(const ValueKey('workspace-draft-send'));
+    await tester.enterText(text, '/mo');
+    await tester.pump();
+    expect(find.byKey(const ValueKey('live-command-model')), findsOneWidget);
+    await tester.enterText(text, '/model');
+    await tester.pump();
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'This command works inside a conversation. Send a first message to '
+        'start one.',
+      ),
+      findsOneWidget,
+    );
+    expect(app.workspaceDrafts!.draft.text, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('app-snack-bar-dismiss')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(text, '/thinking');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('live-command-thinking')));
+    await tester.pumpAndSettle();
+    expect(app.preferences.showReasoning, isFalse);
+    expect(actions.calls.where((c) => c.startsWith('create')), isEmpty);
+    expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
+  });
+
+  testWidgets('the draft picker keeps the field above the keyboard (#278)', (
+    tester,
+  ) async {
+    const size = Size(360, 640);
+    await open(tester, size: size);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: CodeWalkV2Bootstrap(dependencies: app),
+      ),
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('workspace-draft-text')),
+      '/',
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('live-command-picker')), findsOneWidget);
+    final visible = Rect.fromLTRB(0, 0, size.width, size.height - 300);
+    final field = tester.getRect(
+      find.byKey(const ValueKey('workspace-draft-text')),
+    );
+    expect(visible.contains(field.topLeft), isTrue);
+    expect(visible.contains(field.bottomRight - const Offset(1, 1)), isTrue);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
