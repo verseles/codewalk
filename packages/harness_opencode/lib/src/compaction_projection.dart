@@ -94,12 +94,14 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
   // The official reference reducer uses inputID on start, then the last
   // running compaction on terminal. Failed frames can retain inputID without
   // a start. A snapshot may already contain a completed notice without its
-  // native event ID: repair an ambiguous terminal rather than append a guess.
+  // native event ID, or a newer running notice: only a live start proves which
+  // running notice a terminal targets. Repair ambiguity instead of guessing.
   if (type != _started &&
-      input == null &&
-      active == null &&
       duplicate == null &&
-      residentCompaction) {
+      (active != null
+          ? active.meta.source.nativeType != _started ||
+                active.meta.source.nativeEventId == null
+          : input == null && residentCompaction)) {
     _fail(OpenCodeCompactionProjectionFailure.identityUnproven);
   }
   String residentMessage(Notice item) {

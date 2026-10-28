@@ -44,6 +44,75 @@ SessionState apply(SessionState state, List<SessionEvent> events) {
 }
 
 void main() {
+  test('held terminal cannot complete a newer hydrated running notice', () {
+    final empty = SessionState(historyRef);
+    final hydrated = projectOpenCodeHistory(
+      [
+        message('old', 'compaction', {
+          'status': 'completed',
+          'reason': 'manual',
+          'summary': 'Old checkpoint',
+          'recent': '',
+        }),
+        message('new', 'compaction', {
+          'status': 'running',
+          'reason': 'manual',
+          'summary': '',
+          'recent': '',
+        }),
+      ],
+      historyRef,
+      sourceVersion: '2.0.22',
+    );
+    final seed = project(frame('started'), empty).single.meta;
+    final state = apply(empty, [
+      for (final item in hydrated) ItemUpserted(meta: seed, item: item),
+    ]);
+    for (final terminal in [
+      frame('ended', id: 'evt_old_end', data: {'text': 'Old checkpoint'}),
+      frame(
+        'failed',
+        id: 'evt_old_failed',
+        data: {
+          'inputID': 'msg_old',
+          'error': {'type': 'compaction.failed', 'message': 'Old failure'},
+        },
+      ),
+    ]) {
+      expect(
+        () => project(terminal, state, seq: 2),
+        throwsA(
+          isA<OpenCodeCompactionProjectionException>().having(
+            (e) => e.failure,
+            'failure',
+            OpenCodeCompactionProjectionFailure.identityUnproven,
+          ),
+        ),
+      );
+    }
+    // A live start supplies the correlation that history alone cannot prove.
+    var correlated = apply(
+      state,
+      project(
+        frame('started', id: 'evt_new_start', data: {'inputID': 'msg_new'}),
+        state,
+        seq: 3,
+      ),
+    );
+    correlated = apply(
+      correlated,
+      project(
+        frame('ended', id: 'evt_new_end', data: {'text': 'New checkpoint'}),
+        correlated,
+        seq: 4,
+      ),
+    );
+    expect(correlated.timeline.whereType<Notice>().map((item) => item.text), [
+      'Old checkpoint',
+      'New checkpoint',
+    ]);
+  });
+
   test(
     'ended after hydration requires repair rather than a duplicate notice',
     () {
