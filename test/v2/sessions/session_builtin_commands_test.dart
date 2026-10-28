@@ -310,6 +310,25 @@ void main() {
     expect(sessionListDrawerOpen(tester), isTrue);
   });
 
+  testWidgets(
+    'with no room for a row the picker stays shut and takes no keys',
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+    (tester) async {
+      final outbox = FakeOutbox();
+      await _open(tester, outbox, size: const Size(360, 640), keyboard: 540);
+      await tester.tap(_input);
+      await tester.enterText(_input, '/');
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(_picker, findsNothing);
+      // Enter is the field's again: no unseen command runs.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('workspace-draft')), findsNothing);
+      expect(_submits(outbox).single, endsWith(' /'));
+    },
+  );
+
   for (final locale in const [Locale('en'), Locale('ar')]) {
     testWidgets('the picker keeps the field above a phone keyboard (#278, '
         '${locale.languageCode})', (tester) async {

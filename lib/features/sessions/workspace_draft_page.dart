@@ -158,190 +158,202 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
             l10n.sessionsActionUnavailableMarker,
         };
         return LayoutBuilder(
-          builder: (context, box) => SingleChildScrollView(
-            key: const ValueKey('workspace-draft'),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: box.maxHeight),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            l10n.chatNewChat,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 12),
-                          if (c.needsDirectory) ...[
-                            TextField(
-                              key: const ValueKey('workspace-draft-directory'),
-                              controller: _directory,
-                              textDirection: TextDirection.ltr,
-                              decoration: InputDecoration(
-                                labelText: l10n.sessionsCreateProject,
-                                hintText: l10n.sessionsCreateDirectoryHint,
-                                errorText: _invalidPath
-                                    ? l10n.sessionsCreateDirectoryAbsolute
-                                    : null,
-                              ),
-                              onSubmitted: (_) => _chooseDirectory(),
-                            ),
-                            Align(
-                              alignment: AlignmentDirectional.centerEnd,
-                              child: TextButton(
-                                key: const ValueKey(
-                                  'workspace-draft-project-confirm',
-                                ),
-                                onPressed: _chooseDirectory,
-                                child: Text(l10n.sessionsCreateProject),
-                              ),
-                            ),
-                          ] else
-                            Text(
-                              c.currentKey!.canonicalDirectory,
-                              textDirection: TextDirection.ltr,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (notice != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text(
-                                notice,
-                                key: const ValueKey('workspace-draft-notice'),
-                              ),
-                            ),
-                          if (uncertain || failed)
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton(
-                                key: const ValueKey('workspace-draft-reset'),
-                                onPressed: c.sending ? null : c.discardAttempt,
-                                child: Text(l10n.workspaceDraftReset),
-                              ),
-                            ),
-                          if (c.loading) Text(l10n.sessionsLoading),
-                          if (c.endpointOffline &&
-                              c.health != null &&
-                              catalog?.selectedProfile != null)
-                            EndpointHealthRecovery(
-                              profile: catalog!.selectedProfile!,
-                              health: c.health!,
-                            ),
-                          if (!c.needsDirectory &&
-                              !c.loading &&
-                              unavailable != null &&
-                              !c.sending)
-                            Text(unavailable),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 24),
-                        child: Column(
+          builder: (context, box) {
+            // The field scrolls into view with the keyboard open; the `/`
+            // picker keeps above it in what is left: less the field's 20 dp
+            // scroll margin, the page's 16 and the picker's own 4.
+            final pickerRoom =
+                box.maxHeight -
+                MediaQuery.paddingOf(context).bottom -
+                _fieldHeight -
+                40;
+            return SingleChildScrollView(
+              key: const ValueKey('workspace-draft'),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: box.maxHeight),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // The field scrolls into view with the keyboard
-                            // open; the list keeps above it in what is left
-                            // (its 20 dp scroll margin and the page's 16).
-                            SessionCommandPicker(
-                              menu: _commands,
-                              onRun: _run,
-                              maxHeight:
-                                  box.maxHeight -
-                                  MediaQuery.paddingOf(context).bottom -
-                                  _fieldHeight -
-                                  40,
+                            Text(
+                              l10n.chatNewChat,
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            SessionFieldHeightReporter(
-                              onHeight: _fieldMeasured,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Focus(
-                                      // A physical Enter sends; Shift+Enter breaks
-                                      // the line (#174).
-                                      onKeyEvent: (_, event) {
-                                        if (_commands.handleKey(
-                                              event,
-                                              l10n,
-                                              _run,
-                                            ) ==
-                                            KeyEventResult.handled) {
+                            const SizedBox(height: 12),
+                            if (c.needsDirectory) ...[
+                              TextField(
+                                key: const ValueKey(
+                                  'workspace-draft-directory',
+                                ),
+                                controller: _directory,
+                                textDirection: TextDirection.ltr,
+                                decoration: InputDecoration(
+                                  labelText: l10n.sessionsCreateProject,
+                                  hintText: l10n.sessionsCreateDirectoryHint,
+                                  errorText: _invalidPath
+                                      ? l10n.sessionsCreateDirectoryAbsolute
+                                      : null,
+                                ),
+                                onSubmitted: (_) => _chooseDirectory(),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: TextButton(
+                                  key: const ValueKey(
+                                    'workspace-draft-project-confirm',
+                                  ),
+                                  onPressed: _chooseDirectory,
+                                  child: Text(l10n.sessionsCreateProject),
+                                ),
+                              ),
+                            ] else
+                              Text(
+                                c.currentKey!.canonicalDirectory,
+                                textDirection: TextDirection.ltr,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            if (notice != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Text(
+                                  notice,
+                                  key: const ValueKey('workspace-draft-notice'),
+                                ),
+                              ),
+                            if (uncertain || failed)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton(
+                                  key: const ValueKey('workspace-draft-reset'),
+                                  onPressed: c.sending
+                                      ? null
+                                      : c.discardAttempt,
+                                  child: Text(l10n.workspaceDraftReset),
+                                ),
+                              ),
+                            if (c.loading) Text(l10n.sessionsLoading),
+                            if (c.endpointOffline &&
+                                c.health != null &&
+                                catalog?.selectedProfile != null)
+                              EndpointHealthRecovery(
+                                profile: catalog!.selectedProfile!,
+                                health: c.health!,
+                              ),
+                            if (!c.needsDirectory &&
+                                !c.loading &&
+                                unavailable != null &&
+                                !c.sending)
+                              Text(unavailable),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SessionCommandPicker(
+                                menu: _commands,
+                                onRun: _run,
+                                maxHeight: pickerRoom,
+                              ),
+                              SessionFieldHeightReporter(
+                                onHeight: _fieldMeasured,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Focus(
+                                        // A physical Enter sends; Shift+Enter breaks
+                                        // the line (#174).
+                                        onKeyEvent: (_, event) {
+                                          if (_commands.handleKey(
+                                                event,
+                                                l10n,
+                                                _run,
+                                                shown:
+                                                    sessionCommandPickerHeight(
+                                                      context,
+                                                      pickerRoom,
+                                                    ) >
+                                                    0,
+                                              ) ==
+                                              KeyEventResult.handled) {
+                                            return KeyEventResult.handled;
+                                          }
+                                          if (!isComposerSendKey(
+                                            event,
+                                            c.draft.value,
+                                          )) {
+                                            return KeyEventResult.ignored;
+                                          }
+                                          if (_canSend(c)) _send(c);
                                           return KeyEventResult.handled;
-                                        }
-                                        if (!isComposerSendKey(
-                                          event,
-                                          c.draft.value,
-                                        )) {
-                                          return KeyEventResult.ignored;
-                                        }
-                                        if (_canSend(c)) _send(c);
-                                        return KeyEventResult.handled;
-                                      },
-                                      child: ComposerBubble(
-                                        child: ConversationTextScale(
-                                          child: TextField(
-                                            key: const ValueKey(
-                                              'workspace-draft-text',
-                                            ),
-                                            controller: c.draft,
-                                            focusNode: _composerFocus,
-                                            enabled: !c.sending,
-                                            readOnly: c.endpointOffline,
-                                            minLines: 1,
-                                            maxLines: 6,
-                                            keyboardType:
-                                                TextInputType.multiline,
-                                            textCapitalization:
-                                                TextCapitalization.sentences,
-                                            autocorrect: composerSuggests(
-                                              context,
-                                            ),
-                                            enableSuggestions: composerSuggests(
-                                              context,
-                                            ),
-                                            spellCheckConfiguration:
-                                                composerSpellCheckConfiguration(
-                                                  context,
-                                                ),
-                                            decoration: composerDecoration(
-                                              context,
-                                              l10n.composerHint,
+                                        },
+                                        child: ComposerBubble(
+                                          child: ConversationTextScale(
+                                            child: TextField(
+                                              key: const ValueKey(
+                                                'workspace-draft-text',
+                                              ),
+                                              controller: c.draft,
+                                              focusNode: _composerFocus,
+                                              enabled: !c.sending,
+                                              readOnly: c.endpointOffline,
+                                              minLines: 1,
+                                              maxLines: 6,
+                                              keyboardType:
+                                                  TextInputType.multiline,
+                                              textCapitalization:
+                                                  TextCapitalization.sentences,
+                                              autocorrect: composerSuggests(
+                                                context,
+                                              ),
+                                              enableSuggestions:
+                                                  composerSuggests(context),
+                                              spellCheckConfiguration:
+                                                  composerSpellCheckConfiguration(
+                                                    context,
+                                                  ),
+                                              decoration: composerDecoration(
+                                                context,
+                                                l10n.composerHint,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ComposerSendButton(
-                                    buttonKey: const ValueKey(
-                                      'workspace-draft-send',
+                                    const SizedBox(width: 8),
+                                    ComposerSendButton(
+                                      buttonKey: const ValueKey(
+                                        'workspace-draft-send',
+                                      ),
+                                      tooltip: c.sending
+                                          ? l10n.composerSending
+                                          : l10n.composerSend,
+                                      onPressed: _canSend(c)
+                                          ? () => _send(c)
+                                          : null,
                                     ),
-                                    tooltip: c.sending
-                                        ? l10n.composerSending
-                                        : l10n.composerSend,
-                                    onPressed: _canSend(c)
-                                        ? () => _send(c)
-                                        : null,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

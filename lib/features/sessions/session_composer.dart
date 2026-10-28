@@ -61,6 +61,10 @@ class _SessionComposerState extends State<SessionComposer> {
   /// The field row's height, which the `/` picker above it leaves free.
   double _fieldHeight = composerActionSize;
 
+  /// The room the composer leaves above its field, less the picker's 4 dp
+  /// gap: the scroll above keeps the field, so a taller list is clipped.
+  double get _pickerRoom => widget.maxHeight - _fieldHeight - 4;
+
   void _fieldMeasured(double height) {
     if (mounted && height != _fieldHeight) {
       setState(() => _fieldHeight = height);
@@ -78,7 +82,8 @@ class _SessionComposerState extends State<SessionComposer> {
       }.contains(defaultTargetPlatform);
 
   KeyEventResult _key(FocusNode node, KeyEvent event) {
-    if (_commands.handleKey(event, context.v2L10n, _pick) ==
+    final picking = sessionCommandPickerHeight(context, _pickerRoom) > 0;
+    if (_commands.handleKey(event, context.v2L10n, _pick, shown: picking) ==
         KeyEventResult.handled) {
       return KeyEventResult.handled;
     }
@@ -554,12 +559,10 @@ class _SessionComposerState extends State<SessionComposer> {
                   ),
                 ],
               ),
-              // Within the budget the field leaves: the scroll above keeps the
-              // field, so a taller list would be clipped at its top.
               SessionCommandPicker(
                 menu: _commands,
                 onRun: _pick,
-                maxHeight: widget.maxHeight - _fieldHeight - 4,
+                maxHeight: _pickerRoom,
               ),
               SessionFieldHeightReporter(
                 onHeight: _fieldMeasured,

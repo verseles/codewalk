@@ -53,17 +53,19 @@ class SessionCommandMenu extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Handles [event] while the picker shows matches; [run] receives the
-  /// command Enter or Tab picks. Other keys, and keys with a modifier other
-  /// than none, stay the field's.
+  /// Handles [event] while the picker is [shown] with matches; [run]
+  /// receives the command Enter or Tab picks. Other keys, and keys with a
+  /// modifier other than none, stay the field's.
   KeyEventResult handleKey(
     KeyEvent event,
     V2Localizations l10n,
-    ValueChanged<SessionBuiltinCommand> run,
-  ) {
+    ValueChanged<SessionBuiltinCommand> run, {
+    required bool shown,
+  }) {
     final commands = this.commands(l10n);
     final keyboard = HardwareKeyboard.instance;
-    if (commands.isEmpty ||
+    if (!shown ||
+        commands.isEmpty ||
         event is KeyUpEvent ||
         keyboard.isControlPressed ||
         keyboard.isAltPressed ||
@@ -98,6 +100,14 @@ class SessionCommandMenu extends ChangeNotifier {
     text.removeListener(_changed);
     super.dispose();
   }
+}
+
+/// How tall the `/` picker may be with [room] left above its field: at most
+/// 240 dp or 30% of the window, and nothing when not even a row fits, so no
+/// command is picked unseen.
+double sessionCommandPickerHeight(BuildContext context, double room) {
+  final height = min(min(240.0, MediaQuery.sizeOf(context).height * 0.3), room);
+  return height < kMinInteractiveDimension ? 0 : height;
 }
 
 /// The open [menu]'s matches above the field, in a list of bounded height
@@ -157,7 +167,8 @@ class _SessionCommandPickerState extends State<SessionCommandPicker> {
     builder: (context, _) {
       final l10n = context.v2L10n;
       final commands = widget.menu.commands(l10n);
-      if (commands.isEmpty) return const SizedBox.shrink();
+      final height = sessionCommandPickerHeight(context, widget.maxHeight);
+      if (commands.isEmpty || height == 0) return const SizedBox.shrink();
       final active = commands[min(widget.menu.active, commands.length - 1)];
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _reveal(active);
@@ -174,15 +185,7 @@ class _SessionCommandPickerState extends State<SessionCommandPicker> {
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: max(
-                  0,
-                  min(
-                    min(240, MediaQuery.sizeOf(context).height * 0.3),
-                    widget.maxHeight,
-                  ),
-                ),
-              ),
+              constraints: BoxConstraints(maxHeight: height),
               child: ListView(
                 controller: _scroll,
                 shrinkWrap: true,
