@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeNoticeProjectionFailure {
@@ -144,6 +145,7 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
       item: Notice(
         meta: ItemMeta(
           id: id,
+          anchor: openCodeMessageAnchor(messageId),
           generation: jsonEncode([
             'live',
             ref.storageKey,

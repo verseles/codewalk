@@ -14,6 +14,7 @@ enum MutationOperation {
   revertStage,
   revertClear,
   revertCommit,
+  compact,
   fork,
   archive,
   delete,

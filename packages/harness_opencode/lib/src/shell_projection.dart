@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeShellProjectionFailure {
@@ -269,6 +270,7 @@ List<SessionEvent> projectOpenCodeShellEvent(
       item: ShellRun(
         meta: ItemMeta(
           id: id,
+          anchor: openCodeMessageAnchor(messageId),
           generation: jsonEncode([
             'live',
             ref.storageKey,

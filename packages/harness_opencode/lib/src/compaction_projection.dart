@@ -162,6 +162,7 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
       item: Notice(
         meta: ItemMeta(
           id: id,
+          anchor: openCodeMessageAnchor(messageId),
           generation: jsonEncode([
             'live',
             ref.storageKey,

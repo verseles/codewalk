@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import 'compaction_projection.dart';
 import 'error_projection.dart';
+import 'item_ids.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
 
@@ -250,6 +251,7 @@ List<TimelineItem> projectOpenCodeHistory(
       Map<String, Object?> extra = const {},
     }) => ItemMeta(
       message: context,
+      anchor: openCodeMessageAnchor(id),
       id: ItemId(jsonEncode([ref.storageKey, id, kind, discriminator])),
       generation: jsonEncode(['history', ref.storageKey, id]),
       status: status ?? OpenValue<ItemStatus>.unknown('completionUnverified'),
@@ -291,6 +293,7 @@ List<TimelineItem> projectOpenCodeHistory(
             meta: meta('user', 0, status: completed),
             text: text(message['text']),
             delivery: OpenValue.unknown('nativeHistoryDeliveryUnverified'),
+            confirmed: true,
           ),
         );
         final counts = <String, Object?>{};

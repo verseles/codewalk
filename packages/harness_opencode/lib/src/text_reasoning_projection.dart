@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'message_context.dart';
 import 'version_policy.dart';
 
@@ -182,6 +183,7 @@ SessionEvent? projectOpenCodeTextReasoningEvent(
   }
   final itemMeta = ItemMeta(
     id: id,
+    anchor: openCodeMessageAnchor(messageId),
     generation: generation,
     status: OpenValue.known(
       started ? ItemStatus.streaming : ItemStatus.completed,

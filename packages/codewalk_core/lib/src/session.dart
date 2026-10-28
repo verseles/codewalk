@@ -181,11 +181,13 @@ final class PendingInput {
     required this.text,
     required this.delivery,
     this.commandId,
+    this.anchor,
   });
   final ItemId id;
   final String text;
   final OpenValue<Delivery> delivery;
   final CommandId? commandId;
+  final MessageAnchor? anchor;
 }
 
 final class PromptDraft {

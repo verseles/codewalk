@@ -13,6 +13,7 @@ export 'src/message_id.dart';
 export 'src/prompt_client.dart';
 export 'src/interrupt_client.dart';
 export 'src/session_lifecycle_client.dart';
+export 'src/session_turn_client.dart';
 export 'src/permission_reply_client.dart';
 export 'src/form_reply_client.dart';
 export 'src/session_reader.dart';

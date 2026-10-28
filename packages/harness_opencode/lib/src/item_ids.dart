@@ -4,6 +4,11 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 const _idLimit = 64 * 1024;
 
+/// Native message ordering is translated at this adapter edge only.
+/// Callers pass an already validated native message identifier.
+MessageAnchor openCodeMessageAnchor(String message) =>
+    MessageAnchor(message: MessageRef(message), orderKey: message);
+
 /// The native `msg_` id an item of [ref] was projected from: every projection
 /// encodes item ids as `[storageKey, nativeId, kind, discriminator]`. Null for
 /// any other shape, another session or a non-message id.

@@ -155,6 +155,7 @@ List<SessionEvent> projectOpenCodeRevertEvent(
       state: RevertState(
         kind: OpenValue.known(kind),
         boundary: boundary,
+        anchor: messageId == null ? null : openCodeMessageAnchor(messageId),
         details: details == null ? null : CanonicalValue(details),
       ),
     ),
@@ -271,6 +272,7 @@ RevertState openCodeStagedRevert(
   return RevertState(
     kind: const OpenValue.known(RevertKind.staged),
     boundary: boundary,
+    anchor: openCodeMessageAnchor(staged.messageId),
     details: CanonicalValue(staged.details),
   );
 }

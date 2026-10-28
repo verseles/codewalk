@@ -115,6 +115,29 @@ final class MessageRef {
   int get hashCode => value.hashCode;
 }
 
+/// Message identity and ordering supplied by the adapter, within one session.
+/// Consumers compare anchors; the opaque key is never a native ID parser or
+/// evidence that a local/pending input has been confirmed by the harness.
+final class MessageAnchor implements Comparable<MessageAnchor> {
+  MessageAnchor({required this.message, required String orderKey})
+    : orderKey = requireText(orderKey, 'orderKey');
+
+  final MessageRef message;
+  final String orderKey;
+
+  @override
+  int compareTo(MessageAnchor other) => orderKey.compareTo(other.orderKey);
+
+  @override
+  bool operator ==(Object other) =>
+      other is MessageAnchor &&
+      other.message == message &&
+      other.orderKey == orderKey;
+
+  @override
+  int get hashCode => Object.hash(message, orderKey);
+}
+
 /// What the harness reported about the message an item belongs to.
 ///
 /// Every field but [message] is optional: an absent value is unknown, never
@@ -175,11 +198,17 @@ final class ItemMeta {
     this.turnId,
     this.ordinal,
     this.message,
+    this.anchor,
   }) : generation = requireText(generation, 'generation') {
     requireText(id.value, 'id');
     if (turnId != null) requireText(turnId!.value, 'turnId');
     if (ordinal != null && ordinal! < 0) {
       throw ArgumentError.value(ordinal, 'ordinal', 'Must be nonnegative');
+    }
+    if (anchor != null &&
+        message != null &&
+        anchor!.message != message!.message) {
+      throw ArgumentError('Message context and anchor must agree');
     }
   }
 
@@ -193,6 +222,9 @@ final class ItemMeta {
   /// The harness message this item belongs to, when the harness reports one.
   final MessageContext? message;
 
+  /// Stable identity/order, independent of assistant presentation metadata.
+  final MessageAnchor? anchor;
+
   /// This metadata with [message] replaced.
   ItemMeta withMessage(MessageContext? message) => ItemMeta(
     id: id,
@@ -202,6 +234,7 @@ final class ItemMeta {
     turnId: turnId,
     ordinal: ordinal,
     message: message,
+    anchor: anchor,
   );
 }
 
@@ -225,6 +258,7 @@ sealed class TimelineItem {
       attachments: item.attachments,
       mentions: item.mentions,
       commandId: item.commandId,
+      confirmed: item.confirmed,
     ),
     final AssistantText item => AssistantText(
       meta: meta,
@@ -287,6 +321,7 @@ final class UserInput extends TimelineItem {
     Iterable<AttachmentRef> attachments = const [],
     Iterable<MentionRef> mentions = const [],
     this.commandId,
+    this.confirmed = false,
   }) : attachments = immutableList(attachments),
        mentions = immutableList(mentions);
 
@@ -295,6 +330,10 @@ final class UserInput extends TimelineItem {
   final List<MentionRef> mentions;
   final CommandId? commandId;
   final OpenValue<DeliveryState> delivery;
+
+  /// A persisted harness user message, rather than a local or queued echo.
+  /// This does not establish execution completion or exclude pending input.
+  final bool confirmed;
 }
 
 final class AssistantText extends TimelineItem {

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeInboxProjectionFailure {
@@ -167,6 +168,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
     position.epoch,
   ]);
   ItemMeta meta(ItemId id, String generation, ItemStatus status) => ItemMeta(
+    anchor: openCodeMessageAnchor(inboxId),
     id: id,
     generation: generation,
     status: OpenValue.known(status),
@@ -183,6 +185,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
         ),
         text: text,
         delivery: OpenValue.known(state),
+        confirmed: state == DeliveryState.delivered,
       );
   // Only live admissions are open. History rows (delivery unknown) and
   // delivered input are settled and never regress; a cancelled row is
@@ -199,6 +202,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
       pending.removeWhere((e) => e.id == userId || e.id == noticeId);
   void putPending(ItemId id, String text, String mode) {
     final entry = PendingInput(
+      anchor: openCodeMessageAnchor(inboxId),
       id: id,
       text: text,
       delivery: OpenValue.known(
@@ -236,6 +240,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
               UnknownItem(
                 meta: ItemMeta(
                   id: contextId,
+                  anchor: openCodeMessageAnchor(inboxId),
                   generation: liveGeneration(),
                   status: OpenValue<ItemStatus>.unknown('completionUnverified'),
                   source: source,
@@ -378,6 +383,7 @@ _inboxItem(Map<String, Object?> item) {
   final steer = item.delivery == 'steer';
   final id = itemId(item.type == 'user' ? 'user' : 'notice', 0);
   final pending = PendingInput(
+    anchor: openCodeMessageAnchor(inboxId),
     id: id,
     text: item.text,
     delivery: OpenValue.known(steer ? Delivery.steer : Delivery.queue),
@@ -388,6 +394,7 @@ _inboxItem(Map<String, Object?> item) {
     items: [
       UserInput(
         meta: ItemMeta(
+          anchor: openCodeMessageAnchor(inboxId),
           id: id,
           generation: generation,
           status: const OpenValue.known(ItemStatus.pending),
@@ -399,6 +406,7 @@ _inboxItem(Map<String, Object?> item) {
       if (item.context != null)
         UnknownItem(
           meta: ItemMeta(
+            anchor: openCodeMessageAnchor(inboxId),
             id: itemId('unknown', ['context', 'user-context-manifest', 0]),
             generation: generation,
             status: OpenValue<ItemStatus>.unknown('completionUnverified'),
@@ -418,7 +426,8 @@ bool _samePending(List<PendingInput> a, List<PendingInput> b) {
         (a[i].id != b[i].id ||
             a[i].text != b[i].text ||
             a[i].delivery.value != b[i].delivery.value ||
-            a[i].commandId != b[i].commandId)) {
+            a[i].commandId != b[i].commandId ||
+            a[i].anchor != b[i].anchor)) {
       return false;
     }
   }

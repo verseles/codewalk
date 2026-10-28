@@ -110,8 +110,16 @@ final class InteractionState {
 enum RevertKind { none, staged, committed, cleared, unknown }
 
 final class RevertState {
-  const RevertState({required this.kind, this.boundary, this.details});
+  const RevertState({
+    required this.kind,
+    this.boundary,
+    this.anchor,
+    this.details,
+  });
   final OpenValue<RevertKind> kind;
   final ItemId? boundary;
+
+  /// Retained even when the boundary is outside the resident history window.
+  final MessageAnchor? anchor;
   final CanonicalValue? details;
 }
