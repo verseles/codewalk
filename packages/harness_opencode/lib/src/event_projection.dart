@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'compaction_projection.dart';
 import 'execution_projection.dart';
 import 'inbox_projection.dart';
 import 'interaction_projection.dart';
@@ -185,6 +186,12 @@ final Map<String, _Producer> _routes = {
     type: projectOpenCodeNoticeEvent,
   for (final type in const ['session.shell.started', 'session.shell.ended'])
     type: projectOpenCodeShellEvent,
+  for (final type in const [
+    'session.compaction.started',
+    'session.compaction.ended',
+    'session.compaction.failed',
+  ])
+    type: projectOpenCodeCompactionEvent,
 };
 
 /// Official 2.0.22 session types that no producer projects yet; they stay
@@ -195,9 +202,6 @@ const _unprojected = {
   'session.viewed',
   'session.forked',
   'session.skill.activated',
-  'session.compaction.started',
-  'session.compaction.ended',
-  'session.compaction.failed',
   'session.usage.recorded',
   'session.message.content.updated',
   'session.status',

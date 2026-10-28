@@ -152,6 +152,27 @@ class StubTests(unittest.TestCase):
         self.assertIn('"content": "tick 1 "', body)
         self.assertNotIn("Heading", body)
 
+    def test_native_compaction_prompt_gets_a_structured_checkpoint(self):
+        stub = device.Stub()
+        self.addCleanup(stub.stop)
+        connection = http.client.HTTPConnection("127.0.0.1", stub.port, timeout=10)
+        self.addCleanup(connection.close)
+        # The native summary request includes these version-pinned headings.
+        prompt = "Summarize the conversation.\n## Objective\n## Work State\n## Next Move"
+        connection.request("POST", "/v1/chat/completions", body=json.dumps({
+            "messages": [{"role": "user", "content": prompt}],
+        }))
+        response = connection.getresponse()
+        chunks = [json.loads(line[6:]) for line in response.read().decode().split("\n\n")
+                  if line.startswith("data: {")]
+        text = "".join(c["choices"][0]["delta"]["content"] for c in chunks)
+        self.assertEqual(response.status, 200)
+        self.assertIn("## Objective\n", text)
+        self.assertIn("### Completed\n", text)
+        self.assertIn("## Next Move\n", text)
+        self.assertEqual(chunks[-1]["usage"]["cost"], 0)
+        self.assertEqual(chunks[-1]["choices"][0]["finish_reason"], "stop")
+
 
 class RelayTests(unittest.TestCase):
     def setUp(self):

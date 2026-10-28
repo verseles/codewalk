@@ -1,0 +1,217 @@
+{
+  "observed": "negative first capture; generic zero-cost stub returned CW-OK instead of required summary template",
+  "version": "2.0.22",
+  "provider_requests": 9,
+  "calls": [
+    {
+      "label": "busy-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7f6c3026ffeeLNQDH1cK44qRb/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_18093d023001H3nYl5eexE7lU2",
+          "sessionID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+          "time": {
+            "created": 1793158533156
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "idle-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7f6c1408ffeK4us5rPSXtJoNI/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_18093ec75001ORADcE0QrI9Fge",
+          "sessionID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+          "time": {
+            "created": 1793158540406
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_18093eb75002yHGr5gpZrGJgkp",
+      "created": 1793158540149,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_18093d023001H3nYl5eexE7lU2"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_18093eb9f001nLBiYDPGydM0vv",
+      "created": 1793158540191,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "text": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_18093ebaa001BMI1hBNi8ObU7O",
+      "created": 1793158540203,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "text": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_18093ebaf001BfH7Vy3OLaPvMM",
+      "created": 1793158540207,
+      "type": "session.compaction.failed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "reason": "manual",
+        "inputID": "msg_18093d023001H3nYl5eexE7lU2",
+        "error": {
+          "type": "compaction.failed",
+          "message": "Compaction summary did not match the required template"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6c3026ffeeLNQDH1cK44qRb",
+        "seq": 15,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_18093ec7d002P2CRD3joEyugeu",
+      "created": 1793158540413,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_18093ec75001ORADcE0QrI9Fge"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_18093ec9a001RdTWr4CxQOaH6u",
+      "created": 1793158540442,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "text": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_18093eca2001sp0LwNpfaPWpw7",
+      "created": 1793158540450,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "text": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_18093eca5002NhmICbmK5du4ls",
+      "created": 1793158540453,
+      "type": "session.compaction.failed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "reason": "manual",
+        "inputID": "msg_18093ec75001ORADcE0QrI9Fge",
+        "error": {
+          "type": "compaction.failed",
+          "message": "Compaction summary did not match the required template"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6c1408ffeK4us5rPSXtJoNI",
+        "seq": 17,
+        "version": 1
+      }
+    }
+  ],
+  "cleanup": {
+    "sessions_absent": 3,
+    "active": {
+      "data": {}
+    },
+    "user_servers_unchanged": true,
+    "egress": {
+      "violation": null,
+      "nonLoopbackPeers": 0,
+      "socketsObserved": 11,
+      "auditRuns": 6,
+      "firstAuditAt": "2026-10-28T03:35:32.047445+00:00",
+      "lastAuditAt": "2026-10-28T03:35:40.563386+00:00",
+      "auditedAt": "2026-10-28T03:35:40.563402+00:00"
+    }
+  }
+}

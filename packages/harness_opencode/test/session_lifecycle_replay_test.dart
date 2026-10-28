@@ -120,12 +120,12 @@ void main() {
       }
     }
     expect(outcomes, {
-      'session.created→info': 38,
+      'session.created→info': 41,
       'session.renamed→sessionInfoUnproven': 10,
-      'session.deleted→sessionDeleted': 5,
+      'session.deleted→sessionDeleted': 8,
     });
     // Every recorded read of a created session, none renamed in between.
-    expect(matchedReads, 24);
+    expect(matchedReads, 31);
   });
 
   test('observed E: renames over hydrated info match each later read', () {

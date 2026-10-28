@@ -505,7 +505,10 @@ void main() {
         message('b', 'future-native', {
           'payload': {'apiKey': 'private-key'},
         }),
-        message('c', 'compaction', {'summary': 'private context'}),
+        message('c', 'compaction', {
+          'status': 'future-status',
+          'summary': 'private context',
+        }),
         message('d', 'synthetic', {
           'text': 'native notice',
           'metadata': {'childID': 'ses_other'},

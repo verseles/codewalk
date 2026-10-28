@@ -328,8 +328,8 @@ void main() {
           }
         }
       }
-      // 32 frames (one replayed across two lists); no synthetic is captured.
-      expect(counts, {'session.instructions.updated': 32});
+      // Includes four baselines from the V2-071G owned-session capture.
+      expect(counts, {'session.instructions.updated': 36});
     },
   );
 }

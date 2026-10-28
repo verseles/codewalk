@@ -1,0 +1,3806 @@
+{
+  "version": "2.0.22",
+  "complete": true,
+  "calls": [
+    {
+      "label": "redo",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G redo",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158703852
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "first-turn",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/prompt",
+      "request": {
+        "text": "CW071G first turn",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180966b51001tl9aWscU21CIR7",
+          "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "time": {
+            "created": 1793158704470
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G first turn"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "second-turn",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/prompt",
+      "request": {
+        "text": "CW071G second turn",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180966dc5001aBrATgnfKZOdgL",
+          "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "time": {
+            "created": 1793158704583
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G second turn"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "before-stage",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158704583,
+            "idle": 1793158704645
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "before-stage/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180966b51001tl9aWscU21CIR7",
+            "time": {
+              "created": 1793158704491
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966d7b001tRJUPOorpH8Tfn",
+            "time": {
+              "created": 1793158704526,
+              "streamed": 1793158704551,
+              "completed": 1793158704553
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966dae001J8dHsvHLrO1rEP",
+            "time": {
+              "created": 1793158704558
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_180966dc5001aBrATgnfKZOdgL",
+            "time": {
+              "created": 1793158704594
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966dda001dOepdSZXM1obGZ",
+            "time": {
+              "created": 1793158704619,
+              "streamed": 1793158704638,
+              "completed": 1793158704641
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966e05001QRQYxpjjO1Qurq",
+            "time": {
+              "created": 1793158704645
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjZiNTEwMDF0bDlhV3NjVTIxQ0lSNyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjZlMDUwMDFRUlFZeHBqak8xUXVycSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "before-stage/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "undo-both",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/revert/stage",
+      "request": {
+        "messageID": "msg_180966b51001tl9aWscU21CIR7",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_180966b51001tl9aWscU21CIR7",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "after-undo",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158704703,
+            "idle": 1793158704645
+          },
+          "title": "CW071G redo",
+          "revert": {
+            "messageID": "msg_180966b51001tl9aWscU21CIR7",
+            "files": []
+          },
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-undo/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180966b51001tl9aWscU21CIR7",
+            "time": {
+              "created": 1793158704491
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966d7b001tRJUPOorpH8Tfn",
+            "time": {
+              "created": 1793158704526,
+              "streamed": 1793158704551,
+              "completed": 1793158704553
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966dae001J8dHsvHLrO1rEP",
+            "time": {
+              "created": 1793158704558
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_180966dc5001aBrATgnfKZOdgL",
+            "time": {
+              "created": 1793158704594
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966dda001dOepdSZXM1obGZ",
+            "time": {
+              "created": 1793158704619,
+              "streamed": 1793158704638,
+              "completed": 1793158704641
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966e05001QRQYxpjjO1Qurq",
+            "time": {
+              "created": 1793158704645
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjZiNTEwMDF0bDlhV3NjVTIxQ0lSNyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjZlMDUwMDFRUlFZeHBqak8xUXVycSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-undo/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "redo-one",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/revert/stage",
+      "request": {
+        "messageID": "msg_180966dc5001aBrATgnfKZOdgL",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_180966dc5001aBrATgnfKZOdgL",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "after-redo-one",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158704717,
+            "idle": 1793158704645
+          },
+          "title": "CW071G redo",
+          "revert": {
+            "messageID": "msg_180966dc5001aBrATgnfKZOdgL",
+            "files": []
+          },
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-redo-one/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180966b51001tl9aWscU21CIR7",
+            "time": {
+              "created": 1793158704491
+            },
+            "text": "CW071G first turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966d7b001tRJUPOorpH8Tfn",
+            "time": {
+              "created": 1793158704526,
+              "streamed": 1793158704551,
+              "completed": 1793158704553
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966dae001J8dHsvHLrO1rEP",
+            "time": {
+              "created": 1793158704558
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "id": "msg_180966dc5001aBrATgnfKZOdgL",
+            "time": {
+              "created": 1793158704594
+            },
+            "text": "CW071G second turn",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966dda001dOepdSZXM1obGZ",
+            "time": {
+              "created": 1793158704619,
+              "streamed": 1793158704638,
+              "completed": 1793158704641
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966e05001QRQYxpjjO1Qurq",
+            "time": {
+              "created": 1793158704645
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjZiNTEwMDF0bDlhV3NjVTIxQ0lSNyIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjZlMDUwMDFRUlFZeHBqak8xUXVycSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-redo-one/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "redo-all",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/revert",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "branch-stage",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/revert/stage",
+      "request": {
+        "messageID": "msg_180966b51001tl9aWscU21CIR7",
+        "files": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "messageID": "msg_180966b51001tl9aWscU21CIR7",
+          "files": []
+        }
+      }
+    },
+    {
+      "label": "branch-commit",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/revert/commit",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "after-commit",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158704744,
+            "idle": 1793158704733
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-commit/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    },
+    {
+      "label": "after-commit/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "branch-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/prompt",
+      "request": {
+        "text": "CW071G replacement branch",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180966e72001IkatPbn8bGnf3U",
+          "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "time": {
+            "created": 1793158704755
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G replacement branch"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-branch",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158703852,
+            "updated": 1793158704755,
+            "idle": 1793158704830
+          },
+          "title": "CW071G redo",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-branch/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180966e72001IkatPbn8bGnf3U",
+            "time": {
+              "created": 1793158704766
+            },
+            "text": "CW071G replacement branch",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966e86001t46AGH9sEkv281",
+            "time": {
+              "created": 1793158704809,
+              "streamed": 1793158704823,
+              "completed": 1793158704825
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180966ebe001aVodyUNDeQFlsH",
+            "time": {
+              "created": 1793158704830
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjZlNzIwMDFJa2F0UGJuOGJHbmYzVSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjZlYmUwMDFhVm9keVVORGVRRmxzSCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-branch/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "busy",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G busy",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69911affekuUVgtI0Eedpg8",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793158704883,
+            "updated": 1793158704883
+          },
+          "title": "CW071G busy",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "busy-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/prompt",
+      "request": {
+        "text": "CW-SLOW8 CW071G busy",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180966ef9001JeZeunbAIxXIdv",
+          "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+          "time": {
+            "created": 1793158704891
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW-SLOW8 CW071G busy"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "busy-stage",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/revert/stage",
+      "request": {
+        "messageID": "msg_180966ef9001JeZeunbAIxXIdv",
+        "files": true
+      },
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "message": "Session is busy: ses_e7f69911affekuUVgtI0Eedpg8"
+      }
+    },
+    {
+      "label": "busy-clear",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/revert",
+      "request": null,
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "message": "Session is busy: ses_e7f69911affekuUVgtI0Eedpg8"
+      }
+    },
+    {
+      "label": "busy-commit",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/revert/commit",
+      "request": null,
+      "status": 409,
+      "response": {
+        "_tag": "SessionBusyError",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "message": "Session is busy: ses_e7f69911affekuUVgtI0Eedpg8"
+      }
+    },
+    {
+      "label": "busy-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180966f44001F8wuOqYzPTD7Hp",
+          "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+          "time": {
+            "created": 1793158704965
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-busy",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f69911affekuUVgtI0Eedpg8",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158704883,
+            "updated": 1793158704965,
+            "idle": 1793158712007
+          },
+          "title": "CW071G busy",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-busy/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180966ef9001JeZeunbAIxXIdv",
+            "time": {
+              "created": 1793158704902
+            },
+            "text": "CW-SLOW8 CW071G busy",
+            "type": "user"
+          },
+          {
+            "id": "msg_180966f0c0013eqAy1jNjBPa26",
+            "time": {
+              "created": 1793158704924,
+              "streamed": 1793158711936,
+              "completed": 1793158711938
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "tick 1 tick 2 tick 3 tick 4 tick 5 tick 6 tick 7 tick 8 "
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "type": "compaction",
+            "id": "msg_180966f44001F8wuOqYzPTD7Hp",
+            "time": {
+              "created": 1793158711942
+            },
+            "status": "completed",
+            "reason": "manual",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "summary": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+            "recent": "",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180968ac70011qlMJQhlV1DfIk",
+            "time": {
+              "created": 1793158712007
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjZlZjkwMDFKZVpldW5iQUl4WElkdiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjhhYzcwMDExcWxNSlFobFYxRGZJayIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-busy/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "compact",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "title": "CW071G compact",
+        "location": {
+          "directory": "<owned-root>/project"
+        }
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1793158712102,
+            "updated": 1793158712102
+          },
+          "title": "CW071G compact",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "compact-prompt",
+      "method": "POST",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL/prompt",
+      "request": {
+        "text": "CW071G context to compact",
+        "delivery": "steer",
+        "resume": true
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180968b2b001wDqH0Lz32UuMCq",
+          "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+          "time": {
+            "created": 1793158712109
+          },
+          "type": "user",
+          "payload": {
+            "text": "CW071G context to compact"
+          },
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "idle-compact",
+      "method": "POST",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL/compact",
+      "request": {
+        "delivery": "steer"
+      },
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "msg_180968b97001Z5YeMStP4VVRG0",
+          "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+          "time": {
+            "created": 1793158712216
+          },
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      }
+    },
+    {
+      "label": "after-compact",
+      "method": "GET",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+          "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "outcome": "succeeded",
+          "time": {
+            "created": 1793158712102,
+            "updated": 1793158712216,
+            "idle": 1793158712286
+          },
+          "title": "CW071G compact",
+          "location": {
+            "directory": "<owned-root>/project"
+          }
+        }
+      }
+    },
+    {
+      "label": "after-compact/message?order=asc&limit=200",
+      "method": "GET",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL/message?order=asc&limit=200",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": [
+          {
+            "id": "msg_180968b2b001wDqH0Lz32UuMCq",
+            "time": {
+              "created": 1793158712119
+            },
+            "text": "CW071G context to compact",
+            "type": "user"
+          },
+          {
+            "id": "msg_180968b3d0019b5rXsDsDPSq51",
+            "time": {
+              "created": 1793158712141,
+              "streamed": 1793158712153,
+              "completed": 1793158712154
+            },
+            "type": "assistant",
+            "agent": "build",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "CW-OK"
+              }
+            ],
+            "finish": "stop",
+            "rawFinish": "stop",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180968b5e0014SO3wu2Mt77wrS",
+            "time": {
+              "created": 1793158712158
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          },
+          {
+            "type": "compaction",
+            "id": "msg_180968b97001Z5YeMStP4VVRG0",
+            "time": {
+              "created": 1793158712222
+            },
+            "status": "completed",
+            "reason": "manual",
+            "model": {
+              "id": "stub",
+              "providerID": "cw042c"
+            },
+            "summary": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+            "recent": "",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            }
+          },
+          {
+            "id": "msg_180968bde001jKg5BF8wQf6gXB",
+            "time": {
+              "created": 1793158712286
+            },
+            "type": "idle",
+            "outcome": "succeeded"
+          }
+        ],
+        "cursor": {
+          "previous": "eyJpZCI6Im1zZ18xODA5NjhiMmIwMDF3RHFIMEx6MzJVdU1DcSIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+          "next": "eyJpZCI6Im1zZ18xODA5NjhiZGUwMDFqS2c1QkY4d1FmNmdYQiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+        }
+      }
+    },
+    {
+      "label": "after-compact/inbox",
+      "method": "GET",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL/inbox",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69952fffe1JDiYEh7HgPMv1",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "message": "Session not found: ses_e7f69952fffe1JDiYEh7HgPMv1"
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7f69911affekuUVgtI0Eedpg8",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "message": "Session not found: ses_e7f69911affekuUVgtI0Eedpg8"
+      }
+    },
+    {
+      "label": "cleanup-delete",
+      "method": "DELETE",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+      "request": null,
+      "status": 204,
+      "response": null
+    },
+    {
+      "label": "cleanup-absent",
+      "method": "GET",
+      "path": "/api/session/ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+      "request": null,
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "message": "Session not found: ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      }
+    },
+    {
+      "label": "cleanup-active",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "status": 200,
+      "response": {
+        "data": {}
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_180966ac8001de31bAgnLqNCdQ",
+      "type": "server.connected",
+      "data": {}
+    },
+    {
+      "id": "evt_180966ae8001ZsIDkGQkHwcYWh",
+      "created": 1793158703848,
+      "type": "worktree.resolved",
+      "data": {
+        "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "directory": "<owned-root>/project",
+        "previous": "global"
+      },
+      "durable": {
+        "aggregateID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966aec001YQElPkiKfdM0YA",
+      "created": 1793158703852,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "slug": "calm-wolf",
+        "version": "2.0.22",
+        "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G redo"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966b0c001KX964I8ejw9Q21",
+      "created": 1793158703884,
+      "type": "project.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "id": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "canonical": "<owned-root>/project",
+        "vcs": "git",
+        "time": {
+          "created": 1793158703846,
+          "updated": 1793158703846,
+          "active": 1793158703883
+        },
+        "sandboxes": []
+      }
+    },
+    {
+      "id": "evt_180966cf8001cxP8wICPcP0Imb",
+      "created": 1793158704376,
+      "type": "integration.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d01001DT68ejqMUO77ph",
+      "created": 1793158704385,
+      "type": "provider.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d08001wc0GqifLMWWrTq",
+      "created": 1793158704392,
+      "type": "model.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d1d00153mNVudGM1bnDr",
+      "created": 1793158704413,
+      "type": "vcs.branch.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "branch": "master"
+      }
+    },
+    {
+      "id": "evt_180966d1f001y8MnGKJsq85qH6",
+      "created": 1793158704415,
+      "type": "agent.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d20001eVxXB1SRFHAt3U",
+      "created": 1793158704416,
+      "type": "command.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d21001VKOdWZLeDiejd0",
+      "created": 1793158704417,
+      "type": "skill.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d27001IBJLeIMnj0XPmw",
+      "created": 1793158704423,
+      "type": "websearch.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d4d001k5QeuGnUUF6uI4",
+      "created": 1793158704461,
+      "type": "reference.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d540013I9RM0UT3ttdHf",
+      "created": 1793158704468,
+      "type": "plugin.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {}
+    },
+    {
+      "id": "evt_180966d56001D62tEPw0D72vP1",
+      "created": 1793158704470,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180966b51001tl9aWscU21CIR7",
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G first turn"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966d5c001qLNgoY8gPgw9Qc",
+      "created": 1793158704476,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966d67001iDu7L47SBTFYOx",
+      "created": 1793158704487,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "76d692a95c6c7709a49b4dab47dd6c04db7b2818fdc445c9774f86aab089174d"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180966d6b001PDCa0OeTj86rRF",
+      "created": 1793158704491,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "inboxID": "msg_180966b51001tl9aWscU21CIR7"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966d98001UUo7Ffz8F5w8ca",
+      "created": 1793158704537,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn",
+        "started": 1793158704526
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966d9c001gU4o5X892W4rx3",
+      "created": 1793158704540,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966da3001DE8Z4N5BxAPt8i",
+      "created": 1793158704547,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_180966da3002187K9dYOo6QOIk",
+      "created": 1793158704547,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966da7001sgv8q8SM5oRjaR",
+      "created": 1793158704551,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966da9001L6eUCX2cpTzxiE",
+      "created": 1793158704553,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966d7b001tRJUPOorpH8Tfn",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dac001KuMvOmj8y6Mkm6",
+      "created": 1793158704556,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180966dae001J8dHsvHLrO1rEP",
+      "created": 1793158704558,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dc7001YLPuwwNfTmGSWa",
+      "created": 1793158704583,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180966dc5001aBrATgnfKZOdgL",
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G second turn"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dcb001PUsiijTEK9z5SO",
+      "created": 1793158704587,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dd2001XRWMqc21zKRqnZ",
+      "created": 1793158704594,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "inboxID": "msg_180966dc5001aBrATgnfKZOdgL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 13,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966df4001jcuzzR16F0yzSm",
+      "created": 1793158704628,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ",
+        "started": 1793158704619
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966df800172fYSXaJc9sNde",
+      "created": 1793158704632,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 15,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dfb001vd3F0nE86bHMAQ",
+      "created": 1793158704635,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_180966dfc001KaJb63ij8DVbDy",
+      "created": 1793158704636,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 16,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966dfe001uxtWQABNch1uVv",
+      "created": 1793158704638,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 17,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e01001JEfQQlgzhfzEUq",
+      "created": 1793158704641,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966dda001dOepdSZXM1obGZ",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 18,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e0400174ykCodKbou6NJ",
+      "created": 1793158704644,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180966e05001QRQYxpjjO1Qurq",
+      "created": 1793158704645,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 19,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e3f001eawuQ8yFdxIN6a",
+      "created": 1793158704703,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "revert": {
+          "messageID": "msg_180966b51001tl9aWscU21CIR7",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 20,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e4d001ottEN76r8sSoOQ",
+      "created": 1793158704717,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "revert": {
+          "messageID": "msg_180966dc5001aBrATgnfKZOdgL",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 21,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e58001k8Ntbh4B51mYvK",
+      "created": 1793158704728,
+      "type": "session.revert.cleared",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 22,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e5b001SuR1Y0iXh7zsbf",
+      "created": 1793158704731,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 23,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e5d0013fHJ2Gz7720Pmy",
+      "created": 1793158704733,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 24,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e64001Hutc7GTRINrrs5",
+      "created": 1793158704740,
+      "type": "session.revert.staged",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "revert": {
+          "messageID": "msg_180966b51001tl9aWscU21CIR7",
+          "files": []
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 25,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e68001M3kUF01VKv9neA",
+      "created": 1793158704744,
+      "type": "session.revert.committed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "to": "msg_180966b51001tl9aWscU21CIR7"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 26,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e73001VqyF6nOPETxjx2",
+      "created": 1793158704755,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180966e72001IkatPbn8bGnf3U",
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G replacement branch"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 27,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e76001nLlPRPHiICv73Z",
+      "created": 1793158704758,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 28,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966e7c001tsc3BqrXqGfN6w",
+      "created": 1793158704764,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "76d692a95c6c7709a49b4dab47dd6c04db7b2818fdc445c9774f86aab089174d"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 29,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180966e7e0015b522RIJvJ1oGJ",
+      "created": 1793158704766,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "inboxID": "msg_180966e72001IkatPbn8bGnf3U"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 30,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966ead001o4QRRCUO6AlmxF",
+      "created": 1793158704813,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281",
+        "started": 1793158704809
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 31,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966eb0001zVM5u5yln20ZJu",
+      "created": 1793158704816,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 32,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966eb4001cII7pekHi7sUk8",
+      "created": 1793158704820,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_180966eb5001VlVhU0u4hwvJuk",
+      "created": 1793158704821,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 33,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966eb7001X0RO35XJvyz7x3",
+      "created": 1793158704823,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 34,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966eb9001IphBDAzzMlqC3T",
+      "created": 1793158704825,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "assistantMessageID": "msg_180966e86001t46AGH9sEkv281",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 35,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966ebc001mozeevOPa8whvS",
+      "created": 1793158704828,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180966ebe001aVodyUNDeQFlsH",
+      "created": 1793158704830,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 36,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966ef3001RqvYEv9pE0zmG1",
+      "created": 1793158704883,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "slug": "brave-planet",
+        "version": "2.0.22",
+        "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G busy"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966efb001i5M7cr9zaIVwsm",
+      "created": 1793158704891,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180966ef9001JeZeunbAIxXIdv",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW-SLOW8 CW071G busy"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966efe0012nXfR7e8VKfLpY",
+      "created": 1793158704894,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966f03001PsIeBpc4HJm4TI",
+      "created": 1793158704899,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "76d692a95c6c7709a49b4dab47dd6c04db7b2818fdc445c9774f86aab089174d"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180966f060019a5lFkkJ2jwuwR",
+      "created": 1793158704902,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "inboxID": "msg_180966ef9001JeZeunbAIxXIdv"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966f2e001ToOXZsGb9jfm47",
+      "created": 1793158704942,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "started": 1793158704924
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966f31001ufw5qo1TBUZGY6",
+      "created": 1793158704945,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966f45001ypbB6Gb0WyWdvV",
+      "created": 1793158704965,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180966f44001F8wuOqYzPTD7Hp",
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "item": {
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180966f9700179J72b05O31vMc",
+      "created": 1793158705048,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 1 "
+      }
+    },
+    {
+      "id": "evt_18096736e001GI8oAsDZsp9beO",
+      "created": 1793158706030,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 2 "
+      }
+    },
+    {
+      "id": "evt_180967756001TObL7aXqGVDnq4",
+      "created": 1793158707030,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 3 "
+      }
+    },
+    {
+      "id": "evt_180967b3e001yDYz307U62n90q",
+      "created": 1793158708030,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 4 "
+      }
+    },
+    {
+      "id": "evt_180967f27001xv4Ljpc2HoQvcn",
+      "created": 1793158709031,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 5 "
+      }
+    },
+    {
+      "id": "evt_18096830f0019RJNqyL3thpzkF",
+      "created": 1793158710031,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 6 "
+      }
+    },
+    {
+      "id": "evt_1809686f7001i1GCyzk1ZoZGjH",
+      "created": 1793158711031,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 7 "
+      }
+    },
+    {
+      "id": "evt_180968a7c001r4Tz43GhR4dVpS",
+      "created": 1793158711932,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "delta": "tick 8 "
+      }
+    },
+    {
+      "id": "evt_180968a7d0015KBi2xcEfYFdPi",
+      "created": 1793158711933,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "ordinal": 0,
+        "text": "tick 1 tick 2 tick 3 tick 4 tick 5 tick 6 tick 7 tick 8 "
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968a80001mXn2pU9Gzrt2fW",
+      "created": 1793158711936,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968a82001j7rqOfkZaSxxMk",
+      "created": 1793158711938,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "assistantMessageID": "msg_180966f0c0013eqAy1jNjBPa26",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968a84001wefmO6U4MMTsyo",
+      "created": 1793158711940,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180968a850010V38q9UlZVHWfW",
+      "created": 1793158711941,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "inboxID": "msg_180966f44001F8wuOqYzPTD7Hp"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968a86001hvwWPvn1ASB8Cr",
+      "created": 1793158711942,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_180966f44001F8wuOqYzPTD7Hp"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968aab001zFR8uI7YmGGKw7",
+      "created": 1793158711979,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Objective\n"
+      }
+    },
+    {
+      "id": "evt_180968aac001HkiaJP1e1ISDLQ",
+      "created": 1793158711980,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- Exercise the disposable CodeWalk native contract.\n"
+      }
+    },
+    {
+      "id": "evt_180968aad0015J10TnXtkBXUNJ",
+      "created": 1793158711981,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968aad002l1473pn7bR4GbV",
+      "created": 1793158711981,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Requirements\n"
+      }
+    },
+    {
+      "id": "evt_180968aae001c80kfwQtgeV56h",
+      "created": 1793158711982,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- Use the local zero-cost provider only.\n"
+      }
+    },
+    {
+      "id": "evt_180968aae002B12xeFxQSNli1O",
+      "created": 1793158711982,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968aaf001KbgChRh1Hk5Q69",
+      "created": 1793158711983,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Decisions\n"
+      }
+    },
+    {
+      "id": "evt_180968ab0001wiKb354Ll9s72j",
+      "created": 1793158711984,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- Keep all work in the owned temporary project.\n"
+      }
+    },
+    {
+      "id": "evt_180968ab0002znjvyHN5xd3867",
+      "created": 1793158711984,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968ab1001zvm6ncpsuFM48i",
+      "created": 1793158711985,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Work State\n"
+      }
+    },
+    {
+      "id": "evt_180968ab1002Kghze2DdfQLohq",
+      "created": 1793158711985,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "### Completed\n"
+      }
+    },
+    {
+      "id": "evt_180968ab4001oPv62tiCvKUxmZ",
+      "created": 1793158711988,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- Answered the owned marker prompts.\n"
+      }
+    },
+    {
+      "id": "evt_180968ab5001UqhKAImiJFdvHc",
+      "created": 1793158711989,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "### Active\n"
+      }
+    },
+    {
+      "id": "evt_180968ab5002jCS61GY1UOk1Y5",
+      "created": 1793158711989,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- Native contract verification.\n"
+      }
+    },
+    {
+      "id": "evt_180968ab60012BdNu5JWd1YF1r",
+      "created": 1793158711990,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "### Blocked\n"
+      }
+    },
+    {
+      "id": "evt_180968ab6002t1NxO1TW4RPPxv",
+      "created": 1793158711990,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_180968ab7001bLxEaoO1xjVz2L",
+      "created": 1793158711991,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968ab8001K9xeuqgp2gFfk4",
+      "created": 1793158711992,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Next Move\n"
+      }
+    },
+    {
+      "id": "evt_180968ab9001aFIK721oM1rVIn",
+      "created": 1793158711993,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "1. Continue the owned verification.\n"
+      }
+    },
+    {
+      "id": "evt_180968ab9002Wis3rz84ioynQZ",
+      "created": 1793158711993,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968aba001yz3PzR4IN7nWna",
+      "created": 1793158711994,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Relevant Files\n"
+      }
+    },
+    {
+      "id": "evt_180968abb0019TiTnjvKcZCP7U",
+      "created": 1793158711995,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_180968abb002dnjk4vm5kJeUwh",
+      "created": 1793158711995,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968abc001dW5YJ0g7n9TYKG",
+      "created": 1793158711996,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "## Important Context\n"
+      }
+    },
+    {
+      "id": "evt_180968abd001opYMLYt2t3Zm0h",
+      "created": 1793158711997,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "text": "- All provider output is deterministic test data.\n"
+      }
+    },
+    {
+      "id": "evt_180968ac1001dGS2pM8oi5BwDM",
+      "created": 1793158712001,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180968ac10028JLLZ3vh7LBl4W",
+      "created": 1793158712001,
+      "type": "session.compaction.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "reason": "manual",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "text": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+        "recent": "",
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "cost": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968ac70011qlMJQhlV1DfIk",
+      "created": 1793158712007,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 15,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b260012oDvMjHYBqKi9F",
+      "created": 1793158712102,
+      "type": "session.created",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "slug": "shiny-sailor",
+        "version": "2.0.22",
+        "projectID": "de6e10ff40333a8c6feb94bbef01bb09243407bd",
+        "location": {
+          "directory": "<owned-root>/project"
+        },
+        "subpath": "",
+        "title": "CW071G compact"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 0,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b2c001XGCZUSw1cSV88N",
+      "created": 1793158712109,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180968b2b001wDqH0Lz32UuMCq",
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "item": {
+          "type": "user",
+          "payload": {
+            "text": "CW071G context to compact"
+          },
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 1,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b2f001N0SGc2R4Zpo1j3",
+      "created": 1793158712111,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 2,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b34001tue5RrdU2KcvXI",
+      "created": 1793158712117,
+      "metadata": {
+        "instructions": {
+          "initial": true
+        }
+      },
+      "type": "session.instructions.updated",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "delta": {
+          "core/date": "6d4a8d82bb3953b301cff314b2033faa106b99e39c298d2db8f5b01935e78f7f",
+          "core/environment": "76d692a95c6c7709a49b4dab47dd6c04db7b2818fdc445c9774f86aab089174d"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 3,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180968b37001cxUHNkxzJHEVBL",
+      "created": 1793158712119,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "inboxID": "msg_180968b2b001wDqH0Lz32UuMCq"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 4,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b51001wKCz1OKUu0FcR0",
+      "created": 1793158712145,
+      "type": "session.step.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "agent": "build",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51",
+        "started": 1793158712141
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 5,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b53001Gd7Qu8I5iIGSgq",
+      "created": 1793158712147,
+      "type": "session.text.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51",
+        "ordinal": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 6,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b56001sbLnEGX0df7whQ",
+      "created": 1793158712150,
+      "type": "session.text.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51",
+        "ordinal": 0,
+        "delta": "CW-OK"
+      }
+    },
+    {
+      "id": "evt_180968b56002vHI4W381TRRd7l",
+      "created": 1793158712150,
+      "type": "session.text.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51",
+        "ordinal": 0,
+        "text": "CW-OK"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 7,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b59001HfClYvjfdf6eI3",
+      "created": 1793158712153,
+      "type": "session.step.streamed",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 8,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b5a001ZM47Ooa0bbX0YJ",
+      "created": 1793158712154,
+      "type": "session.step.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "assistantMessageID": "msg_180968b3d0019b5rXsDsDPSq51",
+        "finish": "stop",
+        "rawFinish": "stop",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 9,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b5d001UXXvnN78OWqINe",
+      "created": 1793158712157,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180968b5e0014SO3wu2Mt77wrS",
+      "created": 1793158712158,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 10,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b98001spy76ccmjxXMBI",
+      "created": 1793158712216,
+      "type": "session.inbox.enqueued",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "inboxID": "msg_180968b97001Z5YeMStP4VVRG0",
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "item": {
+          "type": "compaction",
+          "payload": {},
+          "delivery": "steer"
+        }
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 11,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b9b001aZHjp6Ia0FUdU8",
+      "created": 1793158712219,
+      "type": "session.execution.started",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 12,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b9e001umEhuTX9ruRiOn",
+      "created": 1793158712222,
+      "type": "session.inbox.delivered",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "inboxID": "msg_180968b97001Z5YeMStP4VVRG0"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 13,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968b9e002YeJ6tOMNo5loQv",
+      "created": 1793158712222,
+      "type": "session.compaction.started",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "reason": "manual",
+        "recent": "",
+        "inputID": "msg_180968b97001Z5YeMStP4VVRG0"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 14,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968bbc001Qvp13RW8rt7Qtf",
+      "created": 1793158712252,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Objective\n"
+      }
+    },
+    {
+      "id": "evt_180968bbd001Pr4eAYcceY2eq9",
+      "created": 1793158712253,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- Exercise the disposable CodeWalk native contract.\n"
+      }
+    },
+    {
+      "id": "evt_180968bbd002rkp6jn3E6dlTDr",
+      "created": 1793158712253,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bbe0014EgJG3aIjEepp7",
+      "created": 1793158712254,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Requirements\n"
+      }
+    },
+    {
+      "id": "evt_180968bbe002sh4oBVJs9lvM77",
+      "created": 1793158712254,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- Use the local zero-cost provider only.\n"
+      }
+    },
+    {
+      "id": "evt_180968bbf001vAVJG1p6PcjziJ",
+      "created": 1793158712255,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bbf002U0qMQ6QGK4yLZJ",
+      "created": 1793158712255,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Decisions\n"
+      }
+    },
+    {
+      "id": "evt_180968bc0001w8Qc2RV0NEex7V",
+      "created": 1793158712256,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- Keep all work in the owned temporary project.\n"
+      }
+    },
+    {
+      "id": "evt_180968bc1001LqiO2TuUWw7EGl",
+      "created": 1793158712257,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bc1002D2ktsyGY3bTEJg",
+      "created": 1793158712257,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Work State\n"
+      }
+    },
+    {
+      "id": "evt_180968bc2001BmiqK8loRbBl6L",
+      "created": 1793158712258,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "### Completed\n"
+      }
+    },
+    {
+      "id": "evt_180968bc2002sTOEewALp4Bv4N",
+      "created": 1793158712258,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- Answered the owned marker prompts.\n"
+      }
+    },
+    {
+      "id": "evt_180968bc3001fmj5741rYm57cB",
+      "created": 1793158712259,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "### Active\n"
+      }
+    },
+    {
+      "id": "evt_180968bc3002MU6vAh3RwKasl6",
+      "created": 1793158712259,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- Native contract verification.\n"
+      }
+    },
+    {
+      "id": "evt_180968bc4001HZwf5r2dc7lIq6",
+      "created": 1793158712260,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "### Blocked\n"
+      }
+    },
+    {
+      "id": "evt_180968bc4002uftDLSyEq0uFbs",
+      "created": 1793158712260,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_180968bc5001j9d7Tmm3PPe4RO",
+      "created": 1793158712261,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bc500226QoZHUU6zNApB",
+      "created": 1793158712261,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Next Move\n"
+      }
+    },
+    {
+      "id": "evt_180968bc8001QcPsMMCWDe2cGs",
+      "created": 1793158712264,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "1. Continue the owned verification.\n"
+      }
+    },
+    {
+      "id": "evt_180968bc80022mJxkQI9u3905h",
+      "created": 1793158712264,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bd4001408QfYa6I3K8z4",
+      "created": 1793158712276,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Relevant Files\n"
+      }
+    },
+    {
+      "id": "evt_180968bd4002Klb6OUX8o4jAx7",
+      "created": 1793158712277,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- (none)\n"
+      }
+    },
+    {
+      "id": "evt_180968bd5001mvqB5c41VBEWd0",
+      "created": 1793158712277,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "\n"
+      }
+    },
+    {
+      "id": "evt_180968bd60012pk8apDswLMKbn",
+      "created": 1793158712278,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "## Important Context\n"
+      }
+    },
+    {
+      "id": "evt_180968bd6002EdS7BlXwPQm4MP",
+      "created": 1793158712278,
+      "type": "session.compaction.delta",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "text": "- All provider output is deterministic test data.\n"
+      }
+    },
+    {
+      "id": "evt_180968bda001KyZsCDJ6vWkdE6",
+      "created": 1793158712282,
+      "type": "session.usage.updated",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "evt_180968bda002bo1dmcLMg7Jbqp",
+      "created": 1793158712282,
+      "type": "session.compaction.ended",
+      "location": {
+        "directory": "<owned-root>/project"
+      },
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "reason": "manual",
+        "model": {
+          "id": "stub",
+          "providerID": "cw042c"
+        },
+        "text": "## Objective\n- Exercise the disposable CodeWalk native contract.\n\n## Requirements\n- Use the local zero-cost provider only.\n\n## Decisions\n- Keep all work in the owned temporary project.\n\n## Work State\n### Completed\n- Answered the owned marker prompts.\n### Active\n- Native contract verification.\n### Blocked\n- (none)\n\n## Next Move\n1. Continue the owned verification.\n\n## Relevant Files\n- (none)\n\n## Important Context\n- All provider output is deterministic test data.\n",
+        "recent": "",
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "cost": 0
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 16,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968bde001jKg5BF8wQf6gXB",
+      "created": 1793158712286,
+      "type": "session.execution.succeeded",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 17,
+        "version": 1
+      }
+    },
+    {
+      "id": "evt_180968c0a001HO48PNClGturUl",
+      "created": 1793158712330,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7f69952fffe1JDiYEh7HgPMv1"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69952fffe1JDiYEh7HgPMv1",
+        "seq": 37,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180968c11001gzIesHaIBinTyD",
+      "created": 1793158712337,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7f69911affekuUVgtI0Eedpg8"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f69911affekuUVgtI0Eedpg8",
+        "seq": 16,
+        "version": 2
+      }
+    },
+    {
+      "id": "evt_180968c17001VVHSfBKFxRfURl",
+      "created": 1793158712343,
+      "type": "session.deleted",
+      "data": {
+        "sessionID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL"
+      },
+      "durable": {
+        "aggregateID": "ses_e7f6974e5ffeuhlrLn9YaSxvVL",
+        "seq": 18,
+        "version": 2
+      }
+    }
+  ],
+  "repo_commit": "0d15eed1f92f43999d82892dd9a6809a34df8c76",
+  "producer_sha256": {
+    "capture_v2_turn_actions.py": "da04407051c95c9ecc0ae8223e83b428f0e59df3ca2c2df80453b701248ca8f1",
+    "v2_device_server.py": "299615f831f6dc8b8e418b966d3304beca019b23e75d3b64e523913f71d5ef6d"
+  },
+  "zero_spend_configuration": true,
+  "binary_sha256": "f27539d9c05c970d3eb9ad6a7724b75d3e638932c5423554f5ecbfe0ee2e8815",
+  "platform": "aarch64",
+  "egress": {
+    "violation": null,
+    "nonLoopbackPeers": 0,
+    "socketsObserved": 11,
+    "auditRuns": 6,
+    "firstAuditAt": "2026-10-28T03:38:23.830899+00:00",
+    "lastAuditAt": "2026-10-28T03:38:32.373200+00:00",
+    "auditedAt": "2026-10-28T03:38:32.373217+00:00"
+  },
+  "provider_requests": 7,
+  "user_servers_unchanged": true
+}

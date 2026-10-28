@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'compaction_projection.dart';
 import 'error_projection.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
@@ -606,6 +607,28 @@ List<TimelineItem> projectOpenCodeHistory(
               type == 'synthetic' ? NoticeKind.continuation : NoticeKind.system,
             ),
             text: text(message['text']),
+          ),
+        );
+      case 'compaction':
+        final ({ItemStatus status, String text})? compact;
+        try {
+          compact = openCodeCompactionNotice(message);
+        } on OpenCodeCompactionProjectionException {
+          malformed();
+        }
+        if (compact == null) {
+          final status = text(message['status'], cap: 4096, nonempty: true);
+          unknown('compaction-status', status, 0, {
+            'type': status,
+            'reason': 'unsupportedCompactionStatus',
+          });
+          break;
+        }
+        add(
+          Notice(
+            meta: meta('notice', 0, status: OpenValue.known(compact.status)),
+            kind: const OpenValue.known(NoticeKind.compaction),
+            text: text(compact.text),
           ),
         );
       case 'idle':

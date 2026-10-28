@@ -30,6 +30,7 @@ const producers = <String, Producer>{
   'revert': projectOpenCodeRevertEvent,
   'lifecycle': projectOpenCodeSessionLifecycleEvent,
   'notice': projectOpenCodeNoticeEvent,
+  'compaction': projectOpenCodeCompactionEvent,
 };
 
 const owned = {
@@ -73,6 +74,9 @@ const owned = {
   'session.deleted': 'lifecycle',
   'session.instructions.updated': 'notice',
   'session.synthetic': 'notice',
+  'session.compaction.started': 'compaction',
+  'session.compaction.ended': 'compaction',
+  'session.compaction.failed': 'compaction',
 };
 
 List<SessionEvent> project(
@@ -177,7 +181,7 @@ void main() {
       ('session.status', 'unprojected'),
       ('session.idle', 'unprojected'),
       ('session.moved', 'unprojected'),
-      ('session.compaction.started', 'unprojected'),
+      ('session.skill.activated', 'unprojected'),
       ('session.future.fact', 'unrecognized'),
     ]) {
       final events = project(
@@ -322,16 +326,30 @@ void main() {
         }
       }
     }
-    // 917 frames reach the shared walker: every session type is owned, the
-    // only unowned type is the session-free `server.connected`, and no
-    // tracked frame becomes a diagnostic. Every step start names the running
+    // 1079 observed frames include V2-071G success and negative compaction.
+    // Unowned types are session-free catalog updates and intentionally
+    // unrendered compaction deltas; no tracked frame becomes a diagnostic.
+    // Every step start names the running
     // step and every step end clears it, so failed steps without usage still
     // emit; their error reaches the turn's outcome. The three D subagent
     // progress frames that name their child session now upsert it.
     expect(categories, {
-      'routed-events': 775,
-      'routed-empty': 116,
-      'noop:server.connected': 26,
+      'routed-events': 857,
+      'routed-empty': 129,
+      'noop:server.connected': 27,
+      'noop:worktree.resolved': 1,
+      'noop:project.updated': 1,
+      'noop:integration.updated': 1,
+      'noop:provider.updated': 1,
+      'noop:model.updated': 1,
+      'noop:vcs.branch.updated': 1,
+      'noop:agent.updated': 1,
+      'noop:command.updated': 1,
+      'noop:skill.updated': 1,
+      'noop:websearch.updated': 1,
+      'noop:reference.updated': 1,
+      'noop:plugin.updated': 1,
+      'noop:session.compaction.delta': 54,
     });
   });
 

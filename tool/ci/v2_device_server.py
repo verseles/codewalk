@@ -39,6 +39,8 @@ Prompts containing CW-SLOW make the stub answer for 30 s (CW-SLOW90 for 90 s),
 so a scenario can disturb a running turn. CW-RICH answers a fixed Markdown,
 code, table, math and Mermaid sample, for comparing how each block renders.
 Any other prompt is answered at once.
+The native compaction summary prompt gets a fixed, structured checkpoint, so
+the real server can validate and finish a manual compaction without paid work.
 
 Usage:
   python3 tool/ci/v2_device_server.py serve --root /tmp/x [--bind ADDR]
@@ -164,6 +166,35 @@ graph TD
 Last line.
 """
 
+# 2.0.22 core/session/compaction.ts at 05018b8862: SUMMARY_TEMPLATE.
+# This is deterministic provider output, never a fabricated server event.
+COMPACTION_SAMPLE = """## Objective
+- Exercise the disposable CodeWalk native contract.
+
+## Requirements
+- Use the local zero-cost provider only.
+
+## Decisions
+- Keep all work in the owned temporary project.
+
+## Work State
+### Completed
+- Answered the owned marker prompts.
+### Active
+- Native contract verification.
+### Blocked
+- (none)
+
+## Next Move
+1. Continue the owned verification.
+
+## Relevant Files
+- (none)
+
+## Important Context
+- All provider output is deterministic test data.
+"""
+
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
@@ -260,6 +291,8 @@ class StubHandler(BaseHTTPRequestHandler):
         seconds = min(int(match.group(1) or 30), 120) if match else 0
         if slow:
             parts = [f"tick {i} " for i in range(1, seconds + 1)]
+        elif all(heading in prompt for heading in ("## Objective", "## Work State", "## Next Move")):
+            parts = COMPACTION_SAMPLE.splitlines(keepends=True)
         elif RICH_MARKER in prompt:
             parts = RICH_SAMPLE.splitlines(keepends=True)
         else:
