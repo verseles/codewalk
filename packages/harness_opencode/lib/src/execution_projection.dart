@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'error_projection.dart';
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeExecutionProjectionFailure {
@@ -144,6 +145,7 @@ List<SessionEvent> projectOpenCodeExecutionEvent(
       item: TurnOutcome(
         meta: ItemMeta(
           id: id,
+          anchor: openCodeMessageAnchor(messageId!),
           generation: jsonEncode([
             'live',
             current.ref.storageKey,

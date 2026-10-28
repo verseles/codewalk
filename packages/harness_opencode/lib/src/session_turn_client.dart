@@ -267,7 +267,11 @@ final class OpenCodeSessionTurnClient {
       }
       final time = data['time'];
       final created = time is Map<String, Object?> ? time['created'] : null;
-      if (data['id'] != message!.value ||
+      // The endpoint may coalesce this request onto an existing control.
+      // Preserve its admitted ID while retaining the original proposed intent.
+      final admittedId = data['id'];
+      if (admittedId is! String ||
+          !_messageId(admittedId) ||
           data['sessionID'] != session.nativeId ||
           data['type'] != 'compaction' ||
           data['delivery'] != 'steer' ||
@@ -279,7 +283,7 @@ final class OpenCodeSessionTurnClient {
         return uncertain('malformedCompactAdmission');
       }
       return finish(
-        CommandReceipt.accepted(id: id, owner: owner, nativeRef: message.value),
+        CommandReceipt.accepted(id: id, owner: owner, nativeRef: admittedId),
       );
     } on TransportException catch (error) {
       if (timedOut) return uncertain('timeout');

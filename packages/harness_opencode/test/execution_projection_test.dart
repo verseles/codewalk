@@ -115,6 +115,7 @@ void main() {
           sourceVersion: '2.0.22',
         ).whereType<TurnOutcome>().single;
         expect(item.id, history.id);
+        expect(item.meta.anchor, history.meta.anchor);
         expect(item.status, history.status);
         expect(item.kind, history.kind);
         expect(item.meta.ordinal, history.meta.ordinal);

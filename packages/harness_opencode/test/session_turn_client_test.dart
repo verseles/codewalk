@@ -73,7 +73,7 @@ RevertRequest target(SessionRef ref, String message, {bool files = true}) =>
     );
 
 Map<String, Object?> compactBody() => {
-  'data': {
+  'data': <String, Object?>{
     'id': 'msg_compact',
     'sessionID': 'ses_a',
     'time': {'created': 1000},
@@ -240,8 +240,47 @@ void main() {
     });
   }
 
+  test('compact may coalesce onto a different valid server input', () async {
+    final body = compactBody();
+    (body['data'] as Map)['id'] = 'msg_existing';
+    final t = _Transport((_, _) => response(body));
+    final result = await client(
+      t,
+    ).compact(session: session, input: MessageRef('msg_compact'), id: command);
+    expect(result.receipt.state.known, ReceiptState.accepted);
+    expect(result.receipt.nativeRef, 'msg_existing');
+    expect(result.command.intent.value, {
+      'input': 'msg_compact',
+      'delivery': 'steer',
+    });
+    expect(jsonDecode(utf8.decode(t.requests.single.body!)), {
+      'id': 'msg_compact',
+      'delivery': 'steer',
+    });
+  });
+
+  for (final (index, invalidId) in [
+    null,
+    42,
+    'msg_',
+    'msg_${'x' * 4097}',
+  ].indexed) {
+    test('compact rejects malformed admitted ID case $index', () async {
+      final body = compactBody();
+      (body['data'] as Map)['id'] = invalidId;
+      final t = _Transport((_, _) => response(body));
+      final result = await client(t).compact(
+        session: session,
+        input: MessageRef('msg_compact'),
+        id: command,
+      );
+      expect(result.receipt.state.known, ReceiptState.uncertain);
+      expect(result.receipt.nativeRef, isNull);
+    });
+  }
+
   for (final entry in <String, Object?>{
-    'id': 'msg_other',
+    'id': 'not_a_message',
     'sessionID': 'ses_child',
     'type': 'user',
     'delivery': 'queue',
