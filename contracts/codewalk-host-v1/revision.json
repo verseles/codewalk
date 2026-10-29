@@ -53,6 +53,6 @@
     "terminalResize": "CanonicalTerminalResizeIntent",
     "terminalClose": "CanonicalTerminalCloseIntent"
   },
-  "schemaSha256": "2dbe4050dc6c891373142dd2a8e76ce416c0cad3f9a34968251004716b279af0",
+  "schemaSha256": "51186a9a084c15ad19b7df42ce6a26f20959addce25ae53d81066bef07e845df",
   "examplesManifestSha256": "bf7e6fb16ae3750c02245f6323b21997b732790fdbfac447e552210dd78c4d2a"
 }

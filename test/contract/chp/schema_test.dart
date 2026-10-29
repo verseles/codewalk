@@ -48,6 +48,17 @@ void main() {
       );
     });
 
+    test('schema identity tracks the bundle revision', () {
+      final root = loadRootSchema();
+      final schemaRevision = revision['schemaRevision'] as String;
+      final urnSuffix = schemaRevision.replaceAll('-', ':').replaceAll('.', ':');
+      expect(
+        root[r'$id'],
+        endsWith(':$urnSuffix'),
+        reason: 'schema \$id must move with every bundle revision bump',
+      );
+    });
+
     test('checksum inventory covers the complete current artifact bundle', () {
       final root = Directory(contractPath);
       final covered = <String>{};

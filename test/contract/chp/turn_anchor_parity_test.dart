@@ -45,6 +45,15 @@ void main() {
         isValidDefinition('CanonicalMessageAnchor', {'message': 'x'}),
         isFalse,
       );
+      expect(
+        isValidDefinition('CanonicalMessageAnchor', {
+          'message': 'x',
+          'orderKey': '001',
+          'nativeTimestamp': 1,
+        }),
+        isFalse,
+        reason: 'an anchor must not smuggle unknown fields such as chronology',
+      );
     },
   );
 
@@ -119,6 +128,12 @@ void main() {
       valid('CanonicalRevertState', wire);
       expect(wire['boundary'], isNull);
       expect(wire['anchor'], projectMessageAnchor(cut));
+      final nullAnchor = cloneObject(wire)..['anchor'] = null;
+      expect(
+        isValidDefinition('CanonicalRevertState', nullAnchor),
+        isTrue,
+        reason: 'an absent anchor must stay expressible as an explicit null',
+      );
       final pending = PendingInput(
         id: const ItemId('pending'),
         text: 'later',
