@@ -90,6 +90,7 @@ class SessionComposerController extends ChangeNotifier {
       !live.stopping &&
       // A model or agent change settles before the next prompt goes out.
       !live.selectionState.holdsSend &&
+      !(live.turnActions?.state.holdsSend ?? false) &&
       live.view?.phase == SessionLivePhase.live &&
       !(live.view?.stale ?? true);
 

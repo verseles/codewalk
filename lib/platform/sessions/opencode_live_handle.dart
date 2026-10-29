@@ -7,13 +7,15 @@ import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import 'opencode_profile_slot.dart';
 
 /// One live session's lease on an [OpenCodeProfileSlot]. It only delegates to
 /// the slot, and lives in its own file so the slot stays below the
 /// architecture guard's file-size limit.
-final class OpenCodeLiveHandle implements SessionLiveHandle {
+final class OpenCodeLiveHandle
+    implements SessionLiveHandle, SessionTurnActionSource {
   OpenCodeLiveHandle(this._slot, this.session);
   final OpenCodeProfileSlot _slot;
   @override
@@ -38,6 +40,10 @@ final class OpenCodeLiveHandle implements SessionLiveHandle {
 
   @override
   PromptOutbox? get outbox => _closed ? null : _slot.outbox;
+
+  @override
+  SessionTurnActionPort? get turnActions =>
+      _closed ? null : _slot.turns?.port(session, () => !_closed);
 
   @override
   SessionStopState get stopState =>

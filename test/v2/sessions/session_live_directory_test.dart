@@ -14,6 +14,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
+import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1263,6 +1264,7 @@ void main() {
       session: ref('ses_one'),
     );
     expect(plain.outbox, isNull);
+    expect(plain.turnActions, isNull);
     plain.close();
 
     final directory = createSessionLiveDirectory(payloads: OutboxStore())!;
@@ -1274,6 +1276,7 @@ void main() {
     );
     await until(handle, (v) => v.phase == SessionLivePhase.live);
     expect(server.methods, {'GET'});
+    expect(handle.turnActions, isNotNull);
     final outbox = handle.outbox!;
     final result = await outbox.submit(
       session: ref('ses_one'),
@@ -1292,6 +1295,7 @@ void main() {
     expect(server.events, 1);
     handle.close();
     expect(handle.outbox, isNull);
+    expect(handle.turnActions, isNull);
   });
 
   test(

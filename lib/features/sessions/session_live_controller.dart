@@ -12,6 +12,7 @@ import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_stop.dart';
+import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/endpoint_health_controller.dart';
 import '../hosts/hosts_controller.dart';
@@ -241,6 +242,7 @@ class SessionLiveController extends ChangeNotifier {
 
   SessionState? get state => view?.state;
   PromptOutbox? get outbox => _handle?.outbox;
+  SessionTurnActionPort? get turnActions => _handle?.turnActions;
   SessionStopState get stopState =>
       _handle?.stopState ?? const SessionStopState();
   bool get stopping => stopState.busy;

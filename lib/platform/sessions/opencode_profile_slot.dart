@@ -13,9 +13,12 @@ import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
+import 'opencode_catalog_lease.dart';
 import 'opencode_live_handle.dart';
 import 'opencode_selection_lane.dart';
+import 'opencode_turn_action_lane.dart';
 import 'prompt_outbox_store.dart';
+import 'turn_action_journal.dart';
 import 'unrestricted_ownership_store.dart';
 
 /// The per-profile runtime of one OpenCode 2.0.22 endpoint: the
@@ -76,6 +79,7 @@ final class OpenCodeProfileSlot {
   OpenCodeFormReplyClient? _forms;
   OpenCodeSessionRulesClient? _rules;
   OpenCodeSelectionLane? _selection;
+  OpenCodeTurnActionLane? _turns;
   final _stops = <SessionRef, _StopRequest>{};
   final _older = <SessionRef, SessionOlderHistoryState>{};
   final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
@@ -102,7 +106,7 @@ final class OpenCodeProfileSlot {
   final handles = <OpenCodeLiveHandle>{};
   // The catalog feeds holding this profile's stream open.
   int _catalogLeases = 0;
-  final _leases = <_CatalogLease>[];
+  final _leases = <OpenCodeCatalogLease>[];
   final _views = <SessionRef, SessionLiveView>{};
 
   Future<void> ready() => _ready ??= _probe();
@@ -165,6 +169,25 @@ final class OpenCodeProfileSlot {
       publish: (ref) => _publish(ref, view(ref)),
     );
     if (payloads case final store?) {
+      _turns = OpenCodeTurnActionLane(
+        queue: queue,
+        journal: TurnActionJournal(store, profile),
+        client: OpenCodeSessionTurnClient(
+          _transport,
+          harness: harness,
+          connectedVersion: observed,
+        ),
+        reader: _reader,
+        ids: ids,
+        commandIds: commandIds,
+        view: view,
+        publish: (ref) => _publish(ref, view(ref)),
+        refreshView: (ref) => _owner?.refresh(ref),
+        currentBinding: () => _activeBinding,
+        selectionHoldsSend: (ref) => _selection?.state(ref).holdsSend ?? false,
+        promptRefusal: (ref) => (outbox as OpenCodePromptOutbox)
+            .turnMutationRefusalWithinQueue(ref),
+      );
       outbox = OpenCodePromptOutbox(
         store: store,
         client: OpenCodePromptClient(
@@ -179,6 +202,8 @@ final class OpenCodeProfileSlot {
         profile: profile,
         isCurrentBinding: () => !isClosed && isCurrentBinding(),
         cancellation: lifetimeCancellation,
+        beforeSubmit: _turns!.beforeSubmit,
+        beforeReplay: _turns!.beforeReplay,
       );
     }
     final connection = IoSseRecovery(
@@ -223,13 +248,13 @@ final class OpenCodeProfileSlot {
       throw const SessionLiveException(SessionLiveFailure.cancelled);
     }
     _catalogLeases++;
-    final lease = _CatalogLease(this, owner);
+    final lease = OpenCodeCatalogLease(owner, _releaseCatalog);
     _leases.add(lease);
     return lease;
   }
 
   /// Releases one catalog feed; the profile closes with its last holder.
-  void _releaseCatalog(_CatalogLease lease) {
+  void _releaseCatalog(OpenCodeCatalogLease lease) {
     _leases.remove(lease);
     if (_catalogLeases == 0) return;
     _catalogLeases--;
@@ -272,6 +297,7 @@ final class OpenCodeProfileSlot {
       _unrestricted.putIfAbsent(session, _UnrestrictedEntry.new);
     }
     _selection?.open(session);
+    _turns?.open(session);
     final handle = OpenCodeLiveHandle(this, session);
     handles.add(handle);
     // A session that is already live reads its rules and catalog now.
@@ -312,6 +338,7 @@ final class OpenCodeProfileSlot {
       stop.state = const SessionStopState();
     }
     _views[session] = view;
+    _turns?.consider(session, view);
     for (final handle in handles.toList()) {
       if (handle.session == session) handle.emit(view);
     }
@@ -322,6 +349,8 @@ final class OpenCodeProfileSlot {
   /// The model and agent of the watched sessions; absent until the endpoint
   /// is verified and after the profile closes.
   OpenCodeSelectionLane? get selection => _activeBinding ? _selection : null;
+
+  OpenCodeTurnActionLane? get turns => _activeBinding ? _turns : null;
 
   SessionStopState stopState(SessionRef ref) =>
       _stops[ref]?.state ?? const SessionStopState();
@@ -1301,6 +1330,7 @@ final class OpenCodeProfileSlot {
       _older.remove(handle.session);
       _unrestricted.remove(handle.session)?.dispose();
       _selection?.release(handle.session);
+      _turns?.release(handle.session);
       _replyStates.removeWhere((_, reply) {
         if (reply.session != handle.session) return false;
         reply.dispose();
@@ -1349,6 +1379,7 @@ final class OpenCodeProfileSlot {
     }
     _unrestricted.clear();
     _selection?.close();
+    _turns?.close();
     for (final reply in _replyStates.values) {
       reply.dispose();
     }
@@ -1405,76 +1436,5 @@ final class _ReplyRequest {
   void dispose() {
     timer?.cancel();
     cancellation.cancel();
-  }
-}
-
-/// The catalog's hold on one profile's stream.
-///
-/// The feed is the endpoint's single stream: the lease only forwards the
-/// owner's payload-free catalog signal and keeps the profile alive while the
-/// catalog needs it.
-final class _CatalogLease implements SessionCatalogChanges {
-  _CatalogLease(this._slot, this._owner) {
-    _changes = _owner.catalogChanges.listen(
-      (change) => _add(switch (change) {
-        OpenCodeCatalogChange.started ||
-        OpenCodeCatalogChange.waiting => const SessionActivityChanged(),
-        _ => const SessionCatalogChanged(),
-      }),
-    );
-    // Only a stream-level update describes the endpoint's stream: a
-    // per-session degradation leaves the stream live.
-    _connection = _owner.updates
-        .where((update) => update is OpenCodeConnectionUpdated)
-        .where(
-          (update) => (update as OpenCodeConnectionUpdated).session == null,
-        )
-        .listen((update) {
-          final kind = (update as OpenCodeConnectionUpdated).kind;
-          _add(SessionCatalogConnection(kind == ConnectionKind.live));
-          if (kind == ConnectionKind.authRequired ||
-              kind == ConnectionKind.incompatible) {
-            // A terminal stream ends the feed: the catalog drops the lease
-            // and re-acquires one on the next read.
-            unawaited(_controller.close());
-          }
-        });
-  }
-
-  final OpenCodeProfileSlot _slot;
-  final OpenCodeStreamOwner _owner;
-  final _controller = StreamController<SessionCatalogSignal>.broadcast();
-  late final StreamSubscription<OpenCodeCatalogChange> _changes;
-  late final StreamSubscription<OpenCodeStreamUpdate> _connection;
-  bool _closed = false;
-
-  @override
-  Stream<SessionCatalogSignal> get signals => Stream.multi((controller) {
-    // A subscriber that arrives late learns the current state first: a
-    // broadcast controller would drop it.
-    final kind = _owner.connectionKind;
-    if (kind != null) {
-      controller.add(SessionCatalogConnection(kind == ConnectionKind.live));
-    }
-    final subscription = _controller.stream.listen(
-      controller.add,
-      onError: controller.addError,
-      onDone: controller.close,
-    );
-    controller.onCancel = subscription.cancel;
-  });
-
-  void _add(SessionCatalogSignal signal) {
-    if (!_closed && !_controller.isClosed) _controller.add(signal);
-  }
-
-  @override
-  void close() {
-    if (_closed) return;
-    _closed = true;
-    unawaited(_changes.cancel());
-    unawaited(_connection.cancel());
-    unawaited(_controller.close());
-    _slot._releaseCatalog(this);
   }
 }

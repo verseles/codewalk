@@ -26,6 +26,8 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     this.profile,
     bool Function()? isCurrentBinding,
     RequestCancellation? cancellation,
+    this.beforeSubmit,
+    this.beforeReplay,
   }) : _now = now ?? DateTime.now,
        _wait = wait ?? Future<void>.delayed,
        _queue = queue ?? KeySerialExecutor(),
@@ -66,6 +68,13 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   /// Shared by every outbox of one server, so two instances writing the same
   /// session ledger still take turns.
   final KeySerialExecutor _queue;
+
+  /// Called inside the shared session queue, immediately before a first send
+  /// or replay. Turn actions use this same queue; callbacks must not acquire
+  /// it again. A replacement send may commit a staged revert, but an automatic
+  /// replay must only check the fence and can never commit one.
+  final Future<String?> Function(SessionRef, bool Function())? beforeSubmit;
+  final Future<String?> Function(SessionRef)? beforeReplay;
 
   bool get _current =>
       profile != null &&
@@ -202,6 +211,20 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         // the composer must not automatically reconcile it as a fresh send.
         await _persist(key, session, base.adding(cancelled));
         return OutboxSubmission.recorded(_entry(cancelled), sent: false);
+      }
+      final refusal = await beforeSubmit?.call(
+        session,
+        () => _current && isCurrent?.call() != false,
+      );
+      if (refusal != null || !_current || isCurrent?.call() == false) {
+        final refused = record.copyWith(
+          state: SubmissionKind.rejected,
+          reason:
+              refusal ?? (_current ? 'cancelledBeforeSend' : 'sourceChanged'),
+          updatedAt: _now().toUtc(),
+        );
+        await _persist(key, session, base.adding(refused));
+        return OutboxSubmission.recorded(_entry(refused), sent: false);
       }
       final attempt = await client.post(ready, cancellation: _cancellation);
       final result = record.copyWith(
@@ -632,6 +655,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     if (record.fence != CancellationFence.none) {
       return settle(SubmissionKind.uncertain, 'cancellationFence');
     }
+    if (await beforeReplay?.call(session) case final refusal?) {
+      return settle(SubmissionKind.uncertain, refusal);
+    }
     if (record.replays >= maxReplays) {
       return settle(SubmissionKind.uncertain, 'replayExhausted');
     }
@@ -684,6 +710,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     if (_sourceRefusal(record) case final reason?) {
       return settle(SubmissionKind.uncertain, reason);
     }
+    if (await beforeReplay?.call(session) case final refusal?) {
+      return settle(SubmissionKind.uncertain, refusal);
+    }
     final attempt = await client.post(ready, cancellation: _cancellation);
     final result = sending.copyWith(
       // Unlike a first send, nothing posted keeps the earlier uncertainty.
@@ -704,6 +733,51 @@ final class OpenCodePromptOutbox implements PromptOutbox {
           ? result.notBefore
           : null,
     );
+  }
+
+  /// Read-only admission reconciliation before a turn mutation, while the
+  /// caller already holds [keyFor] on this outbox's queue. Never replays an
+  /// absent prompt. An admitted entry is not assumed delivered just because
+  /// the live view has not received its inbox event yet.
+  Future<String?> turnMutationRefusalWithinQueue(SessionRef session) async {
+    final key = keyFor(session);
+    final read = await _read(key, session);
+    if (read == null) return 'unreadable';
+    var ledger = await _recover(key, session, read);
+    for (final record in ledger.records.toList()) {
+      if (record.state != SubmissionKind.uncertain &&
+          record.state != SubmissionKind.admitted) {
+        continue;
+      }
+      if (_sourceRefusal(record) case final reason?) return reason;
+      final OpenCodePromptLocation location;
+      try {
+        location = await reader.locatePrompt(
+          session,
+          record.messageId,
+          sourceVersion: client.connectedVersion,
+          cancellation: _cancellation,
+        );
+      } on OpenCodeSessionReadException {
+        return 'promptUnconfirmed';
+      }
+      if (!_current) return 'sourceChanged';
+      if (location is! OpenCodePromptPromoted) {
+        return location is OpenCodePromptPending
+            ? 'promptPending'
+            : 'promptUnconfirmed';
+      }
+      ledger = ledger.replacing(
+        record,
+        record.copyWith(
+          state: SubmissionKind.delivered,
+          reason: null,
+          updatedAt: _now().toUtc(),
+        ),
+      );
+      if (!await _persist(key, session, ledger)) return 'notPersisted';
+    }
+    return null;
   }
 
   /// Only an id proven absent from the inbox and the complete history is
