@@ -234,7 +234,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
               refusal ?? (_current ? 'cancelledBeforeSend' : 'sourceChanged'),
           updatedAt: _now().toUtc(),
         );
-        await _persist(key, session, base.adding(refused));
+        if (!await _persist(key, session, base.adding(refused))) {
+          return const OutboxSubmission.refused('notPersisted');
+        }
         return OutboxSubmission.recorded(_entry(refused), sent: false);
       }
       final sending = record.copyWith(
@@ -251,7 +253,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
           reason: _current ? 'cancelledBeforeSend' : 'sourceChanged',
           updatedAt: _now().toUtc(),
         );
-        await _persist(key, session, base.adding(cancelled));
+        if (!await _persist(key, session, base.adding(cancelled))) {
+          return const OutboxSubmission.refused('notPersisted');
+        }
         return OutboxSubmission.recorded(_entry(cancelled), sent: false);
       }
       final attempt = await client.post(ready, cancellation: _cancellation);

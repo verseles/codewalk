@@ -285,15 +285,17 @@ final class OpenCodeTurnActionLane {
     required MutationOperation operation,
     UserInput? target,
   }) {
+    final entry = _entries[ref];
     final refusal = unavailable(ref, action);
-    if (!leaseCurrent() || refusal != null) {
+    if (entry == null ||
+        !leaseCurrent() ||
+        (refusal != null && refusal != entry.admission)) {
       return Future.value(
         SessionTurnResult(
           unavailable: refusal ?? SessionTurnUnavailable.offline,
         ),
       );
     }
-    final entry = _entries[ref]!;
     final initialCut = _staged(ref) ? _revert(ref)?.anchor : null;
     // Set before queuing so two taps cannot both pass admission.
     entry
@@ -314,13 +316,19 @@ final class OpenCodeTurnActionLane {
       entry.phase = SessionTurnPhase.idle;
       final changed = unavailable(ref, action);
       entry.phase = SessionTurnPhase.pending;
-      if (changed != null) return _refuse(ref, entry, changed);
+      if (changed != null && changed != entry.admission) {
+        return _refuse(ref, entry, changed);
+      }
       final admission = _admissionReason(await promptRefusal(ref));
       if (admission != null) {
         entry
           ..admission = admission
           ..admissionView = view(ref).state;
         return _refuse(ref, entry, admission);
+      } else if (entry.admission != null) {
+        entry
+          ..admission = null
+          ..admissionView = view(ref).state;
       }
       if (!_current(ref, entry) || !leaseCurrent()) {
         return _refuse(ref, entry, SessionTurnUnavailable.offline);
@@ -519,14 +527,14 @@ final class OpenCodeTurnActionLane {
         accepted ||
         attempt.receipt.state.known == ReceiptState.rejected ||
         attempt.receipt.state.known == ReceiptState.unavailable;
-    if (!_current(ref, entry)) {
+    if (!_current(ref, entry) || !callerCurrent()) {
       // Closing a view suppresses UI effects, not a known durable outcome.
       if (accepted && operation == MutationOperation.compact) {
-        await journal.write(
+        await _admitCompact(
           ref,
-          record.withAdmission(
-            MessageRef(attempt.receipt.nativeRef ?? record.input!.value),
-          ),
+          entry,
+          record,
+          MessageRef(attempt.receipt.nativeRef ?? record.input!.value),
         );
       } else if (definite) {
         await journal.clear(ref);
@@ -627,7 +635,7 @@ final class OpenCodeTurnActionLane {
     // replacement additionally needs the destructive commit preflight.
     if (!_staged(ref)) return null;
     final refusal = _whilePending(ref, entry, SessionTurnAction.redoAll);
-    if (refusal != null) return 'turnBusy';
+    if (refusal != null && refusal != entry.admission) return 'turnBusy';
     final cut = revert!.anchor;
     entry.phase = SessionTurnPhase.pending;
     publish(ref);
@@ -642,6 +650,10 @@ final class OpenCodeTurnActionLane {
         ..admissionView = view(ref).state;
       _refuse(ref, entry, admission);
       return 'turnUnconfirmed';
+    } else if (entry.admission != null) {
+      entry
+        ..admission = null
+        ..admissionView = view(ref).state;
     }
     final changed = _whilePending(ref, entry, SessionTurnAction.redoAll);
     if (changed != null || _revert(ref)?.anchor != cut) {
@@ -687,6 +699,14 @@ final class OpenCodeTurnActionLane {
         _ => false,
       };
 
+  static bool _sameRevert(RevertState? a, RevertState? b) {
+    if (identical(a, b)) return true;
+    if (a == null || b == null) return false;
+    return a.kind.known == b.kind.known &&
+        a.boundary == b.boundary &&
+        a.anchor == b.anchor;
+  }
+
   /// Called on canonical publications only. A later remote boundary wins
   /// over a late local HTTP reply. No publication replaces the local draft.
   void consider(SessionRef ref, SessionLiveView current) {
@@ -720,7 +740,7 @@ final class OpenCodeTurnActionLane {
     final record = entry.record;
     if (record != null &&
         record.operation != MutationOperation.compact &&
-        !identical(canonical.revert, entry.base)) {
+        !_sameRevert(canonical.revert, entry.base)) {
       if (_matches(record, canonical.revert)) {
         entry.echoed = true;
         entry.superseded = false;
@@ -728,7 +748,7 @@ final class OpenCodeTurnActionLane {
         entry.superseded = true;
       }
     }
-    if (entry.overlay != null && !identical(canonical.revert, entry.base)) {
+    if (entry.overlay != null && !_sameRevert(canonical.revert, entry.base)) {
       entry.overlay = null;
     }
     final compactNotice = record?.operation == MutationOperation.compact

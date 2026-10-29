@@ -1179,6 +1179,90 @@ void main() {
       }
     },
   );
+
+  test(
+    'R2 rehydrated baseline revert state during mutation does not supersede accepted result',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      rig.wire.answer = (request) {
+        rig.show(
+          revert: const RevertState(kind: OpenValue.known(RevertKind.none)),
+        );
+        final body = jsonDecode(utf8.decode(request.body!)) as Map;
+        return outboxJson({
+          'data': {'messageID': body['messageID']},
+        });
+      };
+      final result = await port.stage(_turn('msg_2').id, id: _id);
+      expect(result.applied, isTrue);
+      expect(port.state.phase, SessionTurnPhase.idle);
+    },
+  );
+
+  test(
+    'R2 closed view compact admission writes coalesced identity and survives reopen',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      var open = true;
+      final port = rig.lane.port(_ref, () => open);
+      rig.wire.answer = (request) {
+        open = false;
+        return outboxJson({
+          'data': {
+            'id': 'msg_coalesced_compact',
+            'sessionID': _ref.nativeId,
+            'type': 'compaction',
+            'delivery': 'steer',
+            'time': {'created': 2},
+            'payload': <String, Object?>{},
+          },
+        });
+      };
+      final result = await port.compact(id: _id);
+      expect(result.unavailable, SessionTurnUnavailable.offline);
+      final journal = TurnActionJournal(rig.store, rig.profile);
+      final record = await journal.read(_ref);
+      expect(record, isNotNull);
+      expect(record!.admittedInput?.value, 'msg_coalesced_compact');
+    },
+  );
+
+  test(
+    'R2 cleared prompt refusal clears cached admission on lane',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      rig.wire.answer = (_) =>
+          throw const TransportException(TransportFailure.timeout);
+      await _send(rig.outbox, 'blocking-admission');
+      rig.lane.release(_ref);
+      final port = await rig.open();
+      expect(
+        port.unavailable(SessionTurnAction.undo),
+        SessionTurnUnavailable.unconfirmed,
+      );
+      rig.wire.answer = null;
+      final entry = (await rig.outbox.entries(_ref)).single;
+      rig.wire.history.add({
+        'id': entry.messageId,
+        'type': 'user',
+        'text': 'replacement',
+        'time': {'created': 3},
+      });
+      await rig.outbox.reconcile(_ref, const CommandId('blocking-admission'));
+      final result = await port.stage(_turn('msg_2').id, id: _id);
+      expect(result.applied, isTrue);
+      expect(
+        port.unavailable(SessionTurnAction.undo),
+        isNull,
+      );
+    },
+  );
 }
 
 final class _JournalGateStore extends OutboxStore {

@@ -60,11 +60,11 @@
 
 ## Helper execution budget (owner, 2026-10-29)
 
-- Every planning/review `helper*` work invocation has a hard **20-minute wall-clock budget**. This explicit owner rule overrides longer skill/runner defaults and their timeout recovery policy.
-- At the deadline, terminate the owned helper process and its detached backend/tool process groups. Reserve shutdown time inside the 20 minutes; with the unified runner, use `--timeout 1190` under a 1200-second outer limit so its termination/escalation can finish within budget.
+- Every planning/review `helper*` work invocation has a hard **45-minute wall-clock budget**. This explicit owner rule overrides longer skill/runner defaults and their timeout recovery policy.
+- At the deadline, terminate the owned helper process and its detached backend/tool process groups. Reserve shutdown time inside the 45 minutes; with the unified runner, use `--timeout 2690` under a 2700-second outer limit so its termination/escalation can finish within budget.
 - When any other eligible helper or usable report is available, ignore the timed-out helper for the remainder of that round. Do not resume, retry or replace its timed-out work; continue with the available helpers and record the timeout as a technical failure, never as a content judgment.
 - Resume timed-out work only when no other helper or usable report is available. A genuinely new review/planning round rediscovers the eligible pool normally; it must not silently recover the discarded work from the previous round.
-- Keep all ordinary participation, Task Memory capture, judgment, validation and publication gates. The 20-minute rule changes helper execution/recovery only; CI and test budgets remain unchanged.
+- Keep all ordinary participation, Task Memory capture, judgment, validation and publication gates. The 45-minute rule changes helper execution/recovery only; CI and test budgets remain unchanged.
 
 ## V2 Plan Execution (`avançar` / `continuar`)
 
