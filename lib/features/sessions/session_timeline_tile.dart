@@ -28,8 +28,10 @@ class SessionTimelineTile extends StatelessWidget {
     this.errorRecovery,
     this.onOpenChild,
     this.messageHeader = false,
+    this.inlineAction,
   });
   final TimelineItem item;
+  final Widget? inlineAction;
   final void Function(String text, String href, String? title)? onTapLink;
   final void Function(String path, int? line, int? col)? onTapFilePath;
   final ValueChanged<String>? onCopyCode;
@@ -104,6 +106,10 @@ class SessionTimelineTile extends StatelessWidget {
                   ),
                 ),
               ),
+              if (inlineAction != null) ...[
+                inlineAction!,
+                const SizedBox(width: 4),
+              ],
               if (message != null) MessageElapsedChip(message: message),
             ],
           ),

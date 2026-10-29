@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "Raisonnement masqué",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "Compacter le contexte",
+  "chatMessageRewindEdit": "Revenir en arrière et modifier à partir d''ici",
+  "chatRedoLastTurn": "Rétablir le dernier tour annulé",
+  "chatRedoNothing": "Rien à rétablir dans cette session",
+  "chatUndoLastTurn": "Annuler le dernier tour",
+  "chatUndoNothing": "Rien à annuler dans cette session",
+  "msgInfoUndoThisTurn": "Annuler ce tour",
+  "chatRedoAll": "Tout rétablir",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "Remplacer le brouillon ?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "Vous avez du texte non envoyé dans votre brouillon. Le remplacer supprimera votre brouillon actuel.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "Remplacer",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "La conversation est occupée.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "Le contexte est en cours de compactage.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "Un tour est actuellement annulé.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

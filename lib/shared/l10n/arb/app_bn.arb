@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "চিন্তা লুকানো হয়েছে",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "কমপ্যাক্ট প্রসঙ্গ",
+  "chatMessageRewindEdit": "রিওয়াইন্ড করুন এবং এখান থেকে সম্পাদনা করুন",
+  "chatRedoLastTurn": "শেষ পূর্বাবস্থায় ফেরানো পালা পুনরায় করুন",
+  "chatRedoNothing": "এই সেশনে পুনরায় করার কিছু নেই",
+  "chatUndoLastTurn": "শেষ মোড় পূর্বাবস্থায় ফেরান",
+  "chatUndoNothing": "এই সেশনে পূর্বাবস্থায় ফিরিয়ে আনার কিছু নেই",
+  "msgInfoUndoThisTurn": "এই পালা পূর্বাবস্থায় ফেরান",
+  "chatRedoAll": "সব পুনরায় করুন",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "খসড়া প্রতিস্থাপন করবেন?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "আপনার খসড়ায় না পাঠানো লেখা আছে। প্রতিস্থাপন করলে খসড়াটি বাতিল হবে।",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "প্রতিস্থাপন",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "কথোপকথন ব্যস্ত আছে।",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "প্রসঙ্গ সংকুচিত করা হচ্ছে।",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "একটি পালা বর্তমানে পূর্বাবস্থায় ফিরিয়ে নেওয়া আছে।",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

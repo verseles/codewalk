@@ -2311,4 +2311,49 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Raisonnement masqué';
+
+  @override
+  String get chatCompactContext => 'Compacter le contexte';
+
+  @override
+  String get chatMessageRewindEdit =>
+      'Revenir en arrière et modifier à partir d\'ici';
+
+  @override
+  String get chatRedoLastTurn => 'Rétablir le dernier tour annulé';
+
+  @override
+  String get chatRedoNothing => 'Rien à rétablir dans cette session';
+
+  @override
+  String get chatUndoLastTurn => 'Annuler le dernier tour';
+
+  @override
+  String get chatUndoNothing => 'Rien à annuler dans cette session';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Annuler ce tour';
+
+  @override
+  String get chatRedoAll => 'Tout rétablir';
+
+  @override
+  String get turnReplaceDraftTitle => 'Remplacer le brouillon ?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'Vous avez du texte non envoyé dans votre brouillon. Le remplacer supprimera votre brouillon actuel.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Remplacer';
+
+  @override
+  String get turnUnavailableBusy => 'La conversation est occupée.';
+
+  @override
+  String get turnUnavailableCompacting =>
+      'Le contexte est en cours de compactage.';
+
+  @override
+  String get turnUnavailableRevertStaged => 'Un tour est actuellement annulé.';
 }

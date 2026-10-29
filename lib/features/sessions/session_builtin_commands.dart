@@ -91,11 +91,18 @@ List<SessionBuiltinCommand> sessionCommandSuggestions(
 enum SessionTurnAction { undo, redo, compact }
 
 /// Why a turn action cannot run.
-enum SessionTurnActionUnavailable { notYetAvailable, needsConversation }
+enum SessionTurnActionUnavailable {
+  notYetAvailable,
+  needsConversation,
+  busy,
+  compacting,
+  revertStaged,
+  nothingToUndo,
+  nothingToRedo,
+  unavailable,
+}
 
-/// How the `/undo`, `/redo` and `/compact` commands reach a session. Until
-/// #455 binds the real actions, [unboundSessionTurnActions] says they are
-/// not available yet, so the command never pretends to have run.
+/// How the `/undo`, `/redo` and `/compact` commands reach a session.
 abstract interface class SessionTurnActions {
   /// Why [action] cannot run now, or null when it can.
   SessionTurnActionUnavailable? unavailable(SessionTurnAction action);
@@ -169,15 +176,27 @@ Future<void> runSessionBuiltinCommand(
         SessionBuiltinCommand.redo => SessionTurnAction.redo,
         _ => SessionTurnAction.compact,
       };
+      final actions =
+          identical(turnActions, unboundSessionTurnActions) && live != null
+              ? live.turn
+              : turnActions;
       final reason = live == null
           ? SessionTurnActionUnavailable.needsConversation
-          : turnActions.unavailable(action);
-      if (reason == null) return turnActions.run(action);
+          : actions.unavailable(action);
+      if (reason == null) return actions.run(action);
       tell(switch (reason) {
         SessionTurnActionUnavailable.notYetAvailable =>
           l10n.commandNotYetAvailable,
         SessionTurnActionUnavailable.needsConversation =>
           l10n.commandNeedsConversation,
+        SessionTurnActionUnavailable.busy => l10n.turnUnavailableBusy,
+        SessionTurnActionUnavailable.compacting =>
+          l10n.turnUnavailableCompacting,
+        SessionTurnActionUnavailable.revertStaged =>
+          l10n.turnUnavailableRevertStaged,
+        SessionTurnActionUnavailable.nothingToUndo => l10n.chatUndoNothing,
+        SessionTurnActionUnavailable.nothingToRedo => l10n.chatRedoNothing,
+        SessionTurnActionUnavailable.unavailable => l10n.commandUnavailableHere,
       });
   }
 }

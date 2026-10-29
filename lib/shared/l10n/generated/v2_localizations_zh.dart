@@ -2122,4 +2122,46 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get commandThinkingHidden => '已隐藏思考过程';
+
+  @override
+  String get chatCompactContext => '紧凑上下文';
+
+  @override
+  String get chatMessageRewindEdit => '从此处回退并编辑';
+
+  @override
+  String get chatRedoLastTurn => '重做上一步';
+
+  @override
+  String get chatRedoNothing => '此会话中没有可重做的操作';
+
+  @override
+  String get chatUndoLastTurn => '撤销上一步';
+
+  @override
+  String get chatUndoNothing => '此会话中没有可撤销的操作';
+
+  @override
+  String get msgInfoUndoThisTurn => '撤销此轮';
+
+  @override
+  String get chatRedoAll => '全部重做';
+
+  @override
+  String get turnReplaceDraftTitle => '替换草稿？';
+
+  @override
+  String get turnReplaceDraftMessage => '草稿中有未发送的文本。替换将放弃当前草稿。';
+
+  @override
+  String get turnReplaceDraftConfirm => '替换';
+
+  @override
+  String get turnUnavailableBusy => '对话正忙。';
+
+  @override
+  String get turnUnavailableCompacting => '正在压缩上下文。';
+
+  @override
+  String get turnUnavailableRevertStaged => '当前有一轮已被撤销。';
 }

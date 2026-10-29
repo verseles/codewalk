@@ -419,13 +419,24 @@ class _SessionLivePageState extends State<SessionLivePage>
   );
 
   Widget _page(BuildContext context) => ListenableBuilder(
-    listenable: widget.controller,
+    listenable: Listenable.merge([widget.controller, widget.controller.turn]),
     builder: (context, child) {
       final c = widget.controller;
       final l10n = context.v2L10n;
       final view = c.view;
       final state = c.state;
-      final items = state?.timeline ?? const <TimelineItem>[];
+      final cut = c.turnActions?.state.staged == true
+          ? c.turnActions?.state.revert?.anchor
+          : null;
+      final rawItems = state?.timeline ?? const <TimelineItem>[];
+      final items = cut == null
+          ? rawItems
+          : [
+              for (final item in rawItems)
+                if (item.meta.anchor == null ||
+                    item.meta.anchor!.compareTo(cut) < 0)
+                  item,
+            ];
       // An opened view speaks through its phase; this is an open failure.
       final failure = _failure(l10n, c.failure);
       final execution = _execution(l10n, state?.execution);
@@ -559,6 +570,29 @@ class _SessionLivePageState extends State<SessionLivePage>
                         child: SessionLiveTimeline(
                           onOpenChild: _openChild,
                           items: items,
+                          userTurnActionBuilder: (context, turnItem, isLatest) {
+                            final tooltip = isLatest
+                                ? l10n.msgInfoUndoThisTurn
+                                : l10n.chatMessageRewindEdit;
+                            return IconButton(
+                              key: ValueKey(
+                                'user-turn-action-${turnItem.id.value}',
+                              ),
+                              icon: Icon(
+                                isLatest ? Icons.undo : Icons.history,
+                                size: 18,
+                              ),
+                              tooltip: tooltip,
+                              onPressed: c.turn.canUndo
+                                  ? () => unawaited(
+                                      c.turn.stageUndo(
+                                        target: turnItem,
+                                        context: context,
+                                      ),
+                                    )
+                                  : null,
+                            );
+                          },
                           emptyBuilder: _empty(c, l10n),
                           scroll: widget.controller.scroll,
                           settled: settled,

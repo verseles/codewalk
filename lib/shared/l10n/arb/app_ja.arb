@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "思考を非表示にしました",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "コンテキストの圧縮",
+  "chatMessageRewindEdit": "ここから巻き戻して編集",
+  "chatRedoLastTurn": "元に戻した最後のターンをやり直す",
+  "chatRedoNothing": "このセッションでやり直す操作はありません",
+  "chatUndoLastTurn": "最後のターンを元に戻す",
+  "chatUndoNothing": "このセッションで元に戻す操作はありません",
+  "msgInfoUndoThisTurn": "このターンを元に戻す",
+  "chatRedoAll": "すべてやり直す",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "下書きを置き換えますか？",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "下書きに未送信のテキストがあります。置き換えると下書きは破棄されます。",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "置き換える",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "会話の処理中です。",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "コンテキストを圧縮中です。",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "現在、ターンが取り消されています。",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

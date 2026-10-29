@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "सोच छिपाई गई",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "संक्षिप्त संदर्भ (Compact Context)",
+  "chatMessageRewindEdit": "यहाँ से रिवाइंड और संपादित करें",
+  "chatRedoLastTurn": "पिछला पूर्ववत किया गया कदम फिर से करें",
+  "chatRedoNothing": "इस सत्र में फिर से करने के लिए कुछ नहीं है",
+  "chatUndoLastTurn": "पिछला कदम पूर्ववत (undo) करें",
+  "chatUndoNothing": "इस सत्र में पूर्ववत करने के लिए कुछ नहीं है",
+  "msgInfoUndoThisTurn": "इस कदम को पूर्ववत करें",
+  "chatRedoAll": "सब फिर से करें",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "ड्राफ़्ट बदलें?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "आपके ड्राफ़्ट में न भेजा गया टेक्स्ट है। इसे बदलने पर आपका ड्राफ़्ट खारिज हो जाएगा।",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "बदलें",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "बातचीत व्यस्त है।",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "संदर्भ संकुचित किया जा रहा है।",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "एक बारी वर्तमान में पूर्ववत है।",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "已隐藏思考过程",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "紧凑上下文",
+  "chatMessageRewindEdit": "从此处回退并编辑",
+  "chatRedoLastTurn": "重做上一步",
+  "chatRedoNothing": "此会话中没有可重做的操作",
+  "chatUndoLastTurn": "撤销上一步",
+  "chatUndoNothing": "此会话中没有可撤销的操作",
+  "msgInfoUndoThisTurn": "撤销此轮",
+  "chatRedoAll": "全部重做",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "替换草稿？",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "草稿中有未发送的文本。替换将放弃当前草稿。",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "替换",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "对话正忙。",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "正在压缩上下文。",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "当前有一轮已被撤销。",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

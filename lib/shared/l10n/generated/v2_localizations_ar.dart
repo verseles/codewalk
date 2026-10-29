@@ -2242,4 +2242,47 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'تم إخفاء التفكير';
+
+  @override
+  String get chatCompactContext => 'ضغط السياق';
+
+  @override
+  String get chatMessageRewindEdit => 'تراجع وتحرير من هنا';
+
+  @override
+  String get chatRedoLastTurn => 'إعادة إجراء الدور الأخير المتراجع عنه';
+
+  @override
+  String get chatRedoNothing => 'لا يوجد شيء لإعادة فعله في هذه الجلسة';
+
+  @override
+  String get chatUndoLastTurn => 'التراجع عن الدور الأخير';
+
+  @override
+  String get chatUndoNothing => 'لا يوجد شيء للتراجع عنه في هذه الجلسة';
+
+  @override
+  String get msgInfoUndoThisTurn => 'تراجع عن هذا الدور';
+
+  @override
+  String get chatRedoAll => 'إعادة الكل';
+
+  @override
+  String get turnReplaceDraftTitle => 'استبدال المسودة؟';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'لديك نص غير مرسل في المسودة. استبداله سيتجاهل مسودتك الحالية.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'استبدال';
+
+  @override
+  String get turnUnavailableBusy => 'المحادثة مشغولة.';
+
+  @override
+  String get turnUnavailableCompacting => 'يتم ضغط السياق حاليًا.';
+
+  @override
+  String get turnUnavailableRevertStaged => 'هناك دور متراجع عنه حاليًا.';
 }

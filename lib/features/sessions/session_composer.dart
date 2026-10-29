@@ -215,6 +215,7 @@ class _SessionComposerState extends State<SessionComposer> {
       command,
       live: widget.controller.live,
       agentAnchor: _agentAnchor,
+      turnActions: widget.controller.live.turn,
     );
   }
 

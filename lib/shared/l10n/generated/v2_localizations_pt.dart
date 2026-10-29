@@ -2292,4 +2292,48 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Raciocínio oculto';
+
+  @override
+  String get chatCompactContext => 'Compactar Contexto';
+
+  @override
+  String get chatMessageRewindEdit => 'Rebobinar e editar a partir daqui';
+
+  @override
+  String get chatRedoLastTurn => 'Refazer último turno desfeito';
+
+  @override
+  String get chatRedoNothing => 'Nada para refazer nesta sessão';
+
+  @override
+  String get chatUndoLastTurn => 'Desfazer último turno';
+
+  @override
+  String get chatUndoNothing => 'Nada para desfazer nesta sessão';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Desfazer este turno';
+
+  @override
+  String get chatRedoAll => 'Refazer tudo';
+
+  @override
+  String get turnReplaceDraftTitle => 'Substituir rascunho?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'Você tem texto não enviado no rascunho. Substituí-lo descartará o rascunho atual.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Substituir';
+
+  @override
+  String get turnUnavailableBusy => 'A conversa está ocupada.';
+
+  @override
+  String get turnUnavailableCompacting => 'O contexto está sendo compactado.';
+
+  @override
+  String get turnUnavailableRevertStaged =>
+      'Um turno está desfeito no momento.';
 }

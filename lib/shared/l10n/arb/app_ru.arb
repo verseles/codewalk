@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "Рассуждения скрыты",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "Сжать контекст",
+  "chatMessageRewindEdit": "Вернуться назад и редактировать отсюда",
+  "chatRedoLastTurn": "Повторить последний отмененный ход",
+  "chatRedoNothing": "В этой сессии нечего повторять",
+  "chatUndoLastTurn": "Отменить последний ход",
+  "chatUndoNothing": "В этой сессии нечего отменять",
+  "msgInfoUndoThisTurn": "Отменить этот ход",
+  "chatRedoAll": "Повторить всё",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "Заменить черновик?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "В черновике есть неотправленный текст. При замене он будет удалён.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "Заменить",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "Беседа занята.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "Контекст сжимается.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "Ход в данный момент отменён.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

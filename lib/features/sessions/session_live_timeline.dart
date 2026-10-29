@@ -42,6 +42,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.errorRecovery,
     this.onOpenChild,
     this.emptyBuilder,
+    this.userTurnActionBuilder,
   });
 
   /// The resident items, in the server's order.
@@ -76,6 +77,10 @@ class SessionLiveTimeline extends StatefulWidget {
   /// session loads, or the empty conversation once it is known to be empty.
   /// Null for none.
   final WidgetBuilder? emptyBuilder;
+
+  /// Optional builder for a confirmed user turn's inline action.
+  final Widget Function(BuildContext context, UserInput item, bool isLatest)?
+      userTurnActionBuilder;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -656,6 +661,15 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               errorRecovery: widget.errorRecovery,
               onOpenChild: widget.onOpenChild,
               messageHeader: messageHeader,
+              inlineAction: item is UserInput &&
+                      item.confirmed &&
+                      widget.userTurnActionBuilder != null
+                  ? widget.userTurnActionBuilder!(
+                      context,
+                      item,
+                      item.id == _latestConfirmedUserTurnId(rows),
+                    )
+                  : null,
             ),
           SessionToolRunRow() => SessionToolRun(
             row: row,
@@ -720,6 +734,15 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
         unread ? Icons.mark_chat_unread : Icons.arrow_downward_rounded,
       ),
     );
+  }
+
+  static ItemId? _latestConfirmedUserTurnId(List<SessionTimelineRow> rows) {
+    for (var i = rows.length - 1; i >= 0; i--) {
+      if (rows[i] case SessionItemRow(item: final UserInput item) when item.confirmed) {
+        return item.id;
+      }
+    }
+    return null;
   }
 }
 

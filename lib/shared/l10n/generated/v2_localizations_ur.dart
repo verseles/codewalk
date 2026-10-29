@@ -2260,4 +2260,47 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'سوچ چھپائی گئی';
+
+  @override
+  String get chatCompactContext => 'کومپیکٹ سیاق و سباق';
+
+  @override
+  String get chatMessageRewindEdit => 'ریوائنڈ اور یہاں سے ترمیم کریں۔';
+
+  @override
+  String get chatRedoLastTurn => 'آخری کالعدم موڑ کو دوبارہ کریں۔';
+
+  @override
+  String get chatRedoNothing => 'اس سیشن میں دوبارہ کرنے کے لیے کچھ نہیں ہے';
+
+  @override
+  String get chatUndoLastTurn => 'آخری موڑ کو کالعدم کریں۔';
+
+  @override
+  String get chatUndoNothing => 'اس سیشن میں کالعدم کرنے کے لیے کچھ نہیں ہے';
+
+  @override
+  String get msgInfoUndoThisTurn => 'اس موڑ کو کالعدم کریں۔';
+
+  @override
+  String get chatRedoAll => 'سب دوبارہ کریں';
+
+  @override
+  String get turnReplaceDraftTitle => 'مسودہ تبدیل کریں؟';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'آپ کے مسودے میں غیر ارسال شدہ متن موجود ہے۔ اسے تبدیل کرنے سے آپ کا مسودہ خارج ہو جائے گا۔';
+
+  @override
+  String get turnReplaceDraftConfirm => 'تبدیل کریں';
+
+  @override
+  String get turnUnavailableBusy => 'گفتگو مصروف ہے۔';
+
+  @override
+  String get turnUnavailableCompacting => 'سیاق و سباق کو سمیٹا جا رہا ہے۔';
+
+  @override
+  String get turnUnavailableRevertStaged => 'ایک باری فی الحال کالعدم ہے۔';
 }

@@ -2312,4 +2312,48 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Ragionamento nascosto';
+
+  @override
+  String get chatCompactContext => 'Compatta contesto';
+
+  @override
+  String get chatMessageRewindEdit => 'Riavvolgi e modifica da qui';
+
+  @override
+  String get chatRedoLastTurn => 'Ripristina ultimo turno annullato';
+
+  @override
+  String get chatRedoNothing => 'Nulla da ripristinare in questa sessione';
+
+  @override
+  String get chatUndoLastTurn => 'Annulla ultimo turno';
+
+  @override
+  String get chatUndoNothing => 'Nulla da annullare in questa sessione';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Annulla questo turno';
+
+  @override
+  String get chatRedoAll => 'Ripristina tutto';
+
+  @override
+  String get turnReplaceDraftTitle => 'Sostituire la bozza?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'Hai del testo non inviato nella bozza. Sostituirlo cancellerà la bozza attuale.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Sostituisci';
+
+  @override
+  String get turnUnavailableBusy => 'La conversazione è occupata.';
+
+  @override
+  String get turnUnavailableCompacting =>
+      'Compattazione del contesto in corso.';
+
+  @override
+  String get turnUnavailableRevertStaged => 'Un turno è attualmente annullato.';
 }

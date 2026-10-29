@@ -2806,5 +2806,61 @@
   "commandThinkingHidden": "Thinking hidden",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "Compact Context",
+  "@chatCompactContext": {
+    "description": "CodeWalk UI string — chatCompactContext"
+  },
+  "chatMessageRewindEdit": "Rewind and edit from here",
+  "@chatMessageRewindEdit": {
+    "description": "CodeWalk UI string — chatMessageRewindEdit"
+  },
+  "chatRedoLastTurn": "Redo last undone turn",
+  "@chatRedoLastTurn": {
+    "description": "CodeWalk UI string — chatRedoLastTurn"
+  },
+  "chatRedoNothing": "Nothing to redo in this session",
+  "@chatRedoNothing": {
+    "description": "CodeWalk UI string — chatRedoNothing"
+  },
+  "chatUndoLastTurn": "Undo last turn",
+  "@chatUndoLastTurn": {
+    "description": "CodeWalk UI string — chatUndoLastTurn"
+  },
+  "chatUndoNothing": "Nothing to undo in this session",
+  "@chatUndoNothing": {
+    "description": "CodeWalk UI string — chatUndoNothing"
+  },
+  "msgInfoUndoThisTurn": "Undo this turn",
+  "@msgInfoUndoThisTurn": {
+    "description": "CodeWalk UI string — msgInfoUndoThisTurn"
+  },
+  "chatRedoAll": "Redo all",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "Replace draft?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "You have unsent text in your draft. Replacing it will discard your draft.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "Replace",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "The conversation is busy.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "Context is currently compacting.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "A turn is currently undone.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

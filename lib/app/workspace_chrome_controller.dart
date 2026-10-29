@@ -77,6 +77,7 @@ final class WorkspaceChromeController extends ChangeNotifier {
             !live.disposed,
       )
       .firstOrNull;
+  SessionLiveController? get activeLive => _live;
   bool get _recovering {
     final live = _live;
     return live != null &&

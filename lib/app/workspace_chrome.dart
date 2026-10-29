@@ -112,6 +112,8 @@ class WorkspaceDrawerNotice extends StatelessWidget {
   }
 }
 
+enum _TurnMenuAction { undo, redoNext, redoAll, compact }
+
 class WorkspaceAppBarActions extends StatelessWidget {
   const WorkspaceAppBarActions({super.key});
 
@@ -151,8 +153,119 @@ class WorkspaceAppBarActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final preferences = context.watch<AppPreferencesController?>();
     context.watch<SessionsController?>();
+    final chrome = context.watch<WorkspaceChromeController?>();
+    final live = chrome?.activeLive;
     final l = context.v2L10n;
     final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
+    final menu = PopupMenuButton<Object>(
+      key: const ValueKey('workspace-actions'),
+      tooltip: l.chatAppBarMoreActions,
+      onSelected: (action) {
+        if (action is WorkspacePinnedAction) {
+          _run(context, action)?.call();
+        } else if (action is _TurnMenuAction && live != null) {
+          switch (action) {
+            case _TurnMenuAction.undo:
+              unawaited(live.turn.undoLast(context: context));
+            case _TurnMenuAction.redoNext:
+              unawaited(live.turn.redoNext());
+            case _TurnMenuAction.redoAll:
+              unawaited(live.turn.redoAll());
+            case _TurnMenuAction.compact:
+              unawaited(live.turn.compact());
+          }
+        }
+      },
+      itemBuilder: (context) => [
+        for (final action in WorkspacePinnedAction.values)
+          PopupMenuItem<Object>(
+            value: action,
+            enabled: _run(context, action) != null,
+            child: Row(
+              children: [
+                Icon(_icon(action)),
+                const SizedBox(width: 12),
+                Expanded(child: Text(_label(l, action))),
+                if (preferences != null)
+                  ListenableBuilder(
+                    listenable: preferences,
+                    builder: (context, _) {
+                      final pinned = preferences.appBarPins.contains(
+                        action,
+                      );
+                      return IconButton(
+                        key: ValueKey('workspace-pin-${action.name}'),
+                        tooltip: pinned
+                            ? l.chatAppBarUnpinAction
+                            : l.chatAppBarPinAction,
+                        icon: Icon(
+                          pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                        ),
+                        onPressed: preferences.canEditAppBarPins
+                            ? () => preferences.setAppBarPinned(
+                                action,
+                                !pinned,
+                              )
+                            : null,
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        if (live != null) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem<Object>(
+            key: const ValueKey('turn-menu-undo'),
+            value: _TurnMenuAction.undo,
+            enabled: live.turn.canUndo,
+            child: Row(
+              children: [
+                const Icon(Icons.undo),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l.chatUndoLastTurn)),
+              ],
+            ),
+          ),
+          PopupMenuItem<Object>(
+            key: const ValueKey('turn-menu-redo-next'),
+            value: _TurnMenuAction.redoNext,
+            enabled: live.turn.canRedoNext,
+            child: Row(
+              children: [
+                const Icon(Icons.redo),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l.chatRedoLastTurn)),
+              ],
+            ),
+          ),
+          PopupMenuItem<Object>(
+            key: const ValueKey('turn-menu-redo-all'),
+            value: _TurnMenuAction.redoAll,
+            enabled: live.turn.canRedoAll,
+            child: Row(
+              children: [
+                const Icon(Icons.fast_forward),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l.chatRedoAll)),
+              ],
+            ),
+          ),
+          PopupMenuItem<Object>(
+            key: const ValueKey('turn-menu-compact'),
+            value: _TurnMenuAction.compact,
+            enabled: live.turn.canCompact,
+            child: Row(
+              children: [
+                const Icon(Icons.compress),
+                const SizedBox(width: 12),
+                Expanded(child: Text(l.chatCompactContext)),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -163,49 +276,13 @@ class WorkspaceAppBarActions extends StatelessWidget {
             onPressed: _run(context, action),
             icon: Icon(_icon(action)),
           ),
-        PopupMenuButton<WorkspacePinnedAction>(
-          key: const ValueKey('workspace-actions'),
-          tooltip: l.chatAppBarMoreActions,
-          onSelected: (action) => _run(context, action)?.call(),
-          itemBuilder: (context) => [
-            for (final action in WorkspacePinnedAction.values)
-              PopupMenuItem(
-                value: action,
-                enabled: _run(context, action) != null,
-                child: Row(
-                  children: [
-                    Icon(_icon(action)),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(_label(l, action))),
-                    if (preferences != null)
-                      ListenableBuilder(
-                        listenable: preferences,
-                        builder: (context, _) {
-                          final pinned = preferences.appBarPins.contains(
-                            action,
-                          );
-                          return IconButton(
-                            key: ValueKey('workspace-pin-${action.name}'),
-                            tooltip: pinned
-                                ? l.chatAppBarUnpinAction
-                                : l.chatAppBarPinAction,
-                            icon: Icon(
-                              pinned ? Icons.push_pin : Icons.push_pin_outlined,
-                            ),
-                            onPressed: preferences.canEditAppBarPins
-                                ? () => preferences.setAppBarPinned(
-                                    action,
-                                    !pinned,
-                                  )
-                                : null,
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+        if (live != null)
+          ListenableBuilder(
+            listenable: live.turn,
+            builder: (context, _) => menu,
+          )
+        else
+          menu,
       ],
     );
   }

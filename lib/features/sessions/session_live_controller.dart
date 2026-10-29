@@ -21,6 +21,7 @@ import 'session_input_history.dart';
 import 'session_live_scroll.dart';
 import 'session_selection_cycle.dart';
 import 'session_selection_memory.dart';
+import 'session_turn_controller.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
 /// observing, reconnecting and closing never mutate the server.
@@ -99,6 +100,9 @@ class SessionLiveController extends ChangeNotifier {
   SessionComposerController get composer =>
       _composer ??= SessionComposerController(live: this);
   SessionComposerController? _composer;
+
+  /// The turn actions and draft provenance controller.
+  late final turn = SessionTurnController(live: this, commandIds: _commandIds);
 
   /// The stored draft is shown once it is read, unless the user has typed
   /// meanwhile: what they typed is theirs, and is saved from the first key.
@@ -983,6 +987,7 @@ class SessionLiveController extends ChangeNotifier {
     _detach();
     scroll.dispose();
     _composer?.dispose();
+    turn.dispose();
     draft.removeListener(_draftChanged);
     drafts?.detach(session, _draftForgotten);
     unawaited(drafts?.flush());

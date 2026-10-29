@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "Razonamiento oculto",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "Compactar Contexto",
+  "chatMessageRewindEdit": "Rebobinar y editar desde aquí",
+  "chatRedoLastTurn": "Rehacer último turno deshecho",
+  "chatRedoNothing": "Nada que rehacer en esta sesión",
+  "chatUndoLastTurn": "Deshacer último turno",
+  "chatUndoNothing": "Nada que deshacer en esta sesión",
+  "msgInfoUndoThisTurn": "Deshacer este turno",
+  "chatRedoAll": "Rehacer todo",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "¿Reemplazar borrador?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "Tienes texto no enviado en el borrador. Reemplazarlo descartará tu borrador actual.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "Reemplazar",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "La conversación está ocupada.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "El contexto se está compactando.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "Un turno está deshecho actualmente.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

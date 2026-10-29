@@ -1667,5 +1667,40 @@
   "commandThinkingHidden": "تم إخفاء التفكير",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "ضغط السياق",
+  "chatMessageRewindEdit": "تراجع وتحرير من هنا",
+  "chatRedoLastTurn": "إعادة إجراء الدور الأخير المتراجع عنه",
+  "chatRedoNothing": "لا يوجد شيء لإعادة فعله في هذه الجلسة",
+  "chatUndoLastTurn": "التراجع عن الدور الأخير",
+  "chatUndoNothing": "لا يوجد شيء للتراجع عنه في هذه الجلسة",
+  "msgInfoUndoThisTurn": "تراجع عن هذا الدور",
+  "chatRedoAll": "إعادة الكل",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "استبدال المسودة؟",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "لديك نص غير مرسل في المسودة. استبداله سيتجاهل مسودتك الحالية.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "استبدال",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "المحادثة مشغولة.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "يتم ضغط السياق حاليًا.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "هناك دور متراجع عنه حاليًا.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

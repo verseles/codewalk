@@ -2264,4 +2264,47 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Thinking hidden';
+
+  @override
+  String get chatCompactContext => 'Compact Context';
+
+  @override
+  String get chatMessageRewindEdit => 'Rewind and edit from here';
+
+  @override
+  String get chatRedoLastTurn => 'Redo last undone turn';
+
+  @override
+  String get chatRedoNothing => 'Nothing to redo in this session';
+
+  @override
+  String get chatUndoLastTurn => 'Undo last turn';
+
+  @override
+  String get chatUndoNothing => 'Nothing to undo in this session';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Undo this turn';
+
+  @override
+  String get chatRedoAll => 'Redo all';
+
+  @override
+  String get turnReplaceDraftTitle => 'Replace draft?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'You have unsent text in your draft. Replacing it will discard your draft.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Replace';
+
+  @override
+  String get turnUnavailableBusy => 'The conversation is busy.';
+
+  @override
+  String get turnUnavailableCompacting => 'Context is currently compacting.';
+
+  @override
+  String get turnUnavailableRevertStaged => 'A turn is currently undone.';
 }

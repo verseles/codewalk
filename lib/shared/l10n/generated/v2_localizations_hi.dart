@@ -2266,4 +2266,47 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'सोच छिपाई गई';
+
+  @override
+  String get chatCompactContext => 'संक्षिप्त संदर्भ (Compact Context)';
+
+  @override
+  String get chatMessageRewindEdit => 'यहाँ से रिवाइंड और संपादित करें';
+
+  @override
+  String get chatRedoLastTurn => 'पिछला पूर्ववत किया गया कदम फिर से करें';
+
+  @override
+  String get chatRedoNothing => 'इस सत्र में फिर से करने के लिए कुछ नहीं है';
+
+  @override
+  String get chatUndoLastTurn => 'पिछला कदम पूर्ववत (undo) करें';
+
+  @override
+  String get chatUndoNothing => 'इस सत्र में पूर्ववत करने के लिए कुछ नहीं है';
+
+  @override
+  String get msgInfoUndoThisTurn => 'इस कदम को पूर्ववत करें';
+
+  @override
+  String get chatRedoAll => 'सब फिर से करें';
+
+  @override
+  String get turnReplaceDraftTitle => 'ड्राफ़्ट बदलें?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'आपके ड्राफ़्ट में न भेजा गया टेक्स्ट है। इसे बदलने पर आपका ड्राफ़्ट खारिज हो जाएगा।';
+
+  @override
+  String get turnReplaceDraftConfirm => 'बदलें';
+
+  @override
+  String get turnUnavailableBusy => 'बातचीत व्यस्त है।';
+
+  @override
+  String get turnUnavailableCompacting => 'संदर्भ संकुचित किया जा रहा है।';
+
+  @override
+  String get turnUnavailableRevertStaged => 'एक बारी वर्तमान में पूर्ववत है।';
 }

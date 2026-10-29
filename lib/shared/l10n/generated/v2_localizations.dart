@@ -4117,6 +4117,90 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Thinking hidden'**
   String get commandThinkingHidden;
+
+  /// CodeWalk UI string — chatCompactContext
+  ///
+  /// In en, this message translates to:
+  /// **'Compact Context'**
+  String get chatCompactContext;
+
+  /// CodeWalk UI string — chatMessageRewindEdit
+  ///
+  /// In en, this message translates to:
+  /// **'Rewind and edit from here'**
+  String get chatMessageRewindEdit;
+
+  /// CodeWalk UI string — chatRedoLastTurn
+  ///
+  /// In en, this message translates to:
+  /// **'Redo last undone turn'**
+  String get chatRedoLastTurn;
+
+  /// CodeWalk UI string — chatRedoNothing
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to redo in this session'**
+  String get chatRedoNothing;
+
+  /// CodeWalk UI string — chatUndoLastTurn
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last turn'**
+  String get chatUndoLastTurn;
+
+  /// CodeWalk UI string — chatUndoNothing
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to undo in this session'**
+  String get chatUndoNothing;
+
+  /// CodeWalk UI string — msgInfoUndoThisTurn
+  ///
+  /// In en, this message translates to:
+  /// **'Undo this turn'**
+  String get msgInfoUndoThisTurn;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'Redo all'**
+  String get chatRedoAll;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'Replace draft?'**
+  String get turnReplaceDraftTitle;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsent text in your draft. Replacing it will discard your draft.'**
+  String get turnReplaceDraftMessage;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get turnReplaceDraftConfirm;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'The conversation is busy.'**
+  String get turnUnavailableBusy;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'Context is currently compacting.'**
+  String get turnUnavailableCompacting;
+
+  /// V2 turn actions and draft provenance
+  ///
+  /// In en, this message translates to:
+  /// **'A turn is currently undone.'**
+  String get turnUnavailableRevertStaged;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

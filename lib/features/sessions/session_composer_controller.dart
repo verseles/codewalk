@@ -147,13 +147,19 @@ class SessionComposerController extends ChangeNotifier {
 
   /// The pending inbox rows, each with this device's entry when it sent it.
   List<ComposerChip> chips(SessionState? state) {
+    final cut = live.turnActions?.state.staged == true
+        ? live.turnActions?.state.revert?.anchor
+        : null;
     final byMessage = {
       for (final e in entries)
         if (e.source == OutboxSource.current) e.messageId: e,
     };
     return [
       for (final pending in state?.pending ?? const <PendingInput>[])
-        ComposerChip(pending, byMessage[live.nativeMessageOf(pending.id)]),
+        if (cut == null ||
+            pending.anchor == null ||
+            pending.anchor!.compareTo(cut) < 0)
+          ComposerChip(pending, byMessage[live.nativeMessageOf(pending.id)]),
     ];
   }
 

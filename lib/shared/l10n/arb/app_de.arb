@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "Denkprozess ausgeblendet",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "Kompakter Kontext",
+  "chatMessageRewindEdit": "Ab hier zurückspulen und bearbeiten",
+  "chatRedoLastTurn": "Letzten rückgängig gemachten Schritt wiederholen",
+  "chatRedoNothing": "Nichts zu wiederholen in dieser Sitzung",
+  "chatUndoLastTurn": "Letzten Schritt rückgängig machen",
+  "chatUndoNothing": "Nichts rückgängig zu machen in dieser Sitzung",
+  "msgInfoUndoThisTurn": "Diesen Schritt rückgängig machen",
+  "chatRedoAll": "Alles wiederholen",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "Entwurf ersetzen?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "Du hast nicht gesendeten Text im Entwurf. Beim Ersetzen wird dein Entwurf verworfen.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "Ersetzen",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "Die Unterhaltung ist beschäftigt.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "Kontext wird gerade komprimiert.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "Ein Schritt ist derzeit rückgängig gemacht.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

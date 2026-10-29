@@ -2259,4 +2259,49 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'চিন্তা লুকানো হয়েছে';
+
+  @override
+  String get chatCompactContext => 'কমপ্যাক্ট প্রসঙ্গ';
+
+  @override
+  String get chatMessageRewindEdit =>
+      'রিওয়াইন্ড করুন এবং এখান থেকে সম্পাদনা করুন';
+
+  @override
+  String get chatRedoLastTurn => 'শেষ পূর্বাবস্থায় ফেরানো পালা পুনরায় করুন';
+
+  @override
+  String get chatRedoNothing => 'এই সেশনে পুনরায় করার কিছু নেই';
+
+  @override
+  String get chatUndoLastTurn => 'শেষ মোড় পূর্বাবস্থায় ফেরান';
+
+  @override
+  String get chatUndoNothing => 'এই সেশনে পূর্বাবস্থায় ফিরিয়ে আনার কিছু নেই';
+
+  @override
+  String get msgInfoUndoThisTurn => 'এই পালা পূর্বাবস্থায় ফেরান';
+
+  @override
+  String get chatRedoAll => 'সব পুনরায় করুন';
+
+  @override
+  String get turnReplaceDraftTitle => 'খসড়া প্রতিস্থাপন করবেন?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'আপনার খসড়ায় না পাঠানো লেখা আছে। প্রতিস্থাপন করলে খসড়াটি বাতিল হবে।';
+
+  @override
+  String get turnReplaceDraftConfirm => 'প্রতিস্থাপন';
+
+  @override
+  String get turnUnavailableBusy => 'কথোপকথন ব্যস্ত আছে।';
+
+  @override
+  String get turnUnavailableCompacting => 'প্রসঙ্গ সংকুচিত করা হচ্ছে।';
+
+  @override
+  String get turnUnavailableRevertStaged =>
+      'একটি পালা বর্তমানে পূর্বাবস্থায় ফিরিয়ে নেওয়া আছে।';
 }

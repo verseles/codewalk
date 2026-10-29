@@ -5,18 +5,21 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
+import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
 import 'fakes.dart';
 
-class LiveHandle implements SessionLiveHandle {
-  LiveHandle(this.session, {this.outbox});
+class LiveHandle implements SessionLiveHandle, SessionTurnActionSource {
+  LiveHandle(this.session, {this.outbox, this.turnActions});
   @override
   final SessionRef session;
   @override
   PromptOutbox? outbox;
+  @override
+  SessionTurnActionPort? turnActions;
   bool stopAvailable = false;
   Future<SessionStopState> Function(CommandId)? stopAction;
   final stops = <CommandId>[];
@@ -379,8 +382,16 @@ class LiveDirectory implements SessionLiveDirectory {
     return completer.future;
   }
 
-  LiveHandle grant(SessionRef session, {PromptOutbox? outbox}) {
-    final handle = LiveHandle(session, outbox: outbox);
+  LiveHandle grant(
+    SessionRef session, {
+    PromptOutbox? outbox,
+    SessionTurnActionPort? turnActions,
+  }) {
+    final handle = LiveHandle(
+      session,
+      outbox: outbox,
+      turnActions: turnActions,
+    );
     handles.add(handle);
     opens.last.complete(handle);
     return handle;

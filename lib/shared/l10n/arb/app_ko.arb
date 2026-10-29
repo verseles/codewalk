@@ -1706,5 +1706,40 @@
   "commandThinkingHidden": "사고 과정 숨겨짐",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "컨텍스트 압축",
+  "chatMessageRewindEdit": "여기서부터 되돌려 편집하기",
+  "chatRedoLastTurn": "마지막 취소한 턴 다시 실행",
+  "chatRedoNothing": "이 세션에서 다시 실행할 작업이 없습니다",
+  "chatUndoLastTurn": "마지막 턴 실행 취소",
+  "chatUndoNothing": "이 세션에서 취소할 작업이 없습니다",
+  "msgInfoUndoThisTurn": "이 턴 취소",
+  "chatRedoAll": "모두 다시 실행",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "초안을 바꾸시겠습니까?",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "초안에 보내지 않은 텍스트가 있습니다. 바꾸면 초안이 삭제됩니다.",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "바꾸기",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "대화가 처리 중입니다.",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "컨텍스트를 압축하는 중입니다.",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "현재 실행 취소된 턴이 있습니다.",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

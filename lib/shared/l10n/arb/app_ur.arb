@@ -1668,5 +1668,40 @@
   "commandThinkingHidden": "سوچ چھپائی گئی",
   "@commandThinkingHidden": {
     "description": "V2 local composer commands"
+  },
+  "chatCompactContext": "کومپیکٹ سیاق و سباق",
+  "chatMessageRewindEdit": "ریوائنڈ اور یہاں سے ترمیم کریں۔",
+  "chatRedoLastTurn": "آخری کالعدم موڑ کو دوبارہ کریں۔",
+  "chatRedoNothing": "اس سیشن میں دوبارہ کرنے کے لیے کچھ نہیں ہے",
+  "chatUndoLastTurn": "آخری موڑ کو کالعدم کریں۔",
+  "chatUndoNothing": "اس سیشن میں کالعدم کرنے کے لیے کچھ نہیں ہے",
+  "msgInfoUndoThisTurn": "اس موڑ کو کالعدم کریں۔",
+  "chatRedoAll": "سب دوبارہ کریں",
+  "@chatRedoAll": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftTitle": "مسودہ تبدیل کریں؟",
+  "@turnReplaceDraftTitle": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftMessage": "آپ کے مسودے میں غیر ارسال شدہ متن موجود ہے۔ اسے تبدیل کرنے سے آپ کا مسودہ خارج ہو جائے گا۔",
+  "@turnReplaceDraftMessage": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnReplaceDraftConfirm": "تبدیل کریں",
+  "@turnReplaceDraftConfirm": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableBusy": "گفتگو مصروف ہے۔",
+  "@turnUnavailableBusy": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableCompacting": "سیاق و سباق کو سمیٹا جا رہا ہے۔",
+  "@turnUnavailableCompacting": {
+    "description": "V2 turn actions and draft provenance"
+  },
+  "turnUnavailableRevertStaged": "ایک باری فی الحال کالعدم ہے۔",
+  "@turnUnavailableRevertStaged": {
+    "description": "V2 turn actions and draft provenance"
   }
 }

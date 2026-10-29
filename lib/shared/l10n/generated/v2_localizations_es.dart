@@ -2299,4 +2299,48 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Razonamiento oculto';
+
+  @override
+  String get chatCompactContext => 'Compactar Contexto';
+
+  @override
+  String get chatMessageRewindEdit => 'Rebobinar y editar desde aquí';
+
+  @override
+  String get chatRedoLastTurn => 'Rehacer último turno deshecho';
+
+  @override
+  String get chatRedoNothing => 'Nada que rehacer en esta sesión';
+
+  @override
+  String get chatUndoLastTurn => 'Deshacer último turno';
+
+  @override
+  String get chatUndoNothing => 'Nada que deshacer en esta sesión';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Deshacer este turno';
+
+  @override
+  String get chatRedoAll => 'Rehacer todo';
+
+  @override
+  String get turnReplaceDraftTitle => '¿Reemplazar borrador?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'Tienes texto no enviado en el borrador. Reemplazarlo descartará tu borrador actual.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Reemplazar';
+
+  @override
+  String get turnUnavailableBusy => 'La conversación está ocupada.';
+
+  @override
+  String get turnUnavailableCompacting => 'El contexto se está compactando.';
+
+  @override
+  String get turnUnavailableRevertStaged =>
+      'Un turno está deshecho actualmente.';
 }

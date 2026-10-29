@@ -2164,4 +2164,46 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get commandThinkingHidden => '思考を非表示にしました';
+
+  @override
+  String get chatCompactContext => 'コンテキストの圧縮';
+
+  @override
+  String get chatMessageRewindEdit => 'ここから巻き戻して編集';
+
+  @override
+  String get chatRedoLastTurn => '元に戻した最後のターンをやり直す';
+
+  @override
+  String get chatRedoNothing => 'このセッションでやり直す操作はありません';
+
+  @override
+  String get chatUndoLastTurn => '最後のターンを元に戻す';
+
+  @override
+  String get chatUndoNothing => 'このセッションで元に戻す操作はありません';
+
+  @override
+  String get msgInfoUndoThisTurn => 'このターンを元に戻す';
+
+  @override
+  String get chatRedoAll => 'すべてやり直す';
+
+  @override
+  String get turnReplaceDraftTitle => '下書きを置き換えますか？';
+
+  @override
+  String get turnReplaceDraftMessage => '下書きに未送信のテキストがあります。置き換えると下書きは破棄されます。';
+
+  @override
+  String get turnReplaceDraftConfirm => '置き換える';
+
+  @override
+  String get turnUnavailableBusy => '会話の処理中です。';
+
+  @override
+  String get turnUnavailableCompacting => 'コンテキストを圧縮中です。';
+
+  @override
+  String get turnUnavailableRevertStaged => '現在、ターンが取り消されています。';
 }

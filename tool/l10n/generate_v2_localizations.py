@@ -49,6 +49,11 @@ from workspace_catalog import (
     NEW_KEYS as WORKSPACE_NEW_KEYS,
     COPY as WORKSPACE_COPY,
 )
+from session_turn_catalog import (
+    PORT_KEYS as TURN_PORT_KEYS,
+    NEW_KEYS as TURN_NEW_KEYS,
+    COPY as TURN_COPY,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -172,6 +177,7 @@ KEYS |= set(ERROR_NEW_KEYS)
 KEYS |= UPDATES_KEYS | set(UPDATES_NEW_KEYS)
 KEYS |= RENDERING_KEYS | set(RENDERING_NEW_KEYS)
 KEYS |= WORKSPACE_KEYS | set(WORKSPACE_NEW_KEYS)
+KEYS |= TURN_PORT_KEYS | set(TURN_NEW_KEYS)
 STORAGE_ERRORS = {
     "ar": "تعذر تحميل إعدادات المظهر أو حفظها. تظل التغييرات مؤقتة حتى تنجح إعادة المحاولة.",
     "bn": "চেহারার সেটিংস লোড বা সংরক্ষণ করা যায়নি। আবার চেষ্টা সফল না হওয়া পর্যন্ত পরিবর্তন অস্থায়ী থাকবে।",
@@ -486,6 +492,24 @@ def port_workspace_copy() -> None:
         path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def port_turn_copy() -> None:
+    ports = []
+    for locale in LOCALES:
+        path = SOURCE / "arb" / f"app_{locale}.arb"
+        arb = json.loads(path.read_text(encoding="utf-8"))
+        legacy = json.loads((ROOT / "lib/l10n" / f"app_{locale}.arb").read_text(encoding="utf-8"))
+        for key in sorted(TURN_PORT_KEYS):
+            arb[key] = legacy[key]
+            if "@" + key in legacy:
+                arb["@" + key] = legacy["@" + key]
+        for key, value in zip(TURN_NEW_KEYS, TURN_COPY[locale], strict=True):
+            arb[key] = value
+            arb["@" + key] = {"description": "V2 turn actions and draft provenance"}
+        ports.append((path, arb))
+    for path, arb in ports:
+        path.write_text(json.dumps(arb, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 OUTPUT_NAMES = {"v2_localizations.dart"} | {
     f"v2_localizations_{locale}.dart" for locale in LOCALES
 }
@@ -570,6 +594,7 @@ def main() -> int:
     parser.add_argument("--port-rendering", action="store_true", help="Add scoped canonical rich rendering copy only.")
     parser.add_argument("--port-updates", action="store_true", help="Add scoped update check copy only.")
     parser.add_argument("--port-workspace", action="store_true", help="Add scoped chat-first workspace copy only.")
+    parser.add_argument("--port-turn", action="store_true", help="Add scoped turn actions and draft provenance copy only.")
     args = parser.parse_args()
     try:
         if args.port_appearance:
@@ -644,6 +669,10 @@ def main() -> int:
             if args.check:
                 raise ValueError("--port-workspace cannot be combined with --check")
             port_workspace_copy()
+        if args.port_turn:
+            if args.check:
+                raise ValueError("--port-turn cannot be combined with --check")
+            port_turn_copy()
         return generate(args.check)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"V2 localization generation failed: {error}", file=sys.stderr)

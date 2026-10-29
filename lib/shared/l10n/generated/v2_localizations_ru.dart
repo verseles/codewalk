@@ -2289,4 +2289,47 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Рассуждения скрыты';
+
+  @override
+  String get chatCompactContext => 'Сжать контекст';
+
+  @override
+  String get chatMessageRewindEdit => 'Вернуться назад и редактировать отсюда';
+
+  @override
+  String get chatRedoLastTurn => 'Повторить последний отмененный ход';
+
+  @override
+  String get chatRedoNothing => 'В этой сессии нечего повторять';
+
+  @override
+  String get chatUndoLastTurn => 'Отменить последний ход';
+
+  @override
+  String get chatUndoNothing => 'В этой сессии нечего отменять';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Отменить этот ход';
+
+  @override
+  String get chatRedoAll => 'Повторить всё';
+
+  @override
+  String get turnReplaceDraftTitle => 'Заменить черновик?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'В черновике есть неотправленный текст. При замене он будет удалён.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Заменить';
+
+  @override
+  String get turnUnavailableBusy => 'Беседа занята.';
+
+  @override
+  String get turnUnavailableCompacting => 'Контекст сжимается.';
+
+  @override
+  String get turnUnavailableRevertStaged => 'Ход в данный момент отменён.';
 }

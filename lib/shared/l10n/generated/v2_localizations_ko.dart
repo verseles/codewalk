@@ -2165,4 +2165,46 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get commandThinkingHidden => '사고 과정 숨겨짐';
+
+  @override
+  String get chatCompactContext => '컨텍스트 압축';
+
+  @override
+  String get chatMessageRewindEdit => '여기서부터 되돌려 편집하기';
+
+  @override
+  String get chatRedoLastTurn => '마지막 취소한 턴 다시 실행';
+
+  @override
+  String get chatRedoNothing => '이 세션에서 다시 실행할 작업이 없습니다';
+
+  @override
+  String get chatUndoLastTurn => '마지막 턴 실행 취소';
+
+  @override
+  String get chatUndoNothing => '이 세션에서 취소할 작업이 없습니다';
+
+  @override
+  String get msgInfoUndoThisTurn => '이 턴 취소';
+
+  @override
+  String get chatRedoAll => '모두 다시 실행';
+
+  @override
+  String get turnReplaceDraftTitle => '초안을 바꾸시겠습니까?';
+
+  @override
+  String get turnReplaceDraftMessage => '초안에 보내지 않은 텍스트가 있습니다. 바꾸면 초안이 삭제됩니다.';
+
+  @override
+  String get turnReplaceDraftConfirm => '바꾸기';
+
+  @override
+  String get turnUnavailableBusy => '대화가 처리 중입니다.';
+
+  @override
+  String get turnUnavailableCompacting => '컨텍스트를 압축하는 중입니다.';
+
+  @override
+  String get turnUnavailableRevertStaged => '현재 실행 취소된 턴이 있습니다.';
 }

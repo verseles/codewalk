@@ -2313,4 +2313,49 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get commandThinkingHidden => 'Denkprozess ausgeblendet';
+
+  @override
+  String get chatCompactContext => 'Kompakter Kontext';
+
+  @override
+  String get chatMessageRewindEdit => 'Ab hier zurückspulen und bearbeiten';
+
+  @override
+  String get chatRedoLastTurn =>
+      'Letzten rückgängig gemachten Schritt wiederholen';
+
+  @override
+  String get chatRedoNothing => 'Nichts zu wiederholen in dieser Sitzung';
+
+  @override
+  String get chatUndoLastTurn => 'Letzten Schritt rückgängig machen';
+
+  @override
+  String get chatUndoNothing => 'Nichts rückgängig zu machen in dieser Sitzung';
+
+  @override
+  String get msgInfoUndoThisTurn => 'Diesen Schritt rückgängig machen';
+
+  @override
+  String get chatRedoAll => 'Alles wiederholen';
+
+  @override
+  String get turnReplaceDraftTitle => 'Entwurf ersetzen?';
+
+  @override
+  String get turnReplaceDraftMessage =>
+      'Du hast nicht gesendeten Text im Entwurf. Beim Ersetzen wird dein Entwurf verworfen.';
+
+  @override
+  String get turnReplaceDraftConfirm => 'Ersetzen';
+
+  @override
+  String get turnUnavailableBusy => 'Die Unterhaltung ist beschäftigt.';
+
+  @override
+  String get turnUnavailableCompacting => 'Kontext wird gerade komprimiert.';
+
+  @override
+  String get turnUnavailableRevertStaged =>
+      'Ein Schritt ist derzeit rückgängig gemacht.';
 }
