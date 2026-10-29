@@ -168,11 +168,11 @@ class WorkspaceAppBarActions extends StatelessWidget {
             case _TurnMenuAction.undo:
               unawaited(live.turn.undoLast(context: context));
             case _TurnMenuAction.redoNext:
-              unawaited(live.turn.redoNext());
+              unawaited(live.turn.redoNext(context: context));
             case _TurnMenuAction.redoAll:
-              unawaited(live.turn.redoAll());
+              unawaited(live.turn.redoAll(context: context));
             case _TurnMenuAction.compact:
-              unawaited(live.turn.compact());
+              unawaited(live.turn.compact(context: context));
           }
         }
       },

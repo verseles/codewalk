@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk/features/sessions/session_builtin_commands.dart'
     as builtin;
 import 'package:codewalk/features/sessions/session_live_controller.dart';
+import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,11 +40,18 @@ final class _FakePort implements SessionTurnActionPort {
     return const SessionTurnResult(applied: true);
   }
 
+  UserInput? nextRedoRestored;
+  bool nextRedoCleared = true;
+
   @override
   Future<SessionTurnResult> redoNext({required CommandId id}) async {
     redoNextCalls++;
     state = const SessionTurnState();
-    return const SessionTurnResult(applied: true, cleared: true);
+    return SessionTurnResult(
+      applied: true,
+      cleared: nextRedoCleared,
+      restored: nextRedoRestored,
+    );
   }
 
   @override
@@ -276,7 +284,7 @@ void main() {
     expect(live.draft.text, isEmpty);
   });
 
-  test('builtin slash commands map unavailable reasons and execute when available', () async {
+  test('redoNext updates restored draft when advancing without full clear', () async {
     final rig = CatalogRig();
     await rig.save('a');
     await rig.sessions.initialize();
@@ -297,8 +305,62 @@ void main() {
     await start;
 
     final turn = live.turn;
+    final target = _turn('msg_1', ref: ref, text: 'First restored prompt');
+    final nextTarget = _turn('msg_2', ref: ref, text: 'Second restored prompt');
 
-    // When port is available
+    await turn.stageUndo(target: target);
+    expect(turn.hasUntouchedRestoredText, isTrue);
+
+    // Partial redo: advances cut to next turn, does not clear staged revert
+    port.nextRedoCleared = false;
+    port.nextRedoRestored = nextTarget;
+
+    await turn.redoNext();
+    expect(port.redoNextCalls, 1);
+    expect(live.draft.text, 'Second restored prompt');
+    expect(turn.hasUntouchedRestoredText, isTrue);
+    expect(turn.restoredText, 'Second restored prompt');
+  });
+
+  test('builtin slash commands map unavailable reasons and execute when available', () async {
+    final rig = CatalogRig();
+    await rig.save('a');
+    await rig.sessions.initialize();
+    final directory = LiveDirectory();
+    final summary = CatalogSource(profile('a')).row('one');
+    final ref = summary.info.ref;
+    final live = SessionLiveController(
+      hosts: rig.hosts,
+      profile: profile('a'),
+      summary: summary,
+      directory: directory,
+    );
+    addTearDown(live.dispose);
+
+    final port = _FakePort();
+    final start = live.start();
+    final handle = directory.grant(ref, turnActions: port);
+    await start;
+
+    final turn = live.turn;
+
+    // When no confirmed turns are in view, canUndo is false and nothingToUndo is returned
+    expect(turn.canUndo, isFalse);
+    expect(turn.unavailable(builtin.SessionTurnAction.undo),
+        builtin.SessionTurnActionUnavailable.nothingToUndo);
+
+    // Emit confirmed user turn into live view
+    final user1 = _turn('msg_1', ref: ref, text: 'User prompt');
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(ref, items: [user1]),
+      ),
+    );
+    await pumpEventQueue();
+
+    // Now port is available and turn is visible
     expect(turn.canUndo, isTrue);
     expect(turn.unavailable(builtin.SessionTurnAction.undo), isNull);
 

@@ -71,7 +71,9 @@ class SessionTurnController extends ChangeNotifier
       _revision == _restoredRevision;
 
   bool get canUndo =>
-      !_disposed && port?.unavailable(shared.SessionTurnAction.undo) == null;
+      !_disposed &&
+      port?.unavailable(shared.SessionTurnAction.undo) == null &&
+      visibleConfirmedTurns().isNotEmpty;
 
   bool get canRedoNext =>
       !_disposed &&
@@ -130,6 +132,28 @@ class SessionTurnController extends ChangeNotifier
         .toList();
   }
 
+  void _showRefusalSnackBar(
+    BuildContext context,
+    shared.SessionTurnUnavailable refusal,
+  ) {
+    if (!context.mounted) return;
+    final l = context.v2L10n;
+    final isCompacting = port?.state.compacting == true;
+    final msg = switch (refusal) {
+      shared.SessionTurnUnavailable.busy => isCompacting
+          ? l.turnUnavailableCompacting
+          : l.turnUnavailableBusy,
+      shared.SessionTurnUnavailable.revertStaged =>
+        l.turnUnavailableRevertStaged,
+      shared.SessionTurnUnavailable.targetUnknown ||
+      shared.SessionTurnUnavailable.noRevert ||
+      shared.SessionTurnUnavailable.historyIncomplete =>
+        l.chatUndoNothing,
+      _ => l.turnUnavailableBusy,
+    };
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   /// Stages an undo/rewind to [target].
   Future<shared.SessionTurnResult> stageUndo({
     required UserInput target,
@@ -149,6 +173,9 @@ class SessionTurnController extends ChangeNotifier
     }
     final refusal = port.unavailable(shared.SessionTurnAction.undo);
     if (refusal != null) {
+      if (context != null) {
+        _showRefusalSnackBar(context, refusal);
+      }
       return shared.SessionTurnResult(unavailable: refusal);
     }
 
@@ -180,6 +207,8 @@ class SessionTurnController extends ChangeNotifier
       if (_revision == initialRevision) {
         _setRestoredDraft(target.text);
       }
+    } else if (result.unavailable != null && context != null && context.mounted) {
+      _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
   }
@@ -203,7 +232,7 @@ class SessionTurnController extends ChangeNotifier
   }
 
   /// Redoes the next cut turn.
-  Future<shared.SessionTurnResult> redoNext() async {
+  Future<shared.SessionTurnResult> redoNext({BuildContext? context}) async {
     if (_disposed) {
       return const shared.SessionTurnResult(
         unavailable: shared.SessionTurnUnavailable.offline,
@@ -216,16 +245,23 @@ class SessionTurnController extends ChangeNotifier
       );
     }
     final result = await port.redoNext(id: _commandIds());
-    if (result.applied && result.cleared && !_disposed) {
+    if (result.applied && !_disposed) {
       if (hasUntouchedRestoredText) {
-        _clearRestoredDraft();
+        final restoredText = result.restored?.text;
+        if (restoredText != null) {
+          _setRestoredDraft(restoredText);
+        } else {
+          _clearRestoredDraft();
+        }
       }
+    } else if (result.unavailable != null && context != null && context.mounted) {
+      _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
   }
 
   /// Clears all staged cuts. If draft holds untouched restored text, it is cleared.
-  Future<shared.SessionTurnResult> redoAll() async {
+  Future<shared.SessionTurnResult> redoAll({BuildContext? context}) async {
     if (_disposed) {
       return const shared.SessionTurnResult(
         unavailable: shared.SessionTurnUnavailable.offline,
@@ -242,12 +278,14 @@ class SessionTurnController extends ChangeNotifier
       if (hasUntouchedRestoredText) {
         _clearRestoredDraft();
       }
+    } else if (result.unavailable != null && context != null && context.mounted) {
+      _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
   }
 
   /// Compacts context in the active session.
-  Future<shared.SessionTurnResult> compact() async {
+  Future<shared.SessionTurnResult> compact({BuildContext? context}) async {
     if (_disposed) {
       return const shared.SessionTurnResult(
         unavailable: shared.SessionTurnUnavailable.offline,
@@ -259,7 +297,11 @@ class SessionTurnController extends ChangeNotifier
         unavailable: shared.SessionTurnUnavailable.offline,
       );
     }
-    return port.compact(id: _commandIds());
+    final result = await port.compact(id: _commandIds());
+    if (result.unavailable != null && context != null && context.mounted) {
+      _showRefusalSnackBar(context, result.unavailable!);
+    }
+    return result;
   }
 
   @override
@@ -275,22 +317,28 @@ class SessionTurnController extends ChangeNotifier
       builtin.SessionTurnAction.compact => shared.SessionTurnAction.compact,
     };
     final reason = port.unavailable(sharedAction);
-    if (reason == null) return null;
-    return switch (reason) {
-      shared.SessionTurnUnavailable.busy => port.state.compacting
-          ? builtin.SessionTurnActionUnavailable.compacting
-          : builtin.SessionTurnActionUnavailable.busy,
-      shared.SessionTurnUnavailable.revertStaged =>
-        builtin.SessionTurnActionUnavailable.revertStaged,
-      shared.SessionTurnUnavailable.targetUnknown =>
-        action == builtin.SessionTurnAction.undo
-            ? builtin.SessionTurnActionUnavailable.nothingToUndo
-            : builtin.SessionTurnActionUnavailable.nothingToRedo,
-      shared.SessionTurnUnavailable.noRevert ||
-      shared.SessionTurnUnavailable.historyIncomplete =>
-        builtin.SessionTurnActionUnavailable.nothingToRedo,
-      _ => builtin.SessionTurnActionUnavailable.busy,
-    };
+    if (reason != null) {
+      return switch (reason) {
+        shared.SessionTurnUnavailable.busy => port.state.compacting
+            ? builtin.SessionTurnActionUnavailable.compacting
+            : builtin.SessionTurnActionUnavailable.busy,
+        shared.SessionTurnUnavailable.revertStaged =>
+          builtin.SessionTurnActionUnavailable.revertStaged,
+        shared.SessionTurnUnavailable.targetUnknown =>
+          action == builtin.SessionTurnAction.undo
+              ? builtin.SessionTurnActionUnavailable.nothingToUndo
+              : builtin.SessionTurnActionUnavailable.nothingToRedo,
+        shared.SessionTurnUnavailable.noRevert ||
+        shared.SessionTurnUnavailable.historyIncomplete =>
+          builtin.SessionTurnActionUnavailable.nothingToRedo,
+        _ => builtin.SessionTurnActionUnavailable.busy,
+      };
+    }
+    if (action == builtin.SessionTurnAction.undo &&
+        visibleConfirmedTurns().isEmpty) {
+      return builtin.SessionTurnActionUnavailable.nothingToUndo;
+    }
+    return null;
   }
 
   @override

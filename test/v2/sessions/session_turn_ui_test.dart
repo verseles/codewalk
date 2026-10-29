@@ -25,6 +25,7 @@ final class _FakePort implements SessionTurnActionPort {
   @override
   SessionTurnState state = const SessionTurnState();
   final List<ItemId> staged = [];
+  MessageAnchor? nextAnchor;
 
   @override
   SessionTurnUnavailable? unavailable(SessionTurnAction action) => null;
@@ -37,10 +38,11 @@ final class _FakePort implements SessionTurnActionPort {
       revert: RevertState(
         kind: const OpenValue.known(RevertKind.staged),
         boundary: boundary,
-        anchor: MessageAnchor(
-          message: MessageRef('msg_2'),
-          orderKey: 'msg_2',
-        ),
+        anchor: nextAnchor ??
+            MessageAnchor(
+              message: MessageRef('msg_2'),
+              orderKey: 'msg_2',
+            ),
       ),
     );
     return const SessionTurnResult(applied: true);
@@ -170,6 +172,7 @@ void main() {
     expect(latestWidget.tooltip, 'Undo this turn');
 
     // Tap latest undo action
+    port.nextAnchor = user2.meta.anchor;
     await tester.tap(latestBtn);
     await tester.pumpAndSettle();
 
@@ -225,6 +228,7 @@ void main() {
     expect(find.text('Second user prompt'), findsOneWidget);
 
     // Stage undo on user2
+    port.nextAnchor = user2.meta.anchor;
     await live.turn.stageUndo(target: user2);
     await tester.pumpAndSettle();
 
