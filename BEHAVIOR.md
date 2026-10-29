@@ -3941,3 +3941,12 @@ On mobile, the on-screen keyboard must never cause overflow, clipping, or layout
 ### Errors: only show blocking ones
 
 The user should see error feedback only when the error prevents them from continuing (send failed, server unreachable). Non-blocking warnings from the server (partial timeouts, transient issues) should be silent.
+
+### Turn Actions (Undo, Redo, Rewind, Compact)
+
+- **When** a session has confirmed user turns, the latest confirmed user turn shows an inline "Undo this turn" action, and older confirmed user turns show a "Rewind and edit from here" action.
+- **Then** staging an undo/rewind immediately filters out all timeline items at or after the staged cut while keeping them in state for redo.
+- **Then** the undone prompt's text is restored into the composer draft. If the draft contains unsent user edits, CodeWalk prompts for confirmation before overwriting. Concurrent typing while the confirmation dialog or RPC is pending is protected via revision CAS checks and never overwritten.
+- **When** Redo Next advances the cut, the next cut turn's prompt is restored to the draft if the draft contains untouched restored text. Redo All or Redo Next clearing the staged cut clears the draft only if the restored text was untouched by user edits.
+- **When** all visible turns have already been undone, Undo is disabled, and `/undo` reports that there is nothing to undo.
+- **Then** app bar overflow menu actions (Undo, Redo Next, Redo All, Compact Context) and slash commands (`/undo`, `/redo`, `/compact`) provide localized feedback if the action is unavailable or refused (e.g. when busy or compacting).
