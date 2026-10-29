@@ -1,7 +1,7 @@
 {
   "type": "command",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.5",
+  "canonicalRevision": "cw-canonical-1-provisional.6",
   "command": {
     "id": "command-prompt-default",
     "harness": {"version": 1, "host": "host-α", "harness": "profile-1"},

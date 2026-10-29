@@ -1,6 +1,6 @@
 {
-  "canonicalRevision": "cw-canonical-1-provisional.5",
-  "canonicalModelCommit": "97dfeb6b975eb5abdc5d8aa9bb436cb094c490c2",
+  "canonicalRevision": "cw-canonical-1-provisional.6",
+  "canonicalModelCommit": "82b52aaf21abe190fecb91cd999bf4b1a9d1d23f",
   "definitions": {
     "CanonicalValue": {
       "category": "canonical",
@@ -18,7 +18,8 @@
         "TurnId",
         "CommandId",
         "InteractionId",
-        "WorkId"
+        "WorkId",
+        "MessageRef"
       ],
       "projection": "Existing domain type projected at the contract edge"
     },
@@ -580,7 +581,11 @@
     },
     "CanonicalPromptIntent": {
       "category": "canonical",
-      "modelTypes": ["PromptDraft", "SessionHandle", "Delivery"],
+      "modelTypes": [
+        "PromptDraft",
+        "SessionHandle",
+        "Delivery"
+      ],
       "projection": "Edge composition of SessionHandle.send draft and its optional delivery argument; not a new core model"
     },
     "CanonicalPromptDraft": {
@@ -1030,6 +1035,21 @@
       "category": "transport",
       "modelTypes": [],
       "projection": "CHP envelope/control definition referencing canonical payloads"
+    },
+    "CanonicalMessageAnchor": {
+      "category": "canonical",
+      "modelTypes": [
+        "MessageAnchor"
+      ],
+      "projection": "Adapter-supplied opaque message identity and order within its containing session"
+    },
+    "CanonicalCompactIntent": {
+      "category": "canonical",
+      "modelTypes": [
+        "OriginalCommand",
+        "MutationOperation"
+      ],
+      "projection": "Edge composition of the original compact input identifier and steer delivery; admission may coalesce onto another reference"
     }
   }
 }

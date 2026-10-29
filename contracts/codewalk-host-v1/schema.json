@@ -37,6 +37,23 @@
       "type": "string",
       "minLength": 1
     },
+    "CanonicalMessageAnchor": {
+      "type": "object",
+      "required": [
+        "message",
+        "orderKey"
+      ],
+      "properties": {
+        "message": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "orderKey": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
     "CanonicalOpenEnum": {
       "type": "string",
       "minLength": 1
@@ -798,6 +815,16 @@
               "type": "null"
             }
           ]
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalMessageAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -846,6 +873,10 @@
               "type": "null"
             }
           ]
+        },
+        "confirmed": {
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false
@@ -1357,6 +1388,16 @@
         },
         "details": {
           "$ref": "#/definitions/CanonicalValue"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalMessageAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -3163,6 +3204,16 @@
               "type": "null"
             }
           ]
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalMessageAnchor"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -3208,10 +3259,16 @@
     },
     "CanonicalPromptIntent": {
       "type": "object",
-      "required": ["draft"],
+      "required": [
+        "draft"
+      ],
       "properties": {
-        "draft": {"$ref": "#/definitions/CanonicalPromptDraft"},
-        "delivery": {"$ref": "#/definitions/CanonicalOpenEnum"}
+        "draft": {
+          "$ref": "#/definitions/CanonicalPromptDraft"
+        },
+        "delivery": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        }
       },
       "additionalProperties": false
     },
@@ -4555,6 +4612,22 @@
       },
       "additionalProperties": false
     },
+    "CanonicalCompactIntent": {
+      "type": "object",
+      "required": [
+        "input",
+        "delivery"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "delivery": {
+          "const": "steer"
+        }
+      },
+      "additionalProperties": false
+    },
     "CanonicalForkRequest": {
       "type": "object",
       "required": [
@@ -4736,7 +4809,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "protocol": {
           "const": "codewalk-host/1"
@@ -4769,7 +4842,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "event": {
           "$ref": "#/definitions/CanonicalSessionEvent"
@@ -4803,7 +4876,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4838,7 +4911,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "session": {
           "$ref": "#/definitions/CanonicalSessionRef"
@@ -4866,7 +4939,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "nonce": {
           "type": "string",
@@ -4891,7 +4964,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "nonce": {
           "type": "string",
@@ -4916,7 +4989,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "receipt": {
           "$ref": "#/definitions/CanonicalCommandReceipt"
@@ -4940,7 +5013,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "snapshot": {
           "$ref": "#/definitions/CanonicalSessionSnapshot"
@@ -4964,7 +5037,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "capabilities": {
           "$ref": "#/definitions/CanonicalCapabilitySet"
@@ -4988,7 +5061,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "page": {
           "$ref": "#/definitions/CanonicalSessionPage"
@@ -5012,7 +5085,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "result": {
           "$ref": "#/definitions/CanonicalCreateResult"
@@ -5036,7 +5109,7 @@
           "const": 1
         },
         "canonicalRevision": {
-          "const": "cw-canonical-1-provisional.5"
+          "const": "cw-canonical-1-provisional.6"
         },
         "command": {
           "$ref": "#/definitions/CanonicalOriginalCommand"
@@ -5326,6 +5399,33 @@
                 "properties": {
                   "intent": {
                     "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "compact"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalCompactIntent"
                   },
                   "owner": {
                     "$ref": "#/definitions/CanonicalSessionOwner"

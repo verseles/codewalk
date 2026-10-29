@@ -53,6 +53,18 @@ Map<String, Object?> projectUnknownEvent(UnknownEvent event) => {
   'raw': event.raw.toJson(),
 };
 
+Map<String, Object?> projectMessageAnchor(MessageAnchor anchor) => {
+  'message': anchor.message.value,
+  'orderKey': anchor.orderKey,
+};
+
+Map<String, Object?> projectRevertState(RevertState state) => {
+  'kind': state.kind.toJson(),
+  'boundary': state.boundary?.toJson(),
+  if (state.anchor != null) 'anchor': projectMessageAnchor(state.anchor!),
+  if (state.details != null) 'details': state.details!.toJson(),
+};
+
 Map<String, Object?> projectItemMeta(ItemMeta meta) => {
   'id': meta.id.toJson(),
   'generation': meta.generation,
@@ -60,9 +72,41 @@ Map<String, Object?> projectItemMeta(ItemMeta meta) => {
   'source': projectSource(meta.source),
   if (meta.turnId != null) 'turnId': meta.turnId!.toJson(),
   if (meta.ordinal != null) 'ordinal': meta.ordinal,
+  if (meta.anchor != null) 'anchor': projectMessageAnchor(meta.anchor!),
 };
 
 Map<String, Object?> projectTimelineItem(TimelineItem item) => switch (item) {
+  UserInput() => {
+    'type': 'userInput',
+    'meta': projectItemMeta(item.meta),
+    'text': item.text,
+    'delivery': item.delivery.toJson(),
+    'confirmed': item.confirmed,
+    'attachments': [
+      for (final a in item.attachments)
+        {
+          'id': a.id,
+          'mimeType': a.mimeType,
+          'content': {
+            'id': a.content.id,
+            if (a.content.mimeType != null) 'mimeType': a.content.mimeType,
+            if (a.content.sizeBytes != null) 'sizeBytes': a.content.sizeBytes,
+            'truncated': a.content.truncated,
+          },
+          if (a.name != null) 'name': a.name,
+        },
+    ],
+    'mentions': [
+      for (final m in item.mentions)
+        {
+          'id': m.id,
+          'kind': m.kind.toJson(),
+          'label': m.label,
+          'target': m.target,
+        },
+    ],
+    if (item.commandId != null) 'commandId': item.commandId!.toJson(),
+  },
   AssistantText() => {
     'type': 'assistantText',
     'meta': projectItemMeta(item.meta),
@@ -110,7 +154,7 @@ Map<String, Object?> projectTimelineItem(TimelineItem item) => switch (item) {
     if (item.error != null) 'error': projectError(item.error!),
     if (item.reason != null) 'reason': item.reason,
   },
-  _ => throw UnsupportedError('This test projection covers five item kinds'),
+  _ => throw UnsupportedError('This test projection covers six item kinds'),
 };
 
 Map<String, Object?> projectBoundary(SnapshotBoundary boundary) => {
@@ -137,6 +181,7 @@ Map<String, Object?> projectPendingInput(PendingInput input) => {
   'text': input.text,
   'delivery': input.delivery.toJson(),
   if (input.commandId != null) 'commandId': input.commandId!.toJson(),
+  if (input.anchor != null) 'anchor': projectMessageAnchor(input.anchor!),
 };
 
 Map<String, Object?> projectPendingCollection(

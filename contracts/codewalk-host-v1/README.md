@@ -7,8 +7,8 @@ It implements no Host, adapter, server, authorization boundary or production
 connection.
 
 `revision.json` pins canonical model commit
-`97dfeb6b975eb5abdc5d8aa9bb436cb094c490c2` and the provisional app-facing revision
-`cw-canonical-1-provisional.5` (`chp-1-provisional.5` schema revision).
+`82b52aaf21abe190fecb91cd999bf4b1a9d1d23f` and the provisional app-facing revision
+`cw-canonical-1-provisional.6` (`chp-1-provisional.6` schema revision).
 **Final G5 remains pending:** real Codex/Claude recordings, their G2 mappings
 and reducer assertions must validate against the
 same final revision, and the artifacts must meet the merge criterion. Synthetic
@@ -56,6 +56,25 @@ the adapter default; queue, steer and unknown values remain distinct. Revision
 .2 does not silently accept the older flattened prompt shape.
 Unknown operations can be retained as observations and must be denied before
 mutation. JSON validity never grants execution authority.
+
+## Turn identity and compaction in provisional.6
+
+`CanonicalMessageAnchor` carries a message reference and an opaque ordering key
+supplied by the adapter within the containing session. Consumers compare that
+order; they do not parse native identifiers or infer wall-clock chronology. Item
+metadata, pending inputs and revert state can carry an anchor. A staged revert
+keeps it when its resident item boundary is null.
+
+`CanonicalUserInput.confirmed` defaults to false when omitted. True identifies
+a persisted harness user message, not execution completion; a pending entry
+still excludes that input as an undo target. Assistant display metadata is
+independent of this ordering and confirmation evidence.
+
+The `compact` command retains its original proposed input and `steer` delivery.
+A successful server admission may coalesce onto a different `nativeRef` in the
+receipt. That reference does not replace the original intent and admission does
+not establish compaction completion or a replay guarantee. Shape validation
+alone proves neither source confirmation nor cross-session authority.
 
 ## Preserved invariants
 
