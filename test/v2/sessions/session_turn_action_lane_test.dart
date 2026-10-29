@@ -126,7 +126,7 @@ final class _Wire implements EndpointHttpTransport {
         'payload': segments.last == 'compact'
             ? <String, Object?>{}
             : {'text': body['text']},
-        'delivery': 'steer',
+        'delivery': body['delivery'] ?? 'steer',
       },
     });
   }
@@ -205,6 +205,7 @@ final class _Rig {
     SessionRef ref = _ref,
     RevertState? revert,
     List<TimelineItem>? items,
+    List<PendingInput> pending = const [],
     bool more = false,
     bool stale = false,
     ExecutionKind execution = ExecutionKind.idle,
@@ -216,6 +217,7 @@ final class _Rig {
       state: liveState(
         ref,
         items: items ?? [_turn('msg_1', ref: ref), _turn('msg_2', ref: ref)],
+        pending: pending,
         execution: ExecutionState(kind: OpenValue.known(execution)),
         revert:
             revert ?? const RevertState(kind: OpenValue.known(RevertKind.none)),
@@ -544,6 +546,7 @@ void main() {
           ),
         ],
       );
+      await rig.queue.drain();
       expect(port.state.compacting, isFalse);
       expect(port.unavailable(SessionTurnAction.compact), isNull);
     },
@@ -816,6 +819,366 @@ void main() {
       );
     },
   );
+  test('R1 staged replacement refuses a canonical pending input', () async {
+    final rig = _Rig();
+    addTearDown(rig.dispose);
+    rig.show(
+      revert: _staged('msg_2'),
+      pending: [
+        PendingInput(
+          id: const ItemId('pending'),
+          text: 'another client input',
+          delivery: const OpenValue.known(Delivery.queue),
+          anchor: _turn('msg_3').meta.anchor,
+        ),
+      ],
+    );
+    final port = await rig.open();
+    final result = await rig.outbox.submit(
+      session: _ref,
+      commandId: _id,
+      draft: PromptDraft(text: 'replacement'),
+      delivery: Delivery.steer,
+    );
+    expect(result.sent, isFalse);
+    expect(rig.wire.mutations, isEmpty);
+    expect(port.state.holdsSend, isTrue);
+  });
+
+  test(
+    'R1 implicit commit checks another unresolved outbox admission',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      rig.wire.answer = (_) =>
+          throw const TransportException(TransportFailure.timeout);
+      await _send(rig.outbox, 'unknown-original');
+      rig.wire.answer = null;
+      rig.show(revert: _staged('msg_2'));
+      final result = await rig.outbox.submit(
+        session: _ref,
+        commandId: _id,
+        draft: PromptDraft(text: 'replacement'),
+        delivery: Delivery.steer,
+      );
+      expect(result.sent, isFalse);
+      expect(rig.wire.mutations, hasLength(1));
+    },
+  );
+
+  test('R1 commit revalidates the cut after journal persistence', () async {
+    final store = _JournalGateStore();
+    final rig = _Rig(store: store);
+    addTearDown(rig.dispose);
+    rig.show(revert: _staged('msg_2'));
+    await rig.open();
+    final sending = rig.outbox.submit(
+      session: _ref,
+      commandId: _id,
+      draft: PromptDraft(text: 'replacement'),
+      delivery: Delivery.steer,
+    );
+    await store.entered.future;
+    rig.show(revert: _staged('msg_1'));
+    store.release.complete();
+    expect((await sending).sent, isFalse);
+    expect(rig.wire.mutations, isEmpty);
+  });
+
+  for (final change in ['execution', 'selection']) {
+    test('R1 revalidates $change after journal persistence', () async {
+      final store = _JournalGateStore();
+      final rig = _Rig(store: store);
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      final action = port.stage(_turn('msg_2').id, id: _id);
+      await store.entered.future;
+      if (change == 'execution') {
+        rig.show(execution: ExecutionKind.running);
+      } else {
+        rig.selectionPending = true;
+      }
+      store.release.complete();
+      expect((await action).applied, isFalse);
+      expect(rig.wire.mutations, isEmpty);
+    });
+  }
+
+  test(
+    'R1 conflicting canonical cut beats HTTP without a matching echo',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      rig.wire.answer = (_) async {
+        entered.complete();
+        await release.future;
+        return outboxJson({
+          'data': {'messageID': 'msg_2'},
+        });
+      };
+      final action = port.stage(_turn('msg_2').id, id: _id);
+      await entered.future;
+      rig.show(revert: _staged('msg_1'));
+      release.complete();
+      final result = await action;
+      expect(result.applied, isFalse);
+      expect(result.restored, isNull);
+      expect(port.state.revert!.anchor, _staged('msg_1').anchor);
+    },
+  );
+
+  test(
+    'R1 redo next refuses a successor that appears during preflight',
+    () async {
+      final store = _OutboxReadGateStore();
+      final rig = _Rig(store: store);
+      addTearDown(rig.dispose);
+      rig.show(revert: _staged('msg_2'));
+      final port = await rig.open();
+      store.armed = true;
+      final action = port.redoNext(id: _id);
+      await store.entered.future;
+      rig.show(
+        revert: _staged('msg_2'),
+        items: [_turn('msg_1'), _turn('msg_2'), _turn('msg_3')],
+      );
+      store.release.complete();
+      expect((await action).applied, isFalse);
+      expect(rig.wire.mutations, isEmpty);
+      expect(port.state.staged, isTrue);
+    },
+  );
+
+  test(
+    'R1 accepted compaction keeps a durable fence across reopened leases',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      expect((await port.compact(id: _id)).applied, isTrue);
+      expect(await rig.store.contains(TurnActionJournal.keyFor(_ref)), isTrue);
+      rig.lane.release(_ref);
+      final reopened = await rig.open();
+      expect(reopened.state.compacting, isTrue);
+      expect(
+        reopened.unavailable(SessionTurnAction.undo),
+        SessionTurnUnavailable.busy,
+      );
+      expect(rig.wire.mutations, hasLength(1));
+    },
+  );
+
+  test(
+    'R1 coalesced compaction terminal retries journal cleanup safely',
+    () async {
+      final store = _FailRemoveStore();
+      final rig = _Rig(store: store);
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      rig.wire.answer = (_) => outboxJson({
+        'data': {
+          'id': 'msg_coalesced',
+          'sessionID': 'ses_one',
+          'time': {'created': 3},
+          'type': 'compaction',
+          'payload': <String, Object?>{},
+          'delivery': 'steer',
+        },
+      });
+      await port.compact(id: _id);
+      store.failRemove = true;
+      rig.show(
+        items: [_turn('msg_1'), _turn('msg_2'), _compaction('msg_coalesced')],
+      );
+      await rig.queue.drain();
+      expect(await store.contains(TurnActionJournal.keyFor(_ref)), isTrue);
+      store.failRemove = false;
+      await port.refresh();
+      await rig.queue.drain();
+      expect(port.state.phase, SessionTurnPhase.idle);
+      expect(port.state.compacting, isFalse);
+      expect(await store.contains(TurnActionJournal.keyFor(_ref)), isFalse);
+      expect(rig.wire.mutations, hasLength(1));
+    },
+  );
+
+  test(
+    'R1 uncertain compaction start latches busy without blocking ordinary prompts',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      rig.wire.answer = (request) {
+        final input =
+            (jsonDecode(utf8.decode(request.body!)) as Map)['id'] as String;
+        rig.show(
+          items: [
+            _turn('msg_1'),
+            _turn('msg_2'),
+            _compaction(input, running: true),
+          ],
+        );
+        throw const TransportException(TransportFailure.timeout);
+      };
+      await port.compact(id: _id);
+      expect(port.state.compacting, isTrue);
+      expect(await rig.store.contains(TurnActionJournal.keyFor(_ref)), isTrue);
+      expect(port.state.holdsSend, isFalse);
+      rig.wire.answer = null;
+      final sent = await rig.outbox.submit(
+        session: _ref,
+        commandId: const CommandId('normal-send'),
+        draft: PromptDraft(text: 'queued while compacting'),
+        delivery: Delivery.queue,
+      );
+      expect(sent.sent, isTrue);
+      expect(
+        port.unavailable(SessionTurnAction.undo),
+        SessionTurnUnavailable.busy,
+      );
+    },
+  );
+
+  test(
+    'R1 reopening probes unresolved admission before enabling turn actions',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      rig.wire.answer = (_) =>
+          throw const TransportException(TransportFailure.timeout);
+      await _send(rig.outbox, 'unknown');
+      rig.lane.release(_ref);
+      final reopened = await rig.open();
+      expect(
+        reopened.unavailable(SessionTurnAction.undo),
+        SessionTurnUnavailable.unconfirmed,
+      );
+      expect(rig.wire.mutations, hasLength(1));
+    },
+  );
+
+  test(
+    'R1 refused replacement cannot replay after its rejected write fails',
+    () async {
+      final store = _FailRefusalStore();
+      final rig = _Rig(store: store);
+      addTearDown(rig.dispose);
+      rig.show(revert: _staged('msg_2'));
+      await rig.open();
+      rig.wire.answer = (_) => outboxJson({}, status: 409);
+      final result = await rig.outbox.submit(
+        session: _ref,
+        commandId: _id,
+        draft: PromptDraft(text: 'keep unsent'),
+        delivery: Delivery.steer,
+      );
+      expect(result.sent, isFalse);
+      expect(store.failedWrites, 1);
+      rig.wire.answer = null;
+      rig.show();
+      final checked = await rig.outbox.reconcile(_ref, _id);
+      expect(checked.posts, 0);
+      expect(rig.wire.mutations, hasLength(1));
+    },
+  );
+
+  test(
+    'R1 commit preserves older admission settlements made by its guard',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      late String originalMessage;
+      rig.wire.answer = (request) {
+        final body = jsonDecode(utf8.decode(request.body!)) as Map;
+        originalMessage = body['id'] as String;
+        rig.wire.history.add({
+          'id': originalMessage,
+          'type': 'user',
+          'text': body['text'],
+          'time': {'created': 3},
+        });
+        throw const TransportException(TransportFailure.timeout);
+      };
+      await _send(rig.outbox, 'original-admission');
+      expect(
+        (await rig.outbox.entries(_ref)).single.state,
+        SubmissionKind.uncertain,
+      );
+      rig.show(
+        revert: _staged(originalMessage),
+        items: [_turn('msg_1'), _turn(originalMessage)],
+      );
+      rig.wire.answer = (request) {
+        if (request.path.endsWith('/commit')) {
+          rig.wire.history.clear();
+          return outboxEmpty(204);
+        }
+        final body = jsonDecode(utf8.decode(request.body!)) as Map;
+        return outboxJson({
+          'data': {
+            'id': body['id'],
+            'sessionID': 'ses_one',
+            'type': 'user',
+            'time': {'created': 4},
+            'payload': {'text': body['text']},
+            'delivery': body['delivery'],
+          },
+        });
+      };
+      final replacement = await rig.outbox.submit(
+        session: _ref,
+        commandId: _id,
+        draft: PromptDraft(text: 'replacement'),
+        delivery: Delivery.steer,
+      );
+      expect(replacement.sent, isTrue);
+      final checked = await rig.outbox.reconcile(
+        _ref,
+        const CommandId('original-admission'),
+      );
+      expect(checked.entry!.state, SubmissionKind.delivered);
+      expect(checked.posts, 0);
+      expect(rig.wire.mutations, hasLength(3));
+    },
+  );
+
+  test(
+    'R1 a crash in preflight does not authorize later prompt replay',
+    () async {
+      final store = _OutboxWriteGateStore();
+      final rig = _Rig(store: store);
+      addTearDown(rig.dispose);
+      rig.show(revert: _staged('msg_2'));
+      await rig.open();
+      store.armed = true;
+      final sending = rig.outbox.submit(
+        session: _ref,
+        commandId: _id,
+        draft: PromptDraft(text: 'still unsent'),
+        delivery: Delivery.steer,
+      );
+      await store.entered.future;
+      final snapshot = OutboxStore()..values.addAll(store.values);
+      final successor = _Rig(store: snapshot);
+      addTearDown(successor.dispose);
+      try {
+        await successor.open();
+        final checked = await successor.outbox.reconcile(_ref, _id);
+        expect(checked.posts, 0);
+        expect(successor.wire.mutations, isEmpty);
+      } finally {
+        rig.binding = false;
+        store.release.complete();
+        await sending;
+      }
+    },
+  );
 }
 
 final class _JournalGateStore extends OutboxStore {
@@ -829,5 +1192,79 @@ final class _JournalGateStore extends OutboxStore {
       await release.future;
     }
     return result;
+  }
+}
+
+Notice _compaction(String id, {bool running = false}) {
+  final meta = _turn(id).meta;
+  return Notice(
+    meta: ItemMeta(
+      id: meta.id,
+      generation: 'compaction',
+      status: OpenValue.known(
+        running ? ItemStatus.streaming : ItemStatus.completed,
+      ),
+      source: meta.source,
+      anchor: meta.anchor,
+    ),
+    kind: const OpenValue.known(NoticeKind.compaction),
+    text: running ? '' : 'summary',
+  );
+}
+
+final class _OutboxReadGateStore extends OutboxStore {
+  bool armed = false;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<bool> contains(String key) async {
+    if (armed && key.startsWith('cw2.outbox.')) {
+      armed = false;
+      entered.complete();
+      await release.future;
+    }
+    return super.contains(key);
+  }
+}
+
+final class _OutboxWriteGateStore extends OutboxStore {
+  bool armed = false;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<PayloadWriteResult> write(String key, String value) async {
+    final result = await super.write(key, value);
+    if (armed && key.startsWith('cw2.outbox.')) {
+      armed = false;
+      entered.complete();
+      await release.future;
+    }
+    return result;
+  }
+}
+
+final class _FailRemoveStore extends OutboxStore {
+  bool failRemove = false;
+  @override
+  Future<void> remove(String key) async {
+    if (failRemove) throw StateError('owned fixture storage failure');
+    await super.remove(key);
+  }
+}
+
+final class _FailRefusalStore extends OutboxStore {
+  int failedWrites = 0;
+  @override
+  Future<PayloadWriteResult> write(String key, String value) async {
+    if (key.startsWith('cw2.outbox.')) {
+      final data = jsonDecode(value) as Map;
+      if ((data['entries'] as List).any(
+        (row) => (row as Map)['reason'] == 'turnUnconfirmed',
+      )) {
+        failedWrites++;
+        throw StateError('owned fixture refused-write failure');
+      }
+    }
+    return super.write(key, value);
   }
 }

@@ -29,13 +29,19 @@ final class SessionTurnState {
     this.receipt,
     this.unavailable,
     this.compacting = false,
+    this.sendUnavailable,
   });
   final SessionTurnPhase phase;
   final RevertState? revert;
   final CommandReceipt? receipt;
   final SessionTurnUnavailable? unavailable;
   final bool compacting;
-  bool get holdsSend => phase != SessionTurnPhase.idle;
+
+  /// A staged replacement would commit the cut before sending. Ordinary
+  /// non-staged prompts can still use their harness's normal queue.
+  final SessionTurnUnavailable? sendUnavailable;
+  bool get holdsSend =>
+      phase != SessionTurnPhase.idle || sendUnavailable != null;
   bool get staged => revert?.kind.known == RevertKind.staged;
 }
 

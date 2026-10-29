@@ -54,9 +54,15 @@ final class OpenCodeTurnActionLane {
           final record = await journal.read(ref);
           if (!_current(ref, entry)) return;
           entry.record = record;
-          entry.phase = record == null
-              ? SessionTurnPhase.idle
-              : SessionTurnPhase.unconfirmed;
+          entry.compact = record?.admittedInput?.value;
+          final admission = _admissionReason(await promptRefusal(ref));
+          if (!_current(ref, entry)) return;
+          entry
+            ..admission = admission
+            ..admissionView = view(ref).state
+            ..phase = record == null || record.admittedInput != null
+                ? SessionTurnPhase.idle
+                : SessionTurnPhase.unconfirmed;
         } on Object {
           if (!_current(ref, entry)) return;
           entry
@@ -75,6 +81,21 @@ final class OpenCodeTurnActionLane {
   bool _current(SessionRef ref, _TurnEntry entry) =>
       !_closed && currentBinding() && identical(_entries[ref], entry);
 
+  RevertState? _revert(SessionRef ref) =>
+      _entries[ref]?.overlay ?? view(ref).state?.revert;
+
+  bool _staged(SessionRef ref) => _revert(ref)?.kind.known == RevertKind.staged;
+
+  bool _compacting(SessionRef ref) =>
+      _entries[ref]?.compact != null ||
+      (view(ref).state?.timeline.any(
+            (item) =>
+                item is Notice &&
+                item.kind.known == NoticeKind.compaction &&
+                item.status.known == ItemStatus.streaming,
+          ) ??
+          false);
+
   SessionTurnState state(SessionRef ref) {
     final entry = _entries[ref];
     return SessionTurnState(
@@ -82,7 +103,10 @@ final class OpenCodeTurnActionLane {
       revert: entry?.overlay ?? view(ref).state?.revert,
       receipt: entry?.receipt,
       unavailable: entry?.failure ?? entry?.admission,
-      compacting: entry?.compact != null,
+      compacting: _compacting(ref),
+      sendUnavailable: _staged(ref)
+          ? unavailable(ref, SessionTurnAction.redoAll)
+          : null,
     );
   }
 
@@ -107,21 +131,16 @@ final class OpenCodeTurnActionLane {
     if (entry.admission case final reason?) return reason;
     if (selectionHoldsSend(ref)) return SessionTurnUnavailable.selectionPending;
     final canonical = current.state;
-    if (canonical?.execution?.kind.known != ExecutionKind.idle ||
-        entry.compact != null ||
-        canonical!.timeline.any(
-          (item) =>
-              item is Notice &&
-              item.kind.known == NoticeKind.compaction &&
-              item.status.known == ItemStatus.streaming,
-        )) {
+    if (canonical == null ||
+        canonical.execution?.kind.known != ExecutionKind.idle ||
+        _compacting(ref)) {
       return SessionTurnUnavailable.busy;
     }
     if (canonical.pending.isNotEmpty) {
       return SessionTurnUnavailable.promptPending;
     }
-    final staged = state(ref).staged;
-    final revert = state(ref).revert;
+    final staged = _staged(ref);
+    final revert = _revert(ref);
     if (revert?.kind.known == null ||
         revert?.kind.known == RevertKind.unknown ||
         (staged && revert?.anchor == null)) {
@@ -133,7 +152,7 @@ final class OpenCodeTurnActionLane {
     if (action == SessionTurnAction.redoNext ||
         action == SessionTurnAction.redoAll) {
       if (!staged) return SessionTurnUnavailable.noRevert;
-      if (state(ref).revert?.anchor == null) {
+      if (_revert(ref)?.anchor == null) {
         return SessionTurnUnavailable.targetUnknown;
       }
       if (action == SessionTurnAction.redoNext && _cutTurn(ref) == null) {
@@ -148,10 +167,34 @@ final class OpenCodeTurnActionLane {
   }
 
   UserInput? _cutTurn(SessionRef ref) {
-    final cut = state(ref).revert?.anchor;
+    final cut = _revert(ref)?.anchor;
     return confirmedSessionTurns(
       view(ref).state,
     ).where((turn) => turn.meta.anchor == cut).firstOrNull;
+  }
+
+  bool _sameSuccessor(SessionRef ref, UserInput? expected) {
+    final cut = _cutTurn(ref);
+    if (cut == null) return false;
+    final next = confirmedSessionTurns(view(ref).state)
+        .where((turn) => turn.meta.anchor!.compareTo(cut.meta.anchor!) > 0)
+        .firstOrNull;
+    return next?.id == expected?.id &&
+        next?.meta.anchor == expected?.meta.anchor;
+  }
+
+  SessionTurnUnavailable? _whilePending(
+    SessionRef ref,
+    _TurnEntry entry,
+    SessionTurnAction action,
+  ) {
+    final previous = entry.phase;
+    entry.phase = SessionTurnPhase.idle;
+    try {
+      return unavailable(ref, action);
+    } finally {
+      entry.phase = previous;
+    }
   }
 
   Future<SessionTurnResult> stage(
@@ -163,7 +206,7 @@ final class OpenCodeTurnActionLane {
     final target = confirmedSessionTurns(
       view(ref).state,
     ).where((turn) => turn.id == boundary).firstOrNull;
-    final cut = state(ref).staged ? state(ref).revert?.anchor : null;
+    final cut = _staged(ref) ? _revert(ref)?.anchor : null;
     if (target == null ||
         (cut != null && target.meta.anchor!.compareTo(cut) >= 0)) {
       return Future.value(
@@ -251,7 +294,7 @@ final class OpenCodeTurnActionLane {
       );
     }
     final entry = _entries[ref]!;
-    final initialCut = state(ref).staged ? state(ref).revert?.anchor : null;
+    final initialCut = _staged(ref) ? _revert(ref)?.anchor : null;
     // Set before queuing so two taps cannot both pass admission.
     entry
       ..phase = SessionTurnPhase.pending
@@ -262,7 +305,7 @@ final class OpenCodeTurnActionLane {
       if (!_current(ref, entry) || !leaseCurrent()) {
         return _refuse(ref, entry, SessionTurnUnavailable.offline);
       }
-      final nowCut = state(ref).staged ? state(ref).revert?.anchor : null;
+      final nowCut = _staged(ref) ? _revert(ref)?.anchor : null;
       if (initialCut != nowCut) {
         return _refuse(ref, entry, SessionTurnUnavailable.targetUnknown);
       }
@@ -286,8 +329,12 @@ final class OpenCodeTurnActionLane {
       final afterRead = unavailable(ref, action);
       entry.phase = SessionTurnPhase.pending;
       if (afterRead != null) return _refuse(ref, entry, afterRead);
-      final afterCut = state(ref).staged ? state(ref).revert?.anchor : null;
+      final afterCut = _staged(ref) ? _revert(ref)?.anchor : null;
       if (afterCut != initialCut) {
+        return _refuse(ref, entry, SessionTurnUnavailable.targetUnknown);
+      }
+      if (action == SessionTurnAction.redoNext &&
+          !_sameSuccessor(ref, target)) {
         return _refuse(ref, entry, SessionTurnUnavailable.targetUnknown);
       }
       // Revalidate a target after the awaited outbox read as well.
@@ -304,6 +351,7 @@ final class OpenCodeTurnActionLane {
         operation,
         id,
         target: target,
+        action: action,
         callerCurrent: leaseCurrent,
       );
       if (!_current(ref, entry) || !leaseCurrent()) {
@@ -327,6 +375,24 @@ final class OpenCodeTurnActionLane {
       publish(ref);
     }
     return SessionTurnResult(unavailable: reason);
+  }
+
+  Future<SessionTurnResult> _retireUnsent(
+    SessionRef ref,
+    _TurnEntry entry,
+    SessionTurnUnavailable reason,
+  ) async {
+    if (await journal.clear(ref)) {
+      if (_current(ref, entry)) entry.record = null;
+      return _refuse(ref, entry, reason);
+    }
+    if (_current(ref, entry)) {
+      entry
+        ..phase = SessionTurnPhase.unconfirmed
+        ..failure = SessionTurnUnavailable.storage;
+      publish(ref);
+    }
+    return const SessionTurnResult(unavailable: SessionTurnUnavailable.storage);
   }
 
   SessionTurnUnavailable? _admissionReason(String? reason) => switch (reason) {
@@ -354,10 +420,13 @@ final class OpenCodeTurnActionLane {
     MutationOperation operation,
     CommandId id, {
     UserInput? target,
+    SessionTurnAction? action,
     required bool Function() callerCurrent,
   }) async {
     final canonical = view(ref).state!;
-    final anchor = target?.meta.anchor ?? state(ref).revert?.anchor;
+    final wasStaged = _staged(ref);
+    final initialCut = wasStaged ? _revert(ref)?.anchor : null;
+    final anchor = target?.meta.anchor ?? _revert(ref)?.anchor;
     final record = TurnActionRecord(
       operation: operation,
       id: id,
@@ -390,23 +459,27 @@ final class OpenCodeTurnActionLane {
         unavailable: SessionTurnUnavailable.storage,
       );
     }
-    if (!_current(ref, entry)) {
-      return const SessionTurnResult(
-        unavailable: SessionTurnUnavailable.offline,
-      );
+    if (!_current(ref, entry) || !callerCurrent()) {
+      return _retireUnsent(ref, entry, SessionTurnUnavailable.offline);
     }
-    if (!callerCurrent()) {
-      if (await journal.clear(ref)) {
-        entry.record = null;
-        return _refuse(ref, entry, SessionTurnUnavailable.offline);
-      }
-      entry
-        ..phase = SessionTurnPhase.unconfirmed
-        ..failure = SessionTurnUnavailable.storage;
-      publish(ref);
-      return const SessionTurnResult(
-        unavailable: SessionTurnUnavailable.storage,
-      );
+    final refusal = _whilePending(
+      ref,
+      entry,
+      action ?? SessionTurnAction.redoAll,
+    );
+    if (refusal != null) return _retireUnsent(ref, entry, refusal);
+    final cut = _staged(ref) ? _revert(ref)?.anchor : null;
+    if (_staged(ref) != wasStaged ||
+        cut != initialCut ||
+        (action == SessionTurnAction.redoNext &&
+            !_sameSuccessor(ref, target)) ||
+        (target != null &&
+            !confirmedSessionTurns(view(ref).state).any(
+              (turn) =>
+                  turn.id == target.id &&
+                  turn.meta.anchor == target.meta.anchor,
+            ))) {
+      return _retireUnsent(ref, entry, SessionTurnUnavailable.targetUnknown);
     }
     final OpenCodeTurnAttempt attempt;
     try {
@@ -441,28 +514,41 @@ final class OpenCodeTurnActionLane {
       }
       rethrow;
     }
-    if (!_current(ref, entry)) {
-      return const SessionTurnResult(
-        unavailable: SessionTurnUnavailable.offline,
-      );
-    }
-    entry.receipt = attempt.receipt;
     final accepted = attempt.receipt.state.known == ReceiptState.accepted;
     final definite =
         accepted ||
         attempt.receipt.state.known == ReceiptState.rejected ||
         attempt.receipt.state.known == ReceiptState.unavailable;
+    if (!_current(ref, entry)) {
+      // Closing a view suppresses UI effects, not a known durable outcome.
+      if (accepted && operation == MutationOperation.compact) {
+        await journal.write(
+          ref,
+          record.withAdmission(
+            MessageRef(attempt.receipt.nativeRef ?? record.input!.value),
+          ),
+        );
+      } else if (definite) {
+        await journal.clear(ref);
+      }
+      return const SessionTurnResult(
+        unavailable: SessionTurnUnavailable.offline,
+      );
+    }
+    entry.receipt = attempt.receipt;
     if (!definite) {
       entry.phase = SessionTurnPhase.unconfirmed;
       publish(ref);
-      await _verifyWithinQueue(ref, entry);
+      final verified = await _verifyWithinQueue(ref, entry);
       final proven =
+          verified &&
           entry.phase == SessionTurnPhase.idle &&
           !entry.superseded &&
-          (operation == MutationOperation.revertStage
-              ? state(ref).revert?.anchor == target?.meta.anchor
-              : operation == MutationOperation.revertClear &&
-                    !state(ref).staged);
+          (operation == MutationOperation.compact ||
+              (operation == MutationOperation.revertStage
+                  ? _revert(ref)?.anchor == target?.meta.anchor
+                  : operation == MutationOperation.revertClear &&
+                        !_staged(ref)));
       return SessionTurnResult(
         receipt: attempt.receipt,
         applied: proven,
@@ -470,23 +556,32 @@ final class OpenCodeTurnActionLane {
         cleared: proven && operation == MutationOperation.revertClear,
       );
     }
+    if (accepted && operation == MutationOperation.compact) {
+      await _admitCompact(
+        ref,
+        entry,
+        record,
+        MessageRef(attempt.receipt.nativeRef ?? record.input!.value),
+      );
+      return SessionTurnResult(
+        receipt: attempt.receipt,
+        applied: true,
+        unavailable: entry.failure,
+      );
+    }
     if (accepted && !entry.superseded) {
-      if (operation == MutationOperation.compact) {
-        entry.compact = attempt.receipt.nativeRef ?? record.input!.value;
-      } else {
-        entry.overlay =
-            attempt.revert ??
-            RevertState(
-              anchor: record.anchor,
-              kind: OpenValue.known(
-                operation == MutationOperation.revertClear
-                    ? RevertKind.cleared
-                    : RevertKind.committed,
-              ),
-            );
-        entry.base = view(ref).state?.revert;
-        if (_matches(record, entry.base)) entry.overlay = null;
-      }
+      entry.overlay =
+          attempt.revert ??
+          RevertState(
+            anchor: record.anchor,
+            kind: OpenValue.known(
+              operation == MutationOperation.revertClear
+                  ? RevertKind.cleared
+                  : RevertKind.committed,
+            ),
+          );
+      entry.base = view(ref).state?.revert;
+      if (_matches(record, entry.base)) entry.overlay = null;
     }
     if (await journal.clear(ref)) {
       entry
@@ -523,19 +618,36 @@ final class OpenCodeTurnActionLane {
     if (current.phase != SessionLivePhase.live || current.stale) {
       return 'turnOffline';
     }
-    final revert = state(ref).revert;
+    final revert = _revert(ref);
     if (revert?.kind.known == null ||
         revert?.kind.known == RevertKind.unknown) {
       return 'turnTargetUnknown';
     }
-    if (!state(ref).staged) return null;
-    if (selectionHoldsSend(ref) ||
-        current.state?.execution?.kind.known != ExecutionKind.idle) {
-      return 'turnBusy';
-    }
-    if (state(ref).revert?.anchor == null) return 'turnTargetUnknown';
+    // Ordinary prompts keep their verified steer/queue behavior. A staged
+    // replacement additionally needs the destructive commit preflight.
+    if (!_staged(ref)) return null;
+    final refusal = _whilePending(ref, entry, SessionTurnAction.redoAll);
+    if (refusal != null) return 'turnBusy';
+    final cut = revert!.anchor;
     entry.phase = SessionTurnPhase.pending;
     publish(ref);
+    final admission = _admissionReason(await promptRefusal(ref));
+    if (!_current(ref, entry) || !callerCurrent()) {
+      _refuse(ref, entry, SessionTurnUnavailable.offline);
+      return 'turnOffline';
+    }
+    if (admission != null) {
+      entry
+        ..admission = admission
+        ..admissionView = view(ref).state;
+      _refuse(ref, entry, admission);
+      return 'turnUnconfirmed';
+    }
+    final changed = _whilePending(ref, entry, SessionTurnAction.redoAll);
+    if (changed != null || _revert(ref)?.anchor != cut) {
+      _refuse(ref, entry, changed ?? SessionTurnUnavailable.targetUnknown);
+      return 'turnBusy';
+    }
     final result = await _mutateWithinQueue(
       ref,
       entry,
@@ -553,9 +665,9 @@ final class OpenCodeTurnActionLane {
   Future<String?> beforeReplay(SessionRef ref) async {
     final entry = _entries[ref];
     if (entry == null || !_current(ref, entry)) return 'turnOffline';
-    final revert = state(ref).revert;
+    final revert = _revert(ref);
     return entry.phase != SessionTurnPhase.idle ||
-            state(ref).staged ||
+            _staged(ref) ||
             revert?.kind.known == null ||
             revert?.kind.known == RevertKind.unknown
         ? 'turnUnconfirmed'
@@ -606,40 +718,29 @@ final class OpenCodeTurnActionLane {
       );
     }
     final record = entry.record;
-    if (record != null && !identical(canonical.revert, entry.base)) {
+    if (record != null &&
+        record.operation != MutationOperation.compact &&
+        !identical(canonical.revert, entry.base)) {
       if (_matches(record, canonical.revert)) {
         entry.echoed = true;
-      } else if (entry.echoed) {
+        entry.superseded = false;
+      } else {
         entry.superseded = true;
       }
     }
     if (entry.overlay != null && !identical(canonical.revert, entry.base)) {
       entry.overlay = null;
     }
-    if (record?.operation == MutationOperation.compact &&
-        canonical.timeline.any(
-          (item) =>
-              item is Notice &&
-              item.kind.known == NoticeKind.compaction &&
-              item.meta.anchor?.message == record!.input,
-        )) {
-      entry.echoed = true;
-    }
-    final compact = entry.compact;
-    if (compact != null &&
-        canonical.timeline.any(
-          (item) =>
-              item is Notice &&
-              item.kind.known == NoticeKind.compaction &&
-              item.meta.anchor?.message.value == compact &&
-              (item.status.known == ItemStatus.completed ||
-                  item.status.known == ItemStatus.failed),
-        )) {
-      entry.compact = null;
-    }
-    if (entry.phase == SessionTurnPhase.unconfirmed &&
-        entry.record != null &&
-        !entry.verifying) {
+    final compactNotice = record?.operation == MutationOperation.compact
+        ? _compactNotice(canonical.timeline, _compactIdentity(entry, record!))
+        : null;
+    if (compactNotice != null) entry.echoed = true;
+    if (entry.record != null &&
+        !entry.verifying &&
+        entry.phase != SessionTurnPhase.pending &&
+        (entry.phase == SessionTurnPhase.unconfirmed ||
+            (compactNotice != null &&
+                (record!.admittedInput == null || _terminal(compactNotice))))) {
       entry.verifying = true;
       unawaited(
         queue.run(OpenCodePromptOutbox.keyFor(ref), () async {
@@ -666,7 +767,13 @@ final class OpenCodeTurnActionLane {
           try {
             entry.record = await journal.read(ref);
             entry.failure = null;
-            if (entry.record == null) entry.phase = SessionTurnPhase.idle;
+            if (entry.record == null) {
+              entry.phase = SessionTurnPhase.idle;
+              entry.compact = null;
+            } else if (entry.record!.admittedInput != null) {
+              entry.phase = SessionTurnPhase.idle;
+              entry.compact = entry.record!.admittedInput!.value;
+            }
           } on Object {
             return;
           }
@@ -678,12 +785,94 @@ final class OpenCodeTurnActionLane {
         refreshView(ref);
       });
 
-  Future<void> _verifyWithinQueue(SessionRef ref, _TurnEntry entry) async {
+  MessageRef _compactIdentity(_TurnEntry entry, TurnActionRecord record) =>
+      record.admittedInput ??
+      (entry.compact == null ? record.input! : MessageRef(entry.compact!));
+
+  Notice? _compactNotice(Iterable<TimelineItem> items, MessageRef identity) =>
+      items
+          .whereType<Notice>()
+          .where(
+            (item) =>
+                item.kind.known == NoticeKind.compaction &&
+                item.meta.anchor?.message == identity,
+          )
+          .firstOrNull;
+
+  bool _terminal(Notice notice) =>
+      notice.status.known == ItemStatus.completed ||
+      notice.status.known == ItemStatus.failed;
+
+  Future<bool> _admitCompact(
+    SessionRef ref,
+    _TurnEntry entry,
+    TurnActionRecord record,
+    MessageRef identity,
+  ) async {
+    final admitted = record.admittedInput == identity
+        ? record
+        : record.withAdmission(identity);
+    final changed =
+        entry.compact != identity.value ||
+        entry.phase != SessionTurnPhase.idle ||
+        entry.failure != null;
+    final stored =
+        (record.admittedInput == identity &&
+            entry.failure != SessionTurnUnavailable.storage) ||
+        await journal.write(ref, admitted);
+    // Keep the admitted identity even when a status write fails. A later
+    // read/terminal can retry storage; it must not fall back to the input ID.
+    entry
+      ..record = admitted
+      ..compact = identity.value;
+    if (!_current(ref, entry)) return stored;
+    entry
+      ..phase = stored ? SessionTurnPhase.idle : SessionTurnPhase.unconfirmed
+      ..failure = stored ? null : SessionTurnUnavailable.storage;
+    if (changed || !stored) {
+      publish(ref);
+      refreshView(ref);
+    }
+    return stored;
+  }
+
+  Future<bool> _verifyWithinQueue(SessionRef ref, _TurnEntry entry) async {
     final record = entry.record;
-    if (record == null || !_current(ref, entry)) return;
+    if (record == null || !_current(ref, entry)) return false;
     final current = view(ref);
-    if (current.phase != SessionLivePhase.live || current.stale) return;
+    if (current.phase != SessionLivePhase.live || current.stale) return false;
     final canonical = current.state;
+    if (record.operation == MutationOperation.compact) {
+      final identity = _compactIdentity(entry, record);
+      final notice = _compactNotice(canonical?.timeline ?? const [], identity);
+      if (notice != null) {
+        if (_terminal(notice)) {
+          return _settleWithinQueue(ref, entry, record, canonical?.revert);
+        }
+        if (notice.status.known == ItemStatus.streaming) {
+          return _admitCompact(ref, entry, record, identity);
+        }
+      }
+      if (record.admittedInput == null &&
+          entry.receipt?.id == record.id &&
+          entry.receipt?.state.known == ReceiptState.accepted) {
+        return _admitCompact(ref, entry, record, identity);
+      }
+    } else if (entry.receipt?.id == record.id &&
+        const {
+          ReceiptState.accepted,
+          ReceiptState.rejected,
+          ReceiptState.unavailable,
+        }.contains(entry.receipt?.state.known)) {
+      // A known HTTP outcome need not become uncertain just because local
+      // journal cleanup failed. Retrying cleanup never repeats the mutation.
+      return _settleWithinQueue(
+        ref,
+        entry,
+        record,
+        entry.overlay ?? canonical?.revert,
+      );
+    }
     final observed =
         entry.echoed &&
         canonical != null &&
@@ -702,11 +891,10 @@ final class OpenCodeTurnActionLane {
                       input.anchor != null &&
                       input.anchor!.compareTo(record.anchor!) < 0,
                 ),
-          _ => true,
+          _ => false,
         };
     if (observed) {
-      await _settleWithinQueue(ref, entry, record, canonical.revert);
-      return;
+      return _settleWithinQueue(ref, entry, record, canonical.revert);
     }
     final SessionSnapshot snapshot;
     try {
@@ -721,18 +909,28 @@ final class OpenCodeTurnActionLane {
         cancellation: entry.cancellation,
       );
     } on OpenCodeSessionReadException {
-      return;
+      return false;
     }
-    if (!_current(ref, entry) || !identical(entry.record, record)) return;
+    if (!_current(ref, entry) || !identical(entry.record, record)) return false;
     // A direct read has no server watermark. Do not overlay a different,
     // newer canonical boundary that arrived while this read was in flight.
     if (record.operation != MutationOperation.compact &&
         !identical(view(ref).state?.revert, current.state?.revert) &&
         !_matches(record, view(ref).state?.revert)) {
-      return;
+      return false;
     }
     final revert = snapshot.revert?.value;
     final timeline = snapshot.timeline;
+    if (record.operation == MutationOperation.compact) {
+      final identity = _compactIdentity(entry, record);
+      final notice = _compactNotice(timeline?.values ?? const [], identity);
+      if (notice == null) return false;
+      if (_terminal(notice)) {
+        return _settleWithinQueue(ref, entry, record, revert);
+      }
+      return notice.status.known == ItemStatus.streaming &&
+          await _admitCompact(ref, entry, record, identity);
+    }
     final complete = timeline?.complete == true && !snapshot.hasMoreHistory;
     final noRevert =
         revert?.kind.known == RevertKind.none ||
@@ -756,30 +954,33 @@ final class OpenCodeTurnActionLane {
             !snapshot.pending!.values.any(
               (input) => record.tail.contains(input.anchor?.message),
             ),
-      _ =>
-        timeline?.values.any(
-              (item) =>
-                  item is Notice &&
-                  item.kind.known == NoticeKind.compaction &&
-                  item.meta.anchor?.message == record.input,
-            ) ==
-            true,
+      _ => false,
     };
-    if (!positive) return;
-    await _settleWithinQueue(ref, entry, record, revert);
+    if (!positive) return false;
+    return _settleWithinQueue(ref, entry, record, revert);
   }
 
-  Future<void> _settleWithinQueue(
+  Future<bool> _settleWithinQueue(
     SessionRef ref,
     _TurnEntry entry,
     TurnActionRecord record,
     RevertState? revert,
   ) async {
-    if (!await journal.clear(ref) || !_current(ref, entry)) return;
+    if (!await journal.clear(ref)) {
+      if (_current(ref, entry)) {
+        entry
+          ..phase = SessionTurnPhase.unconfirmed
+          ..failure = SessionTurnUnavailable.storage;
+        publish(ref);
+      }
+      return false;
+    }
+    if (!_current(ref, entry)) return false;
     entry
       ..record = null
       ..phase = SessionTurnPhase.idle
       ..failure = null;
+    if (record.operation == MutationOperation.compact) entry.compact = null;
     // The stream owner remains the only canonical writer. Until its repair
     // arrives, expose this positively proven revert without changing rows.
     if (record.operation != MutationOperation.compact) {
@@ -788,6 +989,7 @@ final class OpenCodeTurnActionLane {
     entry.base = view(ref).state?.revert;
     publish(ref);
     refreshView(ref);
+    return true;
   }
 
   void release(SessionRef ref) => _entries.remove(ref)?.cancellation.cancel();

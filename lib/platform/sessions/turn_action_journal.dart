@@ -16,6 +16,7 @@ final class TurnActionRecord {
     this.input,
     this.tail = const [],
     this.completeTail = false,
+    this.admittedInput,
   });
   final MutationOperation operation;
   final CommandId id;
@@ -23,6 +24,20 @@ final class TurnActionRecord {
   final MessageRef? input;
   final List<MessageRef> tail;
   final bool completeTail;
+
+  /// The server's admitted/coalesced compaction identity; admission is not
+  /// completion, so this record stays until its terminal notice is observed.
+  final MessageRef? admittedInput;
+
+  TurnActionRecord withAdmission(MessageRef input) => TurnActionRecord(
+    operation: operation,
+    id: id,
+    anchor: anchor,
+    input: this.input,
+    tail: tail,
+    completeTail: completeTail,
+    admittedInput: input,
+  );
 }
 
 final class TurnActionJournal {
@@ -77,6 +92,12 @@ final class TurnActionJournal {
     final input = value['input'] == null
         ? null
         : MessageRef(text(value['input']));
+    final admitted = value['admittedInput'] == null
+        ? null
+        : MessageRef(text(value['admittedInput']));
+    if (admitted != null && operation != MutationOperation.compact) {
+      throw const FormatException('invalidAdmission');
+    }
     final tail = value['tail'];
     if (tail is! List<Object?> ||
         tail.length > 500 ||
@@ -94,6 +115,7 @@ final class TurnActionJournal {
       input: input,
       tail: [for (final message in tail) MessageRef(text(message))],
       completeTail: value['completeTail'] as bool,
+      admittedInput: admitted,
     );
   }
 
@@ -111,6 +133,7 @@ final class TurnActionJournal {
           'orderKey': anchor.orderKey,
         },
       if (record.input case final input?) 'input': input.value,
+      if (record.admittedInput case final input?) 'admittedInput': input.value,
       'tail': [for (final message in record.tail) message.value],
       'completeTail': record.completeTail,
     });

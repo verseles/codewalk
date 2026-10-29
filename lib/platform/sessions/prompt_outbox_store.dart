@@ -192,7 +192,10 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         connectedVersion: ready.command.connectedVersion,
         resume: ready.resume,
         payload: ready.payload,
-        state: SubmissionKind.sending,
+        // Until the turn guard accepts, this is definitely unsent. A crash
+        // or failed refusal write must never turn it into a replayable send.
+        state: SubmissionKind.rejected,
+        reason: 'notSentYet',
         createdAt: now,
         updatedAt: now,
         endpoint: client.transport.endpoint,
@@ -216,6 +219,14 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         session,
         () => _current && isCurrent?.call() != false,
       );
+      // The guard can settle older admissions under this same queue. Keep
+      // those writes instead of restoring the pre-guard ledger snapshot.
+      final guarded = await _read(key, session);
+      if (guarded == null) return const OutboxSubmission.refused('unreadable');
+      base = _Ledger([
+        for (final other in guarded.records)
+          if (other.commandId != commandId) other,
+      ], guarded.forgotten);
       if (refusal != null || !_current || isCurrent?.call() == false) {
         final refused = record.copyWith(
           state: SubmissionKind.rejected,
@@ -226,8 +237,25 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         await _persist(key, session, base.adding(refused));
         return OutboxSubmission.recorded(_entry(refused), sent: false);
       }
+      final sending = record.copyWith(
+        state: SubmissionKind.sending,
+        reason: null,
+        updatedAt: _now().toUtc(),
+      );
+      if (!await _persist(key, session, base.adding(sending))) {
+        return const OutboxSubmission.refused('notPersisted');
+      }
+      if (!_current || isCurrent?.call() == false) {
+        final cancelled = sending.copyWith(
+          state: SubmissionKind.rejected,
+          reason: _current ? 'cancelledBeforeSend' : 'sourceChanged',
+          updatedAt: _now().toUtc(),
+        );
+        await _persist(key, session, base.adding(cancelled));
+        return OutboxSubmission.recorded(_entry(cancelled), sent: false);
+      }
       final attempt = await client.post(ready, cancellation: _cancellation);
-      final result = record.copyWith(
+      final result = sending.copyWith(
         // Refused locally before the wire: definitely not admitted.
         state: attempt.posted
             ? attempt.submission!.kind.known!
