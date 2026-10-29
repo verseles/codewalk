@@ -255,11 +255,11 @@ void main() {
     expect(graph.preferences.showReasoning, isFalse);
     await _dismissMessage(tester);
 
-    // Undo, redo and compact say why they cannot run yet.
+    // Undo, redo and compact say they are unavailable for this conversation when unbound.
     for (final name in ['undo', 'redo', 'compact']) {
       await _sendTyped(tester, '/$name');
       expect(
-        find.text(_l10n.commandNotYetAvailable),
+        find.text(_l10n.commandUnavailableHere),
         findsOneWidget,
         reason: name,
       );
