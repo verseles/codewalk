@@ -73,6 +73,20 @@ void main() {
     );
     expect(find.byKey(const ValueKey('live-model-chip')), findsOneWidget);
     expect(find.byKey(const ValueKey('live-agent-chip')), findsOneWidget);
+    final l10n = dependencies.localizations.current;
+    expect(find.text(l10n.composerLiveSession), findsNothing);
+    expect(find.byKey(const ValueKey('live-status')), findsOneWidget);
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        stale: true,
+        state: liveState(ref),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.composerLiveSession), findsOneWidget);
+    expect(find.text(l10n.liveStale), findsOneWidget);
   });
 
   testWidgets('a failed turn\'s error card opens its one recovery (V2-055A)', (
@@ -515,7 +529,7 @@ void main() {
           tester.view.resetViewInsets();
           await tester.pumpAndSettle();
         }
-        expect(find.text(l10n.composerLiveSession), findsOneWidget);
+        expect(find.text(l10n.composerLiveSession), findsNothing);
         expect(find.text(l10n.liveSendUnavailable), findsNothing);
         expect(find.byKey(const ValueKey('live-composer')), findsOneWidget);
         expect(

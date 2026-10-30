@@ -176,11 +176,17 @@ class _SessionLivePageState extends State<SessionLivePage>
               SessionPermissionModeChip(live: c, compact: true),
           ],
         ),
-      Text(
-        canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
-        style: textTheme.titleMedium,
-      ),
-      Text(c.profileLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
+      if (!widget.workspaceChrome ||
+          !canAct ||
+          c.phase != SessionLivePhase.live ||
+          (view?.stale ?? false) ||
+          failure != null) ...[
+        Text(
+          canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
+          style: textTheme.titleMedium,
+        ),
+        Text(c.profileLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
+      ],
       Semantics(
         liveRegion: true,
         container: true,
