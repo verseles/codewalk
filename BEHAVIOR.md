@@ -7,6 +7,13 @@ The existing feature sections below describe the retained legacy runtime started
 by `lib/main.dart`. The active v2 implementation currently has the independent
 foundation described here; planned v2 behavior remains in GitHub Issues.
 
+## OpenCode v2 compatibility
+
+- **Given** a native OpenCode server on a stable 2.x version at or above 2.0.20
+- **Then** the v2 session runtime can connect; versions outside the tested window remain identified as untested
+- **Then** an uncertain prompt on a version other than 2.0.22 is never automatically replayed, and a history scan that cannot prove absence keeps it unresolved; observed pending or delivered prompts can still be reconciled
+- **Then** unsupported major versions and prereleases are refused, and pairing-token renewal remains limited to the verified 2.0.22 contract
+
 ## Explicit v2 foundation
 
 - **Given** CodeWalk is launched with `lib/main_v2.dart` as its explicit target
@@ -346,7 +353,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 live session execution state
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22
+- **Given** an open native v2 session on a supported OpenCode 2.x server
 - **When** the header shows the session's execution
 - **Then** running, retrying, stopping, resuming after a restart, needing input and idle each have their own label; the last outcome stays beside it
 - **When** the server schedules a retry of the current step
@@ -360,7 +367,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 live session Stop
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22 with a live, current, known-running or retrying execution
+- **Given** an open native v2 session on a supported OpenCode 2.x server with a live, current, known-running or retrying execution
 - **When** the composer draft is empty
 - **Then** its trailing Send action becomes Stop; typing keeps Send with steer/queue, and Stop never clears the draft or partial output
 - **Then** two unmodified Escape presses within 500 milliseconds while the input is focused also request Stop; the first shows a hint, and composing text, repeated keys and modifiers do not trigger it
@@ -376,7 +383,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 live session model and agent
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22
+- **Given** an open native v2 session on a supported OpenCode 2.x server
 - **When** its live page opens
 - **Then** the composer shows separate agent, model and variant chips above its field, wrapping on a narrow window; catalog labels name the session's own selection, and a missing half is the server default; the model's tooltip and semantics retain the whole selection and any pending, unconfirmed or changed-elsewhere status
 - **Then** the session record supplies the selection, and `session.model.selected` / `session.agent.selected` keep it current; the model reference keeps its provider and variant together
@@ -392,7 +399,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 model picker, favorites and recents
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22 that can switch its selection
+- **Given** an open native v2 session on a supported OpenCode 2.x server that can switch its selection
 - **When** the user taps the composer's model chip
 - **Then** a models-only picker opens (a bottom sheet below 600 dp, a dialog otherwise) with a search field that narrows the models by name, id or provider; while searching, each match shows once in its provider's group, and no match says "No models found"
 - **Then** this server's **Favorites** come first, then this project's **Recent** models, then every model grouped by provider; a favorite or recent the session's location does not offer is not shown, a favorite is not repeated among the recents, and outside its provider's group a row names its provider
@@ -465,7 +472,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 ### V2 manual permission replies
 
-- **Given** an open native v2 session on verified OpenCode 2.0.22 whose lease holds a reply port
+- **Given** an open native v2 session on a supported OpenCode 2.x server whose lease holds a reply port
 - **When** the session has a resident permission request
 - **Then** the live footer shows one card per request with its native title and resources, and offers an action only for a choice OpenCode itself accepts: `once`; `always` only with a non-empty, in-bounds pattern preview; `reject` with or without a verbatim note
 - **Then** a request whose native choices include anything else is shown without actions, because one non-native choice makes every reply for that request unsupported
