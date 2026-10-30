@@ -26,6 +26,7 @@ import '../v2/sessions/composer_fakes.dart';
 import '../v2/sessions/fakes.dart';
 import '../v2/sessions/live_fakes.dart';
 import '../v2/sessions/workspace_support.dart';
+import 'capture_writer.dart';
 import '../v2/storage/storage_fakes.dart';
 
 ItemMeta _v2Meta(String id, {String? message, ItemStatus status = ItemStatus.completed}) => ItemMeta(
@@ -119,10 +120,7 @@ Future<void> _capture(WidgetTester tester, GlobalKey key, String filename) async
   final bytes = byteData!.buffer.asUint8List();
 
   final output = File('${_captureDirectory.path}/$filename');
-  if (output.existsSync()) {
-    throw StateError('Capture already exists: ${output.path}');
-  }
-  output.writeAsBytesSync(bytes);
+  writeParityCapture(output, bytes);
 }
 
 void main() {
