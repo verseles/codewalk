@@ -9,11 +9,11 @@ snapshots; CI pins the same Flutter 3.44.1 so pixel parity is enforced rather
 than assumed. Pixel parity on another renderer/SDK is separate from the local
 checks and must be inspected rather than assumed.
 
-The fixture lays out 564 logical px tall, but the shrink-wrapped
-`RepaintBoundary` height is reported as 564.00000095 on some architectures and
-the golden capture rounds with `ceil`, so the same layout produced a 565px
-image on arm64 and a 564px image on x64 CI. `_goldenCanvasHeight` in the test
-pins the canvas to an integral 564px and `closeTo` asserts the fixture's
+The fixture lays out 552 logical px tall, but the shrink-wrapped
+`RepaintBoundary` height can be reported as 552.00000095 and the golden capture
+rounds with `ceil`, which could produce a 553px image on one host and a 552px
+image on another. `_goldenCanvasHeight` in the test
+pins the canvas to an integral 552px and `closeTo` asserts the fixture's
 natural height against it, so growing the fixture fails loudly instead of
 being clipped silently. Bump both together and regenerate.
 
