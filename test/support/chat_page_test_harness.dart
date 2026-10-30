@@ -65,6 +65,7 @@ Widget buildChatPageTestApp(
   MediaQueryData? mediaQueryData,
   bool integratedWindowChrome = false,
   bool forwardSettingsNotifications = true,
+  ThemeData? theme,
 }) {
   if (di.sl.isRegistered<AppLocalDataSource>()) {
     di.sl.unregister<AppLocalDataSource>();
@@ -130,7 +131,7 @@ Widget buildChatPageTestApp(
         ),
     ],
     child: localizedMaterialApp(
-      theme: AppTheme.lightFrom(
+      theme: theme ?? AppTheme.lightFrom(
         ColorScheme.fromSeed(seedColor: AppTheme.seedColor),
       ),
       builder: integratedWindowChrome
