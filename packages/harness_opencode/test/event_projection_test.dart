@@ -245,7 +245,7 @@ void main() {
       failsWith(OpenCodeEventProjectionFailure.limitExceeded),
     );
     expect(
-      () => project(frame('session.future.fact'), version: '2.0.21'),
+      () => project(frame('session.future.fact'), version: '3.0.0'),
       failsWith(OpenCodeEventProjectionFailure.unsupportedVersion),
     );
     expect(

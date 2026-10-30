@@ -190,7 +190,7 @@ void main() {
       final transport = _Transport((_, _) => fail('must not send'));
       final cancelled = RequestCancellation()..cancel();
       final cases = <Future<OpenCodeSessionRulesAttempt>>[
-        _replace(_client(transport, version: '2.0.21')),
+        _replace(_client(transport, version: '3.0.0')),
         _replace(_client(transport), session: 'bad id'),
         _replace(_client(transport), rules: OpenCodeSessionRules.unrecognized),
         _replace(_client(transport), cancellation: cancelled),

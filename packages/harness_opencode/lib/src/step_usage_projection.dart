@@ -80,7 +80,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
   final sessionId = _id(data['sessionID'], 'ses');
   final ref = current.ref;
   if (sessionId != ref.nativeId) return const [];
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeStepUsageProjectionFailure.unsupportedVersion);
   }
   for (final part in [

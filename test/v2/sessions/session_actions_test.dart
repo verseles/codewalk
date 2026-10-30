@@ -229,6 +229,21 @@ void main() {
     },
   );
 
+  test('a newer v2 server allows session actions', () async {
+    final prober = FakeProber()
+      ..assessment = const EndpointAssessment(
+        EndpointStatus.untested,
+        version: '2.2.2',
+      );
+    final source = createSessionActionSource(
+      profile('a'),
+      EndpointCredential(kind: EndpointAuthKind.password, secret: 'secret'),
+      prober,
+    );
+    expect((await source.support()).available, isTrue);
+    source.close();
+  });
+
   test('a transient probe failure is observed again', () async {
     final prober = FakeProber()
       ..assessment = const EndpointAssessment(EndpointStatus.unreachable);

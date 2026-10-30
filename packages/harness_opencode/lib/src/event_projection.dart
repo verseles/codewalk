@@ -255,7 +255,7 @@ List<SessionEvent> projectOpenCodeEvent(
       type.endsWith('.delta')) {
     return const [];
   }
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeEventProjectionFailure.unsupportedVersion);
   }
   final id = value['id'];
@@ -304,7 +304,7 @@ OpenCodeSessionRules projectOpenCodeSessionPermissions(
   if (type != 'session.permissions') {
     _fail(OpenCodeEventProjectionFailure.malformed);
   }
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeEventProjectionFailure.unsupportedVersion);
   }
   final data = value['data'];

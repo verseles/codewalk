@@ -293,7 +293,7 @@ void main() {
       expect(event.meta.source.version, '2.0.22+build.1');
     });
 
-    for (final version in ['2.0.21', '2.0.23', '2.0.22-rc.1', 'secret']) {
+    for (final version in ['3.0.0', '2.0.19', '2.0.22-rc.1', 'secret']) {
       test('unverified source $version fails without echoing values', () {
         expect(
           () =>

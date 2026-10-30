@@ -241,7 +241,7 @@ void main() {
       final result =
           await client(
             t,
-            version: reason == 'version' ? '2.0.21' : '2.0.22',
+            version: reason == 'version' ? '3.0.0' : '2.0.22',
           ).interrupt(
             session: reason == 'session'
                 ? const SessionRef(

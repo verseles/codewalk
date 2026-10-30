@@ -183,7 +183,7 @@ void main() {
     expect(
       await _client(
         transport,
-        version: '2.0.21',
+        version: '3.0.0',
       ).cancelInbox(session: session, messageId: id),
       isA<OpenCodeInboxNotSent>(),
     );

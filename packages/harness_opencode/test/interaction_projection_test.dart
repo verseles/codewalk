@@ -501,7 +501,7 @@ void main() {
     ]) {
       expect(() => projectInteraction(frame), failsWith(failure));
     }
-    for (final version in ['2.0.21', '2.0.22-rc.1', 'x']) {
+    for (final version in ['3.0.0', '2.0.22-rc.1', 'x']) {
       expect(
         () => projectInteraction(
           interactionFrame('permission.asked', askData()),

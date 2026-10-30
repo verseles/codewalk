@@ -336,7 +336,7 @@ _header(
   final data = _object(frame['data']);
   final sessionId = _id(data['sessionID'], 'ses');
   if (sessionId != ref.nativeId) return null;
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeExecutionProjectionFailure.unsupportedVersion);
   }
   for (final part in [

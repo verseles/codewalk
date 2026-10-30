@@ -350,7 +350,7 @@ void main() {
         reason: '$input',
       );
     }
-    expect(() => projectExecution(started, version: '2.0.21'), failsWith(v));
+    expect(() => projectExecution(started, version: '3.0.0'), failsWith(v));
     expect(
       () => projectExecution(started, version: '2.1.0-beta.1'),
       failsWith(v),

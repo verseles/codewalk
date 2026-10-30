@@ -43,7 +43,7 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
   final sessionId = _id(data['sessionID'], 'ses');
   final ref = current.ref;
   if (sessionId != ref.nativeId) return const [];
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeCompactionProjectionFailure.unsupportedVersion);
   }
   for (final part in [
@@ -80,7 +80,11 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
   if (reason != 'auto' && reason != 'manual') {
     _fail(OpenCodeCompactionProjectionFailure.malformed);
   }
-  if (type != _failed) _text(data['recent']);
+  if (type != _failed &&
+      (data.containsKey('recent') ||
+          OpenCodeCompatibility.parse(sourceVersion)?.toString() == '2.0.22')) {
+    _text(data['recent']);
+  }
 
   Notice? active;
   Notice? duplicate;

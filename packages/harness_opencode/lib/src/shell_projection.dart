@@ -155,7 +155,7 @@ List<SessionEvent> projectOpenCodeShellEvent(
   final sessionId = _id(data['sessionID'], 'ses');
   final ref = current.ref;
   if (sessionId != ref.nativeId) return const [];
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeShellProjectionFailure.unsupportedVersion);
   }
   final nativeId = _id(frame['id'], 'evt_');

@@ -197,7 +197,7 @@ void main() {
     );
     expect(
       () =>
-          projectShell(shellFrame('session.shell.started'), version: '2.0.21'),
+          projectShell(shellFrame('session.shell.started'), version: '3.0.0'),
       failsWith(OpenCodeShellProjectionFailure.unsupportedVersion),
     );
   });

@@ -37,6 +37,16 @@ final class OpenCodeCompatibility {
     }
   }
 
+  /// Permits the v2 protocol with an untested-version warning when applicable.
+  static bool supportsV2(String value) {
+    final version = parse(value);
+    return version != null &&
+        version.major == 2 &&
+        version.preRelease.isEmpty &&
+        version >= minimum &&
+        !knownBad.contains(version.toString());
+  }
+
   static EndpointAssessment assess(String value) {
     final version = parse(value);
     if (version == null) {

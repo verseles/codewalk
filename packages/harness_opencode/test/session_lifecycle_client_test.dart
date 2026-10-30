@@ -206,7 +206,7 @@ void main() {
       );
       final attempt = await client(
         transport,
-        version: '2.0.21',
+        version: '3.0.0',
       ).rename(session: session, id: id, title: 'T');
       expect(transport.requests, isEmpty);
       expect(attempt.receipt.state.known, ReceiptState.unavailable);

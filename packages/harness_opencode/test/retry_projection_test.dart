@@ -183,6 +183,6 @@ void main() {
         ]) {
       expect(() => projectRetry(input), failsWith(failure), reason: '$input');
     }
-    expect(() => projectRetry(retryFrame(), version: '2.0.21'), failsWith(v));
+    expect(() => projectRetry(retryFrame(), version: '3.0.0'), failsWith(v));
   });
 }

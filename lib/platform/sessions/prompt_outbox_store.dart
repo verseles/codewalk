@@ -820,7 +820,11 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     operation: const OpenValue.known(MutationOperation.prompt),
     connectedVersion: client.connectedVersion,
     phase: const OpenValue.known(OperationPhase.initial),
-    replay: ReplayPolicy.verifiedUnresolvedAdmission,
+    replay:
+        OpenCodeCompatibility.parse(client.connectedVersion)?.toString() ==
+            '2.0.22'
+        ? ReplayPolicy.verifiedUnresolvedAdmission
+        : ReplayPolicy.reconcileOnly,
     evidence:
         'test/contract/fixtures/opencode/2.0.22/b/prompt-matrix.json: '
         'an id absent after a lost request is admitted once by its retry',

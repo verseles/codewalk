@@ -69,7 +69,7 @@ List<SessionEvent> projectOpenCodeRevertEvent(
   final sessionId = _id(data['sessionID'], 'ses');
   final ref = current.ref;
   if (sessionId != ref.nativeId) return const [];
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeRevertProjectionFailure.unsupportedVersion);
   }
   for (final part in [

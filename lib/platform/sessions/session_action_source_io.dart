@@ -102,8 +102,8 @@ final class _NativeSource implements SessionActionSource {
         );
       }
       _definitive = true;
-      if (OpenCodeCompatibility.parse(version)?.toString() != '2.0.22') {
-        // A known version that does not define these commands.
+      if (!OpenCodeCompatibility.supportsV2(version)) {
+        // The runtime does not admit this version of the v2 protocol.
         return const SessionActionSupport(
           SessionActionReason.versionUnverified,
         );

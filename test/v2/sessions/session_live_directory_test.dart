@@ -1148,8 +1148,26 @@ void main() {
     });
   });
 
-  test('an unverified server version fails closed before streaming', () async {
-    server.version = '2.0.23';
+  test('a newer v2 server opens and hydrates the live session', () async {
+    server.version = '2.2.2';
+    final directory = createSessionLiveDirectory()!;
+    addTearDown(directory.close);
+    final session = await directory.open(
+      profile: p,
+      credential: credential,
+      session: ref('ses_one'),
+    );
+    final view = await until(
+      session,
+      (v) => v.phase == SessionLivePhase.live && v.state != null,
+    );
+    expect(view.version, '2.2.2');
+    expect(view.stale, isFalse);
+    expect(server.events, 1);
+  });
+
+  test('a different major fails closed before streaming', () async {
+    server.version = '3.0.0';
     final directory = createSessionLiveDirectory()!;
     addTearDown(directory.close);
     await expectLater(

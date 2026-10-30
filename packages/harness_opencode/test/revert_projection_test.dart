@@ -511,7 +511,7 @@ void main() {
     ]) {
       expect(() => projectRevert(input), failsWith(failure), reason: '$input');
     }
-    expect(() => projectRevert(cleared, version: '2.0.21'), failsWith(v));
+    expect(() => projectRevert(cleared, version: '3.0.0'), failsWith(v));
     expect(() => projectRevert(cleared, version: '2.1.0-beta.1'), failsWith(v));
     expect(projectRevert(cleared, version: '2.0.22+build.1'), hasLength(1));
   });

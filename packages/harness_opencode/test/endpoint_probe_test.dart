@@ -68,6 +68,18 @@ final class ScriptedTransport implements EndpointHttpTransport {
 }) => (status: status, body: body, media: media, retry: retry);
 
 void main() {
+  test('v2 runtime admits stable 2.x without claiming it is tested', () {
+    expect(OpenCodeCompatibility.supportsV2('2.2.2'), isTrue);
+    expect(OpenCodeCompatibility.supportsV2('2.9.0+build'), isTrue);
+    expect(
+      OpenCodeCompatibility.assess('2.2.2').status,
+      EndpointStatus.untested,
+    );
+    expect(OpenCodeCompatibility.supportsV2('3.0.0'), isFalse);
+    expect(OpenCodeCompatibility.supportsV2('2.0.19'), isFalse);
+    expect(OpenCodeCompatibility.supportsV2('2.2.2-rc.1'), isFalse);
+  });
+
   test(
     'bounded body and deadline reject responses without extra probes',
     () async {

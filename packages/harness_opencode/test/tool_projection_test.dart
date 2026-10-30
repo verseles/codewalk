@@ -636,8 +636,8 @@ void main() {
         );
       }
       for (final version in [
-        '2.0.21',
-        '2.0.23',
+        '3.0.0',
+        '2.0.19',
         '2.0.22-rc.1',
         'fake-private',
       ]) {

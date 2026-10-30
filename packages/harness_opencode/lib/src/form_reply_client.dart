@@ -125,7 +125,7 @@ final class OpenCodeFormReplyClient {
       ),
     );
 
-    if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
+    if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
       return unavailable('unverifiedVersion');
     }
     String ownerSegment;

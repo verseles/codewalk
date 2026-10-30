@@ -384,7 +384,7 @@ void main() {
     test('for unverified versions and unsupported drafts', () async {
       final cancelled = RequestCancellation()..cancel();
       final cases = {
-        'unverifiedVersion': await refuse(version: '2.0.21'),
+        'unverifiedVersion': await refuse(version: '3.0.0'),
         'emptyText': await refuse(draft: PromptDraft(text: '  ')),
         'unsupportedDraft': await refuse(
           draft: PromptDraft(text: 'x', metadata: CanonicalValue({'k': 'v'})),

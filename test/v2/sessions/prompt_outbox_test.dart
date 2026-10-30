@@ -825,6 +825,18 @@ void main() {
       },
     );
 
+    test('unverified 2.x never automatically replays a lost prompt', () async {
+      final server = _Server()..reachServer = false;
+      final outbox = _outbox(_Store(), server.transport, version: '2.2.2');
+      final first = await _submit(outbox);
+      expect(first.entry!.state, SubmissionKind.uncertain);
+      server.reachServer = true;
+      final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
+      expect(result.posts, 0);
+      expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(server.transport.bodies, hasLength(1));
+    });
+
     test('a promoted id is delivered and never posted again', () async {
       final server = _Server()..loseResponse = true;
       final outbox = _outbox(_Store(), server.transport);

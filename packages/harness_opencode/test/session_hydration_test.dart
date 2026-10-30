@@ -408,7 +408,7 @@ void main() {
     );
     final server = Server();
     await expectLater(
-      hydrate(server, version: '2.0.21'),
+      hydrate(server, version: '3.0.0'),
       throwsA(failure(OpenCodeSessionReadFailure.invalidRequest)),
     );
     expect(server.paths, isEmpty);

@@ -477,7 +477,7 @@ void main() {
         final result =
             await _client(
               transport,
-              version: reason == 'version' ? '2.0.23' : '2.0.22',
+              version: reason == 'version' ? '3.0.0' : '2.0.22',
             ).reply(
               request: request,
               response: ApprovalResponse('once'),

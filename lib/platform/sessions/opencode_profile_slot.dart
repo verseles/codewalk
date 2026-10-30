@@ -21,7 +21,7 @@ import 'prompt_outbox_store.dart';
 import 'turn_action_journal.dart';
 import 'unrestricted_ownership_store.dart';
 
-/// The per-profile runtime of one OpenCode 2.0.22 endpoint: the
+/// The per-profile runtime of one OpenCode v2 endpoint: the
 /// authenticated transport, the session reader, the single global event
 /// stream and everything a live session or the session catalog needs from it.
 /// It lives in its own file so the live directory stays readable and below the
@@ -132,9 +132,8 @@ final class OpenCodeProfileSlot {
     if (!assessment.canUse || observed == null) {
       throw const SessionLiveException(SessionLiveFailure.unavailable);
     }
-    // The stream reader is verified against 2.0.22 only; fail closed before
-    // opening the stream instead of hydrating an unverified version.
-    if (OpenCodeCompatibility.parse(observed)?.toString() != '2.0.22') {
+    // Other major versions and prereleases do not use this v2 runtime.
+    if (!OpenCodeCompatibility.supportsV2(observed)) {
       throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
     }
     version = observed;

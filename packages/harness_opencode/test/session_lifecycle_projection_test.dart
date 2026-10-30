@@ -381,7 +381,7 @@ void main() {
         reason: '$input'.substring(0, 80.clamp(0, '$input'.length)),
       );
     }
-    expect(() => projectLifecycle(deleted, version: '2.0.21'), failsWith(v));
+    expect(() => projectLifecycle(deleted, version: '3.0.0'), failsWith(v));
     expect(
       () => projectLifecycle(deleted, version: '2.1.0-beta.1'),
       failsWith(v),

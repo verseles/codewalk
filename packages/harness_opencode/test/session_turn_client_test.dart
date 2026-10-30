@@ -415,7 +415,7 @@ void main() {
         final result =
             await client(
               t,
-              version: why == 'version' ? '2.0.23' : '2.0.22',
+              version: why == 'version' ? '3.0.0' : '2.0.22',
             ).stage(
               session: why == 'session'
                   ? SessionRef(harness.host, harness.harness, 'other')

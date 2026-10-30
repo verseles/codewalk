@@ -773,7 +773,7 @@ final class OpenCodeSessionReader {
       if (hydrationGeneration.isEmpty ||
           historyLimit < 1 ||
           historyLimit > min(200, maxPageItems) ||
-          OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+          !OpenCodeCompatibility.supportsV2(sourceVersion)) {
         throw const FormatException();
       }
     } on FormatException {

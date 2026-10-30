@@ -44,6 +44,19 @@ SessionState apply(SessionState state, List<SessionEvent> events) {
 }
 
 void main() {
+  test('2.2.2 compaction accepts the removed recent field', () {
+    final start = frame('started');
+    (start['data']! as Map<String, Object?>).remove('recent');
+    expect(
+      project(start, SessionState(historyRef), version: '2.2.2'),
+      isNotEmpty,
+    );
+    expect(
+      () => project(start, SessionState(historyRef)),
+      throwsA(isA<OpenCodeCompactionProjectionException>()),
+    );
+  });
+
   test('held terminal cannot complete a newer hydrated running notice', () {
     final empty = SessionState(historyRef);
     final hydrated = projectOpenCodeHistory(
@@ -350,7 +363,7 @@ void main() {
     for (final (value, version) in [
       (frame('started', data: {'reason': 'private-invalid-reason'}), '2.0.22'),
       (frame('ended', data: {'text': 'x' * (256 * 1024 + 1)}), '2.0.22'),
-      (frame('started'), '2.0.21'),
+      (frame('started'), '3.0.0'),
     ]) {
       expect(
         () => project(value, state, version: version),

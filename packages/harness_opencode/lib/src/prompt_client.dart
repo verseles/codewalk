@@ -125,8 +125,8 @@ final class OpenCodePromptClient {
     );
     OpenCodePromptRefused unavailable(String reason) =>
         OpenCodePromptRefused._(_unavailable(command, messageId, reason));
-    // Only the observed 2.0.22 admission semantics are relied on.
-    if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
+    // Later v2 versions are usable but remain marked untested.
+    if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
       return unavailable('unverifiedVersion');
     }
     try {
@@ -398,7 +398,7 @@ final class OpenCodePromptClient {
         'Belongs to another harness',
       );
     }
-    if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
+    if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
       return const OpenCodeInboxNotSent('unverifiedVersion');
     }
     try {

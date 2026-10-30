@@ -93,7 +93,7 @@ SessionEvent? projectOpenCodeInteractionEvent(
     if (sessionText != ref.nativeId) return null;
     owner = SessionOwner(ref);
   }
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeInteractionProjectionFailure.unsupportedVersion);
   }
   for (final part in [

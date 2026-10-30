@@ -63,7 +63,7 @@ SessionEvent? projectOpenCodeTextReasoningEvent(
   // /api/event is global; an unrelated session must not trigger recovery here.
   if (sessionId != current.ref.nativeId) return null;
 
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeTextProjectionFailure.unsupportedVersion);
   }
   for (final part in [

@@ -87,7 +87,7 @@ SessionEvent? projectOpenCodeToolEvent(
   final data = _object(frame['data']);
   final sessionId = _id(data['sessionID'], 'ses');
   if (sessionId != current.ref.nativeId) return null;
-  if (OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+  if (!OpenCodeCompatibility.supportsV2(sourceVersion)) {
     _fail(OpenCodeToolProjectionFailure.unsupportedVersion);
   }
   for (final part in [
@@ -255,8 +255,7 @@ SessionEvent? projectOpenCodeToolEvent(
     final extra = resident.source.extra?.value;
     return resident.generation == generation &&
         resident.source.harness == current.ref.harnessRef &&
-        OpenCodeCompatibility.parse(resident.source.version)?.toString() ==
-            '2.0.22' &&
+        resident.source.version == sourceVersion &&
         const {
           'session.tool.input.started',
           'session.tool.called',

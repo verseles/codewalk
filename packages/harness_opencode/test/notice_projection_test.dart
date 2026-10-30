@@ -283,7 +283,7 @@ void main() {
         reason: '$input'.length > 120 ? '$input'.substring(0, 120) : '$input',
       );
     }
-    expect(() => projectNotice(synthetic, version: '2.0.21'), failsWith(v));
+    expect(() => projectNotice(synthetic, version: '3.0.0'), failsWith(v));
     expect(projectNotice(synthetic, version: '2.0.22+build.1'), hasLength(1));
   });
 

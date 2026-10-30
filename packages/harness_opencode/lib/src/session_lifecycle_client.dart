@@ -382,8 +382,8 @@ final class OpenCodeSessionLifecycleClient {
       ),
     );
 
-    // Only the observed 2.0.22 semantics are relied on.
-    if (OpenCodeCompatibility.parse(connectedVersion)?.toString() != '2.0.22') {
+    // Later v2 versions are usable but remain marked untested.
+    if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
       return unavailable('unverifiedVersion');
     }
     if (session != null) {

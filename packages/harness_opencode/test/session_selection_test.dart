@@ -618,7 +618,7 @@ void main() {
         final transport = _Transport((_) => _response(null, status: 204));
         final attempt = await client(
           transport,
-          version: '2.0.21',
+          version: '3.0.0',
         ).selectAgent(session: session, id: id, agentId: 'plan');
         expect(attempt.receipt.state.known, ReceiptState.unavailable);
         expect(attempt.receipt.reason, 'unverifiedVersion');
