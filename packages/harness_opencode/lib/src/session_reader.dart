@@ -654,7 +654,7 @@ final class OpenCodeSessionReader {
       openCodeSessionId(ref.nativeId);
       if (!messageId.startsWith('msg_') ||
           maxHistoryPages < 1 ||
-          OpenCodeCompatibility.parse(sourceVersion)?.toString() != '2.0.22') {
+          !OpenCodeCompatibility.supportsV2(sourceVersion)) {
         throw const FormatException();
       }
     } on FormatException {
@@ -723,7 +723,14 @@ final class OpenCodeSessionReader {
             ? const OpenCodePromptPromoted()
             : const OpenCodePromptOccupied();
       }
-      if (next == null || length < limit) return const OpenCodePromptAbsent();
+      if (next == null || length < limit) {
+        // Only 2.0.22 has evidence that this scan proves absence. Newer
+        // histories may omit compacted turns, so retain uncertainty.
+        return OpenCodeCompatibility.parse(sourceVersion)?.toString() ==
+                '2.0.22'
+            ? const OpenCodePromptAbsent()
+            : const OpenCodePromptIncomplete();
+      }
       native = next;
     }
     return const OpenCodePromptIncomplete();

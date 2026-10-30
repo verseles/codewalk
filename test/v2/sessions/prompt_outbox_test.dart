@@ -825,6 +825,28 @@ void main() {
       },
     );
 
+    test(
+      '2.2.2 reconciles a pending or promoted prompt without reposting',
+      () async {
+        for (final promoted in [false, true]) {
+          final server = _Server()..loseResponse = true;
+          final outbox = _outbox(_Store(), server.transport, version: '2.2.2');
+          final first = await _submit(outbox);
+          if (promoted) server.promote(first.entry!.messageId);
+          final result = await outbox.reconcile(
+            _session,
+            const CommandId('cmd_1'),
+          );
+          expect(result.posts, 0);
+          expect(
+            result.entry!.state,
+            promoted ? SubmissionKind.delivered : SubmissionKind.admitted,
+          );
+          expect(server.transport.bodies, hasLength(1));
+        }
+      },
+    );
+
     test('unverified 2.x never automatically replays a lost prompt', () async {
       final server = _Server()..reachServer = false;
       final outbox = _outbox(_Store(), server.transport, version: '2.2.2');
@@ -834,6 +856,8 @@ void main() {
       final result = await outbox.reconcile(_session, const CommandId('cmd_1'));
       expect(result.posts, 0);
       expect(result.entry!.state, SubmissionKind.uncertain);
+      expect(result.entry!.reason, 'historyIncomplete');
+      expect(server.transport.reads, isNotEmpty);
       expect(server.transport.bodies, hasLength(1));
     });
 
@@ -1162,6 +1186,20 @@ void main() {
       expect(checked.posts, 0);
       expect(server.transport.bodies, hasLength(1));
     });
+
+    test(
+      '2.2.2 cancellation keeps uncertainty when history cannot prove absence',
+      () async {
+        final server = _Server();
+        final outbox = _outbox(_Store(), server.transport, version: '2.2.2');
+        await _submit(outbox, delivery: Delivery.queue);
+        final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(server.inbox, isEmpty);
+        expect(result.entry!.state, SubmissionKind.admitted);
+        expect(result.entry!.fence, isNot(CancellationFence.cancelled));
+        expect(result.entry!.reason, 'historyIncomplete');
+      },
+    );
 
     test('cancel racing delivery shows the delivery', () async {
       final (server, outbox, _) = await queued();

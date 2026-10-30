@@ -55,6 +55,9 @@ final class OpenCodeCompatibility {
     if (version < minimum || knownBad.contains(version.toString())) {
       return EndpointAssessment(EndpointStatus.belowMinimum, version: value);
     }
+    if (!supportsV2(value)) {
+      return EndpointAssessment(EndpointStatus.unrecognized, version: value);
+    }
     return EndpointAssessment(
       tested.contains(version.toString())
           ? EndpointStatus.compatible

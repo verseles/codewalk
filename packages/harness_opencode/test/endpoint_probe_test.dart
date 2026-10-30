@@ -106,7 +106,7 @@ void main() {
     '2.0.19': EndpointStatus.belowMinimum,
     '2.0.20-rc.1': EndpointStatus.belowMinimum,
     '2.0.20': EndpointStatus.untested,
-    '2.0.21-rc.1': EndpointStatus.untested,
+    '2.0.21-rc.1': EndpointStatus.unrecognized,
     '2.0.21': EndpointStatus.compatible,
     '2.0.22+build.999': EndpointStatus.compatible,
     '2.0.22+001': EndpointStatus.compatible,
@@ -116,9 +116,9 @@ void main() {
     '02.0.22': EndpointStatus.unrecognized,
     '2.0.22-rc.01': EndpointStatus.unrecognized,
     '2.0.22-rc..1': EndpointStatus.unrecognized,
-    '2.0.22-rc.1+build.999': EndpointStatus.untested,
+    '2.0.22-rc.1+build.999': EndpointStatus.unrecognized,
     '2.0.23': EndpointStatus.untested,
-    '3.0.0': EndpointStatus.untested,
+    '3.0.0': EndpointStatus.unrecognized,
     'invalid-private-url': EndpointStatus.unrecognized,
   }.entries) {
     test('version ${entry.key}: support and test evidence differ', () async {

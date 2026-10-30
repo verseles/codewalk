@@ -327,7 +327,7 @@ void main() {
   test('an unverified version or invalid id sends nothing', () async {
     final transport = _Transport((uri) => fail('no request expected'));
     for (final (id, version) in [
-      ('msg_1a10546196f000432f69db883568', '2.0.21'),
+      ('msg_1a10546196f000432f69db883568', '3.0.0'),
       ('evt_1a10546196f000432f69db883568', '2.0.22'),
     ]) {
       await expectLater(

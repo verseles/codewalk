@@ -129,12 +129,12 @@ final class OpenCodeProfileSlot {
         break;
     }
     final observed = assessment.version;
+    // Other major versions and prereleases do not use this v2 runtime.
+    if (observed != null && !OpenCodeCompatibility.supportsV2(observed)) {
+      throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
+    }
     if (!assessment.canUse || observed == null) {
       throw const SessionLiveException(SessionLiveFailure.unavailable);
-    }
-    // Other major versions and prereleases do not use this v2 runtime.
-    if (!OpenCodeCompatibility.supportsV2(observed)) {
-      throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);
     }
     version = observed;
     _interrupt = OpenCodeInterruptClient(
