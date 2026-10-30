@@ -31,9 +31,11 @@ class SessionTimelineTile extends StatelessWidget {
     this.onOpenChild,
     this.messageHeader = false,
     this.inlineAction,
+    this.minimizeUnknownShell = false,
   });
   final TimelineItem item;
   final Widget? inlineAction;
+  final bool minimizeUnknownShell;
   final void Function(String text, String href, String? title)? onTapLink;
   final void Function(String path, int? line, int? col)? onTapFilePath;
   final ValueChanged<String>? onCopyCode;
@@ -123,6 +125,9 @@ class SessionTimelineTile extends StatelessWidget {
     );
     // Asymmetric bubble radius with tighter trailing corner for messaging feel
     final shape = RoundedRectangleBorder(
+      side: isUser && theme.cardTheme.shape is RoundedRectangleBorder
+          ? (theme.cardTheme.shape! as RoundedRectangleBorder).side
+          : BorderSide.none,
       borderRadius: BorderRadius.circular(16).copyWith(
         bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
         bottomLeft: assistant ? const Radius.circular(4) : const Radius.circular(16),
@@ -219,6 +224,13 @@ class SessionTimelineTile extends StatelessWidget {
             onTapFilePath: onTapFilePath,
             onCopyCode: onCopyCode,
           ),
+        );
+      case ShellRun(:final shellStatus)
+          when minimizeUnknownShell && shellStatus?.known == null:
+        return Text(
+          l10n.chatMessageMessagePartUnavailable as String,
+          maxLines: 16,
+          overflow: TextOverflow.ellipsis,
         );
       case ToolCall() || ShellRun():
         return SessionToolResult(item: item);

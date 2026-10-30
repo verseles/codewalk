@@ -18,14 +18,14 @@ ItemMeta _meta(String id) => ItemMeta(
   ),
 );
 
-/// The fixture lays out 568 logical px tall, but the shrink-wrapped height is
-/// reported as 568.00000095 on some architectures. The golden capture rounds
-/// with `ceil`, so that float sliver becomes a 569px image on one host and a
-/// 568px image on another, and `matchesGoldenFile` rejects any size mismatch
+/// The fixture lays out 552 logical px tall, but the shrink-wrapped height is
+/// reported as 552.00000095 on some architectures. The golden capture rounds
+/// with `ceil`, so that float sliver becomes a 553px image on one host and a
+/// 552px image on another, and `matchesGoldenFile` rejects any size mismatch
 /// before comparing pixels. Pinning the golden canvas to an integral height
 /// keeps the captured image size identical everywhere; the sub-pixel sliver is
 /// clipped, not lost.
-const double _goldenCanvasHeight = 560;
+const double _goldenCanvasHeight = 552;
 
 Widget _goldenBody() => SessionTimelineTile(
   item: AssistantText(

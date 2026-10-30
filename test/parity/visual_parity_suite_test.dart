@@ -109,27 +109,45 @@ Future<void> _loadFonts() async {
   }
 }
 
+late Directory _captureDirectory;
+var _removeCaptureDirectory = false;
+
 Future<void> _capture(WidgetTester tester, GlobalKey key, String filename) async {
   final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
   final image = await tester.runAsync(() => boundary.toImage(pixelRatio: 1.0));
   final byteData = await tester.runAsync(() => image!.toByteData(format: ui.ImageByteFormat.png));
   final bytes = byteData!.buffer.asUint8List();
 
-  final repoDir = Directory('evidence/cp5/captures');
-  if (!repoDir.existsSync()) repoDir.createSync(recursive: true);
-  File('${repoDir.path}/$filename').writeAsBytesSync(bytes);
-
-  final runDir = Directory('/home/ubuntu/codewalk-cp5-evidence/run_20261030_cp5/captures');
-  if (runDir.existsSync()) {
-    File('${runDir.path}/$filename').writeAsBytesSync(bytes);
+  final output = File('${_captureDirectory.path}/$filename');
+  if (output.existsSync()) {
+    throw StateError('Capture already exists: ${output.path}');
   }
+  output.writeAsBytesSync(bytes);
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
+    final requested = Platform.environment['CODEWALK_PARITY_CAPTURE_DIR'];
+    if (requested != null && requested.isNotEmpty) {
+      _captureDirectory = Directory(requested);
+      if (_captureDirectory.existsSync() &&
+          _captureDirectory.listSync().isNotEmpty) {
+        throw StateError('Parity capture directory must be empty');
+      }
+      _captureDirectory.createSync(recursive: true);
+    } else {
+      final tempRoot = Directory('${Directory.systemTemp.path}/opencode');
+      tempRoot.createSync(recursive: true);
+      _captureDirectory = tempRoot.createTempSync('codewalk-parity-');
+      _removeCaptureDirectory = true;
+    }
     await _loadFonts();
+  });
+
+  tearDownAll(() {
+    if (_removeCaptureDirectory) _captureDirectory.deleteSync(recursive: true);
   });
 
   setUp(() {

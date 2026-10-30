@@ -124,6 +124,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         return SessionTimelineTile(
                           key: ValueKey(item.id),
                           item: item,
+                          minimizeUnknownShell: true,
                           messageHeader: opensMessage(c.items, index - 1),
                         );
                       },

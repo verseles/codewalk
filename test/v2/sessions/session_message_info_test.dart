@@ -44,6 +44,33 @@ Widget _surface(Widget child) => MaterialApp(
 );
 
 void main() {
+  testWidgets('history minimizes an unknown shell but keeps known shells readable', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _surface(
+        Column(
+          children: [
+            SessionTimelineTile(
+              item: ShellRun(meta: _meta('unknown-shell'), command: 'hidden-command'),
+              minimizeUnknownShell: true,
+            ),
+            SessionTimelineTile(
+              item: ShellRun(
+                meta: _meta('known-shell'),
+                command: 'visible-command',
+                shellStatus: const OpenValue.known(ShellStatus.exited),
+              ),
+              minimizeUnknownShell: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.textContaining('hidden-command'), findsNothing);
+    expect(find.textContaining('visible-command'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tool-toggle-unknown-shell')), findsNothing);
+  });
   test('elapsed time is compact and needs consistent harness times', () {
     String? format(Duration? took) =>
         formatMessageElapsed(_context(took: took));
