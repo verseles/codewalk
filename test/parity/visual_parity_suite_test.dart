@@ -11,6 +11,7 @@ import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,17 +35,52 @@ ItemMeta _v2Meta(String id, {String? message, ItemStatus status = ItemStatus.com
   message: message == null ? null : MessageContext(message: MessageRef(message)),
 );
 
+Future<void> _loadFonts() async {
+  final robotoLoader = FontLoader('Roboto');
+  for (final name in [
+    'Roboto-Regular.ttf',
+    'Roboto-Bold.ttf',
+    'Roboto-Medium.ttf',
+    'Roboto-Light.ttf',
+    'Roboto-Thin.ttf',
+  ]) {
+    final file = File('/home/ubuntu/flutter/bin/cache/artifacts/material_fonts/$name');
+    if (file.existsSync()) {
+      robotoLoader.addFont(Future.value(ByteData.view(file.readAsBytesSync().buffer)));
+    }
+  }
+  await robotoLoader.load();
+
+  final iconLoader = FontLoader('MaterialIcons');
+  final iconFile = File('/home/ubuntu/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  if (iconFile.existsSync()) {
+    iconLoader.addFont(Future.value(ByteData.view(iconFile.readAsBytesSync().buffer)));
+  }
+  await iconLoader.load();
+}
+
 Future<void> _capture(WidgetTester tester, GlobalKey key, String filename) async {
   final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
   final image = await tester.runAsync(() => boundary.toImage(pixelRatio: 1.0));
   final byteData = await tester.runAsync(() => image!.toByteData(format: ui.ImageByteFormat.png));
-  final dir = Directory('/home/ubuntu/codewalk-cp5-evidence/run_20261030_cp5/captures');
-  if (!dir.existsSync()) dir.createSync(recursive: true);
-  File('${dir.path}/$filename').writeAsBytesSync(byteData!.buffer.asUint8List());
+  final bytes = byteData!.buffer.asUint8List();
+
+  final repoDir = Directory('evidence/cp5/captures');
+  if (!repoDir.existsSync()) repoDir.createSync(recursive: true);
+  File('${repoDir.path}/$filename').writeAsBytesSync(bytes);
+
+  final runDir = Directory('/home/ubuntu/codewalk-cp5-evidence/run_20261030_cp5/captures');
+  if (runDir.existsSync()) {
+    File('${runDir.path}/$filename').writeAsBytesSync(bytes);
+  }
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await _loadFonts();
+  });
 
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -177,7 +213,7 @@ void main() {
             appProvider.dispose();
           });
 
-          final v1Theme = isDark
+          final rawV1Theme = isDark
               ? AppTheme.darkFrom(
                   ColorScheme.fromSeed(
                     seedColor: AppTheme.seedColor,
@@ -190,6 +226,9 @@ void main() {
                     brightness: Brightness.light,
                   ),
                 );
+          final v1Theme = rawV1Theme.copyWith(
+            textTheme: rawV1Theme.textTheme.apply(fontFamily: 'Roboto'),
+          );
 
           final key = GlobalKey();
           await tester.pumpWidget(
@@ -240,7 +279,7 @@ void main() {
           await showSessionList(tester);
           final read = dependencies.sessions!.selectProfile('profile_a');
           final catalog = rig.sources.last;
-          final row = catalog.row('one');
+          final row = catalog.row('one', title: tc.title);
           catalog.respond([row]);
           await read;
           await tester.pumpAndSettle();

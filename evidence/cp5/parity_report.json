@@ -1,0 +1,487 @@
+{
+  "status": "complete",
+  "pairs_count": 12,
+  "missing_count": 0,
+  "pairs": [
+    {
+      "scenario": "s1",
+      "title": "Short turn completed",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 111437,
+      "diff_percent": 29.56,
+      "v1_image": "captures/s1_mobile_light_v1.png",
+      "v2_image": "captures/s1_mobile_light_v2.png",
+      "diff_image": "captures/s1_mobile_light_diff.png",
+      "montage_image": "captures/s1_mobile_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 10986,
+          "pixels": 32960,
+          "diff_percent": 33.33,
+          "crop_v1": "captures/s1_mobile_light_v1_header.png",
+          "crop_v2": "captures/s1_mobile_light_v2_header.png",
+          "crop_diff": "captures/s1_mobile_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 74169,
+          "pixels": 288400,
+          "diff_percent": 25.72,
+          "crop_v1": "captures/s1_mobile_light_v1_timeline.png",
+          "crop_v2": "captures/s1_mobile_light_v2_timeline.png",
+          "crop_diff": "captures/s1_mobile_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26282,
+          "pixels": 55620,
+          "diff_percent": 47.25,
+          "crop_v1": "captures/s1_mobile_light_v1_composer.png",
+          "crop_v2": "captures/s1_mobile_light_v2_composer.png",
+          "crop_diff": "captures/s1_mobile_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s1",
+      "title": "Short turn completed",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 111437,
+      "diff_percent": 29.56,
+      "v1_image": "captures/s1_mobile_dark_v1.png",
+      "v2_image": "captures/s1_mobile_dark_v2.png",
+      "diff_image": "captures/s1_mobile_dark_diff.png",
+      "montage_image": "captures/s1_mobile_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 10986,
+          "pixels": 32960,
+          "diff_percent": 33.33,
+          "crop_v1": "captures/s1_mobile_dark_v1_header.png",
+          "crop_v2": "captures/s1_mobile_dark_v2_header.png",
+          "crop_diff": "captures/s1_mobile_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 74176,
+          "pixels": 288400,
+          "diff_percent": 25.72,
+          "crop_v1": "captures/s1_mobile_dark_v1_timeline.png",
+          "crop_v2": "captures/s1_mobile_dark_v2_timeline.png",
+          "crop_diff": "captures/s1_mobile_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26275,
+          "pixels": 55620,
+          "diff_percent": 47.24,
+          "crop_v1": "captures/s1_mobile_dark_v1_composer.png",
+          "crop_v2": "captures/s1_mobile_dark_v2_composer.png",
+          "crop_diff": "captures/s1_mobile_dark_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s1",
+      "title": "Short turn completed",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 239244,
+      "diff_percent": 23.36,
+      "v1_image": "captures/s1_desktop_light_v1.png",
+      "v2_image": "captures/s1_desktop_light_v2.png",
+      "diff_image": "captures/s1_desktop_light_diff.png",
+      "montage_image": "captures/s1_desktop_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 33425,
+          "pixels": 89600,
+          "diff_percent": 37.3,
+          "crop_v1": "captures/s1_desktop_light_v1_header.png",
+          "crop_v2": "captures/s1_desktop_light_v2_header.png",
+          "crop_diff": "captures/s1_desktop_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 151088,
+          "pixels": 806400,
+          "diff_percent": 18.74,
+          "crop_v1": "captures/s1_desktop_light_v1_timeline.png",
+          "crop_v2": "captures/s1_desktop_light_v2_timeline.png",
+          "crop_diff": "captures/s1_desktop_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54731,
+          "pixels": 128000,
+          "diff_percent": 42.76,
+          "crop_v1": "captures/s1_desktop_light_v1_composer.png",
+          "crop_v2": "captures/s1_desktop_light_v2_composer.png",
+          "crop_diff": "captures/s1_desktop_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s1",
+      "title": "Short turn completed",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 239308,
+      "diff_percent": 23.37,
+      "v1_image": "captures/s1_desktop_dark_v1.png",
+      "v2_image": "captures/s1_desktop_dark_v2.png",
+      "diff_image": "captures/s1_desktop_dark_diff.png",
+      "montage_image": "captures/s1_desktop_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 33426,
+          "pixels": 89600,
+          "diff_percent": 37.31,
+          "crop_v1": "captures/s1_desktop_dark_v1_header.png",
+          "crop_v2": "captures/s1_desktop_dark_v2_header.png",
+          "crop_diff": "captures/s1_desktop_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 151121,
+          "pixels": 806400,
+          "diff_percent": 18.74,
+          "crop_v1": "captures/s1_desktop_dark_v1_timeline.png",
+          "crop_v2": "captures/s1_desktop_dark_v2_timeline.png",
+          "crop_diff": "captures/s1_desktop_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54761,
+          "pixels": 128000,
+          "diff_percent": 42.78,
+          "crop_v1": "captures/s1_desktop_dark_v1_composer.png",
+          "crop_v2": "captures/s1_desktop_dark_v2_composer.png",
+          "crop_diff": "captures/s1_desktop_dark_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s2",
+      "title": "Rich timeline with code and reasoning",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 151374,
+      "diff_percent": 40.15,
+      "v1_image": "captures/s2_mobile_light_v1.png",
+      "v2_image": "captures/s2_mobile_light_v2.png",
+      "diff_image": "captures/s2_mobile_light_diff.png",
+      "montage_image": "captures/s2_mobile_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 9902,
+          "pixels": 32960,
+          "diff_percent": 30.04,
+          "crop_v1": "captures/s2_mobile_light_v1_header.png",
+          "crop_v2": "captures/s2_mobile_light_v2_header.png",
+          "crop_diff": "captures/s2_mobile_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 115190,
+          "pixels": 288400,
+          "diff_percent": 39.94,
+          "crop_v1": "captures/s2_mobile_light_v1_timeline.png",
+          "crop_v2": "captures/s2_mobile_light_v2_timeline.png",
+          "crop_diff": "captures/s2_mobile_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26282,
+          "pixels": 55620,
+          "diff_percent": 47.25,
+          "crop_v1": "captures/s2_mobile_light_v1_composer.png",
+          "crop_v2": "captures/s2_mobile_light_v2_composer.png",
+          "crop_diff": "captures/s2_mobile_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s2",
+      "title": "Rich timeline with code and reasoning",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 151374,
+      "diff_percent": 40.15,
+      "v1_image": "captures/s2_mobile_dark_v1.png",
+      "v2_image": "captures/s2_mobile_dark_v2.png",
+      "diff_image": "captures/s2_mobile_dark_diff.png",
+      "montage_image": "captures/s2_mobile_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 9902,
+          "pixels": 32960,
+          "diff_percent": 30.04,
+          "crop_v1": "captures/s2_mobile_dark_v1_header.png",
+          "crop_v2": "captures/s2_mobile_dark_v2_header.png",
+          "crop_diff": "captures/s2_mobile_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 115197,
+          "pixels": 288400,
+          "diff_percent": 39.94,
+          "crop_v1": "captures/s2_mobile_dark_v1_timeline.png",
+          "crop_v2": "captures/s2_mobile_dark_v2_timeline.png",
+          "crop_diff": "captures/s2_mobile_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26275,
+          "pixels": 55620,
+          "diff_percent": 47.24,
+          "crop_v1": "captures/s2_mobile_dark_v1_composer.png",
+          "crop_v2": "captures/s2_mobile_dark_v2_composer.png",
+          "crop_diff": "captures/s2_mobile_dark_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s2",
+      "title": "Rich timeline with code and reasoning",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 267635,
+      "diff_percent": 26.14,
+      "v1_image": "captures/s2_desktop_light_v1.png",
+      "v2_image": "captures/s2_desktop_light_v2.png",
+      "diff_image": "captures/s2_desktop_light_diff.png",
+      "montage_image": "captures/s2_desktop_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 31857,
+          "pixels": 89600,
+          "diff_percent": 35.55,
+          "crop_v1": "captures/s2_desktop_light_v1_header.png",
+          "crop_v2": "captures/s2_desktop_light_v2_header.png",
+          "crop_diff": "captures/s2_desktop_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 181047,
+          "pixels": 806400,
+          "diff_percent": 22.45,
+          "crop_v1": "captures/s2_desktop_light_v1_timeline.png",
+          "crop_v2": "captures/s2_desktop_light_v2_timeline.png",
+          "crop_diff": "captures/s2_desktop_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54731,
+          "pixels": 128000,
+          "diff_percent": 42.76,
+          "crop_v1": "captures/s2_desktop_light_v1_composer.png",
+          "crop_v2": "captures/s2_desktop_light_v2_composer.png",
+          "crop_diff": "captures/s2_desktop_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s2",
+      "title": "Rich timeline with code and reasoning",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 267697,
+      "diff_percent": 26.14,
+      "v1_image": "captures/s2_desktop_dark_v1.png",
+      "v2_image": "captures/s2_desktop_dark_v2.png",
+      "diff_image": "captures/s2_desktop_dark_diff.png",
+      "montage_image": "captures/s2_desktop_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 31858,
+          "pixels": 89600,
+          "diff_percent": 35.56,
+          "crop_v1": "captures/s2_desktop_dark_v1_header.png",
+          "crop_v2": "captures/s2_desktop_dark_v2_header.png",
+          "crop_diff": "captures/s2_desktop_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 181078,
+          "pixels": 806400,
+          "diff_percent": 22.46,
+          "crop_v1": "captures/s2_desktop_dark_v1_timeline.png",
+          "crop_v2": "captures/s2_desktop_dark_v2_timeline.png",
+          "crop_diff": "captures/s2_desktop_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54761,
+          "pixels": 128000,
+          "diff_percent": 42.78,
+          "crop_v1": "captures/s2_desktop_dark_v1_composer.png",
+          "crop_v2": "captures/s2_desktop_dark_v2_composer.png",
+          "crop_diff": "captures/s2_desktop_dark_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s5",
+      "title": "Empty session connected",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 45257,
+      "diff_percent": 12.01,
+      "v1_image": "captures/s5_mobile_light_v1.png",
+      "v2_image": "captures/s5_mobile_light_v2.png",
+      "diff_image": "captures/s5_mobile_light_diff.png",
+      "montage_image": "captures/s5_mobile_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 10326,
+          "pixels": 32960,
+          "diff_percent": 31.33,
+          "crop_v1": "captures/s5_mobile_light_v1_header.png",
+          "crop_v2": "captures/s5_mobile_light_v2_header.png",
+          "crop_diff": "captures/s5_mobile_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 8649,
+          "pixels": 288400,
+          "diff_percent": 3.0,
+          "crop_v1": "captures/s5_mobile_light_v1_timeline.png",
+          "crop_v2": "captures/s5_mobile_light_v2_timeline.png",
+          "crop_diff": "captures/s5_mobile_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26282,
+          "pixels": 55620,
+          "diff_percent": 47.25,
+          "crop_v1": "captures/s5_mobile_light_v1_composer.png",
+          "crop_v2": "captures/s5_mobile_light_v2_composer.png",
+          "crop_diff": "captures/s5_mobile_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s5",
+      "title": "Empty session connected",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 45250,
+      "diff_percent": 12.0,
+      "v1_image": "captures/s5_mobile_dark_v1.png",
+      "v2_image": "captures/s5_mobile_dark_v2.png",
+      "diff_image": "captures/s5_mobile_dark_diff.png",
+      "montage_image": "captures/s5_mobile_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 10326,
+          "pixels": 32960,
+          "diff_percent": 31.33,
+          "crop_v1": "captures/s5_mobile_dark_v1_header.png",
+          "crop_v2": "captures/s5_mobile_dark_v2_header.png",
+          "crop_diff": "captures/s5_mobile_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 8649,
+          "pixels": 288400,
+          "diff_percent": 3.0,
+          "crop_v1": "captures/s5_mobile_dark_v1_timeline.png",
+          "crop_v2": "captures/s5_mobile_dark_v2_timeline.png",
+          "crop_diff": "captures/s5_mobile_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 26275,
+          "pixels": 55620,
+          "diff_percent": 47.24,
+          "crop_v1": "captures/s5_mobile_dark_v1_composer.png",
+          "crop_v2": "captures/s5_mobile_dark_v2_composer.png",
+          "crop_diff": "captures/s5_mobile_dark_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s5",
+      "title": "Empty session connected",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 173285,
+      "diff_percent": 16.92,
+      "v1_image": "captures/s5_desktop_light_v1.png",
+      "v2_image": "captures/s5_desktop_light_v2.png",
+      "diff_image": "captures/s5_desktop_light_diff.png",
+      "montage_image": "captures/s5_desktop_light_montage.png",
+      "regions": {
+        "header": {
+          "ae": 32932,
+          "pixels": 89600,
+          "diff_percent": 36.75,
+          "crop_v1": "captures/s5_desktop_light_v1_header.png",
+          "crop_v2": "captures/s5_desktop_light_v2_header.png",
+          "crop_diff": "captures/s5_desktop_light_diff_header.png"
+        },
+        "timeline": {
+          "ae": 85622,
+          "pixels": 806400,
+          "diff_percent": 10.62,
+          "crop_v1": "captures/s5_desktop_light_v1_timeline.png",
+          "crop_v2": "captures/s5_desktop_light_v2_timeline.png",
+          "crop_diff": "captures/s5_desktop_light_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54731,
+          "pixels": 128000,
+          "diff_percent": 42.76,
+          "crop_v1": "captures/s5_desktop_light_v1_composer.png",
+          "crop_v2": "captures/s5_desktop_light_v2_composer.png",
+          "crop_diff": "captures/s5_desktop_light_diff_composer.png"
+        }
+      }
+    },
+    {
+      "scenario": "s5",
+      "title": "Empty session connected",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 173346,
+      "diff_percent": 16.93,
+      "v1_image": "captures/s5_desktop_dark_v1.png",
+      "v2_image": "captures/s5_desktop_dark_v2.png",
+      "diff_image": "captures/s5_desktop_dark_diff.png",
+      "montage_image": "captures/s5_desktop_dark_montage.png",
+      "regions": {
+        "header": {
+          "ae": 32933,
+          "pixels": 89600,
+          "diff_percent": 36.76,
+          "crop_v1": "captures/s5_desktop_dark_v1_header.png",
+          "crop_v2": "captures/s5_desktop_dark_v2_header.png",
+          "crop_diff": "captures/s5_desktop_dark_diff_header.png"
+        },
+        "timeline": {
+          "ae": 85652,
+          "pixels": 806400,
+          "diff_percent": 10.62,
+          "crop_v1": "captures/s5_desktop_dark_v1_timeline.png",
+          "crop_v2": "captures/s5_desktop_dark_v2_timeline.png",
+          "crop_diff": "captures/s5_desktop_dark_diff_timeline.png"
+        },
+        "composer": {
+          "ae": 54761,
+          "pixels": 128000,
+          "diff_percent": 42.78,
+          "crop_v1": "captures/s5_desktop_dark_v1_composer.png",
+          "crop_v2": "captures/s5_desktop_dark_v2_composer.png",
+          "crop_diff": "captures/s5_desktop_dark_diff_composer.png"
+        }
+      }
+    }
+  ]
+}
