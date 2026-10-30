@@ -74,8 +74,10 @@ class ServerSwitcher extends StatelessWidget {
   const ServerSwitcher({
     super.key,
     this.controlKey = const ValueKey('sessions-profile'),
+    this.compact = false,
   });
   final Key controlKey;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +85,9 @@ class ServerSwitcher extends StatelessWidget {
     final health = context.watch<EndpointHealthController?>();
     final workspace = context.watch<WorkspaceController?>();
     final profile = catalog?.selectedProfile;
+    final status = profile != null
+        ? health?.view(profile).status ?? EndpointHealthStatus.delayed
+        : EndpointHealthStatus.delayed;
     return TextButton(
       key: controlKey,
       onPressed:
@@ -100,6 +105,7 @@ class ServerSwitcher extends StatelessWidget {
               ),
             ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
             child: Text(
@@ -109,14 +115,32 @@ class ServerSwitcher extends StatelessWidget {
             ),
           ),
           if (profile != null) ...[
-            const SizedBox(width: 6),
-            Flexible(
-              child: EndpointHealthIndicator(
-                view: health?.view(profile) ?? const EndpointHealthView(),
+            const SizedBox(width: 4),
+            if (compact)
+              Tooltip(
+                message: healthStatusText(context.v2L10n, status),
+                child: Semantics(
+                  label: healthStatusText(context.v2L10n, status),
+                  child: Icon(
+                    Icons.circle,
+                    size: 8,
+                    color: switch (status) {
+                      EndpointHealthStatus.online => Colors.green,
+                      EndpointHealthStatus.delayed => Colors.orange,
+                      EndpointHealthStatus.offline =>
+                        Theme.of(context).colorScheme.error,
+                    },
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: EndpointHealthIndicator(
+                  view: health?.view(profile) ?? const EndpointHealthView(),
+                ),
               ),
-            ),
           ],
-          const Icon(Icons.arrow_drop_down),
+          const Icon(Icons.arrow_drop_down, size: 18),
         ],
       ),
     );

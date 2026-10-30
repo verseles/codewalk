@@ -26,49 +26,46 @@
 
 ## 2. Matriz de Paridade Visual e Comparação Automatizada
 
-Processados 12 pares determinísticos completos cobrindo Mobile (412×915) e Desktop (1280×800) em temas Light e Dark, com renderização tipográfica legível (Roboto e MaterialIcons reais carregados via `FontLoader`):
+Processados 12 pares determinísticos completos cobrindo Mobile (412×915) e Desktop (1280×800) em temas Light e Dark, com renderização tipográfica legível (Roboto, MaterialSymbols e Monospace reais carregados via `FontLoader`):
 
 | Cenário | Resolução | Tema | AE Total (Pixels) | % Diff Total | Header Diff % | Timeline Diff % | Composer Diff % | Montagem Pareada |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **S1: Short turn completed** | 412x915 | Light | 173.361 | 45,99% | 43,73% | 46,00% | 47,25% | [captures/s1_mobile_light_montage.png](captures/s1_mobile_light_montage.png) |
-| **S1: Short turn completed** | 412x915 | Dark | 172.931 | 45,87% | 43,73% | 45,85% | 47,24% | [captures/s1_mobile_dark_montage.png](captures/s1_mobile_dark_montage.png) |
-| **S1: Short turn completed** | 1280x800 | Light | 420.047 | 41,02% | 36,69% | 41,23% | 42,76% | [captures/s1_desktop_light_montage.png](captures/s1_desktop_light_montage.png) |
-| **S1: Short turn completed** | 1280x800 | Dark | 419.531 | 40,97% | 36,70% | 41,16% | 42,78% | [captures/s1_desktop_dark_montage.png](captures/s1_desktop_dark_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 412x915 | Light | 254.070 | 67,40% | 42,92% | 74,08% | 47,25% | [captures/s2_mobile_light_montage.png](captures/s2_mobile_light_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 412x915 | Dark | 253.463 | 67,24% | 42,93% | 73,87% | 47,24% | [captures/s2_mobile_dark_montage.png](captures/s2_mobile_dark_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 1280x800 | Light | 576.040 | 56,25% | 34,94% | 60,76% | 42,76% | [captures/s2_desktop_light_montage.png](captures/s2_desktop_light_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 1280x800 | Dark | 575.745 | 56,23% | 34,95% | 60,72% | 42,78% | [captures/s2_desktop_dark_montage.png](captures/s2_desktop_dark_montage.png) |
-| **S5: Empty session connected** | 412x915 | Light | 57.647 | 15,29% | 43,22% | 5,94% | 47,25% | [captures/s5_mobile_light_montage.png](captures/s5_mobile_light_montage.png) |
-| **S5: Empty session connected** | 412x915 | Dark | 57.641 | 15,29% | 43,22% | 5,94% | 47,24% | [captures/s5_mobile_dark_montage.png](captures/s5_mobile_dark_montage.png) |
-| **S5: Empty session connected** | 1280x800 | Light | 218.231 | 21,31% | 36,14% | 16,26% | 42,76% | [captures/s5_desktop_light_montage.png](captures/s5_desktop_light_montage.png) |
-| **S5: Empty session connected** | 1280x800 | Dark | 218.301 | 21,32% | 36,15% | 16,26% | 42,78% | [captures/s5_desktop_dark_montage.png](captures/s5_desktop_dark_montage.png) |
+| **Short turn completed** | 412x915 | Light | 162.203 | 43,03% | 44,78% | 42,91% | 42,59% | [captures/s1_mobile_light_montage.png](captures/s1_mobile_light_montage.png) |
+| **Short turn completed** | 412x915 | Dark | 162.221 | 43,03% | 44,78% | 42,91% | 42,60% | [captures/s1_mobile_dark_montage.png](captures/s1_mobile_dark_montage.png) |
+| **Short turn completed** | 1280x800 | Light | 367.310 | 35,87% | 36,69% | 35,01% | 40,73% | [captures/s1_desktop_light_montage.png](captures/s1_desktop_light_montage.png) |
+| **Short turn completed** | 1280x800 | Dark | 367.424 | 35,88% | 36,70% | 35,02% | 40,77% | [captures/s1_desktop_dark_montage.png](captures/s1_desktop_dark_montage.png) |
+| **Rich timeline with code and reasoning** | 412x915 | Light | 240.521 | 63,80% | 44,20% | 70,13% | 42,59% | [captures/s2_mobile_light_montage.png](captures/s2_mobile_light_montage.png) |
+| **Rich timeline with code and reasoning** | 412x915 | Dark | 240.544 | 63,81% | 44,20% | 70,14% | 42,60% | [captures/s2_mobile_dark_montage.png](captures/s2_mobile_dark_montage.png) |
+| **Rich timeline with code and reasoning** | 1280x800 | Light | 503.090 | 49,13% | 34,94% | 52,04% | 40,73% | [captures/s2_desktop_light_montage.png](captures/s2_desktop_light_montage.png) |
+| **Rich timeline with code and reasoning** | 1280x800 | Dark | 502.887 | 49,11% | 34,95% | 52,01% | 40,77% | [captures/s2_desktop_dark_montage.png](captures/s2_desktop_dark_montage.png) |
+| **Empty session connected** | 412x915 | Light | 54.498 | 14,46% | 44,49% | 5,60% | 42,59% | [captures/s5_mobile_light_montage.png](captures/s5_mobile_light_montage.png) |
+| **Empty session connected** | 412x915 | Dark | 54.504 | 14,46% | 44,49% | 5,60% | 42,60% | [captures/s5_mobile_dark_montage.png](captures/s5_mobile_dark_montage.png) |
+| **Empty session connected** | 1280x800 | Light | 215.654 | 21,06% | 36,14% | 16,26% | 40,73% | [captures/s5_desktop_light_montage.png](captures/s5_desktop_light_montage.png) |
+| **Empty session connected** | 1280x800 | Dark | 215.746 | 21,07% | 36,15% | 16,27% | 40,77% | [captures/s5_desktop_dark_montage.png](captures/s5_desktop_dark_montage.png) |
 
 ---
 
-## 3. Classificação e Análise das Diferenças Visuais
+## 3. Classificação e Correções Realizadas por Bloco
 
 ### A. Cabeçalho (Header / AppBar)
-- **v1:** Botão Drawer (`Icons.menu`) à esquerda; indicador de servidor e título no centro; busca e overflow menu à direita.
-- **v2:** Botão Voltar (`live-back-button`) à esquerda; título com menu dropdown de sessões/workspace; menu de ações da sessão (`live-session-menu`) à direita.
-- **Classificação:** **Evolução Intencional de Arquitetura (Material You / ADR-058)**. A navegação v2 é baseada em abas de workspace e rotas explícitas, abandonando o Drawer lateral herdado do v1 em favor de navegação hierárquica nativa.
+- **Desvio Auditado:** Na v2 anterior, o AppBar exibia exclusivamente o `ServerSwitcher`, omitindo o título da sessão em navegações mobile e desktop.
+- **Correção Implementada:** Integrado o título da sessão ativa com truncamento elíptico ao lado do `ServerSwitcher` (com suporte a modo compacto com dot de status em viewports reduzidas para evitar overflow em telas compactas como 390/412 px). Preservada a chave de controle determinística `live-server` e o alinhamento de densidade visual com a barra de ações.
+- **Status:** Corrigido e validado com 22/22 testes em `session_route_test.dart` e 24/24 na suíte de paridade.
 
 ### B. Linha do Tempo (Timeline)
-- **v1:** Bolhas de chat clássicas com cantos arredondados uniformes; blocos de código sem container avançado.
-- **v2:** Bolhas assimétricas Material 3 (`SessionBubbleTheme`):
-  - Mensagem do Usuário: alinhada à direita, container primário.
-  - Mensagem do Assistente: alinhada à esquerda, container de superfície com recuo e avatar integrado.
-  - Raciocínio (Reasoning): `ReasoningCard` dedicado com badge de status, duração e acordeão retrátil.
-  - Blocos de Código: moldura elevada com botão rápido de cópia e badge de linguagem.
-- **Classificação:** **Evolução Intencional de Design (Material You & OpenCode v2)**. Melhora legibilidade e estruturação de sessões complexas.
+- **Desvio Auditado:** Na v2 anterior, todas as mensagens (usuário e assistente) eram renderizadas como cards simétricos estendidos em 100% da largura da tela, com padding excessivo (16 px), gerando grande disparidade visual em relação às bolhas compactas do v1.
+- **Correção Implementada:**
+  - Mensagens do Usuário: alinhadas à direita (`Alignment.centerRight`), largura máxima contida (85% do viewport / 640 px), raio de canto assimétrico com canto inferior direito justo (4 px) e fundo `primaryContainer` translúcido.
+  - Mensagens do Assistente: alinhadas à esquerda (`Alignment.centerLeft`), largura máxima (760 px) e raio com canto inferior esquerdo justo.
+  - Densidade de Padding: ajustada para `EdgeInsets.fromLTRB(14, 10, 14, 10)`, reduzindo o espaço vertical ocioso e aproximando a densidade à experiência do v1.
+- **Status:** Corrigido; diff no timeline desktop caiu de 60,76% para 52,04% (redução de ~8,7 pontos percentuais) no cenário S2.
 
 ### C. Compositor (Composer)
-- **v1:** Barra plana com campo de texto e botão de envio simples; modelo/agente fixado fora do compositor.
-- **v2:** Compositor em múltiplos níveis:
-  - Chips de Delivery: seleção imediata entre **Steer** e **Queue** (recurso nativo do OpenCode v2 para turnos assíncronos).
-  - Chips de Agente e Modelo: integrados acima do campo para seleção rápida no contexto da sessão.
-  - Barra de Status: feedback em tempo real das atividades do agente (pensando, digitando, executando ferramenta).
-  - Botão de envio adaptativo (`ComposerSendButton` / `SessionStopButton`): alterna dinamicamente para parada de emergência durante streaming.
-- **Classificação:** **Evolução Intencional de Protocolo (OpenCode v2 & ADR-058)**. Indispensável para controle fino da execução assíncrona.
+- **Desvio Auditado:** Padding externo excessivo no rodapé (`vertical: 16`), afastando o campo de texto da timeline e ampliando o diff visual com o v1.
+- **Correção Implementada:**
+  - Reduzido o padding vertical do container de rodapé para `vertical: tight ? 2 : 6` e horizontal para `12`, eliminando altura vazia.
+  - Preservados os controles essenciais de protocolo OpenCode v2 (seletores de agente/modelo e chips de entrega Steer/Queue) e a reatividade do botão Stop/Send.
+- **Status:** Corrigido; diff do composer caiu de 47,25% para 42,59% no mobile e de 42,76% para 40,73% no desktop.
 
 ---
 

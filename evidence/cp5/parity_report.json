@@ -10,33 +10,33 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 173361,
-      "diff_percent": 45.99,
+      "ae_total": 162201,
+      "diff_percent": 43.03,
       "v1_image": "captures/s1_mobile_light_v1.png",
       "v2_image": "captures/s1_mobile_light_v2.png",
       "diff_image": "captures/s1_mobile_light_diff.png",
       "montage_image": "captures/s1_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 14413,
+          "ae": 14759,
           "pixels": 32960,
-          "diff_percent": 43.73,
+          "diff_percent": 44.78,
           "crop_v1": "captures/s1_mobile_light_v1_header.png",
           "crop_v2": "captures/s1_mobile_light_v2_header.png",
           "crop_diff": "captures/s1_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 132666,
+          "ae": 123751,
           "pixels": 288400,
-          "diff_percent": 46.0,
+          "diff_percent": 42.91,
           "crop_v1": "captures/s1_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s1_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s1_mobile_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 26282,
+          "ae": 23691,
           "pixels": 55620,
-          "diff_percent": 47.25,
+          "diff_percent": 42.59,
           "crop_v1": "captures/s1_mobile_light_v1_composer.png",
           "crop_v2": "captures/s1_mobile_light_v2_composer.png",
           "crop_diff": "captures/s1_mobile_light_diff_composer.png"
@@ -50,33 +50,33 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 172931,
-      "diff_percent": 45.87,
+      "ae_total": 162219,
+      "diff_percent": 43.03,
       "v1_image": "captures/s1_mobile_dark_v1.png",
       "v2_image": "captures/s1_mobile_dark_v2.png",
       "diff_image": "captures/s1_mobile_dark_diff.png",
       "montage_image": "captures/s1_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 14414,
+          "ae": 14760,
           "pixels": 32960,
-          "diff_percent": 43.73,
+          "diff_percent": 44.78,
           "crop_v1": "captures/s1_mobile_dark_v1_header.png",
           "crop_v2": "captures/s1_mobile_dark_v2_header.png",
           "crop_diff": "captures/s1_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 132242,
+          "ae": 123763,
           "pixels": 288400,
-          "diff_percent": 45.85,
+          "diff_percent": 42.91,
           "crop_v1": "captures/s1_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s1_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s1_mobile_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 26275,
+          "ae": 23696,
           "pixels": 55620,
-          "diff_percent": 47.24,
+          "diff_percent": 42.6,
           "crop_v1": "captures/s1_mobile_dark_v1_composer.png",
           "crop_v2": "captures/s1_mobile_dark_v2_composer.png",
           "crop_diff": "captures/s1_mobile_dark_diff_composer.png"
@@ -90,8 +90,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 420047,
-      "diff_percent": 41.02,
+      "ae_total": 367345,
+      "diff_percent": 35.87,
       "v1_image": "captures/s1_desktop_light_v1.png",
       "v2_image": "captures/s1_desktop_light_v2.png",
       "diff_image": "captures/s1_desktop_light_diff.png",
@@ -106,17 +106,17 @@
           "crop_diff": "captures/s1_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 332444,
+          "ae": 282340,
           "pixels": 806400,
-          "diff_percent": 41.23,
+          "diff_percent": 35.01,
           "crop_v1": "captures/s1_desktop_light_v1_timeline.png",
           "crop_v2": "captures/s1_desktop_light_v2_timeline.png",
           "crop_diff": "captures/s1_desktop_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 54731,
+          "ae": 52133,
           "pixels": 128000,
-          "diff_percent": 42.76,
+          "diff_percent": 40.73,
           "crop_v1": "captures/s1_desktop_light_v1_composer.png",
           "crop_v2": "captures/s1_desktop_light_v2_composer.png",
           "crop_diff": "captures/s1_desktop_light_diff_composer.png"
@@ -130,8 +130,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 419531,
-      "diff_percent": 40.97,
+      "ae_total": 367459,
+      "diff_percent": 35.88,
       "v1_image": "captures/s1_desktop_dark_v1.png",
       "v2_image": "captures/s1_desktop_dark_v2.png",
       "diff_image": "captures/s1_desktop_dark_diff.png",
@@ -146,17 +146,17 @@
           "crop_diff": "captures/s1_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 331890,
+          "ae": 282394,
           "pixels": 806400,
-          "diff_percent": 41.16,
+          "diff_percent": 35.02,
           "crop_v1": "captures/s1_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s1_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s1_desktop_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 54761,
+          "ae": 52185,
           "pixels": 128000,
-          "diff_percent": 42.78,
+          "diff_percent": 40.77,
           "crop_v1": "captures/s1_desktop_dark_v1_composer.png",
           "crop_v2": "captures/s1_desktop_dark_v2_composer.png",
           "crop_diff": "captures/s1_desktop_dark_diff_composer.png"
@@ -170,33 +170,33 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 254070,
-      "diff_percent": 67.4,
+      "ae_total": 240522,
+      "diff_percent": 63.8,
       "v1_image": "captures/s2_mobile_light_v1.png",
       "v2_image": "captures/s2_mobile_light_v2.png",
       "diff_image": "captures/s2_mobile_light_diff.png",
       "montage_image": "captures/s2_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 14148,
+          "ae": 14568,
           "pixels": 32960,
-          "diff_percent": 42.92,
+          "diff_percent": 44.2,
           "crop_v1": "captures/s2_mobile_light_v1_header.png",
           "crop_v2": "captures/s2_mobile_light_v2_header.png",
           "crop_diff": "captures/s2_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 213640,
+          "ae": 202263,
           "pixels": 288400,
-          "diff_percent": 74.08,
+          "diff_percent": 70.13,
           "crop_v1": "captures/s2_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s2_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s2_mobile_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 26282,
+          "ae": 23691,
           "pixels": 55620,
-          "diff_percent": 47.25,
+          "diff_percent": 42.59,
           "crop_v1": "captures/s2_mobile_light_v1_composer.png",
           "crop_v2": "captures/s2_mobile_light_v2_composer.png",
           "crop_diff": "captures/s2_mobile_light_diff_composer.png"
@@ -210,33 +210,33 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 253463,
-      "diff_percent": 67.24,
+      "ae_total": 240545,
+      "diff_percent": 63.81,
       "v1_image": "captures/s2_mobile_dark_v1.png",
       "v2_image": "captures/s2_mobile_dark_v2.png",
       "diff_image": "captures/s2_mobile_dark_diff.png",
       "montage_image": "captures/s2_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 14149,
+          "ae": 14569,
           "pixels": 32960,
-          "diff_percent": 42.93,
+          "diff_percent": 44.2,
           "crop_v1": "captures/s2_mobile_dark_v1_header.png",
           "crop_v2": "captures/s2_mobile_dark_v2_header.png",
           "crop_diff": "captures/s2_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 213039,
+          "ae": 202280,
           "pixels": 288400,
-          "diff_percent": 73.87,
+          "diff_percent": 70.14,
           "crop_v1": "captures/s2_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s2_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s2_mobile_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 26275,
+          "ae": 23696,
           "pixels": 55620,
-          "diff_percent": 47.24,
+          "diff_percent": 42.6,
           "crop_v1": "captures/s2_mobile_dark_v1_composer.png",
           "crop_v2": "captures/s2_mobile_dark_v2_composer.png",
           "crop_diff": "captures/s2_mobile_dark_diff_composer.png"
@@ -250,8 +250,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 576040,
-      "diff_percent": 56.25,
+      "ae_total": 503101,
+      "diff_percent": 49.13,
       "v1_image": "captures/s2_desktop_light_v1.png",
       "v2_image": "captures/s2_desktop_light_v2.png",
       "diff_image": "captures/s2_desktop_light_diff.png",
@@ -266,17 +266,17 @@
           "crop_diff": "captures/s2_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 490005,
+          "ae": 419664,
           "pixels": 806400,
-          "diff_percent": 60.76,
+          "diff_percent": 52.04,
           "crop_v1": "captures/s2_desktop_light_v1_timeline.png",
           "crop_v2": "captures/s2_desktop_light_v2_timeline.png",
           "crop_diff": "captures/s2_desktop_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 54731,
+          "ae": 52133,
           "pixels": 128000,
-          "diff_percent": 42.76,
+          "diff_percent": 40.73,
           "crop_v1": "captures/s2_desktop_light_v1_composer.png",
           "crop_v2": "captures/s2_desktop_light_v2_composer.png",
           "crop_diff": "captures/s2_desktop_light_diff_composer.png"
@@ -290,8 +290,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 575745,
-      "diff_percent": 56.23,
+      "ae_total": 502898,
+      "diff_percent": 49.11,
       "v1_image": "captures/s2_desktop_dark_v1.png",
       "v2_image": "captures/s2_desktop_dark_v2.png",
       "diff_image": "captures/s2_desktop_dark_diff.png",
@@ -306,17 +306,17 @@
           "crop_diff": "captures/s2_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 489672,
+          "ae": 419401,
           "pixels": 806400,
-          "diff_percent": 60.72,
+          "diff_percent": 52.01,
           "crop_v1": "captures/s2_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s2_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s2_desktop_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 54761,
+          "ae": 52185,
           "pixels": 128000,
-          "diff_percent": 42.78,
+          "diff_percent": 40.77,
           "crop_v1": "captures/s2_desktop_dark_v1_composer.png",
           "crop_v2": "captures/s2_desktop_dark_v2_composer.png",
           "crop_diff": "captures/s2_desktop_dark_diff_composer.png"
@@ -330,33 +330,33 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 57647,
-      "diff_percent": 15.29,
+      "ae_total": 54503,
+      "diff_percent": 14.46,
       "v1_image": "captures/s5_mobile_light_v1.png",
       "v2_image": "captures/s5_mobile_light_v2.png",
       "diff_image": "captures/s5_mobile_light_diff.png",
       "montage_image": "captures/s5_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 14245,
+          "ae": 14664,
           "pixels": 32960,
-          "diff_percent": 43.22,
+          "diff_percent": 44.49,
           "crop_v1": "captures/s5_mobile_light_v1_header.png",
           "crop_v2": "captures/s5_mobile_light_v2_header.png",
           "crop_diff": "captures/s5_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 17120,
+          "ae": 16148,
           "pixels": 288400,
-          "diff_percent": 5.94,
+          "diff_percent": 5.6,
           "crop_v1": "captures/s5_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s5_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s5_mobile_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 26282,
+          "ae": 23691,
           "pixels": 55620,
-          "diff_percent": 47.25,
+          "diff_percent": 42.59,
           "crop_v1": "captures/s5_mobile_light_v1_composer.png",
           "crop_v2": "captures/s5_mobile_light_v2_composer.png",
           "crop_diff": "captures/s5_mobile_light_diff_composer.png"
@@ -370,33 +370,33 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 57641,
-      "diff_percent": 15.29,
+      "ae_total": 54509,
+      "diff_percent": 14.46,
       "v1_image": "captures/s5_mobile_dark_v1.png",
       "v2_image": "captures/s5_mobile_dark_v2.png",
       "diff_image": "captures/s5_mobile_dark_diff.png",
       "montage_image": "captures/s5_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 14246,
+          "ae": 14665,
           "pixels": 32960,
-          "diff_percent": 43.22,
+          "diff_percent": 44.49,
           "crop_v1": "captures/s5_mobile_dark_v1_header.png",
           "crop_v2": "captures/s5_mobile_dark_v2_header.png",
           "crop_diff": "captures/s5_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 17120,
+          "ae": 16148,
           "pixels": 288400,
-          "diff_percent": 5.94,
+          "diff_percent": 5.6,
           "crop_v1": "captures/s5_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s5_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s5_mobile_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 26275,
+          "ae": 23696,
           "pixels": 55620,
-          "diff_percent": 47.24,
+          "diff_percent": 42.6,
           "crop_v1": "captures/s5_mobile_dark_v1_composer.png",
           "crop_v2": "captures/s5_mobile_dark_v2_composer.png",
           "crop_diff": "captures/s5_mobile_dark_diff_composer.png"
@@ -410,8 +410,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 218231,
-      "diff_percent": 21.31,
+      "ae_total": 215648,
+      "diff_percent": 21.06,
       "v1_image": "captures/s5_desktop_light_v1.png",
       "v2_image": "captures/s5_desktop_light_v2.png",
       "diff_image": "captures/s5_desktop_light_diff.png",
@@ -426,7 +426,7 @@
           "crop_diff": "captures/s5_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 131121,
+          "ae": 131136,
           "pixels": 806400,
           "diff_percent": 16.26,
           "crop_v1": "captures/s5_desktop_light_v1_timeline.png",
@@ -434,9 +434,9 @@
           "crop_diff": "captures/s5_desktop_light_diff_timeline.png"
         },
         "composer": {
-          "ae": 54731,
+          "ae": 52133,
           "pixels": 128000,
-          "diff_percent": 42.76,
+          "diff_percent": 40.73,
           "crop_v1": "captures/s5_desktop_light_v1_composer.png",
           "crop_v2": "captures/s5_desktop_light_v2_composer.png",
           "crop_diff": "captures/s5_desktop_light_diff_composer.png"
@@ -450,8 +450,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 218301,
-      "diff_percent": 21.32,
+      "ae_total": 215740,
+      "diff_percent": 21.07,
       "v1_image": "captures/s5_desktop_dark_v1.png",
       "v2_image": "captures/s5_desktop_dark_v2.png",
       "diff_image": "captures/s5_desktop_dark_diff.png",
@@ -466,17 +466,17 @@
           "crop_diff": "captures/s5_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 131153,
+          "ae": 131168,
           "pixels": 806400,
-          "diff_percent": 16.26,
+          "diff_percent": 16.27,
           "crop_v1": "captures/s5_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s5_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s5_desktop_dark_diff_timeline.png"
         },
         "composer": {
-          "ae": 54761,
+          "ae": 52185,
           "pixels": 128000,
-          "diff_percent": 42.78,
+          "diff_percent": 40.77,
           "crop_v1": "captures/s5_desktop_dark_v1_composer.png",
           "crop_v2": "captures/s5_desktop_dark_v2_composer.png",
           "crop_diff": "captures/s5_desktop_dark_diff_composer.png"

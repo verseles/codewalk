@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -84,25 +86,26 @@ class SessionTimelineTile extends StatelessWidget {
         ? open
         : null;
     final message = messageHeader ? item.meta.message : null;
-    final assistant = item is! UserInput;
+    final isUser = item is UserInput;
+    final assistant = !isUser;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final body = Padding(
-      // Assistant parts sit closer together; a user turn keeps its frame.
-      padding: assistant
-          ? const EdgeInsets.fromLTRB(16, 12, 16, 12)
-          : const EdgeInsets.all(16),
+      // Compact bubble padding matching v1 density
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(icon),
+              Icon(icon, size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Semantics(
                   header: true,
                   child: Text(
                     label,
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: theme.textTheme.titleSmall,
                   ),
                 ),
               ),
@@ -118,29 +121,45 @@ class SessionTimelineTile extends StatelessWidget {
         ],
       ),
     );
-    // The refined style frames only the user's turns with a hairline.
-    final cardShape = Theme.of(context).cardTheme.shape;
-    final shape = assistant && cardShape is RoundedRectangleBorder
-        ? cardShape.copyWith(side: BorderSide.none)
-        : null;
-    if (child == null) {
-      return ConversationTextScale(
-        child: Card(shape: shape, child: body),
-      );
-    }
-    return ConversationTextScale(
-      child: Card(
-        shape: shape,
-        clipBehavior: Clip.antiAlias,
-        child: Semantics(
-          button: true,
-          child: InkWell(
-            key: ValueKey('subagent-open-${item.id.value}'),
-            onTap: () => child(item as ToolCall),
-            child: body,
-          ),
-        ),
+    // Asymmetric bubble radius with tighter trailing corner for messaging feel
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16).copyWith(
+        bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
+        bottomLeft: assistant ? const Radius.circular(4) : const Radius.circular(16),
       ),
+    );
+    final tile = Card(
+      color: isUser
+          ? colorScheme.primaryContainer.withValues(alpha: 0.7)
+          : null,
+      shape: shape,
+      clipBehavior: child != null ? Clip.antiAlias : Clip.none,
+      child: child != null
+          ? Semantics(
+              button: true,
+              child: InkWell(
+                key: ValueKey('subagent-open-${item.id.value}'),
+                onTap: () => child(item as ToolCall),
+                child: body,
+              ),
+            )
+          : body,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        final candidateW = isUser ? max(220.0, min(640.0, maxW * 0.85)) : min(760.0, maxW);
+        return Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: candidateW,
+            ),
+            child: ConversationTextScale(child: tile),
+          ),
+        );
+      },
     );
   }
 

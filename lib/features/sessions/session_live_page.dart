@@ -470,38 +470,59 @@ class _SessionLivePageState extends State<SessionLivePage>
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          // The chips follow this page's width, not the window's: beside the
-          // session list the page is narrower than the window.
-          child: LayoutBuilder(
-            builder: (context, bar) {
-              final compact = bar.maxWidth < 600;
-              return AppBar(
-                leading: widget.leading,
-                actions: [
-                  if (widget.workspaceChrome) const WorkspaceAppBarActions(),
-                  if (!widget.workspaceChrome && c.permissionModes != null)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 8),
-                      child: SessionPermissionModeChip(
-                        live: c,
-                        compact: compact,
-                      ),
-                    ),
-                ],
-                title: widget.workspaceChrome
-                    ? const ServerSwitcher(controlKey: ValueKey('live-server'))
-                    : Text(
-                        c.summary.info.title.trim().isEmpty
-                            ? l10n.sessionExportUntitled
-                            : c.summary.info.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-              );
-            },
-          ),
-        ),
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                // The chips follow this page's width, not the window's: beside the
+                // session list the page is narrower than the window.
+                child: LayoutBuilder(
+                  builder: (context, bar) {
+                    final compact = bar.maxWidth < 600;
+                    return AppBar(
+                      leading: widget.leading,
+                      actions: [
+                        if (widget.workspaceChrome) const WorkspaceAppBarActions(),
+                        if (!widget.workspaceChrome && c.permissionModes != null)
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 8),
+                            child: SessionPermissionModeChip(
+                              live: c,
+                              compact: compact,
+                            ),
+                          ),
+                      ],
+                      title: widget.workspaceChrome
+                          ? Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    c.summary.info.title.trim().isEmpty
+                                        ? l10n.sessionExportUntitled
+                                        : c.summary.info.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: compact ? 120 : 220,
+                                  ),
+                                  child: ServerSwitcher(
+                                    controlKey: const ValueKey('live-server'),
+                                    compact: compact,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              c.summary.info.title.trim().isEmpty
+                                  ? l10n.sessionExportUntitled
+                                  : c.summary.info.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    );
+                  },
+                ),
+              ),
         body: _frameBody(
           context,
           LayoutBuilder(
@@ -629,8 +650,8 @@ class _SessionLivePageState extends State<SessionLivePage>
                         top: false,
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: tight ? 4 : 16,
+                            horizontal: 12,
+                            vertical: tight ? 2 : 6,
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
