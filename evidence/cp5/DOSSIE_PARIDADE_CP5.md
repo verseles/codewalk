@@ -30,18 +30,18 @@ Processados 12 pares determinísticos completos cobrindo Mobile (412×915) e Des
 
 | Cenário | Resolução | Tema | AE Total (Pixels) | % Diff Total | Header Diff % | Timeline Diff % | Composer Diff % | Montagem Pareada |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **S1: Short turn completed** | 412x915 | Light | 152.179 | 40,37% | 32,00% | 40,00% | 47,25% | [captures/s1_mobile_light_montage.png](captures/s1_mobile_light_montage.png) |
-| **S1: Short turn completed** | 412x915 | Dark | 151.898 | 40,30% | 32,01% | 39,91% | 47,24% | [captures/s1_mobile_dark_montage.png](captures/s1_mobile_dark_montage.png) |
-| **S1: Short turn completed** | 1280x800 | Light | 370.992 | 36,23% | 36,69% | 35,14% | 42,76% | [captures/s1_desktop_light_montage.png](captures/s1_desktop_light_montage.png) |
-| **S1: Short turn completed** | 1280x800 | Dark | 370.529 | 36,18% | 36,70% | 35,07% | 42,78% | [captures/s1_desktop_dark_montage.png](captures/s1_desktop_dark_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 412x915 | Light | 231.503 | 61,41% | 28,71% | 67,88% | 47,25% | [captures/s2_mobile_light_montage.png](captures/s2_mobile_light_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 412x915 | Dark | 231.189 | 61,32% | 28,72% | 67,77% | 47,24% | [captures/s2_mobile_dark_montage.png](captures/s2_mobile_dark_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 1280x800 | Light | 545.188 | 53,24% | 34,94% | 56,93% | 42,76% | [captures/s2_desktop_light_montage.png](captures/s2_desktop_light_montage.png) |
-| **S2: Rich timeline with code and reasoning** | 1280x800 | Dark | 544.972 | 53,22% | 34,95% | 56,91% | 42,78% | [captures/s2_desktop_dark_montage.png](captures/s2_desktop_dark_montage.png) |
-| **S5: Empty session connected** | 412x915 | Light | 44.577 | 11,82% | 30,00% | 2,90% | 47,25% | [captures/s5_mobile_light_montage.png](captures/s5_mobile_light_montage.png) |
-| **S5: Empty session connected** | 412x915 | Dark | 44.577 | 11,82% | 30,00% | 2,90% | 47,24% | [captures/s5_mobile_dark_montage.png](captures/s5_mobile_dark_montage.png) |
-| **S5: Empty session connected** | 1280x800 | Light | 171.493 | 16,75% | 36,14% | 10,46% | 42,76% | [captures/s5_desktop_light_montage.png](captures/s5_desktop_light_montage.png) |
-| **S5: Empty session connected** | 1280x800 | Dark | 171.498 | 16,75% | 36,15% | 10,47% | 42,78% | [captures/s5_desktop_dark_montage.png](captures/s5_desktop_dark_montage.png) |
+| **S1: Short turn completed** | 412x915 | Light | 173.361 | 45,99% | 43,73% | 46,00% | 47,25% | [captures/s1_mobile_light_montage.png](captures/s1_mobile_light_montage.png) |
+| **S1: Short turn completed** | 412x915 | Dark | 172.931 | 45,87% | 43,73% | 45,85% | 47,24% | [captures/s1_mobile_dark_montage.png](captures/s1_mobile_dark_montage.png) |
+| **S1: Short turn completed** | 1280x800 | Light | 420.047 | 41,02% | 36,69% | 41,23% | 42,76% | [captures/s1_desktop_light_montage.png](captures/s1_desktop_light_montage.png) |
+| **S1: Short turn completed** | 1280x800 | Dark | 419.531 | 40,97% | 36,70% | 41,16% | 42,78% | [captures/s1_desktop_dark_montage.png](captures/s1_desktop_dark_montage.png) |
+| **S2: Rich timeline with code and reasoning** | 412x915 | Light | 254.070 | 67,40% | 42,92% | 74,08% | 47,25% | [captures/s2_mobile_light_montage.png](captures/s2_mobile_light_montage.png) |
+| **S2: Rich timeline with code and reasoning** | 412x915 | Dark | 253.463 | 67,24% | 42,93% | 73,87% | 47,24% | [captures/s2_mobile_dark_montage.png](captures/s2_mobile_dark_montage.png) |
+| **S2: Rich timeline with code and reasoning** | 1280x800 | Light | 576.040 | 56,25% | 34,94% | 60,76% | 42,76% | [captures/s2_desktop_light_montage.png](captures/s2_desktop_light_montage.png) |
+| **S2: Rich timeline with code and reasoning** | 1280x800 | Dark | 575.745 | 56,23% | 34,95% | 60,72% | 42,78% | [captures/s2_desktop_dark_montage.png](captures/s2_desktop_dark_montage.png) |
+| **S5: Empty session connected** | 412x915 | Light | 57.647 | 15,29% | 43,22% | 5,94% | 47,25% | [captures/s5_mobile_light_montage.png](captures/s5_mobile_light_montage.png) |
+| **S5: Empty session connected** | 412x915 | Dark | 57.641 | 15,29% | 43,22% | 5,94% | 47,24% | [captures/s5_mobile_dark_montage.png](captures/s5_mobile_dark_montage.png) |
+| **S5: Empty session connected** | 1280x800 | Light | 218.231 | 21,31% | 36,14% | 16,26% | 42,76% | [captures/s5_desktop_light_montage.png](captures/s5_desktop_light_montage.png) |
+| **S5: Empty session connected** | 1280x800 | Dark | 218.301 | 21,32% | 36,15% | 16,26% | 42,78% | [captures/s5_desktop_dark_montage.png](captures/s5_desktop_dark_montage.png) |
 
 ---
 

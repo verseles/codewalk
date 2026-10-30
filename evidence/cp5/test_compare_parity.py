@@ -111,6 +111,27 @@ class TestCompareParity(unittest.TestCase):
                 strict=False,
             )
 
+    def test_both_images_wrong_expected_size_fails(self):
+        # Both images are equal size to each other but wrong expected size
+        for sc in compare_parity.SCENARIOS:
+            for plat_name, plat_info in compare_parity.PLATFORMS.items():
+                w, h = plat_info["size"]
+                for th in compare_parity.THEMES:
+                    pair_id = f"{sc['id']}_{plat_name}_{th}"
+                    if pair_id == "s1_mobile_light":
+                        self._create_image(f"{pair_id}_v1.png", w - 10, h - 10, "white")
+                        self._create_image(f"{pair_id}_v2.png", w - 10, h - 10, "white")
+                    else:
+                        self._create_image(f"{pair_id}_v1.png", w, h, "white")
+                        self._create_image(f"{pair_id}_v2.png", w, h, "white")
+
+        with self.assertRaises(ValueError):
+            compare_parity.run_comparison(
+                captures_dir=self.captures_dir,
+                output_report=self.report_path,
+                strict=False,
+            )
+
     def test_unsupported_format_fails(self):
         # Create a non-PNG image
         jpg_path = os.path.join(self.captures_dir, "test.jpg")

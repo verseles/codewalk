@@ -155,12 +155,9 @@ def run_comparison(captures_dir, output_report, rel_base_dir=None, strict=True):
                 if (w1, h1) != (w2, h2):
                     raise ValueError(f"Pair {pair_id} dimension mismatch: v1=({w1}, {h1}) vs v2=({w2}, {h2})")
                 if (w1, h1) != expected_size:
-                    dimension_errors.append(f"{v1_img}: expected {expected_size}, got ({w1}, {h1})")
+                    raise ValueError(f"{v1_img}: expected {expected_size}, got ({w1}, {h1})")
                 if (w2, h2) != expected_size:
-                    dimension_errors.append(f"{v2_img}: expected {expected_size}, got ({w2}, {h2})")
-
-                if dimension_errors and strict:
-                    raise ValueError(f"Dimension errors detected: {dimension_errors[-1]}")
+                    raise ValueError(f"{v2_img}: expected {expected_size}, got ({w2}, {h2})")
 
                 diff_img = os.path.join(captures_dir, f"{pair_id}_diff.png")
                 montage_img = os.path.join(captures_dir, f"{pair_id}_montage.png")

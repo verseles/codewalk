@@ -5,6 +5,10 @@ import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/platform/sessions/session_draft_store.dart';
+import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
@@ -22,6 +26,7 @@ import '../v2/sessions/composer_fakes.dart';
 import '../v2/sessions/fakes.dart';
 import '../v2/sessions/live_fakes.dart';
 import '../v2/sessions/workspace_support.dart';
+import '../v2/storage/storage_fakes.dart';
 
 ItemMeta _v2Meta(String id, {String? message, ItemStatus status = ItemStatus.completed}) => ItemMeta(
   id: ItemId('cp5/$id'),
@@ -93,6 +98,15 @@ Future<void> _loadFonts() async {
   final msiRounded = FontLoader('packages/material_symbols_icons/MaterialSymbolsRounded');
   msiRounded.addFont(Future.value(ByteData.view(roundedFile.readAsBytesSync().buffer)));
   await msiRounded.load();
+
+  final monoFile = File('$flutterRoot/bin/cache/dart-sdk/bin/resources/devtools/assets/fonts/Roboto_Mono/RobotoMono-Regular.ttf');
+  final sysMono = File('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf');
+  final effectiveMono = monoFile.existsSync() ? monoFile : (sysMono.existsSync() ? sysMono : null);
+  if (effectiveMono != null) {
+    final monoLoader = FontLoader('monospace');
+    monoLoader.addFont(Future.value(ByteData.view(effectiveMono.readAsBytesSync().buffer)));
+    await monoLoader.load();
+  }
 }
 
 Future<void> _capture(WidgetTester tester, GlobalKey key, String filename) async {
@@ -288,6 +302,10 @@ void main() {
             if (part is TextPart) {
               expect(find.text(part.text), findsWidgets);
             }
+            if (tc.id == 's2') {
+              expect(find.textContaining('Here is the implementation'), findsWidgets);
+              expect(find.textContaining('checkParity', findRichText: true), findsWidgets);
+            }
           }
 
           await _capture(tester, key, '${tc.id}_${platform}_${themeName}_v1.png');
@@ -300,12 +318,20 @@ void main() {
           final rig = CatalogRig();
           await rig.save('a');
           final directory = LiveDirectory();
+          final metadata = V2MetadataStore(backend: FakeMetadataBackend());
+          final payloads = PreferencesPayloadStore(metadata);
           final dependencies = createAppDependencies(
             initialLink: Uri(path: '/sessions'),
+            metadataStore: metadata,
             profileRepository: rig.repository,
             endpointProber: FakeProber(),
             sessionCatalogFactory: rig.create,
             sessionLiveDirectory: () => directory,
+            draftStore: SessionDraftStore(payloads: payloads, index: metadata),
+            workspaceDraftStore: WorkspaceDraftStore(
+              payloads: payloads,
+              index: metadata,
+            ),
           );
           addTearDown(dependencies.dispose);
           dependencies.preferences.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
@@ -355,6 +381,8 @@ void main() {
             expect(find.text('Fix the build'), findsWidgets);
           } else if (tc.id == 's2') {
             expect(find.text('Show me the parity check code'), findsWidgets);
+            expect(find.textContaining('Here is the implementation'), findsWidgets);
+            expect(find.textContaining('checkParity', findRichText: true), findsWidgets);
           }
 
           await _capture(tester, key, '${tc.id}_${platform}_${themeName}_v2.png');

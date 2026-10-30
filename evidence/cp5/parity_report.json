@@ -10,25 +10,25 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 152185,
-      "diff_percent": 40.37,
+      "ae_total": 173361,
+      "diff_percent": 45.99,
       "v1_image": "captures/s1_mobile_light_v1.png",
       "v2_image": "captures/s1_mobile_light_v2.png",
       "diff_image": "captures/s1_mobile_light_diff.png",
       "montage_image": "captures/s1_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 10548,
+          "ae": 14413,
           "pixels": 32960,
-          "diff_percent": 32.0,
+          "diff_percent": 43.73,
           "crop_v1": "captures/s1_mobile_light_v1_header.png",
           "crop_v2": "captures/s1_mobile_light_v2_header.png",
           "crop_diff": "captures/s1_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 115355,
+          "ae": 132666,
           "pixels": 288400,
-          "diff_percent": 40.0,
+          "diff_percent": 46.0,
           "crop_v1": "captures/s1_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s1_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s1_mobile_light_diff_timeline.png"
@@ -50,25 +50,25 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 151920,
-      "diff_percent": 40.3,
+      "ae_total": 172931,
+      "diff_percent": 45.87,
       "v1_image": "captures/s1_mobile_dark_v1.png",
       "v2_image": "captures/s1_mobile_dark_v2.png",
       "diff_image": "captures/s1_mobile_dark_diff.png",
       "montage_image": "captures/s1_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 10549,
+          "ae": 14414,
           "pixels": 32960,
-          "diff_percent": 32.01,
+          "diff_percent": 43.73,
           "crop_v1": "captures/s1_mobile_dark_v1_header.png",
           "crop_v2": "captures/s1_mobile_dark_v2_header.png",
           "crop_diff": "captures/s1_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 115096,
+          "ae": 132242,
           "pixels": 288400,
-          "diff_percent": 39.91,
+          "diff_percent": 45.85,
           "crop_v1": "captures/s1_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s1_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s1_mobile_dark_diff_timeline.png"
@@ -90,8 +90,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 370997,
-      "diff_percent": 36.23,
+      "ae_total": 420047,
+      "diff_percent": 41.02,
       "v1_image": "captures/s1_desktop_light_v1.png",
       "v2_image": "captures/s1_desktop_light_v2.png",
       "diff_image": "captures/s1_desktop_light_diff.png",
@@ -106,9 +106,9 @@
           "crop_diff": "captures/s1_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 283394,
+          "ae": 332444,
           "pixels": 806400,
-          "diff_percent": 35.14,
+          "diff_percent": 41.23,
           "crop_v1": "captures/s1_desktop_light_v1_timeline.png",
           "crop_v2": "captures/s1_desktop_light_v2_timeline.png",
           "crop_diff": "captures/s1_desktop_light_diff_timeline.png"
@@ -130,8 +130,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 370445,
-      "diff_percent": 36.18,
+      "ae_total": 419531,
+      "diff_percent": 40.97,
       "v1_image": "captures/s1_desktop_dark_v1.png",
       "v2_image": "captures/s1_desktop_dark_v2.png",
       "diff_image": "captures/s1_desktop_dark_diff.png",
@@ -146,9 +146,9 @@
           "crop_diff": "captures/s1_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 282804,
+          "ae": 331890,
           "pixels": 806400,
-          "diff_percent": 35.07,
+          "diff_percent": 41.16,
           "crop_v1": "captures/s1_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s1_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s1_desktop_dark_diff_timeline.png"
@@ -170,25 +170,25 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 231519,
-      "diff_percent": 61.41,
+      "ae_total": 254070,
+      "diff_percent": 67.4,
       "v1_image": "captures/s2_mobile_light_v1.png",
       "v2_image": "captures/s2_mobile_light_v2.png",
       "diff_image": "captures/s2_mobile_light_diff.png",
       "montage_image": "captures/s2_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 9464,
+          "ae": 14148,
           "pixels": 32960,
-          "diff_percent": 28.71,
+          "diff_percent": 42.92,
           "crop_v1": "captures/s2_mobile_light_v1_header.png",
           "crop_v2": "captures/s2_mobile_light_v2_header.png",
           "crop_diff": "captures/s2_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 195773,
+          "ae": 213640,
           "pixels": 288400,
-          "diff_percent": 67.88,
+          "diff_percent": 74.08,
           "crop_v1": "captures/s2_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s2_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s2_mobile_light_diff_timeline.png"
@@ -210,25 +210,25 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 231177,
-      "diff_percent": 61.32,
+      "ae_total": 253463,
+      "diff_percent": 67.24,
       "v1_image": "captures/s2_mobile_dark_v1.png",
       "v2_image": "captures/s2_mobile_dark_v2.png",
       "diff_image": "captures/s2_mobile_dark_diff.png",
       "montage_image": "captures/s2_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 9465,
+          "ae": 14149,
           "pixels": 32960,
-          "diff_percent": 28.72,
+          "diff_percent": 42.93,
           "crop_v1": "captures/s2_mobile_dark_v1_header.png",
           "crop_v2": "captures/s2_mobile_dark_v2_header.png",
           "crop_diff": "captures/s2_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 195437,
+          "ae": 213039,
           "pixels": 288400,
-          "diff_percent": 67.77,
+          "diff_percent": 73.87,
           "crop_v1": "captures/s2_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s2_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s2_mobile_dark_diff_timeline.png"
@@ -250,8 +250,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 545153,
-      "diff_percent": 53.24,
+      "ae_total": 576040,
+      "diff_percent": 56.25,
       "v1_image": "captures/s2_desktop_light_v1.png",
       "v2_image": "captures/s2_desktop_light_v2.png",
       "diff_image": "captures/s2_desktop_light_diff.png",
@@ -266,9 +266,9 @@
           "crop_diff": "captures/s2_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 459118,
+          "ae": 490005,
           "pixels": 806400,
-          "diff_percent": 56.93,
+          "diff_percent": 60.76,
           "crop_v1": "captures/s2_desktop_light_v1_timeline.png",
           "crop_v2": "captures/s2_desktop_light_v2_timeline.png",
           "crop_diff": "captures/s2_desktop_light_diff_timeline.png"
@@ -290,8 +290,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 544972,
-      "diff_percent": 53.22,
+      "ae_total": 575745,
+      "diff_percent": 56.23,
       "v1_image": "captures/s2_desktop_dark_v1.png",
       "v2_image": "captures/s2_desktop_dark_v2.png",
       "diff_image": "captures/s2_desktop_dark_diff.png",
@@ -306,9 +306,9 @@
           "crop_diff": "captures/s2_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 458899,
+          "ae": 489672,
           "pixels": 806400,
-          "diff_percent": 56.91,
+          "diff_percent": 60.72,
           "crop_v1": "captures/s2_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s2_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s2_desktop_dark_diff_timeline.png"
@@ -330,25 +330,25 @@
       "theme": "light",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 44548,
-      "diff_percent": 11.82,
+      "ae_total": 57647,
+      "diff_percent": 15.29,
       "v1_image": "captures/s5_mobile_light_v1.png",
       "v2_image": "captures/s5_mobile_light_v2.png",
       "diff_image": "captures/s5_mobile_light_diff.png",
       "montage_image": "captures/s5_mobile_light_montage.png",
       "regions": {
         "header": {
-          "ae": 9888,
+          "ae": 14245,
           "pixels": 32960,
-          "diff_percent": 30.0,
+          "diff_percent": 43.22,
           "crop_v1": "captures/s5_mobile_light_v1_header.png",
           "crop_v2": "captures/s5_mobile_light_v2_header.png",
           "crop_diff": "captures/s5_mobile_light_diff_header.png"
         },
         "timeline": {
-          "ae": 8378,
+          "ae": 17120,
           "pixels": 288400,
-          "diff_percent": 2.9,
+          "diff_percent": 5.94,
           "crop_v1": "captures/s5_mobile_light_v1_timeline.png",
           "crop_v2": "captures/s5_mobile_light_v2_timeline.png",
           "crop_diff": "captures/s5_mobile_light_diff_timeline.png"
@@ -370,25 +370,25 @@
       "theme": "dark",
       "resolution": "412x915",
       "total_pixels": 376980,
-      "ae_total": 44542,
-      "diff_percent": 11.82,
+      "ae_total": 57641,
+      "diff_percent": 15.29,
       "v1_image": "captures/s5_mobile_dark_v1.png",
       "v2_image": "captures/s5_mobile_dark_v2.png",
       "diff_image": "captures/s5_mobile_dark_diff.png",
       "montage_image": "captures/s5_mobile_dark_montage.png",
       "regions": {
         "header": {
-          "ae": 9889,
+          "ae": 14246,
           "pixels": 32960,
-          "diff_percent": 30.0,
+          "diff_percent": 43.22,
           "crop_v1": "captures/s5_mobile_dark_v1_header.png",
           "crop_v2": "captures/s5_mobile_dark_v2_header.png",
           "crop_diff": "captures/s5_mobile_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 8378,
+          "ae": 17120,
           "pixels": 288400,
-          "diff_percent": 2.9,
+          "diff_percent": 5.94,
           "crop_v1": "captures/s5_mobile_dark_v1_timeline.png",
           "crop_v2": "captures/s5_mobile_dark_v2_timeline.png",
           "crop_diff": "captures/s5_mobile_dark_diff_timeline.png"
@@ -410,8 +410,8 @@
       "theme": "light",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 171477,
-      "diff_percent": 16.75,
+      "ae_total": 218231,
+      "diff_percent": 21.31,
       "v1_image": "captures/s5_desktop_light_v1.png",
       "v2_image": "captures/s5_desktop_light_v2.png",
       "diff_image": "captures/s5_desktop_light_diff.png",
@@ -426,9 +426,9 @@
           "crop_diff": "captures/s5_desktop_light_diff_header.png"
         },
         "timeline": {
-          "ae": 84367,
+          "ae": 131121,
           "pixels": 806400,
-          "diff_percent": 10.46,
+          "diff_percent": 16.26,
           "crop_v1": "captures/s5_desktop_light_v1_timeline.png",
           "crop_v2": "captures/s5_desktop_light_v2_timeline.png",
           "crop_diff": "captures/s5_desktop_light_diff_timeline.png"
@@ -450,8 +450,8 @@
       "theme": "dark",
       "resolution": "1280x800",
       "total_pixels": 1024000,
-      "ae_total": 171544,
-      "diff_percent": 16.75,
+      "ae_total": 218301,
+      "diff_percent": 21.32,
       "v1_image": "captures/s5_desktop_dark_v1.png",
       "v2_image": "captures/s5_desktop_dark_v2.png",
       "diff_image": "captures/s5_desktop_dark_diff.png",
@@ -466,9 +466,9 @@
           "crop_diff": "captures/s5_desktop_dark_diff_header.png"
         },
         "timeline": {
-          "ae": 84396,
+          "ae": 131153,
           "pixels": 806400,
-          "diff_percent": 10.47,
+          "diff_percent": 16.26,
           "crop_v1": "captures/s5_desktop_dark_v1_timeline.png",
           "crop_v2": "captures/s5_desktop_dark_v2_timeline.png",
           "crop_diff": "captures/s5_desktop_dark_diff_timeline.png"
