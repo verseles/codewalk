@@ -62,7 +62,7 @@ def get_image_dimensions(img_path):
     if os.path.getsize(img_path) == 0:
         raise ValueError(f"Empty image file (0 bytes): {img_path}")
 
-    code, out, err = run_cmd(["identify", "-format", "%w %h", img_path])
+    code, out, err = run_cmd(["identify", "-format", "%w %h %m", img_path])
     if code != 0 or not out:
         raise ValueError(f"Failed to identify image {img_path}: {err or 'Unknown error'}")
 
@@ -71,9 +71,14 @@ def get_image_dimensions(img_path):
         raise ValueError(f"Unexpected identify output '{out}' for {img_path}")
 
     try:
-        return int(parts[0]), int(parts[1])
+        w, h = int(parts[0]), int(parts[1])
     except ValueError as e:
         raise ValueError(f"Invalid dimensions '{out}' for {img_path}: {e}")
+
+    if len(parts) >= 3 and parts[2].upper() != "PNG":
+        raise ValueError(f"Unsupported image format '{parts[2]}' for {img_path}; expected PNG")
+
+    return w, h
 
 
 def compare_images(img1, img2, diff_out):
@@ -147,12 +152,12 @@ def run_comparison(captures_dir, output_report, rel_base_dir=None, strict=True):
                 except Exception as e:
                     raise RuntimeError(f"Validation failed for pair {pair_id}: {e}")
 
+                if (w1, h1) != (w2, h2):
+                    raise ValueError(f"Pair {pair_id} dimension mismatch: v1=({w1}, {h1}) vs v2=({w2}, {h2})")
                 if (w1, h1) != expected_size:
                     dimension_errors.append(f"{v1_img}: expected {expected_size}, got ({w1}, {h1})")
                 if (w2, h2) != expected_size:
                     dimension_errors.append(f"{v2_img}: expected {expected_size}, got ({w2}, {h2})")
-                if (w1, h1) != (w2, h2):
-                    dimension_errors.append(f"Pair {pair_id} dimension mismatch: v1=({w1}, {h1}) vs v2=({w2}, {h2})")
 
                 if dimension_errors and strict:
                     raise ValueError(f"Dimension errors detected: {dimension_errors[-1]}")

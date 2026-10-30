@@ -28,7 +28,7 @@ ItemMeta _v2Meta(String id, {String? message, ItemStatus status = ItemStatus.com
   generation: 'cp5',
   status: OpenValue.known(status),
   source: SourceProvenance(
-    harness: const HarnessRef(HostId('h'), HarnessInstanceId('test')),
+    harness: const HarnessRef(HostId('profile_a'), HarnessInstanceId('profile_a')),
     version: '2.0.22',
     nativeType: 'cp5',
   ),
@@ -36,6 +36,12 @@ ItemMeta _v2Meta(String id, {String? message, ItemStatus status = ItemStatus.com
 );
 
 Future<void> _loadFonts() async {
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'] ??
+      (Directory('/home/ubuntu/flutter').existsSync() ? '/home/ubuntu/flutter' : null);
+  if (flutterRoot == null) {
+    throw StateError('Cannot locate Flutter SDK for font loading');
+  }
+
   final robotoLoader = FontLoader('Roboto');
   for (final name in [
     'Roboto-Regular.ttf',
@@ -44,19 +50,49 @@ Future<void> _loadFonts() async {
     'Roboto-Light.ttf',
     'Roboto-Thin.ttf',
   ]) {
-    final file = File('/home/ubuntu/flutter/bin/cache/artifacts/material_fonts/$name');
-    if (file.existsSync()) {
-      robotoLoader.addFont(Future.value(ByteData.view(file.readAsBytesSync().buffer)));
+    final file = File('$flutterRoot/bin/cache/artifacts/material_fonts/$name');
+    if (!file.existsSync()) {
+      throw FileSystemException('Required Roboto font file missing', file.path);
     }
+    robotoLoader.addFont(Future.value(ByteData.view(file.readAsBytesSync().buffer)));
   }
   await robotoLoader.load();
 
   final iconLoader = FontLoader('MaterialIcons');
-  final iconFile = File('/home/ubuntu/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
-  if (iconFile.existsSync()) {
-    iconLoader.addFont(Future.value(ByteData.view(iconFile.readAsBytesSync().buffer)));
+  final iconFile = File('$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  if (!iconFile.existsSync()) {
+    throw FileSystemException('Required MaterialIcons font file missing', iconFile.path);
   }
+  iconLoader.addFont(Future.value(ByteData.view(iconFile.readAsBytesSync().buffer)));
   await iconLoader.load();
+
+  // Load MaterialSymbolsOutlined and Rounded for packages/material_symbols_icons
+  final pubCache = Platform.environment['PUB_CACHE'] ?? '${Platform.environment['HOME']}/.pub-cache';
+  final candidates = Directory('$pubCache/hosted/pub.dev')
+      .listSync()
+      .whereType<Directory>()
+      .where((d) => d.path.contains('material_symbols_icons'))
+      .toList();
+  if (candidates.isEmpty) {
+    throw StateError('Cannot find material_symbols_icons in pub cache: $pubCache');
+  }
+  final msiDir = candidates.last.path;
+
+  final outlinedFile = File('$msiDir/lib/fonts/MaterialSymbolsOutlined.ttf');
+  if (!outlinedFile.existsSync()) {
+    throw FileSystemException('Missing MaterialSymbolsOutlined.ttf', outlinedFile.path);
+  }
+  final msiOutlined = FontLoader('packages/material_symbols_icons/MaterialSymbolsOutlined');
+  msiOutlined.addFont(Future.value(ByteData.view(outlinedFile.readAsBytesSync().buffer)));
+  await msiOutlined.load();
+
+  final roundedFile = File('$msiDir/lib/fonts/MaterialSymbolsRounded.ttf');
+  if (!roundedFile.existsSync()) {
+    throw FileSystemException('Missing MaterialSymbolsRounded.ttf', roundedFile.path);
+  }
+  final msiRounded = FontLoader('packages/material_symbols_icons/MaterialSymbolsRounded');
+  msiRounded.addFont(Future.value(ByteData.view(roundedFile.readAsBytesSync().buffer)));
+  await msiRounded.load();
 }
 
 Future<void> _capture(WidgetTester tester, GlobalKey key, String filename) async {
@@ -246,6 +282,14 @@ void main() {
           await provider.selectSession(session);
           await tester.pumpAndSettle();
 
+          expect(find.text(tc.title), findsWidgets);
+          if (tc.v1Messages.isNotEmpty) {
+            final part = tc.v1Messages.first.parts.first;
+            if (part is TextPart) {
+              expect(find.text(part.text), findsWidgets);
+            }
+          }
+
           await _capture(tester, key, '${tc.id}_${platform}_${themeName}_v1.png');
         });
 
@@ -254,7 +298,7 @@ void main() {
           addTearDown(() => tester.binding.setSurfaceSize(null));
 
           final rig = CatalogRig();
-          await rig.save('profile_a');
+          await rig.save('a');
           final directory = LiveDirectory();
           final dependencies = createAppDependencies(
             initialLink: Uri(path: '/sessions'),
@@ -306,6 +350,12 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
+
+          if (tc.id == 's1') {
+            expect(find.text('Fix the build'), findsWidgets);
+          } else if (tc.id == 's2') {
+            expect(find.text('Show me the parity check code'), findsWidgets);
+          }
 
           await _capture(tester, key, '${tc.id}_${platform}_${themeName}_v2.png');
         });
