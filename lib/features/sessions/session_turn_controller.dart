@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_turn_actions.dart' as shared;
+import '../../shared/widgets/app_snack_bar.dart';
 import 'session_builtin_commands.dart' as builtin;
 import 'session_live_controller.dart';
 
@@ -151,7 +152,7 @@ class SessionTurnController extends ChangeNotifier
         l.chatUndoNothing,
       _ => l.turnUnavailableBusy,
     };
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    showAppSnackBar(ScaffoldMessenger.maybeOf(context), msg);
   }
 
   /// Stages an undo/rewind to [target].
