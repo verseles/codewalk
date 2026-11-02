@@ -156,18 +156,6 @@ class V2LocalizationsZh extends V2Localizations {
       '选择浅色、深色或系统模式，然后保留 CodeWalk 经典调色板或切换到 OpenCode 预设。';
 
   @override
-  String get settingsAppearanceVisualStyle => '视觉样式';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => '经典';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription => '选择经典外观，或更柔和的精致界面。';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => '精致';
-
-  @override
   String get settingsAppearanceWallpaperColors => '使用壁纸颜色';
 
   @override

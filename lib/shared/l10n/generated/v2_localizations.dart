@@ -405,30 +405,6 @@ abstract class V2Localizations {
   /// **'Choose light, dark, or system mode, then keep the CodeWalk classic palette or switch to an OpenCode preset.'**
   String get settingsAppearanceThemeDescription;
 
-  /// CodeWalk UI string — settingsAppearanceVisualStyle
-  ///
-  /// In en, this message translates to:
-  /// **'Visual style'**
-  String get settingsAppearanceVisualStyle;
-
-  /// CodeWalk UI string — settingsAppearanceVisualStyleClassic
-  ///
-  /// In en, this message translates to:
-  /// **'Classic'**
-  String get settingsAppearanceVisualStyleClassic;
-
-  /// CodeWalk UI string — settingsAppearanceVisualStyleDescription
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Classic or softer Refined surfaces.'**
-  String get settingsAppearanceVisualStyleDescription;
-
-  /// CodeWalk UI string — settingsAppearanceVisualStyleRefined
-  ///
-  /// In en, this message translates to:
-  /// **'Refined'**
-  String get settingsAppearanceVisualStyleRefined;
-
   /// CodeWalk UI string — settingsAppearanceWallpaperColors
   ///
   /// In en, this message translates to:

@@ -1,4 +1,3 @@
-import 'package:codewalk/shared/theme/app_shapes.dart';
 import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/app_visual_style_tokens.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
@@ -25,34 +24,14 @@ void main() {
     expect(darkTheme.brightness, Brightness.dark);
   });
 
-  test('adds classic visual style tokens by default', () {
+  test('adds the single visual style tokens to every theme', () {
     final scheme = ColorScheme.fromSeed(seedColor: AppTheme.seedColor);
     final theme = AppTheme.lightFrom(scheme);
 
     final tokens = theme.extension<AppVisualStyleTokens>();
 
     expect(tokens, isNotNull);
-    expect(tokens!.visualStyle, VisualStyle.classic);
-    expect(tokens.cardRadius, AppShapes.borderExtraLarge);
-  });
-
-  test('adds refined visual style tokens when requested', () {
-    final scheme = ColorScheme.fromSeed(seedColor: AppTheme.seedColor);
-    final classicTheme = AppTheme.lightFrom(scheme);
-    final refinedTheme = AppTheme.lightFrom(
-      scheme,
-      visualStyle: VisualStyle.refined,
-    );
-
-    final classicTokens = classicTheme.extension<AppVisualStyleTokens>()!;
-    final refinedTokens = refinedTheme.extension<AppVisualStyleTokens>()!;
-
-    expect(refinedTokens.visualStyle, VisualStyle.refined);
-    expect(refinedTokens.cardRadius, isNot(classicTokens.cardRadius));
-    expect(
-      refinedTokens.composerShadow.single.blurRadius,
-      lessThan(classicTokens.composerShadow.single.blurRadius),
-    );
+    expect(tokens!.cardRadius, BorderRadius.circular(14));
   });
 
   test('preserves caller extensions beside visual style tokens', () {
@@ -60,15 +39,11 @@ void main() {
     const callerTokens = _CallerTokens(42);
     final theme = AppTheme.lightFrom(
       scheme,
-      visualStyle: VisualStyle.refined,
       themeExtensions: <ThemeExtension<dynamic>>[callerTokens],
     );
 
     expect(theme.extension<_CallerTokens>(), same(callerTokens));
-    expect(
-      theme.extension<AppVisualStyleTokens>()?.visualStyle,
-      VisualStyle.refined,
-    );
+    expect(theme.extension<AppVisualStyleTokens>(), isNotNull);
   });
 
   test('maps density helpers consistently', () {
@@ -101,28 +76,27 @@ void main() {
     }
   });
 
-  test('visual tokens interpolate both light and dark styles', () {
+  test('visual tokens interpolate between light and dark schemes', () {
     final scheme = ColorScheme.fromSeed(seedColor: AppTheme.seedColor);
-    final classic = AppVisualStyleTokens.classic(scheme, Brightness.light);
-    final refined = AppVisualStyleTokens.refined(scheme, Brightness.dark);
-    final middle = classic.lerp(refined, 0.5) as AppVisualStyleTokens;
+    final light = AppVisualStyleTokens.fromScheme(scheme, Brightness.light);
+    final dark = AppVisualStyleTokens.fromScheme(scheme, Brightness.dark);
+    final middle = light.lerp(dark, 0.5) as AppVisualStyleTokens;
 
     expect(
-      (classic.lerp(refined, 0) as AppVisualStyleTokens).cardRadius,
-      classic.cardRadius,
+      (light.lerp(dark, 0) as AppVisualStyleTokens).cardSurface,
+      light.cardSurface,
     );
     expect(
-      (classic.lerp(refined, 1) as AppVisualStyleTokens).cardRadius,
-      refined.cardRadius,
+      (light.lerp(dark, 1) as AppVisualStyleTokens).cardSurface,
+      dark.cardSurface,
     );
-    expect(middle.visualStyle, VisualStyle.refined);
     expect(
       middle.cardSurface,
-      Color.lerp(classic.cardSurface, refined.cardSurface, 0.5),
+      Color.lerp(light.cardSurface, dark.cardSurface, 0.5),
     );
     expect(
       middle.controlRadius,
-      BorderRadius.lerp(classic.controlRadius, refined.controlRadius, 0.5),
+      BorderRadius.lerp(light.controlRadius, dark.controlRadius, 0.5),
     );
   });
 
@@ -144,14 +118,13 @@ void main() {
     expect(resolved.snackBarTheme.width, isNull);
     expect(
       (resolved.snackBarTheme.shape! as RoundedRectangleBorder).borderRadius,
-      AppShapes.borderLarge,
+      theme.visualStyleTokens.controlRadius,
     );
   });
 
-  test('uses refined snackbar radius when visual style is refined', () {
+  test('uses the visual style control radius for snackbars', () {
     final theme = AppTheme.lightFrom(
       ColorScheme.fromSeed(seedColor: AppTheme.seedColor),
-      visualStyle: VisualStyle.refined,
     );
     final resolved = AppTheme.withResponsiveSnackBars(
       theme,
@@ -182,7 +155,7 @@ void main() {
     expect(resolved.snackBarTheme.width, isNull);
     expect(
       (resolved.snackBarTheme.shape! as RoundedRectangleBorder).borderRadius,
-      AppShapes.borderLarge,
+      theme.visualStyleTokens.controlRadius,
     );
   });
 

@@ -8,7 +8,6 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/theme/app_shapes.dart';
 import '../../shared/theme/app_visual_style_tokens.dart';
 import 'session_timeline_projection.dart';
 
@@ -67,11 +66,7 @@ class _ToolDetailsDialog extends StatelessWidget {
     return Dialog(
       key: ValueKey('tool-details-${item.id.value}'),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(
-        borderRadius: tokens.isRefined
-            ? tokens.dialogRadius
-            : AppShapes.borderLarge,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: tokens.dialogRadius),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 640,

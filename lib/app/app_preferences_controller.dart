@@ -36,7 +36,6 @@ class AppPreferencesController extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   Locale? _locale;
   AppDensity _density = AppDensity.normal;
-  VisualStyle _visualStyle = VisualStyle.refined;
   OpenCodeThemePreset? _themePreset;
   int? _customColorSeed;
   double _contrastLevel = 0;
@@ -61,7 +60,6 @@ class AppPreferencesController extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   Locale? get locale => _locale;
   AppDensity get density => _density;
-  VisualStyle get visualStyle => _visualStyle;
   OpenCodeThemePreset? get themePreset => _themePreset;
   int? get customColorSeed => _customColorSeed;
   double get contrastLevel => _contrastLevel;
@@ -270,7 +268,6 @@ class AppPreferencesController extends ChangeNotifier {
 
   Map<String, Object?> get _values => {
     'themeMode': _themeMode.name,
-    'visualStyle': _visualStyle.name,
     'themePreset': _themePreset == null
         ? null
         : openCodeThemePresetKey(_themePreset!),
@@ -333,12 +330,6 @@ class AppPreferencesController extends ChangeNotifier {
           (m) => m.name == mode,
           orElse: () => ThemeMode.system,
         );
-      }
-      final style = value('visualStyle');
-      if (style is String) {
-        _visualStyle = style.trim().toLowerCase() == 'refined'
-            ? VisualStyle.refined
-            : VisualStyle.classic;
       }
       final preset = value('themePreset');
       if (preset is String) _themePreset = openCodeThemePresetFromKey(preset);
@@ -574,12 +565,6 @@ class AppPreferencesController extends ChangeNotifier {
     if (_disposed || _density == value) return;
     _density = value;
     _changed('appDensity');
-  }
-
-  void setVisualStyle(VisualStyle value) {
-    if (_disposed || _visualStyle == value) return;
-    _visualStyle = value;
-    _changed('visualStyle');
   }
 
   void setThemePreset(OpenCodeThemePreset? value) {

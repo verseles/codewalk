@@ -35,7 +35,8 @@ void main() {
     addTearDown(graph.dispose);
     final p = graph.preferences;
     expect(p.themeMode, ThemeMode.dark);
-    expect(p.visualStyle, VisualStyle.classic);
+    expect(backend.values['cw2.settings.visualStyle'], 'classic');
+    expect(backend.removals, isEmpty);
     expect(p.themePreset, OpenCodeThemePreset.oc2);
     expect(p.density, AppDensity.extraDense);
     expect(p.customColorSeed, 0xFF6750A4);
@@ -55,7 +56,6 @@ void main() {
       addTearDown(first.dispose);
       await first.initialize();
       first.setThemeMode(ThemeMode.dark);
-      first.setVisualStyle(VisualStyle.classic);
       first.setDensity(AppDensity.extraSpacious);
       first.setThemePreset(OpenCodeThemePreset.dracula);
       first.setCustomColorSeed(0xFF006B5E);
@@ -67,7 +67,6 @@ void main() {
       addTearDown(second.dispose);
       await second.initialize();
       expect(second.themeMode, ThemeMode.dark);
-      expect(second.visualStyle, VisualStyle.classic);
       expect(second.density, AppDensity.extraSpacious);
       expect(second.themePreset, OpenCodeThemePreset.dracula);
       expect(second.customColorSeed, 0xFF006B5E);
@@ -106,7 +105,6 @@ void main() {
       addTearDown(p.dispose);
       await p.initialize();
       expect(p.themeMode, ThemeMode.system);
-      expect(p.visualStyle, VisualStyle.refined);
       expect(p.themePreset, isNull);
       expect(p.density, AppDensity.normal);
       expect(p.customColorSeed, isNull);

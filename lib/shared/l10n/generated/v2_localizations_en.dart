@@ -164,19 +164,6 @@ class V2LocalizationsEn extends V2Localizations {
       'Choose light, dark, or system mode, then keep the CodeWalk classic palette or switch to an OpenCode preset.';
 
   @override
-  String get settingsAppearanceVisualStyle => 'Visual style';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'Classic';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'Choose Classic or softer Refined surfaces.';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => 'Refined';
-
-  @override
   String get settingsAppearanceWallpaperColors => 'Use wallpaper colors';
 
   @override

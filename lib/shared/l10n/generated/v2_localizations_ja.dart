@@ -162,19 +162,6 @@ class V2LocalizationsJa extends V2Localizations {
       'ライト、ダーク、またはシステムモードを選択し、CodeWalk クラシックパレットを維持するか、OpenCode プリセットに切り替えます。';
 
   @override
-  String get settingsAppearanceVisualStyle => 'ビジュアルスタイル';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'クラシック';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'クラシック表示、またはより柔らかな洗練表示を選択します。';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => '洗練';
-
-  @override
   String get settingsAppearanceWallpaperColors => '壁紙の色を使用する';
 
   @override

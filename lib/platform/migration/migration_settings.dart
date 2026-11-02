@@ -21,7 +21,6 @@ Map<String, Object> selectedLegacySettings(Map<String, dynamic> source) {
   };
   const strings = {
     'themeMode',
-    'visualStyle',
     'themePreset',
     'appDensity',
     'localeCode',

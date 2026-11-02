@@ -78,8 +78,6 @@ APPEARANCE_KEYS = {
     "settingsAppearanceCodeWalkClassic", "settingsAppearanceOpenCodePresets",
     "settingsAppearancePresetPalette", "settingsAppearancePresetHelper",
     "settingsAppearanceSearchPreset", "settingsAppearanceNoPresets",
-    "settingsAppearanceVisualStyle", "settingsAppearanceVisualStyleDescription",
-    "settingsAppearanceVisualStyleClassic", "settingsAppearanceVisualStyleRefined",
     "settingsAppearanceAmoledDark", "settingsAppearanceAmoledDarkActive",
     "settingsAppearanceAmoledDarkInactive", "settingsAppearanceWallpaperColors",
     "settingsAppearanceWallpaperPresetBlocked", "settingsAppearanceWallpaperNormal",

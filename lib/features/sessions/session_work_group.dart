@@ -40,17 +40,11 @@ class SessionWorkGroupHeader extends StatelessWidget {
         child: DecoratedBox(
           key: ValueKey('work-group-${row.id}'),
           decoration: BoxDecoration(
-            color: tokens.isRefined
-                ? tokens.mutedControlSurface
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-            borderRadius: tokens.isRefined
-                ? tokens.cardRadius
-                : BorderRadius.circular(12),
+            color: tokens.mutedControlSurface,
+            borderRadius: tokens.cardRadius,
             border: Border.all(
-              color: tokens.isRefined
-                  ? tokens.separator
-                  : scheme.outlineVariant.withValues(alpha: 0.5),
-              width: tokens.isRefined ? tokens.enabledBorderWidth : 1,
+              color: tokens.separator,
+              width: tokens.enabledBorderWidth,
             ),
           ),
           child: Padding(
@@ -254,17 +248,11 @@ class SessionGenerationPlaceholder extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: tokens.isRefined
-                  ? tokens.cardSurface
-                  : scheme.surfaceContainerHigh,
-              borderRadius: tokens.isRefined
-                  ? tokens.cardRadius
-                  : AppShapes.borderLarge,
+              color: tokens.cardSurface,
+              borderRadius: tokens.cardRadius,
               border: Border.all(
-                color: tokens.isRefined
-                    ? tokens.separator
-                    : scheme.outlineVariant.withValues(alpha: 0.35),
-                width: tokens.isRefined ? tokens.enabledBorderWidth : 1,
+                color: tokens.separator,
+                width: tokens.enabledBorderWidth,
               ),
             ),
             child: Padding(

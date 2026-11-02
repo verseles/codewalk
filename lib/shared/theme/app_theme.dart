@@ -16,7 +16,6 @@ class AppTheme {
   static ThemeData lightFrom(
     ColorScheme colorScheme, {
     AppDensity appDensity = AppDensity.normal,
-    VisualStyle visualStyle = VisualStyle.classic,
     Iterable<ThemeExtension<dynamic>> themeExtensions =
         const <ThemeExtension<dynamic>>[],
   }) {
@@ -24,7 +23,6 @@ class AppTheme {
       colorScheme: colorScheme,
       brightness: Brightness.light,
       appDensity: appDensity,
-      visualStyle: visualStyle,
       themeExtensions: themeExtensions,
     );
   }
@@ -32,7 +30,6 @@ class AppTheme {
   static ThemeData darkFrom(
     ColorScheme colorScheme, {
     AppDensity appDensity = AppDensity.normal,
-    VisualStyle visualStyle = VisualStyle.classic,
     Iterable<ThemeExtension<dynamic>> themeExtensions =
         const <ThemeExtension<dynamic>>[],
   }) {
@@ -40,7 +37,6 @@ class AppTheme {
       colorScheme: colorScheme,
       brightness: Brightness.dark,
       appDensity: appDensity,
-      visualStyle: visualStyle,
       themeExtensions: themeExtensions,
     );
   }
@@ -96,10 +92,7 @@ class AppTheme {
             _mobileSnackBarHorizontalInset,
             16,
           );
-    final visualTokens = theme.visualStyleTokens;
-    final snackBarBorderRadius = visualTokens.isRefined
-        ? visualTokens.controlRadius
-        : AppShapes.borderLarge;
+    final snackBarBorderRadius = theme.visualStyleTokens.controlRadius;
 
     return theme.copyWith(
       snackBarTheme: theme.snackBarTheme.copyWith(
@@ -115,13 +108,12 @@ class AppTheme {
     required ColorScheme colorScheme,
     required Brightness brightness,
     required AppDensity appDensity,
-    required VisualStyle visualStyle,
     required Iterable<ThemeExtension<dynamic>> themeExtensions,
   }) {
-    final refined = visualStyle == VisualStyle.refined;
-    final visualTokens = refined
-        ? AppVisualStyleTokens.refined(colorScheme, brightness)
-        : AppVisualStyleTokens.classic(colorScheme, brightness);
+    final visualTokens = AppVisualStyleTokens.fromScheme(
+      colorScheme,
+      brightness,
+    );
     final resolvedThemeExtensions = List<ThemeExtension<dynamic>>.of(
       themeExtensions,
     )..add(visualTokens);
@@ -148,9 +140,7 @@ class AppTheme {
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        surfaceTintColor: refined
-            ? Colors.transparent
-            : colorScheme.surfaceTint,
+        surfaceTintColor: Colors.transparent,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
       ),
@@ -158,15 +148,11 @@ class AppTheme {
         elevation: 0,
         color: visualTokens.cardSurface,
         shape: RoundedRectangleBorder(
-          borderRadius: refined
-              ? visualTokens.cardRadius
-              : BorderRadius.circular(AppShapes.extraLarge),
-          side: refined
-              ? BorderSide(
-                  color: visualTokens.separator,
-                  width: visualTokens.enabledBorderWidth,
-                )
-              : BorderSide.none,
+          borderRadius: visualTokens.cardRadius,
+          side: BorderSide(
+            color: visualTokens.separator,
+            width: visualTokens.enabledBorderWidth,
+          ),
         ),
       ),
       dividerTheme: DividerThemeData(
@@ -176,9 +162,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: refined
-            ? visualTokens.mutedControlSurface
-            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        fillColor: visualTokens.mutedControlSurface,
         border: OutlineInputBorder(
           borderRadius: visualTokens.controlRadius,
           borderSide: BorderSide(
@@ -202,17 +186,11 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: refined
-              ? visualTokens.controlRadius
-              : AppShapes.borderLarge,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: visualTokens.controlRadius),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
-        backgroundColor: refined
-            ? colorScheme.surface
-            : colorScheme.surfaceContainer,
+        backgroundColor: colorScheme.surface,
         indicatorColor: visualTokens.selectedSurface,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
@@ -226,9 +204,7 @@ class AppTheme {
         }),
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: refined
-            ? visualTokens.panelSurface
-            : colorScheme.surfaceContainerLow,
+        backgroundColor: visualTokens.panelSurface,
         selectedIconTheme: IconThemeData(
           color: colorScheme.onSecondaryContainer,
         ),
@@ -241,13 +217,11 @@ class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,
-        elevation: refined ? 0 : null,
-        focusElevation: refined ? 0 : null,
-        hoverElevation: refined ? 0 : null,
-        highlightElevation: refined ? 0 : null,
-        shape: refined
-            ? RoundedRectangleBorder(borderRadius: AppShapes.borderFull)
-            : null,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppShapes.borderFull),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -257,18 +231,12 @@ class AppTheme {
         closeIconColor: colorScheme.onInverseSurface,
       ),
       chipTheme: base.chipTheme.copyWith(
-        shape: RoundedRectangleBorder(
-          borderRadius: refined
-              ? visualTokens.controlRadius
-              : AppShapes.borderSmall,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: visualTokens.controlRadius),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: refined
-                ? visualTokens.controlRadius
-                : AppShapes.borderLarge,
+            borderRadius: visualTokens.controlRadius,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         ),
@@ -277,9 +245,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: refined
-                ? visualTokens.controlRadius
-                : AppShapes.borderLarge,
+            borderRadius: visualTokens.controlRadius,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         ),
@@ -287,9 +253,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: refined
-                ? visualTokens.controlRadius
-                : AppShapes.borderLarge,
+            borderRadius: visualTokens.controlRadius,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         ),
@@ -297,30 +261,22 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: refined
-                ? visualTokens.controlRadius
-                : BorderRadius.circular(AppShapes.medium),
+            borderRadius: visualTokens.controlRadius,
           ),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: refined
-                ? visualTokens.dialogRadius.topLeft
-                : const Radius.circular(AppShapes.extraLarge),
+            top: visualTokens.dialogRadius.topLeft,
           ),
         ),
         showDragHandle: true,
-        surfaceTintColor: refined ? Colors.transparent : null,
+        surfaceTintColor: Colors.transparent,
       ),
       dialogTheme: DialogThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: refined
-              ? visualTokens.dialogRadius
-              : BorderRadius.circular(AppShapes.extraLarge),
-        ),
-        surfaceTintColor: refined ? Colors.transparent : null,
+        shape: RoundedRectangleBorder(borderRadius: visualTokens.dialogRadius),
+        surfaceTintColor: Colors.transparent,
       ),
     );
   }

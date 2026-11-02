@@ -166,19 +166,6 @@ class V2LocalizationsEs extends V2Localizations {
       'Elija entre modo claro, oscuro o sistema.';
 
   @override
-  String get settingsAppearanceVisualStyle => 'Estilo visual';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'Clásico';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'Elija el aspecto clásico o superficies refinadas más suaves.';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => 'Refinado';
-
-  @override
   String get settingsAppearanceWallpaperColors =>
       'Usar colores del fondo de pantalla';
 

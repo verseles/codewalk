@@ -13,7 +13,6 @@ import 'theme_preferences.dart';
   bool useDynamicColor = true,
   bool useAmoledDark = false,
   AppDensity density = AppDensity.normal,
-  VisualStyle visualStyle = VisualStyle.refined,
   ColorScheme? lightDynamic,
   ColorScheme? darkDynamic,
 }) {
@@ -48,7 +47,6 @@ import 'theme_preferences.dart';
     light: AppTheme.lightFrom(
       light,
       appDensity: density,
-      visualStyle: visualStyle,
       themeExtensions: [
         openCodeThemeTokensFor(preset, Brightness.light) ??
             classicThemeTokensFrom(light),
@@ -57,7 +55,6 @@ import 'theme_preferences.dart';
     dark: AppTheme.darkFrom(
       dark,
       appDensity: density,
-      visualStyle: visualStyle,
       themeExtensions: [
         openCodeThemeTokensFor(preset, Brightness.dark) ??
             classicThemeTokensFrom(dark),

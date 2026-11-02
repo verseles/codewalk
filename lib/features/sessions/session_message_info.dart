@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/theme/app_shapes.dart';
 import '../../shared/theme/app_visual_style_tokens.dart';
 
 /// Whether [items] at [index] is the first part of its harness message.
@@ -126,11 +125,7 @@ Future<void> showMessageInfoDialog(
     return Dialog(
       key: ValueKey('message-info-${message.message.value}'),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(
-        borderRadius: tokens.isRefined
-            ? tokens.dialogRadius
-            : AppShapes.borderLarge,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: tokens.dialogRadius),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 480,

@@ -165,19 +165,6 @@ class V2LocalizationsUr extends V2Localizations {
       'لائٹ، ڈارک، یا سسٹم موڈ کا انتخاب کریں، پھر CodeWalk کلاسک پیلیٹ رکھیں یا اوپن کوڈ پری سیٹ پر سوئچ کریں۔';
 
   @override
-  String get settingsAppearanceVisualStyle => 'بصری انداز';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'کلاسک';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'کلاسک شکل یا زیادہ نرم بہتر سطحوں کا انتخاب کریں۔';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => 'بہتر';
-
-  @override
   String get settingsAppearanceWallpaperColors =>
       'وال پیپر کے رنگ استعمال کریں۔';
 

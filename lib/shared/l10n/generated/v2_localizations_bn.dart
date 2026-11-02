@@ -166,19 +166,6 @@ class V2LocalizationsBn extends V2Localizations {
       'হালকা, অন্ধকার বা সিস্টেম মোড চয়ন করুন, তারপর CodeWalk ক্লাসিক প্যালেট রাখুন বা একটি OpenCode প্রিসেট এ স্যুইচ করুন।';
 
   @override
-  String get settingsAppearanceVisualStyle => 'ভিজ্যুয়াল স্টাইল';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'ক্লাসিক';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'ক্লাসিক রূপ অথবা আরও নরম পরিশীলিত সারফেস বেছে নিন।';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => 'পরিশীলিত';
-
-  @override
   String get settingsAppearanceWallpaperColors => 'ওয়ালপেপার রং ব্যবহার করুন';
 
   @override

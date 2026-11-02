@@ -168,7 +168,6 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
             useDynamicColor: preferences.useDynamicColor,
             useAmoledDark: preferences.useAmoledDark,
             density: preferences.density,
-            visualStyle: preferences.visualStyle,
             lightDynamic: light,
             darkDynamic: dark,
           );

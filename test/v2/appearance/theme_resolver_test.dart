@@ -107,16 +107,11 @@ void main() {
     );
   });
 
-  test('all five density tiers resolve in both visual styles', () {
+  test('all five density tiers resolve to their visual density', () {
     for (final density in AppDensity.values) {
-      for (final style in VisualStyle.values) {
-        final result = resolveAppearanceThemes(
-          density: density,
-          visualStyle: style,
-        );
-        expect(result.light.visualDensity, AppTheme.visualDensityFor(density));
-        expect(result.dark.visualDensity, AppTheme.visualDensityFor(density));
-      }
+      final result = resolveAppearanceThemes(density: density);
+      expect(result.light.visualDensity, AppTheme.visualDensityFor(density));
+      expect(result.dark.visualDensity, AppTheme.visualDensityFor(density));
     }
   });
 

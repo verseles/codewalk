@@ -167,19 +167,6 @@ class V2LocalizationsRu extends V2Localizations {
       'Выберите светлый, темный или системный режим, а затем сохраните классическую палитру CodeWalk или переключитесь на предустановку OpenCode.';
 
   @override
-  String get settingsAppearanceVisualStyle => 'Визуальный стиль';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => 'Классический';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      'Выберите классический вид или более мягкие улучшенные поверхности.';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => 'Улучшенный';
-
-  @override
   String get settingsAppearanceWallpaperColors => 'Использовать цвета обоев';
 
   @override

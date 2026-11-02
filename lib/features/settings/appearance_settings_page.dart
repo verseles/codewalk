@@ -105,22 +105,6 @@ class AppearanceSettingsPage extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              Text(
-                l.settingsAppearanceVisualStyle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              Text(l.settingsAppearanceVisualStyleDescription),
-              const SizedBox(height: 8),
-              _choice<VisualStyle>(
-                key: const ValueKey('settings_visual_style_segmented'),
-                label: l.settingsAppearanceVisualStyle,
-                value: p.visualStyle,
-                options: {
-                  VisualStyle.classic: l.settingsAppearanceVisualStyleClassic,
-                  VisualStyle.refined: l.settingsAppearanceVisualStyleRefined,
-                },
-                onChanged: p.setVisualStyle,
-              ),
               SwitchListTile.adaptive(
                 key: const ValueKey('settings_toggle_amoled_dark'),
                 contentPadding: EdgeInsets.zero,

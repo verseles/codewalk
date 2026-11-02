@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'app_shapes.dart';
-import 'theme_preferences.dart';
-
 @immutable
 class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
   const AppVisualStyleTokens({
-    required this.visualStyle,
     required this.cardRadius,
     required this.controlRadius,
     required this.panelRadius,
@@ -27,50 +23,11 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
     required this.composerShadow,
   });
 
-  factory AppVisualStyleTokens.classic(
+  factory AppVisualStyleTokens.fromScheme(
     ColorScheme colorScheme,
     Brightness brightness,
   ) {
     return AppVisualStyleTokens(
-      visualStyle: VisualStyle.classic,
-      cardRadius: AppShapes.borderExtraLarge,
-      controlRadius: AppShapes.borderLarge,
-      panelRadius: AppShapes.borderLarge,
-      dialogRadius: AppShapes.borderExtraLarge,
-      bubbleRadius: AppShapes.borderLarge,
-      bubbleTightCornerRadius: const Radius.circular(6),
-      cardSurface: colorScheme.surfaceContainerLow,
-      panelSurface: colorScheme.surfaceContainer,
-      composerSurface: Color.alphaBlend(
-        colorScheme.surfaceContainerHighest.withValues(
-          alpha: brightness == Brightness.dark ? 0.94 : 0.96,
-        ),
-        colorScheme.surface,
-      ),
-      mutedControlSurface: colorScheme.surfaceContainerHighest,
-      selectedSurface: colorScheme.secondaryContainer,
-      separator: colorScheme.outlineVariant,
-      focusBorder: colorScheme.primary,
-      softShadow: Colors.black.withValues(alpha: 0.07),
-      dividerThickness: 1,
-      focusedBorderWidth: 2,
-      enabledBorderWidth: 1,
-      composerShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.07),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
-
-  factory AppVisualStyleTokens.refined(
-    ColorScheme colorScheme,
-    Brightness brightness,
-  ) {
-    return AppVisualStyleTokens(
-      visualStyle: VisualStyle.refined,
       cardRadius: BorderRadius.circular(14),
       controlRadius: BorderRadius.circular(12),
       panelRadius: BorderRadius.circular(14),
@@ -121,7 +78,6 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
     );
   }
 
-  final VisualStyle visualStyle;
   final BorderRadius cardRadius;
   final BorderRadius controlRadius;
   final BorderRadius panelRadius;
@@ -141,11 +97,8 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
   final double enabledBorderWidth;
   final List<BoxShadow> composerShadow;
 
-  bool get isRefined => visualStyle == VisualStyle.refined;
-
   @override
   AppVisualStyleTokens copyWith({
-    VisualStyle? visualStyle,
     BorderRadius? cardRadius,
     BorderRadius? controlRadius,
     BorderRadius? panelRadius,
@@ -166,7 +119,6 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
     List<BoxShadow>? composerShadow,
   }) {
     return AppVisualStyleTokens(
-      visualStyle: visualStyle ?? this.visualStyle,
       cardRadius: cardRadius ?? this.cardRadius,
       controlRadius: controlRadius ?? this.controlRadius,
       panelRadius: panelRadius ?? this.panelRadius,
@@ -198,7 +150,6 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
       return this;
     }
     return AppVisualStyleTokens(
-      visualStyle: t < 0.5 ? visualStyle : other.visualStyle,
       cardRadius: BorderRadius.lerp(cardRadius, other.cardRadius, t)!,
       controlRadius: BorderRadius.lerp(controlRadius, other.controlRadius, t)!,
       panelRadius: BorderRadius.lerp(panelRadius, other.panelRadius, t)!,
@@ -246,7 +197,7 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
 extension AppVisualStyleTokensX on ThemeData {
   AppVisualStyleTokens get visualStyleTokens =>
       extension<AppVisualStyleTokens>() ??
-      AppVisualStyleTokens.classic(colorScheme, brightness);
+      AppVisualStyleTokens.fromScheme(colorScheme, brightness);
 }
 
 Color _surfaceOverlay(ColorScheme colorScheme, double alpha) {

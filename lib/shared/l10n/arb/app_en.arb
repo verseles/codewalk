@@ -188,22 +188,6 @@
   "@settingsAppearanceThemeDescription": {
     "description": "CodeWalk UI string — settingsAppearanceThemeDescription"
   },
-  "settingsAppearanceVisualStyle": "Visual style",
-  "@settingsAppearanceVisualStyle": {
-    "description": "CodeWalk UI string — settingsAppearanceVisualStyle"
-  },
-  "settingsAppearanceVisualStyleClassic": "Classic",
-  "@settingsAppearanceVisualStyleClassic": {
-    "description": "CodeWalk UI string — settingsAppearanceVisualStyleClassic"
-  },
-  "settingsAppearanceVisualStyleDescription": "Choose Classic or softer Refined surfaces.",
-  "@settingsAppearanceVisualStyleDescription": {
-    "description": "CodeWalk UI string — settingsAppearanceVisualStyleDescription"
-  },
-  "settingsAppearanceVisualStyleRefined": "Refined",
-  "@settingsAppearanceVisualStyleRefined": {
-    "description": "CodeWalk UI string — settingsAppearanceVisualStyleRefined"
-  },
   "settingsAppearanceWallpaperColors": "Use wallpaper colors",
   "@settingsAppearanceWallpaperColors": {
     "description": "CodeWalk UI string — settingsAppearanceWallpaperColors"

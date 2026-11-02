@@ -129,4 +129,67 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final code in ['en', 'pt']) {
+    testWidgets('settings appearance has one visual style in $code', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final graph = createAppDependencies(initialLink: Uri(path: '/settings'));
+      graph.preferences.setLocale(Locale(code));
+      await tester.pumpWidget(
+        CodeWalkV2Bootstrap(
+          dependencies: graph,
+          dynamicColors: (builder) => builder(null, null),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('settings_destination_appearance')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('settings_theme_family_segmented')),
+        findsOneWidget,
+      );
+      final list = find.byKey(const ValueKey('appearance_settings_list'));
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: list, matching: find.byType(Scrollable)).first,
+          )
+          .position;
+      void expectSingleStyle() {
+        expect(
+          find.byKey(const ValueKey('settings_visual_style_segmented')),
+          findsNothing,
+        );
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                '${widget.data ?? ''}${widget.textSpan?.toPlainText() ?? ''}'
+                    .toLowerCase()
+                    .contains('refin'),
+          ),
+          findsNothing,
+        );
+      }
+
+      // Lazy list items only exist while visible, so check every scroll step.
+      expectSingleStyle();
+      for (
+        var step = 0;
+        step < 40 && position.pixels < position.maxScrollExtent;
+        step++
+      ) {
+        await tester.drag(list, const Offset(0, -400));
+        await tester.pumpAndSettle();
+        expectSingleStyle();
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 }

@@ -162,19 +162,6 @@ class V2LocalizationsKo extends V2Localizations {
       '라이트, 다크 또는 시스템 모드를 선택한 다음 CodeWalk 클래식 팔레트를 유지하거나 OpenCode 프리셋으로 전환합니다.';
 
   @override
-  String get settingsAppearanceVisualStyle => '시각 스타일';
-
-  @override
-  String get settingsAppearanceVisualStyleClassic => '클래식';
-
-  @override
-  String get settingsAppearanceVisualStyleDescription =>
-      '클래식 모양 또는 더 부드러운 리파인드 표면을 선택합니다.';
-
-  @override
-  String get settingsAppearanceVisualStyleRefined => '리파인드';
-
-  @override
   String get settingsAppearanceWallpaperColors => '배경화면 색상 사용';
 
   @override
