@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../shared/theme/app_visual_style_tokens.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
 
 /// The size of the round Send and Stop buttons beside the bubble.
@@ -67,7 +67,7 @@ class ComposerBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).visualStyleTokens;
+    final tokens = Theme.of(context).surfaceTokens;
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: composerActionSize),
       child: DecoratedBox(

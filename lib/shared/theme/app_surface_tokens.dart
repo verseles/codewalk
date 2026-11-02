@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
-  const AppVisualStyleTokens({
+class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
+  const AppSurfaceTokens({
     required this.cardRadius,
     required this.controlRadius,
     required this.panelRadius,
@@ -23,11 +23,11 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
     required this.composerShadow,
   });
 
-  factory AppVisualStyleTokens.fromScheme(
+  factory AppSurfaceTokens.fromScheme(
     ColorScheme colorScheme,
     Brightness brightness,
   ) {
-    return AppVisualStyleTokens(
+    return AppSurfaceTokens(
       cardRadius: BorderRadius.circular(14),
       controlRadius: BorderRadius.circular(12),
       panelRadius: BorderRadius.circular(14),
@@ -98,7 +98,7 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
   final List<BoxShadow> composerShadow;
 
   @override
-  AppVisualStyleTokens copyWith({
+  AppSurfaceTokens copyWith({
     BorderRadius? cardRadius,
     BorderRadius? controlRadius,
     BorderRadius? panelRadius,
@@ -118,7 +118,7 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
     double? enabledBorderWidth,
     List<BoxShadow>? composerShadow,
   }) {
-    return AppVisualStyleTokens(
+    return AppSurfaceTokens(
       cardRadius: cardRadius ?? this.cardRadius,
       controlRadius: controlRadius ?? this.controlRadius,
       panelRadius: panelRadius ?? this.panelRadius,
@@ -142,14 +142,14 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
   }
 
   @override
-  ThemeExtension<AppVisualStyleTokens> lerp(
-    covariant ThemeExtension<AppVisualStyleTokens>? other,
+  ThemeExtension<AppSurfaceTokens> lerp(
+    covariant ThemeExtension<AppSurfaceTokens>? other,
     double t,
   ) {
-    if (other is! AppVisualStyleTokens) {
+    if (other is! AppSurfaceTokens) {
       return this;
     }
-    return AppVisualStyleTokens(
+    return AppSurfaceTokens(
       cardRadius: BorderRadius.lerp(cardRadius, other.cardRadius, t)!,
       controlRadius: BorderRadius.lerp(controlRadius, other.controlRadius, t)!,
       panelRadius: BorderRadius.lerp(panelRadius, other.panelRadius, t)!,
@@ -194,10 +194,10 @@ class AppVisualStyleTokens extends ThemeExtension<AppVisualStyleTokens> {
   }
 }
 
-extension AppVisualStyleTokensX on ThemeData {
-  AppVisualStyleTokens get visualStyleTokens =>
-      extension<AppVisualStyleTokens>() ??
-      AppVisualStyleTokens.fromScheme(colorScheme, brightness);
+extension AppSurfaceTokensX on ThemeData {
+  AppSurfaceTokens get surfaceTokens =>
+      extension<AppSurfaceTokens>() ??
+      AppSurfaceTokens.fromScheme(colorScheme, brightness);
 }
 
 Color _surfaceOverlay(ColorScheme colorScheme, double alpha) {

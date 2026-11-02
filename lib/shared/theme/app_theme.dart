@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../layout/window_size_class.dart';
 import 'app_shapes.dart';
-import 'app_visual_style_tokens.dart';
+import 'app_surface_tokens.dart';
 import 'theme_preferences.dart';
 
 class AppTheme {
@@ -92,7 +92,7 @@ class AppTheme {
             _mobileSnackBarHorizontalInset,
             16,
           );
-    final snackBarBorderRadius = theme.visualStyleTokens.controlRadius;
+    final snackBarBorderRadius = theme.surfaceTokens.controlRadius;
 
     return theme.copyWith(
       snackBarTheme: theme.snackBarTheme.copyWith(
@@ -110,10 +110,7 @@ class AppTheme {
     required AppDensity appDensity,
     required Iterable<ThemeExtension<dynamic>> themeExtensions,
   }) {
-    final visualTokens = AppVisualStyleTokens.fromScheme(
-      colorScheme,
-      brightness,
-    );
+    final visualTokens = AppSurfaceTokens.fromScheme(colorScheme, brightness);
     final resolvedThemeExtensions = List<ThemeExtension<dynamic>>.of(
       themeExtensions,
     )..add(visualTokens);

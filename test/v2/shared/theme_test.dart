@@ -1,5 +1,5 @@
+import 'package:codewalk/shared/theme/app_surface_tokens.dart';
 import 'package:codewalk/shared/theme/app_theme.dart';
-import 'package:codewalk/shared/theme/app_visual_style_tokens.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +28,7 @@ void main() {
     final scheme = ColorScheme.fromSeed(seedColor: AppTheme.seedColor);
     final theme = AppTheme.lightFrom(scheme);
 
-    final tokens = theme.extension<AppVisualStyleTokens>();
+    final tokens = theme.extension<AppSurfaceTokens>();
 
     expect(tokens, isNotNull);
     expect(tokens!.cardRadius, BorderRadius.circular(14));
@@ -43,7 +43,7 @@ void main() {
     );
 
     expect(theme.extension<_CallerTokens>(), same(callerTokens));
-    expect(theme.extension<AppVisualStyleTokens>(), isNotNull);
+    expect(theme.extension<AppSurfaceTokens>(), isNotNull);
   });
 
   test('maps density helpers consistently', () {
@@ -78,16 +78,16 @@ void main() {
 
   test('visual tokens interpolate between light and dark schemes', () {
     final scheme = ColorScheme.fromSeed(seedColor: AppTheme.seedColor);
-    final light = AppVisualStyleTokens.fromScheme(scheme, Brightness.light);
-    final dark = AppVisualStyleTokens.fromScheme(scheme, Brightness.dark);
-    final middle = light.lerp(dark, 0.5) as AppVisualStyleTokens;
+    final light = AppSurfaceTokens.fromScheme(scheme, Brightness.light);
+    final dark = AppSurfaceTokens.fromScheme(scheme, Brightness.dark);
+    final middle = light.lerp(dark, 0.5) as AppSurfaceTokens;
 
     expect(
-      (light.lerp(dark, 0) as AppVisualStyleTokens).cardSurface,
+      (light.lerp(dark, 0) as AppSurfaceTokens).cardSurface,
       light.cardSurface,
     );
     expect(
-      (light.lerp(dark, 1) as AppVisualStyleTokens).cardSurface,
+      (light.lerp(dark, 1) as AppSurfaceTokens).cardSurface,
       dark.cardSurface,
     );
     expect(
@@ -118,7 +118,7 @@ void main() {
     expect(resolved.snackBarTheme.width, isNull);
     expect(
       (resolved.snackBarTheme.shape! as RoundedRectangleBorder).borderRadius,
-      theme.visualStyleTokens.controlRadius,
+      theme.surfaceTokens.controlRadius,
     );
   });
 
@@ -133,7 +133,7 @@ void main() {
 
     expect(
       (resolved.snackBarTheme.shape! as RoundedRectangleBorder).borderRadius,
-      theme.visualStyleTokens.controlRadius,
+      theme.surfaceTokens.controlRadius,
     );
   });
 
@@ -155,7 +155,7 @@ void main() {
     expect(resolved.snackBarTheme.width, isNull);
     expect(
       (resolved.snackBarTheme.shape! as RoundedRectangleBorder).borderRadius,
-      theme.visualStyleTokens.controlRadius,
+      theme.surfaceTokens.controlRadius,
     );
   });
 

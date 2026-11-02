@@ -8,7 +8,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/theme/app_visual_style_tokens.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import 'session_timeline_projection.dart';
 
 /// The title a tool or shell row shows: the tool's name, or the command.
@@ -60,7 +60,7 @@ class _ToolDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
-    final tokens = Theme.of(context).visualStyleTokens;
+    final tokens = Theme.of(context).surfaceTokens;
     final live = this.live;
     Widget body(TimelineItem item) => _ToolDetailsBody(item: item);
     return Dialog(

@@ -5,7 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/app_shapes.dart';
-import '../../shared/theme/app_visual_style_tokens.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_message_info.dart';
@@ -30,7 +30,7 @@ class SessionWorkGroupHeader extends StatelessWidget {
     final l10n = context.v2L10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final tokens = theme.visualStyleTokens;
+    final tokens = theme.surfaceTokens;
     final title = row.messageCount == 1
         ? l10n.chatWorkMessageOne
         : l10n.chatWorkMessagesMultiple(row.messageCount);
@@ -240,7 +240,7 @@ class SessionGenerationPlaceholder extends StatelessWidget {
     final l10n = context.v2L10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final tokens = theme.visualStyleTokens;
+    final tokens = theme.surfaceTokens;
     return ConversationTextScale(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),

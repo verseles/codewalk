@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/theme/app_visual_style_tokens.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 
 /// Whether [items] at [index] is the first part of its harness message.
 bool opensMessage(List<TimelineItem> items, int index) {
@@ -121,7 +121,7 @@ Future<void> showMessageInfoDialog(
   context: context,
   builder: (dialogContext) {
     final l10n = dialogContext.v2L10n;
-    final tokens = Theme.of(dialogContext).visualStyleTokens;
+    final tokens = Theme.of(dialogContext).surfaceTokens;
     return Dialog(
       key: ValueKey('message-info-${message.message.value}'),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
