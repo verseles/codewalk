@@ -5,7 +5,8 @@ shell at 390×844 and 1280×800 in light and OC-2 dark mode. They include compac
 detail Back or the wide destination rail. They use Flutter's deterministic Ahem
 test font, English, DPR 1, fixed settings and an injected no-dynamic-color
 source. Linux Flutter 3.44.1/Dart 3.12.1 generated the initial snapshots;
-CI pins the same Flutter 3.44.1 so pixel parity is enforced rather than
+Linux x86_64 Flutter 3.47.9/Dart 3.13.7 regenerated them on 2026-11-01; CI
+pins the same Flutter 3.47.9 so pixel parity is enforced rather than
 assumed. Pixel parity on another renderer/SDK is
 separate from the local checks and must be inspected rather than assumed.
 

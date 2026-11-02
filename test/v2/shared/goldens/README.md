@@ -5,8 +5,9 @@ list, GFM table, Dart code block, inline LaTeX, allowlisted HTML with a
 `progress` element and a Mermaid diagram — at 390x844 and 1280x800 in light and
 dark, plus Arabic RTL. They use Flutter's deterministic Ahem test font, DPR 1
 and VM-only widget tests. Linux Flutter 3.44.1 generated the initial
-snapshots; CI pins the same Flutter 3.44.1 so pixel parity is enforced rather
-than assumed. Pixel parity on another renderer/SDK is separate from the local
+snapshots; Linux x86_64 Flutter 3.47.9 regenerated them on 2026-11-01, and CI
+pins the same Flutter 3.47.9 so pixel parity is enforced rather than
+assumed. Pixel parity on another renderer/SDK is separate from the local
 checks and must be inspected rather than assumed.
 
 The fixture lays out 552 logical px tall, but the shrink-wrapped

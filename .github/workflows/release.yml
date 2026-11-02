@@ -27,9 +27,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FLUTTER_VERSION: "3.44.1"
+  FLUTTER_VERSION: "3.47.9"
   # The commit of the FLUTTER_VERSION tag; a moved tag fails the SDK check.
-  FLUTTER_REVISION: "924134a44c189315be2148659913dda1671cbe99"
+  FLUTTER_REVISION: "c197ca5199e9ee5661e865596c9c07294dfab51c"
 
 jobs:
   plan:
