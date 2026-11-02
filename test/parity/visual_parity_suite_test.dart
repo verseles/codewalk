@@ -6,11 +6,9 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
-import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
-import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 import 'package:codewalk/presentation/widgets/session_tab_strip.dart'
     as legacy_tabs;
@@ -174,20 +172,22 @@ var _removeCaptureDirectory = false;
 /// The window toolbar: the widest app bar on screen. A desktop session has a
 /// second bar in its chat column, which must not stand in for the toolbar.
 Finder _fullWidthAppBar(WidgetTester tester) {
-  Element? widest;
-  var widestWidth = -1.0;
-  for (final element in find.byType(AppBar).evaluate()) {
-    final width = tester
-        .getSize(find.byElementPredicate((candidate) => candidate == element))
-        .width;
-    if (width > widestWidth) {
-      widest = element;
-      widestWidth = width;
-    }
+  final bars = find.byType(AppBar).evaluate().toList();
+  if (bars.isEmpty) return find.byType(AppBar);
+  final widths = [
+    for (final bar in bars)
+      tester
+          .getSize(find.byElementPredicate((candidate) => candidate == bar))
+          .width,
+  ];
+  final widest = widths.reduce((a, b) => a > b ? a : b);
+  if (widths.where((width) => width == widest).length > 1) {
+    throw StateError(
+      'Two app bars share the widest width; the toolbar is ambiguous',
+    );
   }
-  return widest == null
-      ? find.byType(AppBar)
-      : find.byElementPredicate((candidate) => candidate == widest);
+  final toolbar = bars[widths.indexOf(widest)];
+  return find.byElementPredicate((candidate) => candidate == toolbar);
 }
 
 // Every region named here must match exactly one widget on the captured side;
@@ -311,6 +311,9 @@ void main() {
       complete: true,
     ),
   ];
+  // The same three tabs on both sides. v1 and v2 order them differently; the
+  // order is measured on the tabs surface (#458 S7), not fixed here.
+  const tabTitles = {'First session', 'Second session', 'Third session'};
   final testCases = [
     // Scenario 1: Short turn, connected
     (
@@ -535,24 +538,7 @@ void main() {
           });
 
           // Decision 3: the v1 reference is always the refined style.
-          final rawV1Theme = isDark
-              ? AppTheme.darkFrom(
-                  ColorScheme.fromSeed(
-                    seedColor: AppTheme.seedColor,
-                    brightness: Brightness.dark,
-                  ),
-                  visualStyle: VisualStyle.refined,
-                )
-              : AppTheme.lightFrom(
-                  ColorScheme.fromSeed(
-                    seedColor: AppTheme.seedColor,
-                    brightness: Brightness.light,
-                  ),
-                  visualStyle: VisualStyle.refined,
-                );
-          final v1Theme = rawV1Theme.copyWith(
-            textTheme: rawV1Theme.textTheme.apply(fontFamily: 'Roboto'),
-          );
+          final v1Theme = surface.v1ReferenceTheme(dark: isDark);
 
           final settings = await surface.v1ReferenceSettings(source);
           if (extraSessions.isNotEmpty) {
@@ -626,6 +612,10 @@ void main() {
           }
           if (extraSessions.isNotEmpty) {
             expect(provider.sessionTabs, hasLength(3));
+            expect(
+              provider.sessionTabs.map((tab) => tab.title).toSet(),
+              tabTitles,
+            );
             expect(
               provider.sessionTabs.where((tab) => tab.isSelected),
               hasLength(1),
@@ -763,12 +753,6 @@ void main() {
             await tester.pumpAndSettle();
           }
 
-          // Extra tabs open before the active row, so the tab order matches v1
-          // (the active session is the last tab in both).
-          for (final extra in extraRows) {
-            await dependencies.sessionTabs!.open(extra);
-            await tester.pumpAndSettle();
-          }
           if (tc.opensSession) {
             if (platform == 'mobile') {
               final drawer = find.byKey(const ValueKey('workspace-drawer'));
@@ -832,10 +816,18 @@ void main() {
             }
           }
 
+          for (final extra in extraRows) {
+            await dependencies.sessionTabs!.open(extra);
+            await tester.pumpAndSettle();
+          }
           if (extraRows.isNotEmpty) {
             await dependencies.sessionTabs!.open(row);
             await tester.pumpAndSettle();
             expect(dependencies.sessionTabs!.tabs, hasLength(3));
+            expect(
+              dependencies.sessionTabs!.tabs.map((tab) => tab.title).toSet(),
+              tabTitles,
+            );
             expect(
               dependencies.sessionTabs!.selectedFor(row.info.ref.host),
               row.info.ref,
@@ -1004,24 +996,7 @@ void main() {
           });
 
           // Decision 3: the v1 reference is always the refined style.
-          final rawV1Theme = isDark
-              ? AppTheme.darkFrom(
-                  ColorScheme.fromSeed(
-                    seedColor: AppTheme.seedColor,
-                    brightness: Brightness.dark,
-                  ),
-                  visualStyle: VisualStyle.refined,
-                )
-              : AppTheme.lightFrom(
-                  ColorScheme.fromSeed(
-                    seedColor: AppTheme.seedColor,
-                    brightness: Brightness.light,
-                  ),
-                  visualStyle: VisualStyle.refined,
-                );
-          final v1Theme = rawV1Theme.copyWith(
-            textTheme: rawV1Theme.textTheme.apply(fontFamily: 'Roboto'),
-          );
+          final v1Theme = surface.v1ReferenceTheme(dark: isDark);
 
           final key = GlobalKey();
           await tester.pumpWidget(

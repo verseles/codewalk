@@ -9,6 +9,7 @@ import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,6 +63,26 @@ AppDependencies buildReferenceDependencies({
     dark ? ThemeMode.dark : ThemeMode.light,
   );
   return dependencies;
+}
+
+/// The v1 reference theme of the parity fixtures: refined style, Roboto text.
+ThemeData v1ReferenceTheme({required bool dark}) {
+  final raw = dark
+      ? AppTheme.darkFrom(
+          ColorScheme.fromSeed(
+            seedColor: AppTheme.seedColor,
+            brightness: Brightness.dark,
+          ),
+          visualStyle: VisualStyle.refined,
+        )
+      : AppTheme.lightFrom(
+          ColorScheme.fromSeed(
+            seedColor: AppTheme.seedColor,
+            brightness: Brightness.light,
+          ),
+          visualStyle: VisualStyle.refined,
+        );
+  return raw.copyWith(textTheme: raw.textTheme.apply(fontFamily: 'Roboto'));
 }
 
 /// Decision 3 (#458): the v1 reference hides the Files and Utility desktop
