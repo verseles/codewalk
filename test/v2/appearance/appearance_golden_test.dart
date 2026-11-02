@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Linux Flutter 3.44.x; the test's Ahem font, DPR and inputs are deterministic.
+  // Linux Flutter 3.47.9 (the current golden reference); the test's Ahem font, DPR and inputs are deterministic.
   for (final desktop in [false, true]) {
     for (final dark in [false, true]) {
       final name =
