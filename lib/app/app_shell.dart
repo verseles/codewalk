@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/endpoint_health_view.dart';
-import '../features/hosts/server_switcher.dart';
 import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/project_picker_dialog.dart';
 import '../features/sessions/session_tab_strip.dart';
@@ -23,6 +23,8 @@ import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
 import '../shared/sessions/session_live_source.dart';
 import '../shared/shortcuts/shortcut_action.dart';
+import '../shared/theme/app_theme.dart';
+import '../shared/theme/theme_preferences.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
 import 'resizable_session_pane.dart';
@@ -101,66 +103,73 @@ class AppShell extends StatelessWidget {
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             final size = WindowSizeClass.fromWidth(width);
+            final density =
+                context.watch<AppPreferencesController?>()?.density ??
+                AppDensity.normal;
             if (size.isCompact) {
-              // The chat takes the window; the list is a drawer. An open
-              // session brings its own bar.
-              return Scaffold(
-                appBar: home
-                    ? _WorkspaceAppBar(
-                        bar: AppBar(
-                          leading: Builder(
-                            builder: (context) => WorkspaceMenuButton(
-                              openDrawer: Scaffold.of(context).openDrawer,
-                            ),
-                          ),
-                          title: hasServer
-                              ? const ServerSwitcher(
-                                  controlKey: ValueKey('workspace-server'),
-                                )
-                              : const Text('CodeWalk'),
-                          actions: const [WorkspaceAppBarActions()],
+              // The toolbar and chat share traversal; the open drawer keeps
+              // its own focus scope and handles Escape before the composer.
+              return _WorkspaceEscape(
+                child: Scaffold(
+                  appBar: _WorkspaceAppBar(
+                    bar: AppBar(
+                      toolbarHeight: _toolbarHeight(density, compact: true),
+                      leadingWidth: 42,
+                      titleSpacing: 0,
+                      leading: Builder(
+                        builder: (context) => WorkspaceMenuButton(
+                          openDrawer: Scaffold.of(context).openDrawer,
                         ),
-                      )
-                    : null,
-                drawer: const Drawer(
-                  child: _WorkspaceEscape(
-                    child: SafeArea(child: SessionsPage()),
+                      ),
+                      title: hasServer
+                          ? const _ToolbarProjectTitle(compact: true)
+                          : const Text('CodeWalk'),
+                      actions: const [WorkspaceAppBarActions(compact: true)],
+                    ),
                   ),
-                ),
-                body: _WorkspaceEscape(
-                  child: _WorkspaceBack(child: _homeTabs(context, tabs, home)),
+                  drawer: const Drawer(
+                    child: _WorkspaceEscape(
+                      child: SafeArea(child: SessionsPage()),
+                    ),
+                  ),
+                  body: _WorkspaceEscape(
+                    keepFocus: false,
+                    child: _WorkspaceBack(
+                      child: _homeTabs(context, tabs, home),
+                    ),
+                  ),
                 ),
               );
             }
             final preferences = context.watch<AppPreferencesController?>();
             final hidden = preferences?.sessionPaneHidden ?? false;
             final chat = _WorkspaceBack(child: _homeTabs(context, tabs, home));
-            return Scaffold(
-              appBar: _WorkspaceAppBar(
-                bar: AppBar(
-                  leading: IconButton(
-                    key: const ValueKey('workspace-pane-toggle'),
-                    tooltip: hidden
-                        ? l10n.chatOpenSidebar
-                        : l10n.chatHideConversationsSidebar,
-                    icon: Icon(hidden ? Icons.menu : Icons.menu_open),
-                    onPressed: preferences == null
-                        ? null
-                        : () => preferences.setSessionPaneHidden(!hidden),
+            return _WorkspaceEscape(
+              child: Scaffold(
+                appBar: _WorkspaceAppBar(
+                  bar: AppBar(
+                    toolbarHeight: _toolbarHeight(density, compact: false),
+                    titleSpacing: AppDensitySpacing.appBarTitleSpacing(density),
+                    leading: IconButton(
+                      key: const ValueKey('workspace-pane-toggle'),
+                      tooltip: hidden
+                          ? l10n.chatOpenSidebar
+                          : l10n.chatHideConversationsSidebar,
+                      icon: Icon(hidden ? Symbols.menu : Symbols.menu_open),
+                      onPressed: preferences == null
+                          ? null
+                          : () => preferences.setSessionPaneHidden(!hidden),
+                    ),
+                    title: hasServer
+                        ? const _ToolbarProjectTitle(compact: false)
+                        : const Text('CodeWalk'),
+                    actions: [
+                      if (hidden) ..._hiddenPaneActions(context, preferences),
+                      const WorkspaceAppBarActions(compact: false),
+                    ],
                   ),
-                  title: hasServer
-                      ? const ServerSwitcher(
-                          controlKey: ValueKey('workspace-server'),
-                        )
-                      : const Text('CodeWalk'),
-                  actions: [
-                    if (hidden) ..._hiddenPaneActions(context, preferences),
-                    const WorkspaceAppBarActions(),
-                  ],
                 ),
-              ),
-              body: _WorkspaceEscape(
-                child: hidden
+                body: hidden
                     ? chat
                     : ResizableSessionPane(
                         preferences: preferences,
@@ -214,7 +223,7 @@ class AppShell extends StatelessWidget {
         IconButton(
           key: const ValueKey('workspace-project-context'),
           tooltip: l10n.chatProjectContext,
-          icon: const Icon(Icons.folder_open_outlined),
+          icon: const Icon(Symbols.folder_open),
           onPressed: () => unawaited(
             pickWorkspaceProject(context, catalog: catalog, contexts: contexts),
           ),
@@ -223,7 +232,7 @@ class AppShell extends StatelessWidget {
         IconButton(
           key: const ValueKey('workspace-settings'),
           tooltip: l10n.settingsTitle,
-          icon: const Icon(Icons.settings_outlined),
+          icon: const Icon(Symbols.settings),
           onPressed: () => context.push('/settings'),
         ),
     ];
@@ -276,6 +285,76 @@ class AppShell extends StatelessWidget {
 }
 
 /// The bar shares the workspace Escape policy, including an open drawer.
+/// The v1 toolbar height for a density tier (chat_page_chrome.dart `_toolbarHeightForDensity`).
+double _toolbarHeight(AppDensity density, {required bool compact}) {
+  final base = compact ? 46.0 : 44.0;
+  return switch (density) {
+    AppDensity.extraDense => base - 4,
+    AppDensity.dense => base - 2,
+    AppDensity.normal => base,
+    AppDensity.spacious => base + 4,
+    AppDensity.extraSpacious => base + 8,
+  };
+}
+
+/// The toolbar title is the active project; tapping it opens the project
+/// picker (v1 `_buildProjectSelectorTitle`, chat_page_selector_flow.dart).
+class _ToolbarProjectTitle extends StatelessWidget {
+  const _ToolbarProjectTitle({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final catalog = context.watch<SessionsController?>();
+    final contexts = context.watch<ProjectContextsController?>();
+    final active = contexts?.active;
+    if (catalog == null || contexts == null) return const Text('CodeWalk');
+    final theme = Theme.of(context);
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Tooltip(
+        message: context.v2L10n.chatChooseDirectory,
+        child: InkWell(
+          key: const ValueKey('workspace-project-title'),
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => unawaited(
+            pickWorkspaceProject(context, catalog: catalog, contexts: contexts),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 2 : 4,
+              vertical: 2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: compact ? 100 : 300),
+                    child: Text(
+                      active == null
+                          ? context.v2L10n.chatChooseDirectory
+                          : serverPathTitle(active),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 1),
+                const Icon(Symbols.arrow_drop_down, size: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WorkspaceAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _WorkspaceAppBar({required this.bar});
 
@@ -303,7 +382,12 @@ class _WorkspaceEscape extends StatelessWidget {
   Widget build(BuildContext context) => KeyboardActionScope(
     handlers: {
       ShortcutAction.escape: () {
-        final shell = Scaffold.maybeOf(context);
+        // Opening a drawer focuses its own scope, outside our child handler.
+        // The shared scope sits above Scaffold, so use that focused context.
+        final focused = FocusManager.instance.primaryFocus?.context;
+        final shell =
+            Scaffold.maybeOf(context) ??
+            (focused == null ? null : Scaffold.maybeOf(focused));
         if (shell != null && shell.isDrawerOpen) {
           shell.closeDrawer();
         } else {

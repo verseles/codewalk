@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/workspace_actions.dart';
-import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
@@ -17,7 +16,6 @@ import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
-import '../hosts/server_switcher.dart';
 import 'session_composer.dart';
 import 'session_error_card.dart';
 import 'session_form_card.dart';
@@ -475,7 +473,10 @@ class _SessionLivePageState extends State<SessionLivePage>
       };
       final textTheme = Theme.of(context).textTheme;
       return Scaffold(
-        appBar: PreferredSize(
+        // Inside the workspace the shell owns the only toolbar (decision 8).
+        appBar: widget.workspaceChrome
+            ? null
+            : PreferredSize(
                 preferredSize: const Size.fromHeight(kToolbarHeight),
                 // The chips follow this page's width, not the window's: beside the
                 // session list the page is narrower than the window.
@@ -485,8 +486,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                     return AppBar(
                       leading: widget.leading,
                       actions: [
-                        if (widget.workspaceChrome) const WorkspaceAppBarActions(),
-                        if (!widget.workspaceChrome && c.permissionModes != null)
+                        if (c.permissionModes != null)
                           Padding(
                             padding: const EdgeInsetsDirectional.only(end: 8),
                             child: SessionPermissionModeChip(
@@ -495,36 +495,13 @@ class _SessionLivePageState extends State<SessionLivePage>
                             ),
                           ),
                       ],
-                      title: widget.workspaceChrome
-                          ? Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    c.summary.info.title.trim().isEmpty
-                                        ? l10n.sessionExportUntitled
-                                        : c.summary.info.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: compact ? 120 : 220,
-                                  ),
-                                  child: ServerSwitcher(
-                                    controlKey: const ValueKey('live-server'),
-                                    compact: compact,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Text(
-                              c.summary.info.title.trim().isEmpty
-                                  ? l10n.sessionExportUntitled
-                                  : c.summary.info.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                      title: Text(
+                        c.summary.info.title.trim().isEmpty
+                            ? l10n.sessionExportUntitled
+                            : c.summary.info.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   },
                 ),

@@ -46,41 +46,53 @@ Future<void> _focusControl(WidgetTester tester, Finder control) async {
 }
 
 void main() {
-  for (final reverse in [false, true]) {
-    testWidgets('Tab leaves the app bar in reverse=$reverse', (tester) async {
-      final app = await launchWorkspace(tester);
-      await openLiveSession(tester, app);
-      await _focusControl(
-        tester,
-        find.byKey(const ValueKey('workspace-pane-toggle')),
-      );
-      bool inAppBar() =>
-          FocusManager.instance.primaryFocus?.context
-              ?.findAncestorWidgetOfExactType<AppBar>() !=
-          null;
-      expect(inAppBar(), isTrue);
-      Future<void> tab() async {
-        if (reverse) {
-          await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+  for (final (width, reverse) in const [
+    (390.0, false),
+    (390.0, true),
+    (1280.0, false),
+    (1280.0, true),
+  ]) {
+    testWidgets(
+      'Tab traverses toolbar and body at $width in reverse=$reverse',
+      (tester) async {
+        final app = await launchWorkspace(tester, size: Size(width, 844));
+        await openLiveSession(tester, app);
+        await _focusControl(
+          tester,
+          find.byKey(
+            ValueKey(
+              width < 600 ? 'workspace-drawer' : 'workspace-pane-toggle',
+            ),
+          ),
+        );
+        bool inAppBar() =>
+            FocusManager.instance.primaryFocus?.context
+                ?.findAncestorWidgetOfExactType<AppBar>() !=
+            null;
+        expect(inAppBar(), isTrue);
+        Future<void> tab() async {
+          if (reverse) {
+            await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+          }
+          await _press(tester, LogicalKeyboardKey.tab);
+          if (reverse) {
+            await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+          }
         }
-        await _press(tester, LogicalKeyboardKey.tab);
-        if (reverse) {
-          await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-        }
-      }
 
-      for (var i = 0; i < 12 && inAppBar(); i++) {
-        await tab();
-      }
-      expect(inAppBar(), isFalse);
-      // Traversal also returns from the body, rather than trapping focus
-      // in a second isolated loop after leaving the bar.
-      for (var i = 0; i < 40 && !inAppBar(); i++) {
-        await tab();
-      }
-      expect(inAppBar(), isTrue);
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
+        for (var i = 0; i < 12 && inAppBar(); i++) {
+          await tab();
+        }
+        expect(inAppBar(), isFalse);
+        // Traversal also returns from the body, rather than trapping focus
+        // in a second isolated loop after leaving the bar.
+        for (var i = 0; i < 40 && !inAppBar(); i++) {
+          await tab();
+        }
+        expect(inAppBar(), isTrue);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
   }
 
   for (final control in ['workspace-pane-toggle', 'sessions-search']) {
@@ -103,6 +115,23 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  testWidgets('the toolbar menu owns Escape and blocks workspace shortcuts', (
+    tester,
+  ) async {
+    final app = await launchWorkspace(tester);
+    await openLiveSession(tester, app);
+    final input = find.byKey(const ValueKey('live-composer-input'));
+    await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+    await settleWorkspace(tester);
+    expect(find.byType(MenuItemButton), findsWidgets);
+    await _press(tester, LogicalKeyboardKey.keyW, control: true);
+    expect(app.dependencies.sessionTabs!.tabs, hasLength(1));
+    await _press(tester, LogicalKeyboardKey.escape);
+    expect(find.byType(MenuItemButton), findsNothing);
+    expect(tester.widget<TextField>(input).focusNode!.hasFocus, isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('Escape from the app bar focuses the shown composer', (
     tester,
@@ -227,7 +256,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('workspace-settings')), findsOneWidget);
-    expect(find.byKey(const ValueKey('workspace-server')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('workspace-project-title')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('workspace-settings')));
     await settleWorkspace(tester);

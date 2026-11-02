@@ -66,6 +66,8 @@ class _RoutingAction extends ContextAction<AppShortcutIntent> {
     if (route is PopupRoute || (route != null && !route.isCurrent)) {
       return false;
     }
+    // Anchored menus live in an overlay, so they have no PopupRoute to gate.
+    if (MenuController.maybeOf(context)?.isOpen ?? false) return false;
     final editor = context.findAncestorStateOfType<EditableTextState>();
     if (editor != null) {
       final composing = editor.widget.controller.value.composing;

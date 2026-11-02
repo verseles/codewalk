@@ -3,12 +3,18 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/entities/experience_settings.dart'
+    show DesktopPane, VisualStyle;
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
+import 'package:codewalk/presentation/providers/settings_provider.dart';
+import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 import 'package:codewalk/presentation/widgets/session_tab_strip.dart'
     as legacy_tabs;
@@ -30,6 +36,42 @@ import '../v2/sessions/live_fakes.dart';
 import '../v2/sessions/v1_surface_parity_test.dart' as surface;
 import '../v2/sessions/workspace_support.dart';
 import 'capture_writer.dart';
+
+/// The v1 reference theme of the parity fixtures: refined style, Roboto text.
+ThemeData v1ReferenceTheme({required bool dark}) {
+  final raw = dark
+      ? AppTheme.darkFrom(
+          ColorScheme.fromSeed(
+            seedColor: AppTheme.seedColor,
+            brightness: Brightness.dark,
+          ),
+          visualStyle: VisualStyle.refined,
+        )
+      : AppTheme.lightFrom(
+          ColorScheme.fromSeed(
+            seedColor: AppTheme.seedColor,
+            brightness: Brightness.light,
+          ),
+          visualStyle: VisualStyle.refined,
+        );
+  return raw.copyWith(textTheme: raw.textTheme.apply(fontFamily: 'Roboto'));
+}
+
+/// Decision 3 (#458): the v1 reference hides the Files and Utility desktop
+/// panes; the conversation pane keeps its 300 dp default.
+Future<SettingsProvider> v1ReferenceSettings(
+  InMemoryAppLocalDataSource source,
+) async {
+  final settings = SettingsProvider(
+    localDataSource: source,
+    dioClient: DioClient(),
+    soundService: SoundService(),
+  );
+  addTearDown(settings.dispose);
+  await settings.setDesktopPaneVisible(DesktopPane.files, false);
+  await settings.setDesktopPaneVisible(DesktopPane.utility, false);
+  return settings;
+}
 
 ItemMeta _v2Meta(
   String id, {
@@ -538,9 +580,9 @@ void main() {
           });
 
           // Decision 3: the v1 reference is always the refined style.
-          final v1Theme = surface.v1ReferenceTheme(dark: isDark);
+          final v1Theme = v1ReferenceTheme(dark: isDark);
 
-          final settings = await surface.v1ReferenceSettings(source);
+          final settings = await v1ReferenceSettings(source);
           if (extraSessions.isNotEmpty) {
             await settings.setShowSessionTabsOverride(true);
           }
@@ -903,11 +945,7 @@ void main() {
               if (tc.id == 's12')
                 'overlay': find
                     .ancestor(
-                      of: find
-                          .byWidgetPredicate(
-                            (widget) => widget is PopupMenuEntry,
-                          )
-                          .first,
+                      of: find.byType(MenuItemButton).first,
                       matching: find.byType(Material),
                     )
                     .first,
@@ -996,7 +1034,7 @@ void main() {
           });
 
           // Decision 3: the v1 reference is always the refined style.
-          final v1Theme = surface.v1ReferenceTheme(dark: isDark);
+          final v1Theme = v1ReferenceTheme(dark: isDark);
 
           final key = GlobalKey();
           await tester.pumpWidget(
@@ -1006,7 +1044,7 @@ void main() {
                 provider,
                 appProvider,
                 integratedWindowChrome: platform == 'desktop',
-                settingsProvider: await surface.v1ReferenceSettings(source),
+                settingsProvider: await v1ReferenceSettings(source),
                 theme: v1Theme,
               ),
             ),

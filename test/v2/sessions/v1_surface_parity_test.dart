@@ -1,20 +1,19 @@
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
-import 'package:codewalk/core/network/dio_client.dart';
-import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
-import 'package:codewalk/presentation/providers/settings_provider.dart';
-import 'package:codewalk/presentation/services/sound_service.dart';
-import 'package:codewalk/presentation/theme/app_theme.dart';
+import 'package:codewalk/shared/theme/app_theme.dart'
+    as v2theme
+    show AppDensitySpacing;
+import 'package:codewalk/shared/theme/theme_preferences.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
-import '../../support/fakes.dart';
 import '../hosts/fakes.dart';
 import '../storage/storage_fakes.dart';
 import 'fakes.dart';
@@ -65,42 +64,6 @@ AppDependencies buildReferenceDependencies({
   return dependencies;
 }
 
-/// The v1 reference theme of the parity fixtures: refined style, Roboto text.
-ThemeData v1ReferenceTheme({required bool dark}) {
-  final raw = dark
-      ? AppTheme.darkFrom(
-          ColorScheme.fromSeed(
-            seedColor: AppTheme.seedColor,
-            brightness: Brightness.dark,
-          ),
-          visualStyle: VisualStyle.refined,
-        )
-      : AppTheme.lightFrom(
-          ColorScheme.fromSeed(
-            seedColor: AppTheme.seedColor,
-            brightness: Brightness.light,
-          ),
-          visualStyle: VisualStyle.refined,
-        );
-  return raw.copyWith(textTheme: raw.textTheme.apply(fontFamily: 'Roboto'));
-}
-
-/// Decision 3 (#458): the v1 reference hides the Files and Utility desktop
-/// panes; the conversation pane keeps its 300 dp default.
-Future<SettingsProvider> v1ReferenceSettings(
-  InMemoryAppLocalDataSource source,
-) async {
-  final settings = SettingsProvider(
-    localDataSource: source,
-    dioClient: DioClient(),
-    soundService: SoundService(),
-  );
-  addTearDown(settings.dispose);
-  await settings.setDesktopPaneVisible(DesktopPane.files, false);
-  await settings.setDesktopPaneVisible(DesktopPane.utility, false);
-  return settings;
-}
-
 /// A mounted v2 workspace with the same fakes as the parity suite.
 class ParitySurface {
   ParitySurface._(this.dependencies, this.directory, this.rig);
@@ -115,6 +78,8 @@ class ParitySurface {
     WidgetTester tester, {
     required Size size,
     bool dark = false,
+    AppDensity density = AppDensity.normal,
+    Locale? locale,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -129,6 +94,8 @@ class ParitySurface {
       directory: directory,
       dark: dark,
     );
+    dependencies.preferences.setDensity(density);
+    if (locale != null) dependencies.preferences.setLocale(locale);
 
     await tester.pumpWidget(
       CodeWalkV2Bootstrap(
@@ -142,6 +109,7 @@ class ParitySurface {
 }
 
 void main() {
+  toolbarGroup();
   // Each size shows its own session surface: the compact list drawer on a
   // phone, the persistent sidebar on desktop.
   final surfaces = {
@@ -162,4 +130,103 @@ void main() {
       );
     }
   }
+}
+
+/// Toolbar group (#458 S5, decisions 8 to 10): one bar on the home screen at
+/// both sizes, v1 height per density, leading width and title spacing.
+void toolbarGroup() {
+  const offsets = {
+    AppDensity.extraDense: -4.0,
+    AppDensity.dense: -2.0,
+    AppDensity.normal: 0.0,
+    AppDensity.spacious: 4.0,
+    AppDensity.extraSpacious: 8.0,
+  };
+  for (final entry in {
+    'phone': parityPhoneSize,
+    'desktop': parityDesktopSize,
+  }.entries) {
+    final compact = entry.key == 'phone';
+    for (final density in AppDensity.values) {
+      testWidgets(
+        'toolbar has one bar and v1 metrics on ${entry.key} at ${density.name}',
+        (tester) async {
+          await ParitySurface.pump(tester, size: entry.value, density: density);
+
+          expect(find.byType(AppBar), findsOneWidget);
+          final bar = tester.widget<AppBar>(find.byType(AppBar));
+          // v1: chat_page_chrome.dart:719 (menu), :1230 (new chat).
+          final leading = find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byIcon(compact ? Symbols.menu : Symbols.menu_open),
+          );
+          expect(leading, findsOneWidget);
+          expect(find.byIcon(Symbols.add_comment), findsOneWidget);
+          expect(find.byIcon(Symbols.more_vert), findsOneWidget);
+
+          // v1: lib/presentation/pages/chat_page/chat_page_chrome.dart:634.
+          expect(
+            bar.toolbarHeight,
+            (compact ? 46.0 : 44.0) + offsets[density]!,
+          );
+          if (compact) {
+            // v1: lib/presentation/pages/chat_page/chat_page_chrome.dart:700,872.
+            expect(bar.leadingWidth, 42);
+            expect(bar.titleSpacing, 0);
+          } else {
+            // v1: lib/presentation/pages/chat_page/chat_page_chrome.dart:874.
+            expect(
+              bar.titleSpacing,
+              v2theme.AppDensitySpacing.appBarTitleSpacing(density),
+            );
+          }
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('toolbar overflow uses the v1 menu below the bar', (
+    tester,
+  ) async {
+    await ParitySurface.pump(tester, size: parityPhoneSize);
+    tester.firstState<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
+    await tester.pumpAndSettle();
+    final bottom = tester.getBottomLeft(find.byType(AppBar)).dy;
+    await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+    await tester.pumpAndSettle();
+    // v1: chat_page_mobile_overflow.dart:230-276 (MenuAnchor / MenuItemButton).
+    final items = find.byType(MenuItemButton);
+    expect(items, findsNWidgets(4));
+    expect(tester.getTopLeft(items.first).dy, greaterThanOrEqualTo(bottom));
+    // v1: chat_page_mobile_overflow.dart:245-250 (18dp pins), :261 (dividers).
+    final pin = tester.widget<IconButton>(
+      find.byKey(const ValueKey('workspace-pin-newChat')),
+    );
+    expect(pin.iconSize, 18);
+    expect(find.byType(Divider), findsNWidgets(3));
+    expect(find.byIcon(Symbols.refresh), findsOneWidget);
+    expect(find.byIcon(Symbols.settings), findsOneWidget);
+    expect(find.byIcon(Symbols.dns), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('toolbar keeps one bar in Arabic at text scale 2', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await ParitySurface.pump(
+      tester,
+      size: parityPhoneSize,
+      locale: const Locale('ar'),
+    );
+
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byType(AppBar))),
+      TextDirection.rtl,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

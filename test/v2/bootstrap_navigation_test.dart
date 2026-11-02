@@ -105,7 +105,8 @@ void main() {
           dependencies.navigation.pendingIntent as SessionNavigationIntent;
       expect(intent.host, 'host/one');
       expect(intent.session, 'session?#% value');
-      expect(find.text('Conversation'), findsWidgets);
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.byKey(const ValueKey('session-notice')), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       for (final route in ['/hosts', '/sessions', '/settings', '/']) {

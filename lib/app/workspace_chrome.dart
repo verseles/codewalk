@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../features/hosts/endpoint_health_view.dart';
@@ -43,7 +44,7 @@ class WorkspaceMenuButton extends StatelessWidget {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Icon(Icons.menu),
+          const Icon(Symbols.menu),
           if (badge.kind != WorkspaceBadgeKind.none)
             PositionedDirectional(
               end: -5,
@@ -112,10 +113,10 @@ class WorkspaceDrawerNotice extends StatelessWidget {
   }
 }
 
-enum _TurnMenuAction { undo, redoNext, redoAll, compact }
-
 class WorkspaceAppBarActions extends StatelessWidget {
-  const WorkspaceAppBarActions({super.key});
+  const WorkspaceAppBarActions({required this.compact, super.key});
+
+  final bool compact;
 
   String _label(V2Localizations l, WorkspacePinnedAction action) =>
       switch (action) {
@@ -125,10 +126,10 @@ class WorkspaceAppBarActions extends StatelessWidget {
         WorkspacePinnedAction.settings => l.settingsTitle,
       };
   IconData _icon(WorkspacePinnedAction action) => switch (action) {
-    WorkspacePinnedAction.newChat => Icons.add,
-    WorkspacePinnedAction.refresh => Icons.refresh,
-    WorkspacePinnedAction.servers => Icons.dns_outlined,
-    WorkspacePinnedAction.settings => Icons.settings_outlined,
+    WorkspacePinnedAction.newChat => Symbols.add_comment,
+    WorkspacePinnedAction.refresh => Symbols.refresh,
+    WorkspacePinnedAction.servers => Symbols.dns,
+    WorkspacePinnedAction.settings => Symbols.settings,
   };
   VoidCallback? _run(BuildContext context, WorkspacePinnedAction action) {
     final catalog = context.read<SessionsController?>();
@@ -156,117 +157,107 @@ class WorkspaceAppBarActions extends StatelessWidget {
     final chrome = context.watch<WorkspaceChromeController?>();
     final live = chrome?.activeLive;
     final l = context.v2L10n;
+    final wide = !compact;
     final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
-    final menu = PopupMenuButton<Object>(
-      key: const ValueKey('workspace-actions'),
-      tooltip: l.chatAppBarMoreActions,
-      onSelected: (action) {
-        if (action is WorkspacePinnedAction) {
-          _run(context, action)?.call();
-        } else if (action is _TurnMenuAction && live != null) {
-          switch (action) {
-            case _TurnMenuAction.undo:
-              unawaited(live.turn.undoLast(context: context));
-            case _TurnMenuAction.redoNext:
-              unawaited(live.turn.redoNext(context: context));
-            case _TurnMenuAction.redoAll:
-              unawaited(live.turn.redoAll(context: context));
-            case _TurnMenuAction.compact:
-              unawaited(live.turn.compact(context: context));
-          }
-        }
-      },
-      itemBuilder: (context) => [
-        for (final action in WorkspacePinnedAction.values)
-          PopupMenuItem<Object>(
-            value: action,
-            enabled: _run(context, action) != null,
-            child: Row(
-              children: [
-                Icon(_icon(action)),
-                const SizedBox(width: 12),
-                Expanded(child: Text(_label(l, action))),
-                if (preferences != null)
-                  ListenableBuilder(
+    const order = [
+      WorkspacePinnedAction.newChat,
+      WorkspacePinnedAction.refresh,
+      WorkspacePinnedAction.settings,
+      WorkspacePinnedAction.servers,
+    ];
+    final firstEnabled = order.firstWhere(
+      (action) => _run(context, action) != null,
+    );
+    Widget menu() => MenuAnchor(
+      builder: (context, controller, child) => IconButton(
+        key: const ValueKey('workspace-actions'),
+        icon: const Icon(Symbols.more_vert),
+        tooltip: l.chatAppBarMoreActions,
+        onPressed: controller.isOpen ? controller.close : controller.open,
+      ),
+      menuChildren: [
+        // v1: chat_page_mobile_overflow.dart:230-265 (items and dividers).
+        for (final action in order) ...[
+          MenuItemButton(
+            // Pointer opening must also transfer keyboard focus into the menu.
+            autofocus: action == firstEnabled,
+            leadingIcon: Icon(_icon(action)),
+            onPressed: _run(context, action),
+            trailingIcon: preferences == null
+                ? null
+                : ListenableBuilder(
                     listenable: preferences,
                     builder: (context, _) {
-                      final pinned = preferences.appBarPins.contains(
-                        action,
-                      );
+                      final pinned = preferences.appBarPins.contains(action);
                       return IconButton(
                         key: ValueKey('workspace-pin-${action.name}'),
                         tooltip: pinned
                             ? l.chatAppBarUnpinAction
                             : l.chatAppBarPinAction,
+                        padding: const EdgeInsets.all(8),
+                        constraints: const BoxConstraints(
+                          minWidth: 34,
+                          minHeight: 34,
+                        ),
+                        iconSize: 18,
                         icon: Icon(
-                          pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                          Symbols.push_pin,
+                          color: pinned
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         onPressed: preferences.canEditAppBarPins
-                            ? () => preferences.setAppBarPinned(
-                                action,
-                                !pinned,
-                              )
+                            ? () => preferences.setAppBarPinned(action, !pinned)
                             : null,
                       );
                     },
                   ),
-              ],
-            ),
+            child: Text(_label(l, action)),
           ),
-        if (live != null) ...[
-          const PopupMenuDivider(),
-          PopupMenuItem<Object>(
+          if (action != WorkspacePinnedAction.servers ||
+              (!wide && live != null))
+            const Divider(height: 1),
+        ],
+        if (live != null && !wide) ...[
+          MenuItemButton(
             key: const ValueKey('turn-menu-undo'),
-            value: _TurnMenuAction.undo,
-            enabled: live.turn.canUndo,
-            child: Row(
-              children: [
-                const Icon(Icons.undo),
-                const SizedBox(width: 12),
-                Expanded(child: Text(l.chatUndoLastTurn)),
-              ],
-            ),
+            leadingIcon: const Icon(Symbols.undo_rounded),
+            onPressed: live.turn.canUndo
+                ? () => unawaited(live.turn.undoLast(context: context))
+                : null,
+            child: Text(l.chatUndoLastTurn),
           ),
-          PopupMenuItem<Object>(
+          const Divider(height: 1),
+          MenuItemButton(
             key: const ValueKey('turn-menu-redo-next'),
-            value: _TurnMenuAction.redoNext,
-            enabled: live.turn.canRedoNext,
-            child: Row(
-              children: [
-                const Icon(Icons.redo),
-                const SizedBox(width: 12),
-                Expanded(child: Text(l.chatRedoLastTurn)),
-              ],
-            ),
+            leadingIcon: const Icon(Symbols.redo_rounded),
+            onPressed: live.turn.canRedoNext
+                ? () => unawaited(live.turn.redoNext(context: context))
+                : null,
+            child: Text(l.chatRedoLastTurn),
           ),
-          PopupMenuItem<Object>(
+          const Divider(height: 1),
+          MenuItemButton(
             key: const ValueKey('turn-menu-redo-all'),
-            value: _TurnMenuAction.redoAll,
-            enabled: live.turn.canRedoAll,
-            child: Row(
-              children: [
-                const Icon(Icons.fast_forward),
-                const SizedBox(width: 12),
-                Expanded(child: Text(l.chatRedoAll)),
-              ],
-            ),
+            leadingIcon: const Icon(Symbols.fast_forward),
+            onPressed: live.turn.canRedoAll
+                ? () => unawaited(live.turn.redoAll(context: context))
+                : null,
+            child: Text(l.chatRedoAll),
           ),
-          PopupMenuItem<Object>(
+          const Divider(height: 1),
+          MenuItemButton(
             key: const ValueKey('turn-menu-compact'),
-            value: _TurnMenuAction.compact,
-            enabled: live.turn.canCompact,
-            child: Row(
-              children: [
-                const Icon(Icons.compress),
-                const SizedBox(width: 12),
-                Expanded(child: Text(l.chatCompactContext)),
-              ],
-            ),
+            leadingIcon: const Icon(Symbols.compress),
+            onPressed: live.turn.canCompact
+                ? () => unawaited(live.turn.compact(context: context))
+                : null,
+            child: Text(l.chatCompactContext),
           ),
         ],
       ],
     );
-    return Row(
+    Widget actions() => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         for (final action in pins)
@@ -276,15 +267,53 @@ class WorkspaceAppBarActions extends StatelessWidget {
             onPressed: _run(context, action),
             icon: Icon(_icon(action)),
           ),
-        if (live != null)
-          ListenableBuilder(
-            listenable: live.turn,
-            builder: (context, _) => menu,
-          )
-        else
-          menu,
+        if (wide && live != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                key: const ValueKey('turn-menu-undo'),
+                tooltip: l.chatUndoLastTurn,
+                icon: const Icon(Symbols.undo_rounded),
+                onPressed: live.turn.canUndo
+                    ? () => unawaited(live.turn.undoLast(context: context))
+                    : null,
+              ),
+              IconButton(
+                key: const ValueKey('turn-menu-redo-next'),
+                tooltip: l.chatRedoLastTurn,
+                icon: const Icon(Symbols.redo_rounded),
+                onPressed: live.turn.canRedoNext
+                    ? () => unawaited(live.turn.redoNext(context: context))
+                    : null,
+              ),
+              IconButton(
+                key: const ValueKey('turn-menu-redo-all'),
+                tooltip: l.chatRedoAll,
+                icon: const Icon(Symbols.fast_forward),
+                onPressed: live.turn.canRedoAll
+                    ? () => unawaited(live.turn.redoAll(context: context))
+                    : null,
+              ),
+              IconButton(
+                key: const ValueKey('turn-menu-compact'),
+                tooltip: l.chatCompactContext,
+                icon: const Icon(Symbols.compress),
+                onPressed: live.turn.canCompact
+                    ? () => unawaited(live.turn.compact(context: context))
+                    : null,
+              ),
+            ],
+          ),
+        menu(),
       ],
     );
+    return live == null
+        ? actions()
+        : ListenableBuilder(
+            listenable: live.turn,
+            builder: (context, _) => actions(),
+          );
   }
 }
 

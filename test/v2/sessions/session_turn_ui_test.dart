@@ -252,83 +252,108 @@ void main() {
     expect(find.text('Second user prompt'), findsOneWidget);
   });
 
-  testWidgets('workspace header overflow shows turn actions when session is active',
+  for (final width in [390.0, 1280.0]) {
+    testWidgets(
+      width < 600
+          ? 'workspace header overflow shows turn actions when session is active'
+          : 'workspace toolbar shows turn actions inline on wide',
       (tester) async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final selecting = rig.sessions.selectProfile('profile_a');
-    final source = rig.sources.single;
-    final row = source.row('one');
-    source.respond([row]);
-    await selecting;
+        tester.view.physicalSize = Size(width, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final rig = CatalogRig();
+        await rig.save('a');
+        await rig.sessions.initialize();
+        final selecting = rig.sessions.selectProfile('profile_a');
+        final source = rig.sources.single;
+        final row = source.row('one');
+        source.respond([row]);
+        await selecting;
 
-    final directory = LiveDirectory();
-    final ref = row.info.ref;
-    final port = _FakePort();
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: row,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
-    final start = live.start();
-    directory.grant(ref, turnActions: port);
-    await start;
+        final directory = LiveDirectory();
+        final ref = row.info.ref;
+        final port = _FakePort();
+        final live = SessionLiveController(
+          hosts: rig.hosts,
+          profile: profile('a'),
+          summary: row,
+          directory: directory,
+        );
+        addTearDown(live.dispose);
+        final start = live.start();
+        directory.grant(ref, turnActions: port);
+        await start;
 
-    final tabs = SessionTabsController(
-      catalog: rig.sessions,
-      store: SessionTabsStore(
-        store: V2MetadataStore(backend: FakeMetadataBackend()),
-      ),
-    );
-    addTearDown(tabs.dispose);
-    await tabs.initialize();
+        final tabs = SessionTabsController(
+          catalog: rig.sessions,
+          store: SessionTabsStore(
+            store: V2MetadataStore(backend: FakeMetadataBackend()),
+          ),
+        );
+        addTearDown(tabs.dispose);
+        await tabs.initialize();
 
-    final health = EndpointHealthController(
-      hosts: rig.hosts,
-      now: () => tester.binding.clock.now().toUtc(),
-    );
-    addTearDown(health.dispose);
+        final health = EndpointHealthController(
+          hosts: rig.hosts,
+          now: () => tester.binding.clock.now().toUtc(),
+        );
+        addTearDown(health.dispose);
 
-    final chrome = WorkspaceChromeController(
-      health: health,
-      catalog: rig.sessions,
-      tabs: tabs,
-    );
-    addTearDown(chrome.dispose);
+        final chrome = WorkspaceChromeController(
+          health: health,
+          catalog: rig.sessions,
+          tabs: tabs,
+        );
+        addTearDown(chrome.dispose);
 
-    tabs.live(ref, () => live);
-    chrome.locationChanged('/s/${ref.host.value}/${ref.nativeId}');
+        tabs.live(ref, () => live);
+        chrome.locationChanged('/s/${ref.host.value}/${ref.nativeId}');
 
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: V2Localizations.localizationsDelegates,
-        supportedLocales: V2Localizations.supportedLocales,
-        home: MultiProvider(
-          providers: [
-            ChangeNotifierProvider<SessionsController?>.value(value: rig.sessions),
-            ChangeNotifierProvider<WorkspaceChromeController?>.value(value: chrome),
-          ],
-          child: Scaffold(
-            appBar: AppBar(
-              actions: const [WorkspaceAppBarActions()],
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: MultiProvider(
+              providers: [
+                ChangeNotifierProvider<SessionsController?>.value(
+                  value: rig.sessions,
+                ),
+                ChangeNotifierProvider<WorkspaceChromeController?>.value(
+                  value: chrome,
+                ),
+              ],
+              child: Scaffold(
+                appBar: AppBar(actions: [WorkspaceAppBarActions(compact: width < 600)]),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+        await tester.pumpAndSettle();
+
+        if (width < 600) {
+          expect(find.byKey(const ValueKey('turn-menu-undo')), findsNothing);
+          await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+          await tester.pumpAndSettle();
+        } else {
+          expect(
+            tester.widget(find.byKey(const ValueKey('turn-menu-undo'))),
+            isA<IconButton>(),
+          );
+        }
+
+        // The same actions are inline on wide and in the overflow on compact.
+        expect(find.byKey(const ValueKey('turn-menu-undo')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('turn-menu-redo-next')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('turn-menu-redo-all')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const ValueKey('turn-menu-compact')), findsOneWidget);
+      },
     );
-    await tester.pumpAndSettle();
-
-    // Tap more actions button
-    await tester.tap(find.byKey(const ValueKey('workspace-actions')));
-    await tester.pumpAndSettle();
-
-    // Verify turn action items exist in the popup menu
-    expect(find.byKey(const ValueKey('turn-menu-undo')), findsOneWidget);
-    expect(find.byKey(const ValueKey('turn-menu-redo-next')), findsOneWidget);
-    expect(find.byKey(const ValueKey('turn-menu-redo-all')), findsOneWidget);
-    expect(find.byKey(const ValueKey('turn-menu-compact')), findsOneWidget);
-  });
+  }
 }

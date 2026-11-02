@@ -200,6 +200,7 @@ Future<void> showSessionSelection(
   final pick = compact
       ? await showModalBottomSheet<_Pick>(
           context: context,
+          useRootNavigator: true,
           isScrollControlled: true,
           showDragHandle: true,
           builder: (context) => Padding(

@@ -62,7 +62,9 @@ final class _Rig {
         ],
         child: MaterialApp(
           home: Scaffold(
-            appBar: AppBar(actions: const [WorkspaceAppBarActions()]),
+            appBar: AppBar(
+              actions: const [WorkspaceAppBarActions(compact: false)],
+            ),
             body: hostsPage ? const HostsPage() : const ServerSwitcher(),
           ),
         ),

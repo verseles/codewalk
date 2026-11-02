@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/workspace_chrome.dart';
 import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -217,14 +216,6 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     });
   }
 
-  /// Opens the list drawer of a compact window, the only window whose
-  /// workspace has one.
-  Widget? _leading(BuildContext context) {
-    final shell = Scaffold.maybeOf(context);
-    if (shell == null || !shell.hasDrawer) return null;
-    return WorkspaceMenuButton(openDrawer: shell.openDrawer);
-  }
-
   Future<void> _open(SessionTabsController tabs, SessionSummary summary) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final full = context.v2L10n.sessionTabsFull;
@@ -235,7 +226,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
 
   @override
   Widget build(BuildContext context) {
-    final page = _resolve(context, _leading(context));
+    final page = _resolve(context);
     // A live page that leaves the tree disposes its controller, so a later
     // return makes a new one.
     if (page is! SessionLivePage) _live = null;
@@ -244,12 +235,12 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     return _withFirstPrompt(context, live, page);
   }
 
-  Widget _resolve(BuildContext context, Widget? leading) {
+  Widget _resolve(BuildContext context) {
     final l10n = context.v2L10n;
     final catalog = context.watch<SessionsController?>();
     final directory = context.read<SessionLiveDirectory?>();
     if (catalog == null || directory == null) {
-      return _Notice(message: l10n.chatAddServerToStart, leading: leading);
+      return _Notice(message: l10n.chatAddServerToStart);
     }
     final hosts = catalog.hosts;
     final selected = catalog.selectedProfile;
@@ -317,7 +308,6 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       return SessionLivePage(
         key: ObjectKey(live),
         controller: live,
-        leading: leading,
         workspaceChrome: true,
         bodyFrame: tabs == null
             ? null
@@ -330,16 +320,15 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         ownsController: context.read<SessionTabsController?>() == null,
       );
     }
-    if (!_ready || hosts.loading) return _Notice(leading: leading);
+    if (!_ready || hosts.loading) return const _Notice();
     if (hosts.storageError) {
       return _Notice(
         message: l10n.hostsProfileStorageError,
-        leading: leading,
         onRetry: hosts.load,
       );
     }
     if (profile == null) {
-      return _Notice(message: l10n.sessionLinkUnknownServer, leading: leading);
+      return _Notice(message: l10n.sessionLinkUnknownServer);
     }
     if (selected?.id != profile.id) {
       if (_followed && selected != null) {
@@ -351,7 +340,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
             if (mounted) context.go('/sessions');
           });
         }
-        return _Notice(leading: leading);
+        return const _Notice();
       }
       // The list follows the server of the open session.
       if (!_selecting) {
@@ -360,7 +349,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
           if (mounted) _select(catalog);
         });
       }
-      return _Notice(leading: leading);
+      return const _Notice();
     }
     _followed = true;
     // A reload that clears the choice selects this server again.
@@ -368,7 +357,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
     final ref = _ref;
     // Once found, the session stays open whatever the list later shows.
     if (_read == _Read.notFound) {
-      return _Notice(message: l10n.sessionLinkNotFound, leading: leading);
+      return _Notice(message: l10n.sessionLinkNotFound);
     }
     final summary = _summary ??=
         context
@@ -412,7 +401,6 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       return SessionLivePage(
         key: ObjectKey(live),
         controller: live,
-        leading: leading,
         ownsController: tabs == null,
         workspaceChrome: true,
         bodyFrame: tabs == null
@@ -426,38 +414,26 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       );
     }
     if (catalog.failure == SessionCatalogFailure.authenticationRequired) {
-      return _Notice(
-        message: l10n.hostsAuthRequired,
-        leading: leading,
-        onRetry: _retryLogin,
-      );
+      return _Notice(message: l10n.hostsAuthRequired, onRetry: _retryLogin);
     }
     // Waits for the first list, which may already hold the session. A list
     // cleared by a change of the server can be read again from here.
     if (!catalog.loaded && catalog.failure == null) {
-      return _Notice(
-        leading: leading,
-        onRetry: catalog.loading ? null : catalog.refresh,
-      );
+      return _Notice(onRetry: catalog.loading ? null : catalog.refresh);
     }
     if (_read == _Read.idle) _start(catalog);
     return switch (_read) {
-      _Read.notFound => _Notice(
-        message: l10n.sessionLinkNotFound,
-        leading: leading,
-      ),
+      _Read.notFound => _Notice(message: l10n.sessionLinkNotFound),
       // A fixed login reads again from the retry.
       _Read.login => _Notice(
         message: l10n.hostsAuthRequired,
-        leading: leading,
         onRetry: _retryLogin,
       ),
       _Read.failed => _Notice(
         message: l10n.sessionLinkUnreadable,
-        leading: leading,
         onRetry: _retry,
       ),
-      _Read.idle || _Read.reading => _Notice(leading: leading),
+      _Read.idle || _Read.reading => const _Notice(),
     };
   }
 
@@ -489,18 +465,13 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
 /// A session that is not open yet: progress without [message], otherwise
 /// why it cannot open.
 class _Notice extends StatelessWidget {
-  const _Notice({this.message, this.leading, this.onRetry});
+  const _Notice({this.message, this.onRetry});
 
   final String? message;
-  final Widget? leading;
   final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      leading: leading,
-      title: Text(context.v2L10n.chatConversation),
-    ),
     body: Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

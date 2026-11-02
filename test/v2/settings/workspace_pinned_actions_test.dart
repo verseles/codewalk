@@ -21,7 +21,9 @@ void main() {
         value: preferences,
         child: MaterialApp(
           home: Scaffold(
-            appBar: AppBar(actions: const [WorkspaceAppBarActions()]),
+            appBar: AppBar(
+              actions: const [WorkspaceAppBarActions(compact: false)],
+            ),
           ),
         ),
       ),

@@ -604,6 +604,14 @@ void main() {
       ValueKey('session-tabs-recent-${_ref(app, 'one').storageKey}'),
     );
     expect(one, findsOneWidget);
+    // The modal barrier also covers the shell-owned toolbar.
+    await tester.tapAt(const Offset(195, 20));
+    await _settle(tester);
+    expect(one, findsNothing);
+    expect(_location(app), '/s/profile_a/ses_two');
+    await tester.tap(find.byKey(const ValueKey('session-tabs-recent-button')));
+    await _settle(tester);
+    expect(one, findsOneWidget);
     await tester.tap(one);
     await _settle(tester);
     expect(_location(app), '/s/profile_a/ses_one');

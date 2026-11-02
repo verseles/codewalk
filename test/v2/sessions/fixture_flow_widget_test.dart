@@ -987,8 +987,18 @@ void main() {
             chipShows('live-variant-chip', 'high'),
         reason: 'selection chips updated to Fledge Alpha Free, high',
       );
-      await tester.tap(find.byKey(const ValueKey('live-jump-latest')));
-      await tester.pumpAndSettle();
+      final liveScroll = tester
+          .widget<SessionLivePage>(find.byType(SessionLivePage))
+          .controller
+          .scroll;
+      // With one toolbar the fixture can already fit at the latest content.
+      final jump = find.byKey(const ValueKey('live-jump-latest'));
+      if (jump.evaluate().isNotEmpty) {
+        await tester.tap(jump);
+        await tester.pumpAndSettle();
+      }
+      expect(liveScroll.following, isTrue);
+      expect(liveScroll.atBottom, isTrue);
 
       // 9. Error (`error`): emit `session.execution.started` + `failed`.
       await emitFrames(tester, rig.server, 0, count: 2);

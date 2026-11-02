@@ -65,6 +65,34 @@ Future<void> _settle(WidgetTester tester) async {
 Finder get _notice => find.byKey(const ValueKey('session-notice'));
 
 void main() {
+  for (final width in [390.0, 1280.0]) {
+    testWidgets('one toolbar while session loads and fails at $width', (
+      tester,
+    ) async {
+      final app = await _open(
+        tester,
+        '/s/profile_a/ses_far',
+        size: Size(width, 844),
+      );
+      expect(find.byType(AppBar), findsOneWidget);
+      final source = app.rig.sources.single;
+      source.respond(const []);
+      await _settle(tester);
+      expect(find.byKey(const ValueKey('session-opening')), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
+      source.reads.single.$2.completion.completeError(
+        const SessionCatalogException(SessionCatalogFailure.connection),
+      );
+      await _settle(tester);
+      expect(find.text(app.l10n.sessionLinkUnreadable), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
+      if (width < 600) {
+        expect(find.byKey(const ValueKey('workspace-drawer')), findsOneWidget);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   testWidgets('compact live toolbar survives retained-view rebuilds', (
     tester,
   ) async {
@@ -85,7 +113,10 @@ void main() {
       await tester.pump();
       final state = tester.state(find.byType(SessionLivePage));
       for (var round = 0; round < 2; round++) {
-        expect(find.byKey(const ValueKey('live-server')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('workspace-project-title')),
+          findsOneWidget,
+        );
         expect(
           find.byKey(const ValueKey('workspace-pinned-newChat')),
           findsOneWidget,
@@ -156,7 +187,10 @@ void main() {
     expect(find.byType(SessionLivePage), findsOneWidget);
     final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
     expect(page.controller.summary.info.title, 'Far');
-    expect(find.byKey(const ValueKey('live-server')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('workspace-project-title')),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

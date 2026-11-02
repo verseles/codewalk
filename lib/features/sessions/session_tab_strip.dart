@@ -293,6 +293,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
     final recent = widget.tabs.recent(host);
     final chosen = await showModalBottomSheet<SessionRef>(
       context: context,
+      useRootNavigator: true,
       showDragHandle: true,
       builder: (context) => SafeArea(
         child: ListView(
