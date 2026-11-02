@@ -6,6 +6,7 @@ import 'package:codewalk/features/sessions/sessions_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations_en.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
+import 'package:codewalk/shared/sessions/session_turn_actions.dart' as shared;
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,7 @@ Finder _command(String name) => find.byKey(ValueKey('live-command-$name'));
 Future<AppDependencies> _open(
   WidgetTester tester,
   FakeOutbox outbox, {
+  shared.SessionTurnActionPort? turnActions,
   Size size = const Size(1280, 800),
   Locale locale = const Locale('en'),
   double keyboard = 0,
@@ -62,7 +64,7 @@ Future<AppDependencies> _open(
   await tester.pump();
   await tester.pump();
   final ref = row.info.ref;
-  final handle = directory.grant(ref, outbox: outbox)
+  final handle = directory.grant(ref, outbox: outbox, turnActions: turnActions)
     ..selectionAvailable = true
     ..selectionState = SessionSelectionState(
       selection: const Selection(
@@ -104,6 +106,47 @@ Future<AppDependencies> _open(
     await tester.pumpAndSettle();
   }
   return graph;
+}
+
+/// The live session's turn port: records which actions reached it.
+final class _RecordingTurnPort implements shared.SessionTurnActionPort {
+  @override
+  shared.SessionTurnState state = const shared.SessionTurnState();
+  final List<String> calls = [];
+
+  @override
+  shared.SessionTurnUnavailable? unavailable(shared.SessionTurnAction action) =>
+      null;
+
+  @override
+  Future<shared.SessionTurnResult> stage(
+    ItemId boundary, {
+    required CommandId id,
+  }) async {
+    calls.add('stage');
+    return const shared.SessionTurnResult(applied: true);
+  }
+
+  @override
+  Future<shared.SessionTurnResult> redoNext({required CommandId id}) async {
+    calls.add('redoNext');
+    return const shared.SessionTurnResult(applied: true, cleared: true);
+  }
+
+  @override
+  Future<shared.SessionTurnResult> redoAll({required CommandId id}) async {
+    calls.add('redoAll');
+    return const shared.SessionTurnResult(applied: true, cleared: true);
+  }
+
+  @override
+  Future<shared.SessionTurnResult> compact({required CommandId id}) async {
+    calls.add('compact');
+    return const shared.SessionTurnResult(applied: true);
+  }
+
+  @override
+  Future<void> refresh() async {}
 }
 
 Iterable<String> _submits(FakeOutbox outbox) =>
@@ -173,7 +216,7 @@ void main() {
       expect(sessionCommandSuggestions('zzz', _l10n), isEmpty);
     });
 
-    test('turn actions stay unavailable until #455 binds them', () {
+    test('unbound turn actions report notYetAvailable', () {
       for (final action in SessionTurnAction.values) {
         expect(
           unboundSessionTurnActions.unavailable(action),
@@ -287,6 +330,27 @@ void main() {
     await _sendTyped(tester, '/new');
     expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
     expect(_submits(outbox), hasLength(1));
+  });
+
+  testWidgets('undo, redo and compact reach the bound turn actions (D2)', (
+    tester,
+  ) async {
+    final outbox = FakeOutbox();
+    final port = _RecordingTurnPort();
+    await _open(tester, outbox, turnActions: port);
+
+    await _sendTyped(tester, '/compact');
+    expect(port.calls, ['compact']);
+
+    // Redo reaches the bound port; undo has no visible user turn to target, so
+    // it reaches no port and shows no placeholder.
+    await _sendTyped(tester, '/redo');
+    expect(port.calls, ['compact', 'redoNext']);
+    await _sendTyped(tester, '/undo');
+    expect(port.calls, ['compact', 'redoNext']);
+
+    expect(find.text(_l10n.commandUnavailableHere), findsNothing);
+    expect(_submits(outbox), isEmpty);
   });
 
   testWidgets('/sessions opens the hidden pane of a wide window', (

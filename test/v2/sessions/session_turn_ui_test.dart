@@ -180,7 +180,7 @@ void main() {
     expect(live.draft.text, 'Second user prompt');
   });
 
-  testWidgets('timeline immediately filters staged cut items', (tester) async {
+  testWidgets('undo and redo reflect in the timeline at once', (tester) async {
     final rig = CatalogRig();
     await rig.save('a');
     await rig.sessions.initialize();
@@ -235,6 +235,11 @@ void main() {
     // msg_2 and later items are now filtered from the timeline
     expect(find.text('First user prompt'), findsOneWidget);
     expect(find.text('Second user prompt'), findsNothing);
+
+    // Redo restores the cut turn in the timeline at once.
+    await live.turn.redoAll();
+    await tester.pumpAndSettle();
+    expect(find.text('Second user prompt'), findsOneWidget);
   });
 
   testWidgets('workspace header overflow shows turn actions when session is active',
