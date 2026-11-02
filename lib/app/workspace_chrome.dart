@@ -214,46 +214,49 @@ class WorkspaceAppBarActions extends StatelessWidget {
                   ),
             child: Text(_label(l, action)),
           ),
-          if (action != WorkspacePinnedAction.servers ||
-              (!wide && live != null))
+          if (action != WorkspacePinnedAction.servers || !wide)
             const Divider(height: 1),
         ],
-        if (live != null && !wide) ...[
+        // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
+        // disabled without a turn to undo; redo and compact need a live session.
+        if (!wide) ...[
           MenuItemButton(
             key: const ValueKey('turn-menu-undo'),
             leadingIcon: const Icon(Symbols.undo_rounded),
-            onPressed: live.turn.canUndo
+            onPressed: live != null && live.turn.canUndo
                 ? () => unawaited(live.turn.undoLast(context: context))
                 : null,
             child: Text(l.chatUndoLastTurn),
           ),
-          const Divider(height: 1),
-          MenuItemButton(
-            key: const ValueKey('turn-menu-redo-next'),
-            leadingIcon: const Icon(Symbols.redo_rounded),
-            onPressed: live.turn.canRedoNext
-                ? () => unawaited(live.turn.redoNext(context: context))
-                : null,
-            child: Text(l.chatRedoLastTurn),
-          ),
-          const Divider(height: 1),
-          MenuItemButton(
-            key: const ValueKey('turn-menu-redo-all'),
-            leadingIcon: const Icon(Symbols.fast_forward),
-            onPressed: live.turn.canRedoAll
-                ? () => unawaited(live.turn.redoAll(context: context))
-                : null,
-            child: Text(l.chatRedoAll),
-          ),
-          const Divider(height: 1),
-          MenuItemButton(
-            key: const ValueKey('turn-menu-compact'),
-            leadingIcon: const Icon(Symbols.compress),
-            onPressed: live.turn.canCompact
-                ? () => unawaited(live.turn.compact(context: context))
-                : null,
-            child: Text(l.chatCompactContext),
-          ),
+          if (live != null) ...[
+            const Divider(height: 1),
+            MenuItemButton(
+              key: const ValueKey('turn-menu-redo-next'),
+              leadingIcon: const Icon(Symbols.redo_rounded),
+              onPressed: live.turn.canRedoNext
+                  ? () => unawaited(live.turn.redoNext(context: context))
+                  : null,
+              child: Text(l.chatRedoLastTurn),
+            ),
+            const Divider(height: 1),
+            MenuItemButton(
+              key: const ValueKey('turn-menu-redo-all'),
+              leadingIcon: const Icon(Symbols.fast_forward),
+              onPressed: live.turn.canRedoAll
+                  ? () => unawaited(live.turn.redoAll(context: context))
+                  : null,
+              child: Text(l.chatRedoAll),
+            ),
+            const Divider(height: 1),
+            MenuItemButton(
+              key: const ValueKey('turn-menu-compact'),
+              leadingIcon: const Icon(Symbols.compress),
+              onPressed: live.turn.canCompact
+                  ? () => unawaited(live.turn.compact(context: context))
+                  : null,
+              child: Text(l.chatCompactContext),
+            ),
+          ],
         ],
       ],
     );
@@ -267,7 +270,7 @@ class WorkspaceAppBarActions extends StatelessWidget {
             onPressed: _run(context, action),
             icon: Icon(_icon(action)),
           ),
-        if (wide && live != null)
+        if (wide)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -275,34 +278,36 @@ class WorkspaceAppBarActions extends StatelessWidget {
                 key: const ValueKey('turn-menu-undo'),
                 tooltip: l.chatUndoLastTurn,
                 icon: const Icon(Symbols.undo_rounded),
-                onPressed: live.turn.canUndo
+                onPressed: live != null && live.turn.canUndo
                     ? () => unawaited(live.turn.undoLast(context: context))
                     : null,
               ),
-              IconButton(
-                key: const ValueKey('turn-menu-redo-next'),
-                tooltip: l.chatRedoLastTurn,
-                icon: const Icon(Symbols.redo_rounded),
-                onPressed: live.turn.canRedoNext
-                    ? () => unawaited(live.turn.redoNext(context: context))
-                    : null,
-              ),
-              IconButton(
-                key: const ValueKey('turn-menu-redo-all'),
-                tooltip: l.chatRedoAll,
-                icon: const Icon(Symbols.fast_forward),
-                onPressed: live.turn.canRedoAll
-                    ? () => unawaited(live.turn.redoAll(context: context))
-                    : null,
-              ),
-              IconButton(
-                key: const ValueKey('turn-menu-compact'),
-                tooltip: l.chatCompactContext,
-                icon: const Icon(Symbols.compress),
-                onPressed: live.turn.canCompact
-                    ? () => unawaited(live.turn.compact(context: context))
-                    : null,
-              ),
+              if (live != null) ...[
+                IconButton(
+                  key: const ValueKey('turn-menu-redo-next'),
+                  tooltip: l.chatRedoLastTurn,
+                  icon: const Icon(Symbols.redo_rounded),
+                  onPressed: live.turn.canRedoNext
+                      ? () => unawaited(live.turn.redoNext(context: context))
+                      : null,
+                ),
+                IconButton(
+                  key: const ValueKey('turn-menu-redo-all'),
+                  tooltip: l.chatRedoAll,
+                  icon: const Icon(Symbols.fast_forward),
+                  onPressed: live.turn.canRedoAll
+                      ? () => unawaited(live.turn.redoAll(context: context))
+                      : null,
+                ),
+                IconButton(
+                  key: const ValueKey('turn-menu-compact'),
+                  tooltip: l.chatCompactContext,
+                  icon: const Icon(Symbols.compress),
+                  onPressed: live.turn.canCompact
+                      ? () => unawaited(live.turn.compact(context: context))
+                      : null,
+                ),
+              ],
             ],
           ),
         menu(),

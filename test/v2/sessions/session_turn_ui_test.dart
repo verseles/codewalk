@@ -356,4 +356,88 @@ void main() {
       },
     );
   }
+
+  // v1 keeps "Undo last turn" listed and disabled on the home screen.
+  for (final width in [390.0, 1280.0]) {
+    testWidgets(
+      width < 600
+          ? 'workspace header overflow keeps undo disabled without a live session'
+          : 'workspace toolbar keeps undo disabled without a live session',
+      (tester) async {
+        tester.view.physicalSize = Size(width, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final rig = CatalogRig();
+        await rig.save('a');
+        await rig.sessions.initialize();
+        final selecting = rig.sessions.selectProfile('profile_a');
+        rig.sources.single.respond([rig.sources.single.row('one')]);
+        await selecting;
+
+        final tabs = SessionTabsController(
+          catalog: rig.sessions,
+          store: SessionTabsStore(
+            store: V2MetadataStore(backend: FakeMetadataBackend()),
+          ),
+        );
+        addTearDown(tabs.dispose);
+        await tabs.initialize();
+
+        final health = EndpointHealthController(
+          hosts: rig.hosts,
+          now: () => tester.binding.clock.now().toUtc(),
+        );
+        addTearDown(health.dispose);
+
+        final chrome = WorkspaceChromeController(
+          health: health,
+          catalog: rig.sessions,
+          tabs: tabs,
+        );
+        addTearDown(chrome.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: MultiProvider(
+              providers: [
+                ChangeNotifierProvider<SessionsController?>.value(
+                  value: rig.sessions,
+                ),
+                ChangeNotifierProvider<WorkspaceChromeController?>.value(
+                  value: chrome,
+                ),
+              ],
+              child: Scaffold(
+                appBar: AppBar(
+                  actions: [WorkspaceAppBarActions(compact: width < 600)],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        if (width < 600) {
+          await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+          await tester.pumpAndSettle();
+          final undo = tester.widget<MenuItemButton>(
+            find.byKey(const ValueKey('turn-menu-undo')),
+          );
+          expect(undo.onPressed, isNull);
+        } else {
+          final undo = tester.widget<IconButton>(
+            find.byKey(const ValueKey('turn-menu-undo')),
+          );
+          expect(undo.onPressed, isNull);
+        }
+
+        expect(find.byKey(const ValueKey('turn-menu-redo-next')), findsNothing);
+        expect(find.byKey(const ValueKey('turn-menu-redo-all')), findsNothing);
+        expect(find.byKey(const ValueKey('turn-menu-compact')), findsNothing);
+      },
+    );
+  }
 }
