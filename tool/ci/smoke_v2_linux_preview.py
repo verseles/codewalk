@@ -112,7 +112,7 @@ def smoke(archive_path, evidence):
         if shutil.which(program) is None:
             raise RuntimeError(f"Missing native smoke runtime: {program}")
     report = {
-        "archive_sha256": checksum, "target": "Ubuntu 24.04 Linux X11/software",
+        "archive_sha256": checksum, "target": "Ubuntu 24.04 Linux X11, default renderer",
         "checks": [], "native_visual": "fail", "release_mvp": "not-tested",
         "server_pairing": "not-tested", "gpu_wayland": "not-tested",
     }
@@ -128,7 +128,7 @@ def smoke(archive_path, evidence):
         bundle = extract(archive_path, root / "extracted")
         manifest = preview.verify_bundle(bundle)
         report["source_commit"] = manifest["source_commit"]
-        report["target"] = f"Ubuntu 24.04 Linux {manifest['architecture']} X11/software"
+        report["target"] = f"Ubuntu 24.04 Linux {manifest['architecture']} X11, default renderer"
         env = dict(os.environ)
         env.update({"HOME": str(host), "XDG_DATA_HOME": str(host / ".local/share"),
                     "GDK_SCALE": "1", "GDK_DPI_SCALE": "1",

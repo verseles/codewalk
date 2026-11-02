@@ -140,7 +140,7 @@ def package(bundle, metadata_path, output):
         launcher.chmod(0o755)
         (root / "codewalk").chmod(0o755)
         manifest = {
-            "kind": KIND, "architecture": arch, "runtime": "Ubuntu 24.04 X11/software",
+            "kind": KIND, "architecture": arch, "runtime": "Ubuntu 24.04 X11, default renderer",
             "source_commit": metadata["source_commit"], "source_dirty": metadata["source_dirty"],
             "entry_point": metadata["entry_point"], "flutter": metadata["flutter"],
             "credentials": "encrypted ephemeral keyring; cleared after each launcher session",

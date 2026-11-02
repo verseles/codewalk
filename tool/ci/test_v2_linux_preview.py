@@ -260,9 +260,11 @@ class LinuxPreviewTests(unittest.TestCase):
         profile = self.root / "profile"
         runtime = self.root / "runtime"
         inherited = {"HOME": str(self.root), "DISPLAY": ":123", "DBUS_SESSION_BUS_ADDRESS": "host-bus",
-                     "DBUS_STARTER_ADDRESS": "host-starter", "GNOME_KEYRING_CONTROL": "host-control"}
+                     "DBUS_STARTER_ADDRESS": "host-starter", "GNOME_KEYRING_CONTROL": "host-control",
+                     "FLUTTER_LINUX_RENDERER": "software"}
         result = preview.isolated_environment(profile, runtime, inherited)
         self.assertFalse(any(k.startswith(("DBUS_", "GNOME_KEYRING_")) for k in result))
+        self.assertNotIn("FLUTTER_LINUX_RENDERER", result)
         self.assertEqual(result["DISPLAY"], ":123")
         self.assertEqual(result["XDG_DATA_HOME"], str(profile / "data"))
         self.assertEqual(result["XDG_RUNTIME_DIR"], str(runtime))
