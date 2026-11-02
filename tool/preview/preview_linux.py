@@ -222,8 +222,10 @@ def isolated_environment(profile, runtime, inherited):
         "XDG_CONFIG_HOME": str(profile / "config"), "XDG_CACHE_HOME": str(profile / "cache"),
         "XDG_STATE_HOME": str(profile / "state"), "XDG_RUNTIME_DIR": str(runtime),
         "TMPDIR": str(runtime / "tmp"), "GDK_BACKEND": "x11",
-        "FLUTTER_LINUX_RENDERER": "software",
     })
+    # The default renderer: a forced software renderer aborts on Flutter 3.47.9
+    # under Xvfb ("Impeller DlText cannot be drawn to a Skia canvas").
+    env.pop("FLUTTER_LINUX_RENDERER", None)
     return env
 
 

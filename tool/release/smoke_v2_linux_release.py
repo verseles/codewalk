@@ -64,7 +64,9 @@ def isolated_env(root: Path) -> dict:
         path.mkdir(parents=True, exist_ok=True)
     (root / "runtime").chmod(0o700)
     env.update({key: str(path) for key, path in paths.items()})
-    env.update({"GDK_BACKEND": "x11", "FLUTTER_LINUX_RENDERER": "software"})
+    env.update({"GDK_BACKEND": "x11"})
+    # The default renderer: a forced software renderer aborts on Flutter 3.47.9 under Xvfb.
+    env.pop("FLUTTER_LINUX_RENDERER", None)
     env.setdefault("LANG", "C.UTF-8")
     return env
 

@@ -81,7 +81,8 @@ class SmokeTest(unittest.TestCase):
         self.assertNotIn("/home/owner", env.values())
         # The display cookie from xvfb-run must reach the app, or it cannot open the display.
         self.assertEqual(env["XAUTHORITY"], "/tmp/xvfb-run.abc/Xauthority")
-        self.assertEqual((env["GDK_BACKEND"], env["FLUTTER_LINUX_RENDERER"]), ("x11", "software"))
+        self.assertEqual(env["GDK_BACKEND"], "x11")
+        self.assertNotIn("FLUTTER_LINUX_RENDERER", env)
 
     def test_no_window_or_an_early_exit_fails(self):
         report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess(), found=())

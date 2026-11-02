@@ -252,7 +252,9 @@ def smoke(archive_path, evidence):
             expect(window, ["Enable app logging", "Logging is disabled"], "08-logs")
             reveal(window, "Version and updates")
             click(window, "Version and updates")
-            expect(window, ["Check for updates"], "08b-updates")
+            # The button label renders on screen but the OCR passes cannot read it under the
+            # default renderer; "Update channel" is a control unique to this page.
+            expect(window, ["Update channel"], "08b-updates")
             reveal(window, "Release history")
             click(window, "Release history")
             expect(window, ["Refresh"], "09-history")
