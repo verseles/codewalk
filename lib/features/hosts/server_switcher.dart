@@ -93,74 +93,89 @@ class ServerSwitcher extends StatelessWidget {
     final tokens = Theme.of(context).surfaceTokens;
     // v1: chat_page_status_presenter.dart:644-718 (cloud, status dot, name,
     // state, arrow) on the muted control surface.
-    return InkWell(
-      key: controlKey,
-      borderRadius: tokens.controlRadius,
-      onTap:
-          catalog == null ||
-              catalog.hosts.loading ||
-              catalog.hosts.storageError ||
-              workspace?.switchingServer == true
-          ? null
-          : () => showDialog<void>(
-              context: context,
-              builder: (_) => _ServerPicker(
-                catalog: catalog,
-                health: health,
-                workspace: workspace,
+    final open =
+        catalog == null ||
+            catalog.hosts.loading ||
+            catalog.hosts.storageError ||
+            workspace?.switchingServer == true
+        ? null
+        : () => showDialog<void>(
+            context: context,
+            builder: (_) => _ServerPicker(
+              catalog: catalog,
+              health: health,
+              workspace: workspace,
+            ),
+          );
+    // A button for assistive technology, and a tap target at least 48 dp
+    // tall; the pill keeps its own size inside it.
+    return Semantics(
+      button: true,
+      enabled: open != null,
+      child: InkWell(
+        key: controlKey,
+        borderRadius: tokens.controlRadius,
+        onTap: open,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+              decoration: BoxDecoration(
+                color: tokens.mutedControlSurface,
+                borderRadius: tokens.controlRadius,
               ),
-            ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-        decoration: BoxDecoration(
-          color: tokens.mutedControlSurface,
-          borderRadius: tokens.controlRadius,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Symbols.cloud,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                profile?.label ?? context.v2L10n.sessionsSelectProfile,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (profile != null) ...[
-              const SizedBox(width: 4),
-              if (compact)
-                Tooltip(
-                  message: healthStatusText(context.v2L10n, status),
-                  child: Semantics(
-                    label: healthStatusText(context.v2L10n, status),
-                    child: Icon(
-                      Icons.circle,
-                      size: 8,
-                      color: switch (status) {
-                        EndpointHealthStatus.online => Colors.green,
-                        EndpointHealthStatus.delayed => Colors.orange,
-                        EndpointHealthStatus.offline => Theme.of(
-                          context,
-                        ).colorScheme.error,
-                      },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Symbols.cloud,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      profile?.label ?? context.v2L10n.sessionsSelectProfile,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                )
-              else
-                Flexible(
-                  child: EndpointHealthIndicator(
-                    view: health?.view(profile) ?? const EndpointHealthView(),
-                  ),
-                ),
-            ],
-            const Icon(Symbols.arrow_drop_down, size: 18),
-          ],
+                  if (profile != null) ...[
+                    const SizedBox(width: 4),
+                    if (compact)
+                      Tooltip(
+                        message: healthStatusText(context.v2L10n, status),
+                        child: Semantics(
+                          label: healthStatusText(context.v2L10n, status),
+                          child: Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: switch (status) {
+                              EndpointHealthStatus.online => Colors.green,
+                              EndpointHealthStatus.delayed => Colors.orange,
+                              EndpointHealthStatus.offline => Theme.of(
+                                context,
+                              ).colorScheme.error,
+                            },
+                          ),
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: EndpointHealthIndicator(
+                          view:
+                              health?.view(profile) ??
+                              const EndpointHealthView(),
+                        ),
+                      ),
+                  ],
+                  const Icon(Symbols.arrow_drop_down, size: 18),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

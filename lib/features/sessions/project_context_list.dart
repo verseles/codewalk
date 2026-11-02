@@ -10,6 +10,10 @@ import '../../shared/sessions/server_path.dart';
 /// The width of the accent that marks the selected project or session.
 const _accentWidth = 3.0;
 
+/// Below this width a project row drops its folder and chevron, so the name
+/// and the path keep the space that is left.
+const _iconsMinWidth = 48.0;
+
 /// A row of the session list's continuous surface: no card or row-wide
 /// fill, only a thin accent along the start edge while [selected].
 class AccentedRow extends StatelessWidget {
@@ -183,51 +187,58 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                           // v1: chat_page_scaffold.dart project group row
                           // (folder beside the name); the path keeps the full
                           // width below, so its trailing folders stay visible.
-                          Row(
-                            children: [
-                              Icon(
-                                Symbols.folder_open,
-                                color: widget.active
-                                    ? theme.colorScheme.primary
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleSmall?.copyWith(
+                          LayoutBuilder(
+                            builder: (context, constraints) => Row(
+                              children: [
+                                if (constraints.maxWidth >= _iconsMinWidth) ...[
+                                  Icon(
+                                    Symbols.folder_open,
                                     color: widget.active
                                         ? theme.colorScheme.primary
                                         : null,
-                                    fontWeight: widget.active
-                                        ? FontWeight.w600
-                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Expanded(
+                                  child: Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      color: widget.active
+                                          ? theme.colorScheme.primary
+                                          : null,
+                                      fontWeight: widget.active
+                                          ? FontWeight.w600
+                                          : null,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StartEllipsisPath(
-                                  directory,
-                                  key: ValueKey('project-path-$directory'),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                          LayoutBuilder(
+                            builder: (context, constraints) => Row(
+                              children: [
+                                Expanded(
+                                  child: StartEllipsisPath(
+                                    directory,
+                                    key: ValueKey('project-path-$directory'),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              // The active project shows its conversations
-                              // below it, so its chevron is up.
-                              Icon(
-                                widget.active
-                                    ? Symbols.expand_less
-                                    : Symbols.expand_more,
-                              ),
-                            ],
+                                // The active project shows its conversations
+                                // below it, so its chevron is up.
+                                if (constraints.maxWidth >= _iconsMinWidth)
+                                  Icon(
+                                    widget.active
+                                        ? Symbols.expand_less
+                                        : Symbols.expand_more,
+                                  ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -235,14 +246,21 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                     if (count != null)
                       Padding(
                         padding: const EdgeInsetsDirectional.only(start: 8),
-                        child: Text(
-                          widget.complete ? '$count' : '$count+',
-                          key: ValueKey('project-count-$directory'),
-                          semanticsLabel: widget.complete
-                              ? l10n.projectsSessionCount(count)
-                              : l10n.projectsSessionCountAtLeast(count),
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                        child: ConstrainedBox(
+                          // Three digits at 2x must not push the menu out of
+                          // a narrow row; the count shortens instead.
+                          constraints: const BoxConstraints(maxWidth: 40),
+                          child: Text(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            widget.complete ? '$count' : '$count+',
+                            key: ValueKey('project-count-$directory'),
+                            semanticsLabel: widget.complete
+                                ? l10n.projectsSessionCount(count)
+                                : l10n.projectsSessionCountAtLeast(count),
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ),
