@@ -26,6 +26,8 @@ final class _FakePort implements SessionTurnActionPort {
   SessionTurnState state = const SessionTurnState();
   final List<ItemId> staged = [];
   MessageAnchor? nextAnchor;
+  // Publishes the live view after a change, as the production turn lane does.
+  void Function()? onRedo;
 
   @override
   SessionTurnUnavailable? unavailable(SessionTurnAction action) => null;
@@ -57,6 +59,7 @@ final class _FakePort implements SessionTurnActionPort {
   @override
   Future<SessionTurnResult> redoAll({required CommandId id}) async {
     state = const SessionTurnState();
+    onRedo?.call();
     return const SessionTurnResult(applied: true, cleared: true);
   }
 
@@ -236,7 +239,14 @@ void main() {
     expect(find.text('First user prompt'), findsOneWidget);
     expect(find.text('Second user prompt'), findsNothing);
 
-    // Redo restores the cut turn in the timeline at once.
+    // Redo publishes the full view, as the turn lane does; the cut turn is back at once.
+    port.onRedo = () => handle.emit(
+          SessionLiveView(
+            session: ref,
+            phase: SessionLivePhase.live,
+            state: liveState(ref, items: [user1, ans1, user2, ans2]),
+          ),
+        );
     await live.turn.redoAll();
     await tester.pumpAndSettle();
     expect(find.text('Second user prompt'), findsOneWidget);

@@ -348,6 +348,7 @@ void main() {
     expect(port.calls, ['compact', 'redoNext']);
     await _sendTyped(tester, '/undo');
     expect(port.calls, ['compact', 'redoNext']);
+    expect(find.text(_l10n.chatUndoNothing), findsOneWidget);
 
     expect(find.text(_l10n.commandUnavailableHere), findsNothing);
     expect(_submits(outbox), isEmpty);
