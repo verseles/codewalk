@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/workspace_chrome.dart';
@@ -195,8 +196,6 @@ class _SessionsPageState extends State<SessionsPage> {
         if (hosts.loading || controller.loading)
           AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
         const ServerSwitcher(),
-        if (contexts != null && ready)
-          _projectTitle(context, controller, contexts),
         const SizedBox(height: 8),
         SessionDrawerHeader(
           catalog: controller,
@@ -204,92 +203,32 @@ class _SessionsPageState extends State<SessionsPage> {
           onCreate: ready && !controller.creating
               ? () => openWorkspaceDraft(context)
               : null,
+          onProjects: contexts != null && ready
+              ? () => unawaited(
+                  pickWorkspaceProject(
+                    context,
+                    catalog: controller,
+                    contexts: contexts,
+                  ),
+                )
+              : null,
         ),
-        Wrap(
-          spacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            IconButton(
-              key: const ValueKey('sessions-refresh'),
-              tooltip: l10n.chatRefresh,
-              onPressed: ready && !controller.refreshing
-                  ? controller.refresh
-                  : null,
-              icon: const Icon(Icons.refresh),
+        // Refresh, Settings and Servers are in the toolbar (decision 10); the
+        // retry stays here while the stored profiles cannot be read.
+        if (hosts.storageError)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              onPressed: hosts.loading ? null : hosts.load,
+              child: Text(l10n.chatRetry),
             ),
-            if (hosts.storageError)
-              TextButton(
-                onPressed: hosts.loading ? null : hosts.load,
-                child: Text(l10n.chatRetry),
-              ),
-            IconButton(
-              key: const ValueKey('sessions-settings'),
-              tooltip: l10n.settingsTitle,
-              onPressed: () => context.push('/settings'),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            TextButton(
-              key: const ValueKey('sessions-hosts'),
-              onPressed: () => context.push('/hosts'),
-              child: Text(l10n.onboardingConnectRunningServer),
-            ),
-          ],
-        ),
+          ),
         for (final notice in notices)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(notice),
           ),
       ],
-    );
-  }
-
-  /// The project the list shows; a tap opens the project picker.
-  Widget _projectTitle(
-    BuildContext context,
-    SessionsController controller,
-    ProjectContextsController contexts,
-  ) {
-    final l10n = context.v2L10n;
-    final theme = Theme.of(context);
-    final active = contexts.active;
-    return InkWell(
-      key: const ValueKey('project-title'),
-      onTap: () => unawaited(
-        pickWorkspaceProject(context, catalog: controller, contexts: contexts),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 4, 4),
-        child: Row(
-          children: [
-            const Icon(Icons.folder_outlined, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    active == null
-                        ? l10n.chatChooseDirectory
-                        : serverPathTitle(active),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  if (active != null)
-                    StartEllipsisPath(
-                      active,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Icon(Icons.unfold_more, semanticLabel: l10n.chatChooseDirectory),
-          ],
-        ),
-      ),
     );
   }
 
@@ -330,7 +269,6 @@ class _SessionsPageState extends State<SessionsPage> {
             onTap: available ? () => _openLive(context, controller, row) : null,
           ),
       ],
-      (context) => _sectionTitle(context, l10n.workspaceOpenProjects),
     ];
     for (final directory in contexts.open) {
       final active = directory == shown;
@@ -557,13 +495,41 @@ class _SessionsPageState extends State<SessionsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: selected ? theme.colorScheme.primary : null,
-                        ),
+                      // v1: chat_page_scaffold.dart project group row (folder
+                      // and count beside the title). The path keeps the full
+                      // width below, so its trailing folders stay visible.
+                      Row(
+                        children: [
+                          Icon(
+                            Symbols.folder_open,
+                            color: selected ? theme.colorScheme.primary : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              '${group.sessions.length}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: selected ? FontWeight.w700 : null,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       if (directory != null)
                         StartEllipsisPath(
@@ -573,7 +539,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     ],
                   ),
                 ),
-                Icon(selected ? Icons.expand_less : Icons.expand_more),
+                Icon(selected ? Symbols.expand_less : Symbols.expand_more),
               ],
             ),
           ),

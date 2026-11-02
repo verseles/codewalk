@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../sessions/sessions_controller.dart';
 import 'endpoint_health_controller.dart';
@@ -88,9 +90,13 @@ class ServerSwitcher extends StatelessWidget {
     final status = profile != null
         ? health?.view(profile).status ?? EndpointHealthStatus.delayed
         : EndpointHealthStatus.delayed;
-    return TextButton(
+    final tokens = Theme.of(context).surfaceTokens;
+    // v1: chat_page_status_presenter.dart:644-718 (cloud, status dot, name,
+    // state, arrow) on the muted control surface.
+    return InkWell(
       key: controlKey,
-      onPressed:
+      borderRadius: tokens.controlRadius,
+      onTap:
           catalog == null ||
               catalog.hosts.loading ||
               catalog.hosts.storageError ||
@@ -104,44 +110,58 @@ class ServerSwitcher extends StatelessWidget {
                 workspace: workspace,
               ),
             ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              profile?.label ?? context.v2L10n.sessionsSelectProfile,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+        decoration: BoxDecoration(
+          color: tokens.mutedControlSurface,
+          borderRadius: tokens.controlRadius,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Symbols.cloud,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          ),
-          if (profile != null) ...[
-            const SizedBox(width: 4),
-            if (compact)
-              Tooltip(
-                message: healthStatusText(context.v2L10n, status),
-                child: Semantics(
-                  label: healthStatusText(context.v2L10n, status),
-                  child: Icon(
-                    Icons.circle,
-                    size: 8,
-                    color: switch (status) {
-                      EndpointHealthStatus.online => Colors.green,
-                      EndpointHealthStatus.delayed => Colors.orange,
-                      EndpointHealthStatus.offline =>
-                        Theme.of(context).colorScheme.error,
-                    },
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                profile?.label ?? context.v2L10n.sessionsSelectProfile,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (profile != null) ...[
+              const SizedBox(width: 4),
+              if (compact)
+                Tooltip(
+                  message: healthStatusText(context.v2L10n, status),
+                  child: Semantics(
+                    label: healthStatusText(context.v2L10n, status),
+                    child: Icon(
+                      Icons.circle,
+                      size: 8,
+                      color: switch (status) {
+                        EndpointHealthStatus.online => Colors.green,
+                        EndpointHealthStatus.delayed => Colors.orange,
+                        EndpointHealthStatus.offline => Theme.of(
+                          context,
+                        ).colorScheme.error,
+                      },
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: EndpointHealthIndicator(
+                    view: health?.view(profile) ?? const EndpointHealthView(),
                   ),
                 ),
-              )
-            else
-              Flexible(
-                child: EndpointHealthIndicator(
-                  view: health?.view(profile) ?? const EndpointHealthView(),
-                ),
-              ),
+            ],
+            const Icon(Symbols.arrow_drop_down, size: 18),
           ],
-          const Icon(Icons.arrow_drop_down, size: 18),
-        ],
+        ),
       ),
     );
   }

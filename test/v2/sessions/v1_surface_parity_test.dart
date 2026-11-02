@@ -108,8 +108,56 @@ class ParitySurface {
   }
 }
 
+void sidePanelGroup() {
+  testWidgets('side panel server row uses the v1 cloud pill', (tester) async {
+    await ParitySurface.pump(tester, size: parityPhoneSize);
+    // v1: chat_page_status_presenter.dart:644 (cloud 16), :718 (arrow 18).
+    final server = find.byKey(const ValueKey('sessions-profile'));
+    expect(server, findsOneWidget);
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(of: server, matching: find.byIcon(Symbols.cloud)),
+          )
+          .size,
+      16,
+    );
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: server,
+              matching: find.byIcon(Symbols.arrow_drop_down),
+            ),
+          )
+          .size,
+      18,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('side panel header uses the v1 Symbols glyphs', (tester) async {
+    await ParitySurface.pump(tester, size: parityPhoneSize);
+    // v1: chat_page_scaffold.dart:242 (search), :293 (add_comment), :272
+    // (folder_open for the project picker), :602 (filter_list).
+    expect(find.byIcon(Symbols.search), findsOneWidget);
+    expect(find.byIcon(Symbols.filter_list), findsOneWidget);
+    expect(find.byIcon(Symbols.folder_open), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('sessions-create')),
+        matching: find.byIcon(Symbols.add_comment),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(IconButton), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+}
+
 void main() {
   toolbarGroup();
+  sidePanelGroup();
   // Each size shows its own session surface: the compact list drawer on a
   // phone, the persistent sidebar on desktop.
   final surfaces = {
@@ -161,7 +209,14 @@ void toolbarGroup() {
             matching: find.byIcon(compact ? Symbols.menu : Symbols.menu_open),
           );
           expect(leading, findsOneWidget);
-          expect(find.byIcon(Symbols.add_comment), findsOneWidget);
+          // The drawer header shows the same new-chat glyph beside the list.
+          expect(
+            find.descendant(
+              of: find.byType(AppBar),
+              matching: find.byIcon(Symbols.add_comment),
+            ),
+            findsOneWidget,
+          );
           expect(find.byIcon(Symbols.more_vert), findsOneWidget);
 
           // v1: lib/presentation/pages/chat_page/chat_page_chrome.dart:634.

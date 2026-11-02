@@ -7,12 +7,22 @@ import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
 import 'workspace_support.dart';
+
+/// Opens the toolbar's overflow menu, closing the list drawer first.
+Future<void> _openToolbarMenu(WidgetTester tester) async {
+  final scaffold = tester.firstState<ScaffoldState>(find.byType(Scaffold));
+  if (scaffold.isDrawerOpen) scaffold.closeDrawer();
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+  await tester.pumpAndSettle();
+}
 
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
@@ -43,17 +53,14 @@ void main() {
           // The single saved server opens without being chosen.
           expect(controller.selectedProfile?.id, 'profile_a');
           final source = rig.sources.single;
-          source.respond(
-            [
-              source.row(
-                'first',
-                title: '',
-                directory:
-                    '/a/very/long/workspace/path/that/should/ellipsize/in/the/compact/layout',
-              ),
-            ],
-            next: 'A',
-          );
+          source.respond([
+            source.row(
+              'first',
+              title: '',
+              directory:
+                  '/a/very/long/workspace/path/that/should/ellipsize/in/the/compact/layout',
+            ),
+          ], next: 'A');
           await tester.pumpAndSettle();
           expect(find.text(l10n.sessionExportUntitled), findsOneWidget);
           // The ownership label is on every row, in every locale and size.
@@ -107,12 +114,10 @@ void main() {
         find.text(dependencies.localizations.current.serversNoServersFound),
         findsOneWidget,
       );
-      await tester.tap(find.byKey(const ValueKey('sessions-hosts')));
+      await _openToolbarMenu(tester);
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Servers'));
       await tester.pumpAndSettle();
-      expect(
-        dependencies.router.state.uri.path,
-        '/hosts',
-      );
+      expect(dependencies.router.state.uri.path, '/hosts');
       await rig.save('a');
       await dependencies.hosts.load();
       dependencies.router.go('/sessions');
@@ -132,7 +137,11 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('workspace-retry')), findsOneWidget);
-      expect(find.byKey(const ValueKey('sessions-hosts')), findsOneWidget);
+      // Servers stays a way out in the toolbar, as the list's link was.
+      await _openToolbarMenu(tester);
+      expect(find.widgetWithText(MenuItemButton, 'Servers'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
       expect(
         find.text(dependencies.localizations.current.sessionsEmpty),
         findsNothing,
@@ -170,9 +179,7 @@ void main() {
     final title = '**not markdown** ${'long '.padRight(400, 'x')}';
     const directory =
         '/a/very/long/workspace/path/that/should/ellipsize/in/the/compact/layout';
-    source.respond([
-      source.row('one', title: title, directory: directory),
-    ]);
+    source.respond([source.row('one', title: title, directory: directory)]);
     await read;
     await tester.pumpAndSettle();
     // At 2x the header takes most of the compact viewport, so the row is
@@ -204,62 +211,61 @@ void main() {
     rig.dispose();
   });
 
-  testWidgets(
-    'a session created elsewhere appears without a manual refresh',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final rig = CatalogRig();
-      final directory = LiveDirectory();
-      await rig.save('a');
-      final dependencies = createAppDependencies(
-        initialLink: Uri(path: '/sessions'),
-        profileRepository: rig.repository,
-        endpointProber: FakeProber(),
-        sessionCatalogFactory: rig.create,
-        sessionLiveDirectory: () => directory,
-      );
-      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-      await showSessionList(tester);
-      final controller = dependencies.sessions!;
-      final l10n = dependencies.localizations.current;
-      final source = rig.sources.single;
-      source.respond([source.row('first')]);
-      await tester.pumpAndSettle();
-      expect(find.byKey(ValueKey(source.row('first').info.ref)), findsOneWidget);
+  testWidgets('a session created elsewhere appears without a manual refresh', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    final directory = LiveDirectory();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: () => directory,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await showSessionList(tester);
+    final controller = dependencies.sessions!;
+    final l10n = dependencies.localizations.current;
+    final source = rig.sources.single;
+    source.respond([source.row('first')]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(ValueKey(source.row('first').info.ref)), findsOneWidget);
 
-      // A session starts elsewhere: the endpoint's stream reports it and the
-      // list re-reads itself, without a manual refresh.
-      directory.feeds.last.emit(const SessionCatalogChanged());
-      // The catalog debounces the re-read; the clock has to pass it.
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      source.respond([
-        source.row('first'),
-        source.row(
-          'second',
-          ownership: OwnershipInfo.known(
-            OwnershipKind.liveShared,
-            proof: OwnershipProof(
-              source: 'adapterObservation',
-              observedAt: DateTime.now(),
-            ),
+    // A session starts elsewhere: the endpoint's stream reports it and the
+    // list re-reads itself, without a manual refresh.
+    directory.feeds.last.emit(const SessionCatalogChanged());
+    // The catalog debounces the re-read; the clock has to pass it.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    source.respond([
+      source.row('first'),
+      source.row(
+        'second',
+        ownership: OwnershipInfo.known(
+          OwnershipKind.liveShared,
+          proof: OwnershipProof(
+            source: 'adapterObservation',
+            observedAt: DateTime.now(),
           ),
         ),
-      ]);
-      await tester.pumpAndSettle();
-      expect(find.byKey(ValueKey(source.row('second').info.ref)), findsOneWidget);
-      expect(controller.sessions, hasLength(2));
-      // The label follows the rows the server just returned.
-      expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
-      expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox.shrink());
-      rig.dispose();
-    },
-  );
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(ValueKey(source.row('second').info.ref)), findsOneWidget);
+    expect(controller.sessions, hasLength(2));
+    // The label follows the rows the server just returned.
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
 
   testWidgets(
     'a failed re-read keeps the rows and says the list is not up to date',
@@ -293,7 +299,10 @@ void main() {
       source.fail(SessionCatalogFailure.connection);
       await tester.pumpAndSettle();
       expect(find.text(l10n.liveStale), findsOneWidget);
-      expect(find.byKey(ValueKey(source.row('first').info.ref)), findsOneWidget);
+      expect(
+        find.byKey(ValueKey(source.row('first').info.ref)),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       rig.dispose();
@@ -323,11 +332,22 @@ void main() {
     final observedAt = DateTime.now();
     OwnershipInfo proven(OwnershipKind kind) => OwnershipInfo.known(
       kind,
-      proof: OwnershipProof(source: 'adapterObservation', observedAt: observedAt),
+      proof: OwnershipProof(
+        source: 'adapterObservation',
+        observedAt: observedAt,
+      ),
     );
     source.respond([
-      source.row('live', title: 'Live', ownership: proven(OwnershipKind.liveShared)),
-      source.row('host', title: 'Host', ownership: proven(OwnershipKind.hostOwned)),
+      source.row(
+        'live',
+        title: 'Live',
+        ownership: proven(OwnershipKind.liveShared),
+      ),
+      source.row(
+        'host',
+        title: 'Host',
+        ownership: proven(OwnershipKind.hostOwned),
+      ),
       source.row(
         'saved',
         title: 'Saved',
@@ -381,10 +401,7 @@ void main() {
       title: 'Fresh',
       ownership: OwnershipInfo.known(
         OwnershipKind.liveShared,
-        proof: OwnershipProof(
-          source: 'adapterObservation',
-          observedAt: clock,
-        ),
+        proof: OwnershipProof(source: 'adapterObservation', observedAt: clock),
       ),
     );
     source.respond([fresh()]);
@@ -401,8 +418,11 @@ void main() {
 
     // A manual refresh in flight: the rows are not the endpoint's current
     // answer, so the label falls back to unknown.
-    await tester.tap(find.byKey(const ValueKey('sessions-refresh')));
+    await _openToolbarMenu(tester);
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Refresh'));
     await tester.pump();
+    // The list sits under the drawer, so it is opened again to show its rows.
+    await showSessionList(tester);
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     source.respond([fresh()]);
@@ -451,7 +471,10 @@ void main() {
         title: 'Proven',
         ownership: OwnershipInfo.known(
           OwnershipKind.liveShared,
-          proof: OwnershipProof(source: 'adapterObservation', observedAt: clock),
+          proof: OwnershipProof(
+            source: 'adapterObservation',
+            observedAt: clock,
+          ),
         ),
       ),
     ]);
@@ -498,7 +521,10 @@ void main() {
         title: 'Proven',
         ownership: OwnershipInfo.known(
           OwnershipKind.liveShared,
-          proof: OwnershipProof(source: 'adapterObservation', observedAt: clock),
+          proof: OwnershipProof(
+            source: 'adapterObservation',
+            observedAt: clock,
+          ),
         ),
       ),
     ]);
@@ -562,7 +588,9 @@ void main() {
     await tester.ensureVisible(more);
     await tester.tap(more);
     await tester.pump();
-    source.respond([source.row('four', directory: '/work/alpha', title: 'Four')]);
+    source.respond([
+      source.row('four', directory: '/work/alpha', title: 'Four'),
+    ]);
     await tester.pumpAndSettle();
     expect(find.text('alpha'), findsOneWidget);
     expect(find.text('beta'), findsOneWidget);
@@ -626,43 +654,42 @@ void main() {
     rig.dispose();
   });
 
-  testWidgets(
-    'the sessions the server did not attribute keep a marked group',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final rig = CatalogRig();
-      await rig.save('a');
-      final dependencies = createAppDependencies(
-        initialLink: Uri(path: '/sessions'),
-        profileRepository: rig.repository,
-        endpointProber: FakeProber(),
-        sessionCatalogFactory: rig.create,
-        sessionLiveDirectory: LiveDirectory.new,
-      );
-      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
-      await showSessionList(tester);
-      final l10n = dependencies.localizations.current;
-      final source = rig.sources.single;
-      source.respond([
-        source.row('one', directory: '/work/alpha', title: 'One'),
-        source.row('two', title: 'Two'),
-      ]);
-      await tester.pumpAndSettle();
-      expect(find.text('alpha'), findsOneWidget);
-      expect(find.text(l10n.sessionsUnknownProject), findsOneWidget);
-      expect(find.text('Two'), findsNothing);
-      await tester.tap(find.byKey(const ValueKey('session-project-')));
-      await tester.pumpAndSettle();
-      expect(find.text('Two'), findsOneWidget);
-      expect(find.text('One'), findsNothing);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox.shrink());
-      rig.dispose();
-    },
-  );
+  testWidgets('the sessions the server did not attribute keep a marked group', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final rig = CatalogRig();
+    await rig.save('a');
+    final dependencies = createAppDependencies(
+      initialLink: Uri(path: '/sessions'),
+      profileRepository: rig.repository,
+      endpointProber: FakeProber(),
+      sessionCatalogFactory: rig.create,
+      sessionLiveDirectory: LiveDirectory.new,
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+    await showSessionList(tester);
+    final l10n = dependencies.localizations.current;
+    final source = rig.sources.single;
+    source.respond([
+      source.row('one', directory: '/work/alpha', title: 'One'),
+      source.row('two', title: 'Two'),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text(l10n.sessionsUnknownProject), findsOneWidget);
+    expect(find.text('Two'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('session-project-')));
+    await tester.pumpAndSettle();
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.text('One'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    rig.dispose();
+  });
   group('nesting', () {
     Future<(CatalogSource, V2Localizations, LiveDirectory)> openList(
       WidgetTester tester, {

@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/server_path.dart';
@@ -179,25 +180,54 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: widget.active
-                                  ? theme.colorScheme.primary
-                                  : null,
-                              fontWeight: widget.active
-                                  ? FontWeight.w600
-                                  : null,
-                            ),
+                          // v1: chat_page_scaffold.dart project group row
+                          // (folder beside the name); the path keeps the full
+                          // width below, so its trailing folders stay visible.
+                          Row(
+                            children: [
+                              Icon(
+                                Symbols.folder_open,
+                                color: widget.active
+                                    ? theme.colorScheme.primary
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    color: widget.active
+                                        ? theme.colorScheme.primary
+                                        : null,
+                                    fontWeight: widget.active
+                                        ? FontWeight.w600
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          StartEllipsisPath(
-                            directory,
-                            key: ValueKey('project-path-$directory'),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: StartEllipsisPath(
+                                  directory,
+                                  key: ValueKey('project-path-$directory'),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              // The active project shows its conversations
+                              // below it, so its chevron is up.
+                              Icon(
+                                widget.active
+                                    ? Symbols.expand_less
+                                    : Symbols.expand_more,
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -118,6 +118,22 @@ Future<void> _settleSession(WidgetTester tester) async {
   await tester.pump(const Duration(seconds: 1));
 }
 
+/// Opens the toolbar's overflow menu, closing the list drawer first.
+Future<void> _openToolbarMenu(WidgetTester tester) async {
+  final scaffold = tester.firstState<ScaffoldState>(find.byType(Scaffold));
+  if (scaffold.isDrawerOpen) scaffold.closeDrawer();
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+  await tester.pumpAndSettle();
+}
+
+/// Taps one item of the toolbar's overflow menu by its label.
+Future<void> _toolbarItem(WidgetTester tester, String label) async {
+  await _openToolbarMenu(tester);
+  await tester.tap(find.widgetWithText(MenuItemButton, label));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   for (final (width, pane) in const [
     (390.0, null),
@@ -325,8 +341,7 @@ void main() {
       // A page pushed from the list is the top of the router's stack.
       String path() => dependencies.router.state.uri.path;
 
-      await tester.tap(find.byKey(const ValueKey('sessions-settings')));
-      await tester.pumpAndSettle();
+      await _toolbarItem(tester, 'Settings');
       expect(path(), '/settings');
       expect(find.byKey(const ValueKey('workspace-sidebar')), findsNothing);
       // The system back returns to the list instead of leaving the app.
@@ -335,8 +350,7 @@ void main() {
       expect(path(), '/sessions');
 
       await showSessionList(tester);
-      await tester.tap(find.byKey(const ValueKey('sessions-hosts')));
-      await tester.pumpAndSettle();
+      await _toolbarItem(tester, 'Servers');
       expect(path(), '/hosts');
       // A page opened from a secondary page returns to it.
       await tester.tap(find.byIcon(Icons.qr_code).first);

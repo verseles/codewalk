@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../platform/sessions/project_workspace_store.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -21,6 +22,7 @@ class SessionDrawerHeader extends StatefulWidget {
     required this.catalog,
     required this.contexts,
     required this.onCreate,
+    this.onProjects,
   });
 
   final SessionsController catalog;
@@ -31,6 +33,9 @@ class SessionDrawerHeader extends StatefulWidget {
 
   /// Opens a new chat, or null while one cannot be opened.
   final VoidCallback? onCreate;
+
+  /// Opens the project picker, or null while no project can be picked.
+  final VoidCallback? onProjects;
 
   @override
   State<SessionDrawerHeader> createState() => _SessionDrawerHeaderState();
@@ -102,7 +107,7 @@ class _SessionDrawerHeaderState extends State<SessionDrawerHeader> {
           onTapOutside: (_) => _focus.unfocus(),
           decoration: InputDecoration(
             hintText: l10n.chatSearchConversations,
-            prefixIcon: const Icon(Icons.search),
+            prefixIcon: const Icon(Symbols.search),
             isDense: true,
             suffixIcon: ListenableBuilder(
               listenable: _field,
@@ -125,26 +130,37 @@ class _SessionDrawerHeaderState extends State<SessionDrawerHeader> {
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.titleLarge,
     );
+    // v1: chat_page_scaffold.dart:242-293 (search, folder, new chat icon row).
     final controls = <Widget>[
       if (search)
         IconButton(
           key: const ValueKey('sessions-search'),
           tooltip: l10n.chatSearchConversations,
           onPressed: _expand,
-          icon: const Icon(Icons.search),
+          icon: const Icon(Symbols.search),
         ),
       _ListMenu(catalog: widget.catalog, contexts: contexts),
+      if (widget.onProjects != null)
+        IconButton(
+          key: const ValueKey('sessions-projects'),
+          tooltip: l10n.chatChooseDirectory,
+          onPressed: widget.onProjects,
+          icon: const Icon(Symbols.folder_open),
+        ),
       // The create is a compact control, so the header does not push the
       // rows out of a small viewport.
-      IconButton.filled(
+      IconButton(
         key: const ValueKey('sessions-create'),
         tooltip: l10n.sessionsCreateNew,
         onPressed: widget.onCreate,
-        icon: const Icon(Icons.add),
+        icon: const Icon(Symbols.add_comment),
       ),
     ];
+    // At large text scales the controls wrap under the title; at normal scale
+    // they stay on one line beside it, as in v1.
+    final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.25;
     return LayoutBuilder(
-      builder: (context, constraints) => constraints.maxWidth < 240
+      builder: (context, constraints) => largeText || constraints.maxWidth < 240
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -236,7 +252,7 @@ class _ListMenu extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.filter_list, size: 20),
+            const Icon(Symbols.filter_list),
             const SizedBox(width: 4),
             Text(
               badge,

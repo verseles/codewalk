@@ -87,14 +87,11 @@ Future<void> _closeApp(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('the shown project lists its rows under the open projects', (
-    tester,
-  ) async {
+  testWidgets('the shown project lists its rows', (tester) async {
     final (dependencies, _, l10n) = await _open(tester);
     final contexts = _contexts(tester);
     expect(contexts.active, '/work/alpha');
-    expect(find.byKey(const ValueKey('project-title')), findsOneWidget);
-    expect(find.text(l10n.workspaceOpenProjects), findsOneWidget);
+    expect(find.byKey(const ValueKey('sessions-projects')), findsOneWidget);
     expect(
       find.byKey(const ValueKey('project-context-/work/alpha')),
       findsOneWidget,
@@ -243,7 +240,7 @@ void main() {
 
   testWidgets('the keyboard highlight stays in view', (tester) async {
     final (_, rig, _) = await _open(tester);
-    await tester.tap(find.byKey(const ValueKey('project-title')));
+    await tester.tap(find.byKey(const ValueKey('sessions-projects')));
     await tester.pumpAndSettle();
     rig.sources.single.projectReads.single.completion.complete([
       for (var i = 0; i < 40; i++)
@@ -456,7 +453,7 @@ void main() {
   ) async {
     final (_, rig, l10n) = await _open(tester);
     final contexts = _contexts(tester);
-    await tester.tap(find.byKey(const ValueKey('project-title')));
+    await tester.tap(find.byKey(const ValueKey('sessions-projects')));
     await tester.pumpAndSettle();
     // A compact window gives the picker the whole screen.
     expect(find.byType(Dialog), findsOneWidget);
@@ -491,7 +488,7 @@ void main() {
   ) async {
     final (_, rig, _) = await _open(tester, size: const Size(1280, 800));
     final contexts = _contexts(tester);
-    await tester.tap(find.byKey(const ValueKey('project-title')));
+    await tester.tap(find.byKey(const ValueKey('sessions-projects')));
     await tester.pumpAndSettle();
     // A desktop window centers a bounded dialog.
     expect(
@@ -530,7 +527,7 @@ void main() {
     expect(find.byType(Dialog), findsNothing);
     expect(contexts.active, '/opt/x');
 
-    await tester.tap(find.byKey(const ValueKey('project-title')));
+    await tester.tap(find.byKey(const ValueKey('sessions-projects')));
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
@@ -541,7 +538,7 @@ void main() {
   testWidgets('the browser walks folders in the same dialog', (tester) async {
     final (_, rig, _) = await _open(tester);
     final contexts = _contexts(tester);
-    await tester.tap(find.byKey(const ValueKey('project-title')));
+    await tester.tap(find.byKey(const ValueKey('sessions-projects')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('project-picker-browse')));
     // The listing shows a running indicator until it is answered.
@@ -604,7 +601,10 @@ void main() {
           final contexts = _contexts(tester);
           expect(await contexts.openContext('/srv/beta'), isTrue);
           await tester.pumpAndSettle();
-          expect(find.byKey(const ValueKey('project-title')), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('sessions-projects')),
+            findsOneWidget,
+          );
           expect(contexts.open, hasLength(2));
           await tester.scrollUntilVisible(
             find.byKey(const ValueKey('project-context-/srv/beta')),

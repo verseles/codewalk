@@ -7,6 +7,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'sessions/workspace_support.dart';
 
+/// Opens the toolbar's overflow menu, closing the list drawer first.
+Future<void> _openToolbarMenu(WidgetTester tester) async {
+  final scaffold = tester.firstState<ScaffoldState>(find.byType(Scaffold));
+  if (scaffold.isDrawerOpen) scaffold.closeDrawer();
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+  await tester.pumpAndSettle();
+}
+
+/// Taps one item of the toolbar's overflow menu by its label.
+Future<void> _toolbarItem(WidgetTester tester, String label) async {
+  await _openToolbarMenu(tester);
+  await tester.tap(find.widgetWithText(MenuItemButton, label));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
     testWidgets('navigation and appearance respond at ${size.width}', (
@@ -33,8 +49,7 @@ void main() {
       expect(dependencies.router.routeInformationProvider.value.uri.path, '/');
 
       await showSessionList(tester);
-      await tester.tap(find.byKey(const ValueKey('sessions-settings')));
-      await tester.pumpAndSettle();
+      await _toolbarItem(tester, 'Settings');
       expect(dependencies.router.state.uri.path, '/settings');
       expect(find.text('Settings'), findsWidgets);
 
