@@ -121,14 +121,18 @@ class ServerSwitcher extends StatelessWidget {
           child: Align(
             alignment: AlignmentDirectional.centerStart,
             // Dimmed while no server can be switched, as the disabled button was.
-            child: Opacity(
-              opacity: open == null ? 0.38 : 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-                decoration: BoxDecoration(
-                  color: tokens.mutedControlSurface,
-                  borderRadius: tokens.controlRadius,
-                ),
+            // Ink paints the surface under the focus and splash effects of the
+            // InkWell, so a keyboard focus stays visible at any text scale.
+            child: Ink(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+              decoration: BoxDecoration(
+                color: open == null
+                    ? tokens.mutedControlSurface.withValues(alpha: 0.38)
+                    : tokens.mutedControlSurface,
+                borderRadius: tokens.controlRadius,
+              ),
+              child: Opacity(
+                opacity: open == null ? 0.38 : 1,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

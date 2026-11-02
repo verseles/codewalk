@@ -171,124 +171,135 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
               key: ValueKey('project-context-$directory'),
               onTap: widget.onTap,
               onLongPress: _openMenu,
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  12,
-                  widget.compact ? 10 : 6,
-                  4,
-                  widget.compact ? 10 : 6,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // v1: chat_page_scaffold.dart project group row
-                          // (folder beside the name); the path keeps the full
-                          // width below, so its trailing folders stay visible.
-                          LayoutBuilder(
-                            builder: (context, constraints) => Row(
-                              children: [
-                                if (constraints.maxWidth >= _iconsMinWidth) ...[
-                                  Icon(
-                                    Symbols.folder_open,
-                                    color: widget.active
-                                        ? theme.colorScheme.primary
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 8),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.titleSmall?.copyWith(
+              child: LayoutBuilder(
+                builder: (context, rowConstraints) => Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    12,
+                    widget.compact ? 10 : 6,
+                    4,
+                    widget.compact ? 10 : 6,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // v1: chat_page_scaffold.dart project group row
+                            // (folder beside the name); the path keeps the full
+                            // width below, so its trailing folders stay visible.
+                            LayoutBuilder(
+                              builder: (context, constraints) => Row(
+                                children: [
+                                  if (constraints.maxWidth >=
+                                      _iconsMinWidth) ...[
+                                    Icon(
+                                      Symbols.folder_open,
                                       color: widget.active
                                           ? theme.colorScheme.primary
                                           : null,
-                                      fontWeight: widget.active
-                                          ? FontWeight.w600
-                                          : null,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            color: widget.active
+                                                ? theme.colorScheme.primary
+                                                : null,
+                                            fontWeight: widget.active
+                                                ? FontWeight.w600
+                                                : null,
+                                          ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            ),
+                            LayoutBuilder(
+                              builder: (context, constraints) => Row(
+                                children: [
+                                  Expanded(
+                                    child: StartEllipsisPath(
+                                      directory,
+                                      key: ValueKey('project-path-$directory'),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ),
+                                  // The active project shows its conversations
+                                  // below it, so its chevron is up.
+                                  if (constraints.maxWidth >= _iconsMinWidth)
+                                    Icon(
+                                      widget.active
+                                          ? Symbols.expand_less
+                                          : Symbols.expand_more,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (count != null)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 8),
+                          child: ConstrainedBox(
+                            // A narrow row caps the count, so three digits at 2x
+                            // cannot push the menu out; wider rows keep it whole.
+                            constraints: BoxConstraints(
+                              maxWidth: rowConstraints.maxWidth < 200
+                                  ? 40
+                                  : double.infinity,
+                            ),
+                            child: Text(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              widget.complete ? '$count' : '$count+',
+                              key: ValueKey('project-count-$directory'),
+                              semanticsLabel: widget.complete
+                                  ? l10n.projectsSessionCount(count)
+                                  : l10n.projectsSessionCountAtLeast(count),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
-                          LayoutBuilder(
-                            builder: (context, constraints) => Row(
-                              children: [
-                                Expanded(
-                                  child: StartEllipsisPath(
-                                    directory,
-                                    key: ValueKey('project-path-$directory'),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                                // The active project shows its conversations
-                                // below it, so its chevron is up.
-                                if (constraints.maxWidth >= _iconsMinWidth)
-                                  Icon(
-                                    widget.active
-                                        ? Symbols.expand_less
-                                        : Symbols.expand_more,
-                                  ),
-                              ],
+                        ),
+                      PopupMenuButton<int>(
+                        key: _menu,
+                        tooltip: l10n.chatCloseProject(name),
+                        padding: EdgeInsets.zero,
+                        style: IconButton.styleFrom(
+                          fixedSize: Size.square(menuSize),
+                          minimumSize: Size.square(menuSize),
+                          padding: EdgeInsets.zero,
+                        ),
+                        iconSize: widget.compact ? 22 : 18,
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (_) => widget.onClose?.call(),
+                        itemBuilder: (context) => [
+                          PopupMenuItem<int>(
+                            key: ValueKey('project-close-$directory'),
+                            value: 0,
+                            enabled: widget.onClose != null,
+                            child: Text(
+                              l10n.chatCloseProject(name),
+                              style: TextStyle(color: theme.colorScheme.error),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    if (count != null)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(start: 8),
-                        child: ConstrainedBox(
-                          // Three digits at 2x must not push the menu out of
-                          // a narrow row; the count shortens instead.
-                          constraints: const BoxConstraints(maxWidth: 40),
-                          child: Text(
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            widget.complete ? '$count' : '$count+',
-                            key: ValueKey('project-count-$directory'),
-                            semanticsLabel: widget.complete
-                                ? l10n.projectsSessionCount(count)
-                                : l10n.projectsSessionCountAtLeast(count),
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    PopupMenuButton<int>(
-                      key: _menu,
-                      tooltip: l10n.chatCloseProject(name),
-                      padding: EdgeInsets.zero,
-                      style: IconButton.styleFrom(
-                        fixedSize: Size.square(menuSize),
-                        minimumSize: Size.square(menuSize),
-                        padding: EdgeInsets.zero,
-                      ),
-                      iconSize: widget.compact ? 22 : 18,
-                      icon: const Icon(Icons.more_vert),
-                      onSelected: (_) => widget.onClose?.call(),
-                      itemBuilder: (context) => [
-                        PopupMenuItem<int>(
-                          key: ValueKey('project-close-$directory'),
-                          value: 0,
-                          enabled: widget.onClose != null,
-                          child: Text(
-                            l10n.chatCloseProject(name),
-                            style: TextStyle(color: theme.colorScheme.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
