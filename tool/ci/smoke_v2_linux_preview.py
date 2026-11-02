@@ -269,7 +269,7 @@ def smoke(archive_path, evidence):
             run(["xdotool", "key", "--clearmodifiers", "Escape"])
             expect(window, ["Appearance", "App Logs"], "10-compact-list", absent=["Visual style"])
             click(window, "Appearance")
-            expect(window, ["Visual style", "Dark", "Light"], "11-compact-appearance", absent=["App Logs", "Shortcuts"])
+            expect(window, ["Dark", "Light"], "11-compact-appearance", absent=["App Logs", "Shortcuts", "Visual style", "Refined"])
             run(["xdotool", "key", "--clearmodifiers", "Escape"])
             expect(window, ["Appearance", "App Logs"], "12-compact-back", absent=["Visual style"])
             preview.stop_owned(process, timeout=30)
