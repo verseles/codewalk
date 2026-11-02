@@ -120,59 +120,63 @@ class ServerSwitcher extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 48),
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-              decoration: BoxDecoration(
-                color: tokens.mutedControlSurface,
-                borderRadius: tokens.controlRadius,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Symbols.cloud,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      profile?.label ?? context.v2L10n.sessionsSelectProfile,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            // Dimmed while no server can be switched, as the disabled button was.
+            child: Opacity(
+              opacity: open == null ? 0.38 : 1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                decoration: BoxDecoration(
+                  color: tokens.mutedControlSurface,
+                  borderRadius: tokens.controlRadius,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Symbols.cloud,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                  ),
-                  if (profile != null) ...[
-                    const SizedBox(width: 4),
-                    if (compact)
-                      Tooltip(
-                        message: healthStatusText(context.v2L10n, status),
-                        child: Semantics(
-                          label: healthStatusText(context.v2L10n, status),
-                          child: Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: switch (status) {
-                              EndpointHealthStatus.online => Colors.green,
-                              EndpointHealthStatus.delayed => Colors.orange,
-                              EndpointHealthStatus.offline => Theme.of(
-                                context,
-                              ).colorScheme.error,
-                            },
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        profile?.label ?? context.v2L10n.sessionsSelectProfile,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (profile != null) ...[
+                      const SizedBox(width: 4),
+                      if (compact)
+                        Tooltip(
+                          message: healthStatusText(context.v2L10n, status),
+                          child: Semantics(
+                            label: healthStatusText(context.v2L10n, status),
+                            child: Icon(
+                              Icons.circle,
+                              size: 8,
+                              color: switch (status) {
+                                EndpointHealthStatus.online => Colors.green,
+                                EndpointHealthStatus.delayed => Colors.orange,
+                                EndpointHealthStatus.offline => Theme.of(
+                                  context,
+                                ).colorScheme.error,
+                              },
+                            ),
+                          ),
+                        )
+                      else
+                        Flexible(
+                          child: EndpointHealthIndicator(
+                            view:
+                                health?.view(profile) ??
+                                const EndpointHealthView(),
                           ),
                         ),
-                      )
-                    else
-                      Flexible(
-                        child: EndpointHealthIndicator(
-                          view:
-                              health?.view(profile) ??
-                              const EndpointHealthView(),
-                        ),
-                      ),
+                    ],
+                    const Icon(Symbols.arrow_drop_down, size: 18),
                   ],
-                  const Icon(Symbols.arrow_drop_down, size: 18),
-                ],
+                ),
               ),
             ),
           ),
