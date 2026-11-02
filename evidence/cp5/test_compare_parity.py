@@ -64,7 +64,12 @@ class TestCompareParity(unittest.TestCase):
         self.assertEqual((w, h), (412, 915))
 
     def test_ae_metric_formats_and_errors(self):
-        for output, expected in [("42", 42), ("380890 (0.371963)", 380890), ("0 (0)", 0)]:
+        for output, expected in [
+            ("42", 42),
+            ("380890 (0.371963)", 380890),
+            ("0 (0)", 0),
+            ("1.024e+06 (1)", 1024000),
+        ]:
             with self.subTest(output=output), patch.object(compare_parity, "run_cmd", return_value=(1, "", output)):
                 self.assertEqual(compare_parity.compare_images("a", "b", "diff"), expected)
         for output in ["12 warning", "4 (1.5)", "NaN", "4 (0.5) warning"]:
@@ -109,6 +114,17 @@ class TestCompareParity(unittest.TestCase):
     def test_no_captures_fails(self):
         with self.assertRaises(FileNotFoundError):
             self._run(strict=True)
+
+    def test_capture_outside_the_matrix_fails_strict(self):
+        # The production matrix, not the discovered set, decides what is expected.
+        self._make_pair(pair_id="s12_desktop_light", size=(1280, 800))
+        with self.assertRaises(ValueError):
+            compare_parity.run_comparison(
+                captures_dir=self.captures_dir,
+                output_report=self.report_path,
+                strict=True,
+                check_required_regions=False,
+            )
 
     def test_complete_identical_pair_reports_zero_difference(self):
         self._make_pair()

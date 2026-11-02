@@ -2,22 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
-import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/features/sessions/session_live_timeline.dart';
-import 'package:codewalk/platform/sessions/session_draft_store.dart';
-import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
-import 'package:codewalk/platform/storage/metadata_store.dart';
-import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
-import 'package:codewalk/presentation/providers/settings_provider.dart';
-import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 import 'package:codewalk/presentation/widgets/session_tab_strip.dart'
@@ -34,12 +26,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/chat_page_test_harness.dart';
 import '../support/fakes.dart';
-import '../v2/hosts/fakes.dart';
 import '../v2/sessions/composer_fakes.dart';
 import '../v2/sessions/fakes.dart';
 import '../v2/sessions/live_fakes.dart';
+import '../v2/sessions/v1_surface_parity_test.dart' as surface;
 import '../v2/sessions/workspace_support.dart';
-import '../v2/storage/storage_fakes.dart';
 import 'capture_writer.dart';
 
 ItemMeta _v2Meta(
@@ -180,8 +171,28 @@ Future<void> _loadFonts() async {
 late Directory _captureDirectory;
 var _removeCaptureDirectory = false;
 
-// Every region named here must exist on the captured side; a missing region
-// fails the capture instead of silently shrinking the comparison.
+/// The window toolbar: the widest app bar on screen. A desktop session has a
+/// second bar in its chat column, which must not stand in for the toolbar.
+Finder _fullWidthAppBar(WidgetTester tester) {
+  Element? widest;
+  var widestWidth = -1.0;
+  for (final element in find.byType(AppBar).evaluate()) {
+    final width = tester
+        .getSize(find.byElementPredicate((candidate) => candidate == element))
+        .width;
+    if (width > widestWidth) {
+      widest = element;
+      widestWidth = width;
+    }
+  }
+  return widest == null
+      ? find.byType(AppBar)
+      : find.byElementPredicate((candidate) => candidate == widest);
+}
+
+// Every region named here must match exactly one widget on the captured side;
+// a missing or ambiguous region fails the capture instead of being resolved
+// by its first match.
 Future<void> _capture(
   WidgetTester tester,
   GlobalKey key,
@@ -202,10 +213,13 @@ Future<void> _capture(
   final origin = tester.getTopLeft(find.byKey(key));
   final rects = <String, Map<String, double>>{};
   for (final entry in regions.entries) {
-    if (entry.value.evaluate().isEmpty) {
-      throw StateError('Parity region missing in $filename: ${entry.key}');
+    final matches = entry.value.evaluate().length;
+    if (matches != 1) {
+      throw StateError(
+        'Parity region ${entry.key} in $filename matches $matches widgets, expected 1',
+      );
     }
-    final rect = tester.getRect(entry.value.first).shift(-origin);
+    final rect = tester.getRect(entry.value).shift(-origin);
     rects[entry.key] = {
       'x': rect.left,
       'y': rect.top,
@@ -217,31 +231,6 @@ Future<void> _capture(
     '${_captureDirectory.path}/${filename.replaceFirst('.png', '.regions.json')}',
   ).writeAsStringSync(jsonEncode({'regions': rects}));
 }
-
-/// Decision 3 (#458): the v1 reference hides the Files and Utility desktop
-/// panes; the conversation pane keeps its 300 dp default.
-Future<SettingsProvider> _v1ReferenceSettings(
-  InMemoryAppLocalDataSource source,
-) async {
-  final settings = SettingsProvider(
-    localDataSource: source,
-    dioClient: DioClient(),
-    soundService: SoundService(),
-  );
-  addTearDown(settings.dispose);
-  await settings.setDesktopPaneVisible(DesktopPane.files, false);
-  await settings.setDesktopPaneVisible(DesktopPane.utility, false);
-  return settings;
-}
-
-Future<void> _saveReferenceProfile(CatalogRig rig) => rig.repository.save(
-  EndpointProfile(
-    id: 'profile_a',
-    label: 'Test Server',
-    endpoint: Uri.parse('http://127.0.0.1:4096/proxy/'),
-  ),
-  'fake-a',
-);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -278,6 +267,50 @@ void main() {
   const mobileSize = Size(412, 915);
   const desktopSize = Size(1280, 800);
 
+  // The short turn shared by s1 and s7 (s7 differs only in its toolbar title).
+  final shortTurnV1Messages = <ChatMessage>[
+    UserMessage(
+      id: 'm1',
+      sessionId: 'ses_1',
+      time: DateTime(2026, 9, 1, 10, 0),
+      parts: const [
+        TextPart(
+          id: 'p1',
+          messageId: 'm1',
+          sessionId: 'ses_1',
+          text: 'Fix the build',
+        ),
+      ],
+    ),
+    AssistantMessage(
+      id: 'm2',
+      sessionId: 'ses_1',
+      time: DateTime(2026, 9, 1, 10, 0, 1),
+      completedTime: DateTime(2026, 9, 1, 10, 0, 5),
+      providerId: 'nvidia',
+      modelId: 'minimax-m3.1-flash',
+      parts: const [
+        TextPart(
+          id: 'p2',
+          messageId: 'm2',
+          sessionId: 'ses_1',
+          text: 'The build is fixed: the parser accepts empty input again.',
+        ),
+      ],
+    ),
+  ];
+  final shortTurnV2Items = <TimelineItem>[
+    UserInput(
+      meta: _v2Meta('u1'),
+      text: 'Fix the build',
+      delivery: const OpenValue.known(DeliveryState.delivered),
+    ),
+    AssistantText(
+      meta: _v2Meta('a1', message: 'm1'),
+      text: 'The build is fixed: the parser accepts empty input again.',
+      complete: true,
+    ),
+  ];
   final testCases = [
     // Scenario 1: Short turn, connected
     (
@@ -285,49 +318,8 @@ void main() {
       title: 'Short turn completed',
       opensSession: true,
       composer: true,
-      v1Messages: [
-        UserMessage(
-          id: 'm1',
-          sessionId: 'ses_1',
-          time: DateTime(2026, 9, 1, 10, 0),
-          parts: const [
-            TextPart(
-              id: 'p1',
-              messageId: 'm1',
-              sessionId: 'ses_1',
-              text: 'Fix the build',
-            ),
-          ],
-        ),
-        AssistantMessage(
-          id: 'm2',
-          sessionId: 'ses_1',
-          time: DateTime(2026, 9, 1, 10, 0, 1),
-          completedTime: DateTime(2026, 9, 1, 10, 0, 5),
-          providerId: 'nvidia',
-          modelId: 'minimax-m3.1-flash',
-          parts: const [
-            TextPart(
-              id: 'p2',
-              messageId: 'm2',
-              sessionId: 'ses_1',
-              text: 'The build is fixed: the parser accepts empty input again.',
-            ),
-          ],
-        ),
-      ],
-      v2Items: [
-        UserInput(
-          meta: _v2Meta('u1'),
-          text: 'Fix the build',
-          delivery: const OpenValue.known(DeliveryState.delivered),
-        ),
-        AssistantText(
-          meta: _v2Meta('a1', message: 'm1'),
-          text: 'The build is fixed: the parser accepts empty input again.',
-          complete: true,
-        ),
-      ],
+      v1Messages: shortTurnV1Messages,
+      v2Items: shortTurnV2Items,
     ),
     // Scenario 2: Rich timeline with code on both sides.
     (
@@ -412,49 +404,8 @@ void main() {
       title: 'Toolbar with an open session',
       opensSession: true,
       composer: true,
-      v1Messages: [
-        UserMessage(
-          id: 'm1',
-          sessionId: 'ses_1',
-          time: DateTime(2026, 9, 1, 10, 0),
-          parts: const [
-            TextPart(
-              id: 'p1',
-              messageId: 'm1',
-              sessionId: 'ses_1',
-              text: 'Fix the build',
-            ),
-          ],
-        ),
-        AssistantMessage(
-          id: 'm2',
-          sessionId: 'ses_1',
-          time: DateTime(2026, 9, 1, 10, 0, 1),
-          completedTime: DateTime(2026, 9, 1, 10, 0, 5),
-          providerId: 'nvidia',
-          modelId: 'minimax-m3.1-flash',
-          parts: const [
-            TextPart(
-              id: 'p2',
-              messageId: 'm2',
-              sessionId: 'ses_1',
-              text: 'The build is fixed: the parser accepts empty input again.',
-            ),
-          ],
-        ),
-      ],
-      v2Items: [
-        UserInput(
-          meta: _v2Meta('u1'),
-          text: 'Fix the build',
-          delivery: const OpenValue.known(DeliveryState.delivered),
-        ),
-        AssistantText(
-          meta: _v2Meta('a1', message: 'm1'),
-          text: 'The build is fixed: the parser accepts empty input again.',
-          complete: true,
-        ),
-      ],
+      v1Messages: shortTurnV1Messages,
+      v2Items: shortTurnV2Items,
     ),
     // Scenario 6: Toolbar on the home screen, no session open
     (
@@ -603,7 +554,7 @@ void main() {
             textTheme: rawV1Theme.textTheme.apply(fontFamily: 'Roboto'),
           );
 
-          final settings = await _v1ReferenceSettings(source);
+          final settings = await surface.v1ReferenceSettings(source);
           if (extraSessions.isNotEmpty) {
             await settings.setShowSessionTabsOverride(true);
           }
@@ -629,6 +580,19 @@ void main() {
           for (final extra in extraSessions) {
             await provider.selectSession(extra);
             await tester.pumpAndSettle();
+          }
+          if (platform == 'desktop') {
+            // Decision 3: the conversation pane keeps its 300 dp default.
+            expect(
+              tester
+                  .getSize(
+                    find.byKey(
+                      const ValueKey<String>('desktop_pane_conversations'),
+                    ),
+                  )
+                  .width,
+              300,
+            );
           }
           if (tc.opensSession) {
             await provider.selectSession(session);
@@ -706,24 +670,30 @@ void main() {
             key,
             '${tc.id}_${platform}_${themeName}_v1.png',
             regions: {
-              'toolbar': find.byType(AppBar),
+              'toolbar': _fullWidthAppBar(tester),
               if (tc.v1Messages.isNotEmpty)
                 'timeline': find.byType(CustomScrollView),
               if (tc.composer) 'composer': find.byType(ChatInputWidget),
               if (extraSessions.isNotEmpty)
                 'tabs': find.byType(legacy_tabs.SessionTabStrip),
               if (tc.id == 's10')
-                'overlay': find.ancestor(
-                  of: find
-                      .byWidgetPredicate((widget) => widget is PopupMenuEntry)
-                      .first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find
+                          .byWidgetPredicate(
+                            (widget) => widget is PopupMenuEntry,
+                          )
+                          .first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
               if (tc.id == 's12')
-                'overlay': find.ancestor(
-                  of: find.byType(MenuItemButton).first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find.byType(MenuItemButton).first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
               if (platform == 'desktop')
                 'side_panel': find.byKey(
                   const ValueKey('desktop_pane_conversations'),
@@ -737,27 +707,12 @@ void main() {
           addTearDown(() => tester.binding.setSurfaceSize(null));
 
           final rig = CatalogRig();
-          await _saveReferenceProfile(rig);
+          await surface.saveReferenceProfile(rig);
           final directory = LiveDirectory();
-          final metadata = V2MetadataStore(backend: FakeMetadataBackend());
-          final payloads = PreferencesPayloadStore(metadata);
-          final dependencies = createAppDependencies(
-            initialLink: Uri(path: '/sessions'),
-            sessionClock: () => DateTime.utc(2026, 11, 2, 12),
-            metadataStore: metadata,
-            profileRepository: rig.repository,
-            endpointProber: FakeProber(),
-            sessionCatalogFactory: rig.create,
-            sessionLiveDirectory: () => directory,
-            draftStore: SessionDraftStore(payloads: payloads, index: metadata),
-            workspaceDraftStore: WorkspaceDraftStore(
-              payloads: payloads,
-              index: metadata,
-            ),
-          );
-          addTearDown(dependencies.dispose);
-          dependencies.preferences.setThemeMode(
-            isDark ? ThemeMode.dark : ThemeMode.light,
+          final dependencies = surface.buildReferenceDependencies(
+            rig: rig,
+            directory: directory,
+            dark: isDark,
           );
 
           final key = GlobalKey();
@@ -808,6 +763,12 @@ void main() {
             await tester.pumpAndSettle();
           }
 
+          // Extra tabs open before the active row, so the tab order matches v1
+          // (the active session is the last tab in both).
+          for (final extra in extraRows) {
+            await dependencies.sessionTabs!.open(extra);
+            await tester.pumpAndSettle();
+          }
           if (tc.opensSession) {
             if (platform == 'mobile') {
               final drawer = find.byKey(const ValueKey('workspace-drawer'));
@@ -871,10 +832,6 @@ void main() {
             }
           }
 
-          for (final extra in extraRows) {
-            await dependencies.sessionTabs!.open(extra);
-            await tester.pumpAndSettle();
-          }
           if (extraRows.isNotEmpty) {
             await dependencies.sessionTabs!.open(row);
             await tester.pumpAndSettle();
@@ -933,7 +890,7 @@ void main() {
             key,
             '${tc.id}_${platform}_${themeName}_v2.png',
             regions: {
-              'toolbar': find.byType(AppBar),
+              'toolbar': _fullWidthAppBar(tester),
               if (tc.v2Items.isNotEmpty)
                 'timeline': find.byType(SessionLiveTimeline),
               if (tc.composer)
@@ -941,19 +898,27 @@ void main() {
               if (extraRows.isNotEmpty)
                 'tabs': find.byKey(const ValueKey('session-tabs')),
               if (tc.id == 's10')
-                'overlay': find.ancestor(
-                  of: find
-                      .byWidgetPredicate((widget) => widget is PopupMenuEntry)
-                      .first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find
+                          .byWidgetPredicate(
+                            (widget) => widget is PopupMenuEntry,
+                          )
+                          .first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
               if (tc.id == 's12')
-                'overlay': find.ancestor(
-                  of: find
-                      .byWidgetPredicate((widget) => widget is PopupMenuEntry)
-                      .first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find
+                          .byWidgetPredicate(
+                            (widget) => widget is PopupMenuEntry,
+                          )
+                          .first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
               if (platform == 'desktop')
                 'side_panel': find.byKey(const ValueKey('workspace-sidebar')),
             },
@@ -1066,7 +1031,7 @@ void main() {
                 provider,
                 appProvider,
                 integratedWindowChrome: platform == 'desktop',
-                settingsProvider: await _v1ReferenceSettings(source),
+                settingsProvider: await surface.v1ReferenceSettings(source),
                 theme: v1Theme,
               ),
             ),
@@ -1111,17 +1076,21 @@ void main() {
             key,
             '${scenario}_${platform}_${themeName}_v1.png',
             regions: {
-              'toolbar': find.byType(AppBar),
+              'toolbar': _fullWidthAppBar(tester),
               'side_panel': platform == 'mobile'
                   ? find.byType(Drawer)
                   : find.byKey(const ValueKey('desktop_pane_conversations')),
               if (scenario != 's8')
-                'overlay': find.ancestor(
-                  of: find
-                      .byWidgetPredicate((widget) => widget is PopupMenuEntry)
-                      .first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find
+                          .byWidgetPredicate(
+                            (widget) => widget is PopupMenuEntry,
+                          )
+                          .first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
             },
           );
         });
@@ -1131,27 +1100,12 @@ void main() {
           addTearDown(() => tester.binding.setSurfaceSize(null));
 
           final rig = CatalogRig();
-          await _saveReferenceProfile(rig);
+          await surface.saveReferenceProfile(rig);
           final directory = LiveDirectory();
-          final metadata = V2MetadataStore(backend: FakeMetadataBackend());
-          final payloads = PreferencesPayloadStore(metadata);
-          final dependencies = createAppDependencies(
-            initialLink: Uri(path: '/sessions'),
-            sessionClock: () => DateTime.utc(2026, 11, 2, 12),
-            metadataStore: metadata,
-            profileRepository: rig.repository,
-            endpointProber: FakeProber(),
-            sessionCatalogFactory: rig.create,
-            sessionLiveDirectory: () => directory,
-            draftStore: SessionDraftStore(payloads: payloads, index: metadata),
-            workspaceDraftStore: WorkspaceDraftStore(
-              payloads: payloads,
-              index: metadata,
-            ),
-          );
-          addTearDown(dependencies.dispose);
-          dependencies.preferences.setThemeMode(
-            isDark ? ThemeMode.dark : ThemeMode.light,
+          final dependencies = surface.buildReferenceDependencies(
+            rig: rig,
+            directory: directory,
+            dark: isDark,
           );
 
           final key = GlobalKey();
@@ -1216,17 +1170,21 @@ void main() {
             key,
             '${scenario}_${platform}_${themeName}_v2.png',
             regions: {
-              'toolbar': find.byType(AppBar),
+              'toolbar': _fullWidthAppBar(tester),
               'side_panel': platform == 'mobile'
                   ? find.byType(Drawer)
                   : find.byKey(const ValueKey('workspace-sidebar')),
               if (scenario != 's8')
-                'overlay': find.ancestor(
-                  of: find
-                      .byWidgetPredicate((widget) => widget is PopupMenuEntry)
-                      .first,
-                  matching: find.byType(Material),
-                ),
+                'overlay': find
+                    .ancestor(
+                      of: find
+                          .byWidgetPredicate(
+                            (widget) => widget is PopupMenuEntry,
+                          )
+                          .first,
+                      matching: find.byType(Material),
+                    )
+                    .first,
             },
           );
         });

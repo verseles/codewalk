@@ -79,9 +79,10 @@ def compare_images(img1, img2, diff_out):
     code, out, err = run_cmd(cmd)
     if code in (0, 1):
         metric_str = err.strip()
-        match = re.fullmatch(r"(\d+)(?:\s+\((\d*\.?\d+(?:[eE][+-]?\d+)?)\))?", metric_str)
+        # ImageMagick prints large counts in %g notation, e.g. "1.024e+06 (1)".
+        match = re.fullmatch(r"(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?:\s+\((\d*\.?\d+(?:[eE][+-]?\d+)?)\))?", metric_str)
         if match and (match.group(2) is None or 0 <= float(match.group(2)) <= 1):
-            return int(match.group(1))
+            return int(round(float(match.group(1))))
         raise RuntimeError(f"Unable to parse compare AE metric '{metric_str}': {err}")
     raise RuntimeError(f"ImageMagick compare failed with code {code} for {img1} vs {img2}: {err}")
 
@@ -168,7 +169,11 @@ def run_comparison(captures_dir, output_report, rel_base_dir=None, strict=True, 
     discovered = discover_pairs(captures_dir)
     if not discovered:
         raise FileNotFoundError(f"No parity captures found in {captures_dir}")
-    pair_ids = sorted(set(discovered) | (EXPECTED_PAIRS if expected_pair_ids is None else set(expected_pair_ids)))
+    expected = EXPECTED_PAIRS if expected_pair_ids is None else set(expected_pair_ids)
+    unexpected = sorted(set(discovered) - expected)
+    if unexpected and strict:
+        raise ValueError(f"Captures outside the expected matrix: {', '.join(unexpected)}")
+    pair_ids = sorted(set(discovered) | expected)
 
     results = []
     missing_pairs = []
