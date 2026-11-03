@@ -116,7 +116,9 @@ void main() {
   group('the live timeline', () {
     testWidgets('the list opens on the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 2));
-      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
       final controller = list.controller!;
       expect(controller.offset, controller.position.maxScrollExtent);
       expect(find.text('row 1'), findsOneWidget);
@@ -127,7 +129,9 @@ void main() {
 
     testWidgets('a live update follows the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 1));
-      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
       final controller = list.controller!;
       expect(controller.offset, controller.position.maxScrollExtent);
       live.handle.emit(
@@ -154,7 +158,9 @@ void main() {
       tester,
     ) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 40));
-      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
       final controller = list.controller!;
       final bottom = controller.position.maxScrollExtent;
       expect(bottom, greaterThan(0));
@@ -188,7 +194,9 @@ void main() {
 
     testWidgets('the control returns to the newest content', (tester) async {
       final live = await _openLive(tester, (ref) => _answers(ref, 40));
-      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
       final controller = list.controller!;
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
       await tester.pumpAndSettle();
@@ -233,7 +241,9 @@ void main() {
           ),
         ],
       );
-      final list = tester.widget<CustomScrollView>(find.byType(CustomScrollView));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
       final controller = list.controller!;
       // The answer starts at the top of the viewport, not at its end.
       expect(controller.offset, lessThan(controller.position.maxScrollExtent));
@@ -617,7 +627,9 @@ void main() {
       );
       final controller = _controller(tester);
       final gesture = await tester.startGesture(
-        tester.getCenter(find.byType(CustomScrollView)),
+        // The list margin, not the text under its centre (SelectionArea takes a drag there).
+        tester.getTopRight(find.byType(CustomScrollView)) +
+            const Offset(-4, 40),
       );
       // The first move stays within the bottom epsilon, then the drag goes
       // farther in the same direction, which reports no new direction.
@@ -863,9 +875,8 @@ void main() {
     /// marks the content that arrived below the reader.
     Finder jumpControl() => find.byKey(const ValueKey('live-jump-latest'));
 
-    Color? controlColor(WidgetTester tester) => tester
-        .widget<FloatingActionButton>(jumpControl())
-        .backgroundColor;
+    Color? controlColor(WidgetTester tester) =>
+        tester.widget<FloatingActionButton>(jumpControl()).backgroundColor;
 
     testWidgets('a row that is not the last one is an arrival', (tester) async {
       final live = await _openLive(
@@ -1106,9 +1117,7 @@ void main() {
       live.rig.dispose();
     });
 
-    testWidgets('a replacement of the same size is an arrival', (
-      tester,
-    ) async {
+    testWidgets('a replacement of the same size is an arrival', (tester) async {
       Future<void> expectMarked(
         List<TimelineItem> Function(SessionRef ref) before,
         List<TimelineItem> Function(SessionRef ref) after,
@@ -1262,94 +1271,98 @@ void main() {
       live.rig.dispose();
     });
 
-    testWidgets('a drag that cannot leave the bottom does not stop the follow', (
-      tester,
-    ) async {
-      final live = await _openLive(
-        tester,
-        (ref) => _answers(ref, 40),
-        settled: false,
-      );
-      final controller = _controller(tester);
-      // The reader holds the list at the bottom: the finger is down and the
-      // drag has not moved the list.
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.byType(CustomScrollView)),
-      );
-      await tester.pump();
-      // The reader pulls the list up at the tail: the drag is a real one and
-      // the physics clamp it, so the list cannot move.
-      await gesture.moveBy(const Offset(0, -60));
-      await tester.pump();
-      // The content grows while the drag is held.
-      live.handle.emit(
-        SessionLiveView(
-          session: live.ref,
-          phase: SessionLivePhase.live,
-          state: liveState(
-            live.ref,
-            items: _answers(live.ref, 41),
-            execution: const ExecutionState(
-              kind: OpenValue.known(ExecutionKind.running),
+    testWidgets(
+      'a drag that cannot leave the bottom does not stop the follow',
+      (tester) async {
+        final live = await _openLive(
+          tester,
+          (ref) => _answers(ref, 40),
+          settled: false,
+        );
+        final controller = _controller(tester);
+        // The reader holds the list at the bottom: the finger is down and the
+        // drag has not moved the list.
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(CustomScrollView)),
+        );
+        await tester.pump();
+        // The reader pulls the list up at the tail: the drag is a real one and
+        // the physics clamp it, so the list cannot move.
+        await gesture.moveBy(const Offset(0, -60));
+        await tester.pump();
+        // The content grows while the drag is held.
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: _answers(live.ref, 41),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump();
-      await tester.pump();
-      // The follow still reached the newest content: the reader's hold did
-      // not stop it, and the control was never offered.
-      expect(controller.offset, controller.position.maxScrollExtent);
-      expect(jumpControl(), findsNothing);
-      await gesture.up();
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(const SizedBox.shrink());
-      live.rig.dispose();
-    });
+        );
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        // The follow still reached the newest content: the reader's hold did
+        // not stop it, and the control was never offered.
+        expect(controller.offset, controller.position.maxScrollExtent);
+        expect(jumpControl(), findsNothing);
+        await gesture.up();
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      },
+    );
 
-    testWidgets('content that arrives under a reader is marked when the follow yields', (
-      tester,
-    ) async {
-      final live = await _openLive(
-        tester,
-        (ref) => _answers(ref, 40),
-        settled: false,
-      );
-      final controller = _controller(tester);
-      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
-      // The content arrives and the reader starts a page-key scroll before
-      // the follow's frame.
-      live.handle.emit(
-        SessionLiveView(
-          session: live.ref,
-          phase: SessionLivePhase.live,
-          state: liveState(
-            live.ref,
-            items: _answers(live.ref, 41),
-            execution: const ExecutionState(
-              kind: OpenValue.known(ExecutionKind.running),
+    testWidgets(
+      'content that arrives under a reader is marked when the follow yields',
+      (tester) async {
+        final live = await _openLive(
+          tester,
+          (ref) => _answers(ref, 40),
+          settled: false,
+        );
+        final controller = _controller(tester);
+        final scheme = Theme.of(
+          tester.element(find.byType(CustomScrollView)),
+        ).colorScheme;
+        // The content arrives and the reader starts a page-key scroll before
+        // the follow's frame.
+        live.handle.emit(
+          SessionLiveView(
+            session: live.ref,
+            phase: SessionLivePhase.live,
+            state: liveState(
+              live.ref,
+              items: _answers(live.ref, 41),
+              execution: const ExecutionState(
+                kind: OpenValue.known(ExecutionKind.running),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
-      unawaited(
-        controller.position.moveTo(
-          controller.position.pixels - 200,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeInOut,
-        ),
-      );
-      await tester.pump();
-      await tester.pumpAndSettle();
-      // The control that returns to the newest content is marked: content
-      // landed below the reader.
-      final control = tester.widget<FloatingActionButton>(jumpControl());
-      expect(control.backgroundColor, scheme.primary);
-      await tester.pumpWidget(const SizedBox.shrink());
-      live.rig.dispose();
-    });
+        );
+        await tester.pump();
+        unawaited(
+          controller.position.moveTo(
+            controller.position.pixels - 200,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeInOut,
+          ),
+        );
+        await tester.pump();
+        await tester.pumpAndSettle();
+        // The control that returns to the newest content is marked: content
+        // landed below the reader.
+        final control = tester.widget<FloatingActionButton>(jumpControl());
+        expect(control.backgroundColor, scheme.primary);
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      },
+    );
 
     testWidgets('an answer that settled while the reader scrolled stays put', (
       tester,
@@ -1470,7 +1483,9 @@ void main() {
         (ref) => _answers(ref, 40),
         settled: false,
       );
-      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
+      final scheme = Theme.of(
+        tester.element(find.byType(CustomScrollView)),
+      ).colorScheme;
       // The reader moves away, so the control is offered.
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
@@ -1508,7 +1523,9 @@ void main() {
         ),
       ];
       final live = await _openLive(tester, items, settled: false);
-      final scheme = Theme.of(tester.element(find.byType(CustomScrollView))).colorScheme;
+      final scheme = Theme.of(
+        tester.element(find.byType(CustomScrollView)),
+      ).colorScheme;
       // The item changes with the same size, so the extent does not move and
       // the reader, at the bottom, has already seen it.
       live.handle.emit(
@@ -1550,7 +1567,6 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });
-
   });
 
   group('the scroll rules', () {

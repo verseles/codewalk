@@ -92,33 +92,96 @@ class SessionTimelineTile extends StatelessWidget {
     final assistant = !isUser;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final created = message?.created;
+    final clock = created == null
+        ? null
+        : MaterialLocalizations.of(context).formatTimeOfDay(
+            TimeOfDay.fromDateTime(created.toLocal()),
+            alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+          );
+    // An assistant message without a time, a duration or an action has no
+    // header at all, so it takes no space above its body.
+    final headerShown =
+        item is! AssistantText ||
+        clock != null ||
+        inlineAction != null ||
+        message != null;
     final body = Padding(
       // Compact bubble padding matching v1 density
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    label,
-                    style: theme.textTheme.titleSmall,
+          if (headerShown) ...[
+            if (item is UserInput || item is AssistantText)
+              // v1 chat_message_content.dart: the user header is "You" and the
+              // time; an assistant message has no label, only the time, and its
+              // duration ends the line.
+              Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (item is UserInput) ...[
+                          Flexible(
+                            child: Semantics(
+                              header: true,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        if (clock != null)
+                          Flexible(
+                            child: Text(
+                              clock,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
+                  if (inlineAction != null) ...[
+                    inlineAction!,
+                    const SizedBox(width: 4),
+                  ],
+                  if (item is AssistantText && message != null)
+                    MessageElapsedChip(message: message),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Icon(icon, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(label, style: theme.textTheme.titleSmall),
+                    ),
+                  ),
+                  if (inlineAction != null) ...[
+                    inlineAction!,
+                    const SizedBox(width: 4),
+                  ],
+                  if (message != null) MessageElapsedChip(message: message),
+                ],
               ),
-              if (inlineAction != null) ...[
-                inlineAction!,
-                const SizedBox(width: 4),
-              ],
-              if (message != null) MessageElapsedChip(message: message),
-            ],
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
           _buildBody(context, l10n),
         ],
       ),
@@ -129,8 +192,12 @@ class SessionTimelineTile extends StatelessWidget {
           ? (theme.cardTheme.shape! as RoundedRectangleBorder).side
           : BorderSide.none,
       borderRadius: BorderRadius.circular(16).copyWith(
-        bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
-        bottomLeft: assistant ? const Radius.circular(4) : const Radius.circular(16),
+        bottomRight: isUser
+            ? const Radius.circular(4)
+            : const Radius.circular(16),
+        bottomLeft: assistant
+            ? const Radius.circular(4)
+            : const Radius.circular(16),
       ),
     );
     final tile = Card(
@@ -154,13 +221,13 @@ class SessionTimelineTile extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
-        final candidateW = isUser ? max(220.0, min(640.0, maxW * 0.85)) : min(760.0, maxW);
+        final candidateW = isUser
+            ? max(220.0, min(640.0, maxW * 0.85))
+            : min(760.0, maxW);
         return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: candidateW,
-            ),
+            constraints: BoxConstraints(maxWidth: candidateW),
             child: ConversationTextScale(child: tile),
           ),
         );

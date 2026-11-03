@@ -18,21 +18,23 @@ ItemMeta _meta(String id) => ItemMeta(
   ),
 );
 
-/// The fixture lays out 552 logical px tall, but the shrink-wrapped height is
-/// reported as 552.00000095 on some architectures. The golden capture rounds
+/// The fixture lays out 524 logical px tall, but the shrink-wrapped height is
+/// reported as 524.00000095 on some architectures. The golden capture rounds
 /// with `ceil`, so that float sliver becomes a 553px image on one host and a
-/// 552px image on another, and `matchesGoldenFile` rejects any size mismatch
+/// 524px image on another, and `matchesGoldenFile` rejects any size mismatch
 /// before comparing pixels. Pinning the golden canvas to an integral height
 /// keeps the captured image size identical everywhere; the sub-pixel sliver is
 /// clipped, not lost.
-const double _goldenCanvasHeight = 552;
+const double _goldenCanvasHeight = 524;
 
 Widget _goldenBody() => SessionTimelineTile(
   item: AssistantText(
     meta: _meta('a1'),
-    text: '# Title\n\n- item\n\n| a | b |\n|---|---|\n| c | d |\n\n'
+    text:
+        '# Title\n\n- item\n\n| a | b |\n|---|---|\n| c | d |\n\n'
         '```dart\nfinal x = 1;\n```\n\n'
-        r'Inline $E = mc^2$ text.' '\n\n'
+        r'Inline $E = mc^2$ text.'
+        '\n\n'
         '<b>Bold</b> <progress value="40" max="100"></progress>\n\n'
         '```mermaid\ngraph TD; A-->B\n```',
     complete: true,
@@ -82,11 +84,31 @@ Future<void> _pumpGolden(
 
 void main() {
   final cases = [
-    ('mobile_light', const Size(390, 844), const Locale('en'), Brightness.light),
+    (
+      'mobile_light',
+      const Size(390, 844),
+      const Locale('en'),
+      Brightness.light,
+    ),
     ('mobile_dark', const Size(390, 844), const Locale('en'), Brightness.dark),
-    ('desktop_light', const Size(1280, 800), const Locale('en'), Brightness.light),
-    ('desktop_dark', const Size(1280, 800), const Locale('en'), Brightness.dark),
-    ('mobile_ar_rtl', const Size(390, 844), const Locale('ar'), Brightness.light),
+    (
+      'desktop_light',
+      const Size(1280, 800),
+      const Locale('en'),
+      Brightness.light,
+    ),
+    (
+      'desktop_dark',
+      const Size(1280, 800),
+      const Locale('en'),
+      Brightness.dark,
+    ),
+    (
+      'mobile_ar_rtl',
+      const Size(390, 844),
+      const Locale('ar'),
+      Brightness.light,
+    ),
   ];
   for (final (name, size, locale, brightness) in cases) {
     testWidgets('rich rendering golden $name', (tester) async {

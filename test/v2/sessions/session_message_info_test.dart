@@ -240,4 +240,37 @@ void main() {
     // Without the header flag the message details stay out of the row.
     expect(find.byType(MessageElapsedChip), findsNothing);
   });
+
+  testWidgets('a narrow user header keeps its label semantic at text scale 2', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(
+      _surface(
+        SizedBox(
+          width: 150,
+          child: SessionTimelineTile(
+            item: UserInput(
+              meta: _meta('u', message: _context()),
+              text: 'Hi',
+              delivery: const OpenValue.known(DeliveryState.delivered),
+            ),
+            messageHeader: true,
+            inlineAction: const Icon(Icons.more_horiz),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(
+      find.ancestor(
+        of: find.text('You'),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.header == true,
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
 }
