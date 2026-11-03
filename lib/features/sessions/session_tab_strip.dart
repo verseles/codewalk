@@ -537,86 +537,103 @@ class _StripState extends State<_Strip> {
   Widget build(BuildContext context) {
     final projection = widget.projection;
     final hasRegular = projection.groups.isNotEmpty || widget.drafting;
-    return Material(
-      key: const ValueKey('session-tabs'),
-      color: Theme.of(context).colorScheme.surfaceContainer,
-      child: Semantics(
-        label: context.v2L10n.chatSessionTabsToggle,
-        container: true,
-        child: LayoutBuilder(
-          builder: (context, box) {
-            final usable = math.max(1.0, box.maxWidth - 48);
-            final compact = MediaQuery.sizeOf(context).width < 600;
-            final selectedPin = projection.pinned.any(
-              (t) => t.ref == widget.current,
-            );
-            final wanted =
-                projection.pinned.length * 38.0 + (selectedPin ? 124 : 0);
-            final cap = hasRegular
-                ? math.max(
-                    0.0,
-                    usable - math.min(compact ? 100.0 : 120.0, usable / 2),
-                  )
-                : usable;
-            final pinnedWidth = math.min(
-              wanted,
-              math.min(
-                cap,
-                selectedPin
-                    ? math.max(usable * .5, math.min(180.0, cap))
-                    : usable * .45,
-              ),
-            );
-            final regular = <Widget>[];
-            var draftAdded = false;
-            for (final entry in projection.groups.entries) {
-              if (regular.isNotEmpty) regular.add(const SizedBox(width: 8));
-              for (final tab in entry.value) {
-                regular.add(
-                  _tab(tab, math.max(1.0, usable - pinnedWidth), pinned: false),
-                );
+    // v1 strip heights (kAppTabStripHeightCompact, kAppTabStripHeight).
+    final stripHeight = MediaQuery.sizeOf(context).width < 600 ? 46.4 : 43.2;
+    return SizedBox(
+      height: stripHeight,
+      child: Material(
+        key: const ValueKey('session-tabs'),
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        child: Semantics(
+          label: context.v2L10n.chatSessionTabsToggle,
+          container: true,
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final usable = math.max(1.0, box.maxWidth - 48);
+              final compact = MediaQuery.sizeOf(context).width < 600;
+              final selectedPin = projection.pinned.any(
+                (t) => t.ref == widget.current,
+              );
+              final wanted =
+                  projection.pinned.length * 38.0 + (selectedPin ? 124 : 0);
+              final cap = hasRegular
+                  ? math.max(
+                      0.0,
+                      usable - math.min(compact ? 100.0 : 120.0, usable / 2),
+                    )
+                  : usable;
+              final pinnedWidth = math.min(
+                wanted,
+                math.min(
+                  cap,
+                  selectedPin
+                      ? math.max(usable * .5, math.min(180.0, cap))
+                      : usable * .45,
+                ),
+              );
+              final regular = <Widget>[];
+              var draftAdded = false;
+              for (final entry in projection.groups.entries) {
+                if (regular.isNotEmpty) regular.add(const SizedBox(width: 8));
+                // The selected tab leads its project group, as in v1; the other
+                // tabs keep their opening order.
+                final ordered = [
+                  for (final tab in entry.value)
+                    if (tab.ref == widget.current) tab,
+                  for (final tab in entry.value)
+                    if (tab.ref != widget.current) tab,
+                ];
+                for (final tab in ordered) {
+                  regular.add(
+                    _tab(
+                      tab,
+                      math.max(1.0, usable - pinnedWidth),
+                      pinned: false,
+                    ),
+                  );
+                }
+                final project = entry.key;
+                if (widget.drafting && project == widget.draftProject) {
+                  regular.add(_draft(usable));
+                  draftAdded = true;
+                } else if (project != null) {
+                  regular.add(
+                    IconButton(
+                      key: ValueKey('session-tab-add-${project.storageKey}'),
+                      tooltip: context.v2L10n.chatNewChat,
+                      icon: const Icon(Icons.add),
+                      onPressed: () => widget.onDraft(project),
+                    ),
+                  );
+                }
               }
-              final project = entry.key;
-              if (widget.drafting && project == widget.draftProject) {
-                regular.add(_draft(usable));
-                draftAdded = true;
-              } else if (project != null) {
-                regular.add(
+              if (widget.drafting && !draftAdded) regular.add(_draft(usable));
+              return Row(
+                children: [
+                  if (projection.pinned.isNotEmpty && pinnedWidth > 0)
+                    SizedBox(
+                      width: pinnedWidth,
+                      child: _scroll([
+                        for (final tab in projection.pinned)
+                          _tab(tab, pinnedWidth, pinned: true),
+                      ], key: const ValueKey('session-tabs-pinned')),
+                    ),
+                  Expanded(
+                    child: _scroll(
+                      regular,
+                      key: const ValueKey('session-tabs-regular'),
+                    ),
+                  ),
                   IconButton(
-                    key: ValueKey('session-tab-add-${project.storageKey}'),
-                    tooltip: context.v2L10n.chatNewChat,
-                    icon: const Icon(Icons.add),
-                    onPressed: () => widget.onDraft(project),
+                    key: const ValueKey('session-tabs-recent-button'),
+                    tooltip: context.v2L10n.sessionTabSwitcherTitle,
+                    icon: const Icon(Icons.swap_horiz),
+                    onPressed: widget.onRecent,
                   ),
-                );
-              }
-            }
-            if (widget.drafting && !draftAdded) regular.add(_draft(usable));
-            return Row(
-              children: [
-                if (projection.pinned.isNotEmpty && pinnedWidth > 0)
-                  SizedBox(
-                    width: pinnedWidth,
-                    child: _scroll([
-                      for (final tab in projection.pinned)
-                        _tab(tab, pinnedWidth, pinned: true),
-                    ], key: const ValueKey('session-tabs-pinned')),
-                  ),
-                Expanded(
-                  child: _scroll(
-                    regular,
-                    key: const ValueKey('session-tabs-regular'),
-                  ),
-                ),
-                IconButton(
-                  key: const ValueKey('session-tabs-recent-button'),
-                  tooltip: context.v2L10n.sessionTabSwitcherTitle,
-                  icon: const Icon(Icons.swap_horiz),
-                  onPressed: widget.onRecent,
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -485,6 +485,47 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets(
+    'the selected tab leads its project group, the others keep order',
+    (tester) async {
+      _useMemoryPreferences();
+      final app = await _launch(tester);
+      await _visit(tester, app, ['one', 'two', 'three']);
+      double left(String id) => tester.getTopLeft(_tab(app, id)).dx;
+      expect(left('three'), lessThan(left('one')));
+      expect(left('one'), lessThan(left('two')));
+
+      // Showing another tab moves it to the front; the rest keep their order.
+      await _visit(tester, app, ['one']);
+      // _ids are session ids (ses_*); _ref takes the short id.
+      final others = _ids(app)
+          .map((id) => id.replaceFirst('ses_', ''))
+          .where((id) => id != 'one')
+          .toList();
+      expect(left('one'), lessThan(left(others.first)));
+      expect(left(others.first), lessThan(left(others.last)));
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('only the selected tab shows a close control, and it closes', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester);
+    await _visit(tester, app, ['one', 'two', 'three']);
+    Finder closeOf(String id) =>
+        find.byKey(ValueKey('session-tab-close-${_ref(app, id).storageKey}'));
+    expect(closeOf('three'), findsOneWidget);
+    expect(closeOf('one'), findsNothing);
+
+    await tester.ensureVisible(closeOf('three'));
+    await tester.tap(closeOf('three'));
+    await _settle(tester);
+    expect(_ids(app), isNot(contains('ses_three')));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a double tap and Delete close a tab without a close button', (
     tester,
   ) async {
@@ -603,14 +644,18 @@ void main() {
           expect(tester.takeException(), isNull);
           final strip = find.byKey(const ValueKey('session-tabs'));
           expect(strip, findsOneWidget);
-          // The shown tab is scrolled into view and every tab keeps a
-          // 48 dp target.
+          // The shown tab is scrolled into view. The strip and its tabs keep
+          // the v1 heights (owner decision B, S7).
           final shown = tester.getRect(_tab(app, 'three'));
           final bounds = tester.getRect(strip);
           expect(shown.left, greaterThanOrEqualTo(bounds.left - 0.5));
           expect(shown.right, lessThanOrEqualTo(bounds.right + 0.5));
+          expect(
+            tester.getSize(strip).height,
+            closeTo(width < 600 ? 46.4 : 43.2, 0.01),
+          );
           for (final id in ['one', 'two', 'three', 'other']) {
-            expect(tester.getSize(_tab(app, id)).height, 48);
+            expect(tester.getSize(_tab(app, id)).height, closeTo(38.4, 0.01));
           }
           expect(
             find.descendant(

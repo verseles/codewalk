@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../platform/sessions/session_tabs_store.dart';
@@ -47,11 +48,11 @@ class SessionTabGlyph extends StatelessWidget {
     final l = context.v2L10n;
     final preset = SessionTabIconPreset.fromId(tabs.iconFor(tab.ref));
     final glyph = failed
-        ? Icons.error_outline
+        ? Symbols.error
         : waiting
-        ? Icons.help_outline
+        ? Symbols.help
         : marks.contains(SessionActivityMark.unread)
-        ? Icons.check_circle_outline
+        ? Symbols.notifications_active
         : preset?.icon ?? Icons.folder_open;
     return Semantics(
       label: [
@@ -80,13 +81,76 @@ class SessionTabGlyph extends StatelessWidget {
               PositionedDirectional(
                 end: -3,
                 top: -3,
-                child: Icon(Icons.sync, size: 12, color: scheme.secondary),
+                child: Icon(
+                  Symbols.sync_rounded,
+                  size: 12,
+                  color: scheme.secondary,
+                ),
               ),
           ],
         ),
       ),
     );
   }
+}
+
+/// The tab outline of v1 `AppTabBorder`: straight sides, a curved shoulder
+/// into the bottom corners and a top radius. Private to the tab chip.
+class _TabShoulderBorder extends ShapeBorder {
+  const _TabShoulderBorder({required this.topRadius, required this.shoulder});
+
+  final double topRadius;
+  final double shoulder;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      getOuterPath(rect, textDirection: textDirection);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    final lowerCurveTop = rect.bottom - shoulder;
+    final r = topRadius;
+    return Path()
+      ..moveTo(rect.left, rect.bottom)
+      ..cubicTo(
+        rect.left + shoulder * 0.55,
+        rect.bottom,
+        rect.left + shoulder,
+        rect.bottom - shoulder * 0.45,
+        rect.left + shoulder,
+        lowerCurveTop,
+      )
+      ..lineTo(rect.left + shoulder, rect.top + r)
+      ..arcToPoint(
+        Offset(rect.left + shoulder + r, rect.top),
+        radius: Radius.circular(r),
+      )
+      ..lineTo(rect.right - shoulder - r, rect.top)
+      ..arcToPoint(
+        Offset(rect.right - shoulder, rect.top + r),
+        radius: Radius.circular(r),
+      )
+      ..lineTo(rect.right - shoulder, lowerCurveTop)
+      ..cubicTo(
+        rect.right - shoulder,
+        rect.bottom - shoulder * 0.45,
+        rect.right - shoulder * 0.55,
+        rect.bottom,
+        rect.right,
+        rect.bottom,
+      )
+      ..close();
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+
+  @override
+  ShapeBorder scale(double t) =>
+      _TabShoulderBorder(topRadius: topRadius * t, shoulder: shoulder * t);
 }
 
 /// A tab has no close button: double-tap, middle-click, Delete and semantic
@@ -156,16 +220,11 @@ class SessionTabChip extends StatelessWidget {
               triggerMode: TooltipTriggerMode.manual,
               child: Material(
                 key: ValueKey('session-tab-${tab.ref.storageKey}'),
-                color: selected
-                    ? scheme.secondaryContainer
-                    : scheme.surfaceContainer,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: selected ? scheme.primary : Colors.transparent,
-                  ),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(selected ? 8 : 5),
-                  ),
+                // v1: app_tab_strip.dart (content fill, shoulder and top radius).
+                color: selected ? scheme.surface : Colors.transparent,
+                shape: _TabShoulderBorder(
+                  topRadius: selected ? 8 : 5,
+                  shoulder: 10,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
@@ -173,7 +232,9 @@ class SessionTabChip extends StatelessWidget {
                   onDoubleTap: onClose,
                   child: SizedBox(
                     width: width,
-                    height: 48,
+                    // v1 tab height (48 x 0.8). Below the 48 dp target by owner
+                    // decision B (S7); recorded as an accessibility exception.
+                    height: 38.4,
                     child: Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: pinned && !selected ? 4 : 10,
@@ -193,6 +254,24 @@ class SessionTabChip extends StatelessWidget {
                                   style: style,
                                 ),
                               ),
+                            ),
+                          ],
+                          // The selected tab keeps the v1 trailing close control.
+                          if (selected) ...[
+                            const SizedBox(width: 2),
+                            IconButton(
+                              key: ValueKey(
+                                'session-tab-close-${tab.ref.storageKey}',
+                              ),
+                              tooltip: context.v2L10n.chatClose,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints.tightFor(
+                                width: 24,
+                                height: 24,
+                              ),
+                              iconSize: 16,
+                              onPressed: onClose,
+                              icon: const Icon(Symbols.close),
                             ),
                           ],
                         ],
