@@ -273,7 +273,9 @@ void tabsGroup() {
         lessThan(tester.getTopLeft(_tabOf(surface, 'two')).dx),
       );
       expect(_closeOf(surface, 'three'), findsOneWidget);
-      expect(_closeOf(surface, 'one'), findsNothing);
+      for (final id in ['one', 'two']) {
+        expect(_closeOf(surface, id), findsNothing);
+      }
       expect(tester.takeException(), isNull);
     });
   }
@@ -406,20 +408,38 @@ void timelineGroup() {
   testWidgets('an assistant without time, duration or action has no header', (
     tester,
   ) async {
+    // Without a header the body starts 14 dp below the card's top edge; an
+    // empty header row and its 8 dp gap would move it down.
     await tester.pumpWidget(
       _timelineSurface(
-        SessionTimelineTile(
-          item: AssistantText(
-            meta: _timelineMeta('bare'),
-            text: 'Body',
-            complete: true,
-          ),
-          messageHeader: true,
+        Column(
+          children: [
+            for (final header in [false, true])
+              SessionTimelineTile(
+                item: AssistantText(
+                  meta: _timelineMeta(header ? 'bare' : 'plain'),
+                  text: 'Body',
+                  complete: true,
+                ),
+                messageHeader: header,
+              ),
+          ],
         ),
       ),
     );
+    double bodyOffset(int card) =>
+        tester
+            .getTopLeft(
+              find.descendant(
+                of: find.byType(Card).at(card),
+                matching: find.text('Body'),
+              ),
+            )
+            .dy -
+        tester.getTopLeft(find.byType(Card).at(card)).dy;
+    expect(bodyOffset(0), closeTo(14, 0.5));
+    expect(bodyOffset(1), closeTo(14, 0.5));
     expect(find.byType(MessageElapsedChip), findsNothing);
-    expect(find.byIcon(Icons.chat_bubble_outline), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
