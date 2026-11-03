@@ -38,7 +38,9 @@ val releaseStoreFile = resolveSigningFile(
 val previewKeystore = rootProject.file("../../codewalk-v2-preview-signing.keystore")
 val previewProperties = Properties().apply {
     val file = previewKeystore.resolveSibling("codewalk-v2-preview-signing.properties")
-    if (file.exists()) file.inputStream().use { load(it) }
+    if (codewalkPreview && previewKeystore.exists() && file.exists()) {
+        file.inputStream().use { load(it) }
+    }
 }
 
 fun requiredPreviewProperty(name: String): String =
