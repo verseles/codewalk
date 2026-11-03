@@ -2,7 +2,7 @@
 
 **Escopo:** Seq 5.6 / Issue #458 (V2-071H): toolbar, painel lateral, abas, composer, menus e mensagens da v2 comparados com a v1 `v1.265.1`, no celular (412×915) e no desktop (1280×800), em claro e escuro.
 **Referência v1:** tag `v1.265.1` (commit `a046da262dd91dfa7d157c6f3264368f32535528`), somente leitura.
-**Candidato medido:** `445e2468` no neo (x86_64, Flutter 3.47.9), em um clone limpo do commit, com árvore sem alterações. Linha de base S4: `S4-5057601`.
+**Candidato:** o HEAD do commit que contém esta seção. O último commit de código é `60737be3` (teste de Configurações do item 2). As capturas foram medidas no neo (x86_64, Flutter 3.47.9), em clone limpo de `445e2468`, cujo código é idêntico ao atual, exceto pelo teste. Linha de base S4: `S4-5057601`.
 **Evidências no repositório:** `evidence/cp5/surfaces-445e2468/` (`report.json` e 54 montagens). Checklist por superfície, decisões e linhas abertas: este arquivo e comentário de S10 na #458.
 **Registros de validação** (captures, `make check`, arquitetura, localizações, prévias, hashes e smoke): #458 e #398 e Task Memory. Não ficam neste arquivo, para não mudar o SHA do candidato.
 
@@ -115,6 +115,7 @@ Convenção: pares comparáveis são os de linha de base S4 com diferença de pi
 3. **Alvo de toque da ação de turno (40 dp):** achado W1 da rodada 1 de `rvw_20261103T105717Z_2b94b2a4`. Não aplicado nesta linha, porque o objetivo é paridade com a v1 e acessibilidade está fora de escopo. O intercâmbio de dissidência com o helper `-F` concordou, sem mudança. Acompanhamento em #464.
 4. **Menu de linha de sessão sem teste de valor no arquivo de paridade:** residual registrado. O gate item 3 cobre o grupo de menus (overflow e menu de aba), então este item não o bloqueia.
 5. **Ações do turno do usuário:** à esquerda da bolha, como na v1 (decisão B do dono, comentário de 2026-11-03 10:36 na #458). O cabeçalho do usuário mantém só "You" e a hora.
+6. **Teste de Configurações (gate item 2):** o teste "settings appearance has one visual style" (en e pt) passou a exigir, na mesma rolagem, modo de tema, seletor de paleta, densidade e contraste, além da ausência de controle de estilo e de "Refin". Commit `60737be3`. Revisão rodada 2 (`rvw_20261103T105717Z_2b94b2a4`): luna, sol-F e grok aprovam sem achados.
 
 ## 6.1 Goldens regenerados e motivo
 
@@ -126,6 +127,24 @@ Nenhum golden foi regenerado na S10: nenhum PNG muda nos commits da S10, e `make
 | `ad19f5d0` (S8) | Glifos de envio e parada em 24 dp; chips Steer e Queue em stadium | `sessions/goldens/command_picker_mobile_{light,dark,ar_rtl}.png`, `composer_input_mobile_{light,dark,ar_rtl}.png` |
 | `7208393f` (S8) | Regeneração no neo com a fonte Symbols carregada | `sessions/goldens/command_picker_mobile_{dark,ar_rtl}.png`, `composer_input_mobile_{dark,ar_rtl}.png` |
 | `78c91962` (S9) | Cabeçalho da mensagem: "You" e hora; sem cabeçalho do assistente quando vazio | `sessions/goldens/live_{top,work,tail,work_open}_*.png`; `shared/goldens/{desktop,mobile}_*.png` (renderização rica, altura 524 px) |
+
+---
+
+## 7. Gate técnico da #458
+
+A regra (c) da seção 2 não é atendida em medição. Ela está registrada como exceção aceita pelo owner em 2026-11-03 (opção A), não como atendida.
+
+| Item | Estado | Evidência |
+| :--- | :--- | :--- |
+| 1. Busca do estilo clássico vazia | atendido | grep de `VisualStyle`, `visualStyle`, `isRefined`, `AppVisualStyleTokens.classic` e `settingsAppearanceVisualStyle` em `lib/app`, `lib/features`, `lib/shared`, `lib/platform`, `test/v2` e no gerador de l10n: 0 ocorrências |
+| 2. Configurações: tema, paleta, densidade e contraste; sem controle de estilo nem "Refin" em en e pt | atendido | `test/v2/appearance/appearance_widget_test.dart`, testes "settings appearance has one visual style" em en e pt, commit `60737be3` |
+| 3. Grupos de valores da v1 sem `skip` | atendido | `test/v2/sessions/v1_surface_parity_test.dart`: 0 ocorrências de `skip`; grupos de barra, painel, abas, composer, menus e timeline |
+| 4. Testes focados, arquitetura, localizações e `make check` no SHA final | atendido no SHA final | registrado na #458 para o HEAD deste commit |
+| 5. Critérios 40, 86 e D2 do #455 provados e marcados; 5.4c aceito | atendido | #455 marca os três critérios com teste e commit; #398: 5.4c "✅ accepted 2026-11-02 at `ef8ef7f7`"; #302: V2-071G marcado |
+| 6. Revisões convergidas sem achado confirmado aberto | atendido | rodada 1 (`445e2468`): W1 não aplicado, dissidência do sol-F concordou; rodada 2 (`60737be3`): luna, sol-F e grok aprovam sem achados |
+| 7. Árvore legada e `pubspec.yaml` intactos | atendido | `git diff --stat b436058e HEAD -- lib/presentation lib/domain lib/l10n test/widget pubspec.yaml` vazio |
+| 8. Relatório sem ausentes, checklists, dossiê, goldens listados e after-mvp | atendido com exceção do owner | comparação 54 pares, 0 ausentes; checklists na seção 3; regra (c) aceita pelo owner (opção A, #463); goldens na seção 6.1; #462 e #464 abertos |
+| 9. CI verde no SHA final | não exigido nesta fase | o CI do GitHub passa a ser exigido quando o owner autorizar o push |
 
 ---
 
