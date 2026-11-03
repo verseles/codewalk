@@ -93,8 +93,13 @@ class SessionTabsController extends ChangeNotifier {
   Future<bool> forgetIcon(SessionRef ref) async =>
       await _icons?.removeWhere((iconRef, _) => iconRef == ref) ?? true;
 
-  SessionTabProjection projection(HostId host) =>
-      SessionTabProjection(tabs: tabs, host: host, isPinned: isPinned);
+  SessionTabProjection projection(HostId host, {SessionRef? active}) =>
+      SessionTabProjection(
+        tabs: tabs,
+        host: host,
+        isPinned: isPinned,
+        active: active,
+      );
 
   bool get loaded => _store.loaded;
 
@@ -410,6 +415,8 @@ class SessionTabsController extends ChangeNotifier {
     tabs: state.tabs,
     host: ref.host,
     isPinned: pinned ?? isPinned,
+    // The closed tab is the shown one, so the strip order leads with it.
+    active: ref,
   ).neighbour(ref);
 
   /// Removes the tabs of [refs], or the tabs [where] picks, at the store's

@@ -352,8 +352,9 @@ void main() {
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_three'],
     );
-    // Its right-hand neighbour takes its place; Undo never navigates.
-    expect(_location(app), '/s/profile_a/ses_three');
+    // The next displayed tab takes its place (the shown tab leads its group);
+    // Undo never navigates.
+    expect(_location(app), '/s/profile_a/ses_one');
     expect(find.text(app.l10n.sessionTabClosedMessage('Two')), findsOneWidget);
 
     await tester.tap(find.text(app.l10n.sessionTabUndo));
@@ -362,7 +363,7 @@ void main() {
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_three');
+    expect(_location(app), '/s/profile_a/ses_one');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -408,7 +409,7 @@ void main() {
 
     await _middleClose(tester, app, 'two');
     await _settle(tester);
-    expect(_location(app), '/s/profile_a/ses_three');
+    expect(_location(app), '/s/profile_a/ses_one');
     // The reader moves on before using the undo.
     await _visit(tester, app, ['one']);
     await tester.tap(find.text(app.l10n.sessionTabUndo));
@@ -437,7 +438,7 @@ void main() {
 
     await _middleClose(tester, app, 'two');
     await _settle(tester);
-    expect(_location(app), '/s/profile_a/ses_three');
+    expect(_location(app), '/s/profile_a/ses_one');
     await tester.tap(find.text(app.l10n.sessionTabUndo));
     // The reader moves on before the undo is saved.
     app.dependencies.router.go('/s/profile_a/ses_one');

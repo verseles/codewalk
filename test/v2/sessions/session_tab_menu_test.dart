@@ -526,6 +526,25 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('closing the shown tab hands over to the next displayed tab', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester);
+    // Opening order is one, two, three, other; the strip shows three first.
+    await _visit(tester, app, ['one', 'two', 'three', 'other']);
+    await _visit(tester, app, ['three']);
+    final close = find.byKey(
+      ValueKey('session-tab-close-${_ref(app, 'three').storageKey}'),
+    );
+    await tester.ensureVisible(close);
+    await tester.tap(close);
+    await _settle(tester);
+    // The next displayed tab is one, not other (the next in opening order).
+    expect(_location(app), '/s/profile_a/ses_one');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a double tap and Delete close a tab without a close button', (
     tester,
   ) async {

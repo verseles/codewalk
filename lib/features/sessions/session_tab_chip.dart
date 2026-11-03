@@ -196,7 +196,10 @@ class SessionTabChip extends StatelessWidget {
     );
     final width = pinned && !selected
         ? math.min(36.0, upper)
-        : (painter.width + 56).clamp(lower, upper).toDouble();
+        // The selected tab also holds its close control (24 dp and a 2 dp gap).
+        : (painter.width + 56 + (selected ? 26 : 0))
+              .clamp(lower, upper)
+              .toDouble();
     painter.dispose();
     final scheme = Theme.of(context).colorScheme;
     return Padding(
@@ -224,7 +227,8 @@ class SessionTabChip extends StatelessWidget {
                 color: selected ? scheme.surface : Colors.transparent,
                 shape: _TabShoulderBorder(
                   topRadius: selected ? 8 : 5,
-                  shoulder: 10,
+                  // v1 app_tab_strip.dart: only the selected tab has the shoulder.
+                  shoulder: selected ? 10 : 0,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
@@ -259,19 +263,27 @@ class SessionTabChip extends StatelessWidget {
                           // The selected tab keeps the v1 trailing close control.
                           if (selected) ...[
                             const SizedBox(width: 2),
-                            IconButton(
-                              key: ValueKey(
-                                'session-tab-close-${tab.ref.storageKey}',
+                            // Keyboard users close with Delete on the focused
+                            // tab, so the button stays out of the focus order.
+                            ExcludeFocus(
+                              child: IconButton(
+                                key: ValueKey(
+                                  'session-tab-close-${tab.ref.storageKey}',
+                                ),
+                                tooltip: context.v2L10n.chatClose,
+                                style: IconButton.styleFrom(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints.tightFor(
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                iconSize: 16,
+                                onPressed: onClose,
+                                icon: const Icon(Symbols.close),
                               ),
-                              tooltip: context.v2L10n.chatClose,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints.tightFor(
-                                width: 24,
-                                height: 24,
-                              ),
-                              iconSize: 16,
-                              onPressed: onClose,
-                              icon: const Icon(Symbols.close),
                             ),
                           ],
                         ],

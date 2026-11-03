@@ -333,7 +333,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             (profile == null ? null : HostId(profile.id));
         if (host == null) return widget.child;
         final tab = _tab;
-        final projection = widget.tabs.projection(host);
+        final projection = widget.tabs.projection(host, active: widget.current);
         final drafting =
             widget.current == null && drafts?.isDraftActive == true;
         final directory = drafts?.currentKey?.canonicalDirectory;
@@ -575,15 +575,8 @@ class _StripState extends State<_Strip> {
               var draftAdded = false;
               for (final entry in projection.groups.entries) {
                 if (regular.isNotEmpty) regular.add(const SizedBox(width: 8));
-                // The selected tab leads its project group, as in v1; the other
-                // tabs keep their opening order.
-                final ordered = [
-                  for (final tab in entry.value)
-                    if (tab.ref == widget.current) tab,
-                  for (final tab in entry.value)
-                    if (tab.ref != widget.current) tab,
-                ];
-                for (final tab in ordered) {
+                // The projection already leads with the shown tab.
+                for (final tab in entry.value) {
                   regular.add(
                     _tab(
                       tab,
