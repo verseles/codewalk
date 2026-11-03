@@ -7,6 +7,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
@@ -118,7 +119,7 @@ class ComposerSendButton extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     this.onDoubleTap,
-    this.icon = Icons.arrow_upward_rounded,
+    this.icon = Symbols.send_rounded,
   });
 
   /// The key of the button itself, so its state can be read.
@@ -153,7 +154,7 @@ class ComposerSendButton extends StatelessWidget {
           elevation: enabled ? 1.5 : 0,
           shadowColor: scheme.primary.withValues(alpha: 0.3),
         ),
-        icon: Icon(icon, size: 20),
+        icon: Icon(icon, size: 24),
       ),
     );
     // A click on Send is part of the field's region, so a desktop field

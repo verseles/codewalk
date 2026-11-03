@@ -546,6 +546,8 @@ class _SessionComposerState extends State<SessionComposer> {
                 trailing: [
                   ChoiceChip(
                     key: const ValueKey('live-delivery-steer'),
+                    side: BorderSide.none,
+                    shape: const StadiumBorder(),
                     label: Text(l10n.composerSteer),
                     selected: c.delivery == Delivery.steer,
                     visualDensity: VisualDensity.compact,
@@ -553,6 +555,8 @@ class _SessionComposerState extends State<SessionComposer> {
                   ),
                   ChoiceChip(
                     key: const ValueKey('live-delivery-queue'),
+                    side: BorderSide.none,
+                    shape: const StadiumBorder(),
                     label: Text(l10n.composerQueue),
                     selected: c.delivery == Delivery.queue,
                     visualDensity: VisualDensity.compact,

@@ -6,6 +6,7 @@ import 'package:codewalk/features/sessions/session_command_picker.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/symbols_font.dart';
 
 /// The `/` picker open over a composer field that holds only `/` (#137),
 /// with the first command highlighted.
@@ -61,6 +62,7 @@ Widget _picker(Locale locale, Brightness brightness, SessionCommandMenu menu) =>
     );
 
 void main() {
+  setUpAll(loadSymbolsFonts);
   final cases = [
     ('mobile_light', const Locale('en'), Brightness.light),
     ('mobile_dark', const Locale('en'), Brightness.dark),

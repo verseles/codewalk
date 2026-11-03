@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
@@ -42,7 +43,7 @@ class SessionStopButton extends StatelessWidget {
           backgroundColor: const Color(0xFF424242),
           foregroundColor: scheme.error,
         ),
-        icon: const Icon(Icons.stop_rounded, size: 20),
+        icon: const Icon(Symbols.stop_rounded, size: 24),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:codewalk/features/sessions/composer_input.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/symbols_font.dart';
 
 /// The shared composer pieces: the bubble with its hint and with text, and
 /// the round Send, enabled and disabled.
@@ -58,6 +59,7 @@ Widget _composer(Locale locale, Brightness brightness) => MaterialApp(
 );
 
 void main() {
+  setUpAll(loadSymbolsFonts);
   final cases = [
     ('mobile_light', const Locale('en'), Brightness.light),
     ('mobile_dark', const Locale('en'), Brightness.dark),
