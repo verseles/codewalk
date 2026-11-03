@@ -2,10 +2,13 @@ import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/composer_input.dart';
+import 'package:codewalk/features/sessions/session_message_info.dart';
+import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
+import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/theme/app_theme.dart'
     as v2theme
     show AppDensitySpacing;
@@ -41,11 +44,12 @@ AppDependencies buildReferenceDependencies({
   required CatalogRig rig,
   required LiveDirectory directory,
   required bool dark,
+  String link = '/sessions',
 }) {
   final metadata = V2MetadataStore(backend: FakeMetadataBackend());
   final payloads = PreferencesPayloadStore(metadata);
   final dependencies = createAppDependencies(
-    initialLink: Uri(path: '/sessions'),
+    initialLink: Uri.parse(link),
     sessionClock: () => DateTime.utc(2026, 11, 2, 12),
     metadataStore: metadata,
     profileRepository: rig.repository,
@@ -81,6 +85,7 @@ class ParitySurface {
     bool dark = false,
     AppDensity density = AppDensity.normal,
     Locale? locale,
+    String link = '/sessions',
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -94,6 +99,7 @@ class ParitySurface {
       rig: rig,
       directory: directory,
       dark: dark,
+      link: link,
     );
     dependencies.preferences.setDensity(density);
     if (locale != null) dependencies.preferences.setLocale(locale);
@@ -104,7 +110,8 @@ class ParitySurface {
         dynamicColors: (builder) => builder(null, null),
       ),
     );
-    await showSessionList(tester);
+    // A session link opens its own page; only the list needs the drawer.
+    if (link == '/sessions') await showSessionList(tester);
     return ParitySurface._(dependencies, directory, rig);
   }
 }
@@ -177,10 +184,253 @@ void composerGroup() {
   });
 }
 
+/// Settles the tab strip and its reads with the fake clock.
+Future<void> _settleTabs(WidgetTester tester) async {
+  for (var i = 0; i < 6; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// Opens the sessions [ids] of project `/work/a` as tabs, ending on the last.
+Future<void> _openTabs(
+  WidgetTester tester,
+  ParitySurface surface,
+  List<String> ids,
+) async {
+  // The catalog source exists once the first frames of the page have run.
+  await _settleTabs(tester);
+  final source = surface.rig.sources.single;
+  source.respond([
+    for (final id in ids) source.row(id, title: id, directory: '/work/a'),
+  ]);
+  await _settleTabs(tester);
+  for (final id in ids) {
+    surface.dependencies.router.go('/s/profile_a/ses_$id');
+    await _settleTabs(tester);
+    final ref = source.row(id).info.ref;
+    for (final (read, task) in source.reads.toList()) {
+      if (read != ref || task.completion.isCompleted) continue;
+      task.completion.complete(
+        source.served.firstWhere((row) => row.info.ref == ref),
+      );
+      await _settleTabs(tester);
+    }
+    if (surface.directory.handles.every((handle) => handle.session != ref)) {
+      surface.directory.grant(ref);
+      await tester.pump();
+    }
+  }
+}
+
+Finder _tabOf(ParitySurface surface, String id) => find.byKey(
+  ValueKey(
+    'session-tab-${surface.rig.sources.single.row(id).info.ref.storageKey}',
+  ),
+);
+
+Finder _closeOf(ParitySurface surface, String id) => find.byKey(
+  ValueKey(
+    'session-tab-close-${surface.rig.sources.single.row(id).info.ref.storageKey}',
+  ),
+);
+
+/// Tabs group (#458 S7, decision 13 and owner decision B): the strip keeps the
+/// v1 height (46.4 compact, 43.2 wide), each tab 38.4 dp, the shown tab leads
+/// its project group, and only the shown tab has a close control.
+void tabsGroup() {
+  for (final entry in {
+    'phone': parityPhoneSize,
+    'desktop': parityDesktopSize,
+  }.entries) {
+    testWidgets('tab strip keeps the v1 heights and order on ${entry.key}', (
+      tester,
+    ) async {
+      final surface = await ParitySurface.pump(
+        tester,
+        size: entry.value,
+        link: '/s/profile_a/ses_one',
+      );
+      await _openTabs(tester, surface, ['one', 'two', 'three']);
+      // The compact session drawer opens over the strip; close it to measure.
+      tester.firstState<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
+      await _settleTabs(tester);
+
+      expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('session-tabs'))).height,
+        closeTo(entry.key == 'phone' ? 46.4 : 43.2, 0.01),
+      );
+      for (final id in ['one', 'two', 'three']) {
+        expect(tester.getSize(_tabOf(surface, id)).height, closeTo(38.4, 0.01));
+      }
+      // The shown tab, `three`, leads its project group.
+      expect(
+        tester.getTopLeft(_tabOf(surface, 'three')).dx,
+        lessThan(tester.getTopLeft(_tabOf(surface, 'one')).dx),
+      );
+      expect(
+        tester.getTopLeft(_tabOf(surface, 'three')).dx,
+        lessThan(tester.getTopLeft(_tabOf(surface, 'two')).dx),
+      );
+      expect(_closeOf(surface, 'three'), findsOneWidget);
+      expect(_closeOf(surface, 'one'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+}
+
+/// Menus group (#458 S6, v1 session_context_menu.dart): a tab menu opens
+/// without selecting its tab, and the glyph and label of an item keep the v1
+/// 8 dp gap.
+void menusGroup() {
+  testWidgets('a tab menu opens without selecting the tab; glyph gap is 8 dp', (
+    tester,
+  ) async {
+    final surface = await ParitySurface.pump(
+      tester,
+      size: parityDesktopSize,
+      link: '/s/profile_a/ses_one',
+    );
+    await _openTabs(tester, surface, ['one', 'two']);
+    String location() => surface
+        .dependencies
+        .router
+        .routerDelegate
+        .currentConfiguration
+        .uri
+        .toString();
+    final before = location();
+
+    await tester.longPress(_tabOf(surface, 'one'));
+    await _settleTabs(tester);
+
+    expect(location(), before);
+    final glyph = find.byIcon(Symbols.push_pin).first;
+    expect(glyph, findsOneWidget);
+    final row = find.ancestor(of: glyph, matching: find.byType(Row)).first;
+    final label = find.descendant(of: row, matching: find.byType(Text)).first;
+    expect(
+      tester.getRect(label).left - tester.getRect(glyph).right,
+      closeTo(8, 0.5),
+    );
+    expect(tester.takeException(), isNull);
+  });
+}
+
+/// Message header of a standalone timeline tile, the same frame as the
+/// timeline tests use.
+Widget _timelineSurface(Widget child) => MaterialApp(
+  localizationsDelegates: V2Localizations.localizationsDelegates,
+  supportedLocales: V2Localizations.supportedLocales,
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
+
+ItemMeta _timelineMeta(String id, {MessageContext? message}) => ItemMeta(
+  id: ItemId('parity/$id'),
+  generation: 'parity',
+  status: OpenValue.unknown('parity'),
+  source: SourceProvenance(
+    harness: const HarnessRef(HostId('h'), HarnessInstanceId('parity')),
+    version: '2.0.22',
+    nativeType: 'assistant',
+  ),
+  message: message,
+);
+
+/// Timeline group (#458 S9, decision 16, v1 chat_message_content.dart): a user
+/// header shows "You" and the clock time; an assistant header shows its clock
+/// time and its elapsed chip; an assistant message with none has no header.
+void timelineGroup() {
+  final created = DateTime.utc(2026, 11, 2, 12, 5);
+  final context = MessageContext(
+    message: MessageRef('msg_a'),
+    created: created,
+    completed: created.add(const Duration(seconds: 3)),
+    modelId: 'model-x',
+    modelProviderId: 'provider-y',
+    tokens: TokenBreakdown(input: 10, output: 5),
+    finish: 'stop',
+  );
+
+  String clockOf(WidgetTester tester) {
+    final context = tester.element(find.byType(Scaffold));
+    return MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(created.toLocal()),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+  }
+
+  testWidgets('a user header shows You and the clock, with no elapsed chip', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _timelineSurface(
+        SessionTimelineTile(
+          item: UserInput(
+            meta: _timelineMeta('u', message: context),
+            text: 'Hi',
+            delivery: const OpenValue.known(DeliveryState.delivered),
+          ),
+          messageHeader: true,
+        ),
+      ),
+    );
+    expect(find.text('You'), findsOneWidget);
+    expect(find.text(clockOf(tester)), findsOneWidget);
+    expect(find.byType(MessageElapsedChip), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an assistant header shows its clock and its elapsed chip', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _timelineSurface(
+        SessionTimelineTile(
+          item: AssistantText(
+            meta: _timelineMeta('a', message: context),
+            text: 'Body',
+            complete: true,
+          ),
+          messageHeader: true,
+        ),
+      ),
+    );
+    expect(find.text(clockOf(tester)), findsOneWidget);
+    expect(find.byType(MessageElapsedChip), findsOneWidget);
+    expect(find.text('3s'), findsOneWidget);
+    expect(find.text('You'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an assistant without time, duration or action has no header', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _timelineSurface(
+        SessionTimelineTile(
+          item: AssistantText(
+            meta: _timelineMeta('bare'),
+            text: 'Body',
+            complete: true,
+          ),
+          messageHeader: true,
+        ),
+      ),
+    );
+    expect(find.byType(MessageElapsedChip), findsNothing);
+    expect(find.byIcon(Icons.chat_bubble_outline), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+}
+
 void main() {
   toolbarGroup();
   sidePanelGroup();
   composerGroup();
+  tabsGroup();
+  menusGroup();
+  timelineGroup();
   // Each size shows its own session surface: the compact list drawer on a
   // phone, the persistent sidebar on desktop.
   final surfaces = {
