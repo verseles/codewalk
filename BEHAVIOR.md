@@ -1194,6 +1194,7 @@ the Flutter VM; they do not certify installed native targets.
 - **Then** draft mode remains active and the app does not auto-switch back to another session
 - **Then** draft mode remains visible until the user sends the first message or explicitly selects another session
 - **Then** the draft shows the server's default agent and model as read-only chips above its field: the agent is the `default_agent` of the highest-priority config document of the project's location (`GET /api/config`), named by the registered agent (`GET /api/agent`), and the model is the location's default (`GET /api/model/default`); a part the server does not give is not shown; a chip is a preview, so tapping it selects nothing, and nothing is chosen before the first send
+- **Then** the draft greets like an empty conversation, with the same two texts, in the space above its field; the greeting steps aside while the field has the focus, so the keyboard leaves the field whole; the draft's tab is the selected tab of the strip, with the folder glyph and the same surface as the other selected tabs
 
 ### New Chat draft skips the select-or-create empty state
 

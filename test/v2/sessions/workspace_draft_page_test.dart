@@ -270,6 +270,32 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets(
+    'the draft greets like an empty conversation until the field has focus',
+    (tester) async {
+      await open(tester);
+      expect(find.text('Hello! I am your AI assistant'), findsOneWidget);
+      expect(find.text('How can I help you today?'), findsOneWidget);
+      app.workspaceDrafts!.focusComposer();
+      await tester.pumpAndSettle();
+      expect(find.text('Hello! I am your AI assistant'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('the draft tab is the selected tab with the folder glyph', (
+    tester,
+  ) async {
+    await open(tester);
+    final tab = find.byKey(const ValueKey('session-tab-draft'));
+    expect(tab, findsOneWidget);
+    expect(
+      find.descendant(of: tab, matching: find.byIcon(Icons.folder_open)),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('Settings during a local draft read does not strand loading', (
     tester,
   ) async {

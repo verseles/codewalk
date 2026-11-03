@@ -494,7 +494,9 @@ class _StripState extends State<_Strip> {
         padding: const EdgeInsetsDirectional.only(end: 2, top: 3),
         child: Material(
           key: const ValueKey('session-tab-draft'),
-          color: Theme.of(context).colorScheme.secondaryContainer,
+          // The selected tab's surface and glyph, as in v1: the draft is the
+          // selected tab of the strip.
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -504,13 +506,16 @@ class _StripState extends State<_Strip> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    widget.draftFailed ? Icons.error_outline : Icons.add,
-                    size: 19,
+                    widget.draftFailed
+                        ? Icons.error_outline
+                        : Icons.folder_open,
+                    size: 18,
                   ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       context.v2L10n.chatNewChat,
+                      style: Theme.of(context).textTheme.labelLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../platform/sessions/workspace_draft_store.dart';
@@ -53,8 +54,16 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
   }
 
   bool _invalidPath = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _composerFocus.addListener(_composerFocusChanged);
+  }
+
   @override
   void dispose() {
+    _composerFocus.removeListener(_composerFocusChanged);
     _directory.dispose();
     _composerFocus.dispose();
     _commands.dispose();
@@ -104,6 +113,12 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
       },
     ),
   );
+
+  /// The greeting steps aside while the field has the focus, so it follows the
+  /// focus.
+  void _composerFocusChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +267,45 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                 !c.sending)
                               Text(unavailable),
                           ],
+                        ),
+                        // The v1 greeting of an empty conversation, in the space
+                        // above the field: a draft has no items yet. It steps
+                        // aside while the field has the focus, so the keyboard
+                        // leaves the field whole.
+                        Visibility(
+                          visible: !_composerFocus.hasFocus,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Symbols.waving_hand,
+                                  size: 64,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.chatHelloAssistant,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.chatWelcomeSubmessage,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 24),
