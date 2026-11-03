@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -113,7 +114,7 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
               key: ValueKey('history-open-${row.info.ref.storageKey}'),
               value: SessionRowAction.history,
               enabled: widget.historyEnabled,
-              child: Text(l10n.historyOpen),
+              child: _item(Symbols.history, Text(l10n.historyOpen)),
             ),
           if (widget.onPin != null)
             PopupMenuItem<SessionRowAction>(
@@ -121,43 +122,58 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
               value: widget.pinned
                   ? SessionRowAction.unpin
                   : SessionRowAction.pin,
-              child: Text(widget.pinned ? l10n.sessionUnpin : l10n.sessionPin),
+              child: _item(
+                Symbols.push_pin,
+                Text(widget.pinned ? l10n.sessionUnpin : l10n.sessionPin),
+              ),
             ),
           if (unread && widget.commands)
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.markViewed,
               enabled: enabled,
-              child: _label(l10n.sessionsActionMarkViewed, reason),
+              child: _item(
+                Symbols.visibility,
+                _label(l10n.sessionsActionMarkViewed, reason),
+              ),
             ),
           if (widget.commands) ...[
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.rename,
               enabled: enabled,
-              child: _label(l10n.sessionsActionRename, reason),
+              child: _item(
+                Symbols.edit,
+                _label(l10n.sessionsActionRename, reason),
+              ),
             ),
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.fork,
               enabled: enabled,
-              child: _label(l10n.sessionsActionFork, reason),
+              child: _item(
+                Symbols.call_split,
+                _label(l10n.sessionsActionFork, reason),
+              ),
             ),
           ],
           PopupMenuItem<SessionRowAction>(
             value: hidden ? SessionRowAction.unhide : SessionRowAction.hide,
             enabled: controller.hideAvailable,
-            child: _label(
-              hidden ? l10n.sessionsActionUnhide : l10n.sessionsActionHide,
-              controller.hideAvailable
-                  ? null
-                  : l10n.sessionsActionUnavailableStore,
+            child: _item(
+              hidden ? Symbols.visibility : Symbols.visibility_off,
+              _label(
+                hidden ? l10n.sessionsActionUnhide : l10n.sessionsActionHide,
+                controller.hideAvailable
+                    ? null
+                    : l10n.sessionsActionUnavailableStore,
+              ),
             ),
           ),
           if (widget.commands)
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.delete,
               enabled: enabled,
-              child: _label(
-                l10n.sessionsActionDelete,
-                reason,
+              child: _item(
+                Symbols.delete,
+                _label(l10n.sessionsActionDelete, reason, destructive: true),
                 destructive: true,
               ),
             ),
@@ -165,7 +181,10 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
             const PopupMenuDivider(),
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.changeIcon,
-              child: Text(l10n.sessionTabChangeIconAction),
+              child: _item(
+                Symbols.category,
+                Text(l10n.sessionTabChangeIconAction),
+              ),
             ),
           ],
           if (widget.closeProjectLabel case final label?)
@@ -174,9 +193,9 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
               enabled:
                   widget.onCloseProject != null &&
                   widget.closeProjectReason == null,
-              child: _label(
-                label,
-                widget.closeProjectReason,
+              child: _item(
+                Symbols.close,
+                _label(label, widget.closeProjectReason, destructive: true),
                 destructive: true,
               ),
             ),
@@ -208,6 +227,20 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       SessionActionReason.noIdleMarker => l10n.sessionsActionUnavailableMarker,
     };
   }
+
+  /// The glyph of an entry comes first, in the destructive color when it
+  /// removes something, as the legacy menu shows it.
+  Widget _item(IconData icon, Widget label, {bool destructive = false}) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        color: destructive ? Theme.of(context).colorScheme.error : null,
+      ),
+      const SizedBox(width: 12),
+      Flexible(child: label),
+    ],
+  );
 
   Widget _label(String title, String? reason, {bool destructive = false}) =>
       Column(

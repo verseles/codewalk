@@ -291,9 +291,23 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                             key: ValueKey('project-close-$directory'),
                             value: 0,
                             enabled: widget.onClose != null,
-                            child: Text(
-                              l10n.chatCloseProject(name),
-                              style: TextStyle(color: theme.colorScheme.error),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Symbols.close,
+                                  color: theme.colorScheme.error,
+                                ),
+                                const SizedBox(width: 12),
+                                Flexible(
+                                  child: Text(
+                                    l10n.chatCloseProject(name),
+                                    style: TextStyle(
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
