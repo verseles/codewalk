@@ -246,11 +246,6 @@ class WorkspaceDraftController extends ChangeNotifier {
 
   void _catalogChanged() {
     if (_disposed) return;
-    // A source that became ready after the draft opened answers now.
-    final draftKey = _currentKey;
-    if (draftKey != null && !_sameDraft(draftKey, _defaultsKey)) {
-      unawaited(_loadDefaults(draftKey));
-    }
     final selected = _catalog.selectedProfile;
     final profile = selected?.id;
     final changing =
@@ -267,6 +262,14 @@ class WorkspaceDraftController extends ChangeNotifier {
       _defaultsGeneration++;
       _defaultsKey = null;
       _defaults = const DraftDefaults();
+    }
+    // A source that became ready, or a server that changed, answers the draft
+    // now. This runs after the invalidation above, so its answer is current.
+    final draftKey = _currentKey;
+    if (draftKey != null &&
+        draftKey.profileId == selected?.id &&
+        !_sameDraft(draftKey, _defaultsKey)) {
+      unawaited(_loadDefaults(draftKey));
     }
     _changingBinding = changing;
     _binding = selected;

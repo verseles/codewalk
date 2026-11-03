@@ -122,6 +122,36 @@ void main() {
   );
 
   test(
+    'a server change asks the new server for the open draft defaults',
+    () async {
+      rig.catalogRig.holdDefaults = true;
+      await rig.setupServerAndProjects();
+      await rig.controller.openDraft(directory: '/work/project-a');
+      final previous = rig.catalogRig.sources.last;
+      final asked = previous.heldDefaults.length;
+      final hosts = rig.catalogRig.hosts;
+      final original = hosts.profiles.single;
+      expect(
+        await hosts.updateProfile(
+          original,
+          label: original.label,
+          endpoint: original.endpoint.resolve('/other/'),
+          expectedRevision: hosts.catalogRevision,
+        ),
+        isTrue,
+      );
+      await flush();
+      // Only reads made after the change count: the server now answering the
+      // draft must be asked for the open draft's defaults.
+      final current = rig.catalogRig.sources.last;
+      final since = identical(current, previous)
+          ? current.heldDefaults.skip(asked)
+          : current.heldDefaults;
+      expect(since.map((read) => read.directory), contains('/work/project-a'));
+    },
+  );
+
+  test(
     'URL ABA during a created-session read preserves the draft without handoff',
     () async {
       await rig.setupServerAndProjects();
