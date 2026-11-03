@@ -143,7 +143,7 @@ class AppShell extends StatelessWidget {
             }
             final preferences = context.watch<AppPreferencesController?>();
             final hidden = preferences?.sessionPaneHidden ?? false;
-            final chat = _WorkspaceBack(child: _homeTabs(context, tabs, home));
+            final chat = _WorkspaceBack(child: child);
             return _WorkspaceEscape(
               child: Scaffold(
                 appBar: _WorkspaceAppBar(
@@ -169,14 +169,19 @@ class AppShell extends StatelessWidget {
                     ],
                   ),
                 ),
-                body: hidden
-                    ? chat
-                    : ResizableSessionPane(
-                        preferences: preferences,
-                        resizable: size.isAtLeastExpanded,
-                        pane: const SessionsPage(),
-                        chat: chat,
-                      ),
+                body: _tabsAboveWorkspace(
+                  context,
+                  tabs,
+                  location,
+                  hidden
+                      ? chat
+                      : ResizableSessionPane(
+                          preferences: preferences,
+                          resizable: size.isAtLeastExpanded,
+                          pane: const SessionsPage(),
+                          chat: chat,
+                        ),
+                ),
               ),
             );
           },
@@ -190,6 +195,26 @@ class AppShell extends StatelessWidget {
       catalog: context.read<SessionsController?>(),
       home: home,
       child: observed,
+    );
+  }
+
+  /// On a wide window the tab strip spans the pane and the chat, as in v1; the
+  /// session pages then leave their strip to this one.
+  Widget _tabsAboveWorkspace(
+    BuildContext context,
+    SessionTabsController? tabs,
+    String location,
+    Widget workspace,
+  ) {
+    if (tabs == null) return workspace;
+    final catalog = context.watch<SessionsController?>();
+    return SessionTabsAboveWorkspace(
+      child: SessionTabsFrame(
+        tabs: tabs,
+        current: sessionRefOfLocation(location),
+        project: catalog?.selectedProject?.project,
+        child: workspace,
+      ),
     );
   }
 

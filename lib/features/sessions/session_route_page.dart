@@ -311,12 +311,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         workspaceChrome: true,
         bodyFrame: tabs == null
             ? null
-            : (context, body) => SessionTabsFrame(
-                tabs: tabs,
-                current: _ref,
-                project: live.summary.info.project,
-                child: body,
-              ),
+            : (context, body) => SessionTabsAboveWorkspace.of(context)
+                  ? body
+                  : SessionTabsFrame(
+                      tabs: tabs,
+                      current: _ref,
+                      project: live.summary.info.project,
+                      child: body,
+                    ),
         ownsController: context.read<SessionTabsController?>() == null,
       );
     }
@@ -405,12 +407,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         workspaceChrome: true,
         bodyFrame: tabs == null
             ? null
-            : (context, body) => SessionTabsFrame(
-                tabs: tabs,
-                current: ref,
-                project: summary.info.project,
-                child: body,
-              ),
+            : (context, body) => SessionTabsAboveWorkspace.of(context)
+                  ? body
+                  : SessionTabsFrame(
+                      tabs: tabs,
+                      current: ref,
+                      project: summary.info.project,
+                      child: body,
+                    ),
       );
     }
     if (catalog.failure == SessionCatalogFailure.authenticationRequired) {

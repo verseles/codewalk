@@ -28,6 +28,26 @@ import 'workspace_draft_controller.dart';
 String sessionTabLocation(SessionRef ref) =>
     Uri(pathSegments: ['', 's', ref.host.value, ref.nativeId]).toString();
 
+/// The session a workspace location shows; `null` on the home and other pages.
+SessionRef? sessionRefOfLocation(String location) {
+  final parts = Uri.tryParse(location)?.pathSegments;
+  if (parts == null || parts.length != 3 || parts.first != 's') return null;
+  return SessionRef(HostId(parts[1]), HarnessInstanceId(parts[1]), parts[2]);
+}
+
+/// Marks a workspace that draws the tab strip above its pane and chat, so the
+/// session pages inside it leave the strip to the workspace.
+class SessionTabsAboveWorkspace extends InheritedWidget {
+  const SessionTabsAboveWorkspace({super.key, required super.child});
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SessionTabsAboveWorkspace>() !=
+      null;
+
+  @override
+  bool updateShouldNotify(SessionTabsAboveWorkspace oldWidget) => false;
+}
+
 /// The open session with its tabs above it: the tabs of its project, a way
 /// to the recent tabs of its server, and the keys that switch and close
 /// them.

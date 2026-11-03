@@ -256,10 +256,18 @@ void tabsGroup() {
       await _settleTabs(tester);
 
       expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
+      final strip = find.byKey(const ValueKey('session-tabs'));
       expect(
-        tester.getSize(find.byKey(const ValueKey('session-tabs'))).height,
+        tester.getSize(strip).height,
         closeTo(entry.key == 'phone' ? 46.4 : 43.2, 0.01),
       );
+      expect(tester.getSize(strip).width, closeTo(entry.value.width, 0.01));
+      if (entry.key == 'desktop') {
+        final sidebar = find.byKey(const ValueKey('workspace-sidebar'));
+        expect(sidebar, findsOneWidget);
+        expect(tester.getTopLeft(strip).dx, tester.getTopLeft(sidebar).dx);
+        expect(tester.getBottomLeft(strip).dy, tester.getTopLeft(sidebar).dy);
+      }
       for (final id in ['one', 'two', 'three']) {
         expect(tester.getSize(_tabOf(surface, id)).height, closeTo(38.4, 0.01));
       }
@@ -334,12 +342,17 @@ void menusGroup() {
     await _settleTabs(tester);
     // v1: session_context_menu.dart:346-351 (PopupMenuItem with the default
     // 24 dp Icon, then SizedBox(width: 8) before the label).
-    final row = find.byWidgetPredicate(
-      (widget) =>
-          widget.key is ValueKey<String> &&
-          (widget.key! as ValueKey<String>).value.startsWith(
-            'session-actions-',
-          ),
+    // The tab strip above the pane shows the same menus for open tabs, so the
+    // search stays in the side pane where the session rows are.
+    final row = find.descendant(
+      of: find.byKey(const ValueKey('workspace-sidebar')),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget.key is ValueKey<String> &&
+            (widget.key! as ValueKey<String>).value.startsWith(
+              'session-actions-',
+            ),
+      ),
     );
     expect(row, findsWidgets);
     final menu = find.descendant(
