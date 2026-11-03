@@ -20,12 +20,14 @@ import 'session_composer_controller.dart';
 import 'session_input_history.dart';
 import 'session_live_scroll.dart';
 import 'session_selection_cycle.dart';
+import 'session_selection_host.dart';
 import 'session_selection_memory.dart';
 import 'session_turn_controller.dart';
 
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
 /// observing, reconnecting and closing never mutate the server.
-class SessionLiveController extends ChangeNotifier {
+class SessionLiveController extends ChangeNotifier
+    implements SessionSelectionHost {
   SessionLiveController({
     required this.hosts,
     required this.profile,
@@ -163,6 +165,7 @@ class SessionLiveController extends ChangeNotifier {
 
   /// The acknowledged permission policy for this session, when the app graph
   /// provides one. The controller never owns or disposes it.
+  @override
   final EditablePermissionModePolicy? permissionModes;
   final DateTime Function() _now;
 
@@ -189,11 +192,19 @@ class SessionLiveController extends ChangeNotifier {
   bool get started => opening || _handle != null;
 
   /// The acknowledged effective mode, never a requested-in-flight value.
+  @override
   SessionPermissionModeState get permissionModeState =>
       permissionModes?.effectiveFor(session) ??
       const SessionPermissionModeState.unavailable('noPolicy');
 
+  @override
+  int get pendingPermissions => (state?.interactions ?? const [])
+      .where((i) => i.kind.known == InteractionKind.permission)
+      .length;
+
+  @override
   bool get savingPermissionMode => _savingPermissionMode;
+  @override
   bool get canChangePermissionMode =>
       !_disposed &&
       permissionModes != null &&
@@ -206,6 +217,7 @@ class SessionLiveController extends ChangeNotifier {
   /// Allow all while the app default already applies it is a no-op, so the
   /// session never silently pins standing approval authority; an explicit Ask
   /// is always stored, so a later default change cannot widen it.
+  @override
   Future<bool> setPermissionMode(PermissionMode mode) {
     if (!canChangePermissionMode) return Future.value(false);
     final current = permissionModeState;
@@ -323,8 +335,10 @@ class SessionLiveController extends ChangeNotifier {
 
   /// Unrestricted is the session's own server rule (ADR-059 §7), separate
   /// from [permissionModeState]; it changes only after explicit confirmation.
+  @override
   bool get supportsUnrestricted =>
       !_disposed && (_handle?.supportsUnrestricted ?? false);
+  @override
   SessionUnrestrictedState get unrestrictedState =>
       _handle?.unrestrictedState ?? const SessionUnrestrictedState();
 
@@ -375,22 +389,27 @@ class SessionLiveController extends ChangeNotifier {
 
   /// The session's model and agent. A pending or unconfirmed change holds
   /// this session's sends; the prompt itself never carries a selection.
+  @override
   bool get supportsSelection =>
       !_disposed && (_handle?.supportsSelection ?? false);
+  @override
   SessionSelectionState get selectionState =>
       _handle?.selectionState ??
       SessionSelectionState(selection: state?.selection);
 
   /// A sub-conversation runs with what its parent chose: its own selection
   /// is shown, never changed here.
+  @override
   bool get isChild => _summary.info.lineage.parent != null;
 
+  @override
   bool get canChangeSelection =>
       _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
 
   /// The command id is taken with the gesture, for this lease's session.
   /// A switch the server took is remembered (recents, each agent's model),
   /// also when an unconfirmed switch is settled later.
+  @override
   Future<void> selectModel(ModelEntry model, {String? variant}) => _switch(
     (project, before) => PendingSelectionSwitch.model(
       model,
@@ -411,6 +430,7 @@ class SessionLiveController extends ChangeNotifier {
   /// reports the switch and a next one can be sent. A model changed since
   /// the switch began (by the server with the agent, or by another client),
   /// a refusal, another lease or a newer pick cancels it.
+  @override
   Future<void> selectAgent(CatalogEntry agent) async {
     final before = selectionState.selection;
     final revision = _modelRevision;
@@ -617,6 +637,7 @@ class SessionLiveController extends ChangeNotifier {
 
   /// Where the favorite and recent models are kept on this device, when the
   /// app graph provides it. The controller never owns or disposes it.
+  @override
   final ModelPreferenceStore? modelPreferences;
 
   /// How [modelPreferences] names a model.
@@ -629,10 +650,12 @@ class SessionLiveController extends ChangeNotifier {
       _summary.info.project?.canonicalDirectory;
 
   /// This server's favorite models, in the order they were starred.
+  @override
   List<String> get favoriteModels =>
       modelPreferences?.favorites(profile.id) ?? const [];
 
   /// This project's recent models, newest first.
+  @override
   List<String> get recentModels => switch (_project) {
     final project? =>
       modelPreferences?.recents(profile.id, project) ?? const [],
@@ -640,9 +663,11 @@ class SessionLiveController extends ChangeNotifier {
   };
 
   /// A star can be saved now.
+  @override
   bool get canFavoriteModels => modelPreferences?.writable ?? false;
 
   /// Stars or unstars [model] for this server; false when it was not saved.
+  @override
   Future<bool> setFavoriteModel(ModelEntry model, {required bool favorite}) =>
       modelPreferences?.setFavorite(
         profile.id,
@@ -651,6 +676,7 @@ class SessionLiveController extends ChangeNotifier {
       ) ??
       Future.value(false);
 
+  @override
   Future<void> refreshSelection() => _act(
     _liveCurrent && supportsSelection,
     (handle) => handle.refreshSelection(),

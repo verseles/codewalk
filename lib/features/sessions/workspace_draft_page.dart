@@ -14,6 +14,8 @@ import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
 import 'session_builtin_commands.dart';
 import 'session_command_picker.dart';
+import 'session_composer_controls.dart';
+import 'session_composer_status.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
 
@@ -88,9 +90,19 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
       parseSessionBuiltinCommand(c.draft.text) != null ? !c.sending : c.canSend;
 
   /// Runs a local `/` command, which never becomes the first prompt (#137).
+  /// Marks the agent chip, so `/agent` opens its menu there.
+  final _agentAnchor = GlobalKey();
+
   void _run(SessionBuiltinCommand command) {
     widget.controller.draft.clear();
-    unawaited(runSessionBuiltinCommand(context, command));
+    unawaited(
+      runSessionBuiltinCommand(
+        context,
+        command,
+        selection: widget.controller.selection,
+        agentAnchor: _agentAnchor,
+      ),
+    );
   }
 
   /// Sends the first prompt, then opens the session it created.
@@ -312,53 +324,21 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              // The live composer's status slot and selection
+                              // row, so the chips look and work the same
+                              // before and after the first send.
+                              const SizedBox(
+                                height: SessionComposerStatus.height,
+                              ),
+                              SessionComposerControls(
+                                live: c.selection,
+                                agentAnchor: _agentAnchor,
+                              ),
                               SessionCommandPicker(
                                 menu: _commands,
                                 onRun: _run,
                                 maxHeight: pickerRoom,
                               ),
-                              // The server's default agent and model, as read-only chips: a preview of
-                              // what the first send uses, never a selection before it.
-                              if (!c.defaults.isEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  child: Wrap(
-                                    spacing: 8,
-                                    runSpacing: 4,
-                                    children: [
-                                      if (c.defaults.agent != null)
-                                        Chip(
-                                          key: const ValueKey(
-                                            'draft-default-agent',
-                                          ),
-                                          label: Text(c.defaults.agent!),
-                                        ),
-                                      if (c.defaults.model != null)
-                                        Chip(
-                                          key: const ValueKey(
-                                            'draft-default-model',
-                                          ),
-                                          label: Text(c.defaults.model!),
-                                        ),
-                                      if (c.defaults.selection?.modelVariant
-                                          case final variant?
-                                          when c.defaults.model != null)
-                                        Chip(
-                                          key: const ValueKey(
-                                            'draft-default-variant',
-                                          ),
-                                          label: Text(variant),
-                                        )
-                                      else if (c.defaults.variants)
-                                        Chip(
-                                          key: const ValueKey(
-                                            'draft-default-variant',
-                                          ),
-                                          label: Text(l10n.liveSelectionAuto),
-                                        ),
-                                    ],
-                                  ),
-                                ),
                               SessionFieldHeightReporter(
                                 onHeight: _fieldMeasured,
                                 child: Row(

@@ -76,9 +76,10 @@ final class _NativeSource implements SessionCatalogSource {
       }
     }
 
-    final agent = await part(
-      () => _locations.readDefaultAgentDetails(directory: directory),
+    final details = await part(
+      () => _locations.readAgentDetails(directory: directory),
     );
+    final agent = details?.defaultAgent;
     final models = await part(() => _reader.readModels(directory));
     final global = await part(
       () => _locations.readDefaultModelDetails(directory: directory),
@@ -86,25 +87,46 @@ final class _NativeSource implements SessionCatalogSource {
     ModelEntry? offered(String? provider, String? id) => models
         ?.where((model) => model.providerId == provider && model.id == id)
         .firstOrNull;
-    final preferred = offered(agent?.providerId, agent?.modelId);
     final fallback = offered(global?.providerId, global?.id);
-    final model = agent == null ? null : preferred ?? fallback;
-    final variant =
-        preferred != null &&
-            agent?.variant != null &&
-            preferred.variants.contains(agent!.variant)
-        ? agent.variant
-        : null;
+
+    /// What [agent] runs with: its own offered model, with its variant when
+    /// that model lists it, else the location's default model.
+    Selection runsWith(OpenCodeAgentDetails agent) {
+      final own = offered(agent.providerId, agent.modelId);
+      final model = own ?? fallback;
+      return Selection(
+        agentId: agent.id,
+        modelId: model?.id,
+        modelProviderId: model?.providerId,
+        modelVariant:
+            own != null &&
+                agent.variant != null &&
+                own.variants.contains(agent.variant)
+            ? agent.variant
+            : null,
+      );
+    }
+
+    final selection = agent == null ? null : runsWith(agent);
+    final model = offered(selection?.modelProviderId, selection?.modelId);
     return DraftDefaults(
       agent: agent?.name,
       model: model?.label.isNotEmpty == true ? model!.label : model?.id,
-      selection: Selection(
-        agentId: agent?.id,
-        modelId: model?.id,
-        modelProviderId: model?.providerId,
-        modelVariant: variant,
-      ),
-      variants: model?.variants.isNotEmpty ?? false,
+      selection: selection ?? const Selection(),
+      agents: [
+        for (final entry in details?.agents ?? const <OpenCodeAgentDetails>[])
+          CatalogEntry(
+            id: entry.id,
+            kind: const OpenValue.known(CatalogKind.agent),
+            label: entry.name,
+            description: entry.description,
+          ),
+      ],
+      models: models ?? const [],
+      agentModels: {
+        for (final entry in details?.agents ?? const <OpenCodeAgentDetails>[])
+          entry.id: runsWith(entry),
+      },
     );
   }
 

@@ -6,6 +6,16 @@ import 'package:codewalk_net/codewalk_net.dart';
 import 'json_reads.dart';
 import 'session_reader.dart';
 
+/// One agent a user may pick, with its optional model reference.
+typedef OpenCodeAgentDetails = ({
+  String id,
+  String name,
+  String? description,
+  String? modelId,
+  String? providerId,
+  String? variant,
+});
+
 /// The endpoint's projects, locations and directories: what a project picker
 /// offers. Every read is bounded like a session read and fails with the same
 /// finite [OpenCodeSessionReadException].
@@ -167,16 +177,18 @@ final class OpenCodeLocationReader {
   /// The location's default agent, with its optional model reference: the
   /// configured `default_agent` when selectable, else `build` when
   /// selectable, else the first selectable agent.
+  Future<OpenCodeAgentDetails?> readDefaultAgentDetails({
+    required String directory,
+  }) async => (await readAgentDetails(directory: directory)).defaultAgent;
+
+  /// The agents a user may pick at [directory]'s location (primary or all,
+  /// not hidden), in the server's order, each with its optional model
+  /// reference, and which of them is the default, as
+  /// [readDefaultAgentDetails] resolves it.
   Future<
-    ({
-      String id,
-      String name,
-      String? modelId,
-      String? providerId,
-      String? variant,
-    })?
+    ({List<OpenCodeAgentDetails> agents, OpenCodeAgentDetails? defaultAgent})
   >
-  readDefaultAgentDetails({required String directory}) async {
+  readAgentDetails({required String directory}) async {
     _checkOpen();
     _requireDirectory(directory);
     final configured = await readDefaultAgent(directory: directory);
@@ -189,14 +201,7 @@ final class OpenCodeLocationReader {
       if (rows is! List || rows.length > maxEntries) {
         throw const FormatException('Malformed agent list.');
       }
-      ({
-        String id,
-        String name,
-        String? modelId,
-        String? providerId,
-        String? variant,
-      })? first,
-          build;
+      final agents = <OpenCodeAgentDetails>[];
       for (final row in rows) {
         final agent = _object(row);
         final mode = agent['mode'];
@@ -207,20 +212,26 @@ final class OpenCodeLocationReader {
         if (hidden || (mode != 'primary' && mode != 'all')) continue;
         final id = _text(agent['id']);
         final name = agent['name'];
+        final description = agent['description'];
         final rawModel = agent['model'];
         final model = rawModel == null ? null : _object(rawModel);
-        final details = (
+        agents.add((
           id: id,
           name: name is String && name.trim().isNotEmpty ? name : id,
+          description: description is String && description.trim().isNotEmpty
+              ? description
+              : null,
           modelId: model == null ? null : _text(model['id']),
           providerId: model == null ? null : _text(model['providerID']),
           variant: model?['variant'] as String?,
-        );
-        if (id == configured) return details;
-        first ??= details;
-        if (id == 'build') build ??= details;
+        ));
       }
-      return build ?? first;
+      OpenCodeAgentDetails? named(String? id) =>
+          agents.where((agent) => agent.id == id).firstOrNull;
+      return (
+        agents: agents,
+        defaultAgent: named(configured) ?? named('build') ?? agents.firstOrNull,
+      );
     }, null);
   }
 

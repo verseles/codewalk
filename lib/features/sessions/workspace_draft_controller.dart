@@ -5,12 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart'
     show TextEditingController, TextEditingValue, TextSelection;
 
+import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/endpoint_health_controller.dart';
 import 'sessions_controller.dart';
+import 'workspace_draft_selection.dart';
 
 enum WorkspaceDraftNotice {
   none,
@@ -46,9 +48,17 @@ class WorkspaceDraftController extends ChangeNotifier {
     required WorkspaceDraftStore store,
     this.health,
     CommandId Function()? commandIds,
+    ModelPreferenceStore? modelPreferences,
   }) : _catalog = catalog,
        _store = store,
        _commandIds = commandIds ?? mintCommandId {
+    selection = WorkspaceDraftSelection(
+      canChange: () => !_sending && isDraftActive,
+      refresh: _refreshDefaults,
+      profileId: () => _currentKey?.profileId,
+      project: () => _currentKey?.canonicalDirectory,
+      modelPreferences: modelPreferences,
+    );
     _catalog.addListener(_catalogChanged);
     health?.addListener(_notify);
     draft.addListener(_draftChanged);
@@ -92,6 +102,7 @@ class WorkspaceDraftController extends ChangeNotifier {
   WorkspaceDraftKey? _defaultsKey;
   int _defaultsGeneration = 0;
   Future<void>? _defaultsRead;
+  int _refreshes = 0;
 
   WorkspaceDraftNotice get notice => _notice;
   bool get sending => _sending;
@@ -101,6 +112,10 @@ class WorkspaceDraftController extends ChangeNotifier {
   /// The server's default agent and model for the draft's location: a
   /// read-only preview, empty until the read answers.
   DraftDefaults get defaults => _defaults;
+
+  /// The agent, model and variant the first send applies, picked with the
+  /// composer's chips.
+  late final WorkspaceDraftSelection selection;
   WorkspaceDraftEntry? get entry => _entry;
   WorkspaceDraftStatus get status =>
       _entry?.status ?? WorkspaceDraftStatus.ready;
@@ -266,6 +281,7 @@ class WorkspaceDraftController extends ChangeNotifier {
       _defaultsGeneration++;
       _defaultsKey = null;
       _defaults = const DraftDefaults();
+      selection.reset(_defaults, loading: false);
     }
     // A source that became ready, or a server that changed, answers the draft
     // now. This runs after the invalidation above, so its answer is current.
@@ -343,6 +359,7 @@ class WorkspaceDraftController extends ChangeNotifier {
     final generation = ++_defaultsGeneration;
     _defaultsKey = key;
     _defaults = const DraftDefaults();
+    selection.reset(_defaults, loading: key != null);
     if (key == null) return Future.value();
     final read = _readDefaults(key, generation);
     _defaultsRead = read;
@@ -356,9 +373,31 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (_disposed || generation != _defaultsGeneration) return;
     if (loaded == null) {
       _defaultsKey = null;
+      selection.reset(_defaults, loading: false);
       return;
     }
     _defaults = loaded;
+    selection.reset(loaded, loading: false);
+    _notify();
+  }
+
+  /// The pick menus read the lists again on open; the user's pick stays.
+  Future<void> _refreshDefaults() async {
+    final key = _defaultsKey;
+    if (key == null || _defaultsRead != null || _sending) return;
+    final generation = _defaultsGeneration;
+    final refresh = ++_refreshes;
+    final loaded = await _catalog.draftDefaults(key.canonicalDirectory);
+    // Only the newest read for this draft applies, and never during a send.
+    if (_disposed ||
+        loaded == null ||
+        generation != _defaultsGeneration ||
+        refresh != _refreshes ||
+        _sending) {
+      return;
+    }
+    _defaults = loaded;
+    selection.refreshed(loaded);
     _notify();
   }
 
@@ -468,7 +507,7 @@ class WorkspaceDraftController extends ChangeNotifier {
       }
       final result = await _catalog.create(
         directory: key.canonicalDirectory,
-        initialSelection: _defaults.selection,
+        initialSelection: selection.selection,
       );
       final ref = result.session;
       if (result.outcome != SessionActionOutcome.accepted ||
@@ -574,6 +613,7 @@ class WorkspaceDraftController extends ChangeNotifier {
     health?.removeListener(_notify);
     draft.removeListener(_draftChanged);
     draft.dispose();
+    selection.dispose();
     super.dispose();
   }
 }

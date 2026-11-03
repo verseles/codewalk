@@ -245,63 +245,140 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('the draft shows the server defaults as read-only chips', (
+  DraftDefaults pickable() {
+    final build = CatalogEntry(
+      id: 'build',
+      kind: const OpenValue.known(CatalogKind.agent),
+      label: 'Build',
+    );
+    final plan = CatalogEntry(
+      id: 'plan',
+      kind: const OpenValue.known(CatalogKind.agent),
+      label: 'Plan',
+    );
+    return DraftDefaults(
+      agent: 'Build',
+      model: 'Model 1',
+      selection: const Selection(
+        agentId: 'build',
+        modelId: 'model_1',
+        modelProviderId: 'p',
+        modelVariant: 'high',
+      ),
+      agents: [build, plan],
+      models: [
+        ModelEntry(
+          id: 'model_1',
+          providerId: 'p',
+          label: 'Model 1',
+          variants: const ['low', 'high'],
+        ),
+        ModelEntry(
+          id: 'model_2',
+          providerId: 'p',
+          label: 'Model 2',
+          variants: const ['max'],
+        ),
+      ],
+      agentModels: const {
+        'build': Selection(
+          agentId: 'build',
+          modelId: 'model_1',
+          modelProviderId: 'p',
+          modelVariant: 'high',
+        ),
+        'plan': Selection(
+          agentId: 'plan',
+          modelId: 'model_2',
+          modelProviderId: 'p',
+        ),
+      },
+    );
+  }
+
+  Finder chipText(String key, String text) =>
+      find.descendant(of: find.byKey(ValueKey(key)), matching: find.text(text));
+
+  testWidgets('the draft shows the defaults with the composer chips', (
     tester,
   ) async {
-    await open(
-      tester,
-      defaults: const DraftDefaults(agent: 'Build', model: 'model_1'),
-    );
-    expect(find.byKey(const ValueKey('draft-default-agent')), findsOneWidget);
-    expect(find.text('Build'), findsOneWidget);
-    expect(find.byKey(const ValueKey('draft-default-model')), findsOneWidget);
-    expect(find.text('model_1'), findsOneWidget);
-    // A chip is a preview: tapping it selects nothing and sends nothing.
-    await tester.tap(find.byKey(const ValueKey('draft-default-agent')));
-    await tester.pump();
+    await open(tester, defaults: pickable());
+    await tester.pumpAndSettle();
+    expect(chipText('live-agent-chip', 'Build'), findsOneWidget);
+    expect(chipText('live-model-chip', 'Model 1'), findsOneWidget);
+    expect(chipText('live-variant-chip', 'high'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an agent picked in the draft brings its model; send applies '
+      'the pick', (tester) async {
+    await open(tester, defaults: pickable());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-agent-menu-plan')));
+    await tester.pumpAndSettle();
+    expect(chipText('live-agent-chip', 'Plan'), findsOneWidget);
+    expect(chipText('live-model-chip', 'Model 2'), findsOneWidget);
+    expect(chipText('live-variant-chip', 'Auto'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-variant-max')));
+    await tester.pumpAndSettle();
+    expect(chipText('live-variant-chip', 'max'), findsOneWidget);
+    // Picking selects nothing on the server and sends nothing.
     expect(actions.calls.where((call) => call == 'create'), isEmpty);
-    expect(app.workspaceDrafts!.draft.text, isEmpty);
+    await startSend(tester, waitForRead: false);
+    await waitFor(tester, () => actions.created.isNotEmpty);
+    final applied = actions.createdSelections.single!;
+    expect(applied.agentId, 'plan');
+    expect(applied.modelId, 'model_2');
+    expect(applied.modelVariant, 'max');
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('the draft shows the default variant, or Auto without one', (
+  testWidgets('a menu re-read keeps the selection the chips show', (
     tester,
   ) async {
-    await open(
-      tester,
-      defaults: const DraftDefaults(
-        agent: 'Build',
-        model: 'model_1',
-        selection: Selection(modelId: 'model_1', modelVariant: 'high'),
-        variants: true,
-      ),
+    await open(tester, defaults: pickable());
+    await tester.pumpAndSettle();
+    final changed = pickable();
+    source.defaults = DraftDefaults(
+      agent: 'Plan',
+      model: 'Model 2',
+      selection: changed.agentModels['plan'],
+      agents: changed.agents,
+      models: changed.models,
+      agentModels: changed.agentModels,
     );
-    final chip = find.byKey(const ValueKey('draft-default-variant'));
-    expect(
-      find.descendant(of: chip, matching: find.text('high')),
-      findsOneWidget,
-    );
-    await tester.pumpWidget(const SizedBox());
-    await open(
-      tester,
-      defaults: const DraftDefaults(
-        agent: 'Build',
-        model: 'model_1',
-        variants: true,
-      ),
-    );
-    expect(
-      find.descendant(of: chip, matching: find.text('Auto')),
-      findsOneWidget,
-    );
+    await app.workspaceDrafts!.selection.refreshSelection();
+    await tester.pumpAndSettle();
+    expect(chipText('live-agent-chip', 'Build'), findsOneWidget);
+    expect(chipText('live-model-chip', 'Model 1'), findsOneWidget);
+    expect(app.workspaceDrafts!.selection.selection?.agentId, 'build');
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('a draft without server defaults shows no chips', (tester) async {
+  testWidgets('/agent in the draft opens the agent chip menu', (tester) async {
+    await open(tester, defaults: pickable());
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('workspace-draft-text')),
+      '/agent',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('workspace-draft-send')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
+    expect(actions.calls.where((call) => call == 'create'), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a draft without server defaults picks nothing', (tester) async {
     await open(tester);
-    expect(find.byKey(const ValueKey('draft-default-agent')), findsNothing);
-    expect(find.byKey(const ValueKey('draft-default-model')), findsNothing);
-    expect(find.byKey(const ValueKey('draft-default-variant')), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('live-variant-chip')), findsNothing);
+    expect(app.workspaceDrafts!.selection.canChangeSelection, isFalse);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -811,10 +888,13 @@ void main() {
     await tester.pump();
     await tester.tap(send);
     await tester.pumpAndSettle();
+    // Without a catalog the draft has nothing to pick yet.
     expect(
       find.text(
-        'This command works inside a conversation. Send a first message to '
-        'start one.',
+        tester
+            .element(find.byKey(const ValueKey('workspace-draft')))
+            .v2L10n
+            .commandUnavailableHere,
       ),
       findsOneWidget,
     );

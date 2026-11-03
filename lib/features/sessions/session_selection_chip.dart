@@ -10,6 +10,7 @@ import '../../shared/sessions/session_selection.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_live_controller.dart';
+import 'session_selection_host.dart';
 
 /// The live session's model and agent (V2-054A). The label is the server's
 /// selection, or a switch it accepted and has not reported yet; a missing
@@ -18,7 +19,7 @@ import 'session_live_controller.dart';
 class SessionSelectionChip extends StatelessWidget {
   const SessionSelectionChip({super.key, required this.live, this.compact});
 
-  final SessionLiveController live;
+  final SessionSelectionHost live;
 
   /// Icon-only; by default below 600 dp of window width.
   final bool? compact;
@@ -182,7 +183,7 @@ ModelEntry? _offeredModel(SessionSelectionState state, Selection? selection) =>
 
 /// Whether [showSessionSelection] can open for [live] now, by the AppBar
 /// chip's own rule.
-bool canShowSessionSelection(SessionLiveController live) =>
+bool canShowSessionSelection(SessionSelectionHost live) =>
     live.supportsSelection &&
     live.canChangeSelection &&
     SessionSelectionChip._openable(live.selectionState);
@@ -193,7 +194,7 @@ bool canShowSessionSelection(SessionLiveController live) =>
 /// opens it.
 Future<void> showSessionSelection(
   BuildContext context,
-  SessionLiveController live, {
+  SessionSelectionHost live, {
   bool agents = true,
 }) async {
   unawaited(live.refreshSelection());
@@ -235,10 +236,7 @@ Future<void> showSessionSelection(
 
 /// Tells the reader how a pick ended when it did not simply apply: refused,
 /// not applied, changed elsewhere, or not confirmed yet.
-void announceSessionSelection(
-  BuildContext context,
-  SessionLiveController live,
-) {
+void announceSessionSelection(BuildContext context, SessionSelectionHost live) {
   final l10n = context.v2L10n;
   final state = live.selectionState;
   final unconfirmed = state.phase == SessionSelectionPhase.unconfirmed;
@@ -275,7 +273,7 @@ final class _Pick {
   final String? variant;
   final CatalogEntry? agent;
 
-  Future<void> apply(SessionLiveController live) => switch (model) {
+  Future<void> apply(SessionSelectionHost live) => switch (model) {
     final model? => live.selectModel(model, variant: variant),
     null => live.selectAgent(agent!),
   };
@@ -291,7 +289,7 @@ class _SelectionPanel extends StatefulWidget {
     this.autofocus = false,
   });
 
-  final SessionLiveController live;
+  final SessionSelectionHost live;
   final bool agents;
   final bool autofocus;
 

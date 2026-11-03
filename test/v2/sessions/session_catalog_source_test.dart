@@ -72,7 +72,9 @@ void main() {
     expect(defaults.selection?.agentId, 'build');
     expect(defaults.selection?.modelProviderId, 'provider');
     expect(defaults.selection?.modelId, 'preferred');
-    expect(defaults.variants, isTrue);
+    expect(defaults.agents.map((agent) => agent.id), ['build']);
+    expect(defaults.models, hasLength(2));
+    expect(defaults.agentModels['build']?.modelId, 'preferred');
   });
 
   for (final kind in EndpointAuthKind.values) {

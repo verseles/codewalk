@@ -11,6 +11,7 @@ import '../../shared/widgets/modal_primary_action_shortcuts.dart';
 import 'session_composer_controls.dart';
 import 'session_live_controller.dart';
 import 'session_selection_chip.dart';
+import 'session_selection_host.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_page.dart';
 
@@ -130,11 +131,14 @@ Future<void> runSessionBuiltinCommand(
   BuildContext context,
   SessionBuiltinCommand command, {
   SessionLiveController? live,
+  SessionSelectionHost? selection,
   GlobalKey? agentAnchor,
   SessionTurnActions turnActions = unboundSessionTurnActions,
 }) async {
   final l10n = context.v2L10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
+  // A New Chat draft picks its agent and model without a session.
+  final host = selection ?? live;
   void tell(String message) => showAppSnackBar(messenger, message);
   switch (command) {
     case SessionBuiltinCommand.newChat:
@@ -145,19 +149,19 @@ Future<void> runSessionBuiltinCommand(
         tell(l10n.commandUnavailableHere);
       }
     case SessionBuiltinCommand.model:
-      if (live == null) return tell(l10n.commandNeedsConversation);
-      if (live.isChild) return tell(l10n.chatModelLockedSubConversation);
-      if (!canShowSessionSelection(live)) {
+      if (host == null) return tell(l10n.commandNeedsConversation);
+      if (host.isChild) return tell(l10n.chatModelLockedSubConversation);
+      if (!canShowSessionSelection(host)) {
         return tell(l10n.commandUnavailableHere);
       }
-      await showSessionSelection(context, live, agents: false);
+      await showSessionSelection(context, host, agents: false);
     case SessionBuiltinCommand.agent:
-      if (live == null) return tell(l10n.commandNeedsConversation);
+      if (host == null) return tell(l10n.commandNeedsConversation);
       final anchor = agentAnchor?.currentContext;
-      if (live.isChild || anchor == null) {
+      if (host.isChild || anchor == null) {
         return tell(l10n.commandUnavailableHere);
       }
-      await showAgentMenu(anchor, live);
+      await showAgentMenu(anchor, host);
     case SessionBuiltinCommand.sessions:
       openSessionList(context);
     case SessionBuiltinCommand.help:
@@ -178,8 +182,8 @@ Future<void> runSessionBuiltinCommand(
       };
       final actions =
           identical(turnActions, unboundSessionTurnActions) && live != null
-              ? live.turn
-              : turnActions;
+          ? live.turn
+          : turnActions;
       final reason = live == null
           ? SessionTurnActionUnavailable.needsConversation
           : actions.unavailable(action);

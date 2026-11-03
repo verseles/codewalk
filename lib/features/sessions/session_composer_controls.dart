@@ -10,8 +10,8 @@ import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
-import 'session_live_controller.dart';
 import 'session_selection_chip.dart';
+import 'session_selection_host.dart';
 
 /// The composer's selection chips, like the retained reference's controls
 /// row (#153): the agent, with the count of permissions waiting for the
@@ -25,7 +25,7 @@ class SessionComposerControls extends StatelessWidget {
     this.agentAnchor,
   });
 
-  final SessionLiveController live;
+  final SessionSelectionHost live;
 
   /// Marks the agent chip, so a `/agent` command opens its menu there.
   final GlobalKey? agentAnchor;
@@ -49,9 +49,7 @@ class SessionComposerControls extends StatelessWidget {
       final compact = MediaQuery.sizeOf(context).width < 600;
       final model = offeredSessionModel(state);
       final variant = selection?.modelVariant;
-      final pending = (live.state?.interactions ?? const [])
-          .where((i) => i.kind.known == InteractionKind.permission)
-          .length;
+      final pending = live.pendingPermissions;
       final busy =
           state.phase == SessionSelectionPhase.pending || state.loading;
       final attention =
@@ -185,7 +183,7 @@ class SessionComposerControls extends StatelessWidget {
 /// only an explicit Auto clears it (#176).
 Future<void> _pickVariant(
   BuildContext anchor,
-  SessionLiveController live,
+  SessionSelectionHost live,
   ModelEntry model,
 ) async {
   final l10n = anchor.v2L10n;
@@ -218,7 +216,7 @@ Future<void> _pickVariant(
 /// all) or asks for each (Ask). The switch keeps the menu open.
 Future<void> showAgentMenu(
   BuildContext anchor,
-  SessionLiveController live,
+  SessionSelectionHost live,
 ) async {
   if (live.supportsSelection) unawaited(live.refreshSelection());
   final box = anchor.findRenderObject()! as RenderBox;
@@ -296,7 +294,7 @@ Future<void> showAgentMenu(
 class _AgentMenu extends StatelessWidget {
   const _AgentMenu({required this.live, required this.anchor});
 
-  final SessionLiveController live;
+  final SessionSelectionHost live;
 
   /// Where a failed switch is told: the page under the menu.
   final BuildContext anchor;

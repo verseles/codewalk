@@ -207,8 +207,11 @@ AppDependencies createAppDependencies({
     store: workspaceState,
     tabs: sessionTabs,
   );
+  final modelPreferences =
+      modelPreferenceStore ?? ModelPreferenceStore(store: metadata);
   final workspaceDrafts = WorkspaceDraftController(
     catalog: locator<SessionsController>(),
+    modelPreferences: modelPreferences,
     health: endpointHealth,
     store:
         workspaceDraftStore ??
@@ -268,8 +271,7 @@ AppDependencies createAppDependencies({
     projectContexts: projectContexts,
     sessionDrafts:
         draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
-    modelPreferences:
-        modelPreferenceStore ?? ModelPreferenceStore(store: metadata),
+    modelPreferences: modelPreferences,
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
