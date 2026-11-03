@@ -161,6 +161,13 @@ void main() {
             find.descendant(of: list, matching: find.byType(Scrollable)).first,
           )
           .position;
+      final shown = <String>{};
+      bool isDensityKey(Widget widget) {
+        final key = widget.key;
+        return key is ValueKey<String> &&
+            key.value.startsWith('settings_density_');
+      }
+
       void expectSingleStyle() {
         expect(
           find.byKey(const ValueKey('settings_visual_style_segmented')),
@@ -176,6 +183,16 @@ void main() {
           ),
           findsNothing,
         );
+        for (final key in const [
+          'settings_theme_mode_segmented',
+          'settings_theme_family_segmented',
+          'settings_contrast_slider',
+        ]) {
+          if (find.byKey(ValueKey(key)).evaluate().isNotEmpty) shown.add(key);
+        }
+        if (find.byWidgetPredicate(isDensityKey).evaluate().isNotEmpty) {
+          shown.add('settings_density');
+        }
       }
 
       // Lazy list items only exist while visible, so check every scroll step.
@@ -189,6 +206,15 @@ void main() {
         await tester.pumpAndSettle();
         expectSingleStyle();
       }
+      expect(
+        shown,
+        containsAll([
+          'settings_theme_mode_segmented',
+          'settings_theme_family_segmented',
+          'settings_contrast_slider',
+          'settings_density',
+        ]),
+      );
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
