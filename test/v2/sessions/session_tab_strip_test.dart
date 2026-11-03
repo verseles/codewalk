@@ -411,15 +411,15 @@ void main() {
     await _settle(tester);
     expect(_location(app), '/s/profile_a/ses_one');
     // The reader moves on before using the undo.
-    await _visit(tester, app, ['one']);
+    await _visit(tester, app, ['three']);
     await tester.tap(find.text(app.l10n.sessionTabUndo));
     await _settle(tester);
     expect(
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_one');
-    expect(tabs.selectedFor(_ref(app, 'one').host), _ref(app, 'one'));
+    expect(_location(app), '/s/profile_a/ses_three');
+    expect(tabs.selectedFor(_ref(app, 'three').host), _ref(app, 'three'));
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -441,14 +441,14 @@ void main() {
     expect(_location(app), '/s/profile_a/ses_one');
     await tester.tap(find.text(app.l10n.sessionTabUndo));
     // The reader moves on before the undo is saved.
-    app.dependencies.router.go('/s/profile_a/ses_one');
+    app.dependencies.router.go('/s/profile_a/ses_three');
     await _settle(tester);
     expect(
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_one');
-    expect(tabs.selectedFor(_ref(app, 'one').host), _ref(app, 'one'));
+    expect(_location(app), '/s/profile_a/ses_three');
+    expect(tabs.selectedFor(_ref(app, 'three').host), _ref(app, 'three'));
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -464,20 +464,20 @@ void main() {
 
     // Both closes start before either is saved.
     await _middleClose(tester, app, 'two');
-    await _middleClose(tester, app, 'three');
+    await _middleClose(tester, app, 'one');
     await _settle(tester);
     expect(
       [for (final tab in app.dependencies.sessionTabs!.tabs) tab.ref.nativeId],
-      ['ses_one'],
+      ['ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_one');
+    expect(_location(app), '/s/profile_a/ses_three');
     expect(find.byType(SessionLivePage), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('the close key closes the current tab', (tester) async {
     _useMemoryPreferences();
-    final app = await _launch(tester, '/s/profile_a/ses_one');
+    final app = await _launch(tester, '/s/profile_a/ses_three');
     final source = app.rig.sources.single;
     source.respond([source.row('one'), source.row('two')]);
     await _settle(tester);
