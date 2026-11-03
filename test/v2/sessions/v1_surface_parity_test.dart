@@ -1,6 +1,7 @@
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/composer_input.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -155,9 +156,31 @@ void sidePanelGroup() {
   });
 }
 
+void composerGroup() {
+  testWidgets('composer send is a 42 dp circle with a 24 dp v1 glyph', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ComposerSendButton(tooltip: 'Send', onPressed: () {}),
+          ),
+        ),
+      ),
+    );
+    // v1: chat_input_widget.dart:355 (42 dp), :1685 (elevation 1.5 when
+    // sendable), :1728 (send_rounded 24).
+    expect(tester.getSize(find.byType(IconButton)), const Size(42, 42));
+    expect(tester.widget<Icon>(find.byIcon(Symbols.send_rounded)).size, 24);
+    expect(tester.takeException(), isNull);
+  });
+}
+
 void main() {
   toolbarGroup();
   sidePanelGroup();
+  composerGroup();
   // Each size shows its own session surface: the compact list drawer on a
   // phone, the persistent sidebar on desktop.
   final surfaces = {
