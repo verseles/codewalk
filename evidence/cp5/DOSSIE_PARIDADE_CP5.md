@@ -1,111 +1,120 @@
-# Dossiê de Evidências e Checklist de Paridade Visual — Checkpoint 5 (CP5)
+# Dossiê de Paridade Visual — Seq 5.6 (#458, S10)
 
-**Data de Execução:** 31 de Outubro de 2026  
-**Execução:** `run_20261031_cp5`  
-**Escopo:** Seq 5.5 / Issue #302 — Paridade Visual e de Plataforma (CP5)  
-**Ambiente:**
-- Host Orquestrador (`mercury`): Ubuntu 24.04 aarch64, Flutter 3.44.1, commit `7e2bea81662dbc55cf7548bced4dd83394a76385`
-- Host de Teste (`neo`): Ubuntu 26.04.1 x86_64 (KVM, i7-13650HX, RTX 4060, Flutter 3.44.1 isolado, Android SDK / Emulator API 31)
-- Servidor v1: endpoint OpenCode v1 (sem auth, probe de leitura verificado)
-- Servidor v2: endpoint OpenCode v2 (HTTP Basic Auth sanitizado `[REDACTED_SECRET]`, probe de leitura verificado)
-- Referência v1: tag `v1.265.1` (commit `a046da262dd91dfa7d157c6f3264368f32535528`)
-- Candidato v2: `main` (commit `7e2bea81662dbc55cf7548bced4dd83394a76385`)
+**Escopo:** Seq 5.6 / Issue #458 (V2-071H): toolbar, painel lateral, abas, composer, menus e mensagens da v2 comparados com a v1 `v1.265.1`, no celular (412×915) e no desktop (1280×800), em claro e escuro.
+**Referência v1:** tag `v1.265.1` (commit `a046da262dd91dfa7d157c6f3264368f32535528`), somente leitura.
+**Captura final medida:** `S9-78c91962` no neo (x86_64, Flutter 3.47.9), código do commit `78c91962`. O commit `448b6198` altera só um teste de fixture e não muda nenhuma captura.
+**Evidências no repositório:** `evidence/cp5/surfaces-<sha7>/` (montagens e `report.json` do candidato).
+**Registros de validação** (captures, `make check`, arquitetura, localizações, prévias, hashes): #458 e #398 e Task Memory. Não ficam neste arquivo, para não mudar o SHA do candidato.
+
+Este dossiê não declara nenhuma diferença como "intencional". Cada diferença restante tem um destino: uma issue `after-mvp` ou uma causa de plataforma documentada.
 
 ---
 
-## 1. Pacotes de Visualização e Teste Gerados
+## 1. Captura e comparação
 
-| Plataforma | Pacote / Binário | Host / Dispositivo | Status |
-| :--- | :--- | :--- | :--- |
-| **Android v1 (baseline)** | `app-x86_64-profile.apk` (`com.verseles.codewalk`) | `neo` (Emulator Pixel 5, API 31) | ✅ Instalado e Capturado |
-| **Android v2 (candidato)** | `app-x86_64-profile.apk` (`com.verseles.codewalk.v2preview`) | `neo` (Emulator Pixel 5, API 31) & Galaxy S25 target | ✅ Compilado com Flutter 3.44.1, Instalado e Capturado |
-| **Linux Desktop v1** | `codewalk` bundle x86_64 (Xvfb + Secret Service) | `neo` (Linux x86_64) | ✅ Executado e Capturado |
-| **Linux Desktop v2** | `codewalk-v2-preview` bundle x86_64 | `neo` (Linux x86_64) | ✅ Executado e Capturado (12 telas) |
+- Pares: 54 (13 cenários × 2 temas × 2 tamanhos, mais `s12` só no celular).
+- Captures: 108 testes passam (`S9-78c91962`).
+- Comparação estrita (`compare_parity.py`): status `complete`, 54 pares, 0 ausentes.
 
----
+## 2. Regra de conclusão por superfície
 
-## 2. Matriz de Paridade Visual e Comparação Automatizada
+Uma superfície está concluída quando (a) seu grupo de teste passa, (b) o checklist está completo, (c) a diferença por região não piorou em relação ao S4 (`S4-5057601`) e (d) cada diferença restante está classificada. Duas superfícies não atendem (c) e não estão concluídas. Outras duas aguardam a decisão de gate item 3 (seção 6).
 
-Processados 12 pares determinísticos completos cobrindo Mobile (412×915) e Desktop (1280×800) em temas Light e Dark, com renderização tipográfica legível (Roboto, MaterialSymbols e Monospace reais carregados via `FontLoader`):
+## 3. Checklists por superfície
 
-| Cenário | Resolução | Tema | AE Total (Pixels) | % Diff Total | Header Diff % | Timeline Diff % | Composer Diff % | Montagem Pareada |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Short turn completed** | 412x915 | Light | 151.360 | 40,15% | 44,78% | 39,15% | 42,59% | [captures/s1_mobile_light_montage.png](captures/s1_mobile_light_montage.png) |
-| **Short turn completed** | 412x915 | Dark | 151.374 | 40,15% | 44,78% | 39,15% | 42,60% | [captures/s1_mobile_dark_montage.png](captures/s1_mobile_dark_montage.png) |
-| **Short turn completed** | 1280x800 | Light | 349.917 | 34,17% | 36,69% | 32,85% | 40,73% | [captures/s1_desktop_light_montage.png](captures/s1_desktop_light_montage.png) |
-| **Short turn completed** | 1280x800 | Dark | 350.024 | 34,18% | 36,70% | 32,86% | 40,77% | [captures/s1_desktop_dark_montage.png](captures/s1_desktop_dark_montage.png) |
-| **Rich timeline with code and reasoning** | 412x915 | Light | 229.164 | 60,79% | 44,20% | 66,19% | 42,59% | [captures/s2_mobile_light_montage.png](captures/s2_mobile_light_montage.png) |
-| **Rich timeline with code and reasoning** | 412x915 | Dark | 229.189 | 60,80% | 44,20% | 66,20% | 42,60% | [captures/s2_mobile_dark_montage.png](captures/s2_mobile_dark_montage.png) |
-| **Rich timeline with code and reasoning** | 1280x800 | Light | 501.073 | 48,93% | 34,94% | 51,79% | 40,73% | [captures/s2_desktop_light_montage.png](captures/s2_desktop_light_montage.png) |
-| **Rich timeline with code and reasoning** | 1280x800 | Dark | 500.875 | 48,91% | 34,95% | 51,76% | 40,77% | [captures/s2_desktop_dark_montage.png](captures/s2_desktop_dark_montage.png) |
-| **Empty session connected** | 412x915 | Light | 53.660 | 14,23% | 44,49% | 5,31% | 42,59% | [captures/s5_mobile_light_montage.png](captures/s5_mobile_light_montage.png) |
-| **Empty session connected** | 412x915 | Dark | 53.666 | 14,24% | 44,49% | 5,31% | 42,60% | [captures/s5_mobile_dark_montage.png](captures/s5_mobile_dark_montage.png) |
-| **Empty session connected** | 1280x800 | Light | 214.817 | 20,98% | 36,14% | 16,16% | 40,73% | [captures/s5_desktop_light_montage.png](captures/s5_desktop_light_montage.png) |
-| **Empty session connected** | 1280x800 | Dark | 214.909 | 20,99% | 36,15% | 16,16% | 40,77% | [captures/s5_desktop_dark_montage.png](captures/s5_desktop_dark_montage.png) |
+Itens: ordem dos controles, altura (±1 dp), padding (±2 dp), raio, glifo, texto, cor, corte e sobreposição.
 
----
+### 3.1 Barra superior (toolbar) — concluída, com diferença classificada
 
-## 3. Classificação e Correções Realizadas por Bloco
+- [x] Grupo `toolbarGroup` (densidades e overflow) passa.
+- [x] Ordem e controles: decisão 10. Desfazer listado e desabilitado sem sessão viva.
+- [x] Altura: 44/46 dp idênticas em 54 de 54 pares.
+- [x] Região contra S4: não comparável (54/54) → comparável, média 7,47%.
+- [~] Diferença de pixel média de 7,47% (ver seção 5, destino #463).
 
-### A. Cabeçalho (Header / AppBar)
-- **Desvio Auditado:** Na v2 anterior, o AppBar exibia exclusivamente o `ServerSwitcher`, omitindo o título da sessão em navegações mobile e desktop. Além disso, o corpo da sessão repetia rótulos redundantes ("Live session" e linha de perfil do servidor), empurrando o conteúdo da timeline para baixo.
-- **Correção Implementada:**
-  - Integrado o título da sessão ativa com truncamento elíptico ao lado do `ServerSwitcher` (com suporte a modo compacto com dot de status em viewports reduzidas).
-  - Compactação de cabeçalho no commit `e7b8ebeb`: removidas as linhas redundantes do cabeçalho de rolagem exclusivamente para sessões saudáveis e acionáveis no workspace, elevando a primeira mensagem em ~44px. Estados degradados, somente leitura, com falha ou páginas avulsas mantêm a identificação completa.
-- **Status:** Corrigido e validado com 22/22 testes em `session_route_test.dart`, 24/24 na suíte de paridade e revisão formal aprovada por 3 revisores independentes.
+### 3.2 Painel lateral — NÃO concluído (geometria piorou em relação ao S4)
 
-### B. Linha do Tempo (Timeline)
-- **Desvio Auditado:** Na v2 anterior, todas as mensagens (usuário e assistente) eram renderizadas como cards simétricos estendidos em 100% da largura da tela, com padding excessivo (16 px), gerando grande disparidade visual em relação às bolhas compactas do v1.
-- **Correção Implementada:**
-  - Mensagens do Usuário: alinhadas à direita (`Alignment.centerRight`), largura máxima contida (85% do viewport / 640 px), raio de canto assimétrico com canto inferior direito justo (4 px) e fundo `primaryContainer` translúcido.
-  - Mensagens do Assistente: alinhadas à esquerda (`Alignment.centerLeft`), largura máxima (760 px) e raio com canto inferior esquerdo justo.
-  - Densidade de Padding: ajustada para `EdgeInsets.fromLTRB(14, 10, 14, 10)`, reduzindo o espaço vertical ocioso e aproximando a densidade à experiência do v1.
-- **Status:** Corrigido; diff no timeline mobile (S1) reduziu de 42,91% para 39,15%, e no cenário S2 reduziu de 70,13% para 66,19%.
+- [x] Grupo `sidePanelGroup` passa (servidor com nuvem 16 dp e seta 18 dp; glifos Symbols).
+- [x] Controles removidos conforme decisões 1A, 2A e 3A do dono (2026-11-02): linha de atualizar e configurações, link "Connect to a running server" e rótulo "Open projects". Destino: #462, itens 11 a 13.
+- [~] Altura do cabeçalho: v1 87 px, v2 44 px (consequência das remoções aceitas).
+- [x] Diferença de pixel nos 6 pares comparáveis: média 18,00%, contra 21,42% no S4 (melhorou). Destino #463.
+- [ ] **Geometria contra o S4 piorou**: média de |Δaltura| 25,2 → 34,9 px. Não confirmei a causa; é provável que as remoções aceitas mudem as bordas da região. Decisão do dono: se a regra (c) aceita geometria alterada pelas remoções aprovadas.
 
-### C. Compositor (Composer)
-- **Desvio Auditado:** Padding externo excessivo no rodapé (`vertical: 16`), afastando o campo de texto da timeline e ampliando o diff visual com o v1.
-- **Correção Implementada:**
-  - Reduzido o padding vertical do container de rodapé para `vertical: tight ? 2 : 6` e horizontal para `12`, eliminando altura vazia.
-  - Preservados os controles essenciais de protocolo OpenCode v2 (seletores de agente/modelo e chips de entrega Steer/Queue) e a reatividade do botão Stop/Send.
-- **Status:** Corrigido; diff do composer mantido estabilizado em 42,59% no mobile e 40,73% no desktop.
+### 3.3 Abas — classificada; grupo de valores pendente (gate item 3)
 
----
+- [x] Altura da faixa: 46,4 dp (compacto) e 43,2 dp (largo), decisão 13. Código em `session_tab_strip.dart:541`.
+- [x] Alvo de toque da aba: 38,4 dp dentro da faixa. Exceção de acessibilidade do dono (comentário 6592135781); causa de plataforma: alvo mínimo de 48 dp.
+- [x] Ordem: aba ativa primeiro no grupo, decisão B do dono (2026-11-03).
+- [x] Botão de fechar só na aba ativa.
+- [~] Região: 43 px na v2 contra 43–46 px na v1 (8 pares, sem comparação de pixel). Destino #463.
+- [x] Região contra S4: melhorou (Δaltura média 6,5 → 1,5 px).
+- [ ] Grupo de valores em `v1_surface_parity_test.dart` ausente: os testes de valores estão em `session_tab_strip_test.dart` e `session_tab_menu_test.dart`. Decisão pendente (seção 6).
 
-## 4. Lista Objetiva das Lacunas Restantes por Bloco
+### 3.4 Composer — concluído, com controles só-v2 classificados
 
-As lacunas a seguir representam divergências intencionais de arquitetura ou evoluções de contrato entre v1 e v2, registradas para avaliação do proprietário sem aplicação de novas alterações antes do sign-off:
+- [x] Grupo `composerGroup`: botão de envio de 42 dp com glifo de 24 dp (decisão 7).
+- [x] Parar: glifo `stop_rounded` de 24 dp, na cor de erro.
+- [x] Chips Steer e Queue: forma stadium, sem borda (decisão 15).
+- [x] Campo com a bolha refinada e dica de texto v2 mantidos (decisões do dono).
+- [~] Altura: 118–166 px na v2 contra 50–82 px na v1 (36 pares, sem comparação de pixel). Controles só-v2: seletores de agente, modelo e variante, a linha de chips e o slot de status. Classificação: controle só-v2. Destino #463.
+- [x] Região contra S4: igual (Δaltura média 69,8 px nos dois).
 
-1. **Cabeçalho (Header / AppBar):**
-   - **Controles de Modelo no Topo (Desktop):** No v1 desktop, botões de atalho rápido de modelo residiam na barra superior; na v2 esses seletores foram consolidados no compositor e no drawer de configurações.
-   - **Indicador de Latência:** O v1 continha medição numérica de ping em milissegundos no tooltip de conexão; a v2 adota semântica visual unificada de dot colorido e badge de estado.
-2. **Linha do Tempo (Timeline):**
-   - **Quebra e Destaque de Código:** O v1 utilizava blocos de código com bordas estritas de 8px e highlight.js legado; a v2 renderiza blocos via motor nativo do Flutter com cores dinâmicas Material 3 `SurfaceVariant`.
-   - **Agrupamento de Execuções e Ferramentas:** Chamadas de ferramentas e sub-execuções na v2 são agrupadas em blocos retráteis/colapsáveis ("Finished work" / "Tool calls"), enquanto no v1 eram renderizadas sequencialmente em linhas estáticas.
-   - **Metadados de Resposta:** Na v2, tempo decorrido de geração e contadores de tokens aparecem em subtítulo discreto sob a mensagem; no v1 ficavam restritos ao menu de detalhes.
-3. **Compositor (Composer):**
-   - **Chips de Controle de Protocolo v2:** A v2 apresenta chips interativos de entrega (`Steer` / `Queue`) e seletores de agente/modelo integrados à área do compositor; esses seletores não existiam no protocolo v1.
-   - **Botão de Envio/Parada:** O v1 possuía botão flutuante circular elevado; a v2 adota `IconButton` integrado com animação de troca dinâmica entre Send e Stop reativo.
+### 3.5 Timeline (mensagens) — classificada; grupo de valores pendente (gate item 3)
+
+- [x] Cabeçalho do usuário: rótulo "You" com semântica de cabeçalho, e hora; sem chip de duração (decisão 16).
+- [x] Cabeçalho do assistente: hora no início, chip de duração no fim; sem cabeçalho quando não há hora, duração nem ação.
+- [x] Rótulos relativos e de data da v1 omitidos: as chaves de l10n não existem na v2, e o dono aceitou a hora. Destino #462.
+- [~] Região: deslocamento de 2–3 px e altura dentro de 1 px (16 pares). Segue a faixa de abas. Destino #463.
+- [x] Região contra S4: melhorou (Δaltura média 47,5 → 0,5 px).
+- [ ] Grupo de valores em `v1_surface_parity_test.dart` ausente: os testes estão em `session_message_info_test.dart` e `session_timeline_rendering_test.dart`. Decisão pendente (seção 6).
+
+### 3.6 Menus e overlays — NÃO concluído (menu de overflow piorou em relação ao S4)
+
+- [x] Menus de sessão: glifos Symbols, 18 dp, rótulos com reticências (S6).
+- [x] Projetos: diferença média 0,91% nos 4 pares comparáveis, contra 8,17% no S4 (melhorou).
+- [~] Sessões: deslocamento vertical de 13–19 px, mesma altura (4 pares). Destino #463.
+- [ ] **Menu de overflow mobile (`s12`)**: v2 260 px, v1 162 px, S4 208 px. Piorou 52 px em relação ao S4. Destino #463, com a causa não confirmada.
 
 ---
 
-## 5. Auditoria de Defeitos de Layout e Regressões
+## 4. Regiões contra a linha de base S4
 
-- **Overflows:** 0 ocorrências detectadas em toda a suíte (24 testes de tela completa executados sem exceções).
-- **Responsividade:** O layout adapta-se fluidamente de 412 px (largura mobile retrato) a 1280 px (desktop estendido).
-- **Temas:** Suporte determinístico verificado em Light e Dark modes sem inversão de contraste.
-- **Contratos:** Preservados scroll, outbox de rascunhos, foco do teclado e atalhos de navegação.
+| Região | Pares | Comparáveis S4 → final | Diferença média S4 → final | Δaltura média S4 → final | Leitura |
+| :--- | ---: | ---: | ---: | ---: | :--- |
+| Toolbar | 54 | 0 → 54 | não comparável → 7,47% | — | Melhorou (agora comparável) |
+| Overlay | 14 | 4 → 4 | 8,17% → 0,91% | 13,4 → 20,9 px | Pixels melhoraram; geometria do `s12` piorou |
+| Painel lateral | 32 | 6 → 6 | 21,42% → 18,00% | 25,2 → 34,9 px | Pixels melhoraram; geometria piorou (ver 3.2) |
+| Composer | 36 | 0 → 0 | — | 69,8 → 69,8 px | Igual |
+| Timeline | 16 | 0 → 0 | — | 47,5 → 0,5 px | Melhorou |
+| Abas | 8 | 0 → 0 | — | 6,5 → 1,5 px | Melhorou |
+
+## 5. Diferenças restantes e destino
+
+| Diferença | Medida | Destino |
+| :--- | :--- | :--- |
+| Controles v1 sem função v2 (terminal, arquivos, busca, exibição, atalhos, economia de dados, tour, voz, anexos, ícones de projeto, linhas do painel, hora relativa) | 13 itens | Issue **#462** (`after-mvp`) |
+| Diferença de pixel na toolbar | 7,47% médio | Issue **#463** |
+| Geometria do painel lateral | +9,7 px médio contra o S4, por remoções aceitas | #462 (remoções) e #463 (geometria) |
+| Altura e deslocamento do composer | 118–166 px contra 50–82 px | #463 (controles só-v2) |
+| Faixa de abas e deslocamento da timeline | 2–3 px | #463 |
+| Menu de overflow mobile | 260 px contra 162 px (S4: 208 px) | #463 |
+| Menus de sessão | deslocamento de 13–19 px | #463 |
+| Alvo de toque da aba | 38,4 dp | Plataforma: alvo mínimo de 48 dp (exceção de acessibilidade) |
+
+## 6. Decisões pendentes
+
+1. **Gate item 3 (#458, comentário 6595560754):** o grupo de valores de abas, menus e timeline não está em `v1_surface_parity_test.dart`. Opções: **A** criar esses grupos no arquivo de paridade, ou **B** ajustar o texto do gate para os testes de cada superfície. Recomendação: **B**.
+2. **Painel lateral e menu de overflow:** a regra (c) não é atendida na geometria. O dono decide se aceita as remoções aprovadas como causa e se o menu `s12` precisa de ajuste antes do CP5.
+
+## 6.1 Goldens regenerados e motivo
+
+| Commit | Motivo | Arquivos |
+| :--- | :--- | :--- |
+| `c5905b10` (S3) | Estilo visual único refinado (decisões 17 a 20) | `appearance/goldens/{desktop,mobile}_{light,dark}.png`; `sessions/goldens/command_picker_*`, `composer_input_*`, `live_work_*` |
+| `ad19f5d0` (S8) | Glifos de envio e parada em 24 dp; chips Steer e Queue em stadium | `sessions/goldens/command_picker_mobile_{light,dark,ar_rtl}.png`, `composer_input_mobile_{light,dark,ar_rtl}.png` |
+| `7208393f` (S8) | Regeneração no neo com a fonte Symbols carregada | `sessions/goldens/command_picker_mobile_{dark,ar_rtl}.png`, `composer_input_mobile_{dark,ar_rtl}.png` |
+| `78c91962` (S9) | Cabeçalho da mensagem: "You" e hora; sem cabeçalho do assistente quando vazio | `sessions/goldens/live_{top,work,tail,work_open}_*.png`; `shared/goldens/{desktop,mobile}_*.png` (renderização rica, altura 524 px) |
 
 ---
 
-## 6. Checklist de Paridade para Sign-off do CP5
-
-- [x] P0: Preflight, verificação de proveniência e integridade dos ambientes `mercury` e `neo`.
-- [x] P1: Primeiro par determinístico v1 × v2 capturado, medido e validado com dados populados.
-- [x] P2: Suíte de paridade com fontes e ícones reais legíveis (Roboto + MaterialSymbols) comprovados por OCR.
-- [x] P3: Comparador determinístico estrito (`compare_parity.py`) com validação de dimensões e 10 unit tests aprovados.
-- [x] P4: Classificação e documentação dos desvios visuais por blocos (Header, Timeline, Composer).
-- [x] P5: Entrega completa das evidências e do candidato para avaliação do proprietário.
-- [ ] **Portão Humano (Sign-off Formal do Proprietário):** Pendente inspeção e aceite explícito do proprietário para o CP5; beta v2.0.0-beta.1 NÃO publicado.
-
----
-*Dossiê gerado e preservado em `evidence/cp5/`.*
+*Dossiê de Seq 5.6 (#458, S10). Substitui o dossiê de 31 de outubro de 2026 (CP5 da Seq 5.5), que usava veredictos "intencionais".*
