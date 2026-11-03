@@ -521,7 +521,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** a live or history timeline shows the parts (text, reasoning, tools) of an assistant message
 - **When** the first part of that message is rendered
-- **Then** a user turn's header shows `You` and its clock time with no elapsed chip; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header
+- **Then** a user turn's header shows `You` and its clock time with no elapsed chip; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header; a user turn's undo (latest turn) or rewind-and-edit (older turns) action sits to the left of the bubble, as in v1, outside the header, and history shows none
 - **Then** the details dialog lists the elapsed time, model, provider, the reported token total (only when input and output are known), cost in USD, and "Step started #1" / "Step finished #1: reason • tokens • cost" (a v2 message is one model step); with nothing known it says "No metadata available"; it scrolls, closes with its button, the barrier or Escape
 - **Then** live parts learn the model, agent and start of the running step when it starts; when the step ends or fails they receive the completion time, usage and finish reason; a retried step on the same message resets them to the new attempt
 - **Then** history reads the same facts from the assistant record; an unexpected, oversized or malformed display value is unknown and never rejects the page
@@ -608,7 +608,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **When** the user taps a command, picks it with the keyboard, or sends a builtin's name (any case) with Send or Enter
 - **Then** the command runs locally, the field is cleared, and nothing is sent to the server; words after the name are ignored
 - **Then** `/new` opens the New Chat draft; `/model` opens the model picker and `/agent` the agent menu on its chip; `/sessions` opens the list drawer on a phone, or shows the hidden list pane on a wider window; `/help` lists the commands in a dialog that Enter closes; `/thinking` shows or hides reasoning (the Appearance switch) and says which
-- **Then** `/undo`, `/redo` and `/compact` say they are not available in this version yet; on the New Chat draft the commands that need a conversation (`/model`, `/agent`, `/undo`, `/redo`, `/compact`) say to send a first message; a sub-conversation's `/model` says its model is its parent's
+- **Then** `/undo`, `/redo` and `/compact` run the shown session's turn actions, and say they are not available in this version yet when no session is bound; on the New Chat draft the commands that need a conversation (`/model`, `/agent`, `/undo`, `/redo`, `/compact`) say to send a first message; a sub-conversation's `/model` says its model is its parent's
 - **Then** any other `/word` is sent as an ordinary prompt; the server's own commands are not listed
 
 ### V2 agent menu and permission quick switch
@@ -678,7 +678,7 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 
 - **Given** the user opens Settings > Appearance in the explicit v2 app
 - **When** appearance controls are displayed
-- **Then** the user can choose system/light/dark mode, classic/refined visual style, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
+- **Then** the user can choose system/light/dark mode, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
 - **Then** the searchable preset picker and five density tiers work in compact and wide layouts; on narrow screens or enlarged text the segmented choices become fields that open the same searchable picker
 - **Then** the controls use the scoped 14-language catalog, including right-to-left layout
 
@@ -706,8 +706,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Given** the explicit v2 app starts or the user changes appearance
 - **When** its preferences are loaded or saved
 - **Then** startup hydrates appearance before mounting the app, and accepted changes persist under the isolated `cw2.settings.*` namespace
-- **Then** defaults are system mode, refined style, normal density, dynamic colors enabled, no selected preset or custom seed, standard contrast and AMOLED disabled
-- **Then** an explicitly stored classic style is preserved; missing or invalid fields do not cause default values to be written over stored preferences
+- **Then** defaults are system mode, normal density, dynamic colors enabled, no selected preset or custom seed, standard contrast and AMOLED disabled
+- **Then** a stored `visualStyle` value is ignored on load, whatever it is (missing, classic, refined or invalid), and is never written or deleted; missing or invalid fields do not cause default values to be written over stored preferences
 - **Then** nullable preset and seed selections can be cleared without altering unrelated settings
 - **Then** a load/save failure keeps the app usable and shows an appearance-storage error with a retry action
 

@@ -1,0 +1,4232 @@
+{
+  "status": "complete",
+  "pairs_count": 54,
+  "missing_count": 0,
+  "missing_pairs": [],
+  "pairs": [
+    {
+      "pair_id": "s10_desktop_dark",
+      "state": "s10",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 333406,
+      "diff_percent": 32.56,
+      "v1_image": "s10_desktop_dark_v1.png",
+      "v2_image": "s10_desktop_dark_v2.png",
+      "diff_image": "s10_desktop_dark_diff.png",
+      "montage_image": "s10_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_dark_v1_composer.png",
+          "crop_v2": "s10_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "overlay": {
+          "v1_rect": {
+            "x": 96,
+            "y": 67,
+            "w": 224,
+            "h": 440
+          },
+          "v2_rect": {
+            "x": 392,
+            "y": 65,
+            "w": 280,
+            "h": 416
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 98560,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_dark_v1_overlay.png",
+          "crop_v2": "s10_desktop_dark_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s10_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 1280,
+            "h": 43
+          },
+          "v2_rect": {
+            "x": 308,
+            "y": 44,
+            "w": 972,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 55040,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_dark_v1_tabs.png",
+          "crop_v2": "s10_desktop_dark_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s10_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s10_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s10_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s10_desktop_light",
+      "state": "s10",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 297936,
+      "diff_percent": 29.1,
+      "v1_image": "s10_desktop_light_v1.png",
+      "v2_image": "s10_desktop_light_v2.png",
+      "diff_image": "s10_desktop_light_diff.png",
+      "montage_image": "s10_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_light_v1_composer.png",
+          "crop_v2": "s10_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "overlay": {
+          "v1_rect": {
+            "x": 96,
+            "y": 67,
+            "w": 224,
+            "h": 440
+          },
+          "v2_rect": {
+            "x": 392,
+            "y": 65,
+            "w": 280,
+            "h": 416
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 98560,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_light_v1_overlay.png",
+          "crop_v2": "s10_desktop_light_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_light_v1_side_panel.png",
+          "crop_v2": "s10_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 1280,
+            "h": 43
+          },
+          "v2_rect": {
+            "x": 308,
+            "y": 44,
+            "w": 972,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 55040,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_desktop_light_v1_tabs.png",
+          "crop_v2": "s10_desktop_light_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s10_desktop_light_v1_toolbar.png",
+          "crop_v2": "s10_desktop_light_v2_toolbar.png",
+          "crop_diff": "s10_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s10_mobile_dark",
+      "state": "s10",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 80436,
+      "diff_percent": 21.34,
+      "v1_image": "s10_mobile_dark_v1.png",
+      "v2_image": "s10_mobile_dark_v2.png",
+      "diff_image": "s10_mobile_dark_diff.png",
+      "montage_image": "s10_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_dark_v1_composer.png",
+          "crop_v2": "s10_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "overlay": {
+          "v1_rect": {
+            "x": 94,
+            "y": 71,
+            "w": 224,
+            "h": 440
+          },
+          "v2_rect": {
+            "x": 84,
+            "y": 67,
+            "w": 280,
+            "h": 416
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 98560,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_dark_v1_overlay.png",
+          "crop_v2": "s10_mobile_dark_v2_overlay.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 18952,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_dark_v1_tabs.png",
+          "crop_v2": "s10_mobile_dark_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s10_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s10_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s10_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s10_mobile_light",
+      "state": "s10",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 68122,
+      "diff_percent": 18.07,
+      "v1_image": "s10_mobile_light_v1.png",
+      "v2_image": "s10_mobile_light_v2.png",
+      "diff_image": "s10_mobile_light_diff.png",
+      "montage_image": "s10_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_light_v1_composer.png",
+          "crop_v2": "s10_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "overlay": {
+          "v1_rect": {
+            "x": 94,
+            "y": 71,
+            "w": 224,
+            "h": 440
+          },
+          "v2_rect": {
+            "x": 84,
+            "y": 67,
+            "w": 280,
+            "h": 416
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 98560,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_light_v1_overlay.png",
+          "crop_v2": "s10_mobile_light_v2_overlay.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 18952,
+          "diff_percent": 100.0,
+          "crop_v1": "s10_mobile_light_v1_tabs.png",
+          "crop_v2": "s10_mobile_light_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s10_mobile_light_v1_toolbar.png",
+          "crop_v2": "s10_mobile_light_v2_toolbar.png",
+          "crop_diff": "s10_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_project_desktop_dark",
+      "state": "s11_project",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 139417,
+      "diff_percent": 13.61,
+      "v1_image": "s11_project_desktop_dark_v1.png",
+      "v2_image": "s11_project_desktop_dark_v2.png",
+      "diff_image": "s11_project_desktop_dark_diff.png",
+      "montage_image": "s11_project_desktop_dark_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 154,
+            "y": 355,
+            "w": 112,
+            "h": 64
+          },
+          "v2_rect": {
+            "x": 240,
+            "y": 346,
+            "w": 112,
+            "h": 64
+          },
+          "size_mismatch": false,
+          "ae": 130,
+          "pixels": 7168,
+          "diff_percent": 1.81,
+          "crop_v1": "s11_project_desktop_dark_v1_overlay.png",
+          "crop_v2": "s11_project_desktop_dark_v2_overlay.png",
+          "crop_diff": "s11_project_desktop_dark_diff_overlay.png"
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_project_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s11_project_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2702,
+          "pixels": 56320,
+          "diff_percent": 4.8,
+          "crop_v1": "s11_project_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s11_project_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s11_project_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_project_desktop_light",
+      "state": "s11_project",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 139368,
+      "diff_percent": 13.61,
+      "v1_image": "s11_project_desktop_light_v1.png",
+      "v2_image": "s11_project_desktop_light_v2.png",
+      "diff_image": "s11_project_desktop_light_diff.png",
+      "montage_image": "s11_project_desktop_light_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 154,
+            "y": 355,
+            "w": 112,
+            "h": 64
+          },
+          "v2_rect": {
+            "x": 240,
+            "y": 346,
+            "w": 112,
+            "h": 64
+          },
+          "size_mismatch": false,
+          "ae": 132,
+          "pixels": 7168,
+          "diff_percent": 1.84,
+          "crop_v1": "s11_project_desktop_light_v1_overlay.png",
+          "crop_v2": "s11_project_desktop_light_v2_overlay.png",
+          "crop_diff": "s11_project_desktop_light_diff_overlay.png"
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_project_desktop_light_v1_side_panel.png",
+          "crop_v2": "s11_project_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2696,
+          "pixels": 56320,
+          "diff_percent": 4.79,
+          "crop_v1": "s11_project_desktop_light_v1_toolbar.png",
+          "crop_v2": "s11_project_desktop_light_v2_toolbar.png",
+          "crop_diff": "s11_project_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_project_mobile_dark",
+      "state": "s11_project",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 45958,
+      "diff_percent": 12.19,
+      "v1_image": "s11_project_mobile_dark_v1.png",
+      "v2_image": "s11_project_mobile_dark_v2.png",
+      "diff_image": "s11_project_mobile_dark_diff.png",
+      "montage_image": "s11_project_mobile_dark_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 156,
+            "y": 280,
+            "w": 112,
+            "h": 64
+          },
+          "v2_rect": {
+            "x": 180,
+            "y": 302,
+            "w": 112,
+            "h": 64
+          },
+          "size_mismatch": false,
+          "ae": 0,
+          "pixels": 7168,
+          "diff_percent": 0.0,
+          "crop_v1": "s11_project_mobile_dark_v1_overlay.png",
+          "crop_v2": "s11_project_mobile_dark_v2_overlay.png",
+          "crop_diff": "s11_project_mobile_dark_diff_overlay.png"
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 36966,
+          "pixels": 278160,
+          "diff_percent": 13.29,
+          "crop_v1": "s11_project_mobile_dark_v1_side_panel.png",
+          "crop_v2": "s11_project_mobile_dark_v2_side_panel.png",
+          "crop_diff": "s11_project_mobile_dark_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7125,
+          "pixels": 18952,
+          "diff_percent": 37.59,
+          "crop_v1": "s11_project_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s11_project_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s11_project_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_project_mobile_light",
+      "state": "s11_project",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 45908,
+      "diff_percent": 12.18,
+      "v1_image": "s11_project_mobile_light_v1.png",
+      "v2_image": "s11_project_mobile_light_v2.png",
+      "diff_image": "s11_project_mobile_light_diff.png",
+      "montage_image": "s11_project_mobile_light_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 156,
+            "y": 280,
+            "w": 112,
+            "h": 64
+          },
+          "v2_rect": {
+            "x": 180,
+            "y": 302,
+            "w": 112,
+            "h": 64
+          },
+          "size_mismatch": false,
+          "ae": 0,
+          "pixels": 7168,
+          "diff_percent": 0.0,
+          "crop_v1": "s11_project_mobile_light_v1_overlay.png",
+          "crop_v2": "s11_project_mobile_light_v2_overlay.png",
+          "crop_diff": "s11_project_mobile_light_diff_overlay.png"
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 36915,
+          "pixels": 278160,
+          "diff_percent": 13.27,
+          "crop_v1": "s11_project_mobile_light_v1_side_panel.png",
+          "crop_v2": "s11_project_mobile_light_v2_side_panel.png",
+          "crop_diff": "s11_project_mobile_light_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7114,
+          "pixels": 18952,
+          "diff_percent": 37.54,
+          "crop_v1": "s11_project_mobile_light_v1_toolbar.png",
+          "crop_v2": "s11_project_mobile_light_v2_toolbar.png",
+          "crop_diff": "s11_project_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_session_desktop_dark",
+      "state": "s11_session",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 236493,
+      "diff_percent": 23.1,
+      "v1_image": "s11_session_desktop_dark_v1.png",
+      "v2_image": "s11_session_desktop_dark_v2.png",
+      "diff_image": "s11_session_desktop_dark_diff.png",
+      "montage_image": "s11_session_desktop_dark_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 150,
+            "y": 419,
+            "w": 112,
+            "h": 304
+          },
+          "v2_rect": {
+            "x": 240,
+            "y": 406,
+            "w": 280,
+            "h": 304
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 34048,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_desktop_dark_v1_overlay.png",
+          "crop_v2": "s11_session_desktop_dark_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s11_session_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2702,
+          "pixels": 56320,
+          "diff_percent": 4.8,
+          "crop_v1": "s11_session_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s11_session_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s11_session_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_session_desktop_light",
+      "state": "s11_session",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 236433,
+      "diff_percent": 23.09,
+      "v1_image": "s11_session_desktop_light_v1.png",
+      "v2_image": "s11_session_desktop_light_v2.png",
+      "diff_image": "s11_session_desktop_light_diff.png",
+      "montage_image": "s11_session_desktop_light_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 150,
+            "y": 419,
+            "w": 112,
+            "h": 304
+          },
+          "v2_rect": {
+            "x": 240,
+            "y": 406,
+            "w": 280,
+            "h": 304
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 34048,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_desktop_light_v1_overlay.png",
+          "crop_v2": "s11_session_desktop_light_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_desktop_light_v1_side_panel.png",
+          "crop_v2": "s11_session_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2696,
+          "pixels": 56320,
+          "diff_percent": 4.79,
+          "crop_v1": "s11_session_desktop_light_v1_toolbar.png",
+          "crop_v2": "s11_session_desktop_light_v2_toolbar.png",
+          "crop_diff": "s11_session_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_session_mobile_dark",
+      "state": "s11_session",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 93880,
+      "diff_percent": 24.9,
+      "v1_image": "s11_session_mobile_dark_v1.png",
+      "v2_image": "s11_session_mobile_dark_v2.png",
+      "diff_image": "s11_session_mobile_dark_diff.png",
+      "montage_image": "s11_session_mobile_dark_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 152,
+            "y": 343,
+            "w": 112,
+            "h": 304
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 362,
+            "w": 280,
+            "h": 304
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 34048,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_mobile_dark_v1_overlay.png",
+          "crop_v2": "s11_session_mobile_dark_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 84888,
+          "pixels": 278160,
+          "diff_percent": 30.52,
+          "crop_v1": "s11_session_mobile_dark_v1_side_panel.png",
+          "crop_v2": "s11_session_mobile_dark_v2_side_panel.png",
+          "crop_diff": "s11_session_mobile_dark_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7125,
+          "pixels": 18952,
+          "diff_percent": 37.59,
+          "crop_v1": "s11_session_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s11_session_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s11_session_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s11_session_mobile_light",
+      "state": "s11_session",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 93840,
+      "diff_percent": 24.89,
+      "v1_image": "s11_session_mobile_light_v1.png",
+      "v2_image": "s11_session_mobile_light_v2.png",
+      "diff_image": "s11_session_mobile_light_diff.png",
+      "montage_image": "s11_session_mobile_light_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 152,
+            "y": 343,
+            "w": 112,
+            "h": 304
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 362,
+            "w": 280,
+            "h": 304
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 34048,
+          "diff_percent": 100.0,
+          "crop_v1": "s11_session_mobile_light_v1_overlay.png",
+          "crop_v2": "s11_session_mobile_light_v2_overlay.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 84847,
+          "pixels": 278160,
+          "diff_percent": 30.5,
+          "crop_v1": "s11_session_mobile_light_v1_side_panel.png",
+          "crop_v2": "s11_session_mobile_light_v2_side_panel.png",
+          "crop_diff": "s11_session_mobile_light_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7114,
+          "pixels": 18952,
+          "diff_percent": 37.54,
+          "crop_v1": "s11_session_mobile_light_v1_toolbar.png",
+          "crop_v2": "s11_session_mobile_light_v2_toolbar.png",
+          "crop_diff": "s11_session_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s12_mobile_dark",
+      "state": "s12",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 64230,
+      "diff_percent": 17.04,
+      "v1_image": "s12_mobile_dark_v1.png",
+      "v2_image": "s12_mobile_dark_v2.png",
+      "diff_image": "s12_mobile_dark_diff.png",
+      "montage_image": "s12_mobile_dark_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 207,
+            "y": 46,
+            "w": 205,
+            "h": 162
+          },
+          "v2_rect": {
+            "x": 231,
+            "y": 46,
+            "w": 181,
+            "h": 260
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 33210,
+          "diff_percent": 100.0,
+          "crop_v1": "s12_mobile_dark_v1_overlay.png",
+          "crop_v2": "s12_mobile_dark_v2_overlay.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 442,
+          "pixels": 18952,
+          "diff_percent": 2.33,
+          "crop_v1": "s12_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s12_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s12_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s12_mobile_light",
+      "state": "s12",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 55572,
+      "diff_percent": 14.74,
+      "v1_image": "s12_mobile_light_v1.png",
+      "v2_image": "s12_mobile_light_v2.png",
+      "diff_image": "s12_mobile_light_diff.png",
+      "montage_image": "s12_mobile_light_montage.png",
+      "regions": {
+        "overlay": {
+          "v1_rect": {
+            "x": 207,
+            "y": 46,
+            "w": 205,
+            "h": 162
+          },
+          "v2_rect": {
+            "x": 231,
+            "y": 46,
+            "w": 181,
+            "h": 260
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 33210,
+          "diff_percent": 100.0,
+          "crop_v1": "s12_mobile_light_v1_overlay.png",
+          "crop_v2": "s12_mobile_light_v2_overlay.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 442,
+          "pixels": 18952,
+          "diff_percent": 2.33,
+          "crop_v1": "s12_mobile_light_v1_toolbar.png",
+          "crop_v2": "s12_mobile_light_v2_toolbar.png",
+          "crop_diff": "s12_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_busy_desktop_dark",
+      "state": "s13_busy",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 230014,
+      "diff_percent": 22.46,
+      "v1_image": "s13_busy_desktop_dark_v1.png",
+      "v2_image": "s13_busy_desktop_dark_v2.png",
+      "diff_image": "s13_busy_desktop_dark_diff.png",
+      "montage_image": "s13_busy_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_dark_v1_composer.png",
+          "crop_v2": "s13_busy_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s13_busy_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_dark_v1_timeline.png",
+          "crop_v2": "s13_busy_desktop_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s13_busy_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s13_busy_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s13_busy_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_busy_desktop_light",
+      "state": "s13_busy",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 194546,
+      "diff_percent": 19.0,
+      "v1_image": "s13_busy_desktop_light_v1.png",
+      "v2_image": "s13_busy_desktop_light_v2.png",
+      "diff_image": "s13_busy_desktop_light_diff.png",
+      "montage_image": "s13_busy_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_light_v1_composer.png",
+          "crop_v2": "s13_busy_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_light_v1_side_panel.png",
+          "crop_v2": "s13_busy_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_desktop_light_v1_timeline.png",
+          "crop_v2": "s13_busy_desktop_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3014,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s13_busy_desktop_light_v1_toolbar.png",
+          "crop_v2": "s13_busy_desktop_light_v2_toolbar.png",
+          "crop_diff": "s13_busy_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_busy_mobile_dark",
+      "state": "s13_busy",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 89650,
+      "diff_percent": 23.78,
+      "v1_image": "s13_busy_mobile_dark_v1.png",
+      "v2_image": "s13_busy_mobile_dark_v2.png",
+      "diff_image": "s13_busy_mobile_dark_diff.png",
+      "montage_image": "s13_busy_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_mobile_dark_v1_composer.png",
+          "crop_v2": "s13_busy_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_mobile_dark_v1_timeline.png",
+          "crop_v2": "s13_busy_mobile_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_busy_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s13_busy_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s13_busy_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_busy_mobile_light",
+      "state": "s13_busy",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 77369,
+      "diff_percent": 20.52,
+      "v1_image": "s13_busy_mobile_light_v1.png",
+      "v2_image": "s13_busy_mobile_light_v2.png",
+      "diff_image": "s13_busy_mobile_light_diff.png",
+      "montage_image": "s13_busy_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_mobile_light_v1_composer.png",
+          "crop_v2": "s13_busy_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_busy_mobile_light_v1_timeline.png",
+          "crop_v2": "s13_busy_mobile_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_busy_mobile_light_v1_toolbar.png",
+          "crop_v2": "s13_busy_mobile_light_v2_toolbar.png",
+          "crop_diff": "s13_busy_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_empty_desktop_dark",
+      "state": "s13_empty",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 127961,
+      "diff_percent": 12.5,
+      "v1_image": "s13_empty_desktop_dark_v1.png",
+      "v2_image": "s13_empty_desktop_dark_v2.png",
+      "diff_image": "s13_empty_desktop_dark_diff.png",
+      "montage_image": "s13_empty_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_desktop_dark_v1_composer.png",
+          "crop_v2": "s13_empty_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s13_empty_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s13_empty_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s13_empty_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s13_empty_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_empty_desktop_light",
+      "state": "s13_empty",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 92479,
+      "diff_percent": 9.03,
+      "v1_image": "s13_empty_desktop_light_v1.png",
+      "v2_image": "s13_empty_desktop_light_v2.png",
+      "diff_image": "s13_empty_desktop_light_diff.png",
+      "montage_image": "s13_empty_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_desktop_light_v1_composer.png",
+          "crop_v2": "s13_empty_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_desktop_light_v1_side_panel.png",
+          "crop_v2": "s13_empty_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s13_empty_desktop_light_v1_toolbar.png",
+          "crop_v2": "s13_empty_desktop_light_v2_toolbar.png",
+          "crop_diff": "s13_empty_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_empty_mobile_dark",
+      "state": "s13_empty",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 40422,
+      "diff_percent": 10.72,
+      "v1_image": "s13_empty_mobile_dark_v1.png",
+      "v2_image": "s13_empty_mobile_dark_v2.png",
+      "diff_image": "s13_empty_mobile_dark_diff.png",
+      "montage_image": "s13_empty_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_mobile_dark_v1_composer.png",
+          "crop_v2": "s13_empty_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_empty_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s13_empty_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s13_empty_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_empty_mobile_light",
+      "state": "s13_empty",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 28132,
+      "diff_percent": 7.46,
+      "v1_image": "s13_empty_mobile_light_v1.png",
+      "v2_image": "s13_empty_mobile_light_v2.png",
+      "diff_image": "s13_empty_mobile_light_diff.png",
+      "montage_image": "s13_empty_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_empty_mobile_light_v1_composer.png",
+          "crop_v2": "s13_empty_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_empty_mobile_light_v1_toolbar.png",
+          "crop_v2": "s13_empty_mobile_light_v2_toolbar.png",
+          "crop_diff": "s13_empty_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_multiline_desktop_dark",
+      "state": "s13_multiline",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 170451,
+      "diff_percent": 16.65,
+      "v1_image": "s13_multiline_desktop_dark_v1.png",
+      "v2_image": "s13_multiline_desktop_dark_v2.png",
+      "diff_image": "s13_multiline_desktop_dark_diff.png",
+      "montage_image": "s13_multiline_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 716,
+            "w": 948,
+            "h": 82
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 628,
+            "w": 936,
+            "h": 166
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 77736,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_desktop_dark_v1_composer.png",
+          "crop_v2": "s13_multiline_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s13_multiline_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s13_multiline_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s13_multiline_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s13_multiline_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_multiline_desktop_light",
+      "state": "s13_multiline",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 108357,
+      "diff_percent": 10.58,
+      "v1_image": "s13_multiline_desktop_light_v1.png",
+      "v2_image": "s13_multiline_desktop_light_v2.png",
+      "diff_image": "s13_multiline_desktop_light_diff.png",
+      "montage_image": "s13_multiline_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 716,
+            "w": 948,
+            "h": 82
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 628,
+            "w": 936,
+            "h": 166
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 77736,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_desktop_light_v1_composer.png",
+          "crop_v2": "s13_multiline_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_desktop_light_v1_side_panel.png",
+          "crop_v2": "s13_multiline_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s13_multiline_desktop_light_v1_toolbar.png",
+          "crop_v2": "s13_multiline_desktop_light_v2_toolbar.png",
+          "crop_diff": "s13_multiline_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_multiline_mobile_dark",
+      "state": "s13_multiline",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 57000,
+      "diff_percent": 15.12,
+      "v1_image": "s13_multiline_mobile_dark_v1.png",
+      "v2_image": "s13_multiline_mobile_dark_v2.png",
+      "diff_image": "s13_multiline_mobile_dark_diff.png",
+      "montage_image": "s13_multiline_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 833,
+            "w": 412,
+            "h": 82
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 743,
+            "w": 388,
+            "h": 166
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 33784,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_mobile_dark_v1_composer.png",
+          "crop_v2": "s13_multiline_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_multiline_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s13_multiline_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s13_multiline_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s13_multiline_mobile_light",
+      "state": "s13_multiline",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 35174,
+      "diff_percent": 9.33,
+      "v1_image": "s13_multiline_mobile_light_v1.png",
+      "v2_image": "s13_multiline_mobile_light_v2.png",
+      "diff_image": "s13_multiline_mobile_light_diff.png",
+      "montage_image": "s13_multiline_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 833,
+            "w": 412,
+            "h": 82
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 743,
+            "w": 388,
+            "h": 166
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 33784,
+          "diff_percent": 100.0,
+          "crop_v1": "s13_multiline_mobile_light_v1_composer.png",
+          "crop_v2": "s13_multiline_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s13_multiline_mobile_light_v1_toolbar.png",
+          "crop_v2": "s13_multiline_mobile_light_v2_toolbar.png",
+          "crop_diff": "s13_multiline_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s1_desktop_dark",
+      "state": "s1",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 275076,
+      "diff_percent": 26.86,
+      "v1_image": "s1_desktop_dark_v1.png",
+      "v2_image": "s1_desktop_dark_v2.png",
+      "diff_image": "s1_desktop_dark_diff.png",
+      "montage_image": "s1_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_dark_v1_composer.png",
+          "crop_v2": "s1_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s1_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_dark_v1_timeline.png",
+          "crop_v2": "s1_desktop_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s1_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s1_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s1_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s1_desktop_light",
+      "state": "s1",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 239554,
+      "diff_percent": 23.39,
+      "v1_image": "s1_desktop_light_v1.png",
+      "v2_image": "s1_desktop_light_v2.png",
+      "diff_image": "s1_desktop_light_diff.png",
+      "montage_image": "s1_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_light_v1_composer.png",
+          "crop_v2": "s1_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_light_v1_side_panel.png",
+          "crop_v2": "s1_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_desktop_light_v1_timeline.png",
+          "crop_v2": "s1_desktop_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s1_desktop_light_v1_toolbar.png",
+          "crop_v2": "s1_desktop_light_v2_toolbar.png",
+          "crop_diff": "s1_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s1_mobile_dark",
+      "state": "s1",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 117260,
+      "diff_percent": 31.11,
+      "v1_image": "s1_mobile_dark_v1.png",
+      "v2_image": "s1_mobile_dark_v2.png",
+      "diff_image": "s1_mobile_dark_diff.png",
+      "montage_image": "s1_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_mobile_dark_v1_composer.png",
+          "crop_v2": "s1_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_mobile_dark_v1_timeline.png",
+          "crop_v2": "s1_mobile_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s1_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s1_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s1_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s1_mobile_light",
+      "state": "s1",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 104905,
+      "diff_percent": 27.83,
+      "v1_image": "s1_mobile_light_v1.png",
+      "v2_image": "s1_mobile_light_v2.png",
+      "diff_image": "s1_mobile_light_diff.png",
+      "montage_image": "s1_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_mobile_light_v1_composer.png",
+          "crop_v2": "s1_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s1_mobile_light_v1_timeline.png",
+          "crop_v2": "s1_mobile_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s1_mobile_light_v1_toolbar.png",
+          "crop_v2": "s1_mobile_light_v2_toolbar.png",
+          "crop_diff": "s1_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s2_desktop_dark",
+      "state": "s2",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 353464,
+      "diff_percent": 34.52,
+      "v1_image": "s2_desktop_dark_v1.png",
+      "v2_image": "s2_desktop_dark_v2.png",
+      "diff_image": "s2_desktop_dark_diff.png",
+      "montage_image": "s2_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_dark_v1_composer.png",
+          "crop_v2": "s2_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s2_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_dark_v1_timeline.png",
+          "crop_v2": "s2_desktop_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s2_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s2_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s2_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s2_desktop_light",
+      "state": "s2",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 317943,
+      "diff_percent": 31.05,
+      "v1_image": "s2_desktop_light_v1.png",
+      "v2_image": "s2_desktop_light_v2.png",
+      "diff_image": "s2_desktop_light_diff.png",
+      "montage_image": "s2_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_light_v1_composer.png",
+          "crop_v2": "s2_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_light_v1_side_panel.png",
+          "crop_v2": "s2_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_desktop_light_v1_timeline.png",
+          "crop_v2": "s2_desktop_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s2_desktop_light_v1_toolbar.png",
+          "crop_v2": "s2_desktop_light_v2_toolbar.png",
+          "crop_diff": "s2_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s2_mobile_dark",
+      "state": "s2",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 151244,
+      "diff_percent": 40.12,
+      "v1_image": "s2_mobile_dark_v1.png",
+      "v2_image": "s2_mobile_dark_v2.png",
+      "diff_image": "s2_mobile_dark_diff.png",
+      "montage_image": "s2_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_mobile_dark_v1_composer.png",
+          "crop_v2": "s2_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_mobile_dark_v1_timeline.png",
+          "crop_v2": "s2_mobile_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s2_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s2_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s2_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s2_mobile_light",
+      "state": "s2",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 138888,
+      "diff_percent": 36.84,
+      "v1_image": "s2_mobile_light_v1.png",
+      "v2_image": "s2_mobile_light_v2.png",
+      "diff_image": "s2_mobile_light_diff.png",
+      "montage_image": "s2_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_mobile_light_v1_composer.png",
+          "crop_v2": "s2_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s2_mobile_light_v1_timeline.png",
+          "crop_v2": "s2_mobile_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s2_mobile_light_v1_toolbar.png",
+          "crop_v2": "s2_mobile_light_v2_toolbar.png",
+          "crop_diff": "s2_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s5_desktop_dark",
+      "state": "s5",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 127533,
+      "diff_percent": 12.45,
+      "v1_image": "s5_desktop_dark_v1.png",
+      "v2_image": "s5_desktop_dark_v2.png",
+      "diff_image": "s5_desktop_dark_diff.png",
+      "montage_image": "s5_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_desktop_dark_v1_composer.png",
+          "crop_v2": "s5_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s5_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s5_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s5_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s5_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s5_desktop_light",
+      "state": "s5",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 92052,
+      "diff_percent": 8.99,
+      "v1_image": "s5_desktop_light_v1.png",
+      "v2_image": "s5_desktop_light_v2.png",
+      "diff_image": "s5_desktop_light_diff.png",
+      "montage_image": "s5_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_desktop_light_v1_composer.png",
+          "crop_v2": "s5_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_desktop_light_v1_side_panel.png",
+          "crop_v2": "s5_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s5_desktop_light_v1_toolbar.png",
+          "crop_v2": "s5_desktop_light_v2_toolbar.png",
+          "crop_diff": "s5_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s5_mobile_dark",
+      "state": "s5",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 39021,
+      "diff_percent": 10.35,
+      "v1_image": "s5_mobile_dark_v1.png",
+      "v2_image": "s5_mobile_dark_v2.png",
+      "diff_image": "s5_mobile_dark_diff.png",
+      "montage_image": "s5_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_mobile_dark_v1_composer.png",
+          "crop_v2": "s5_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s5_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s5_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s5_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s5_mobile_light",
+      "state": "s5",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 26730,
+      "diff_percent": 7.09,
+      "v1_image": "s5_mobile_light_v1.png",
+      "v2_image": "s5_mobile_light_v2.png",
+      "diff_image": "s5_mobile_light_diff.png",
+      "montage_image": "s5_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s5_mobile_light_v1_composer.png",
+          "crop_v2": "s5_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s5_mobile_light_v1_toolbar.png",
+          "crop_v2": "s5_mobile_light_v2_toolbar.png",
+          "crop_diff": "s5_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s6_desktop_dark",
+      "state": "s6",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 140320,
+      "diff_percent": 13.7,
+      "v1_image": "s6_desktop_dark_v1.png",
+      "v2_image": "s6_desktop_dark_v2.png",
+      "diff_image": "s6_desktop_dark_diff.png",
+      "montage_image": "s6_desktop_dark_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s6_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s6_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2702,
+          "pixels": 56320,
+          "diff_percent": 4.8,
+          "crop_v1": "s6_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s6_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s6_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s6_desktop_light",
+      "state": "s6",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 113540,
+      "diff_percent": 11.09,
+      "v1_image": "s6_desktop_light_v1.png",
+      "v2_image": "s6_desktop_light_v2.png",
+      "diff_image": "s6_desktop_light_diff.png",
+      "montage_image": "s6_desktop_light_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s6_desktop_light_v1_side_panel.png",
+          "crop_v2": "s6_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2696,
+          "pixels": 56320,
+          "diff_percent": 4.79,
+          "crop_v1": "s6_desktop_light_v1_toolbar.png",
+          "crop_v2": "s6_desktop_light_v2_toolbar.png",
+          "crop_diff": "s6_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s6_mobile_dark",
+      "state": "s6",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 48661,
+      "diff_percent": 12.91,
+      "v1_image": "s6_mobile_dark_v1.png",
+      "v2_image": "s6_mobile_dark_v2.png",
+      "diff_image": "s6_mobile_dark_diff.png",
+      "montage_image": "s6_mobile_dark_montage.png",
+      "regions": {
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s6_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s6_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s6_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s6_mobile_light",
+      "state": "s6",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 40000,
+      "diff_percent": 10.61,
+      "v1_image": "s6_mobile_light_v1.png",
+      "v2_image": "s6_mobile_light_v2.png",
+      "diff_image": "s6_mobile_light_diff.png",
+      "montage_image": "s6_mobile_light_montage.png",
+      "regions": {
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s6_mobile_light_v1_toolbar.png",
+          "crop_v2": "s6_mobile_light_v2_toolbar.png",
+          "crop_diff": "s6_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s7_desktop_dark",
+      "state": "s7",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 274552,
+      "diff_percent": 26.81,
+      "v1_image": "s7_desktop_dark_v1.png",
+      "v2_image": "s7_desktop_dark_v2.png",
+      "diff_image": "s7_desktop_dark_diff.png",
+      "montage_image": "s7_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_dark_v1_composer.png",
+          "crop_v2": "s7_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s7_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_dark_v1_timeline.png",
+          "crop_v2": "s7_desktop_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s7_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s7_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s7_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s7_desktop_light",
+      "state": "s7",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 239028,
+      "diff_percent": 23.34,
+      "v1_image": "s7_desktop_light_v1.png",
+      "v2_image": "s7_desktop_light_v2.png",
+      "diff_image": "s7_desktop_light_diff.png",
+      "montage_image": "s7_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_light_v1_composer.png",
+          "crop_v2": "s7_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_light_v1_side_panel.png",
+          "crop_v2": "s7_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 320,
+            "y": 89,
+            "w": 948,
+            "h": 583
+          },
+          "v2_rect": {
+            "x": 314,
+            "y": 87,
+            "w": 960,
+            "h": 583
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 552684,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_desktop_light_v1_timeline.png",
+          "crop_v2": "s7_desktop_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s7_desktop_light_v1_toolbar.png",
+          "crop_v2": "s7_desktop_light_v2_toolbar.png",
+          "crop_diff": "s7_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s7_mobile_dark",
+      "state": "s7",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 115625,
+      "diff_percent": 30.67,
+      "v1_image": "s7_mobile_dark_v1.png",
+      "v2_image": "s7_mobile_dark_v2.png",
+      "diff_image": "s7_mobile_dark_diff.png",
+      "montage_image": "s7_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_mobile_dark_v1_composer.png",
+          "crop_v2": "s7_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_mobile_dark_v1_timeline.png",
+          "crop_v2": "s7_mobile_dark_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s7_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s7_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s7_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s7_mobile_light",
+      "state": "s7",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 103270,
+      "diff_percent": 27.39,
+      "v1_image": "s7_mobile_light_v1.png",
+      "v2_image": "s7_mobile_light_v2.png",
+      "diff_image": "s7_mobile_light_diff.png",
+      "montage_image": "s7_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_mobile_light_v1_composer.png",
+          "crop_v2": "s7_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "timeline": {
+          "v1_rect": {
+            "x": 0,
+            "y": 92,
+            "w": 412,
+            "h": 697
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 89,
+            "w": 412,
+            "h": 696
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 287164,
+          "diff_percent": 100.0,
+          "crop_v1": "s7_mobile_light_v1_timeline.png",
+          "crop_v2": "s7_mobile_light_v2_timeline.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s7_mobile_light_v1_toolbar.png",
+          "crop_v2": "s7_mobile_light_v2_toolbar.png",
+          "crop_diff": "s7_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s8_desktop_dark",
+      "state": "s8",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 126473,
+      "diff_percent": 12.35,
+      "v1_image": "s8_desktop_dark_v1.png",
+      "v2_image": "s8_desktop_dark_v2.png",
+      "diff_image": "s8_desktop_dark_diff.png",
+      "montage_image": "s8_desktop_dark_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s8_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s8_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2702,
+          "pixels": 56320,
+          "diff_percent": 4.8,
+          "crop_v1": "s8_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s8_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s8_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s8_desktop_light",
+      "state": "s8",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 126421,
+      "diff_percent": 12.35,
+      "v1_image": "s8_desktop_light_v1.png",
+      "v2_image": "s8_desktop_light_v2.png",
+      "diff_image": "s8_desktop_light_diff.png",
+      "montage_image": "s8_desktop_light_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s8_desktop_light_v1_side_panel.png",
+          "crop_v2": "s8_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 2696,
+          "pixels": 56320,
+          "diff_percent": 4.79,
+          "crop_v1": "s8_desktop_light_v1_toolbar.png",
+          "crop_v2": "s8_desktop_light_v2_toolbar.png",
+          "crop_diff": "s8_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s8_mobile_dark",
+      "state": "s8",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 37269,
+      "diff_percent": 9.89,
+      "v1_image": "s8_mobile_dark_v1.png",
+      "v2_image": "s8_mobile_dark_v2.png",
+      "diff_image": "s8_mobile_dark_diff.png",
+      "montage_image": "s8_mobile_dark_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 28277,
+          "pixels": 278160,
+          "diff_percent": 10.17,
+          "crop_v1": "s8_mobile_dark_v1_side_panel.png",
+          "crop_v2": "s8_mobile_dark_v2_side_panel.png",
+          "crop_diff": "s8_mobile_dark_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7125,
+          "pixels": 18952,
+          "diff_percent": 37.59,
+          "crop_v1": "s8_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s8_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s8_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s8_mobile_light",
+      "state": "s8",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 37219,
+      "diff_percent": 9.87,
+      "v1_image": "s8_mobile_light_v1.png",
+      "v2_image": "s8_mobile_light_v2.png",
+      "diff_image": "s8_mobile_light_diff.png",
+      "montage_image": "s8_mobile_light_montage.png",
+      "regions": {
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 915
+          },
+          "size_mismatch": false,
+          "ae": 28226,
+          "pixels": 278160,
+          "diff_percent": 10.15,
+          "crop_v1": "s8_mobile_light_v1_side_panel.png",
+          "crop_v2": "s8_mobile_light_v2_side_panel.png",
+          "crop_diff": "s8_mobile_light_diff_side_panel.png"
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 7114,
+          "pixels": 18952,
+          "diff_percent": 37.54,
+          "crop_v1": "s8_mobile_light_v1_toolbar.png",
+          "crop_v2": "s8_mobile_light_v2_toolbar.png",
+          "crop_diff": "s8_mobile_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s9_desktop_dark",
+      "state": "s9",
+      "platform": "desktop",
+      "theme": "dark",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 134810,
+      "diff_percent": 13.17,
+      "v1_image": "s9_desktop_dark_v1.png",
+      "v2_image": "s9_desktop_dark_v2.png",
+      "diff_image": "s9_desktop_dark_diff.png",
+      "montage_image": "s9_desktop_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_dark_v1_composer.png",
+          "crop_v2": "s9_desktop_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_dark_v1_side_panel.png",
+          "crop_v2": "s9_desktop_dark_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 1280,
+            "h": 43
+          },
+          "v2_rect": {
+            "x": 308,
+            "y": 44,
+            "w": 972,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 55040,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_dark_v1_tabs.png",
+          "crop_v2": "s9_desktop_dark_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3020,
+          "pixels": 56320,
+          "diff_percent": 5.36,
+          "crop_v1": "s9_desktop_dark_v1_toolbar.png",
+          "crop_v2": "s9_desktop_dark_v2_toolbar.png",
+          "crop_diff": "s9_desktop_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s9_desktop_light",
+      "state": "s9",
+      "platform": "desktop",
+      "theme": "light",
+      "resolution": "1280x800",
+      "total_pixels": 1024000,
+      "ae_total": 99321,
+      "diff_percent": 9.7,
+      "v1_image": "s9_desktop_light_v1.png",
+      "v2_image": "s9_desktop_light_v2.png",
+      "diff_image": "s9_desktop_light_diff.png",
+      "montage_image": "s9_desktop_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 320,
+            "y": 748,
+            "w": 948,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 326,
+            "y": 676,
+            "w": 936,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 47400,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_light_v1_composer.png",
+          "crop_v2": "s9_desktop_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "side_panel": {
+          "v1_rect": {
+            "x": 0,
+            "y": 87,
+            "w": 300,
+            "h": 713
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 300,
+            "h": 756
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 213900,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_light_v1_side_panel.png",
+          "crop_v2": "s9_desktop_light_v2_side_panel.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 44,
+            "w": 1280,
+            "h": 43
+          },
+          "v2_rect": {
+            "x": 308,
+            "y": 44,
+            "w": 972,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 55040,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_desktop_light_v1_tabs.png",
+          "crop_v2": "s9_desktop_light_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 44
+          },
+          "size_mismatch": false,
+          "ae": 3013,
+          "pixels": 56320,
+          "diff_percent": 5.35,
+          "crop_v1": "s9_desktop_light_v1_toolbar.png",
+          "crop_v2": "s9_desktop_light_v2_toolbar.png",
+          "crop_diff": "s9_desktop_light_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s9_mobile_dark",
+      "state": "s9",
+      "platform": "mobile",
+      "theme": "dark",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 41419,
+      "diff_percent": 10.99,
+      "v1_image": "s9_mobile_dark_v1.png",
+      "v2_image": "s9_mobile_dark_v2.png",
+      "diff_image": "s9_mobile_dark_diff.png",
+      "montage_image": "s9_mobile_dark_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_mobile_dark_v1_composer.png",
+          "crop_v2": "s9_mobile_dark_v2_composer.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 18952,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_mobile_dark_v1_tabs.png",
+          "crop_v2": "s9_mobile_dark_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s9_mobile_dark_v1_toolbar.png",
+          "crop_v2": "s9_mobile_dark_v2_toolbar.png",
+          "crop_diff": "s9_mobile_dark_diff_toolbar.png"
+        }
+      }
+    },
+    {
+      "pair_id": "s9_mobile_light",
+      "state": "s9",
+      "platform": "mobile",
+      "theme": "light",
+      "resolution": "412x915",
+      "total_pixels": 376980,
+      "ae_total": 29123,
+      "diff_percent": 7.73,
+      "v1_image": "s9_mobile_light_v1.png",
+      "v2_image": "s9_mobile_light_v2.png",
+      "diff_image": "s9_mobile_light_diff.png",
+      "montage_image": "s9_mobile_light_montage.png",
+      "regions": {
+        "composer": {
+          "v1_rect": {
+            "x": 0,
+            "y": 865,
+            "w": 412,
+            "h": 50
+          },
+          "v2_rect": {
+            "x": 12,
+            "y": 791,
+            "w": 388,
+            "h": 118
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 20600,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_mobile_light_v1_composer.png",
+          "crop_v2": "s9_mobile_light_v2_composer.png",
+          "crop_diff": null
+        },
+        "tabs": {
+          "v1_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 46,
+            "w": 412,
+            "h": 43
+          },
+          "size_mismatch": true,
+          "ae": null,
+          "pixels": 18952,
+          "diff_percent": 100.0,
+          "crop_v1": "s9_mobile_light_v1_tabs.png",
+          "crop_v2": "s9_mobile_light_v2_tabs.png",
+          "crop_diff": null
+        },
+        "toolbar": {
+          "v1_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "v2_rect": {
+            "x": 0,
+            "y": 0,
+            "w": 412,
+            "h": 46
+          },
+          "size_mismatch": false,
+          "ae": 365,
+          "pixels": 18952,
+          "diff_percent": 1.93,
+          "crop_v1": "s9_mobile_light_v1_toolbar.png",
+          "crop_v2": "s9_mobile_light_v2_toolbar.png",
+          "crop_diff": "s9_mobile_light_diff_toolbar.png"
+        }
+      }
+    }
+  ]
+}
