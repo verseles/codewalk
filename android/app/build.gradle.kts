@@ -32,14 +32,18 @@ val releaseStoreFile = resolveSigningFile(
     keyProperties.getProperty("storeFile"),
 )
 
-// The owner's preview key stays outside the repository, in the folder above the
-// project root (`../codewalk-v2-preview-signing.keystore`). Its passwords come from
-// the Gradle user properties, never from the repository.
+// The owner's preview key and its passwords stay outside the repository, in the folder
+// above the project root: `../codewalk-v2-preview-signing.keystore` and its sibling
+// `codewalk-v2-preview-signing.properties` (keyAlias, storePassword, keyPassword).
 val previewKeystore = rootProject.file("../../codewalk-v2-preview-signing.keystore")
+val previewProperties = Properties().apply {
+    val file = previewKeystore.resolveSibling("codewalk-v2-preview-signing.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
 
 fun requiredPreviewProperty(name: String): String =
-    providers.gradleProperty(name).orNull
-        ?: throw GradleException("The preview keystore is installed, but $name is missing from ~/.gradle/gradle.properties.")
+    previewProperties.getProperty(name)
+        ?: throw GradleException("The preview keystore is installed, but $name is missing from codewalk-v2-preview-signing.properties.")
 
 fun requireReleaseSigningConfig() {
     if (!keyPropertiesFile.exists()) {
@@ -131,9 +135,9 @@ android {
         if (codewalkPreview && previewKeystore.exists()) {
             create("preview") {
                 storeFile = previewKeystore
-                keyAlias = requiredPreviewProperty("codewalkPreviewKeyAlias")
-                keyPassword = requiredPreviewProperty("codewalkPreviewKeyPassword")
-                storePassword = requiredPreviewProperty("codewalkPreviewStorePassword")
+                keyAlias = requiredPreviewProperty("keyAlias")
+                keyPassword = requiredPreviewProperty("keyPassword")
+                storePassword = requiredPreviewProperty("storePassword")
             }
         }
     }
