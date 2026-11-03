@@ -346,6 +346,8 @@ void main() {
       meta: _v2Meta('u1'),
       text: 'Fix the build',
       delivery: const OpenValue.known(DeliveryState.delivered),
+      // A delivered turn is one the harness has confirmed, as in v1.
+      confirmed: true,
     ),
     AssistantText(
       meta: _v2Meta('a1', message: 'm1'),
@@ -409,6 +411,7 @@ void main() {
           meta: _v2Meta('u1'),
           text: 'Show me the parity check code',
           delivery: const OpenValue.known(DeliveryState.delivered),
+          confirmed: true,
         ),
         AssistantText(
           meta: _v2Meta('a1', message: 'm1'),
@@ -497,6 +500,7 @@ void main() {
               meta: _v2Meta('busy'),
               text: 'Working on the build',
               delivery: const OpenValue.known(DeliveryState.delivered),
+              confirmed: true,
             ),
         ],
       ),
