@@ -131,12 +131,13 @@ def preview_identity(apk, runner):
                           check=True, text=True, capture_output=True).stdout
     # apksigner names its signers differently across build-tools versions
     # ("Signer #1", "V2 Signer:", "Signer (minSdkVersion=…)"); every one must
-    # be the debug key.
+    # be the owner's preview key or the debug key, never the release key.
     signers = re.findall(r"^.*Signer.*certificate DN: (.*)$", certificates, re.MULTILINE)
-    if not signers or any("CN=Android Debug" not in signer for signer in signers):
+    allowed = ("CN=CodeWalk v2 Preview", "CN=Android Debug")
+    if not signers or any(not any(name in signer for name in allowed) for signer in signers):
         # The certificate lines are public and show which key was found.
         found = [line for line in certificates.splitlines() if "certificate DN" in line][:4]
-        raise RuntimeError(f"Preview APK must be signed with the debug key, never the release key: {found}")
+        raise RuntimeError(f"Preview APK must be signed with the preview or debug key, never the release key: {found}")
     identity["signer"] = signers[0]
     return identity
 

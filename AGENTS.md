@@ -57,6 +57,7 @@
 - When the user needs a testable Android build, run `HEY_CAPTION="specific caption" make android` after checks pass.
 - Use a specific upload caption. Avoid generic captions like `Latest adjustments made`.
 - Android APK builds do not work reliably on ARM64 Linux hosts; use GitHub Actions for release APKs. `make check` works on ARM64.
+- Preview signing key (outside the repository, never committed): `../codewalk-v2-preview-signing.keystore`, relative to the project root (on neo, `~/cw-clone/`). Its passwords live in `~/.gradle/gradle.properties` as `codewalkPreview*`. Without the key, the preview keeps the debug key.
 
 ## Helper execution budget (owner, 2026-10-29)
 

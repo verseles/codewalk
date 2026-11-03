@@ -155,6 +155,20 @@ class NativeBuildTests(unittest.TestCase):
                     self.root = old_root
                     self.reset_preview()
 
+    def test_android_preview_accepts_the_preview_key(self):
+        preview = "CN=CodeWalk v2 Preview"
+        with tempfile.TemporaryDirectory() as directory:
+            old_root = self.root
+            self.root = Path(directory)
+            try:
+                (self.root / "lib").mkdir()
+                (self.root / native.ENTRY_POINT).write_text("fixture", encoding="utf-8")
+                self.signer = preview
+                self.assertEqual(self.build("android-preview")["identity"]["arm64-v8a"]["signer"], preview)
+            finally:
+                self.root = old_root
+                self.reset_preview()
+
     def test_android_preview_refuses_a_jit_kernel_or_another_identity(self):
         cases = (("jit_kernel", True, "not a profile build"),
                  ("package", "com.verseles.codewalk", "identity"),

@@ -32,6 +32,15 @@ val releaseStoreFile = resolveSigningFile(
     keyProperties.getProperty("storeFile"),
 )
 
+// The owner's preview key stays outside the repository, in the folder above the
+// project root (`../codewalk-v2-preview-signing.keystore`). Its passwords come from
+// the Gradle user properties, never from the repository.
+val previewKeystore = rootProject.file("../../codewalk-v2-preview-signing.keystore")
+
+fun requiredPreviewProperty(name: String): String =
+    providers.gradleProperty(name).orNull
+        ?: throw GradleException("The preview keystore is installed, but $name is missing from ~/.gradle/gradle.properties.")
+
 fun requireReleaseSigningConfig() {
     if (!keyPropertiesFile.exists()) {
         throw GradleException(
@@ -119,6 +128,14 @@ android {
                 storePassword = keyProperties["storePassword"] as String
             }
         }
+        if (codewalkPreview && previewKeystore.exists()) {
+            create("preview") {
+                storeFile = previewKeystore
+                keyAlias = requiredPreviewProperty("codewalkPreviewKeyAlias")
+                keyPassword = requiredPreviewProperty("codewalkPreviewKeyPassword")
+                storePassword = requiredPreviewProperty("codewalkPreviewStorePassword")
+            }
+        }
     }
 
     buildTypes {
@@ -130,6 +147,13 @@ android {
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")
+        }
+        // Preview builds (profile) use the preview key when it is installed here;
+        // without it they keep Flutter's debug signing.
+        configureEach {
+            if (name == "profile" && codewalkPreview && previewKeystore.exists()) {
+                signingConfig = signingConfigs.getByName("preview")
+            }
         }
     }
 
