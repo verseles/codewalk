@@ -161,6 +161,51 @@ void sidePanelGroup() {
     expect(find.byType(IconButton), findsWidgets);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('session row menu items use a 24 dp glyph and an 8 dp gap', (
+    tester,
+  ) async {
+    final surface = await ParitySurface.pump(
+      tester,
+      size: parityDesktopSize,
+    );
+    await _settleTabs(tester);
+    final source = surface.rig.sources.single;
+    source.respond([
+      source.row('one', title: 'one', directory: '/work/a'),
+      source.row('two', title: 'two', directory: '/work/a'),
+    ]);
+    await _settleTabs(tester);
+    // v1: session_context_menu.dart:346-351 (PopupMenuItem with the default
+    // 24 dp Icon, then SizedBox(width: 8) before the label).
+    final row = find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>).value.startsWith(
+            'session-actions-',
+          ),
+    );
+    expect(row, findsWidgets);
+    final menu = find.descendant(
+      of: row.first,
+      matching: find.byWidgetPredicate((widget) => widget is PopupMenuButton),
+    );
+    expect(menu, findsOneWidget);
+    await tester.tap(menu);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byIcon(Symbols.push_pin), findsWidgets);
+
+    final item = find.byWidgetPredicate((widget) => widget is PopupMenuItem);
+    expect(item, findsWidgets);
+    final glyph = find.descendant(of: item.first, matching: find.byType(Icon));
+    final label = find.descendant(of: item.first, matching: find.byType(Text));
+    expect(tester.getSize(glyph.first).width, closeTo(24, 0.5));
+    expect(
+      tester.getRect(label.first).left - tester.getRect(glyph.first).right,
+      closeTo(8, 0.5),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 void composerGroup() {
