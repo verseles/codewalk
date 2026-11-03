@@ -38,6 +38,12 @@ TransportResponse response(Object? body) => TransportResponse(
   cancel: () {},
 );
 
+/// A location-scoped answer: its rows under `data`, for the location it names.
+Map<String, Object?> located(String directory, [Object? data]) => {
+  'location': {'directory': directory},
+  'data': ?data,
+};
+
 Map<String, String> query(TransportRequest request) =>
     Uri.parse(request.path).queryParameters;
 
@@ -82,12 +88,14 @@ void main() {
   test('the default model is named, or by its id without a name', () async {
     final named = TestTransport((request) {
       expect(Uri.parse(request.path).path, 'api/model/default');
-      return response({
-        'id': 'm1',
-        'modelID': 'model_1',
-        'providerID': 'p',
-        'name': 'Model One',
-      });
+      return response(
+        located('/work/a', {
+          'id': 'm1',
+          'modelID': 'model_1',
+          'providerID': 'p',
+          'name': 'Model One',
+        }),
+      );
     });
     expect(
       await OpenCodeLocationReader(
@@ -98,7 +106,13 @@ void main() {
     );
 
     final unnamed = TestTransport(
-      (_) => response({'id': 'm2', 'modelID': 'model_2', 'providerID': 'p'}),
+      (_) => response(
+        located('/work/a', {
+          'id': 'm2',
+          'modelID': 'model_2',
+          'providerID': 'p',
+        }),
+      ),
     );
     expect(
       await OpenCodeLocationReader(
@@ -110,7 +124,7 @@ void main() {
   });
 
   test('an absent default model is null', () async {
-    final transport = TestTransport((_) => response(null));
+    final transport = TestTransport((_) => response(located('/work/a')));
     expect(
       await OpenCodeLocationReader(
         transport,
@@ -120,15 +134,35 @@ void main() {
     );
   });
 
+  test('an answer for another location is refused', () async {
+    final transport = TestTransport(
+      (_) => response(located('/work/b', {'modelID': 'model_2'})),
+    );
+    await expectLater(
+      OpenCodeLocationReader(
+        transport,
+        harness: harness,
+      ).readDefaultModel(directory: '/work/a'),
+      throwsA(anything),
+    );
+  });
+
   test(
     'an agent is named by its registered name, or its id without one',
     () async {
       final transport = TestTransport((request) {
         expect(Uri.parse(request.path).path, 'api/agent');
-        return response([
-          {'id': 'build', 'name': 'Build', 'mode': 'primary', 'hidden': false},
-          {'id': 'plan', 'mode': 'primary', 'hidden': false},
-        ]);
+        return response(
+          located('/work/a', [
+            {
+              'id': 'build',
+              'name': 'Build',
+              'mode': 'primary',
+              'hidden': false,
+            },
+            {'id': 'plan', 'mode': 'primary', 'hidden': false},
+          ]),
+        );
       });
       final reader = OpenCodeLocationReader(transport, harness: harness);
       expect(

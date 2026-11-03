@@ -89,7 +89,8 @@ class WorkspaceDraftController extends ChangeNotifier {
       _loading = false;
   String _draftText = '';
   DraftDefaults _defaults = const DraftDefaults();
-  String? _defaultsDirectory;
+  WorkspaceDraftKey? _defaultsKey;
+  int _defaultsGeneration = 0;
 
   WorkspaceDraftNotice get notice => _notice;
   bool get sending => _sending;
@@ -246,9 +247,9 @@ class WorkspaceDraftController extends ChangeNotifier {
   void _catalogChanged() {
     if (_disposed) return;
     // A source that became ready after the draft opened answers now.
-    final draftDirectory = _currentKey?.canonicalDirectory;
-    if (draftDirectory != null && draftDirectory != _defaultsDirectory) {
-      unawaited(_loadDefaults(draftDirectory));
+    final draftKey = _currentKey;
+    if (draftKey != null && !_sameDraft(draftKey, _defaultsKey)) {
+      unawaited(_loadDefaults(draftKey));
     }
     final selected = _catalog.selectedProfile;
     final profile = selected?.id;
@@ -262,6 +263,10 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (invalidated) {
       _intent++;
       _handoff = null;
+      // The server behind the draft changed: its defaults no longer apply.
+      _defaultsGeneration++;
+      _defaultsKey = null;
+      _defaults = const DraftDefaults();
     }
     _changingBinding = changing;
     _binding = selected;
@@ -313,21 +318,29 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (previous != null) _store.detach(previous, _draftForgotten);
     _currentKey = key;
     if (key != null) _store.attach(key, _draftForgotten);
-    unawaited(_loadDefaults(key?.canonicalDirectory));
+    unawaited(_loadDefaults(key));
   }
 
-  /// Reads the server's default agent and model for [directory] once per
-  /// draft location. A source that is not ready yet leaves the location to
-  /// be asked again; an answer for another location is dropped.
-  Future<void> _loadDefaults(String? directory) async {
-    if (directory == _defaultsDirectory) return;
-    _defaultsDirectory = directory;
+  /// Whether two draft keys name the same profile and location.
+  static bool _sameDraft(WorkspaceDraftKey? a, WorkspaceDraftKey? b) =>
+      a?.profileId == b?.profileId &&
+      a?.canonicalDirectory == b?.canonicalDirectory;
+
+  /// Reads the server's default agent and model for the draft's profile and
+  /// location, once per draft. A source that is not ready yet leaves the draft
+  /// to be asked again. Every change starts a new generation, so an answer
+  /// that arrives after the draft moved on is dropped, even when it came from
+  /// the same location as the draft's current one.
+  Future<void> _loadDefaults(WorkspaceDraftKey? key) async {
+    if (_sameDraft(key, _defaultsKey)) return;
+    final generation = ++_defaultsGeneration;
+    _defaultsKey = key;
     _defaults = const DraftDefaults();
-    if (directory == null) return;
-    final loaded = await _catalog.draftDefaults(directory);
-    if (_disposed || _defaultsDirectory != directory) return;
+    if (key == null) return;
+    final loaded = await _catalog.draftDefaults(key.canonicalDirectory);
+    if (_disposed || generation != _defaultsGeneration) return;
     if (loaded == null) {
-      _defaultsDirectory = null;
+      _defaultsKey = null;
       return;
     }
     _defaults = loaded;

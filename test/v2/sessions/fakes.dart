@@ -202,9 +202,19 @@ class CatalogSource implements SessionCatalogSource {
   /// The defaults a draft reads; tests set them before the draft opens.
   DraftDefaults defaults = const DraftDefaults();
 
+  /// When set, each defaults read waits in [heldDefaults] until the test
+  /// answers it, in whichever order the test chooses.
+  bool holdDefaults = false;
+  final heldDefaults =
+      <({String directory, Completer<DraftDefaults> answer})>[];
+
   @override
-  Future<DraftDefaults> draftDefaults({required String directory}) async =>
-      defaults;
+  Future<DraftDefaults> draftDefaults({required String directory}) {
+    if (!holdDefaults) return Future.value(defaults);
+    final answer = Completer<DraftDefaults>();
+    heldDefaults.add((directory: directory, answer: answer));
+    return answer.future;
+  }
 
   @override
   void close() => closes++;
@@ -234,6 +244,9 @@ class CatalogRig {
   late final SessionsController sessions;
   /// The defaults every source of this rig answers a draft with.
   DraftDefaults draftDefaults = const DraftDefaults();
+
+  /// Whether every source of this rig holds its defaults reads for the test.
+  bool holdDefaults = false;
   final sources = <CatalogSource>[];
 
   /// The endpoint's lifecycle feeds, one per acquisition; the tests drive
@@ -259,7 +272,9 @@ class CatalogRig {
   }
 
   CatalogSource create(EndpointProfile profile, EndpointCredential credential) {
-    final source = CatalogSource(profile)..defaults = draftDefaults;
+    final source = CatalogSource(profile)
+      ..defaults = draftDefaults
+      ..holdDefaults = holdDefaults;
     sources.add(source);
     return source;
   }

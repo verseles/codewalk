@@ -6,6 +6,7 @@ import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,6 +88,38 @@ void main() {
   late _Rig rig;
   setUp(() => rig = _Rig());
   tearDown(() => rig.dispose());
+
+  test(
+    'a defaults answer from an earlier visit never replaces the current draft',
+    () async {
+      // Held from the start, so the first visit's read is held too.
+      rig.catalogRig.holdDefaults = true;
+      await rig.setupServerAndProjects();
+      final source = rig.catalogRig.sources.single;
+      await rig.controller.openDraft(directory: '/work/project-a');
+      await rig.controller.openDraft(directory: '/work/project-b');
+      await rig.controller.openDraft(directory: '/work/project-a');
+      expect(source.heldDefaults.map((read) => read.directory), [
+        '/work/project-a',
+        '/work/project-b',
+        '/work/project-a',
+      ]);
+      // The newest read for project A answers first; the first visit's answer
+      // for the same location arrives last and must not win.
+      source.heldDefaults[2].answer.complete(
+        const DraftDefaults(agent: 'Build', model: 'model_1'),
+      );
+      await flush();
+      expect(rig.controller.defaults.agent, 'Build');
+      source.heldDefaults[0].answer.complete(
+        const DraftDefaults(agent: 'Stale', model: 'old_model'),
+      );
+      source.heldDefaults[1].answer.complete(const DraftDefaults(agent: 'B'));
+      await flush();
+      expect(rig.controller.defaults.agent, 'Build');
+      expect(rig.controller.defaults.model, 'model_1');
+    },
+  );
 
   test(
     'URL ABA during a created-session read preserves the draft without handoff',

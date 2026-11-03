@@ -154,11 +154,12 @@ final class OpenCodeLocationReader {
       queryParameters: {'location[directory]': directory},
     ).toString();
     return _reads.read(path, (value) {
-      if (value == null) return null;
-      final model = _object(value);
-      final name = model['name'];
+      final model = _located(value, directory)['data'];
+      if (model == null) return null;
+      final object = _object(model);
+      final name = object['name'];
       if (name is String && name.trim().isNotEmpty) return name;
-      final id = model['modelID'];
+      final id = object['modelID'];
       return id is String && id.trim().isNotEmpty ? id : null;
     }, cancellation);
   }
@@ -177,10 +178,11 @@ final class OpenCodeLocationReader {
       queryParameters: {'location[directory]': directory},
     ).toString();
     return _reads.read(path, (value) {
-      if (value is! List || value.length > maxEntries) {
+      final rows = _located(value, directory)['data'];
+      if (rows is! List || rows.length > maxEntries) {
         throw const FormatException('Malformed agent list.');
       }
-      for (final row in value) {
+      for (final row in rows) {
         final agent = _object(row);
         if (agent['id'] == id) {
           final name = agent['name'];
@@ -258,6 +260,17 @@ final class OpenCodeLocationReader {
     if (_disposed) return;
     _disposed = true;
     _reads.dispose();
+  }
+
+  /// A location-scoped answer wraps its rows under `data` and names the
+  /// location it answers, which must be the one asked for.
+  Map<String, Object?> _located(Object? value, String directory) {
+    final response = _object(value);
+    final location = _object(response['location']);
+    if (location['directory'] != directory) {
+      throw const FormatException('Answer of another location.');
+    }
+    return response;
   }
 
   /// A location-scoped answer names its location, which must be the one
