@@ -2,8 +2,8 @@
 
 **Escopo:** Seq 5.6 / Issue #458 (V2-071H): toolbar, painel lateral, abas, composer, menus e mensagens da v2 comparados com a v1 `v1.265.1`, no celular (412×915) e no desktop (1280×800), em claro e escuro.
 **Referência v1:** tag `v1.265.1` (commit `a046da262dd91dfa7d157c6f3264368f32535528`), somente leitura.
-**Captura final medida:** `F-1d447467` no neo (x86_64, Flutter 3.47.9), em um clone do commit `1d447467` cuja árvore é idêntica à local. Os números são os mesmos da execução anterior `S9-78c91962` (commit `78c91962`): o código de produto não mudou entre os dois.
-**Evidências no repositório:** `evidence/cp5/surfaces-1d447467/` (`report.json` e 54 montagens do candidato `1d447467`). Checklist por superfície e linhas abertas: comentário de S10 na #458.
+**Captura final medida:** `F-424a2ce8` no neo (x86_64, Flutter 3.47.9), em um clone do commit `424a2ce8` cuja árvore é idêntica à local. Em relação à execução `F-1d447467`, quatro regiões do painel lateral variaram 0,01 ponto (chips de padrão do rascunho e ordem de Recentes); a média total continua 63,22%. Os pares que ficam piores que o S4 são os mesmos de antes: `s8` mobile claro e escuro, aceitos pelo dono (decisão 1A).
+**Evidências no repositório:** `evidence/cp5/surfaces-424a2ce8/` (`report.json` e 54 montagens do candidato `424a2ce8`). Checklist por superfície e linhas abertas: comentário de S10 na #458.
 **Registros de validação** (captures, `make check`, arquitetura, localizações, prévias, hashes): #458 e #398 e Task Memory. Não ficam neste arquivo, para não mudar o SHA do candidato.
 
 Este dossiê não declara nenhuma diferença como "intencional". Cada diferença restante tem um destino: uma issue `after-mvp` ou uma causa de plataforma documentada.
@@ -13,7 +13,7 @@ Este dossiê não declara nenhuma diferença como "intencional". Cada diferença
 ## 1. Captura e comparação
 
 - Pares: 54 (13 cenários × 2 temas × 2 tamanhos, mais `s12` só no celular).
-- Captures: 108 testes passam (`F-1d447467`).
+- Captures: 108 testes passam (`F-424a2ce8`).
 - Comparação estrita (`compare_parity.py`): status `complete`, 54 pares, 0 ausentes.
 
 ## 2. Regra de conclusão por superfície
