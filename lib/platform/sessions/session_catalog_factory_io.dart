@@ -104,6 +104,7 @@ final class _NativeSource implements SessionCatalogSource {
         modelProviderId: model?.providerId,
         modelVariant: variant,
       ),
+      variants: model?.variants.isNotEmpty ?? false,
     );
   }
 

@@ -340,6 +340,22 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                           ),
                                           label: Text(c.defaults.model!),
                                         ),
+                                      if (c.defaults.selection?.modelVariant
+                                          case final variant?
+                                          when c.defaults.model != null)
+                                        Chip(
+                                          key: const ValueKey(
+                                            'draft-default-variant',
+                                          ),
+                                          label: Text(variant),
+                                        )
+                                      else if (c.defaults.variants)
+                                        Chip(
+                                          key: const ValueKey(
+                                            'draft-default-variant',
+                                          ),
+                                          label: Text(l10n.liveSelectionAuto),
+                                        ),
                                     ],
                                   ),
                                 ),

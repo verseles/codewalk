@@ -72,6 +72,7 @@ void main() {
     expect(defaults.selection?.agentId, 'build');
     expect(defaults.selection?.modelProviderId, 'provider');
     expect(defaults.selection?.modelId, 'preferred');
+    expect(defaults.variants, isTrue);
   });
 
   for (final kind in EndpointAuthKind.values) {

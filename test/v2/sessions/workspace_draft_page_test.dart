@@ -264,10 +264,44 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('the draft shows the default variant, or Auto without one', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      defaults: const DraftDefaults(
+        agent: 'Build',
+        model: 'model_1',
+        selection: Selection(modelId: 'model_1', modelVariant: 'high'),
+        variants: true,
+      ),
+    );
+    final chip = find.byKey(const ValueKey('draft-default-variant'));
+    expect(
+      find.descendant(of: chip, matching: find.text('high')),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+    await open(
+      tester,
+      defaults: const DraftDefaults(
+        agent: 'Build',
+        model: 'model_1',
+        variants: true,
+      ),
+    );
+    expect(
+      find.descendant(of: chip, matching: find.text('Auto')),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a draft without server defaults shows no chips', (tester) async {
     await open(tester);
     expect(find.byKey(const ValueKey('draft-default-agent')), findsNothing);
     expect(find.byKey(const ValueKey('draft-default-model')), findsNothing);
+    expect(find.byKey(const ValueKey('draft-default-variant')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 
