@@ -5,6 +5,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -344,7 +345,7 @@ class _SessionComposerState extends State<SessionComposer> {
           if (entry != null && idle && canSwitch(entry))
             _action(
               'live-chip-switch-${entry.commandId.value}',
-              queued ? Icons.bolt : Icons.schedule,
+              queued ? Symbols.bolt : Symbols.schedule,
               queued ? l10n.composerMoveToSteer : l10n.composerMoveToQueue,
               () => c.switchDelivery(
                 entry.commandId,
@@ -354,7 +355,7 @@ class _SessionComposerState extends State<SessionComposer> {
           if (entry != null && idle && canCancel(entry))
             _action(
               'live-chip-cancel-${entry.commandId.value}',
-              Icons.close,
+              Symbols.close,
               l10n.composerCancel,
               () => c.cancel(entry.commandId),
             ),
@@ -363,7 +364,7 @@ class _SessionComposerState extends State<SessionComposer> {
               (fenced || entry.state == SubmissionKind.uncertain))
             _action(
               'live-chip-check-${entry.commandId.value}',
-              Icons.refresh,
+              Symbols.refresh,
               l10n.composerCheckAgain,
               () => c.checkAgain(entry.commandId),
             ),
@@ -424,7 +425,7 @@ class _SessionComposerState extends State<SessionComposer> {
             IconButton(
               key: ValueKey('live-row-inspect-$id'),
               tooltip: l10n.composerHint,
-              icon: const Icon(Icons.visibility_outlined),
+              icon: const Icon(Symbols.visibility),
               onPressed: () => showDialog<void>(
                 context: context,
                 builder: (context) => AlertDialog(

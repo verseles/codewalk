@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_preferences_controller.dart';
@@ -157,14 +158,14 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                 onPressed: _copying || events.isEmpty
                     ? null
                     : () => _copy(diagnostics!),
-                icon: const Icon(Icons.copy_outlined),
+                icon: const Icon(Symbols.content_copy),
                 label: Text(l.logsCopyFiltered),
               ),
               TextButton.icon(
                 onPressed: diagnostics!.events.isEmpty
                     ? null
                     : diagnostics.clear,
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(Symbols.delete_outline),
                 label: Text(l.logsClear),
               ),
             ],

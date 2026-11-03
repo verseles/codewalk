@@ -5,6 +5,13 @@ import 'package:codewalk/shared/widgets/app_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Flutter draws a SnackBar's own close as an IconButton with its glyph, so it
+/// is found by place rather than by icon.
+Finder get _snackBarClose => find.descendant(
+  of: find.byType(SnackBar),
+  matching: find.byType(IconButton),
+);
+
 /// The snackbar policy (#160, #161, #212): one path, the app's responsive
 /// theme, a tap that closes a message without an action.
 void main() {
@@ -53,7 +60,7 @@ void main() {
       bar.behavior ?? SnackBarBehavior.floating,
       SnackBarBehavior.floating,
     );
-    expect(find.byIcon(Icons.close), findsNothing);
+    expect(_snackBarClose, findsNothing);
     await tester.tap(find.text('Copied'));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
@@ -70,7 +77,7 @@ void main() {
       action: SnackBarAction(label: 'Retry', onPressed: () => retried++),
     );
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.close), findsNothing);
+    expect(_snackBarClose, findsNothing);
     expect(find.byKey(const ValueKey('app-snack-bar-dismiss')), findsNothing);
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
@@ -104,7 +111,8 @@ void main() {
       }
       expect(find.text('Open'), findsOneWidget);
       // Always closable by hand, beside the action.
-      await tester.tap(find.byIcon(Icons.close));
+      expect(_snackBarClose, findsOneWidget);
+      await tester.tap(_snackBarClose);
       await tester.pumpAndSettle();
       expect(find.byType(SnackBar), findsNothing);
     }

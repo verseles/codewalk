@@ -53,7 +53,7 @@ class SessionTabGlyph extends StatelessWidget {
         ? Symbols.help
         : marks.contains(SessionActivityMark.unread)
         ? Symbols.notifications_active
-        : preset?.icon ?? Icons.folder_open;
+        : preset?.icon ?? Symbols.folder_open;
     return Semantics(
       label: [
         if (failed) l.sessionsActionFailed,

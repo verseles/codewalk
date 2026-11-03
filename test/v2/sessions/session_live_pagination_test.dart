@@ -8,6 +8,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../hosts/fakes.dart';
 import 'fakes.dart';
 import 'history_fakes.dart';
@@ -194,7 +195,7 @@ void main() {
         isA<Icon>().having(
           (icon) => icon.icon,
           'icon',
-          Icons.arrow_downward_rounded,
+          Symbols.arrow_downward_rounded,
         ),
       );
       await tester.pumpWidget(const SizedBox.shrink());
@@ -222,7 +223,7 @@ void main() {
     final jump = find.byKey(const ValueKey('live-jump-latest'));
     expect(
       tester.widget<FloatingActionButton>(jump).child,
-      isA<Icon>().having((icon) => icon.icon, 'icon', Icons.mark_chat_unread),
+      isA<Icon>().having((icon) => icon.icon, 'icon', Symbols.mark_chat_unread),
     );
     await tester.pumpWidget(const SizedBox.shrink());
     live.rig.dispose();
@@ -331,9 +332,7 @@ void main() {
     live.rig.dispose();
   });
 
-  testWidgets('a window paused while not live shows no limit', (
-    tester,
-  ) async {
+  testWidgets('a window paused while not live shows no limit', (tester) async {
     final live = await _open(tester);
     final view = live.handle.current;
     live.handle.emit(
@@ -354,9 +353,7 @@ void main() {
     live.rig.dispose();
   });
 
-  testWidgets('a short session never pages and shows no limit', (
-    tester,
-  ) async {
+  testWidgets('a short session never pages and shows no limit', (tester) async {
     final live = await _open(tester, total: 150);
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 2000));
     await tester.pumpAndSettle();

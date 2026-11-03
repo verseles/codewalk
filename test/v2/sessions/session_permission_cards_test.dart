@@ -14,6 +14,7 @@ import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import 'composer_fakes.dart';
@@ -76,12 +77,7 @@ Future<void> _settleFrames(WidgetTester tester) async {
 /// Mounts the live page for one catalog session with a reply-capable lease
 /// already granted, so a test only has to emit the view it wants.
 Future<
-  ({
-    CatalogRig rig,
-    SessionRef ref,
-    LiveHandle handle,
-    V2Localizations l10n,
-  })
+  ({CatalogRig rig, SessionRef ref, LiveHandle handle, V2Localizations l10n})
 >
 _mountLivePage(
   WidgetTester tester, {
@@ -375,13 +371,15 @@ void main() {
           ),
         );
 
-    SessionLiveView view(List<InteractionRequest> interactions, {bool stale = false}) =>
-        SessionLiveView(
-          session: ref,
-          phase: SessionLivePhase.live,
-          stale: stale,
-          state: liveState(ref, interactions: interactions),
-        );
+    SessionLiveView view(
+      List<InteractionRequest> interactions, {
+      bool stale = false,
+    }) => SessionLiveView(
+      session: ref,
+      phase: SessionLivePhase.live,
+      stale: stale,
+      state: liveState(ref, interactions: interactions),
+    );
 
     setUp(() async {
       rig = CatalogRig();
@@ -407,17 +405,21 @@ void main() {
     ) async {
       await open([_ask(ref, 'per_1')], replyPort: false);
       await pump(tester);
-      expect(
-        find.byKey(const ValueKey('live-permission-per_1')),
-        findsNothing,
-      );
+      expect(find.byKey(const ValueKey('live-permission-per_1')), findsNothing);
     });
 
     testWidgets('always is offered only with a nonempty native preview', (
       tester,
     ) async {
       await open([
-        _ask(ref, 'per_1', choices: [_once(), _always(['src/**'])]),
+        _ask(
+          ref,
+          'per_1',
+          choices: [
+            _once(),
+            _always(['src/**']),
+          ],
+        ),
       ]);
       await pump(tester);
       final always = find.byKey(const ValueKey('live-permission-always-per_1'));
@@ -538,7 +540,10 @@ void main() {
       // No outbox: the footer still explains that prompt sending is out,
       // and its wording no longer claims the view is read-only while the
       // cards above it can reply.
-      expect(find.text(V2LocalizationsEn().liveSendUnavailable), findsOneWidget);
+      expect(
+        find.text(V2LocalizationsEn().liveSendUnavailable),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('read-only'),
         findsNothing,
@@ -551,7 +556,14 @@ void main() {
       tester,
     ) async {
       await open([
-        _ask(ref, 'per_1', choices: [_once(), _always(const [''])]),
+        _ask(
+          ref,
+          'per_1',
+          choices: [
+            _once(),
+            _always(const ['']),
+          ],
+        ),
       ]);
       await pump(tester);
       expect(
@@ -621,7 +633,9 @@ void main() {
       // No outbox: the footer renders the Stop notice beside the cards.
       handle = directory.grant(ref);
       handle.replyAvailable = true;
-      handle.stopState = const SessionStopState(phase: SessionStopPhase.refused);
+      handle.stopState = const SessionStopState(
+        phase: SessionStopPhase.refused,
+      );
       await tester.pump();
       handle.emit(
         SessionLiveView(
@@ -644,7 +658,14 @@ void main() {
       tester,
     ) async {
       await open([
-        _ask(ref, 'per_1', choices: [_once(), _always(['src/**', ''])]),
+        _ask(
+          ref,
+          'per_1',
+          choices: [
+            _once(),
+            _always(['src/**', '']),
+          ],
+        ),
       ]);
       await pump(tester);
       expect(
@@ -655,7 +676,10 @@ void main() {
         find.byKey(const ValueKey('live-permission-allow-per_1')),
         findsNothing,
       );
-      expect(find.byKey(const ValueKey('live-permission-per_1')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('live-permission-per_1')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a hydrating card body keeps the footer bounded', (
@@ -717,39 +741,40 @@ void main() {
       expect(find.text('+1'), findsOneWidget);
     });
 
-    testWidgets('a typed note survives a lease re-open and dies with the request', (
-      tester,
-    ) async {
-      await open([_ask(ref, 'per_1')]);
-      await pump(tester);
-      await tester.tap(
-        find.byKey(const ValueKey('live-permission-reject-note-per_1')),
-      );
-      await tester.pump();
-      await tester.enterText(
-        find.byKey(const ValueKey('live-permission-note-per_1')),
-        'keep me',
-      );
-      await tester.pump();
-      expect(live.permissionNote(const InteractionId('per_1')), 'keep me');
+    testWidgets(
+      'a typed note survives a lease re-open and dies with the request',
+      (tester) async {
+        await open([_ask(ref, 'per_1')]);
+        await pump(tester);
+        await tester.tap(
+          find.byKey(const ValueKey('live-permission-reject-note-per_1')),
+        );
+        await tester.pump();
+        await tester.enterText(
+          find.byKey(const ValueKey('live-permission-note-per_1')),
+          'keep me',
+        );
+        await tester.pump();
+        expect(live.permissionNote(const InteractionId('per_1')), 'keep me');
 
-      handle.emit(
-        SessionLiveView(session: ref, phase: SessionLivePhase.connecting),
-      );
-      await tester.pump();
-      expect(
-        find.byKey(const ValueKey('live-permission-per_1')),
-        findsNothing,
-      );
+        handle.emit(
+          SessionLiveView(session: ref, phase: SessionLivePhase.connecting),
+        );
+        await tester.pump();
+        expect(
+          find.byKey(const ValueKey('live-permission-per_1')),
+          findsNothing,
+        );
 
-      handle.emit(view([_ask(ref, 'per_1')]));
-      await tester.pump();
-      expect(find.text('keep me'), findsOneWidget);
+        handle.emit(view([_ask(ref, 'per_1')]));
+        await tester.pump();
+        expect(find.text('keep me'), findsOneWidget);
 
-      handle.emit(view(const []));
-      await tester.pump();
-      expect(live.permissionNote(const InteractionId('per_1')), isEmpty);
-    });
+        handle.emit(view(const []));
+        await tester.pump();
+        expect(live.permissionNote(const InteractionId('per_1')), isEmpty);
+      },
+    );
 
     for (final size in [const Size(390, 844), const Size(1280, 800)]) {
       testWidgets('a pending card leaves the composer usable at $size', (
@@ -793,7 +818,10 @@ void main() {
           greaterThanOrEqualTo(56),
         );
         await tester.tap(input);
-        expect(find.text(V2LocalizationsEn().composerLiveSession), findsOneWidget);
+        expect(
+          find.text(V2LocalizationsEn().composerLiveSession),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
       });
     }
@@ -905,7 +933,7 @@ void main() {
         expect(
           find.descendant(
             of: find.byType(SessionPermissionCards),
-            matching: find.byIcon(Icons.subdirectory_arrow_right),
+            matching: find.byIcon(Symbols.subdirectory_arrow_right),
           ),
           findsNWidgets(3),
         );

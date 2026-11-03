@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
@@ -137,9 +138,9 @@ class SessionComposerControls extends StatelessWidget {
                 avatar: busy
                     ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                     : live.isChild
-                    ? const Icon(Icons.lock_outline, size: 16)
+                    ? const Icon(Symbols.lock_outline, size: 16)
                     : attention
-                    ? const Icon(Icons.info_outline, size: 16)
+                    ? const Icon(Symbols.info, size: 16)
                     : null,
                 onPressed: picks && !live.isChild
                     ? () => unawaited(
@@ -318,7 +319,7 @@ class _AgentMenu extends StatelessWidget {
                 children: [
                   if (state.agentUnavailable case final reason?)
                     ListTile(
-                      leading: const Icon(Icons.info_outline),
+                      leading: const Icon(Symbols.info),
                       title: Text(sessionSelectionReason(reason, l10n)),
                     )
                   else
@@ -332,7 +333,7 @@ class _AgentMenu extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         trailing: agent.id == agentId
-                            ? const Icon(Icons.check, size: 18)
+                            ? const Icon(Symbols.check, size: 18)
                             : null,
                         onTap: () => Navigator.of(context).pop(agent),
                       ),

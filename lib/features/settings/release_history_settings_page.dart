@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/l10n_context.dart';
@@ -57,7 +58,7 @@ class _ReleaseHistorySettingsPageState
             onPressed: controller == null || controller.loading
                 ? null
                 : () => controller.load(forceRefresh: true),
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Symbols.refresh),
             label: Text(l.chatRefresh),
           ),
         ),

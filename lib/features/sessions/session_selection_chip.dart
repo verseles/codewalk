@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -58,10 +59,10 @@ class SessionSelectionChip extends StatelessWidget {
                 ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                 : Icon(
                     live.isChild
-                        ? Icons.lock_outline
+                        ? Symbols.lock_outline
                         : attention
-                        ? Icons.info_outline
-                        : Icons.tune,
+                        ? Symbols.info
+                        : Symbols.tune,
                   ),
             // On compact widths the AppBar has no room for the label; the
             // icon plus the tooltip and semantics carry it.
@@ -371,7 +372,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         ),
       );
       Widget unavailable(SessionSelectionUnavailable reason) => ListTile(
-        leading: const Icon(Icons.info_outline),
+        leading: const Icon(Symbols.info),
         title: Text(sessionSelectionReason(reason, l10n)),
       );
       // The session's value stays visible when the list does not hold it;
@@ -380,7 +381,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         enabled: false,
         title: Text(label),
         subtitle: listed ? Text(l10n.liveSelectionNotOffered) : null,
-        trailing: const Icon(Icons.check),
+        trailing: const Icon(Symbols.check),
       );
       Widget model(ModelEntry model, {String? section}) {
         final key = SessionLiveController.modelKey(model);
@@ -414,7 +415,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
               if (selected && currentVariant == null)
                 const Padding(
                   padding: EdgeInsetsDirectional.only(start: 8),
-                  child: Icon(Icons.check),
+                  child: Icon(Symbols.check),
                 ),
               // Starring never picks the model.
               IconButton(
@@ -423,8 +424,8 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                     ? l10n.liveModelFavoriteRemove
                     : l10n.liveModelFavoriteAdd,
                 isSelected: favorite,
-                icon: const Icon(Icons.star_border),
-                selectedIcon: const Icon(Icons.star),
+                icon: const Icon(Symbols.star_border),
+                selectedIcon: const Icon(Symbols.star),
                 onPressed: live.canFavoriteModels
                     ? () => unawaited(
                         live.setFavoriteModel(model, favorite: !favorite),
@@ -484,7 +485,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             if (notice != null)
               ListTile(
                 key: const ValueKey('live-selection-notice'),
-                leading: const Icon(Icons.info_outline),
+                leading: const Icon(Symbols.info),
                 title: Text(notice),
                 trailing: unconfirmed
                     ? TextButton(
@@ -512,7 +513,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                             overflow: TextOverflow.ellipsis,
                           ),
                     trailing: agent.id == agentId
-                        ? const Icon(Icons.check)
+                        ? const Icon(Symbols.check)
                         : null,
                     onTap: () => pick(_Pick.agent(agent)),
                   ),
@@ -535,7 +536,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                     autofocus: widget.autofocus,
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(Symbols.search),
                       hintText: l10n.liveModelSearch,
                       isDense: true,
                       border: const OutlineInputBorder(),
@@ -546,7 +547,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                   (saving.unreadable || saving.hasPersistenceError))
                 ListTile(
                   key: const ValueKey('live-selection-preferences-unsaved'),
-                  leading: const Icon(Icons.info_outline),
+                  leading: const Icon(Symbols.info),
                   title: Text(l10n.liveModelPreferencesUnsaved),
                 ),
               // While searching, the matches show once, by provider.

@@ -54,7 +54,7 @@ class WorkspaceMenuButton extends StatelessWidget {
                 child: badge.kind == WorkspaceBadgeKind.syncing
                     ? const AppIndeterminateRing(size: 12, strokeWidth: 2)
                     : Icon(
-                        Icons.circle,
+                        Symbols.circle,
                         key: ValueKey('workspace-badge-${badge.kind.name}'),
                         size: 10,
                         color: switch (badge.kind) {
@@ -89,9 +89,7 @@ class WorkspaceDrawerNotice extends StatelessWidget {
       key: const ValueKey('workspace-drawer-notice'),
       dense: true,
       leading: Icon(
-        badge.kind == WorkspaceBadgeKind.syncing
-            ? Icons.sync
-            : Icons.info_outline,
+        badge.kind == WorkspaceBadgeKind.syncing ? Symbols.sync : Symbols.info,
       ),
       title: Text(workspaceBadgeText(context.v2L10n, badge)),
       onTap:

@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_navigation_controller.dart';
@@ -76,14 +77,14 @@ class _PairingPageState extends State<PairingPage> {
                     onPressed: pairing.busy
                         ? null
                         : () => pairing.capture(camera: true),
-                    icon: const Icon(Icons.qr_code_scanner),
+                    icon: const Icon(Symbols.qr_code_scanner),
                     label: Text(l.pairingScanQr),
                   ),
                 OutlinedButton.icon(
                   onPressed: pairing.busy
                       ? null
                       : () => pairing.capture(camera: false),
-                  icon: const Icon(Icons.image_outlined),
+                  icon: const Icon(Symbols.image),
                   label: Text(l.pairingImageQr),
                 ),
               ],

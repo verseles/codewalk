@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -134,42 +135,42 @@ class SessionErrorCard extends StatelessWidget {
       ErrorKind.auth => (
         l10n.liveErrorAuth,
         l10n.liveErrorAuthDetail,
-        Icons.lock_outline,
+        Symbols.lock_outline,
       ),
       ErrorKind.rateLimit => (
         l10n.liveErrorRateLimit,
         l10n.liveErrorRateLimitDetail,
-        Icons.hourglass_empty,
+        Symbols.hourglass_empty,
       ),
       ErrorKind.quota => (
         l10n.liveErrorQuota,
         l10n.liveErrorQuotaDetail,
-        Icons.data_usage,
+        Symbols.data_usage,
       ),
       ErrorKind.contextOverflow => (
         l10n.liveErrorContext,
         l10n.liveErrorContextDetail,
-        Icons.unfold_less,
+        Symbols.unfold_less,
       ),
       ErrorKind.provider => (
         l10n.liveErrorProvider,
         l10n.liveErrorProviderDetail,
-        Icons.error_outline,
+        Symbols.error_outline,
       ),
       ErrorKind.network => (
         l10n.liveErrorNetwork,
         l10n.liveErrorNetworkDetail,
-        Icons.cloud_off_outlined,
+        Symbols.cloud_off,
       ),
       ErrorKind.contentFilter => (
         l10n.liveErrorContentFilter,
         l10n.liveErrorContentFilterDetail,
-        Icons.block,
+        Symbols.block,
       ),
       ErrorKind.versionUnsupported => (
         l10n.liveErrorVersion,
         l10n.liveErrorVersionDetail,
-        Icons.system_update_alt,
+        Symbols.system_update_alt,
       ),
       ErrorKind.permissionRejected ||
       ErrorKind.toolFailure ||
@@ -178,6 +179,6 @@ class SessionErrorCard extends StatelessWidget {
       null => (
         l10n.liveErrorUnknown,
         l10n.liveErrorUnknownDetail,
-        Icons.help_outline,
+        Symbols.help_outline,
       ),
     };

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
@@ -171,8 +172,8 @@ class _SessionCreateDialogState extends State<SessionCreateDialog> {
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(
                   selected == directory
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
+                      ? Symbols.radio_button_checked
+                      : Symbols.radio_button_unchecked,
                 ),
                 title: Text(
                   _name(directory),

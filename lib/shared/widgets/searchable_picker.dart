@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../l10n/l10n_context.dart';
 
@@ -51,7 +52,7 @@ class SearchablePickerField<T extends Object> extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
-          suffixIcon: const Icon(Icons.arrow_drop_down),
+          suffixIcon: const Icon(Symbols.arrow_drop_down),
           enabled: onChanged != null,
         ),
         child: Text(
@@ -109,7 +110,7 @@ class _SearchablePickerState<T extends Object>
               autofocus: true,
               decoration: InputDecoration(
                 labelText: l.searchableDropdownSearchHint,
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Symbols.search),
               ),
               onChanged: (value) => setState(() => _query = value),
             ),
@@ -129,7 +130,7 @@ class _SearchablePickerState<T extends Object>
                           title: Text(option.value),
                           selected: option.key == widget.selected,
                           trailing: option.key == widget.selected
-                              ? const Icon(Icons.check)
+                              ? const Icon(Symbols.check)
                               : null,
                           onTap: () => Navigator.pop(context, option.key),
                         );

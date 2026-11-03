@@ -157,7 +157,7 @@ class ServerSwitcher extends StatelessWidget {
                           child: Semantics(
                             label: healthStatusText(context.v2L10n, status),
                             child: Icon(
-                              Icons.circle,
+                              Symbols.circle,
                               size: 8,
                               color: switch (status) {
                                 EndpointHealthStatus.online => Colors.green,
@@ -243,7 +243,7 @@ class _ServerPickerState extends State<_ServerPicker> {
                   controller: _search,
                   decoration: InputDecoration(
                     labelText: l.serversSearchActiveHint,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Symbols.search),
                   ),
                 ),
                 Expanded(

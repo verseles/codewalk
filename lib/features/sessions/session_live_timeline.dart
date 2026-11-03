@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/chat_appearance.dart';
@@ -80,7 +81,7 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// Optional builder for a confirmed user turn's inline action.
   final Widget Function(BuildContext context, UserInput item, bool isLatest)?
-      userTurnActionBuilder;
+  userTurnActionBuilder;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -661,7 +662,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               errorRecovery: widget.errorRecovery,
               onOpenChild: widget.onOpenChild,
               messageHeader: messageHeader,
-              inlineAction: item is UserInput &&
+              inlineAction:
+                  item is UserInput &&
                       item.confirmed &&
                       widget.userTurnActionBuilder != null
                   ? widget.userTurnActionBuilder!(
@@ -731,14 +733,16 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       backgroundColor: unread ? scheme.primary : scheme.surfaceContainerHigh,
       foregroundColor: unread ? scheme.onPrimary : scheme.onSurfaceVariant,
       child: Icon(
-        unread ? Icons.mark_chat_unread : Icons.arrow_downward_rounded,
+        unread ? Symbols.mark_chat_unread : Symbols.arrow_downward_rounded,
       ),
     );
   }
 
   static ItemId? _latestConfirmedUserTurnId(List<SessionTimelineRow> rows) {
     for (var i = rows.length - 1; i >= 0; i--) {
-      if (rows[i] case SessionItemRow(item: final UserInput item) when item.confirmed) {
+      if (rows[i] case SessionItemRow(
+        item: final UserInput item,
+      ) when item.confirmed) {
         return item.id;
       }
     }

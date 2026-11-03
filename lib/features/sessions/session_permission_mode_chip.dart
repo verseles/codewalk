@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -124,11 +125,11 @@ class SessionPermissionModeChip extends StatelessWidget {
                   ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
                   : Icon(
                       inEffect
-                          ? Icons.lock_open
+                          ? Symbols.lock_open
                           : switch (mode) {
-                              PermissionMode.ask => Icons.pan_tool_outlined,
-                              PermissionMode.allowAll => Icons.done_all,
-                              null => Icons.error_outline,
+                              PermissionMode.ask => Symbols.pan_tool,
+                              PermissionMode.allowAll => Symbols.done_all,
+                              null => Symbols.error_outline,
                             },
                       color: inEffect ? scheme.onErrorContainer : null,
                     ),
@@ -175,7 +176,7 @@ class SessionPermissionModeChip extends StatelessWidget {
       enabled: live.canChangePermissionMode,
       child: Row(
         children: [
-          Icon(selected ? Icons.check : null, size: 18),
+          Icon(selected ? Symbols.check : null, size: 18),
           const SizedBox(width: 8),
           Text(label),
         ],

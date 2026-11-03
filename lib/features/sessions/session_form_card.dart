@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart' hide FormField;
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -13,11 +14,7 @@ import 'session_live_controller.dart';
 /// Answers are preserved in controller draft state on failure and pruned
 /// only when the interaction leaves resident state.
 class SessionFormCards extends StatelessWidget {
-  const SessionFormCards({
-    super.key,
-    required this.live,
-    this.maxHeight = 300,
-  });
+  const SessionFormCards({super.key, required this.live, this.maxHeight = 300});
 
   final SessionLiveController live;
 
@@ -114,11 +111,7 @@ String? formNoticeText(
 
 /// An interactive form card rendered according to its [FormSpec].
 class SessionFormCard extends StatefulWidget {
-  const SessionFormCard({
-    super.key,
-    required this.live,
-    required this.request,
-  });
+  const SessionFormCard({super.key, required this.live, required this.request});
 
   final SessionLiveController live;
   final InteractionRequest request;
@@ -150,10 +143,7 @@ class _SessionFormCardState extends State<SessionFormCard> {
     });
   }
 
-  FormAnswers _buildAnswers(
-    FormSpec spec,
-    Map<String, dynamic> draft,
-  ) {
+  FormAnswers _buildAnswers(FormSpec spec, Map<String, dynamic> draft) {
     final rawAnswers = <String, FormAnswer>{};
     for (final field in spec.fields) {
       final val = draft[field.key] ?? _defaultRaw(field);
@@ -202,9 +192,10 @@ class _SessionFormCardState extends State<SessionFormCard> {
         raw is String ? StringAnswer(raw) : StringAnswer(raw.toString()),
       FormFieldKind.number => switch (raw) {
         final num n when n.isFinite => NumberAnswer(n),
-        final String s => num.tryParse(s) != null && num.tryParse(s)!.isFinite
-            ? NumberAnswer(num.tryParse(s)!)
-            : null,
+        final String s =>
+          num.tryParse(s) != null && num.tryParse(s)!.isFinite
+              ? NumberAnswer(num.tryParse(s)!)
+              : null,
         _ => null,
       },
       FormFieldKind.integer => switch (raw) {
@@ -219,9 +210,10 @@ class _SessionFormCardState extends State<SessionFormCard> {
         final String s => BooleanAnswer(s.toLowerCase() == 'true'),
         _ => null,
       },
-      FormFieldKind.singleSelect => raw is String
-          ? SingleSelectAnswer(raw)
-          : SingleSelectAnswer(raw.toString()),
+      FormFieldKind.singleSelect =>
+        raw is String
+            ? SingleSelectAnswer(raw)
+            : SingleSelectAnswer(raw.toString()),
       FormFieldKind.multiSelect => switch (raw) {
         final List<String> list => MultiSelectAnswer(list),
         final Iterable list => MultiSelectAnswer(list.map((e) => e.toString())),
@@ -306,10 +298,7 @@ class _SessionFormCardState extends State<SessionFormCard> {
       setState(() {});
       return;
     }
-    await widget.live.replyToForm(
-      request: widget.request,
-      answers: answers,
-    );
+    await widget.live.replyToForm(request: widget.request, answers: answers);
   }
 
   @override
@@ -377,13 +366,7 @@ class _SessionFormCardState extends State<SessionFormCard> {
                 if (field.isActive(activeAnswers) && !field.hidden)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: _buildField(
-                      context,
-                      field,
-                      draft,
-                      enabled,
-                      l10n,
-                    ),
+                    child: _buildField(context, field, draft, enabled, l10n),
                   ),
             ],
             const SizedBox(height: 8),
@@ -431,7 +414,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
     switch (kind) {
       case FormFieldKind.string:
         if (field.options.isNotEmpty) {
-          final currentVal = draft[field.key]?.toString() ??
+          final currentVal =
+              draft[field.key]?.toString() ??
               _defaultRaw(field)?.toString() ??
               '';
           final hasCustom = field.acceptsCustom;
@@ -505,7 +489,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
             ],
           );
         }
-        final currentVal = draft[field.key]?.toString() ??
+        final currentVal =
+            draft[field.key]?.toString() ??
             _defaultRaw(field)?.toString() ??
             '';
         final controller = _controllerFor(field.key, currentVal);
@@ -530,7 +515,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
         );
 
       case FormFieldKind.custom:
-        final currentVal = draft[field.key]?.toString() ??
+        final currentVal =
+            draft[field.key]?.toString() ??
             _defaultRaw(field)?.toString() ??
             '';
         final controller = _controllerFor(field.key, currentVal);
@@ -556,7 +542,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
         );
 
       case FormFieldKind.secret:
-        final currentVal = draft[field.key]?.toString() ??
+        final currentVal =
+            draft[field.key]?.toString() ??
             _defaultRaw(field)?.toString() ??
             '';
         final controller = _controllerFor(field.key, currentVal);
@@ -575,7 +562,9 @@ class _SessionFormCardState extends State<SessionFormCard> {
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               key: ValueKey('form-secret-toggle-${field.key}'),
-              icon: Icon(revealed ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(
+                revealed ? Symbols.visibility_off : Symbols.visibility,
+              ),
               tooltip: l10n.liveFormSecretToggle,
               onPressed: () {
                 setState(() {
@@ -600,7 +589,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
 
       case FormFieldKind.number:
       case FormFieldKind.integer:
-        final currentVal = draft[field.key]?.toString() ??
+        final currentVal =
+            draft[field.key]?.toString() ??
             _defaultRaw(field)?.toString() ??
             '';
         final controller = _controllerFor(field.key, currentVal);
@@ -661,8 +651,8 @@ class _SessionFormCardState extends State<SessionFormCard> {
         );
 
       case FormFieldKind.singleSelect:
-        final currentVal = draft[field.key]?.toString() ??
-            _defaultRaw(field)?.toString();
+        final currentVal =
+            draft[field.key]?.toString() ?? _defaultRaw(field)?.toString();
         final hasCustom = field.acceptsCustom;
         final isPredefined = field.options.any((o) => o.value == currentVal);
         final dropdown = DropdownButtonFormField<String>(
@@ -677,10 +667,7 @@ class _SessionFormCardState extends State<SessionFormCard> {
           ),
           items: [
             for (final opt in field.options)
-              DropdownMenuItem(
-                value: opt.value,
-                child: Text(opt.label),
-              ),
+              DropdownMenuItem(value: opt.value, child: Text(opt.label)),
           ],
           onChanged: enabled
               ? (val) {
@@ -740,10 +727,10 @@ class _SessionFormCardState extends State<SessionFormCard> {
           final List<String> list => list,
           final Iterable it => it.map((e) => e.toString()).toList(),
           _ => switch (_defaultRaw(field)) {
-              final List<String> defs => defs,
-              final Iterable it => it.map((e) => e.toString()).toList(),
-              _ => const <String>[],
-            },
+            final List<String> defs => defs,
+            final Iterable it => it.map((e) => e.toString()).toList(),
+            _ => const <String>[],
+          },
         };
         return Column(
           key: ValueKey('form-field-${field.key}'),
@@ -802,7 +789,7 @@ class _SessionFormCardState extends State<SessionFormCard> {
         final url = field.externalUrl;
         return OutlinedButton.icon(
           key: ValueKey('form-field-${field.key}'),
-          icon: const Icon(Icons.open_in_new),
+          icon: const Icon(Symbols.open_in_new),
           label: Text(field.title ?? l10n.liveFormOpenLink),
           onPressed: url != null
               ? () async {

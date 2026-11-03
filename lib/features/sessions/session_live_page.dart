@@ -583,9 +583,18 @@ class _SessionLivePageState extends State<SessionLivePage>
                                 'user-turn-action-${turnItem.id.value}',
                               ),
                               icon: Icon(
-                                isLatest ? Icons.undo : Icons.history,
-                                size: 18,
+                                isLatest
+                                    ? Symbols.undo_rounded
+                                    : Symbols.settings_backup_restore,
                               ),
+                              // v1 density: a 48 dp target with a 24 dp glyph.
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 48,
+                                minHeight: 48,
+                              ),
+                              splashRadius: 18,
                               tooltip: tooltip,
                               onPressed: c.turn.canUndo
                                   ? () => unawaited(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -99,7 +100,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           child: FilledButton.tonalIcon(
             key: const ValueKey('updates_check'),
             onPressed: checking ? null : () => unawaited(controller.check()),
-            icon: const Icon(Icons.system_update_alt),
+            icon: const Icon(Symbols.system_update_alt),
             label: Text(l.settingsAboutCheckForUpdates),
           ),
         ),
@@ -149,7 +150,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
               FilledButton.icon(
                 key: const ValueKey('updates_download'),
                 onPressed: () => unawaited(widget.open(candidate.assetUrl)),
-                icon: const Icon(Icons.download),
+                icon: const Icon(Symbols.download),
                 label: Text(l.updatesDownload),
               )
             else ...[
@@ -166,7 +167,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
               TextButton.icon(
                 key: const ValueKey('updates_copy_command'),
                 onPressed: () => unawaited(_copy(command)),
-                icon: const Icon(Icons.copy),
+                icon: const Icon(Symbols.content_copy),
                 label: Text(l.updatesCopyCommand),
               ),
             ],

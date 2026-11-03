@@ -14,6 +14,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../hosts/fakes.dart';
@@ -217,7 +218,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('Server connection needs attention.'), findsOneWidget);
-        expect(find.byIcon(Icons.close), findsNothing);
+        expect(find.byIcon(Symbols.close), findsNothing);
         rig.observe(EndpointStatus.compatible);
         await tester.pump();
         expect(

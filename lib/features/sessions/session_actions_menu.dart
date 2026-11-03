@@ -103,7 +103,7 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       key: ValueKey('session-actions-${row.info.ref.storageKey}'),
       child: PopupMenuButton<SessionRowAction>(
         key: widget.menuKey,
-        icon: widget.child == null ? const Icon(Icons.more_vert) : null,
+        icon: widget.child == null ? const Icon(Symbols.more_vert) : null,
         offset: widget.offset,
         tooltip: l10n.sessionsActionsMenu,
         enabled: !pending || widget.onChangeIcon != null,

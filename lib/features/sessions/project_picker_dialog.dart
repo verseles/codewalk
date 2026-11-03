@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
@@ -236,7 +237,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                         context,
                       ).closeButtonTooltip,
                       onPressed: _close,
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(Symbols.close),
                     ),
                   ],
                 ),
@@ -255,7 +256,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                   decoration: InputDecoration(
                     hintText: l10n.workspaceProjectHint,
                     labelText: l10n.workspaceFilterDirs,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Symbols.search),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -267,14 +268,14 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                       TextButton.icon(
                         key: const ValueKey('project-picker-search'),
                         onPressed: _picker.stopBrowsing,
-                        icon: const Icon(Icons.arrow_back),
+                        icon: const Icon(Symbols.arrow_back),
                         label: Text(l10n.workspaceFilterDirs),
                       )
                     else
                       TextButton.icon(
                         key: const ValueKey('project-picker-browse'),
                         onPressed: _picker.startBrowsing,
-                        icon: const Icon(Icons.folder_open),
+                        icon: const Icon(Symbols.folder_open),
                         label: Text(l10n.workspaceBrowseDirs),
                       ),
                     FilledButton.tonal(
@@ -351,10 +352,10 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
           dense: true,
           selected: entry.directory == active,
           leading: Icon(switch (entry.source) {
-            ProjectPickerSource.open => Icons.folder_special_outlined,
-            ProjectPickerSource.closed => Icons.history,
-            ProjectPickerSource.server => Icons.folder_outlined,
-            ProjectPickerSource.found => Icons.search,
+            ProjectPickerSource.open => Symbols.folder_special,
+            ProjectPickerSource.closed => Symbols.history,
+            ProjectPickerSource.server => Symbols.folder,
+            ProjectPickerSource.found => Symbols.search,
           }),
           title: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: StartEllipsisPath(
@@ -368,7 +369,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                   onPressed: _picker.opening
                       ? null
                       : () => _picker.forget(entry.directory),
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Symbols.close),
                 )
               : null,
           onTap: _picker.opening ? null : () => _open(entry),
@@ -409,7 +410,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                 ListTile(
                   key: const ValueKey('project-picker-up'),
                   dense: true,
-                  leading: const Icon(Icons.arrow_upward),
+                  leading: const Icon(Symbols.arrow_upward),
                   title: const Text('..', textDirection: TextDirection.ltr),
                   onTap: _picker.browseUp,
                 ),
@@ -417,7 +418,7 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
                 ListTile(
                   key: ValueKey('project-picker-folder-$folder'),
                   dense: true,
-                  leading: const Icon(Icons.folder_outlined),
+                  leading: const Icon(Symbols.folder),
                   title: Text(
                     serverPathName(folder),
                     maxLines: 1,

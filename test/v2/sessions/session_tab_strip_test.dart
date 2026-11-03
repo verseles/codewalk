@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
@@ -264,14 +265,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.mark_chat_unread), findsNothing);
+    expect(find.byIcon(Symbols.mark_chat_unread), findsNothing);
 
     await _visit(tester, app, ['two']);
     handle.emit(view(41));
     await tester.pump();
     await _visit(tester, app, ['one']);
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.mark_chat_unread), findsOneWidget);
+    expect(find.byIcon(Symbols.mark_chat_unread), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

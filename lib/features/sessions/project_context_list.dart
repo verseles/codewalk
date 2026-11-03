@@ -284,7 +284,7 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                           padding: EdgeInsets.zero,
                         ),
                         iconSize: widget.compact ? 22 : 18,
-                        icon: const Icon(Icons.more_vert),
+                        icon: const Icon(Symbols.more_vert),
                         onSelected: (_) => widget.onClose?.call(),
                         itemBuilder: (context) => [
                           PopupMenuItem<int>(
@@ -381,7 +381,7 @@ class RecentSessionRow extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsetsDirectional.only(start: 6),
                   child: Icon(
-                    Icons.sync,
+                    Symbols.sync,
                     key: ValueKey('recent-running-${row.info.ref.storageKey}'),
                     size: 14,
                     color: scheme.secondary,

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
@@ -159,7 +160,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
                         focusNode: _backFocus,
                         tooltip: l.settingsBack,
                         onPressed: _back,
-                        icon: const Icon(Icons.arrow_back),
+                        icon: const Icon(Symbols.arrow_back),
                       ),
                       Expanded(
                         child: Text(
@@ -247,13 +248,13 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             labelText: l.settingsNavigationSearchHint,
-            prefixIcon: const Icon(Icons.search),
+            prefixIcon: const Icon(Symbols.search),
             suffixIcon: query.isEmpty
                 ? null
                 : IconButton(
                     tooltip: l.settingsSearchClear,
                     onPressed: () => setState(_search.clear),
-                    icon: const Icon(Icons.clear),
+                    icon: const Icon(Symbols.clear),
                   ),
           ),
         ),
@@ -273,7 +274,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
           _group(context, l.settingsNavigationGroupSetup),
           ListTile(
             key: const ValueKey('settings_destination_servers'),
-            leading: const Icon(Icons.dns_outlined),
+            leading: const Icon(Symbols.dns),
             title: Text(l.settingsServersTitle),
             subtitle: Text(l.chatAddServerToStart),
             onTap: () => context.push(
@@ -289,14 +290,14 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             SettingsSection.appearance,
             l.settingsAppearanceTitle,
             appearanceDescription,
-            Icons.palette_outlined,
+            Symbols.palette,
           ),
         if (behavior)
           _destination(
             SettingsSection.behavior,
             l.settingsBehaviorTitle,
             l.settingsBehaviorChatRenderModeDescription,
-            Icons.tune_outlined,
+            Symbols.tune,
           ),
         if (shortcuts) ...[
           _group(context, l.settingsNavigationGroupInput),
@@ -304,7 +305,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             SettingsSection.shortcuts,
             l.settingsShortcutsTitle,
             l.settingsShortcutsDescription,
-            Icons.keyboard_outlined,
+            Symbols.keyboard,
           ),
         ],
         if (logs || updates || history || about)
@@ -314,28 +315,28 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             SettingsSection.logs,
             l.logsAppLogs,
             l.logsEnableLoggingDescription,
-            Icons.receipt_long_outlined,
+            Symbols.receipt_long,
           ),
         if (updates)
           _destination(
             SettingsSection.updates,
             l.settingsGroupVersionUpdates,
             l.updatesDescription,
-            Icons.system_update_alt,
+            Symbols.system_update_alt,
           ),
         if (history)
           _destination(
             SettingsSection.releaseHistory,
             l.releaseHistoryTitle,
             l.releaseHistoryDescription,
-            Icons.history_outlined,
+            Symbols.history,
           ),
         if (about)
           _destination(
             SettingsSection.about,
             l.settingsAboutTitle,
             l.settingsAboutDescription,
-            Icons.info_outline,
+            Symbols.info,
           ),
       ],
     );

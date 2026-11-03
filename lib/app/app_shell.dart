@@ -477,7 +477,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     }
     if (catalog == null) {
       return _HomeState(
-        icon: Icons.chat_bubble_outline,
+        icon: Symbols.chat_bubble_outline,
         title: l10n.sessionsUnavailable,
       );
     }
@@ -485,7 +485,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     void openServers() => context.push('/hosts');
     if (hosts.storageError) {
       return _HomeState(
-        icon: Icons.error_outline,
+        icon: Symbols.error_outline,
         title: l10n.hostsProfileStorageError,
         actions: [
           FilledButton(
@@ -500,14 +500,14 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     // No server, no chat: the home says so and leads to the setup.
     if (hosts.profiles.isEmpty) {
       return _HomeState(
-        icon: Icons.dns_outlined,
+        icon: Symbols.dns,
         title: l10n.chatNoServerYet,
         body: l10n.chatAddServerToStart,
         actions: [
           FilledButton.icon(
             key: const ValueKey('workspace-set-up-server'),
             onPressed: openServers,
-            icon: const Icon(Icons.add),
+            icon: const Icon(Symbols.add),
             label: Text(l10n.chatSetUpServer),
           ),
         ],
@@ -517,14 +517,14 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     if (profile == null) return const _HomeLoading();
     if (health?.view(profile).status == EndpointHealthStatus.offline) {
       return _HomeState(
-        icon: Icons.cloud_off_outlined,
+        icon: Symbols.cloud_off,
         title: profile.label,
         actions: [
           if (AppShell.canCreate(catalog))
             FilledButton.icon(
               key: const ValueKey('workspace-new-chat'),
               onPressed: () => openWorkspaceDraft(context),
-              icon: const Icon(Icons.add),
+              icon: const Icon(Symbols.add),
               label: Text(l10n.chatNewChat),
             ),
           EndpointHealthRecovery(profile: profile, health: health!),
@@ -535,7 +535,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     // keeps the ways out of it.
     if (catalog.failure case final failure?) {
       return _HomeState(
-        icon: Icons.cloud_off_outlined,
+        icon: Symbols.cloud_off,
         title: profile.label,
         body: sessionCatalogFailureText(l10n, failure),
         actions: [
@@ -543,7 +543,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
             FilledButton.icon(
               key: const ValueKey('workspace-new-chat'),
               onPressed: () => openWorkspaceDraft(context),
-              icon: const Icon(Icons.add),
+              icon: const Icon(Symbols.add),
               label: Text(l10n.chatNewChat),
             ),
           FilledButton(
@@ -561,13 +561,13 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     }
     final create = AppShell.canCreate(catalog);
     return _HomeState(
-      icon: Icons.chat_bubble_outline,
+      icon: Symbols.chat_bubble_outline,
       title: l10n.chatSelectOrCreate,
       actions: [
         FilledButton.icon(
           key: const ValueKey('workspace-new-chat'),
           onPressed: create ? () => openWorkspaceDraft(context) : null,
-          icon: const Icon(Icons.add),
+          icon: const Icon(Symbols.add),
           label: Text(l10n.chatNewChat),
         ),
       ],

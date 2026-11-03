@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
@@ -507,8 +508,8 @@ class _StripState extends State<_Strip> {
                 children: [
                   Icon(
                     widget.draftFailed
-                        ? Icons.error_outline
-                        : Icons.folder_open,
+                        ? Symbols.error_outline
+                        : Symbols.folder_open,
                     size: 18,
                   ),
                   const SizedBox(width: 6),
@@ -599,7 +600,7 @@ class _StripState extends State<_Strip> {
                     IconButton(
                       key: ValueKey('session-tab-add-${project.storageKey}'),
                       tooltip: context.v2L10n.chatNewChat,
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Symbols.add),
                       onPressed: () => widget.onDraft(project),
                     ),
                   );
@@ -625,7 +626,7 @@ class _StripState extends State<_Strip> {
                   IconButton(
                     key: const ValueKey('session-tabs-recent-button'),
                     tooltip: context.v2L10n.sessionTabSwitcherTitle,
-                    icon: const Icon(Icons.swap_horiz),
+                    icon: const Icon(Symbols.swap_horiz),
                     onPressed: widget.onRecent,
                   ),
                 ],

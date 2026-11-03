@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -234,7 +235,7 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                     context: context,
                     builder: (_) => _ProfileDialog(hosts: hosts),
                   ),
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Symbols.add),
                   label: Text(l.serversAddServer),
                 ),
                 OutlinedButton.icon(
@@ -242,7 +243,7 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                     context.read<PairingController>().empty();
                     context.push('/pair');
                   },
-                  icon: const Icon(Icons.qr_code),
+                  icon: const Icon(Symbols.qr_code),
                   label: Text(l.pairingTitle),
                 ),
               ],
@@ -260,12 +261,12 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: l.serversSearchActiveHint,
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(Symbols.search),
                       suffixIcon: _search.text.isEmpty
                           ? null
                           : IconButton(
                               tooltip: l.commonCancel,
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(Symbols.clear),
                               onPressed: () => setState(_search.clear),
                             ),
                     ),

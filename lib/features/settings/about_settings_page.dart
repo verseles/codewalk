@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/l10n_context.dart';
@@ -54,18 +55,18 @@ class AboutSettingsPage extends StatelessWidget {
             ),
             ListTile(
               key: const ValueKey('about_github'),
-              leading: const Icon(Icons.code),
+              leading: const Icon(Symbols.code),
               title: Text(l.aboutGitHub),
               subtitle: Text(githubUri.host + githubUri.path),
-              trailing: const Icon(Icons.open_in_new),
+              trailing: const Icon(Symbols.open_in_new),
               onTap: () => unawaited(_launch(context, githubUri)),
             ),
             ListTile(
               key: const ValueKey('about_telegram'),
-              leading: const Icon(Icons.forum_outlined),
+              leading: const Icon(Symbols.forum),
               title: Text(l.aboutTelegram),
               subtitle: Text(l.settingsAboutOurGroup),
-              trailing: const Icon(Icons.open_in_new),
+              trailing: const Icon(Symbols.open_in_new),
               onTap: () => unawaited(_launch(context, telegramUri)),
             ),
           ],

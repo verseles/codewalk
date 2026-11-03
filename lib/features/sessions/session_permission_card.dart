@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -270,7 +271,7 @@ class _PermissionCardState extends State<_PermissionCard> {
                   key: ValueKey('live-permission-child-$keyId'),
                   children: [
                     Icon(
-                      Icons.subdirectory_arrow_right,
+                      Symbols.subdirectory_arrow_right,
                       size: 16,
                       color: scheme.onSecondaryContainer,
                     ),

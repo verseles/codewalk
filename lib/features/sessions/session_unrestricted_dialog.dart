@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 
@@ -12,7 +13,7 @@ Future<bool> confirmSessionUnrestricted(BuildContext context) async {
       final scheme = Theme.of(context).colorScheme;
       return AlertDialog(
         key: const ValueKey('live-unrestricted-dialog'),
-        icon: Icon(Icons.lock_open, color: scheme.error),
+        icon: Icon(Symbols.lock_open, color: scheme.error),
         title: Text(l10n.liveUnrestrictedTitle),
         scrollable: true,
         content: ConstrainedBox(

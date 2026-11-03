@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
@@ -34,6 +35,9 @@ class SessionTimelineTile extends StatelessWidget {
     this.minimizeUnknownShell = false,
   });
   final TimelineItem item;
+
+  /// The user turn's action (undo this turn, or rewind and edit), shown to the
+  /// left of the bubble and centred on it, as v1 does. Null for none.
   final Widget? inlineAction;
   final bool minimizeUnknownShell;
   final void Function(String text, String href, String? title)? onTapLink;
@@ -68,20 +72,20 @@ class SessionTimelineTile extends StatelessWidget {
       }
     }
     final (label, icon) = switch (item) {
-      UserInput() => (l10n.chatMessageYou, Icons.person_outline),
-      AssistantText() => (l10n.historyAssistant, Icons.chat_bubble_outline),
+      UserInput() => (l10n.chatMessageYou, Symbols.person_outline),
+      AssistantText() => (l10n.historyAssistant, Symbols.chat_bubble_outline),
       // Compact screens use the retained reference's short label.
       Reasoning() => (
         MediaQuery.sizeOf(context).width < 600
             ? l10n.chatMessageThinking
             : l10n.chatMessageThinkingProcess,
-        Icons.psychology_outlined,
+        Symbols.psychology,
       ),
-      Notice() => (l10n.historyDetails, Icons.info_outline),
-      ToolCall() => (l10n.historyDetails, Icons.build_outlined),
-      ShellRun() => (l10n.historyDetails, Icons.terminal_outlined),
-      TurnOutcome() => (l10n.historyDetails, Icons.flag_outlined),
-      UnknownItem() => (l10n.historyDetails, Icons.info_outline),
+      Notice() => (l10n.historyDetails, Symbols.info),
+      ToolCall() => (l10n.historyDetails, Symbols.build),
+      ShellRun() => (l10n.historyDetails, Symbols.terminal),
+      TurnOutcome() => (l10n.historyDetails, Symbols.flag),
+      UnknownItem() => (l10n.historyDetails, Symbols.info),
     };
     final open = onOpenChild;
     final child = item is ToolCall && item.kind.known == ToolKind.subagent
@@ -102,10 +106,7 @@ class SessionTimelineTile extends StatelessWidget {
     // An assistant message without a time, a duration or an action has no
     // header at all, so it takes no space above its body.
     final headerShown =
-        item is! AssistantText ||
-        clock != null ||
-        inlineAction != null ||
-        message != null;
+        item is! AssistantText || clock != null || message != null;
     final body = Padding(
       // Compact bubble padding matching v1 density
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
@@ -154,10 +155,6 @@ class SessionTimelineTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (inlineAction != null) ...[
-                    inlineAction!,
-                    const SizedBox(width: 4),
-                  ],
                   if (item is AssistantText && message != null)
                     MessageElapsedChip(message: message),
                 ],
@@ -173,10 +170,6 @@ class SessionTimelineTile extends StatelessWidget {
                       child: Text(label, style: theme.textTheme.titleSmall),
                     ),
                   ),
-                  if (inlineAction != null) ...[
-                    inlineAction!,
-                    const SizedBox(width: 4),
-                  ],
                   if (message != null) MessageElapsedChip(message: message),
                 ],
               ),
@@ -224,12 +217,26 @@ class SessionTimelineTile extends StatelessWidget {
         final candidateW = isUser
             ? max(220.0, min(640.0, maxW * 0.85))
             : min(760.0, maxW);
+        final bubble = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: candidateW),
+          child: ConversationTextScale(child: tile),
+        );
+        final action = inlineAction;
+        // As v1: the action sits left of the bubble, centred on it, and the
+        // bubble keeps its own width cap rather than sharing it with the action.
         return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: candidateW),
-            child: ConversationTextScale(child: tile),
-          ),
+          child: action == null
+              ? bubble
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    action,
+                    const SizedBox(width: 8),
+                    Flexible(fit: FlexFit.loose, child: bubble),
+                  ],
+                ),
         );
       },
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
@@ -89,7 +90,7 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage> {
               controller: _search,
               decoration: InputDecoration(
                 labelText: l.settingsShortcutsSearch,
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Symbols.search),
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -163,7 +164,7 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage> {
                   key: ValueKey('shortcut_edit_${action.key}'),
                   tooltip: l.settingsShortcutsEdit,
                   onPressed: () => _edit(p, action),
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const Icon(Symbols.edit),
                 ),
                 IconButton(
                   key: ValueKey('shortcut_unassign_${action.key}'),
@@ -171,13 +172,13 @@ class _ShortcutsSettingsPageState extends State<ShortcutsSettingsPage> {
                   onPressed: binding.isEmpty && !invalid
                       ? null
                       : () => p.setShortcutBinding(action, ''),
-                  icon: const Icon(Icons.block),
+                  icon: const Icon(Symbols.block),
                 ),
                 IconButton(
                   key: ValueKey('shortcut_reset_${action.key}'),
                   tooltip: l.settingsShortcutsReset,
                   onPressed: () => p.setShortcutBinding(action, null),
-                  icon: const Icon(Icons.restart_alt),
+                  icon: const Icon(Symbols.restart_alt),
                 ),
               ],
             ),

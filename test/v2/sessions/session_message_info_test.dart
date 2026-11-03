@@ -5,6 +5,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 final _created = DateTime.utc(2026, 10, 27, 12);
 
@@ -44,33 +45,40 @@ Widget _surface(Widget child) => MaterialApp(
 );
 
 void main() {
-  testWidgets('history minimizes an unknown shell but keeps known shells readable', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _surface(
-        Column(
-          children: [
-            SessionTimelineTile(
-              item: ShellRun(meta: _meta('unknown-shell'), command: 'hidden-command'),
-              minimizeUnknownShell: true,
-            ),
-            SessionTimelineTile(
-              item: ShellRun(
-                meta: _meta('known-shell'),
-                command: 'visible-command',
-                shellStatus: const OpenValue.known(ShellStatus.exited),
+  testWidgets(
+    'history minimizes an unknown shell but keeps known shells readable',
+    (tester) async {
+      await tester.pumpWidget(
+        _surface(
+          Column(
+            children: [
+              SessionTimelineTile(
+                item: ShellRun(
+                  meta: _meta('unknown-shell'),
+                  command: 'hidden-command',
+                ),
+                minimizeUnknownShell: true,
               ),
-              minimizeUnknownShell: true,
-            ),
-          ],
+              SessionTimelineTile(
+                item: ShellRun(
+                  meta: _meta('known-shell'),
+                  command: 'visible-command',
+                  shellStatus: const OpenValue.known(ShellStatus.exited),
+                ),
+                minimizeUnknownShell: true,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-    expect(find.textContaining('hidden-command'), findsNothing);
-    expect(find.textContaining('visible-command'), findsOneWidget);
-    expect(find.byKey(const ValueKey('tool-toggle-unknown-shell')), findsNothing);
-  });
+      );
+      expect(find.textContaining('hidden-command'), findsNothing);
+      expect(find.textContaining('visible-command'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('tool-toggle-unknown-shell')),
+        findsNothing,
+      );
+    },
+  );
   test('elapsed time is compact and needs consistent harness times', () {
     String? format(Duration? took) =>
         formatMessageElapsed(_context(took: took));
@@ -257,7 +265,7 @@ void main() {
               delivery: const OpenValue.known(DeliveryState.delivered),
             ),
             messageHeader: true,
-            inlineAction: const Icon(Icons.more_horiz),
+            inlineAction: const Icon(Symbols.more_horiz),
           ),
         ),
       ),
@@ -272,5 +280,34 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a user turn action sits left of its bubble, centred on it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _surface(
+        SizedBox(
+          width: 400,
+          child: SessionTimelineTile(
+            item: UserInput(
+              meta: _meta('u', message: _context()),
+              text: 'Hi',
+              delivery: const OpenValue.known(DeliveryState.delivered),
+            ),
+            messageHeader: true,
+            inlineAction: const Icon(
+              Symbols.undo_rounded,
+              key: ValueKey('user-action'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final action = tester.getRect(find.byKey(const ValueKey('user-action')));
+    final bubble = tester.getRect(find.byType(Card));
+    expect(action.right, lessThanOrEqualTo(bubble.left));
+    expect(action.center.dy, closeTo(bubble.center.dy, 0.5));
+    expect(bubble.right, closeTo(400, 0.5));
   });
 }

@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -52,7 +53,7 @@ class EndpointHealthIndicator extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       Icon(
-        Icons.circle,
+        Symbols.circle,
         size: 10,
         color: switch (view.status) {
           EndpointHealthStatus.online => Colors.green,

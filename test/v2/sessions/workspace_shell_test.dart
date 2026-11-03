@@ -9,6 +9,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
@@ -353,7 +354,7 @@ void main() {
       await _toolbarItem(tester, 'Servers');
       expect(path(), '/hosts');
       // A page opened from a secondary page returns to it.
-      await tester.tap(find.byIcon(Icons.qr_code).first);
+      await tester.tap(find.byIcon(Symbols.qr_code).first);
       await tester.pumpAndSettle();
       expect(path(), '/pair');
       expect(await tester.binding.handlePopRoute(), isTrue);

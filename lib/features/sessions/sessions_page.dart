@@ -626,21 +626,21 @@ class _SessionsPageState extends State<SessionsPage> {
           for (final kind in marks)
             switch (kind) {
               SessionActivityMark.needsYou => mark(
-                Icons.help_outline,
+                Symbols.help_outline,
                 14,
                 scheme.tertiary,
                 l10n.liveNeedsYou,
                 'session-needs-you',
               ),
               SessionActivityMark.running => mark(
-                Icons.sync,
+                Symbols.sync,
                 14,
                 scheme.secondary,
                 l10n.liveRunning,
                 'session-running',
               ),
               SessionActivityMark.unread => mark(
-                Icons.circle,
+                Symbols.circle,
                 10,
                 scheme.primary,
                 l10n.sessionsActionUnread,
@@ -804,7 +804,7 @@ class _SessionsPageState extends State<SessionsPage> {
                                   end: 4,
                                 ),
                                 child: Icon(
-                                  Icons.push_pin,
+                                  Symbols.push_pin,
                                   key: ValueKey(
                                     'session-pinned-${row.info.ref.storageKey}',
                                   ),

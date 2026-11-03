@@ -12,6 +12,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../hosts/fakes.dart';
@@ -147,7 +148,7 @@ void main() {
       // The trailing menu closes a project; the last one stays open.
       final menu = find.descendant(
         of: find.byKey(const ValueKey('project-row-/work/beta')),
-        matching: find.byIcon(Icons.more_vert),
+        matching: find.byIcon(Symbols.more_vert),
       );
       await tester.tap(menu);
       await tester.pumpAndSettle();
@@ -224,7 +225,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byKey(const ValueKey('project-row-/work/beta')),
-        matching: find.byIcon(Icons.more_vert),
+        matching: find.byIcon(Symbols.more_vert),
       ),
     );
     // The open session's live view keeps frames running: pump, not settle.
@@ -356,7 +357,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byKey(ValueKey('session-actions-$charlie')),
-        matching: find.byIcon(Icons.more_vert),
+        matching: find.byIcon(Symbols.more_vert),
       ),
     );
     await tester.pumpAndSettle();

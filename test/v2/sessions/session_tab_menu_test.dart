@@ -551,7 +551,12 @@ void main() {
     _useMemoryPreferences();
     final app = await _launch(tester);
     await _visit(tester, app, ['one', 'two', 'three']);
-    expect(find.byIcon(Icons.close), findsNothing);
+    // Only the selected tab holds a close control (v1 keeps it there); the
+    // background tab 'one' has none and closes by double tap or Delete.
+    expect(
+      find.byKey(ValueKey('session-tab-close-${_ref(app, 'one').storageKey}')),
+      findsNothing,
+    );
 
     // Closing a background tab never navigates.
     await tester.ensureVisible(_tab(app, 'one'));

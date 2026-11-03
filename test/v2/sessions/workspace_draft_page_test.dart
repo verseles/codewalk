@@ -17,6 +17,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import '../storage/storage_fakes.dart';
@@ -290,7 +291,7 @@ void main() {
     final tab = find.byKey(const ValueKey('session-tab-draft'));
     expect(tab, findsOneWidget);
     expect(
-      find.descendant(of: tab, matching: find.byIcon(Icons.folder_open)),
+      find.descendant(of: tab, matching: find.byIcon(Symbols.folder_open)),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox());

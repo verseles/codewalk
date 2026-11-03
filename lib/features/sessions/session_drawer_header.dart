@@ -117,7 +117,7 @@ class _SessionDrawerHeaderState extends State<SessionDrawerHeader> {
                       key: const ValueKey('sessions-search-clear'),
                       tooltip: l10n.settingsSearchClear,
                       onPressed: _clear,
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(Symbols.close),
                     ),
             ),
           ),
