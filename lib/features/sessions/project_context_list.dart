@@ -296,12 +296,15 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                               children: [
                                 Icon(
                                   Symbols.close,
+                                  size: 18,
                                   color: theme.colorScheme.error,
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
                                 Flexible(
                                   child: Text(
                                     l10n.chatCloseProject(name),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: theme.colorScheme.error,
                                     ),

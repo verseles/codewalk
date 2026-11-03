@@ -237,7 +237,7 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
         icon,
         color: destructive ? Theme.of(context).colorScheme.error : null,
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 8),
       Flexible(child: label),
     ],
   );
