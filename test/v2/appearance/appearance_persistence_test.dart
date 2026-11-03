@@ -20,7 +20,7 @@ void main() {
     backend.values.addAll({
       'cw2.schema': 1,
       'cw2.settings.themeMode': 'dark',
-      'cw2.settings.visualStyle': 'classic',
+      'cw2.settings.retiredKey': 'kept',
       'cw2.settings.themePreset': 'oc-1',
       'cw2.settings.appDensity': 'extra_dense',
       'cw2.settings.customColorSeed': 0xFF6750A4.toDouble(),
@@ -35,7 +35,7 @@ void main() {
     addTearDown(graph.dispose);
     final p = graph.preferences;
     expect(p.themeMode, ThemeMode.dark);
-    expect(backend.values['cw2.settings.visualStyle'], 'classic');
+    expect(backend.values['cw2.settings.retiredKey'], 'kept');
     expect(backend.removals, isEmpty);
     expect(p.themePreset, OpenCodeThemePreset.oc2);
     expect(p.density, AppDensity.extraDense);
