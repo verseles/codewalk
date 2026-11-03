@@ -164,6 +164,90 @@ final class OpenCodeLocationReader {
     }, cancellation);
   }
 
+  /// The location's default agent, with its optional model reference: the
+  /// configured `default_agent` when selectable, else `build` when
+  /// selectable, else the first selectable agent.
+  Future<
+    ({
+      String id,
+      String name,
+      String? modelId,
+      String? providerId,
+      String? variant,
+    })?
+  >
+  readDefaultAgentDetails({required String directory}) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final configured = await readDefaultAgent(directory: directory);
+    final path = Uri(
+      path: 'api/agent',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      final rows = _located(value, directory)['data'];
+      if (rows is! List || rows.length > maxEntries) {
+        throw const FormatException('Malformed agent list.');
+      }
+      ({
+        String id,
+        String name,
+        String? modelId,
+        String? providerId,
+        String? variant,
+      })? first,
+          build;
+      for (final row in rows) {
+        final agent = _object(row);
+        final mode = agent['mode'];
+        final hidden = agent['hidden'];
+        if (mode is! String || hidden is! bool) {
+          throw const FormatException('Malformed agent.');
+        }
+        if (hidden || (mode != 'primary' && mode != 'all')) continue;
+        final id = _text(agent['id']);
+        final name = agent['name'];
+        final rawModel = agent['model'];
+        final model = rawModel == null ? null : _object(rawModel);
+        final details = (
+          id: id,
+          name: name is String && name.trim().isNotEmpty ? name : id,
+          modelId: model == null ? null : _text(model['id']),
+          providerId: model == null ? null : _text(model['providerID']),
+          variant: model?['variant'] as String?,
+        );
+        if (id == configured) return details;
+        first ??= details;
+        if (id == 'build') build ??= details;
+      }
+      return build ?? first;
+    }, null);
+  }
+
+  /// The location default model's complete identity and display label.
+  Future<({String id, String providerId, String name})?>
+  readDefaultModelDetails({required String directory}) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final path = Uri(
+      path: 'api/model/default',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      final raw = _located(value, directory)['data'];
+      if (raw == null) return null;
+      final model = _object(raw);
+      final id = _text(model['id']);
+      final provider = _text(model['providerID']);
+      final name = model['name'];
+      return (
+        id: id,
+        providerId: provider,
+        name: name is String && name.trim().isNotEmpty ? name : id,
+      );
+    }, null);
+  }
+
   /// The display name of agent [id] in [directory]'s location, or null when
   /// the location does not register it.
   Future<String?> readAgentName({

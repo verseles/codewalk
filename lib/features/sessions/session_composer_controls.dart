@@ -118,7 +118,9 @@ class SessionComposerControls extends StatelessWidget {
                   child: chip(
                     'live-agent-chip',
                     agentId == null
-                        ? l10n.chatChooseAgent
+                        ? (selection == null
+                              ? l10n.chatChooseAgent
+                              : l10n.liveSelectionDefault)
                         : catalogLabel(agent?.label, agentId),
                     tooltip: l10n.modelChooseAgent,
                     onPressed: () => showAgentMenu(anchor, live),
@@ -130,7 +132,10 @@ class SessionComposerControls extends StatelessWidget {
                 'live-model-chip',
                 switch (selection?.modelId) {
                   final modelId? => catalogLabel(model?.label, modelId),
-                  null => l10n.chatChooseModel,
+                  null =>
+                    selection == null
+                        ? l10n.chatChooseModel
+                        : l10n.liveSelectionDefault,
                 },
                 tooltip: modelDescription,
                 semantics: modelDescription,

@@ -77,17 +77,34 @@ final class _NativeSource implements SessionCatalogSource {
     }
 
     final agent = await part(
-      () => _locations.readDefaultAgent(directory: directory),
+      () => _locations.readDefaultAgentDetails(directory: directory),
     );
-    final model = await part(
-      () => _locations.readDefaultModel(directory: directory),
+    final models = await part(() => _reader.readModels(directory));
+    final global = await part(
+      () => _locations.readDefaultModelDetails(directory: directory),
     );
-    final name = agent == null
-        ? null
-        : await part(
-            () => _locations.readAgentName(directory: directory, id: agent),
-          );
-    return DraftDefaults(agent: name ?? agent, model: model);
+    ModelEntry? offered(String? provider, String? id) => models
+        ?.where((model) => model.providerId == provider && model.id == id)
+        .firstOrNull;
+    final preferred = offered(agent?.providerId, agent?.modelId);
+    final fallback = offered(global?.providerId, global?.id);
+    final model = agent == null ? null : preferred ?? fallback;
+    final variant =
+        preferred != null &&
+            agent?.variant != null &&
+            preferred.variants.contains(agent!.variant)
+        ? agent.variant
+        : null;
+    return DraftDefaults(
+      agent: agent?.name,
+      model: model?.label.isNotEmpty == true ? model!.label : model?.id,
+      selection: Selection(
+        agentId: agent?.id,
+        modelId: model?.id,
+        modelProviderId: model?.providerId,
+        modelVariant: variant,
+      ),
+    );
   }
 
   @override

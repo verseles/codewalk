@@ -49,6 +49,85 @@ Map<String, String> query(TransportRequest request) =>
 
 void main() {
   test(
+    'ordered selectable default agent carries its model reference',
+    () async {
+      final transport = TestTransport(
+        (request) => Uri.parse(request.path).path == 'api/config'
+            ? response(<Object?>[])
+            : response(
+                located('/work/a', [
+                  {'id': 'hidden', 'mode': 'primary', 'hidden': true},
+                  {
+                    'id': 'build',
+                    'name': 'Build',
+                    'mode': 'primary',
+                    'hidden': false,
+                    'model': {
+                      'id': 'preferred',
+                      'providerID': 'provider',
+                      'variant': 'high',
+                    },
+                  },
+                ]),
+              ),
+      );
+      final result = await OpenCodeLocationReader(
+        transport,
+        harness: harness,
+      ).readDefaultAgentDetails(directory: '/work/a');
+      expect(result?.id, 'build');
+      expect(result?.name, 'Build');
+      expect(result?.modelId, 'preferred');
+      expect(result?.providerId, 'provider');
+      expect(result?.variant, 'high');
+    },
+  );
+
+  TestTransport agents(String? configured) => TestTransport(
+    (request) => Uri.parse(request.path).path == 'api/config'
+        ? response([
+            if (configured != null)
+              {
+                'type': 'document',
+                'path': '/work/a/opencode.json',
+                'info': {'default_agent': configured},
+              },
+          ])
+        : response(
+            located('/work/a', [
+              {'id': 'review', 'mode': 'primary', 'hidden': false},
+              {'id': 'build', 'mode': 'primary', 'hidden': false},
+              {
+                'id': 'plan',
+                'mode': 'primary',
+                'hidden': false,
+                'model': {'id': 'm', 'providerID': 'p'},
+              },
+              {'id': 'helper', 'mode': 'subagent', 'hidden': false},
+            ]),
+          ),
+  );
+
+  test('the configured default agent wins when selectable', () async {
+    final result = await OpenCodeLocationReader(
+      agents('plan'),
+      harness: harness,
+    ).readDefaultAgentDetails(directory: '/work/a');
+    expect(result?.id, 'plan');
+    expect(result?.modelId, 'm');
+  });
+
+  test('an unselectable configured agent falls back to build', () async {
+    for (final configured in ['helper', 'missing', null]) {
+      final result = await OpenCodeLocationReader(
+        agents(configured),
+        harness: harness,
+      ).readDefaultAgentDetails(directory: '/work/a');
+      expect(result?.id, 'build', reason: '$configured');
+    }
+  });
+
+  test(
     'the default agent is the highest-priority document that sets it',
     () async {
       final transport = TestTransport((request) {

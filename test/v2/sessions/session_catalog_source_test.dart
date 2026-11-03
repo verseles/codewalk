@@ -10,6 +10,70 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('draft prefers the default agent model over the global model', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    final fixture =
+        jsonDecode(
+              File(
+                'test/contract/fixtures/opencode/2.0.22/model.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    Map<String, dynamic> model(String id) => {
+      ...fixture,
+      'id': id,
+      'modelID': id,
+      'providerID': 'provider',
+      'name': 'Name $id',
+      'enabled': true,
+    };
+    server.listen((request) async {
+      request.response.headers.contentType = ContentType.json;
+      if (request.uri.path == '/api/config') {
+        request.response.write('[]');
+        return request.response.close();
+      }
+      final data = switch (request.uri.path) {
+        '/api/agent' => [
+          {
+            'id': 'build',
+            'name': 'Build',
+            'mode': 'primary',
+            'hidden': false,
+            'model': {'id': 'preferred', 'providerID': 'provider'},
+          },
+        ],
+        '/api/model' => [model('global'), model('preferred')],
+        '/api/model/default' => model('global'),
+        _ => throw StateError('unexpected route'),
+      };
+      request.response.headers.contentType = ContentType.json;
+      request.response.write(
+        jsonEncode({
+          'location': {'directory': '/work/a'},
+          'data': data,
+        }),
+      );
+      await request.response.close();
+    });
+    final source = createSessionCatalogSource(
+      EndpointProfile(
+        id: 'profile_a',
+        label: 'Native',
+        endpoint: Uri.parse('http://127.0.0.1:${server.port}/'),
+      ),
+      EndpointCredential(kind: EndpointAuthKind.password, secret: 'fake'),
+    );
+    addTearDown(source.close);
+    final defaults = await source.draftDefaults(directory: '/work/a');
+    expect(defaults.agent, 'Build');
+    expect(defaults.model, 'Name preferred');
+    expect(defaults.selection?.agentId, 'build');
+    expect(defaults.selection?.modelProviderId, 'provider');
+    expect(defaults.selection?.modelId, 'preferred');
+  });
+
   for (final kind in EndpointAuthKind.values) {
     test(
       'native bridge authenticates $kind and preserves proxy/port/opaque paging',

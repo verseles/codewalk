@@ -357,6 +357,22 @@ void main() {
     });
   }
 
+  testWidgets('an unset session selection is presented as the server default', (
+    tester,
+  ) async {
+    final (_, handle) = await open(tester);
+    handle.selectionState = SessionSelectionState(
+      selection: const Selection(),
+      models: [_alpha],
+      agents: [_build],
+    );
+    handle.emit(handle.current);
+    await tester.pump();
+    await tester.pump();
+    expect(chip('live-agent-chip', 'Default'), findsOneWidget);
+    expect(chip('live-model-chip', 'Default'), findsOneWidget);
+  });
+
   testWidgets('the model chip retains selection status in its semantics', (
     tester,
   ) async {

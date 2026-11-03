@@ -374,6 +374,8 @@ final class FakeActionSource implements SessionActionSource {
   /// The titles the created sessions carried.
   final createdTitles = <String?>[];
 
+  final createdSelections = <Selection?>[];
+
   /// The created session reference to return, if any.
   SessionRef? createdSessionRef;
 
@@ -381,10 +383,12 @@ final class FakeActionSource implements SessionActionSource {
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
+    Selection? initialSelection,
   }) async {
     calls.add('create');
     created.add(directory);
     createdTitles.add(title);
+    createdSelections.add(initialSelection);
     if (createDelay > Duration.zero) {
       await Future<void>.delayed(createDelay);
     }

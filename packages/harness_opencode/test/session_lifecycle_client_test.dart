@@ -84,6 +84,31 @@ Map<String, Object?> bodyOf(TransportRequest request) =>
 
 void main() {
   group('the encodings', () {
+    test('create sends the verified agent and full model reference', () async {
+      final transport = _Transport(
+        (_, _) => response({'data': sessionRecord()}),
+      );
+      await client(transport).create(
+        id: id,
+        directory: '/work/project',
+        initialSelection: const Selection(
+          agentId: 'build',
+          modelId: 'preferred',
+          modelProviderId: 'provider',
+          modelVariant: 'high',
+        ),
+      );
+      expect(bodyOf(transport.requests.single), {
+        'location': {'directory': '/work/project'},
+        'agent': 'build',
+        'model': {
+          'id': 'preferred',
+          'providerID': 'provider',
+          'variant': 'high',
+        },
+      });
+    });
+
     test('create sends the directory in the body and nothing else', () async {
       final transport = _Transport(
         (_, _) => response({'data': sessionRecord(title: 'New')}),

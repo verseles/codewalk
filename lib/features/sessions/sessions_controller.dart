@@ -1025,6 +1025,7 @@ class SessionsController extends ChangeNotifier {
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
+    Selection? initialSelection,
   }) async {
     final source = _actions;
     if (source == null) {
@@ -1048,7 +1049,11 @@ class SessionsController extends ChangeNotifier {
     _actionFailure = null;
     _notify();
     try {
-      final result = await source.create(directory: directory, title: title);
+      final result = await source.create(
+        directory: directory,
+        title: title,
+        initialSelection: initialSelection,
+      );
       final outcome = result.outcome;
       if (!identical(source, _actions)) {
         // The profile changed while the create was in flight.

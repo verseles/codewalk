@@ -93,6 +93,7 @@ final class OpenCodeSessionLifecycleClient {
     required String directory,
     String? nativeSessionId,
     String? title,
+    Selection? initialSelection,
     RequestCancellation? cancellation,
   }) async {
     if (nativeSessionId != null) {
@@ -116,6 +117,21 @@ final class OpenCodeSessionLifecycleClient {
     if (title != null && !_boundedText(title, _titleLimit)) {
       throw ArgumentError('The create body carries a bounded title');
     }
+    final agent = initialSelection?.agentId;
+    final model = initialSelection?.modelId;
+    final provider = initialSelection?.modelProviderId;
+    final variant = initialSelection?.modelVariant;
+    if ((agent != null && (agent.isEmpty || !_boundedText(agent, _idLimit))) ||
+        (model == null) != (provider == null) ||
+        (model != null && (model.isEmpty || !_boundedText(model, _idLimit))) ||
+        (provider != null &&
+            (provider.isEmpty || !_boundedText(provider, _idLimit))) ||
+        (variant != null &&
+            (model == null || !_boundedText(variant, _idLimit)))) {
+      throw ArgumentError(
+        'The initial selection must contain bounded identities',
+      );
+    }
     final owner = ProjectOwner(
       ProjectRef(harness.host, directory),
       harness: harness,
@@ -127,6 +143,14 @@ final class OpenCodeSessionLifecycleClient {
     };
     if (nativeSessionId != null) body['id'] = nativeSessionId;
     if (title != null) body['title'] = title;
+    if (agent != null) body['agent'] = agent;
+    if (model != null && provider != null) {
+      body['model'] = {
+        'id': model,
+        'providerID': provider,
+        'variant': ?variant,
+      };
+    }
     return _send(
       id: id,
       operation: MutationOperation.create,

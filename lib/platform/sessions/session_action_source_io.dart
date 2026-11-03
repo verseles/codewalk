@@ -155,6 +155,7 @@ final class _NativeSource implements SessionActionSource {
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
+    Selection? initialSelection,
   }) async {
     final client = _client();
     if (client == null) {
@@ -165,6 +166,7 @@ final class _NativeSource implements SessionActionSource {
         id: mintCommandId(),
         directory: directory,
         title: title,
+        initialSelection: initialSelection,
       );
       final outcome = _outcome(attempt.receipt);
       final ref = attempt.session?.info.ref;

@@ -91,6 +91,7 @@ class WorkspaceDraftController extends ChangeNotifier {
   DraftDefaults _defaults = const DraftDefaults();
   WorkspaceDraftKey? _defaultsKey;
   int _defaultsGeneration = 0;
+  Future<void>? _defaultsRead;
 
   WorkspaceDraftNotice get notice => _notice;
   bool get sending => _sending;
@@ -159,6 +160,9 @@ class WorkspaceDraftController extends ChangeNotifier {
     _intent++;
     _handoff = null;
     _restoreGeneration++;
+    // A newly opened draft must not reuse defaults from an earlier visit.
+    _defaultsGeneration++;
+    _defaultsKey = null;
     _setCurrentKey(_deriveKey(directory));
     _entry = null;
     _profile = _catalog.selectedProfile?.id;
@@ -334,12 +338,20 @@ class WorkspaceDraftController extends ChangeNotifier {
   /// to be asked again. Every change starts a new generation, so an answer
   /// that arrives after the draft moved on is dropped, even when it came from
   /// the same location as the draft's current one.
-  Future<void> _loadDefaults(WorkspaceDraftKey? key) async {
-    if (_sameDraft(key, _defaultsKey)) return;
+  Future<void> _loadDefaults(WorkspaceDraftKey? key) {
+    if (_sameDraft(key, _defaultsKey)) return _defaultsRead ?? Future.value();
     final generation = ++_defaultsGeneration;
     _defaultsKey = key;
     _defaults = const DraftDefaults();
-    if (key == null) return;
+    if (key == null) return Future.value();
+    final read = _readDefaults(key, generation);
+    _defaultsRead = read;
+    return read.whenComplete(() {
+      if (identical(_defaultsRead, read)) _defaultsRead = null;
+    });
+  }
+
+  Future<void> _readDefaults(WorkspaceDraftKey key, int generation) async {
     final loaded = await _catalog.draftDefaults(key.canonicalDirectory);
     if (_disposed || generation != _defaultsGeneration) return;
     if (loaded == null) {
@@ -449,7 +461,15 @@ class WorkspaceDraftController extends ChangeNotifier {
         await _store.updateStatus(key, WorkspaceDraftStatus.ready);
         return false;
       }
-      final result = await _catalog.create(directory: key.canonicalDirectory);
+      await _loadDefaults(key);
+      if (!wanted()) {
+        await _store.updateStatus(key, WorkspaceDraftStatus.ready);
+        return false;
+      }
+      final result = await _catalog.create(
+        directory: key.canonicalDirectory,
+        initialSelection: _defaults.selection,
+      );
       final ref = result.session;
       if (result.outcome != SessionActionOutcome.accepted ||
           ref == null ||

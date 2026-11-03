@@ -131,6 +131,7 @@ abstract interface class SessionActionSource {
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
+    Selection? initialSelection,
   });
 
   /// Renames the session.

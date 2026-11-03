@@ -33,6 +33,7 @@ final class _UnsupportedSource implements SessionActionSource {
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
+    Selection? initialSelection,
   }) async => const SessionCreateResult(SessionActionOutcome.unavailable);
 
   @override

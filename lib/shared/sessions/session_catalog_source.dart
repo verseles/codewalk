@@ -71,13 +71,16 @@ abstract interface class SessionCatalogSource {
 
 /// The server's defaults for a draft: a read-only preview, never a selection.
 final class DraftDefaults {
-  const DraftDefaults({this.agent, this.model});
+  const DraftDefaults({this.agent, this.model, this.selection});
 
   /// The agent's display name, or its id when the location does not name it.
   final String? agent;
 
   /// The model's name, or its model id.
   final String? model;
+
+  /// Verified identities to apply when the first send creates the session.
+  final Selection? selection;
 
   bool get isEmpty => agent == null && model == null;
 }

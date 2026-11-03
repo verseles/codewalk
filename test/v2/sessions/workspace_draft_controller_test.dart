@@ -90,6 +90,39 @@ void main() {
   tearDown(() => rig.dispose());
 
   test(
+    'first send waits for defaults and passes their identities to create',
+    () async {
+      rig.catalogRig.holdDefaults = true;
+      await rig.setupServerAndProjects();
+      await rig.controller.openDraft(directory: '/work/project-a');
+      final source = rig.catalogRig.sources.single;
+      rig.controller.draft.text = 'Hello';
+      rig.actions.createdSessionRef = source
+          .row('created', directory: '/work/project-a')
+          .info
+          .ref;
+      final pending = rig.controller.sendFirstPrompt(onBound: (_, _, _) {});
+      await flush();
+      expect(rig.actions.created, isEmpty);
+      source.heldDefaults.last.answer.complete(
+        const DraftDefaults(
+          agent: 'Build',
+          model: 'Preferred',
+          selection: Selection(
+            agentId: 'build',
+            modelProviderId: 'provider',
+            modelId: 'preferred',
+          ),
+        ),
+      );
+      await rig.completeCreatedRead();
+      expect(await pending, isTrue);
+      expect(rig.actions.createdSelections.single?.agentId, 'build');
+      expect(rig.actions.createdSelections.single?.modelId, 'preferred');
+    },
+  );
+
+  test(
     'a defaults answer from an earlier visit never replaces the current draft',
     () async {
       // Held from the start, so the first visit's read is held too.
@@ -101,12 +134,13 @@ void main() {
       await rig.controller.openDraft(directory: '/work/project-a');
       expect(source.heldDefaults.map((read) => read.directory), [
         '/work/project-a',
+        '/work/project-a',
         '/work/project-b',
         '/work/project-a',
       ]);
       // The newest read for project A answers first; the first visit's answer
       // for the same location arrives last and must not win.
-      source.heldDefaults[2].answer.complete(
+      source.heldDefaults[3].answer.complete(
         const DraftDefaults(agent: 'Build', model: 'model_1'),
       );
       await flush();
@@ -114,7 +148,8 @@ void main() {
       source.heldDefaults[0].answer.complete(
         const DraftDefaults(agent: 'Stale', model: 'old_model'),
       );
-      source.heldDefaults[1].answer.complete(const DraftDefaults(agent: 'B'));
+      source.heldDefaults[1].answer.complete(const DraftDefaults(agent: 'A'));
+      source.heldDefaults[2].answer.complete(const DraftDefaults(agent: 'B'));
       await flush();
       expect(rig.controller.defaults.agent, 'Build');
       expect(rig.controller.defaults.model, 'model_1');
