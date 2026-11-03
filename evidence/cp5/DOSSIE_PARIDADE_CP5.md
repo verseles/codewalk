@@ -2,8 +2,8 @@
 
 **Escopo:** Seq 5.6 / Issue #458 (V2-071H): toolbar, painel lateral, abas, composer, menus e mensagens da v2 comparados com a v1 `v1.265.1`, no celular (412×915) e no desktop (1280×800), em claro e escuro.
 **Referência v1:** tag `v1.265.1` (commit `a046da262dd91dfa7d157c6f3264368f32535528`), somente leitura.
-**Candidato:** o HEAD do commit que contém esta seção. O último commit de código é `60737be3` (teste de Configurações do item 2). As capturas foram medidas no neo (x86_64, Flutter 3.47.9), em clone limpo de `445e2468`, cujo código é idêntico ao atual, exceto pelo teste. Linha de base S4: `S4-5057601`.
-**Evidências no repositório:** `evidence/cp5/surfaces-445e2468/` (`report.json` e 54 montagens). Checklist por superfície, decisões e linhas abertas: este arquivo e comentário de S10 na #458.
+**Candidato:** código revisado em `59d0ee79`, incluindo a faixa de abas sobre toda a largura do desktop. As capturas foram feitas no neo (x86_64, Flutter 3.47.9), em clone limpo desse commit. Linha de base S4: `S4-5057601`.
+**Evidências no repositório:** `evidence/cp5/surfaces-59d0ee79/` (`report.json` e 54 montagens). Checklist por superfície, decisões e linhas abertas: este arquivo e comentário de S10 na #458.
 **Registros de validação** (captures, `make check`, arquitetura, localizações, prévias, hashes e smoke): #458 e #398 e Task Memory. Não ficam neste arquivo, para não mudar o SHA do candidato.
 
 Este dossiê não aceita veredictos sem destino. Cada diferença restante tem um destino: uma issue `after-mvp`, uma decisão registrada do dono, ou uma causa de plataforma documentada.
@@ -15,7 +15,7 @@ Este dossiê não aceita veredictos sem destino. Cada diferença restante tem um
 - Pares: 54 (13 cenários × 2 temas × 2 tamanhos, mais `s12` só no celular).
 - Captures: 108 testes passam.
 - Comparação estrita (`compare_parity.py`): status `complete`, 54 pares, 0 ausentes.
-- `make check TEST_TIMEOUT=20m`: 4815 testes passaram, com 6 ignorados; análise com 335 problemas, dentro do orçamento de 337.
+- `make check TEST_TIMEOUT=20m`: o resultado no SHA final é registrado na #458.
 - `make v2-architecture`: 404 arquivos governados e 4 pacotes, sem violação.
 - `generate_v2_localizations.py --check`: 15 arquivos, sem diferença.
 
@@ -23,9 +23,9 @@ Este dossiê não aceita veredictos sem destino. Cada diferença restante tem um
 
 Uma superfície está concluída quando (a) seu grupo de teste passa, (b) o checklist está completo, (c) a diferença por região não piorou em relação ao S4 (`S4-5057601`) e (d) cada diferença restante está classificada.
 
-Duas decisões do dono tratam a regra (c):
+As decisões anteriores do dono sobre a regra (c) incluem:
 - **Decisão 1A (2026-11-02):** aceitou os pares `s8` mobile claro e escuro, que pioram a diferença de pixel (9,60 → 10,15 e 9,62 → 10,17).
-- **Opção A (2026-11-03):** aceitou a geometria do painel lateral (+12 px no desktop, decisões 11 e 12) e a linha Desfazer no overflow compacto (+52 px, decisão 10) como consequência das decisões aprovadas. Ambas ficam como resíduos em #463.
+- **Opção A (2026-11-03):** aceitou a geometria anterior do painel e a linha Desfazer no overflow compacto (+52 px). A geometria do painel foi posteriormente corrigida; o overflow permanece em #463.
 
 ## 3. Checklists por superfície
 
@@ -38,11 +38,11 @@ Itens: ordem dos controles, altura (±1 dp), padding (±2 dp), raio, glifo, text
 - [x] Região contra S4: não comparável (54/54) → comparável, diferença média de 7,47%.
 - [~] Diferença de pixel média de 7,47%. Destino #463.
 
-### 3.2 Painel lateral — concluído, com geometria aceita (opção A)
+### 3.2 Painel lateral — concluído
 - [x] Grupo `sidePanelGroup` passa (servidor com nuvem 16 dp e seta 18 dp; glifos Symbols).
 - [x] Controles removidos conforme decisões 1A, 2A e 3A do dono (2026-11-02): linha de atualizar e configurações, link "Connect to a running server" e rótulo "Open projects". Destino: #462, itens 11 a 13.
 - [x] Pixels nos 6 pares comparáveis: média 17,98%, contra 21,42% no S4 (melhorou). Destino #463.
-- [~] Geometria: retângulo do painel em y=87 px na v1 e y=44 px na v2 (desktop). |Δaltura| média 25,2 → 34,9 px; nos 26 pares do desktop, 31 → 43 px. Aceito pelo dono (opção A) como consequência das decisões 11 e 12. Destino #463.
+- [x] Geometria: no desktop, o painel começa em y=87 px na v1 e na v2 após a faixa passar para cima do painel e do chat. Δaltura média 25,2 → 0 px.
 - [~] `s8` mobile: 9,62 → 10,17 (escuro) e 9,60 → 10,15 (claro). Aceito pela decisão 1A.
 
 ### 3.3 Abas — concluída
@@ -52,7 +52,7 @@ Itens: ordem dos controles, altura (±1 dp), padding (±2 dp), raio, glifo, text
 - [x] Ordem: aba ativa primeiro, decisão B do dono (2026-11-03).
 - [x] Botão de fechar só na aba ativa.
 - [x] Região contra S4: Δaltura média 6,5 → 1,5 px (melhorou).
-- [~] Faixa de 43 px na v2 contra 43–46 px na v1 (8 pares, sem comparação de pixel). Destino #463.
+- [~] Faixa de 43 px na v2 contra 43–46 px na v1 (8 pares; 4 comparáveis em pixels). Destino #463.
 
 ### 3.4 Composer — concluído, com controles só-v2 classificados
 - [x] Grupo `composerGroup` (linha 167 de `v1_surface_parity_test.dart`): botão de envio de 42 dp com glifo de 24 dp (decisão 7).
@@ -72,8 +72,8 @@ Itens: ordem dos controles, altura (±1 dp), padding (±2 dp), raio, glifo, text
 ### 3.6 Menus e overlays — concluída, com overflow aceito (opção A)
 - [x] Grupo de valores do overflow (linha 537) e do menu de aba (linha 288) em `v1_surface_parity_test.dart`.
 - [x] Menus de projeto: valores em `project_context_row_test.dart` e `project_contexts_test.dart`.
-- [~] Menu de linha de sessão: glifos Symbols de 18 dp e rótulos com reticências, implementados na S6 (`e02a45e1`, `47e7f838`). Não há teste de valor desse menu no arquivo de paridade; residual registrado na seção 6.
-- [x] Overlay: pixels 8,17% → 0,91% nos 4 pares comparáveis (melhorou).
+- [x] Menu de linha de sessão: o grupo de menus verifica glifo de 24 dp e espaço de 8 dp no arquivo de paridade (`4f775253`, `b3c596e1`).
+- [x] Overlay: pixels 8,17% → 0,00% nos 4 pares comparáveis (melhorou).
 - [~] Overflow compacto (`s12`): 208 px (S4) → 260 px. A linha extra é "Desfazer último turno", prescrita pela decisão 10 (v1 mostra 162 px, com 3 linhas). Aceito pelo dono (opção A). Destino #463.
 
 ---
@@ -85,8 +85,8 @@ Convenção: pares comparáveis são os de linha de base S4 com diferença de pi
 | Região | Pares | Comparáveis S4 → final | Diferença média S4 → final | Δaltura média S4 → final | Leitura |
 | :--- | ---: | ---: | ---: | ---: | :--- |
 | Toolbar | 54 | 0 → 54 | não comparável → 7,47% | 11,0 → 0,0 px | Melhorou; altura idêntica |
-| Overlay | 14 | 4 → 4 | 8,17% → 0,91% | 13,4 → 20,9 px | Pixels melhoraram; geometria do `s12` piorou (aceito, opção A) |
-| Painel lateral | 32 | 6 → 6 | 21,42% → 17,98% | 25,2 → 34,9 px | Pixels melhoraram; geometria piorou (aceito, opção A) |
+| Overlay | 14 | 4 → 4 | 8,17% → 0,00% | 13,4 → 20,9 px | Pixels melhoraram; geometria do `s12` piorou (aceito, opção A) |
+| Painel lateral | 32 | 6 → 6 | 21,42% → 17,98% | 25,2 → 0,0 px | Pixels e geometria melhoraram |
 | Composer | 36 | 0 → 0 | — | 69,8 → 69,8 px | Igual |
 | Timeline | 16 | 0 → 0 | — | 47,5 → 0,5 px | Melhorou |
 | Abas | 8 | 0 → 0 | — | 6,5 → 1,5 px | Melhorou |
@@ -99,7 +99,7 @@ Convenção: pares comparáveis são os de linha de base S4 com diferença de pi
 | Glifo de trocar abas | controle só-v2, mantido com estilo v1 | Decisão 7: função mantida |
 | Regra de Recentes, estilo da aba de rascunho, saudação e chips do novo chat | implementados | Commits `7f0e1f58` e `89f12cad` |
 | Diferença de pixel na toolbar | 7,47% médio | #463 |
-| Geometria do painel lateral | 31 → 43 px no desktop; faixa de 43 px na v1 | Aceito (opção A, 2026-11-03); #463 |
+| Geometria do painel lateral | y=87 px no desktop, igual à v1 | Corrigida pela faixa acima do painel (`ff837661`) |
 | Pixels do painel no `s8` mobile | 9,62 → 10,17 e 9,60 → 10,15 | Aceito (decisão 1A, 2026-11-02) |
 | Overflow compacto (`s12`) | 208 → 260 px (linha Desfazer, decisão 10) | Aceito (opção A, 2026-11-03); #463 |
 | Altura e deslocamento do composer | 118 px contra 50 px (estado vazio) | #463 (controles só-v2) |
@@ -113,7 +113,7 @@ Convenção: pares comparáveis são os de linha de base S4 com diferença de pi
 1. **Gate item 3 (#458, comentário 6595560754): resolvido.** Os grupos de valores de abas, timeline e overflow estão em `v1_surface_parity_test.dart` (linhas 245, 288, 365–492 e 537–569), sem `skip`. O commit `1df27934` criou esses grupos, então a opção A do gate foi adotada.
 2. **Regra (c) do painel lateral e do overflow compacto: decidido pelo dono em 2026-11-03 (opção A).** As diferenças de geometria ficam como resíduos em #463, com os números da seção 4.
 3. **Alvo de toque da ação de turno (40 dp):** achado W1 da rodada 1 de `rvw_20261103T105717Z_2b94b2a4`. Não aplicado nesta linha, porque o objetivo é paridade com a v1 e acessibilidade está fora de escopo. O intercâmbio de dissidência com o helper `-F` concordou, sem mudança. Acompanhamento em #464.
-4. **Menu de linha de sessão sem teste de valor no arquivo de paridade:** residual registrado. O gate item 3 cobre o grupo de menus (overflow e menu de aba), então este item não o bloqueia.
+4. **Menu de linha de sessão:** o teste de valor foi adicionado ao grupo de menus e aprovado na revisão.
 5. **Ações do turno do usuário:** à esquerda da bolha, como na v1 (decisão B do dono, comentário de 2026-11-03 10:36 na #458). O cabeçalho do usuário mantém só "You" e a hora.
 6. **Teste de Configurações (gate item 2):** o teste "settings appearance has one visual style" (en e pt) passou a exigir, na mesma rolagem, modo de tema, seletor de paleta, densidade e contraste, além da ausência de controle de estilo e de "Refin". Commit `60737be3`. Revisão rodada 2 (`rvw_20261103T105717Z_2b94b2a4`): luna, sol-F e grok aprovam sem achados.
 
@@ -139,9 +139,9 @@ A regra (c) da seção 2 não é atendida em medição. Ela está registrada com
 | 1. Busca do estilo clássico vazia | atendido | grep de `VisualStyle`, `visualStyle`, `isRefined`, `AppVisualStyleTokens.classic` e `settingsAppearanceVisualStyle` em `lib/app`, `lib/features`, `lib/shared`, `lib/platform`, `test/v2` e no gerador de l10n: 0 ocorrências |
 | 2. Configurações: tema, paleta, densidade e contraste; sem controle de estilo nem "Refin" em en e pt | atendido | `test/v2/appearance/appearance_widget_test.dart`, testes "settings appearance has one visual style" em en e pt, commit `60737be3` |
 | 3. Grupos de valores da v1 sem `skip` | atendido | `test/v2/sessions/v1_surface_parity_test.dart`: 0 ocorrências de `skip`; grupos de barra, painel, abas, composer, menus e timeline |
-| 4. Testes focados, arquitetura, localizações e `make check` no SHA final | atendido no SHA final | registrado na #458 para o HEAD deste commit |
+| 4. Testes focados, arquitetura, localizações e `make check` no SHA final | consultar registro final | resultado na #458 para o HEAD final |
 | 5. Critérios 40, 86 e D2 do #455 provados e marcados; 5.4c aceito | atendido | #455 marca os três critérios com teste e commit; #398: 5.4c "✅ accepted 2026-11-02 at `ef8ef7f7`"; #302: V2-071G marcado |
-| 6. Revisões convergidas sem achado confirmado aberto | atendido | rodada 1 (`445e2468`): W1 não aplicado, dissidência do sol-F concordou; rodada 2 (`60737be3`): luna, sol-F e grok aprovam sem achados |
+| 6. Revisões convergidas sem achado confirmado aberto | atendido | rodada 1 (`445e2468`): W1 não aplicado, dissidência do sol-F concordou; rodada 2 (`60737be3`): luna, sol-F e grok aprovam; faixa `ff837661` e correção de assinatura `59d0ee79` aprovadas pelos três |
 | 7. Árvore legada e `pubspec.yaml` intactos | atendido | `git diff --stat b436058e HEAD -- lib/presentation lib/domain lib/l10n test/widget pubspec.yaml` vazio |
 | 8. Relatório sem ausentes, checklists, dossiê, goldens listados e after-mvp | atendido com exceção do owner | comparação 54 pares, 0 ausentes; checklists na seção 3; regra (c) aceita pelo owner (opção A, #463); goldens na seção 6.1; #462 e #464 abertos |
 | 9. CI verde no SHA final | não exigido nesta fase | o CI do GitHub passa a ser exigido quando o owner autorizar o push |
