@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart'
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/endpoint_health_controller.dart';
 import 'sessions_controller.dart';
 
@@ -87,11 +88,17 @@ class WorkspaceDraftController extends ChangeNotifier {
       _applyingDraft = false,
       _loading = false;
   String _draftText = '';
+  DraftDefaults _defaults = const DraftDefaults();
+  String? _defaultsDirectory;
 
   WorkspaceDraftNotice get notice => _notice;
   bool get sending => _sending;
   bool get loading => _loading;
   WorkspaceDraftKey? get currentKey => _currentKey;
+
+  /// The server's default agent and model for the draft's location: a
+  /// read-only preview, empty until the read answers.
+  DraftDefaults get defaults => _defaults;
   WorkspaceDraftEntry? get entry => _entry;
   WorkspaceDraftStatus get status =>
       _entry?.status ?? WorkspaceDraftStatus.ready;
@@ -238,6 +245,11 @@ class WorkspaceDraftController extends ChangeNotifier {
 
   void _catalogChanged() {
     if (_disposed) return;
+    // A source that became ready after the draft opened answers now.
+    final draftDirectory = _currentKey?.canonicalDirectory;
+    if (draftDirectory != null && draftDirectory != _defaultsDirectory) {
+      unawaited(_loadDefaults(draftDirectory));
+    }
     final selected = _catalog.selectedProfile;
     final profile = selected?.id;
     final changing =
@@ -301,6 +313,25 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (previous != null) _store.detach(previous, _draftForgotten);
     _currentKey = key;
     if (key != null) _store.attach(key, _draftForgotten);
+    unawaited(_loadDefaults(key?.canonicalDirectory));
+  }
+
+  /// Reads the server's default agent and model for [directory] once per
+  /// draft location. A source that is not ready yet leaves the location to
+  /// be asked again; an answer for another location is dropped.
+  Future<void> _loadDefaults(String? directory) async {
+    if (directory == _defaultsDirectory) return;
+    _defaultsDirectory = directory;
+    _defaults = const DraftDefaults();
+    if (directory == null) return;
+    final loaded = await _catalog.draftDefaults(directory);
+    if (_disposed || _defaultsDirectory != directory) return;
+    if (loaded == null) {
+      _defaultsDirectory = null;
+      return;
+    }
+    _defaults = loaded;
+    _notify();
   }
 
   void _draftForgotten(String text) {

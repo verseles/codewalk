@@ -252,7 +252,23 @@ class _SessionsPageState extends State<SessionsPage> {
     ];
     final hidden = controller.hiddenIn(everything);
     final visible = filterSessions(everything, hidden, controller.filter);
-    final recent = recentSessions(everything, hidden);
+    // Attention is the header badge's own test (failed, waiting for the
+    // user, or an unread reply); the shown session never needs it.
+    final recent = recentSessions(
+      everything,
+      hidden,
+      needsAttention: (row) =>
+          row.info.ref != current &&
+          (row.execution?.lastOutcome?.kind.known ==
+                  ExecutionOutcomeKind.failed ||
+              controller
+                  .activityMarks(row)
+                  .any(
+                    (mark) =>
+                        mark == SessionActivityMark.needsYou ||
+                        mark == SessionActivityMark.unread,
+                  )),
+    );
     // Every emphasized row ends its hour, Recent's included.
     _scheduleEmphasis(nextEmphasisEnd([...visible, ...recent], now: now));
     final builders = <WidgetBuilder>[

@@ -133,6 +133,38 @@ void main() {
     expect(_ids(recent), ['r6', 'r4', 'r3', 'r2', 'r1']);
   });
 
+  test('roots that need attention lead Recent, each band by update', () {
+    final rows = [
+      _row(
+        'older-waiting',
+        updated: DateTime.utc(2026, 10, 26, 8).millisecondsSinceEpoch,
+      ),
+      _row(
+        'newest',
+        updated: DateTime.utc(2026, 10, 26, 12).millisecondsSinceEpoch,
+      ),
+      _row(
+        'middle',
+        updated: DateTime.utc(2026, 10, 26, 9).millisecondsSinceEpoch,
+      ),
+      _row(
+        'recent-waiting',
+        updated: DateTime.utc(2026, 10, 26, 10).millisecondsSinceEpoch,
+      ),
+    ];
+    final recent = recentSessions(
+      rows,
+      const {},
+      needsAttention: (row) => row.info.ref.nativeId.endsWith('waiting'),
+    );
+    expect(_ids(recent), [
+      'recent-waiting',
+      'older-waiting',
+      'newest',
+      'middle',
+    ]);
+  });
+
   test('a completed unread root is emphasized for one hour after idle', () {
     final idle = DateTime.utc(2026, 10, 26, 12);
     final unread = SessionViewMarker(idleAt: idle);

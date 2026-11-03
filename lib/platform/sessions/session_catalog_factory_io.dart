@@ -64,6 +64,32 @@ final class _NativeSource implements SessionCatalogSource {
     );
   }
 
+  /// Each part is read on its own: a failed read leaves that part null.
+  @override
+  Future<DraftDefaults> draftDefaults({required String directory}) async {
+    if (_closed) return const DraftDefaults();
+    Future<T?> part<T>(Future<T?> Function() read) async {
+      try {
+        return await read();
+      } on Object {
+        return null;
+      }
+    }
+
+    final agent = await part(
+      () => _locations.readDefaultAgent(directory: directory),
+    );
+    final model = await part(
+      () => _locations.readDefaultModel(directory: directory),
+    );
+    final name = agent == null
+        ? null
+        : await part(
+            () => _locations.readAgentName(directory: directory, id: agent),
+          );
+    return DraftDefaults(agent: name ?? agent, model: model);
+  }
+
   @override
   SessionCatalogRead<List<ProjectRef>> projects() => _NativeRequest(
     (cancellation) => _locations.listProjects(cancellation: cancellation),

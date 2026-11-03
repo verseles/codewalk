@@ -296,6 +296,14 @@ class SessionsController extends ChangeNotifier {
 
   /// The source of the selected server for the project and directory reads,
   /// or null while it is not ready.
+  /// The server's default agent and model for a draft in [directory]; null
+  /// while no source is ready, so the caller asks again later.
+  Future<DraftDefaults?> draftDefaults(String directory) async {
+    final source = directorySource;
+    if (source == null) return null;
+    return source.draftDefaults(directory: directory);
+  }
+
   SessionCatalogSource? get directorySource {
     if (_disposed ||
         hosts.loading ||

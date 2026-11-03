@@ -11,6 +11,7 @@ import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/shared/l10n/l10n_context.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
@@ -89,12 +90,13 @@ void main() {
     double scale = 1,
     PayloadStore Function(PayloadStore)? workspacePayloads,
     PayloadStore Function(PayloadStore)? sessionPayloads,
+    DraftDefaults defaults = const DraftDefaults(),
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    rig = CatalogRig(withFeed: false);
+    rig = CatalogRig(withFeed: false)..draftDefaults = defaults;
     addTearDown(rig.dispose);
     await rig.save('a');
     actions = FakeActionSource(
@@ -239,6 +241,32 @@ void main() {
     expect(app.workspaceDrafts!.draft.text, 'keep me');
     expect(app.workspaceDrafts!.currentKey!.canonicalDirectory, '/work/alpha');
     expect(find.byKey(const ValueKey('workspace-draft')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('the draft shows the server defaults as read-only chips', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      defaults: const DraftDefaults(agent: 'Build', model: 'model_1'),
+    );
+    expect(find.byKey(const ValueKey('draft-default-agent')), findsOneWidget);
+    expect(find.text('Build'), findsOneWidget);
+    expect(find.byKey(const ValueKey('draft-default-model')), findsOneWidget);
+    expect(find.text('model_1'), findsOneWidget);
+    // A chip is a preview: tapping it selects nothing and sends nothing.
+    await tester.tap(find.byKey(const ValueKey('draft-default-agent')));
+    await tester.pump();
+    expect(actions.calls.where((call) => call == 'create'), isEmpty);
+    expect(app.workspaceDrafts!.draft.text, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a draft without server defaults shows no chips', (tester) async {
+    await open(tester);
+    expect(find.byKey(const ValueKey('draft-default-agent')), findsNothing);
+    expect(find.byKey(const ValueKey('draft-default-model')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
 

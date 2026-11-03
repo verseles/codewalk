@@ -115,11 +115,13 @@ List<SessionSummary> sortSessions(
 }
 
 /// The recent root sessions across the open contexts: the [limit] most
-/// recently updated roots that are not hidden in effect.
+/// recently updated roots that are not hidden in effect. Roots that
+/// [needsAttention] names come first, each band by its last update.
 List<SessionSummary> recentSessions(
   Iterable<SessionSummary> rows,
   Set<SessionRef> hidden, {
   int limit = 5,
+  bool Function(SessionSummary row)? needsAttention,
 }) {
   final roots = [
     for (final row in rows)
@@ -128,7 +130,12 @@ List<SessionSummary> recentSessions(
           !hidden.contains(row.info.ref))
         row,
   ];
-  roots.sort((a, b) => b.updatedAt!.compareTo(a.updatedAt!));
+  bool attention(SessionSummary row) => needsAttention?.call(row) ?? false;
+  roots.sort((a, b) {
+    final band = (attention(b) ? 1 : 0).compareTo(attention(a) ? 1 : 0);
+    if (band != 0) return band;
+    return b.updatedAt!.compareTo(a.updatedAt!);
+  });
   final seen = <SessionRef>{};
   return [
     for (final row in roots)

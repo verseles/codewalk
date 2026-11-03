@@ -199,6 +199,13 @@ class CatalogSource implements SessionCatalogSource {
   }
   void fail(SessionCatalogFailure failure) =>
       tasks.last.completion.completeError(SessionCatalogException(failure));
+  /// The defaults a draft reads; tests set them before the draft opens.
+  DraftDefaults defaults = const DraftDefaults();
+
+  @override
+  Future<DraftDefaults> draftDefaults({required String directory}) async =>
+      defaults;
+
   @override
   void close() => closes++;
 }
@@ -225,6 +232,8 @@ class CatalogRig {
   final repository = GatedProfiles();
   late final HostsController hosts;
   late final SessionsController sessions;
+  /// The defaults every source of this rig answers a draft with.
+  DraftDefaults draftDefaults = const DraftDefaults();
   final sources = <CatalogSource>[];
 
   /// The endpoint's lifecycle feeds, one per acquisition; the tests drive
@@ -250,7 +259,7 @@ class CatalogRig {
   }
 
   CatalogSource create(EndpointProfile profile, EndpointCredential credential) {
-    final source = CatalogSource(profile);
+    final source = CatalogSource(profile)..defaults = draftDefaults;
     sources.add(source);
     return source;
   }

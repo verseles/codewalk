@@ -61,7 +61,25 @@ abstract interface class SessionCatalogSource {
     String directory,
     String query,
   );
+
+  /// The server's default agent and model for [directory]'s location, shown on
+  /// a draft that has no session yet. Each part is null when the server has
+  /// none or its read failed.
+  Future<DraftDefaults> draftDefaults({required String directory});
   void close();
+}
+
+/// The server's defaults for a draft: a read-only preview, never a selection.
+final class DraftDefaults {
+  const DraftDefaults({this.agent, this.model});
+
+  /// The agent's display name, or its id when the location does not name it.
+  final String? agent;
+
+  /// The model's name, or its model id.
+  final String? model;
+
+  bool get isEmpty => agent == null && model == null;
 }
 
 /// One cancellable read of what the server offers to open.

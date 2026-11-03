@@ -20,6 +20,10 @@ final class _UnsupportedSource implements SessionCatalogSource {
   Future<SessionActivity> activity({String? directory}) async =>
       const SessionActivity();
   @override
+  Future<DraftDefaults> draftDefaults({required String directory}) async =>
+      const DraftDefaults();
+
+  @override
   SessionCatalogRead<List<ProjectRef>> projects() => _UnsupportedRequest();
   @override
   SessionCatalogRead<ProjectRef> location({String? directory}) =>

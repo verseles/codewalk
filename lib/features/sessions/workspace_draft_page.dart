@@ -263,6 +263,32 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                 onRun: _run,
                                 maxHeight: pickerRoom,
                               ),
+                              // The server's default agent and model, as read-only chips: a preview of
+                              // what the first send uses, never a selection before it.
+                              if (!c.defaults.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    children: [
+                                      if (c.defaults.agent != null)
+                                        Chip(
+                                          key: const ValueKey(
+                                            'draft-default-agent',
+                                          ),
+                                          label: Text(c.defaults.agent!),
+                                        ),
+                                      if (c.defaults.model != null)
+                                        Chip(
+                                          key: const ValueKey(
+                                            'draft-default-model',
+                                          ),
+                                          label: Text(c.defaults.model!),
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               SessionFieldHeightReporter(
                                 onHeight: _fieldMeasured,
                                 child: Row(

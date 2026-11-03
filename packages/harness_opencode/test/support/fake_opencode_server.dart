@@ -295,6 +295,20 @@ final class FakeOpenCodeServer {
         return;
       }
     }
+    // A New Chat draft reads the location's defaults when it opens. The script
+    // does not describe them, so they are answered beside it, with no
+    // configured agent and no default model, and the script does not advance.
+    if (request.method == 'GET' &&
+        (uri.path.endsWith('/api/config') ||
+            uri.path.endsWith('/api/agent') ||
+            uri.path.endsWith('/api/model/default'))) {
+      await _json(
+        request,
+        200,
+        uri.path.endsWith('/api/model/default') ? null : <Object?>[],
+      );
+      return;
+    }
     final index = _cursor;
     if (scenario.routes.isNotEmpty) {
       await _handleRouted(

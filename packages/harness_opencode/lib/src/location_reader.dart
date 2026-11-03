@@ -110,6 +110,87 @@ final class OpenCodeLocationReader {
     }, cancellation);
   }
 
+  /// The configured default agent of [directory]'s location: the value of the
+  /// highest-priority config document that sets `default_agent`, or null when
+  /// none does. The endpoint lists documents from lowest to highest priority.
+  Future<String?> readDefaultAgent({
+    required String directory,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final path = Uri(
+      path: 'api/config',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      if (value is! List || value.length > maxEntries) {
+        throw const FormatException('Malformed config list.');
+      }
+      String? agent;
+      for (final entry in value) {
+        final document = _object(entry);
+        final info = document['info'];
+        if (document['type'] != 'document' || info is! Map) continue;
+        final configured = info['default_agent'];
+        if (configured is String && configured.trim().isNotEmpty) {
+          agent = configured;
+        }
+      }
+      return agent;
+    }, cancellation);
+  }
+
+  /// The endpoint's default model for [directory]'s location, named by its
+  /// name or, without one, its model id; null when the endpoint has none.
+  Future<String?> readDefaultModel({
+    required String directory,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final path = Uri(
+      path: 'api/model/default',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      if (value == null) return null;
+      final model = _object(value);
+      final name = model['name'];
+      if (name is String && name.trim().isNotEmpty) return name;
+      final id = model['modelID'];
+      return id is String && id.trim().isNotEmpty ? id : null;
+    }, cancellation);
+  }
+
+  /// The display name of agent [id] in [directory]'s location, or null when
+  /// the location does not register it.
+  Future<String?> readAgentName({
+    required String directory,
+    required String id,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final path = Uri(
+      path: 'api/agent',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      if (value is! List || value.length > maxEntries) {
+        throw const FormatException('Malformed agent list.');
+      }
+      for (final row in value) {
+        final agent = _object(row);
+        if (agent['id'] == id) {
+          final name = agent['name'];
+          return name is String && name.trim().isNotEmpty ? name : id;
+        }
+      }
+      return null;
+    }, cancellation);
+  }
+
   /// The direct children of [path] in [directory]'s location; [path] is
   /// absolute or relative to [directory] and defaults to it. Entry paths stay
   /// relative to [directory], even for a parent or sibling.
