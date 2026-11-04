@@ -20,6 +20,8 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
   final HttpClient _client;
   final int maxRedirects;
   bool _closed = false;
+  HttpClientRequest? _activeRequest;
+  HttpClientResponse? _activeResponse;
 
   static const Duration _connectTimeout = Duration(seconds: 15);
   static const Duration _headerTimeout = Duration(seconds: 15);
@@ -30,7 +32,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
   Future<String> fetchText(Uri uri, {int maxBytes = maxIntegrityBytes}) async {
     final response = await _open(uri);
     if (response.statusCode != 200) {
-      await response.drain<void>();
+      await _discardResponse(response);
       throw const ApkDownloadException(ApkUpdateFailure.http);
     }
     final bytes = <int>[];
@@ -46,6 +48,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
     } on SocketException catch (error) {
       throw ApkDownloadException(ApkUpdateFailure.network, error);
     }
+    _activeResponse = null;
     return utf8.decode(bytes);
   }
 
@@ -58,12 +61,12 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
   }) async {
     final response = await _open(uri);
     if (response.statusCode != 200) {
-      await response.drain<void>();
+      await _discardResponse(response);
       throw const ApkDownloadException(ApkUpdateFailure.http);
     }
     final total = response.contentLength >= 0 ? response.contentLength : null;
     if (total != null && total > maxApkBytes) {
-      await response.drain<void>();
+      await _discardResponse(response);
       throw const ApkDownloadException(ApkUpdateFailure.tooLarge);
     }
 
@@ -111,6 +114,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       await _discard(handle, file);
       throw ApkDownloadException(ApkUpdateFailure.network, error);
     }
+    _activeResponse = null;
     final digest = digestSink.value;
     if (digest == null) {
       throw const ApkDownloadException(ApkUpdateFailure.checksumUnavailable);
@@ -146,6 +150,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
         throw ApkDownloadException(ApkUpdateFailure.network, error);
       }
       request.followRedirects = false;
+      _activeRequest = request;
       request.headers.set(HttpHeaders.userAgentHeader, 'CodeWalk');
       request.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
       final HttpClientResponse response;
@@ -156,9 +161,14 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       } on SocketException catch (error) {
         throw ApkDownloadException(ApkUpdateFailure.network, error);
       }
-      if (!response.isRedirect) return response;
+      _activeRequest = null;
+      if (!response.isRedirect) {
+        _activeResponse = response;
+        return response;
+      }
       final location = response.headers.value(HttpHeaders.locationHeader);
-      await response.drain<void>();
+      await _discardResponse(response);
+      _activeResponse = null;
       if (location == null) {
         throw const ApkDownloadException(ApkUpdateFailure.http);
       }
@@ -167,11 +177,35 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
     throw const ApkDownloadException(ApkUpdateFailure.http);
   }
 
+  /// Aborts a response we will not read, without waiting for its body.
+  Future<void> _discardResponse(HttpClientResponse response) async {
+    try {
+      final socket = await response.detachSocket();
+      socket.destroy();
+    } on Object {
+      // The response was already consumed or the socket is gone.
+    }
+  }
+
   @override
   void close() {
     if (_closed) return;
     _closed = true;
     _client.close(force: true);
+  }
+
+  @override
+  void cancelActive() {
+    _activeRequest?.abort();
+    final response = _activeResponse;
+    if (response == null) return;
+    _activeResponse = null;
+    unawaited(
+      response
+          .detachSocket()
+          .then<void>((socket) => socket.destroy())
+          .catchError((Object _) {}),
+    );
   }
 }
 

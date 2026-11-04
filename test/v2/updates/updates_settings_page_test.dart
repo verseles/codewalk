@@ -122,6 +122,9 @@ class FakeFetcher implements ApkAssetFetcher {
 
   @override
   void close() {}
+
+  @override
+  void cancelActive() {}
 }
 
 class FakeInstaller implements ApkInstaller {

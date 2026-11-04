@@ -54,13 +54,21 @@ final class ApkFileStoreIo implements ApkFileStore {
   Future<void> cleanupStale() async {
     final root = Directory(await _root());
     if (!root.existsSync()) return;
+    final cutoff = DateTime.now().subtract(const Duration(hours: 24));
     await for (final entity in root.list(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.part')) {
-        try {
+      if (entity is! File) continue;
+      final path = entity.path;
+      try {
+        if (path.endsWith('.part')) {
           await entity.delete();
-        } on FileSystemException {
-          // A locked part is retried on the next start.
+          continue;
         }
+        if (path.endsWith('.apk') &&
+            entity.statSync().modified.isBefore(cutoff)) {
+          await entity.delete();
+        }
+      } on FileSystemException {
+        // A locked file is retried on the next start.
       }
     }
   }

@@ -64,6 +64,12 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     } else {
       final checking = controller.status == UpdateCheckStatus.checking;
       final candidate = controller.candidate;
+      final installBusy =
+          install != null &&
+          (install.status == ApkUpdateStatus.downloading ||
+              install.status == ApkUpdateStatus.verifying ||
+              install.status == ApkUpdateStatus.ready ||
+              install.status == ApkUpdateStatus.handingOff);
       children.addAll([
         Text(l.updatesChannel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
@@ -80,8 +86,10 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
             ),
           ],
           selected: {controller.channel},
-          onSelectionChanged: (selection) =>
-              unawaited(controller.setChannel(selection.single)),
+          onSelectionChanged: installBusy
+              ? null
+              : (selection) =>
+                    unawaited(controller.setChannel(selection.single)),
         ),
         if (controller.channel == UpdateChannel.beta) ...[
           const SizedBox(height: 8),
@@ -96,7 +104,9 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           alignment: AlignmentDirectional.centerStart,
           child: FilledButton.tonalIcon(
             key: const ValueKey('updates_check'),
-            onPressed: checking ? null : () => unawaited(controller.check()),
+            onPressed: checking || installBusy
+                ? null
+                : () => unawaited(controller.check()),
             icon: const Icon(Symbols.system_update_alt),
             label: Text(l.settingsAboutCheckForUpdates),
           ),

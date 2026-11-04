@@ -93,6 +93,7 @@ class FakeFetcher implements ApkAssetFetcher {
   int downloadBytes = 10;
   Uri? downloaded;
   Exception? failure;
+  int downloads = 0;
 
   @override
   Future<String> fetchText(Uri uri, {int maxBytes = 256 * 1024}) async {
@@ -112,6 +113,7 @@ class FakeFetcher implements ApkAssetFetcher {
   }) async {
     if (failure case final error?) throw error;
     downloaded = uri;
+    downloads++;
     store.files[partPath] = downloadSha;
     onProgress(downloadBytes, downloadBytes);
     return ApkDownloadResult(bytes: downloadBytes, sha256: downloadSha);
@@ -119,6 +121,9 @@ class FakeFetcher implements ApkAssetFetcher {
 
   @override
   void close() {}
+
+  @override
+  void cancelActive() {}
 }
 
 class FakeInstaller implements ApkInstaller {
@@ -138,6 +143,7 @@ void main() {
   late FakeInstaller installer;
   late UpdateCheckController checks;
   late ApkUpdateController controller;
+  var foreground = false;
 
   void build({
     String packageName = codewalkAndroidApplicationId,
@@ -156,7 +162,7 @@ void main() {
       checks: checks,
       installedBuildNumber: () async => build,
       packageName: () async => packageName,
-      isForeground: () => false,
+      isForeground: () => foreground,
     );
   }
 
@@ -180,8 +186,8 @@ void main() {
   });
 
   test('opens the installer and reports installerOpened', () async {
+    foreground = true;
     await controller.start(candidate);
-    await controller.openInstaller();
     expect(controller.status, ApkUpdateStatus.installerOpened);
     expect(installer.openedPath, isNotNull);
   });
@@ -207,6 +213,18 @@ void main() {
     expect(controller.failure, ApkUpdateFailure.checksumMismatch);
   });
 
+  test('retries the installer without downloading again', () async {
+    foreground = true;
+    installer.outcome = ApkInstallOutcome.failed;
+    await controller.start(candidate);
+    expect(controller.status, ApkUpdateStatus.failed);
+    expect(controller.failure, ApkUpdateFailure.installerFailed);
+    installer.outcome = ApkInstallOutcome.opened;
+    await controller.retry();
+    expect(controller.status, ApkUpdateStatus.installerOpened);
+    expect(fetcher.downloads, 1);
+  });
+
   test('refuses a downgrade', () async {
     build(build: '999');
     await controller.start(candidate);
@@ -219,5 +237,17 @@ void main() {
     await controller.start(candidate);
     expect(controller.status, ApkUpdateStatus.failed);
     expect(controller.failure, ApkUpdateFailure.unsupported);
+  });
+
+  test('refuses a non-canonical asset URL', () async {
+    final bad = UpdateCandidate(
+      tag: candidate.tag,
+      version: candidate.version,
+      assetUrl: Uri.parse('https://example.com/codewalk-android-arm64.apk'),
+    );
+    await controller.start(bad);
+    expect(controller.status, ApkUpdateStatus.failed);
+    expect(controller.failure, ApkUpdateFailure.http);
+    expect(fetcher.downloaded, isNull);
   });
 }

@@ -22,4 +22,7 @@ final class _UnsupportedFetcher implements ApkAssetFetcher {
 
   @override
   void close() {}
+
+  @override
+  void cancelActive() {}
 }

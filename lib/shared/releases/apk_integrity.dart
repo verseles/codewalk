@@ -88,6 +88,8 @@ ReleaseManifest? parseReleaseManifest(
     if (releaseTag is! String || releaseTag != tag || version is! String) {
       return null;
     }
+    final canonical = tag.startsWith('v') ? tag.substring(1) : tag;
+    if (version != canonical) return null;
     final assets = root['assets'];
     if (assets is! Map) return null;
     final asset = assets[assetName];
@@ -115,6 +117,7 @@ ReleaseManifest? parseReleaseManifest(
     if (size <= 0 || versionCode <= 0) return null;
     if (abi != codewalkAndroidAbi) return null;
     if (applicationId != codewalkAndroidApplicationId) return null;
+    if (versionName != canonical) return null;
     return ReleaseManifest(
       tag: releaseTag,
       version: version,

@@ -89,6 +89,14 @@ final class ApkUpdateController extends ChangeNotifier {
       }
       final buildNumber = int.tryParse(await _installedBuildNumber());
       final tag = candidate.tag;
+      if (!isExactReleaseAssetUri(
+        candidate.assetUrl,
+        tag: tag,
+        name: codewalkAndroidAssetName,
+      )) {
+        _fail(ApkUpdateFailure.http);
+        return;
+      }
       final sumsBody = await _fetcher.fetchText(
         releaseAssetUri(tag, releaseChecksumsAssetName),
         maxBytes: maxIntegrityBytes,
@@ -155,6 +163,10 @@ final class ApkUpdateController extends ChangeNotifier {
       }
       final finalPath = await _fileStore.finalPath(tag);
       await _fileStore.rename(partPath, finalPath);
+      if (!_current(generation)) {
+        await _fileStore.delete(finalPath);
+        return;
+      }
       _verifiedPath = finalPath;
       _status = ApkUpdateStatus.ready;
       notifyListeners();
@@ -173,45 +185,65 @@ final class ApkUpdateController extends ChangeNotifier {
   /// Re-opens the verified file without downloading it again.
   Future<void> openInstaller() async {
     if (_disposed) return;
-    if (_status != ApkUpdateStatus.ready &&
-        _status != ApkUpdateStatus.installerOpened) {
-      return;
-    }
+    final generation = _generation;
+    final canOpen =
+        _status == ApkUpdateStatus.ready ||
+        _status == ApkUpdateStatus.installerOpened ||
+        (_status == ApkUpdateStatus.failed && _verifiedPath != null);
+    if (!canOpen) return;
     final path = _verifiedPath;
     final expected = _expectedSha256;
     if (path == null || expected == null) {
       _fail(ApkUpdateFailure.fileMissing);
       return;
     }
-    if (!await _fileStore.exists(path)) {
-      _verifiedPath = null;
-      _fail(ApkUpdateFailure.fileMissing);
-      return;
-    }
-    _status = ApkUpdateStatus.handingOff;
-    notifyListeners();
-    final digest = await _fileStore.sha256(path);
-    if (digest == null || digest != expected) {
-      await _fileStore.delete(path);
-      _verifiedPath = null;
-      _fail(ApkUpdateFailure.checksumMismatch);
-      return;
-    }
-    final outcome = await _installer.open(path);
-    switch (outcome) {
-      case ApkInstallOutcome.opened:
-        _status = ApkUpdateStatus.installerOpened;
-      case ApkInstallOutcome.noInstaller:
-        _fail(ApkUpdateFailure.installerUnavailable);
-      case ApkInstallOutcome.denied:
-        _fail(ApkUpdateFailure.installerDenied);
-      case ApkInstallOutcome.fileMissing:
+    try {
+      if (!await _fileStore.exists(path)) {
+        if (!_current(generation)) return;
         _verifiedPath = null;
         _fail(ApkUpdateFailure.fileMissing);
-      case ApkInstallOutcome.failed:
-        _fail(ApkUpdateFailure.installerFailed);
+        return;
+      }
+      if (!_current(generation)) return;
+      _status = ApkUpdateStatus.handingOff;
+      _notify();
+      final digest = await _fileStore.sha256(path);
+      if (!_current(generation)) return;
+      if (digest == null || digest != expected) {
+        await _fileStore.delete(path);
+        if (!_current(generation)) return;
+        _verifiedPath = null;
+        _fail(ApkUpdateFailure.checksumMismatch);
+        return;
+      }
+      if (!_isForeground()) {
+        _status = ApkUpdateStatus.ready;
+        _notify();
+        return;
+      }
+      final outcome = await _installer.open(path);
+      if (!_current(generation)) return;
+      switch (outcome) {
+        case ApkInstallOutcome.opened:
+          _status = ApkUpdateStatus.installerOpened;
+        case ApkInstallOutcome.noInstaller:
+          _fail(ApkUpdateFailure.installerUnavailable);
+        case ApkInstallOutcome.denied:
+          _fail(ApkUpdateFailure.installerDenied);
+        case ApkInstallOutcome.fileMissing:
+          _verifiedPath = null;
+          _fail(ApkUpdateFailure.fileMissing);
+        case ApkInstallOutcome.failed:
+          _fail(ApkUpdateFailure.installerFailed);
+      }
+      _notify();
+    } on Object {
+      if (_current(generation)) _fail(ApkUpdateFailure.fileMissing);
     }
-    notifyListeners();
+  }
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
   }
 
   /// Aborts an active transfer and removes its partial file.
@@ -220,6 +252,7 @@ final class ApkUpdateController extends ChangeNotifier {
     if (_status == ApkUpdateStatus.idle) return;
     _cancelled = true;
     _generation++;
+    _fetcher.cancelActive();
     _status = ApkUpdateStatus.idle;
     _failure = null;
     _progress = 0;
@@ -233,10 +266,19 @@ final class ApkUpdateController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Retries the last failed candidate from scratch.
+  /// Retries the last failed candidate, reusing a verified APK when the
+  /// failure came only from the installer handoff.
   Future<void> retry() async {
     final candidate = _candidate;
     if (candidate == null || _status != ApkUpdateStatus.failed) return;
+    final failure = _failure;
+    if (_verifiedPath != null &&
+        (failure == ApkUpdateFailure.installerUnavailable ||
+            failure == ApkUpdateFailure.installerDenied ||
+            failure == ApkUpdateFailure.installerFailed)) {
+      await openInstaller();
+      return;
+    }
     await start(candidate);
   }
 

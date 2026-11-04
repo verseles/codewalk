@@ -62,6 +62,9 @@ abstract interface class ApkAssetFetcher {
   });
 
   void close();
+
+  /// Aborts the transfer currently in flight, if any.
+  void cancelActive();
 }
 
 /// Opens a verified local APK with the system installer.

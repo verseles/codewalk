@@ -7,6 +7,8 @@ const _sha = '64d338107e0175b26d25343ed00af2a01ac009c9286c16c9f1aed32ac7c58f5b';
 
 String _manifest({
   String tag = 'v2.0.0-beta.1',
+  String version = '2.0.0-beta.1',
+  String versionName = '2.0.0-beta.1',
   String sha = _sha,
   String signer = codewalkAndroidSignerSha256,
   String abi = 'arm64-v8a',
@@ -17,7 +19,7 @@ String _manifest({
 }) => jsonEncode({
   'schema': schema,
   'tag': tag,
-  'version': '2.0.0-beta.1',
+  'version': version,
   'assets': {
     'codewalk-android-arm64.apk': {
       'abi': abi,
@@ -26,7 +28,7 @@ String _manifest({
       'signer_sha256': signer,
       'size': size,
       'version_code': versionCode,
-      'version_name': '2.0.0-beta.1',
+      'version_name': versionName,
     },
   },
 });
@@ -70,6 +72,8 @@ void main() {
     test('rejects a different tag, signer, abi or application id', () {
       for (final body in [
         _manifest(tag: 'v2.0.0-beta.2'),
+        _manifest(version: '9.9.9'),
+        _manifest(versionName: '9.9.9'),
         _manifest(signer: 'a' * 64),
         _manifest(abi: 'x86_64'),
         _manifest(appId: 'com.example'),
