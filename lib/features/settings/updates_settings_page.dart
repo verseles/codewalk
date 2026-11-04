@@ -69,7 +69,10 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           (install.status == ApkUpdateStatus.downloading ||
               install.status == ApkUpdateStatus.verifying ||
               install.status == ApkUpdateStatus.ready ||
-              install.status == ApkUpdateStatus.handingOff);
+              install.status == ApkUpdateStatus.handingOff ||
+              install.status == ApkUpdateStatus.installerOpened ||
+              (install.status == ApkUpdateStatus.failed &&
+                  install.hasVerifiedPackage));
       children.addAll([
         Text(l.updatesChannel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),

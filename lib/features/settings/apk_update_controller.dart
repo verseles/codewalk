@@ -62,6 +62,7 @@ final class ApkUpdateController extends ChangeNotifier {
   ApkUpdateFailure? get failure => _failure;
   double get progress => _progress;
   UpdateCandidate? get candidate => _candidate;
+  bool get hasVerifiedPackage => _verifiedPath != null;
 
   /// Downloads, verifies and (when foregrounded) opens the installer for the
   /// exact [candidate] selected by [UpdateCheckController].
@@ -264,7 +265,7 @@ final class ApkUpdateController extends ChangeNotifier {
       await _fileStore.delete(await _fileStore.partPath(tag));
     }
     if (path != null) await _fileStore.delete(path);
-    notifyListeners();
+    _notify();
   }
 
   /// Retries the last failed candidate, reusing a verified APK when the
@@ -295,6 +296,7 @@ final class ApkUpdateController extends ChangeNotifier {
   void _onCheckChanged() {
     if (_disposed || _status == ApkUpdateStatus.idle) return;
     final candidate = _checks.candidate;
+    if (_verifiedPath != null) return;
     if (candidate == null || candidate.tag != _candidate?.tag) {
       unawaited(cancel());
     }
