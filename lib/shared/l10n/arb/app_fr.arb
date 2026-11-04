@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "Un tour est actuellement annulé.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "Vérification de la mise à jour…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "Installer",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "Programme d’installation ouvert. Confirmez l’installation sur l’écran du système.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "Réessayer",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "Échec de la mise à jour.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

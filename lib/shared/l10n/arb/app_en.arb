@@ -2846,5 +2846,25 @@
   "turnUnavailableRevertStaged": "A turn is currently undone.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "Verifying update…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "Install",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "Installer opened. Confirm the install on the system screen.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "Try again",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "Update failed.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

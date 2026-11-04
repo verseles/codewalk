@@ -9,6 +9,7 @@ import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
+import '../features/settings/apk_update_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
@@ -41,6 +42,7 @@ class AppDependencies {
     this.diagnostics,
     this.releaseHistory,
     this.updates,
+    this.apkUpdates,
     this.sessions,
     this.historyFactory,
     this.liveDirectory,
@@ -116,6 +118,7 @@ class AppDependencies {
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
   final UpdateCheckController? updates;
+  final ApkUpdateController? apkUpdates;
   NativePairingLinks? links;
   bool _disposed = false;
 
@@ -154,6 +157,7 @@ class AppDependencies {
     modelPreferences?.dispose();
     releaseHistory?.dispose();
     updates?.dispose();
+    apkUpdates?.dispose();
     diagnostics?.dispose();
   }
 }

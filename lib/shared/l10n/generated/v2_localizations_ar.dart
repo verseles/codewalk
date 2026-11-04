@@ -2273,4 +2273,20 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'هناك دور متراجع عنه حاليًا.';
+
+  @override
+  String get updatesVerifying => 'جارٍ التحقق من التحديث…';
+
+  @override
+  String get updatesInstall => 'تثبيت';
+
+  @override
+  String get updatesInstallerOpened =>
+      'تم فتح المثبّت. أكّد التثبيت على شاشة النظام.';
+
+  @override
+  String get updatesRetry => 'إعادة المحاولة';
+
+  @override
+  String get updatesUpdateFailed => 'فشل التحديث.';
 }

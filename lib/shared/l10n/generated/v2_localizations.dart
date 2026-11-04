@@ -4177,6 +4177,36 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'A turn is currently undone.'**
   String get turnUnavailableRevertStaged;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying update…'**
+  String get updatesVerifying;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get updatesInstall;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Installer opened. Confirm the install on the system screen.'**
+  String get updatesInstallerOpened;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get updatesRetry;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed.'**
+  String get updatesUpdateFailed;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "एक बारी वर्तमान में पूर्ववत है।",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "अपडेट सत्यापित हो रहा है…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "इंस्टॉल करें",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "इंस्टॉलर खुल गया। सिस्टम स्क्रीन पर इंस्टॉल की पुष्टि करें।",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "फिर से कोशिश करें",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "अपडेट विफल।",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

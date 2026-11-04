@@ -2344,4 +2344,20 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'Un turno è attualmente annullato.';
+
+  @override
+  String get updatesVerifying => 'Verifica aggiornamento…';
+
+  @override
+  String get updatesInstall => 'Installa';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Programma di installazione aperto. Conferma l’installazione nella schermata di sistema.';
+
+  @override
+  String get updatesRetry => 'Riprova';
+
+  @override
+  String get updatesUpdateFailed => 'Aggiornamento non riuscito.';
 }

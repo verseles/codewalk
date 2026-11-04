@@ -2153,4 +2153,19 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => '当前有一轮已被撤销。';
+
+  @override
+  String get updatesVerifying => '正在校验更新…';
+
+  @override
+  String get updatesInstall => '安装';
+
+  @override
+  String get updatesInstallerOpened => '安装程序已打开。请在系统界面确认安装。';
+
+  @override
+  String get updatesRetry => '重试';
+
+  @override
+  String get updatesUpdateFailed => '更新失败。';
 }

@@ -4,23 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/releases/apk_update.dart';
 import '../../shared/releases/update_selector.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import 'apk_update_controller.dart';
 import 'update_check_controller.dart';
 
-Future<bool> _openExternally(Uri uri) =>
-    launchUrl(uri, mode: LaunchMode.externalApplication);
-
-/// Manual update check: Android downloads the exact APK in the browser; Linux
-/// shows the installer command for the exact tag. Nothing installs itself.
+/// Manual update check: Android downloads and verifies the exact APK in-app,
+/// then hands it to the system installer; Linux shows the installer command.
 class UpdatesSettingsPage extends StatefulWidget {
-  const UpdatesSettingsPage({super.key, this.open = _openExternally});
-
-  final Future<bool> Function(Uri uri) open;
+  const UpdatesSettingsPage({super.key});
 
   @override
   State<UpdatesSettingsPage> createState() => _UpdatesSettingsPageState();
@@ -52,6 +48,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<UpdateCheckController?>();
+    final install = context.watch<ApkUpdateController?>();
     final l = context.v2L10n;
     final theme = Theme.of(context);
     final children = <Widget>[
@@ -116,7 +113,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           ),
         if (controller.status == UpdateCheckStatus.available &&
             candidate != null)
-          _available(context, controller.target!, candidate),
+          _available(context, controller.target!, candidate, install),
       ]);
     }
     return ListView(
@@ -130,6 +127,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     BuildContext context,
     UpdateTarget target,
     UpdateCandidate candidate,
+    ApkUpdateController? install,
   ) {
     final l = context.v2L10n;
     final theme = Theme.of(context);
@@ -147,12 +145,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
             ),
             const SizedBox(height: 12),
             if (target == UpdateTarget.androidArm64)
-              FilledButton.icon(
-                key: const ValueKey('updates_download'),
-                onPressed: () => unawaited(widget.open(candidate.assetUrl)),
-                icon: const Icon(Symbols.download),
-                label: Text(l.updatesDownload),
-              )
+              _androidInstall(context, candidate, install)
             else ...[
               Text(l.updatesLinuxInstallHint),
               const SizedBox(height: 8),
@@ -175,5 +168,108 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
         ),
       ),
     );
+  }
+
+  Widget _androidInstall(
+    BuildContext context,
+    UpdateCandidate candidate,
+    ApkUpdateController? install,
+  ) {
+    final l = context.v2L10n;
+    final theme = Theme.of(context);
+    if (install == null) {
+      return Text(l.updatesUnsupported);
+    }
+    switch (install.status) {
+      case ApkUpdateStatus.idle:
+        return FilledButton.icon(
+          key: const ValueKey('updates_download'),
+          onPressed: () => unawaited(install.start(candidate)),
+          icon: const Icon(Symbols.download),
+          label: Text(l.updatesDownload),
+        );
+      case ApkUpdateStatus.downloading:
+        final percent = (install.progress * 100).round();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinearProgressIndicator(
+              key: const ValueKey('updates_progress'),
+              value: install.progress > 0 ? install.progress : null,
+            ),
+            const SizedBox(height: 8),
+            Text(install.progress > 0 ? '$percent%' : l.updatesDownload),
+            TextButton(
+              key: const ValueKey('updates_cancel'),
+              onPressed: () => unawaited(install.cancel()),
+              child: Text(l.commonCancel),
+            ),
+          ],
+        );
+      case ApkUpdateStatus.verifying:
+      case ApkUpdateStatus.handingOff:
+        return Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: AppIndeterminateRing(size: 16, strokeWidth: 2),
+            ),
+            const SizedBox(width: 8),
+            Text(l.updatesVerifying),
+          ],
+        );
+      case ApkUpdateStatus.ready:
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              key: const ValueKey('updates_install'),
+              onPressed: () => unawaited(install.openInstaller()),
+              icon: const Icon(Symbols.install_mobile),
+              label: Text(l.updatesInstall),
+            ),
+            TextButton(
+              key: const ValueKey('updates_cancel'),
+              onPressed: () => unawaited(install.cancel()),
+              child: Text(l.commonCancel),
+            ),
+          ],
+        );
+      case ApkUpdateStatus.installerOpened:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.updatesInstallerOpened,
+              key: const ValueKey('updates_installer_opened'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              key: const ValueKey('updates_install'),
+              onPressed: () => unawaited(install.openInstaller()),
+              child: Text(l.updatesInstall),
+            ),
+          ],
+        );
+      case ApkUpdateStatus.failed:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.updatesUpdateFailed,
+              key: const ValueKey('updates_error'),
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              key: const ValueKey('updates_retry'),
+              onPressed: () => unawaited(install.retry()),
+              child: Text(l.updatesRetry),
+            ),
+          ],
+        );
+    }
   }
 }

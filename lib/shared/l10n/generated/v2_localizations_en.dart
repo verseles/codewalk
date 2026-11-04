@@ -2295,4 +2295,20 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'A turn is currently undone.';
+
+  @override
+  String get updatesVerifying => 'Verifying update…';
+
+  @override
+  String get updatesInstall => 'Install';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Installer opened. Confirm the install on the system screen.';
+
+  @override
+  String get updatesRetry => 'Try again';
+
+  @override
+  String get updatesUpdateFailed => 'Update failed.';
 }

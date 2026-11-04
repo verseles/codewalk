@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "Ein Schritt ist derzeit rückgängig gemacht.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "Update wird überprüft…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "Installieren",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "Installer geöffnet. Bestätige die Installation auf dem Systembildschirm.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "Erneut versuchen",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "Update fehlgeschlagen.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

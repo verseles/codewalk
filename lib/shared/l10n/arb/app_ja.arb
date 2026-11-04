@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "現在、ターンが取り消されています。",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "アップデートを確認中…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "インストール",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "インストーラーを開きました。システム画面でインストールを確認してください。",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "再試行",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "アップデートに失敗しました。",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

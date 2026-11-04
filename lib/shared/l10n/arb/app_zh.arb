@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "当前有一轮已被撤销。",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "正在校验更新…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "安装",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "安装程序已打开。请在系统界面确认安装。",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "重试",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "更新失败。",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

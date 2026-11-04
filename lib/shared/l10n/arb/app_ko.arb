@@ -1737,5 +1737,25 @@
   "turnUnavailableRevertStaged": "현재 실행 취소된 턴이 있습니다.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "업데이트 확인 중…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "설치",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "설치 프로그램을 열었습니다. 시스템 화면에서 설치를 확인하세요.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "다시 시도",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "업데이트 실패.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

@@ -1698,5 +1698,25 @@
   "turnUnavailableRevertStaged": "هناك دور متراجع عنه حاليًا.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "جارٍ التحقق من التحديث…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "تثبيت",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "تم فتح المثبّت. أكّد التثبيت على شاشة النظام.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "إعادة المحاولة",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "فشل التحديث.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

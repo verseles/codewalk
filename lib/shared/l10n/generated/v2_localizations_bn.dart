@@ -2292,4 +2292,20 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get turnUnavailableRevertStaged =>
       'একটি পালা বর্তমানে পূর্বাবস্থায় ফিরিয়ে নেওয়া আছে।';
+
+  @override
+  String get updatesVerifying => 'আপডেট যাচাই হচ্ছে…';
+
+  @override
+  String get updatesInstall => 'ইনস্টল করুন';
+
+  @override
+  String get updatesInstallerOpened =>
+      'ইনস্টলার খোলা হয়েছে। সিস্টেম স্ক্রিনে ইনস্টল নিশ্চিত করুন।';
+
+  @override
+  String get updatesRetry => 'আবার চেষ্টা করুন';
+
+  @override
+  String get updatesUpdateFailed => 'আপডেট ব্যর্থ।';
 }

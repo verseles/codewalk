@@ -2194,4 +2194,19 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => '現在、ターンが取り消されています。';
+
+  @override
+  String get updatesVerifying => 'アップデートを確認中…';
+
+  @override
+  String get updatesInstall => 'インストール';
+
+  @override
+  String get updatesInstallerOpened => 'インストーラーを開きました。システム画面でインストールを確認してください。';
+
+  @override
+  String get updatesRetry => '再試行';
+
+  @override
+  String get updatesUpdateFailed => 'アップデートに失敗しました。';
 }

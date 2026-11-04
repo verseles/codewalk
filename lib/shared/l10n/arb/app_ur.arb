@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "ایک باری فی الحال کالعدم ہے۔",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "اپڈیٹ کی تصدیق ہو رہی ہے…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "انسٹال کریں",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "انسٹالر کھل گیا۔ سسٹم اسکرین پر انسٹال کی تصدیق کریں۔",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "دوبارہ کوشش کریں",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "اپڈیٹ ناکام۔",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

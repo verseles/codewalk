@@ -8,6 +8,7 @@ import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
+import '../features/settings/apk_update_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
@@ -144,6 +145,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ),
         if (dependencies.updates case final updates?)
           ChangeNotifierProvider<UpdateCheckController>.value(value: updates),
+        if (dependencies.apkUpdates case final apkUpdates?)
+          ChangeNotifierProvider<ApkUpdateController>.value(value: apkUpdates),
         if (dependencies.pairing case final pairing?)
           ChangeNotifierProvider.value(value: pairing),
         Provider.value(value: dependencies.localizations),

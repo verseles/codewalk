@@ -2297,4 +2297,20 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'एक बारी वर्तमान में पूर्ववत है।';
+
+  @override
+  String get updatesVerifying => 'अपडेट सत्यापित हो रहा है…';
+
+  @override
+  String get updatesInstall => 'इंस्टॉल करें';
+
+  @override
+  String get updatesInstallerOpened =>
+      'इंस्टॉलर खुल गया। सिस्टम स्क्रीन पर इंस्टॉल की पुष्टि करें।';
+
+  @override
+  String get updatesRetry => 'फिर से कोशिश करें';
+
+  @override
+  String get updatesUpdateFailed => 'अपडेट विफल।';
 }

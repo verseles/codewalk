@@ -1,1 +1,0 @@
-chama um handshake dos helpers pra ver se todos estão funcionando

@@ -11,6 +11,7 @@ import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
+import '../features/settings/apk_update_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../platform/connectivity/network_changes.dart';
@@ -19,6 +20,7 @@ import '../platform/endpoints/probe_factory.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
+import '../platform/releases/apk_platform_factory.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
@@ -246,6 +248,25 @@ AppDependencies createAppDependencies({
       initialLocation: navigation.prepareLink(initial),
     ),
   );
+  final updates = UpdateCheckController(
+    source: updateSource ?? createUpdateSource(),
+    store: metadata,
+    installedVersion:
+        installedVersion ??
+        () async => (await PackageInfo.fromPlatform()).version,
+    target: currentUpdateTarget(),
+  );
+  final apkUpdates = ApkUpdateController(
+    fetcher: createApkFetcher(),
+    installer: createApkInstaller(),
+    fileStore: createApkFileStore(),
+    checks: updates,
+    installedBuildNumber: () async =>
+        (await PackageInfo.fromPlatform()).buildNumber,
+    packageName: () async => (await PackageInfo.fromPlatform()).packageName,
+    isForeground: () =>
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
+  );
   return AppDependencies(
     preferences: locator<AppPreferencesController>(),
     navigation: navigation,
@@ -276,14 +297,8 @@ AppDependencies createAppDependencies({
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),
-    updates: UpdateCheckController(
-      source: updateSource ?? createUpdateSource(),
-      store: metadata,
-      installedVersion:
-          installedVersion ??
-          () async => (await PackageInfo.fromPlatform()).version,
-      target: currentUpdateTarget(),
-    ),
+    updates: updates,
+    apkUpdates: apkUpdates,
   );
 }
 

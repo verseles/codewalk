@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "Un turno è attualmente annullato.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "Verifica aggiornamento…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "Installa",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "Programma di installazione aperto. Conferma l’installazione nella schermata di sistema.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "Riprova",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "Aggiornamento non riuscito.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

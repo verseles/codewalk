@@ -2344,4 +2344,20 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'Un tour est actuellement annulé.';
+
+  @override
+  String get updatesVerifying => 'Vérification de la mise à jour…';
+
+  @override
+  String get updatesInstall => 'Installer';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Programme d’installation ouvert. Confirmez l’installation sur l’écran du système.';
+
+  @override
+  String get updatesRetry => 'Réessayer';
+
+  @override
+  String get updatesUpdateFailed => 'Échec de la mise à jour.';
 }

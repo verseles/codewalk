@@ -2320,4 +2320,20 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'Ход в данный момент отменён.';
+
+  @override
+  String get updatesVerifying => 'Проверка обновления…';
+
+  @override
+  String get updatesInstall => 'Установить';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Установщик открыт. Подтвердите установку на экране системы.';
+
+  @override
+  String get updatesRetry => 'Повторить';
+
+  @override
+  String get updatesUpdateFailed => 'Не удалось обновить.';
 }

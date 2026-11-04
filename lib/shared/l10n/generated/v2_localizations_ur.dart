@@ -2291,4 +2291,20 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => 'ایک باری فی الحال کالعدم ہے۔';
+
+  @override
+  String get updatesVerifying => 'اپڈیٹ کی تصدیق ہو رہی ہے…';
+
+  @override
+  String get updatesInstall => 'انسٹال کریں';
+
+  @override
+  String get updatesInstallerOpened =>
+      'انسٹالر کھل گیا۔ سسٹم اسکرین پر انسٹال کی تصدیق کریں۔';
+
+  @override
+  String get updatesRetry => 'دوبارہ کوشش کریں';
+
+  @override
+  String get updatesUpdateFailed => 'اپڈیٹ ناکام۔';
 }

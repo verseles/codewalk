@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "একটি পালা বর্তমানে পূর্বাবস্থায় ফিরিয়ে নেওয়া আছে।",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "আপডেট যাচাই হচ্ছে…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "ইনস্টল করুন",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "ইনস্টলার খোলা হয়েছে। সিস্টেম স্ক্রিনে ইনস্টল নিশ্চিত করুন।",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "আবার চেষ্টা করুন",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "আপডেট ব্যর্থ।",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

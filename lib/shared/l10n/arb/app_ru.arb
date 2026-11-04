@@ -1699,5 +1699,25 @@
   "turnUnavailableRevertStaged": "Ход в данный момент отменён.",
   "@turnUnavailableRevertStaged": {
     "description": "V2 turn actions and draft provenance"
+  },
+  "updatesVerifying": "Проверка обновления…",
+  "@updatesVerifying": {
+    "description": "V2 update check"
+  },
+  "updatesInstall": "Установить",
+  "@updatesInstall": {
+    "description": "V2 update check"
+  },
+  "updatesInstallerOpened": "Установщик открыт. Подтвердите установку на экране системы.",
+  "@updatesInstallerOpened": {
+    "description": "V2 update check"
+  },
+  "updatesRetry": "Повторить",
+  "@updatesRetry": {
+    "description": "V2 update check"
+  },
+  "updatesUpdateFailed": "Не удалось обновить.",
+  "@updatesUpdateFailed": {
+    "description": "V2 update check"
   }
 }

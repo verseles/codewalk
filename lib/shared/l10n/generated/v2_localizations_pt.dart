@@ -2324,4 +2324,20 @@ class V2LocalizationsPt extends V2Localizations {
   @override
   String get turnUnavailableRevertStaged =>
       'Um turno está desfeito no momento.';
+
+  @override
+  String get updatesVerifying => 'Verificando atualização…';
+
+  @override
+  String get updatesInstall => 'Instalar';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Instalador aberto. Confirme a instalação na tela do sistema.';
+
+  @override
+  String get updatesRetry => 'Tentar novamente';
+
+  @override
+  String get updatesUpdateFailed => 'Falha na atualização.';
 }

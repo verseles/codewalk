@@ -2195,4 +2195,19 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get turnUnavailableRevertStaged => '현재 실행 취소된 턴이 있습니다.';
+
+  @override
+  String get updatesVerifying => '업데이트 확인 중…';
+
+  @override
+  String get updatesInstall => '설치';
+
+  @override
+  String get updatesInstallerOpened => '설치 프로그램을 열었습니다. 시스템 화면에서 설치를 확인하세요.';
+
+  @override
+  String get updatesRetry => '다시 시도';
+
+  @override
+  String get updatesUpdateFailed => '업데이트 실패.';
 }

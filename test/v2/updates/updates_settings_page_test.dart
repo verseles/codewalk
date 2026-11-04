@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/settings/apk_update_controller.dart';
 import 'package:codewalk/features/settings/update_check_controller.dart';
 import 'package:codewalk/features/settings/updates_settings_page.dart';
 import 'package:codewalk/platform/releases/release_source_factory.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/releases/apk_integrity.dart';
+import 'package:codewalk/shared/releases/apk_update.dart';
 import 'package:codewalk/shared/releases/release_source.dart';
 import 'package:codewalk/shared/releases/update_selector.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +45,95 @@ class ImmediateTask implements ReleaseSourceTask {
   void cancel() {}
 }
 
+const _apkSha =
+    '64d338107e0175b26d25343ed00af2a01ac009c9286c16c9f1aed32ac7c58f5b';
+
+String _apkManifest() => jsonEncode({
+  'schema': 1,
+  'tag': 'v2.0.0-beta.2',
+  'version': '2.0.0-beta.2',
+  'assets': {
+    'codewalk-android-arm64.apk': {
+      'abi': 'arm64-v8a',
+      'application_id': codewalkAndroidApplicationId,
+      'sha256': _apkSha,
+      'signer_sha256': codewalkAndroidSignerSha256,
+      'size': 10,
+      'version_code': 2,
+      'version_name': '2.0.0-beta.2',
+    },
+  },
+});
+
+class FakeStore implements ApkFileStore {
+  final Map<String, String> files = {};
+
+  @override
+  Future<String> partPath(String tag) async => '/tmp/$tag.apk.part';
+
+  @override
+  Future<String> finalPath(String tag) async => '/tmp/$tag.apk';
+
+  @override
+  Future<void> rename(String from, String to) async {
+    files[to] = files[from] ?? '';
+    files.remove(from);
+  }
+
+  @override
+  Future<void> delete(String path) async => files.remove(path);
+
+  @override
+  Future<bool> exists(String path) async => files.containsKey(path);
+
+  @override
+  Future<String?> sha256(String path) async => files[path];
+
+  @override
+  Future<void> cleanupStale() async {}
+}
+
+class FakeFetcher implements ApkAssetFetcher {
+  FakeFetcher(this.store);
+
+  final FakeStore store;
+  Uri? downloaded;
+
+  @override
+  Future<String> fetchText(Uri uri, {int maxBytes = 256 * 1024}) async {
+    if (uri.path.endsWith('SHA256SUMS')) {
+      return '$_apkSha  codewalk-android-arm64.apk\n';
+    }
+    return _apkManifest();
+  }
+
+  @override
+  Future<ApkDownloadResult> download(
+    Uri uri,
+    String partPath, {
+    required void Function(int received, int? total) onProgress,
+    required bool Function() isCancelled,
+  }) async {
+    downloaded = uri;
+    store.files[partPath] = _apkSha;
+    onProgress(10, 10);
+    return const ApkDownloadResult(bytes: 10, sha256: _apkSha);
+  }
+
+  @override
+  void close() {}
+}
+
+class FakeInstaller implements ApkInstaller {
+  String? openedPath;
+
+  @override
+  Future<ApkInstallOutcome> open(String path) async {
+    openedPath = path;
+    return ApkInstallOutcome.opened;
+  }
+}
+
 String listing(String tag) => jsonEncode([
   {
     'tag_name': tag,
@@ -59,11 +151,13 @@ String listing(String tag) => jsonEncode([
 ]);
 
 void main() {
+  FakeFetcher? lastFetcher;
+  FakeInstaller? lastInstaller;
+
   Future<UpdateCheckController> mount(
     WidgetTester tester, {
     required UpdateTarget? target,
     String? body,
-    List<Uri>? opened,
   }) async {
     final updates = UpdateCheckController(
       source: ImmediateSource(body),
@@ -72,17 +166,36 @@ void main() {
       target: target,
     );
     addTearDown(updates.dispose);
+    ApkUpdateController? install;
+    if (target == UpdateTarget.androidArm64) {
+      final store = FakeStore();
+      final fetcher = lastFetcher = FakeFetcher(store);
+      final installer = lastInstaller = FakeInstaller();
+      install = ApkUpdateController(
+        fetcher: fetcher,
+        installer: installer,
+        fileStore: store,
+        checks: updates,
+        installedBuildNumber: () async => '1',
+        packageName: () async => codewalkAndroidApplicationId,
+        isForeground: () => false,
+      );
+      addTearDown(install.dispose);
+    }
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider<UpdateCheckController?>.value(
-            value: updates,
-            child: UpdatesSettingsPage(
-              open: (uri) async {
-                opened?.add(uri);
-                return true;
-              },
-            ),
+          body: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<UpdateCheckController?>.value(
+                value: updates,
+              ),
+              if (install != null)
+                ChangeNotifierProvider<ApkUpdateController?>.value(
+                  value: install,
+                ),
+            ],
+            child: const UpdatesSettingsPage(),
           ),
         ),
       ),
@@ -102,28 +215,30 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Android opens the exact APK and installs nothing itself', (
-    tester,
-  ) async {
-    final opened = <Uri>[];
-    await mount(
-      tester,
-      target: UpdateTarget.androidArm64,
-      body: listing('v2.0.0-beta.2'),
-      opened: opened,
-    );
-    await optInAndCheck(tester);
-    expect(find.text('Update available: v2.0.0-beta.2'), findsOneWidget);
-    expect(find.text('Installed version: 2.0.0-beta.1'), findsOneWidget);
-    expect(find.byKey(const ValueKey('updates_linux_command')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('updates_download')));
-    await tester.pump();
-    expect(opened, [
-      Uri.parse(
-        'https://github.com/verseles/codewalk/releases/download/v2.0.0-beta.2/codewalk-android-arm64.apk',
-      ),
-    ]);
-  });
+  testWidgets(
+    'Android downloads the exact APK in-app and installs nothing itself',
+    (tester) async {
+      await mount(
+        tester,
+        target: UpdateTarget.androidArm64,
+        body: listing('v2.0.0-beta.2'),
+      );
+      await optInAndCheck(tester);
+      expect(find.text('Update available: v2.0.0-beta.2'), findsOneWidget);
+      expect(find.text('Installed version: 2.0.0-beta.1'), findsOneWidget);
+      expect(find.byKey(const ValueKey('updates_linux_command')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('updates_download')));
+      await tester.pumpAndSettle();
+      expect(
+        lastFetcher!.downloaded,
+        Uri.parse(
+          'https://github.com/verseles/codewalk/releases/download/v2.0.0-beta.2/codewalk-android-arm64.apk',
+        ),
+      );
+      expect(lastInstaller!.openedPath, isNull);
+      expect(find.byKey(const ValueKey('updates_install')), findsOneWidget);
+    },
+  );
 
   testWidgets('Linux shows and copies the exact-tag installer command', (
     tester,

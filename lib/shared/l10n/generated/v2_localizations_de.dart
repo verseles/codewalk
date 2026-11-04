@@ -2346,4 +2346,20 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String get turnUnavailableRevertStaged =>
       'Ein Schritt ist derzeit rückgängig gemacht.';
+
+  @override
+  String get updatesVerifying => 'Update wird überprüft…';
+
+  @override
+  String get updatesInstall => 'Installieren';
+
+  @override
+  String get updatesInstallerOpened =>
+      'Installer geöffnet. Bestätige die Installation auf dem Systembildschirm.';
+
+  @override
+  String get updatesRetry => 'Erneut versuchen';
+
+  @override
+  String get updatesUpdateFailed => 'Update fehlgeschlagen.';
 }
