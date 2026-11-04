@@ -71,7 +71,7 @@ def locate(words, label, *, prefer_exact=False):
 
 
 def recognize_screenshot(filename, evidence, command_runner=run):
-    """Three fixed OCR passes; never concatenate phrases across pass/line IDs."""
+    """Fixed OCR passes; never concatenate phrases across pass/line IDs."""
     words = parse_ocr(command_runner(["tesseract", str(filename), "stdout", "--psm", "11", "tsv"], timeout=15))
     for inverted in (False, True):
         name = "gray-2x-inverted" if inverted else "gray-2x"
@@ -83,6 +83,12 @@ def recognize_screenshot(filename, evidence, command_runner=run):
         text = command_runner(["tesseract", str(processed), "stdout", "--psm", "6", "tsv"], timeout=15)
         (evidence / f"ocr-{name}.tsv").write_text(text)
         words.extend(parse_ocr(text, scale=2, pass_id=name))
+    # White labels on a filled button (the empty-workspace setup action) are missed at 2x; psm 4 reads them at 4x.
+    processed = evidence / "ocr-gray-4x.png"
+    command_runner(["convert", str(filename), "-colorspace", "Gray", "-resize", "400%", str(processed)])
+    text = command_runner(["tesseract", str(processed), "stdout", "--psm", "4", "tsv"], timeout=30)
+    (evidence / "ocr-gray-4x.tsv").write_text(text)
+    words.extend(parse_ocr(text, scale=4, pass_id="gray-4x"))
     return words
 
 
