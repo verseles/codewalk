@@ -49,7 +49,16 @@ void main() {
       expect(dependencies.router.routeInformationProvider.value.uri.path, '/');
 
       await showSessionList(tester);
-      await _toolbarItem(tester, 'Settings');
+      if (size.width < 600) {
+        tester.firstState<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('workspace-pinned-settings')),
+        );
+        await tester.pumpAndSettle();
+      } else {
+        await _toolbarItem(tester, 'Settings');
+      }
       expect(dependencies.router.state.uri.path, '/settings');
       expect(find.text('Settings'), findsWidgets);
 
