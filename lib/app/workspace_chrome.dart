@@ -157,6 +157,14 @@ class WorkspaceAppBarActions extends StatelessWidget {
     final l = context.v2L10n;
     final wide = !compact;
     final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
+    // A Settings pin saved on a wide layout must not duplicate the fixed
+    // drawer-header action when the compact bar renders.
+    final shownPins = wide
+        ? pins
+        : [
+            for (final action in pins)
+              if (action != WorkspacePinnedAction.settings) action,
+          ];
     const order = [
       WorkspacePinnedAction.newChat,
       WorkspacePinnedAction.refresh,
@@ -271,7 +279,7 @@ class WorkspaceAppBarActions extends StatelessWidget {
     Widget actions() => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (final action in pins)
+        for (final action in shownPins)
           IconButton(
             key: ValueKey('workspace-pinned-${action.name}'),
             tooltip: _label(l, action),

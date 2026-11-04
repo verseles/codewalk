@@ -1,4 +1,5 @@
 import 'package:codewalk/app/app_dependencies.dart';
+import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/app_shell.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
@@ -333,6 +334,32 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final size in const [Size(390, 844), Size(1280, 800)]) {
+    testWidgets('a saved Settings pin respects the layout, ${size.width}', (
+      tester,
+    ) async {
+      final (dependencies, _) = await _open(tester, size: size);
+      dependencies.preferences.setAppBarPinned(
+        WorkspacePinnedAction.settings,
+        true,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        dependencies.preferences.appBarPins,
+        contains(WorkspacePinnedAction.settings),
+      );
+      expect(
+        find.byKey(const ValueKey('workspace-pinned-settings')),
+        size.width < 600 ? findsNothing : findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('sidebar_settings_icon_button')),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 
   for (final size in const [Size(390, 844), Size(1280, 800)]) {
     testWidgets('settings and servers are secondary pages, ${size.width}', (
