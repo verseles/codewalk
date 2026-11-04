@@ -97,6 +97,31 @@ In CodeWalk, `flow` is the release workflow. Execution of `v2-plan.md` and its o
     13.1. Ask whether any related issue should be closed. When useful, suggest the next task from GitHub Issues.
     13.2. When relevant and evergreen, ask whether the rules in `./AGENTS.md` should be updated to reflect the changes or introduce new rules.
     
+## Flow Beta (temporário, até o GA)
+
+Caminho curto para publicar `v2.0.0-beta.N` durante a fase beta. Não altera `flow`, `avançar`/`continuar` nem o release estável.
+
+**Preparação**
+1. Implementar a unidade e commitar o boundary.
+2. `make check` verde no SHA final.
+3. Disparar a review de todos os helpers assim que o commit existe; check e review rodam em paralelo.
+4. Julgar os relatórios, agrupar os findings aceitos, aplicar tudo e fazer um único commit de correção.
+5. Re-review só se as correções afetarem concorrência, segurança, interfaces, persistência ou arquitetura; caso contrário, validação focada.
+6. Preparar docs/notas durante check/review; commitar depois.
+
+**Corte**
+7. Árvore limpa e `main == origin/main`; o `push` pode rodar em paralelo com o check.
+8. `make release V=beta` só depois do check verde (sequencial): bump, commit, tag `v2.0.0-beta.N`, push atômico.
+9. Monitorar o Release run com `cimonitor`/`gh run watch` até `publish`.
+10. Verificar tag/commit, `prerelease: true`, `make_latest: false`, assets + `SHA256SUMS` + `release-manifest.json`, versionCode maior.
+11. Enviar a URL do APK arm64 via `hey`; registrar na issue e no Task Memory.
+
+**Regras**
+- `3 ∥ 2` e `7 ∥ 2` são permitidos; `8` nunca é paralelo ao check.
+- CI vermelho: corrigir e cortar `beta.N+1`; tag publicada não se move.
+- Cada beta exige autorização explícita do owner.
+- Desvio de ordem do `v2-plan.md` vai para o §17.
+
 ## Release
 
 - New versions use `make release V=patch|minor|major` on `v1`. On `main`, `make release` accepts only `V=beta` (next `v2.0.0-beta.N`; `DRY_RUN=1` previews) and betas never write `CHANGELOG.md`, because installed v1 apps parse main's changelog with stable headings only.
