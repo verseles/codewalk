@@ -172,7 +172,13 @@ class WorkspaceAppBarActions extends StatelessWidget {
       WorkspacePinnedAction.settings,
       WorkspacePinnedAction.servers,
     ];
-    final firstEnabled = order.firstWhere(
+    final menuOrder = wide
+        ? order
+        : [
+            for (final action in order)
+              if (action != WorkspacePinnedAction.settings) action,
+          ];
+    final firstEnabled = menuOrder.firstWhere(
       (action) => _run(context, action) != null,
     );
     Widget menu() => MenuAnchor(
