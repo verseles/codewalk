@@ -3906,7 +3906,7 @@ Related: V2-003 ([#237](https://github.com/verseles/codewalk/issues/237)); ADR-0
 
 ## ADR-060: CodeWalk v1 to v2 Transition (2026-10-04)
 
-**Status**: Accepted transition policy (amended 2026-10-08 and 2026-10-21).
+**Status**: Accepted transition policy (amended 2026-10-08, 2026-10-21 and 2026-11-04).
 
 **Implementation**: Pending — this approves the transition decisions and bounded acceptance plan, not implementation. The update gate, installers, storage/importer, Web split, beta tooling, MVP freeze and GA release are not asserted to be implemented. All new bounded issues remain open/pending; this amendment grants no acceptance, release, publication or production-hosting change. No app identifier, runtime compatibility switch or release channel is changed by this ADR.
 
@@ -3915,6 +3915,8 @@ Related: V2-003 ([#237](https://github.com/verseles/codewalk/issues/237)); ADR-0
 **Owner amendment (2026-10-23):** The owner abandoned v1 → v2 data migration for both the MVP and GA, because few users run v1. v2 does not read or import v1 settings, server profiles, credentials, drafts or caches; it starts clean and users add their servers again. `V2-076` and `V2-076A` are cancelled. The `v1.266.0-native.N` cohort remains a published opt-in prerelease but is no longer a migration source. The v1 update dialog, the v2.0.0 release notes and the first v2 launch must say that servers and settings are entered again. v1 keys stay untouched, and the isolated `cw2.*` namespace remains.
 
 **Owner amendment (2026-10-21):** `V2-086` requires G3, G4 and the provisional G5 revision instead of G1–G5; G1, G2 and the final G5 are the first post-MVP phase (`v2-plan.md` §11.6 phase 7), required before any other post-MVP feature, any v2.1 Host work and v2.0 GA (ADR-058 decision 5). Until `V2-086` is accepted, the fixed roadmap in `v2-plan.md` §11.6 orders the MVP work and its rows define the MVP native feature scope. No acceptance, release or publication is conferred by this amendment.
+
+**Freeze record (2026-11-04):** CP7 accepted the MVP beta `v2.0.0-beta.1` (tag commit `c38a5f6d`, `prerelease: true`, `make_latest: false`) on the owner's Galaxy S25; Linux x64/ARM64 were accepted by the owner before testing and are checked on 2026-11-05, recorded as residual risk rather than passing evidence (#321). Routine v1 maintenance is frozen with last stable `v1.265.1` at `a046da26` (still `latest`), published cohort `v1.266.0-native.1` at `2db66940`, and the `v1` branch tip `2db66940`. The sole planned post-freeze exception remains the finite original transition (final stable `v1.266.0` with Windows/macOS acceptance). G1, G2, the final G5, the deferred platforms, V1-02/V1-04 and GA (#320) remain pending and unwaived.
 
 ### Context
 
