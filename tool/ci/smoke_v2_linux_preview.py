@@ -197,7 +197,8 @@ def smoke(archive_path, evidence):
             # The app opens into the workspace: the list beside the actionable
             # no-server chat state.
             expect(window, ["CodeWalk", "Conversations", "No server configured yet"], "01-initial")
-            click(window, "Connect to a running server")
+            # The empty workspace's setup action ("Set up server", 3f27b60e) opens the same Servers page.
+            click(window, "Set up server")
             expect(window, ["Servers", "No servers found"], "02-hosts")
             # The full-width page leaves its outlined button hard to read, so
             # the pairing opens by keyboard order when OCR misses it: Add
