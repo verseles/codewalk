@@ -157,15 +157,6 @@ class WorkspaceAppBarActions extends StatelessWidget {
     final l = context.v2L10n;
     final wide = !compact;
     final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
-    // v1 v1.265.1 kept Settings fixed in the compact app bar, outside the
-    // kebab. Keep that place and leave the overflow entry desktop-only.
-    final shownPins = wide
-        ? pins
-        : [
-            for (final action in pins)
-              if (action != WorkspacePinnedAction.settings) action,
-            WorkspacePinnedAction.settings,
-          ];
     const order = [
       WorkspacePinnedAction.newChat,
       WorkspacePinnedAction.refresh,
@@ -280,7 +271,7 @@ class WorkspaceAppBarActions extends StatelessWidget {
     Widget actions() => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (final action in shownPins)
+        for (final action in pins)
           IconButton(
             key: ValueKey('workspace-pinned-${action.name}'),
             tooltip: _label(l, action),

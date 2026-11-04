@@ -150,6 +150,7 @@ void sidePanelGroup() {
     // (folder_open for the project picker), :602 (filter_list).
     expect(find.byIcon(Symbols.search), findsOneWidget);
     expect(find.byIcon(Symbols.filter_list), findsOneWidget);
+    expect(find.byIcon(Symbols.settings), findsOneWidget);
     expect(find.byIcon(Symbols.folder_open), findsWidgets);
     expect(
       find.descendant(
@@ -608,11 +609,6 @@ void toolbarGroup() {
     );
     expect(pin.iconSize, 18);
     expect(find.byType(Divider), findsNWidgets(3));
-    // #466: compact Settings lives in the bar, not in the overflow.
-    expect(
-      find.byKey(const ValueKey('workspace-pinned-settings')),
-      findsOneWidget,
-    );
     // Decision 10 order: undo follows the pinned actions; disabled on home as in v1.
     expect(
       tester
@@ -621,7 +617,6 @@ void toolbarGroup() {
       isNull,
     );
     expect(find.byIcon(Symbols.refresh), findsOneWidget);
-    expect(find.byIcon(Symbols.settings), findsOneWidget);
     expect(find.byIcon(Symbols.dns), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

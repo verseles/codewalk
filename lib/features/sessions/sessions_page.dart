@@ -195,7 +195,17 @@ class _SessionsPageState extends State<SessionsPage> {
         const WorkspaceDrawerNotice(),
         if (hosts.loading || controller.loading)
           AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
-        const ServerSwitcher(),
+        Row(
+          children: [
+            const Expanded(child: ServerSwitcher()),
+            IconButton(
+              key: const ValueKey('sidebar_settings_icon_button'),
+              tooltip: l10n.settingsTitle,
+              onPressed: () => context.push('/settings'),
+              icon: const Icon(Symbols.settings, size: 20),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         SessionDrawerHeader(
           catalog: controller,

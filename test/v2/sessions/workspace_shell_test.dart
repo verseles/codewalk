@@ -343,17 +343,8 @@ void main() {
       String path() => dependencies.router.state.uri.path;
 
       if (size.width < 600) {
-        expect(
-          find.byKey(const ValueKey('workspace-pinned-settings')),
-          findsOneWidget,
-        );
-        final scaffold = tester.firstState<ScaffoldState>(
-          find.byType(Scaffold),
-        );
-        if (scaffold.isDrawerOpen) scaffold.closeDrawer();
-        await tester.pumpAndSettle();
         await tester.tap(
-          find.byKey(const ValueKey('workspace-pinned-settings')),
+          find.byKey(const ValueKey('sidebar_settings_icon_button')),
         );
         await tester.pumpAndSettle();
       } else {

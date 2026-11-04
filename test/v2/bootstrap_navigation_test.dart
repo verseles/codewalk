@@ -50,10 +50,8 @@ void main() {
 
       await showSessionList(tester);
       if (size.width < 600) {
-        tester.firstState<ScaffoldState>(find.byType(Scaffold)).closeDrawer();
-        await tester.pumpAndSettle();
         await tester.tap(
-          find.byKey(const ValueKey('workspace-pinned-settings')),
+          find.byKey(const ValueKey('sidebar_settings_icon_button')),
         );
         await tester.pumpAndSettle();
       } else {
