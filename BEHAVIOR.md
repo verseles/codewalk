@@ -86,7 +86,8 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **When** something needs the user's attention
 - **Then** the hamburger carries one badge chosen in this order: the active server Offline after a 5-second resume grace, a conversation still syncing 10 seconds after that grace, a conversation of the current project that failed, one that waits for input or approval, one with an unread reply, and a resume sync in progress; the drawer opens with a notice explaining that badge, and tapping the notice opens the conversation it names, or Servers for the server alert
 - **Then** a warning snackbar about an Offline active server appears only 5 seconds after the resume grace, once per outage, and is cancelled by recovery, a move to the background or a change of server or page
-- **Then** New Chat is pinned in the app bar by default and up to three of New Chat, Refresh, Servers and Settings can be pinned from the overflow menu, which offers every action, with Undo listed and disabled while no live session is shown; the choice is kept locally
+- **Then** Settings has its own button in the list header, including the compact drawer; it is absent from the compact app bar and overflow even when a Settings pin was saved on a wider layout, while the saved pin still appears on wide layouts
+- **Then** New Chat is pinned in the app bar by default and up to three actions can be pinned from the overflow menu; compact offers New Chat, Refresh and Servers, while wide also offers Settings, and the choice is kept locally; the shared three-pin limit includes a hidden Settings pin and adding a fourth pin drops the oldest saved pin; Undo remains listed and disabled while no live session is shown
 
 - **Given** the user edits a saved server on the Servers page
 - **When** only its name changes
