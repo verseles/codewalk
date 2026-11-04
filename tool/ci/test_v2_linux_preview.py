@@ -348,8 +348,8 @@ class LinuxPreviewTests(unittest.TestCase):
         words = smoke.recognize_screenshot(self.root / "screenshot.png", self.root, runner)
         self.assertIsNotNone(smoke.locate(words, "Pair"))
         self.assertIsNone(smoke.locate(words, "Missing control"))
-        self.assertEqual(sum(command[0] == "tesseract" for command in calls), 3)
-        self.assertEqual(sum(command[0] == "convert" for command in calls), 2)
+        self.assertEqual(sum(command[0] == "tesseract" for command in calls), 4)
+        self.assertEqual(sum(command[0] == "convert" for command in calls), 3)
 
 
 if __name__ == "__main__":
