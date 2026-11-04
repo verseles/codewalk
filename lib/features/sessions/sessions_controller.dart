@@ -1028,10 +1028,7 @@ class SessionsController extends ChangeNotifier {
     Selection? initialSelection,
   }) async {
     final source = _actions;
-    if (source == null) {
-      return const SessionCreateResult(SessionActionOutcome.unavailable);
-    }
-    if (_creating) {
+    if (source == null || _creating) {
       return const SessionCreateResult(SessionActionOutcome.unavailable);
     }
     if (!_ready(createSource: false) ||
@@ -1064,9 +1061,7 @@ class SessionsController extends ChangeNotifier {
         // The effect is observed by the authoritative re-read. An uncertain
         // create is reconciled there and never sent again.
         _markLiveChange();
-        if (outcome == SessionActionOutcome.uncertain) {
-          _actionPending = true;
-        }
+        if (outcome == SessionActionOutcome.uncertain) _actionPending = true;
       } else {
         _actionFailure = outcome;
       }
