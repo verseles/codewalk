@@ -342,7 +342,23 @@ void main() {
       // A page pushed from the list is the top of the router's stack.
       String path() => dependencies.router.state.uri.path;
 
-      await _toolbarItem(tester, 'Settings');
+      if (size.width < 600) {
+        expect(
+          find.byKey(const ValueKey('workspace-pinned-settings')),
+          findsOneWidget,
+        );
+        final scaffold = tester.firstState<ScaffoldState>(
+          find.byType(Scaffold),
+        );
+        if (scaffold.isDrawerOpen) scaffold.closeDrawer();
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('workspace-pinned-settings')),
+        );
+        await tester.pumpAndSettle();
+      } else {
+        await _toolbarItem(tester, 'Settings');
+      }
       expect(path(), '/settings');
       expect(find.byKey(const ValueKey('workspace-sidebar')), findsNothing);
       // The system back returns to the list instead of leaving the app.

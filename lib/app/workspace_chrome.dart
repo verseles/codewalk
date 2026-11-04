@@ -157,6 +157,15 @@ class WorkspaceAppBarActions extends StatelessWidget {
     final l = context.v2L10n;
     final wide = !compact;
     final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
+    // v1 v1.265.1 kept Settings fixed in the compact app bar, outside the
+    // kebab. Keep that place and leave the overflow entry desktop-only.
+    final shownPins = wide
+        ? pins
+        : [
+            for (final action in pins)
+              if (action != WorkspacePinnedAction.settings) action,
+            WorkspacePinnedAction.settings,
+          ];
     const order = [
       WorkspacePinnedAction.newChat,
       WorkspacePinnedAction.refresh,
@@ -175,46 +184,50 @@ class WorkspaceAppBarActions extends StatelessWidget {
       ),
       menuChildren: [
         // v1: chat_page_mobile_overflow.dart:230-265 (items and dividers).
-        for (final action in order) ...[
-          MenuItemButton(
-            // Pointer opening must also transfer keyboard focus into the menu.
-            autofocus: action == firstEnabled,
-            leadingIcon: Icon(_icon(action)),
-            onPressed: _run(context, action),
-            trailingIcon: preferences == null
-                ? null
-                : ListenableBuilder(
-                    listenable: preferences,
-                    builder: (context, _) {
-                      final pinned = preferences.appBarPins.contains(action);
-                      return IconButton(
-                        key: ValueKey('workspace-pin-${action.name}'),
-                        tooltip: pinned
-                            ? l.chatAppBarUnpinAction
-                            : l.chatAppBarPinAction,
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(
-                          minWidth: 34,
-                          minHeight: 34,
-                        ),
-                        iconSize: 18,
-                        icon: Icon(
-                          Symbols.push_pin,
-                          color: pinned
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        onPressed: preferences.canEditAppBarPins
-                            ? () => preferences.setAppBarPinned(action, !pinned)
-                            : null,
-                      );
-                    },
-                  ),
-            child: Text(_label(l, action)),
-          ),
-          if (action != WorkspacePinnedAction.servers || !wide)
-            const Divider(height: 1),
-        ],
+        for (final action in order)
+          if (wide || action != WorkspacePinnedAction.settings) ...[
+            MenuItemButton(
+              // Pointer opening must also transfer keyboard focus into the menu.
+              autofocus: action == firstEnabled,
+              leadingIcon: Icon(_icon(action)),
+              onPressed: _run(context, action),
+              trailingIcon: preferences == null
+                  ? null
+                  : ListenableBuilder(
+                      listenable: preferences,
+                      builder: (context, _) {
+                        final pinned = preferences.appBarPins.contains(action);
+                        return IconButton(
+                          key: ValueKey('workspace-pin-${action.name}'),
+                          tooltip: pinned
+                              ? l.chatAppBarUnpinAction
+                              : l.chatAppBarPinAction,
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(
+                            minWidth: 34,
+                            minHeight: 34,
+                          ),
+                          iconSize: 18,
+                          icon: Icon(
+                            Symbols.push_pin,
+                            color: pinned
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                          ),
+                          onPressed: preferences.canEditAppBarPins
+                              ? () =>
+                                    preferences.setAppBarPinned(action, !pinned)
+                              : null,
+                        );
+                      },
+                    ),
+              child: Text(_label(l, action)),
+            ),
+            if (action != WorkspacePinnedAction.servers || !wide)
+              const Divider(height: 1),
+          ],
         // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
         // disabled without a turn to undo; redo and compact need a live session.
         if (!wide) ...[
@@ -261,7 +274,7 @@ class WorkspaceAppBarActions extends StatelessWidget {
     Widget actions() => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (final action in pins)
+        for (final action in shownPins)
           IconButton(
             key: ValueKey('workspace-pinned-${action.name}'),
             tooltip: _label(l, action),
