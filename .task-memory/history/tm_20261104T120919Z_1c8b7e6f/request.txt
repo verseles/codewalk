@@ -1,0 +1,1 @@
+plano do #471, Importando as funcionalidades, não necessariamente o código. Deve incluir o suporte a beta, porém opt-in por padrão desligado.
