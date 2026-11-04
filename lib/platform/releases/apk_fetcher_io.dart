@@ -20,6 +20,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
   final HttpClient _client;
   final int maxRedirects;
   bool _closed = false;
+  bool _cancelRequested = false;
   HttpClientRequest? _activeRequest;
   HttpClientResponse? _activeResponse;
 
@@ -30,6 +31,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
 
   @override
   Future<String> fetchText(Uri uri, {int maxBytes = maxIntegrityBytes}) async {
+    _cancelRequested = false;
     final response = await _open(uri);
     if (response.statusCode != 200) {
       await _discardResponse(response);
@@ -59,6 +61,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
     required void Function(int received, int? total) onProgress,
     required bool Function() isCancelled,
   }) async {
+    _cancelRequested = false;
     final response = await _open(uri);
     if (response.statusCode != 200) {
       await _discardResponse(response);
@@ -151,6 +154,10 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       }
       request.followRedirects = false;
       _activeRequest = request;
+      if (_cancelRequested) {
+        request.abort();
+        throw const ApkDownloadException(ApkUpdateFailure.cancelled);
+      }
       request.headers.set(HttpHeaders.userAgentHeader, 'CodeWalk');
       request.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
       final HttpClientResponse response;
@@ -162,6 +169,10 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
         throw ApkDownloadException(ApkUpdateFailure.network, error);
       }
       _activeRequest = null;
+      if (_cancelRequested) {
+        await _discardResponse(response);
+        throw const ApkDownloadException(ApkUpdateFailure.cancelled);
+      }
       if (!response.isRedirect) {
         _activeResponse = response;
         return response;
@@ -196,6 +207,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
 
   @override
   void cancelActive() {
+    _cancelRequested = true;
     _activeRequest?.abort();
     final response = _activeResponse;
     if (response == null) return;

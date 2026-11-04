@@ -101,6 +101,7 @@ final class ApkUpdateController extends ChangeNotifier {
         releaseAssetUri(tag, releaseChecksumsAssetName),
         maxBytes: maxIntegrityBytes,
       );
+      if (!_current(generation)) return;
       final manifestBody = await _fetcher.fetchText(
         releaseAssetUri(tag, releaseManifestAssetName),
         maxBytes: maxIntegrityBytes,
