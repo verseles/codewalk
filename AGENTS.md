@@ -114,12 +114,15 @@ Caminho curto para publicar `v2.0.0-beta.N` durante a fase beta. Não altera `fl
 8. `make release V=beta` só depois do check verde (sequencial): bump, commit, tag `v2.0.0-beta.N`, push atômico.
 9. Monitorar o Release run com `cimonitor`/`gh run watch` até `publish`.
 10. Verificar tag/commit, `prerelease: true`, `make_latest: false`, assets + `SHA256SUMS` + `release-manifest.json`, versionCode maior.
-11. Enviar a URL do APK arm64 via `hey`; registrar na issue e no Task Memory.
+11. Validar o caminho in-app: com o beta anterior instalado e o canal Beta ativo, o check deve oferecer o novo beta.
+12. Notificar no `hey` que o beta.N está publicado. O link do APK é exceção: enviar apenas para a primeira instalação, recuperação ou aparelho sem o updater; a partir do beta.2 o caminho normal é o canal Beta dentro do app.
+13. Registrar na issue e no Task Memory.
 
 **Regras**
 - `3 ∥ 2` e `7 ∥ 2` são permitidos; `8` nunca é paralelo ao check.
 - CI vermelho: corrigir e cortar `beta.N+1`; tag publicada não se move.
 - Cada beta exige autorização explícita do owner.
+- O link manual do APK é exceção, não a entrega padrão; valide primeiro o canal Beta in-app.
 - Desvio de ordem do `v2-plan.md` vai para o §17.
 
 ## Release
