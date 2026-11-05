@@ -2148,6 +2148,30 @@ class V2LocalizationsAr extends V2Localizations {
       'إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'تبويبات الجلسات';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمة وأيضًا يمكن سحبه.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'الجلسات الأخيرة';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'أظهر الجلسات الأخيرة فوق قائمة المشاريع.';
+
+  @override
+  String get chatDisplayMenu => 'العرض';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'اسحب التبويب لإعادة ترتيبه؛ واستخدم قائمته لتثبيته أو تغيير أيقونته أو إغلاقه.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'لا تُظهر مرة أخرى';
+
+  @override
   String get chatChooseAgent => 'اختيار الوكيل';
 
   @override

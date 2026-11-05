@@ -2073,6 +2073,30 @@ class V2LocalizationsJa extends V2Localizations {
       'アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。';
 
   @override
+  String get settingsAppearanceSessionTabs => 'セッションタブ';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'チャットの上にタブバーを表示します。各タブにはメニューがあり、ドラッグできます。';
+
+  @override
+  String get settingsAppearanceRecentSessions => '最近のセッション';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'プロジェクト一覧の上に最近のセッションを表示します。';
+
+  @override
+  String get chatDisplayMenu => '表示';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'タブをドラッグして並べ替え、メニューから固定・アイコン変更・閉じるができます。';
+
+  @override
+  String get sessionTabsGestureHintDismiss => '今後表示しない';
+
+  @override
   String get chatChooseAgent => 'エージェントを選択';
 
   @override

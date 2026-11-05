@@ -2165,6 +2165,30 @@ class V2LocalizationsUr extends V2Localizations {
       'اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔';
 
   @override
+  String get settingsAppearanceSessionTabs => 'سیشن ٹیبز';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے اور اسے گھسیٹا جا سکتا ہے۔';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'حالیہ سیشنز';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'پروجیکٹ فہرست کے اوپر حالیہ سیشنز دکھائیں۔';
+
+  @override
+  String get chatDisplayMenu => 'ظاہری شکل';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'ترتیب بدلنے کے لیے ٹیب گھسیٹیں؛ اس کے مینو سے پن کریں، آئیکن بدلیں یا بند کریں۔';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'دوبارہ نہ دکھائیں';
+
+  @override
   String get chatChooseAgent => 'ایجنٹ منتخب کریں';
 
   @override

@@ -2073,6 +2073,30 @@ class V2LocalizationsKo extends V2Localizations {
       '어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.';
 
   @override
+  String get settingsAppearanceSessionTabs => '세션 탭';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      '채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있고 끌어서 옮길 수 있습니다.';
+
+  @override
+  String get settingsAppearanceRecentSessions => '최근 세션';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      '프로젝트 목록 위에 최근 세션을 표시합니다.';
+
+  @override
+  String get chatDisplayMenu => '표시';
+
+  @override
+  String get sessionTabsGestureHint =>
+      '탭을 끌어 순서를 바꾸고, 메뉴에서 고정·아이콘 변경·닫기를 할 수 있습니다.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => '다시 표시하지 않음';
+
+  @override
   String get chatChooseAgent => '에이전트 선택';
 
   @override

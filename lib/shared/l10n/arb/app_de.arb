@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "Tipp: Wählen Sie einen fokussierten Agenten für Plan, Review oder Build",
   "settingsAppearanceComposerTips": "Composer-Tipps",
   "settingsAppearanceComposerTipsDescription": "Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt.",
+  "settingsAppearanceSessionTabs": "Sitzungs-Tabs",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü und lässt sich ziehen.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "Letzte Sitzungen",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "Letzte Sitzungen über der Projektliste anzeigen.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "Anzeige",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "Ziehe einen Tab, um ihn umzusortieren; sein Menü heftet ihn an, ändert das Symbol oder schließt ihn.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "Nicht mehr anzeigen",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "Agent auswählen",
   "chatChooseModel": "Modell auswählen",
   "chatPermissionAutoApproveOff": "Automatische Genehmigung ist deaktiviert",

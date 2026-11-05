@@ -2680,6 +2680,34 @@
     "description": "CodeWalk UI string — settingsAppearanceComposerTips"
   },
   "settingsAppearanceComposerTipsDescription": "Show or hide rotating tips while the assistant is reasoning.",
+  "settingsAppearanceSessionTabs": "Session tabs",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "Show the tab strip above the chat. Each tab has its own menu and can be dragged.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "Recent sessions",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "Show Recent sessions above the project list.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "Display",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "Drag a tab to reorder it; use its menu to pin it, change its icon or close it.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "Don''t show again",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "@settingsAppearanceComposerTipsDescription": {
     "description": "CodeWalk UI string — settingsAppearanceComposerTipsDescription"
   },

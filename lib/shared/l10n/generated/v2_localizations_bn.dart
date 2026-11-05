@@ -2161,6 +2161,30 @@ class V2LocalizationsBn extends V2Localizations {
       'সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷';
 
   @override
+  String get settingsAppearanceSessionTabs => 'সেশন ট্যাব';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে এবং সেটি টেনে সরানো যায়।';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'সাম্প্রতিক সেশন';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'প্রকল্প তালিকার উপরে সাম্প্রতিক সেশন দেখান।';
+
+  @override
+  String get chatDisplayMenu => 'প্রদর্শন';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'ক্রম বদলাতে ট্যাব টেনে সরান; পিন করতে, আইকন বদলাতে বা বন্ধ করতে এর মেনু ব্যবহার করুন।';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'আর দেখাবেন না';
+
+  @override
   String get chatChooseAgent => 'এজেন্ট নির্বাচন করুন';
 
   @override

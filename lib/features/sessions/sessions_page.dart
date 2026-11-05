@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/app_preferences_controller.dart';
 import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -253,6 +254,8 @@ class _SessionsPageState extends State<SessionsPage> {
     bool compact,
   ) {
     final l10n = context.v2L10n;
+    final preferences = context.watch<AppPreferencesController?>();
+    final showRecent = preferences?.showRecentSessions ?? true;
     final shown = controller.directory!;
     final now = controller.now;
     final current = contexts.viewOf(shown);
@@ -282,7 +285,7 @@ class _SessionsPageState extends State<SessionsPage> {
     // Every emphasized row ends its hour, Recent's included.
     _scheduleEmphasis(nextEmphasisEnd([...visible, ...recent], now: now));
     final builders = <WidgetBuilder>[
-      if (recent.isNotEmpty) ...[
+      if (recent.isNotEmpty && showRecent) ...[
         (context) => _sectionTitle(context, l10n.chatRecentSessions),
         for (final row in recent)
           (context) => RecentSessionRow(

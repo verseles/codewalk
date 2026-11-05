@@ -1598,6 +1598,34 @@
   "chatTipUseFocusedAgents": "نصيحة: اختر وكيلا مركزا للتخطيط أو المراجعة أو البناء",
   "settingsAppearanceComposerTips": "نصائح الملحِّن",
   "settingsAppearanceComposerTipsDescription": "إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.",
+  "settingsAppearanceSessionTabs": "تبويبات الجلسات",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمة وأيضًا يمكن سحبه.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "الجلسات الأخيرة",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "أظهر الجلسات الأخيرة فوق قائمة المشاريع.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "العرض",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "اسحب التبويب لإعادة ترتيبه؛ واستخدم قائمته لتثبيته أو تغيير أيقونته أو إغلاقه.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "لا تُظهر مرة أخرى",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "اختيار الوكيل",
   "chatChooseModel": "اختيار النموذج",
   "chatPermissionAutoApproveOff": "الموافقة التلقائية على الأذونات غير مفعلة",

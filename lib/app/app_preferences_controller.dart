@@ -188,6 +188,34 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('composerSpellCheck');
   }
 
+  /// Whether the session tab strip and the Recent sessions section show;
+  /// both are on by default.
+  bool _showSessionTabs = true;
+  bool _showRecentSessions = true;
+  bool _tabsGestureHintDismissed = false;
+  bool get showSessionTabs => _showSessionTabs;
+  bool get showRecentSessions => _showRecentSessions;
+  bool get tabsGestureHintDismissed => _tabsGestureHintDismissed;
+
+  void setShowSessionTabs(bool value) {
+    if (_disposed || _showSessionTabs == value) return;
+    _showSessionTabs = value;
+    _changed('showSessionTabs');
+  }
+
+  void setShowRecentSessions(bool value) {
+    if (_disposed || _showRecentSessions == value) return;
+    _showRecentSessions = value;
+    _changed('showRecentSessions');
+  }
+
+  /// The first-use hint explains the tab gestures once; dismissing it is kept.
+  void setTabsGestureHintDismissed(bool value) {
+    if (_disposed || _tabsGestureHintDismissed == value) return;
+    _tabsGestureHintDismissed = value;
+    _changed('tabsGestureHintDismissed');
+  }
+
   /// Whether the composer's status slot rotates tips while the assistant
   /// works; on by default.
   bool _composerTips = true;
@@ -299,6 +327,9 @@ class AppPreferencesController extends ChangeNotifier {
     'showToolCalls': _showToolCalls ? null : false,
     'composerSpellCheck': _composerSpellCheck ? null : false,
     'composerTips': _composerTips ? null : false,
+    'showSessionTabs': _showSessionTabs ? null : false,
+    'showRecentSessions': _showRecentSessions ? null : false,
+    'tabsGestureHintDismissed': _tabsGestureHintDismissed ? true : null,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -399,6 +430,12 @@ class AppPreferencesController extends ChangeNotifier {
       if (spellCheck is bool) _composerSpellCheck = spellCheck;
       final tips = value('composerTips');
       if (tips is bool) _composerTips = tips;
+      final tabs = value('showSessionTabs');
+      if (tabs is bool) _showSessionTabs = tabs;
+      final recent = value('showRecentSessions');
+      if (recent is bool) _showRecentSessions = recent;
+      final hint = value('tabsGestureHintDismissed');
+      if (hint is bool) _tabsGestureHintDismissed = hint;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

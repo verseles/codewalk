@@ -132,6 +132,11 @@ description of this code.
 - **Then** sessions merely absent from the loaded rows, unreadable or behind a login keep their tabs; known background-project rows need no full history read, tabs of a removed server leave with it, and a failed automatic tab write waits for later external input rather than immediately retrying itself
 - **Then** at most 32 tabs are kept: a new one beyond that is refused with a notice instead of closing another; an unreadable saved record is kept untouched and no tab is saved over it
 
+- **Given** the session tab strip is shown for the first time in this install
+- **When** the strip appears above the chat
+- **Then** a one-time hint explains that a tab can be dragged to reorder and that its menu pins it, changes its icon or closes it
+- **Then** "Don't show again" hides the hint for good and is persisted as `cw2.settings.tabsGestureHintDismissed`; it never returns, and hiding the strip hides the hint with it
+
 ### V2 sub-conversations
 
 - **Given** a v2 session whose timeline shows a subagent call
@@ -695,6 +700,8 @@ description of this code.
 - **Then** the user can choose system/light/dark mode, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
 - **Then** the searchable preset picker and five density tiers work in compact and wide layouts; on narrow screens or enlarged text the segmented choices become fields that open the same searchable picker
 - **Then** the controls use the scoped 14-language catalog, including right-to-left layout
+- **Then** Session tabs and Recent sessions can each be turned off and on, persisted as `cw2.settings.showSessionTabs` and `cw2.settings.showRecentSessions` (on by default); turning tabs off also hides their first-use hint, and the Recent sessions choice also governs the section above the project list
+- **Then** the chat's overflow opens Display, a sheet with the same thinking, tool call, composer tip, session tab and Recent session choices, so the workspace can be reshaped without leaving the chat
 
 - **Given** the user changes Settings > Appearance > Text size
 - **When** the System or Conversation slider moves (80–160 %, 5 % steps)

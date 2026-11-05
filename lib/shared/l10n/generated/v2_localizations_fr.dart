@@ -2211,6 +2211,30 @@ class V2LocalizationsFr extends V2Localizations {
       'Afficher ou masquer les conseils rotatifs pendant que l\'assistant réfléchit.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Onglets de session';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu et peut être glissé.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Sessions récentes';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Afficher les sessions récentes au-dessus de la liste des projets.';
+
+  @override
+  String get chatDisplayMenu => 'Affichage';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Faites glisser un onglet pour le réordonner ; son menu permet de l’épingler, de changer son icône ou de le fermer.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Ne plus afficher';
+
+  @override
   String get chatChooseAgent => 'Sélectionner l\'agent';
 
   @override

@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "Conseil : Choisissez un agent ciblé pour planifier, relire ou construire",
   "settingsAppearanceComposerTips": "Conseils de l''éditeur de message",
   "settingsAppearanceComposerTipsDescription": "Afficher ou masquer les conseils rotatifs pendant que l''assistant réfléchit.",
+  "settingsAppearanceSessionTabs": "Onglets de session",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu et peut être glissé.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "Sessions récentes",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "Afficher les sessions récentes au-dessus de la liste des projets.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "Affichage",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "Faites glisser un onglet pour le réordonner ; son menu permet de l’épingler, de changer son icône ou de le fermer.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "Ne plus afficher",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "Sélectionner l''agent",
   "chatChooseModel": "Choisir le modèle",
   "chatPermissionAutoApproveOff": "Approbation automatique des permissions désactivée",

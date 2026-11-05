@@ -3932,6 +3932,48 @@ abstract class V2Localizations {
   /// **'Show or hide rotating tips while the assistant is reasoning.'**
   String get settingsAppearanceComposerTipsDescription;
 
+  /// Appearance toggle that shows the session tab strip
+  ///
+  /// In en, this message translates to:
+  /// **'Session tabs'**
+  String get settingsAppearanceSessionTabs;
+
+  /// Explains the session tab strip toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show the tab strip above the chat. Each tab has its own menu and can be dragged.'**
+  String get settingsAppearanceSessionTabsDescription;
+
+  /// Appearance toggle that shows the Recent sessions section
+  ///
+  /// In en, this message translates to:
+  /// **'Recent sessions'**
+  String get settingsAppearanceRecentSessions;
+
+  /// Explains the Recent sessions toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show Recent sessions above the project list.'**
+  String get settingsAppearanceRecentSessionsDescription;
+
+  /// Chat overflow entry that opens the display choices
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get chatDisplayMenu;
+
+  /// First-use hint about tab gestures
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a tab to reorder it; use its menu to pin it, change its icon or close it.'**
+  String get sessionTabsGestureHint;
+
+  /// Dismisses the tab gesture hint for good
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'\'t show again'**
+  String get sessionTabsGestureHintDismiss;
+
   /// CodeWalk UI string — chatChooseAgent
   ///
   /// In en, this message translates to:

@@ -102,6 +102,13 @@ APPEARANCE_KEYS = {
     "settingsAppearanceToolCallBubblesDescription",
     "settingsAppearanceComposerTips",
     "settingsAppearanceComposerTipsDescription",
+    "settingsAppearanceSessionTabs",
+    "settingsAppearanceSessionTabsDescription",
+    "settingsAppearanceRecentSessions",
+    "settingsAppearanceRecentSessionsDescription",
+    "chatDisplayMenu",
+    "sessionTabsGestureHint",
+    "sessionTabsGestureHintDismiss",
 }
 KEYS |= APPEARANCE_KEYS | {"appearanceStorageError"}
 SETTINGS_KEYS = {

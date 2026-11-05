@@ -2194,6 +2194,30 @@ class V2LocalizationsPt extends V2Localizations {
       'Mostrar ou ocultar dicas rotativas enquanto o assistente está raciocinando.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Abas de sessão';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Mostra a faixa de abas acima do chat. Cada aba tem o próprio menu e pode ser arrastada.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Sessões recentes';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Mostra as sessões recentes acima da lista de projetos.';
+
+  @override
+  String get chatDisplayMenu => 'Exibição';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Arraste uma aba para reordenar; use o menu dela para fixar, trocar o ícone ou fechar.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Não mostrar de novo';
+
+  @override
   String get chatChooseAgent => 'Selecionar agente';
 
   @override

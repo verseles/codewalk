@@ -1610,6 +1610,34 @@
   "chatTipUseFocusedAgents": "팁: 계획, 리뷰, 빌드에 맞는 에이전트를 선택하세요",
   "settingsAppearanceComposerTips": "컴포저 팁",
   "settingsAppearanceComposerTipsDescription": "어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.",
+  "settingsAppearanceSessionTabs": "세션 탭",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있고 끌어서 옮길 수 있습니다.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "최근 세션",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "프로젝트 목록 위에 최근 세션을 표시합니다.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "표시",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "탭을 끌어 순서를 바꾸고, 메뉴에서 고정·아이콘 변경·닫기를 할 수 있습니다.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "다시 표시하지 않음",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "에이전트 선택",
   "chatChooseModel": "모델 선택",
   "chatPermissionAutoApproveOff": "권한 자동 승인 꺼짐",

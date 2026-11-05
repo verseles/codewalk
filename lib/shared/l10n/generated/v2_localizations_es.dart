@@ -2200,6 +2200,30 @@ class V2LocalizationsEs extends V2Localizations {
       'Mostrar u ocultar consejos rotativos mientras el asistente razona.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Pestañas de sesión';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú y se puede arrastrar.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Sesiones recientes';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Mostrar las sesiones recientes sobre la lista de proyectos.';
+
+  @override
+  String get chatDisplayMenu => 'Visualización';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Arrastra una pestaña para reordenarla; usa su menú para fijarla, cambiar su icono o cerrarla.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'No volver a mostrar';
+
+  @override
   String get chatChooseAgent => 'Seleccionar agente';
 
   @override

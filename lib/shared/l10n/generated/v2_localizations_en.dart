@@ -2170,6 +2170,30 @@ class V2LocalizationsEn extends V2Localizations {
       'Show or hide rotating tips while the assistant is reasoning.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Session tabs';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Show the tab strip above the chat. Each tab has its own menu and can be dragged.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Recent sessions';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Show Recent sessions above the project list.';
+
+  @override
+  String get chatDisplayMenu => 'Display';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Drag a tab to reorder it; use its menu to pin it, change its icon or close it.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Don\'t show again';
+
+  @override
   String get chatChooseAgent => 'Select agent';
 
   @override

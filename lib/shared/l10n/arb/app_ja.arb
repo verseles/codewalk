@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "ヒント: 計画、レビュー、実装に合うエージェントを選びましょう",
   "settingsAppearanceComposerTips": "コンポーザーヒント",
   "settingsAppearanceComposerTipsDescription": "アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。",
+  "settingsAppearanceSessionTabs": "セッションタブ",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "チャットの上にタブバーを表示します。各タブにはメニューがあり、ドラッグできます。",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "最近のセッション",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "プロジェクト一覧の上に最近のセッションを表示します。",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "表示",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "タブをドラッグして並べ替え、メニューから固定・アイコン変更・閉じるができます。",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "今後表示しない",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "エージェントを選択",
   "chatChooseModel": "モデルを選択",
   "chatPermissionAutoApproveOff": "権限の自動承認がオフ",

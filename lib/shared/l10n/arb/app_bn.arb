@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "পরামর্শ: পরিকল্পনা, রিভিউ বা বিল্ডের জন্য ফোকাসড এজেন্ট বেছে নিন",
   "settingsAppearanceComposerTips": "সুরকার টিপস",
   "settingsAppearanceComposerTipsDescription": "সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷",
+  "settingsAppearanceSessionTabs": "সেশন ট্যাব",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে এবং সেটি টেনে সরানো যায়।",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "সাম্প্রতিক সেশন",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "প্রকল্প তালিকার উপরে সাম্প্রতিক সেশন দেখান।",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "প্রদর্শন",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "ক্রম বদলাতে ট্যাব টেনে সরান; পিন করতে, আইকন বদলাতে বা বন্ধ করতে এর মেনু ব্যবহার করুন।",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "আর দেখাবেন না",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "এজেন্ট নির্বাচন করুন",
   "chatChooseModel": "মডেল নির্বাচন করুন",
   "chatPermissionAutoApproveOff": "অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে",

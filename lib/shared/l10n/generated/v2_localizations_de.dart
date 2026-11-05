@@ -2213,6 +2213,30 @@ class V2LocalizationsDe extends V2Localizations {
       'Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Sitzungs-Tabs';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü und lässt sich ziehen.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Letzte Sitzungen';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Letzte Sitzungen über der Projektliste anzeigen.';
+
+  @override
+  String get chatDisplayMenu => 'Anzeige';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Ziehe einen Tab, um ihn umzusortieren; sein Menü heftet ihn an, ändert das Symbol oder schließt ihn.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Nicht mehr anzeigen';
+
+  @override
   String get chatChooseAgent => 'Agent auswählen';
 
   @override

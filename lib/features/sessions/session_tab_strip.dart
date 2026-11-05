@@ -10,6 +10,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
+import '../../app/app_preferences_controller.dart';
 import '../../app/workspace_actions.dart';
 import '../../platform/sessions/session_tabs_store.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
@@ -345,6 +346,10 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
   Widget build(BuildContext context) {
     final catalog = context.watch<SessionsController?>();
     final drafts = context.watch<WorkspaceDraftController?>();
+    final preferences = context.watch<AppPreferencesController?>();
+    final showHint =
+        (preferences?.tabsGestureHintDismissed ?? true) != true &&
+        (preferences?.showSessionTabs ?? true);
     return ListenableBuilder(
       listenable: Listenable.merge([widget.tabs, ...widget.tabs.warmViews]),
       builder: (context, _) {
@@ -375,7 +380,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             skipTraversal: true,
             child: Column(
               children: [
-                if (shown)
+                if (shown && (preferences?.showSessionTabs ?? true))
                   _Strip(
                     tabs: widget.tabs,
                     projection: projection,
@@ -398,6 +403,20 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
                           tabs: switcher,
                           highlight: _highlight,
                           icons: widget.tabs,
+                        )
+                      // The first-use hint floats over the chat, so it never
+                      // takes room from the composer.
+                      else if (shown &&
+                          showHint &&
+                          (preferences?.showSessionTabs ?? true))
+                        PositionedDirectional(
+                          top: 8,
+                          start: 16,
+                          end: 16,
+                          child: _GestureHint(
+                            onDismiss: () =>
+                                preferences?.setTabsGestureHintDismissed(true),
+                          ),
                         ),
                     ],
                   ),
@@ -847,4 +866,65 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// The first-use explanation of the tab gestures: shown over the chat once,
+/// until the reader dismisses it for good.
+///
+/// The explanation itself never takes a tap from the chat below it; only the
+/// dismissal is interactive.
+class _GestureHint extends StatelessWidget {
+  const _GestureHint({required this.onDismiss});
+
+  final VoidCallback? onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final l = context.v2L10n;
+    final text = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: scheme.onSecondaryContainer);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        IgnorePointer(
+          child: Material(
+            key: const ValueKey('session-tabs-gesture-hint'),
+            color: scheme.secondaryContainer,
+            elevation: 3,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Symbols.touch_app,
+                    size: 20,
+                    color: scheme.onSecondaryContainer,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(l.sessionTabsGestureHint, style: text)),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: Material(
+            type: MaterialType.transparency,
+            child: TextButton(
+              key: const ValueKey('session-tabs-gesture-hint-dismiss'),
+              onPressed: onDismiss,
+              child: Text(l.sessionTabsGestureHintDismiss),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

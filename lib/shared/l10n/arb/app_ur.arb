@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "مشورہ: پلان، ریویو یا بلڈ کے لیے مرکوز ایجنٹ چنیں",
   "settingsAppearanceComposerTips": "کمپوزر ٹپس",
   "settingsAppearanceComposerTipsDescription": "اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔",
+  "settingsAppearanceSessionTabs": "سیشن ٹیبز",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے اور اسے گھسیٹا جا سکتا ہے۔",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "حالیہ سیشنز",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "پروجیکٹ فہرست کے اوپر حالیہ سیشنز دکھائیں۔",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "ظاہری شکل",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "ترتیب بدلنے کے لیے ٹیب گھسیٹیں؛ اس کے مینو سے پن کریں، آئیکن بدلیں یا بند کریں۔",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "دوبارہ نہ دکھائیں",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "ایجنٹ منتخب کریں",
   "chatChooseModel": "ماڈل منتخب کریں",
   "chatPermissionAutoApproveOff": "اجازت خودکار منظوری آف ہے",

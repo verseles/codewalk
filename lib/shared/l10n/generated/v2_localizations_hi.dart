@@ -2172,6 +2172,30 @@ class V2LocalizationsHi extends V2Localizations {
       'जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।';
 
   @override
+  String get settingsAppearanceSessionTabs => 'सत्र टैब';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है और उसे खींचा जा सकता है।';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'हाल के सत्र';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'प्रोजेक्ट सूची के ऊपर हाल के सत्र दिखाएँ।';
+
+  @override
+  String get chatDisplayMenu => 'दिखावट';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'क्रम बदलने के लिए टैब खींचें; उसे पिन करने, आइकन बदलने या बंद करने के लिए उसका मेन्यू खोलें।';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'दोबारा न दिखाएँ';
+
+  @override
   String get chatChooseAgent => 'एजेंट चुनें';
 
   @override

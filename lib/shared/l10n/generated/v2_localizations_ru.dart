@@ -2190,6 +2190,30 @@ class V2LocalizationsRu extends V2Localizations {
       'Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Вкладки сессий';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Показывать полосу вкладок над чатом. У каждой вкладки есть меню, и её можно перетаскивать.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Недавние сессии';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Показывать недавние сессии над списком проектов.';
+
+  @override
+  String get chatDisplayMenu => 'Отображение';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Перетащите вкладку, чтобы изменить порядок; её меню закрепляет, меняет значок или закрывает.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Больше не показывать';
+
+  @override
   String get chatChooseAgent => 'Выбрать агента';
 
   @override

@@ -2211,6 +2211,30 @@ class V2LocalizationsIt extends V2Localizations {
       'Mostra o nascondi i suggerimenti a rotazione mentre l\'assistente sta ragionando.';
 
   @override
+  String get settingsAppearanceSessionTabs => 'Schede delle sessioni';
+
+  @override
+  String get settingsAppearanceSessionTabsDescription =>
+      'Mostra la barra delle schede sopra la chat. Ogni scheda ha il suo menu e può essere trascinata.';
+
+  @override
+  String get settingsAppearanceRecentSessions => 'Sessioni recenti';
+
+  @override
+  String get settingsAppearanceRecentSessionsDescription =>
+      'Mostra le sessioni recenti sopra l’elenco dei progetti.';
+
+  @override
+  String get chatDisplayMenu => 'Visualizzazione';
+
+  @override
+  String get sessionTabsGestureHint =>
+      'Trascina una scheda per riordinarla; il suo menu la fissa, cambia l’icona o la chiude.';
+
+  @override
+  String get sessionTabsGestureHintDismiss => 'Non mostrare più';
+
+  @override
   String get chatChooseAgent => 'Seleziona agente';
 
   @override

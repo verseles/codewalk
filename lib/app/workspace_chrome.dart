@@ -233,6 +233,15 @@ class WorkspaceAppBarActions extends StatelessWidget {
             if (action != WorkspacePinnedAction.servers || !wide)
               const Divider(height: 1),
           ],
+        const Divider(height: 1),
+        MenuItemButton(
+          key: const ValueKey('workspace-display-menu'),
+          leadingIcon: const Icon(Symbols.tune),
+          onPressed: preferences == null
+              ? null
+              : () => showWorkspaceDisplayMenu(context),
+          child: Text(l.chatDisplayMenu),
+        ),
         // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
         // disabled without a turn to undo; redo and compact need a live session.
         if (!wide) ...[
@@ -392,4 +401,64 @@ class _WorkspaceWarningObserverState extends State<WorkspaceWarningObserver> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// The display choices that shape the workspace in place, reachable from the
+/// chat without opening Settings.
+Future<void> showWorkspaceDisplayMenu(BuildContext context) =>
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
+      builder: (context) => const _WorkspaceDisplaySheet(),
+    );
+
+class _WorkspaceDisplaySheet extends StatelessWidget {
+  const _WorkspaceDisplaySheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final preferences = context.watch<AppPreferencesController?>();
+    final l = context.v2L10n;
+    if (preferences == null) return const SizedBox.shrink();
+    return SafeArea(
+      child: ListView(
+        key: const ValueKey('workspace-display-sheet'),
+        shrinkWrap: true,
+        children: [
+          ListTile(title: Text(l.chatDisplayMenu)),
+          SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-thinking'),
+            title: Text(l.settingsAppearanceThinkingBubbles),
+            value: preferences.showReasoning,
+            onChanged: preferences.setShowReasoning,
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-tool-calls'),
+            title: Text(l.settingsAppearanceToolCallBubbles),
+            value: preferences.showToolCalls,
+            onChanged: preferences.setShowToolCalls,
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-composer-tips'),
+            title: Text(l.settingsAppearanceComposerTips),
+            value: preferences.composerTips,
+            onChanged: preferences.setComposerTips,
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-session-tabs'),
+            title: Text(l.settingsAppearanceSessionTabs),
+            value: preferences.showSessionTabs,
+            onChanged: preferences.setShowSessionTabs,
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-recent-sessions'),
+            title: Text(l.settingsAppearanceRecentSessions),
+            value: preferences.showRecentSessions,
+            onChanged: preferences.setShowRecentSessions,
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -700,4 +700,87 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('the first-use hint explains the gestures once', (tester) async {
+    _useMemoryPreferences();
+    final app = await _launch(
+      tester,
+      '/s/profile_a/ses_one',
+      size: const Size(390, 844),
+    );
+    final source = app.rig.sources.single;
+    source.respond([source.row('one'), source.row('two')]);
+    await _settle(tester);
+    await _visit(tester, app, ['one']);
+
+    final hint = find.byKey(const ValueKey('session-tabs-gesture-hint'));
+    expect(hint, findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey('session-tabs-gesture-hint-dismiss')),
+    );
+    await _settle(tester);
+    expect(hint, findsNothing);
+    await app.dependencies.preferences.flush();
+    expect(app.dependencies.preferences.tabsGestureHintDismissed, isTrue);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('the strip can be hidden from the display preferences', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(
+      tester,
+      '/s/profile_a/ses_one',
+      size: const Size(390, 844),
+    );
+    final source = app.rig.sources.single;
+    source.respond([source.row('one'), source.row('two')]);
+    await _settle(tester);
+    await _visit(tester, app, ['one']);
+    expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
+
+    app.dependencies.preferences.setShowSessionTabs(false);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('session-tabs')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('session-tabs-gesture-hint')),
+      findsNothing,
+    );
+
+    app.dependencies.preferences.setShowSessionTabs(true);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('the chat overflow opens the display choices', (tester) async {
+    _useMemoryPreferences();
+    final app = await _launch(
+      tester,
+      '/s/profile_a/ses_one',
+      size: const Size(390, 844),
+    );
+    final source = app.rig.sources.single;
+    source.respond([source.row('one'), source.row('two')]);
+    await _settle(tester);
+    await _visit(tester, app, ['one']);
+
+    await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+    await _settle(tester);
+    await tester.tap(find.byKey(const ValueKey('workspace-display-menu')));
+    await _settle(tester);
+    expect(
+      find.byKey(const ValueKey('workspace-display-sheet')),
+      findsOneWidget,
+    );
+
+    // The same choice the Settings toggle writes, applied in place.
+    await tester.tap(
+      find.byKey(const ValueKey('display-toggle-recent-sessions')),
+    );
+    await _settle(tester);
+    expect(app.dependencies.preferences.showRecentSessions, isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

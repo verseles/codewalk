@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "提示：为计划、评审或构建选择专注代理",
   "settingsAppearanceComposerTips": "Composer 提示",
   "settingsAppearanceComposerTipsDescription": "在助手进行推理时显示或隐藏循环提示。",
+  "settingsAppearanceSessionTabs": "会话标签页",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "在聊天上方显示标签栏。每个标签页都有自己的菜单，并且可以拖动。",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "最近会话",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "在项目列表上方显示最近会话。",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "显示",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "拖动标签页可重新排序；用它的菜单可固定、更换图标或关闭。",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "不再显示",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "选择代理",
   "chatChooseModel": "选择模型",
   "chatPermissionAutoApproveOff": "权限自动批准已关闭",

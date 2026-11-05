@@ -1599,6 +1599,34 @@
   "chatTipUseFocusedAgents": "Совет: Выберите фокусного агента для плана, ревью или сборки",
   "settingsAppearanceComposerTips": "Подсказки в редакторе",
   "settingsAppearanceComposerTipsDescription": "Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.",
+  "settingsAppearanceSessionTabs": "Вкладки сессий",
+  "@settingsAppearanceSessionTabs": {
+    "description": "Appearance toggle that shows the session tab strip"
+  },
+  "settingsAppearanceSessionTabsDescription": "Показывать полосу вкладок над чатом. У каждой вкладки есть меню, и её можно перетаскивать.",
+  "@settingsAppearanceSessionTabsDescription": {
+    "description": "Explains the session tab strip toggle"
+  },
+  "settingsAppearanceRecentSessions": "Недавние сессии",
+  "@settingsAppearanceRecentSessions": {
+    "description": "Appearance toggle that shows the Recent sessions section"
+  },
+  "settingsAppearanceRecentSessionsDescription": "Показывать недавние сессии над списком проектов.",
+  "@settingsAppearanceRecentSessionsDescription": {
+    "description": "Explains the Recent sessions toggle"
+  },
+  "chatDisplayMenu": "Отображение",
+  "@chatDisplayMenu": {
+    "description": "Chat overflow entry that opens the display choices"
+  },
+  "sessionTabsGestureHint": "Перетащите вкладку, чтобы изменить порядок; её меню закрепляет, меняет значок или закрывает.",
+  "@sessionTabsGestureHint": {
+    "description": "First-use hint about tab gestures"
+  },
+  "sessionTabsGestureHintDismiss": "Больше не показывать",
+  "@sessionTabsGestureHintDismiss": {
+    "description": "Dismisses the tab gesture hint for good"
+  },
   "chatChooseAgent": "Выбрать агента",
   "chatChooseModel": "Выбрать модель",
   "chatPermissionAutoApproveOff": "Автоматическое одобрение разрешений выключено",
