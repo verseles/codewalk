@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "اپڈیٹ ناکام۔",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "اوپن پر اپ ڈیٹس کی جانچ کریں۔",
+  "settingsAboutCheckOnOpenDescription": "ایپ کب شروع ہوتی ہے خود بخود چیک کریں۔",
+  "settingsAboutDismiss": "برطرف کرنا",
+  "releaseAnnouncementsDoNotShowAgain": "اگلی اپ ڈیٹ تک دوبارہ نہ دکھائیں",
+  "releaseAnnouncementsTitle": "نیا کیا ہے",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version} میں نیا کیا ہے",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "اپ ڈیٹ انسٹال ہو رہا ہے...",
+  "appShellRestart": "دوبارہ شروع کریں",
+  "settingsAboutUpdateInstalled": "اپ ڈیٹ انسٹال ہو گیا۔ درخواست دینے کے لیے ایپ کو دوبارہ شروع کریں۔",
+  "settingsAboutChecking": "چیک کر رہا ہے...",
+  "updatesFailureNetwork": "ڈاؤن لوڈ رک گیا ہے۔ اپنا کنکشن چیک کریں، پھر دوبارہ کوشش کریں۔",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "ڈاؤن لوڈ دستیاب نہیں ہے۔ بعد میں دوبارہ کوشش کریں۔",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "اپ ڈیٹ محفوظ نہیں ہو سکی۔ جگہ خالی کریں اور اسٹوریج کی اجازتیں چیک کریں۔",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "اپ ڈیٹ کی توثیق ناکام ہو گئی۔ پیکیج دوبارہ ڈاؤن لوڈ کریں۔",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "یہ بلڈ انسٹال شدہ ورژن سے نیا نہیں ہے۔",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "یہ ایپ یا ڈیوائس اس اپ ڈیٹ کو سپورٹ نہیں کرتی۔",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "CodeWalk کو ایپس انسٹال کرنے کی اجازت دیں، پھر دوبارہ کوشش کریں۔",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "سسٹم انسٹالر دستیاب نہیں ہے۔",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "سسٹم انسٹالر ناکام ہو گیا۔ اسے دوبارہ کھولنے کی کوشش کریں۔",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "ڈاؤن لوڈ کی گئی فائل موجود نہیں ہے۔ اسے دوبارہ ڈاؤن لوڈ کریں۔",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "اپ ڈیٹ ڈاؤن لوڈ کے سائز کی حد سے زیادہ ہے۔",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub اپ ڈیٹ کی درخواستوں کو محدود کر رہا ہے۔ بعد میں دوبارہ کوشش کریں۔",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "اس انسٹالیشن کے لیے خودکار انسٹالیشن دستیاب نہیں ہے۔ نیچے دیا گیا کمانڈ استعمال کریں۔",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "ری اسٹارٹ ناکام ہو گیا۔ آپ کی چلتی ہوئی ایپ اب بھی دستیاب ہے؛ دوبارہ کوشش کریں۔",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "ڈاؤن لوڈ جاری رکھیں",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

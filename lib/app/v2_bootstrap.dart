@@ -9,8 +9,11 @@ import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/apk_update_controller.dart';
+import '../features/settings/linux_update_controller.dart';
+import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
+import '../features/settings/update_scheduler.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/session_draft_store.dart';
@@ -55,6 +58,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
     WidgetsBinding.instance.addObserver(this);
     unawaited(widget.dependencies.preferences.initialize());
     _startHealth();
+    unawaited(widget.dependencies.updateScheduler?.start());
+    unawaited(widget.dependencies.releaseAnnouncements?.start());
   }
 
   bool _visible(AppLifecycleState? state) =>
@@ -84,6 +89,8 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
     if (!identical(oldWidget.dependencies, widget.dependencies)) {
       oldWidget.dependencies.dispose();
       _startHealth();
+      unawaited(widget.dependencies.updateScheduler?.start());
+      unawaited(widget.dependencies.releaseAnnouncements?.start());
     }
   }
 
@@ -143,10 +150,20 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           ChangeNotifierProvider<ReleaseHistoryController>.value(
             value: history,
           ),
+        if (dependencies.releaseAnnouncements case final announcements?)
+          ChangeNotifierProvider<ReleaseAnnouncementsController>.value(
+            value: announcements,
+          ),
         if (dependencies.updates case final updates?)
           ChangeNotifierProvider<UpdateCheckController>.value(value: updates),
+        if (dependencies.updateScheduler case final scheduler?)
+          ChangeNotifierProvider<UpdateScheduler>.value(value: scheduler),
         if (dependencies.apkUpdates case final apkUpdates?)
           ChangeNotifierProvider<ApkUpdateController>.value(value: apkUpdates),
+        if (dependencies.linuxUpdates case final linuxUpdates?)
+          ChangeNotifierProvider<LinuxUpdateController>.value(
+            value: linuxUpdates,
+          ),
         if (dependencies.pairing case final pairing?)
           ChangeNotifierProvider.value(value: pairing),
         Provider.value(value: dependencies.localizations),

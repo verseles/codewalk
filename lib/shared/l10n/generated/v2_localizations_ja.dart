@@ -2209,4 +2209,90 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'アップデートに失敗しました。';
+
+  @override
+  String get settingsAboutCheckOnOpen => '起動時にアップデートを確認';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription => 'アプリ起動時に自動的に確認します';
+
+  @override
+  String get settingsAboutDismiss => '閉じる';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '次の更新まで表示しない';
+
+  @override
+  String get releaseAnnouncementsTitle => '新着情報';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version の新機能';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'アップデートをインストール中...';
+
+  @override
+  String get appShellRestart => '再起動';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'アップデートがインストールされました。適用するにはアプリを再起動してください。';
+
+  @override
+  String get settingsAboutChecking => '確認中...';
+
+  @override
+  String get updatesFailureNetwork => 'ダウンロードが中断されました。接続を確認して、もう一度お試しください。';
+
+  @override
+  String get updatesFailureHttp => 'ダウンロードを利用できません。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get updatesFailureStorage =>
+      'アップデートを保存できません。空き容量を確保し、ストレージの権限を確認してください。';
+
+  @override
+  String get updatesFailureIntegrity => 'アップデートの検証に失敗しました。パッケージを再ダウンロードしてください。';
+
+  @override
+  String get updatesFailureDowngrade => 'このビルドはインストール済みのバージョンより新しくありません。';
+
+  @override
+  String get updatesFailureUnsupported => 'このアプリまたはデバイスはこのアップデートに対応していません。';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'CodeWalkによるアプリのインストールを許可してから、もう一度お試しください。';
+
+  @override
+  String get updatesFailureInstallerMissing => 'システムインストーラーが利用できません。';
+
+  @override
+  String get updatesFailureInstaller => 'システムインストーラーに失敗しました。もう一度開いてみてください。';
+
+  @override
+  String get updatesFailureFileMissing => 'ダウンロードしたファイルが見つかりません。再ダウンロードしてください。';
+
+  @override
+  String get updatesFailureTooLarge => 'アップデートがダウンロードサイズの上限を超えています。';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHubがアップデートのリクエストを制限しています。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'このインストールでは自動インストールを利用できません。以下のコマンドを使用してください。';
+
+  @override
+  String get updatesRestartFailed =>
+      '再起動に失敗しました。実行中のアプリは引き続き利用できます。もう一度お試しください。';
+
+  @override
+  String get updatesResume => 'ダウンロードを再開';
 }

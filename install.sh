@@ -517,6 +517,10 @@ cleanup_install_attempt() {
       mv "$backup_install_dir" "$INSTALL_DIR"
     fi
   fi
+  if [ "${install_lock_acquired:-0}" = "1" ]; then
+    rm -f "$install_lock/pid"
+    rmdir "$install_lock" 2>/dev/null || true
+  fi
   exit "$status"
 }
 
@@ -529,14 +533,41 @@ download_and_install() {
   rm -rf "$staged_install_dir" "$backup_install_dir"
   mkdir -p "$staged_install_dir"
   install_succeeded=0
+  install_lock="$INSTALL_DIR.update-lock"
+  install_lock_acquired=0
   trap cleanup_install_attempt EXIT
   trap 'exit 129' HUP
   trap 'exit 130' INT
   trap 'exit 143' TERM
 
+  if ! mkdir "$install_lock" 2>/dev/null; then
+    lock_pid="$(cat "$install_lock/pid" 2>/dev/null || true)"
+    case "$lock_pid" in ''|*[!0-9]*) fail "Another installer is initializing" ;; esac
+    if kill -0 "$lock_pid" 2>/dev/null; then
+      fail "Another installer is running"
+    fi
+    rm -f "$install_lock/pid"
+    rmdir "$install_lock" 2>/dev/null || fail "Could not recover installer lock"
+    mkdir "$install_lock" 2>/dev/null || fail "Another installer acquired the lock"
+  fi
+  install_lock_acquired=1
+  printf '%s\n' "$$" > "$install_lock/pid"
+
   url="https://github.com/$REPO/releases/download/$version/$asset"
   info "Downloading $asset from $REPO ($version)"
-  fetch "$url" > "$tmp/$asset" || fail "Failed to download $url"
+  if [ -n "${CODEWALK_LOCAL_ARCHIVE:-}" ]; then
+    [ "${CODEWALK_UPDATE_CONTRACT:-}" = "1" ] && [ "$platform" = "linux" ] &&
+      [ "${CODEWALK_MIGRATION:-}" = "none" ] || fail "Local archives require the Linux update contract"
+    local_sha="${CODEWALK_LOCAL_SHA256:-}"
+    [ "${#local_sha}" = "64" ] || fail "Invalid local archive digest"
+    case "$local_sha" in *[!0-9a-f]*) fail "Invalid local archive digest" ;; esac
+    command -v sha256sum >/dev/null 2>&1 || fail "sha256sum is required"
+    cp "$CODEWALK_LOCAL_ARCHIVE" "$tmp/$asset" || fail "Could not stage local archive"
+    actual_sha="$(sha256sum "$tmp/$asset" | awk '{print $1}')"
+    [ "$actual_sha" = "$local_sha" ] || fail "Local archive verification failed"
+  else
+    fetch "$url" > "$tmp/$asset" || fail "Failed to download $url"
+  fi
 
   tar -xzf "$tmp/$asset" -C "$staged_install_dir" ||
     fail "Failed to extract $asset"
@@ -587,6 +618,9 @@ download_and_install() {
   printf '%s\n' "${channel:-stable}" > "$CHANNEL_FILE"
   install_succeeded=1
   rm -rf "$tmp" "$staged_install_dir" "$backup_install_dir"
+  rm -f "$install_lock/pid"
+  rmdir "$install_lock" 2>/dev/null || true
+  install_lock_acquired=0
   trap - EXIT HUP INT TERM
 }
 

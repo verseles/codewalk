@@ -108,6 +108,14 @@ always installs the latest release.
 
 Installers automatically pick the right release for your platform.
 
+In CodeWalk 2, opt in to **Beta** under **Settings → Version and updates**.
+Automatic checks can be disabled; Settings-entry and manual checks remain
+available. Android downloads and verifies updates in-app before asking the
+system installer for confirmation. Managed Linux installs support verified
+installation and restart; older or portable builds keep an exact-version
+installer command. Update dismissal and release news are independent, and
+interrupted downloads can resume.
+
 On Linux, release files are installed under
 `${XDG_DATA_HOME:-$HOME/.local/share}/codewalk-app`, separately from user data.
 Existing installations keep their preferences and caches in the legacy

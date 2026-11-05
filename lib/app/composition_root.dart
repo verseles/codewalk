@@ -1,4 +1,7 @@
+import 'dart:ui' show AppExitType;
+
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -12,8 +15,11 @@ import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/apk_update_controller.dart';
+import '../features/settings/linux_update_controller.dart';
+import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
+import '../features/settings/update_scheduler.dart';
 import '../platform/connectivity/network_changes.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
@@ -21,6 +27,7 @@ import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/apk_platform_factory.dart';
+import '../platform/releases/linux_installer_factory.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
@@ -43,6 +50,7 @@ import '../platform/storage/preferences_backend.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/releases/release_source.dart';
+import '../shared/releases/update_selector.dart';
 import '../shared/sessions/session_actions.dart';
 import '../shared/sessions/session_catalog_source.dart';
 import '../shared/sessions/session_history_source.dart';
@@ -88,6 +96,15 @@ AppDependencies createAppDependencies({
   final navigator = GlobalKey<NavigatorState>();
   final metadata =
       metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend());
+  // Read the prior v2 footprint before graph initialization can create it.
+  final existingV2Installation =
+      Future.wait([
+        metadata.read('cw2.endpointProfiles.index'),
+        metadata.read(UpdateCheckController.channelKey),
+      ]).then(
+        (values) => values.any((value) => value != null),
+        onError: (Object _) => false,
+      );
   // The live slot consults this policy before answering anything on its own;
   // it is loaded before the graph is mounted (see loadAppDependencies).
   final permissionModes =
@@ -255,18 +272,25 @@ AppDependencies createAppDependencies({
         installedVersion ??
         () async => (await PackageInfo.fromPlatform()).version,
     target: currentUpdateTarget(),
+    installedBuild: () async => (await PackageInfo.fromPlatform()).buildNumber,
   );
-  final apkUpdates = ApkUpdateController(
-    fetcher: createApkFetcher(),
-    installer: createApkInstaller(),
-    fileStore: createApkFileStore(),
-    checks: updates,
-    installedBuildNumber: () async =>
-        (await PackageInfo.fromPlatform()).buildNumber,
-    packageName: () async => (await PackageInfo.fromPlatform()).packageName,
-    isForeground: () =>
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
-  );
+  final apkUpdates = currentUpdateTarget() == UpdateTarget.androidArm64
+      ? ApkUpdateController(
+          fetcher: createApkFetcher(),
+          installer: createApkInstaller(),
+          fileStore: createApkFileStore(),
+          checks: updates,
+          installedBuildNumber: () async =>
+              (await PackageInfo.fromPlatform()).buildNumber,
+          packageName: () async =>
+              (await PackageInfo.fromPlatform()).packageName,
+          isForeground: () =>
+              WidgetsBinding.instance.lifecycleState ==
+              AppLifecycleState.resumed,
+        )
+      : null;
+  final sessionDrafts =
+      draftStore ?? SessionDraftStore(payloads: payloads, index: metadata);
   return AppDependencies(
     preferences: locator<AppPreferencesController>(),
     navigation: navigation,
@@ -290,15 +314,36 @@ AppDependencies createAppDependencies({
     workspace: workspace,
     workspaceDrafts: workspaceDrafts,
     projectContexts: projectContexts,
-    sessionDrafts:
-        draftStore ?? SessionDraftStore(payloads: payloads, index: metadata),
+    sessionDrafts: sessionDrafts,
     modelPreferences: modelPreferences,
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),
     releaseHistory: locator<ReleaseHistoryController>(),
     updates: updates,
+    updateScheduler: UpdateScheduler(checks: updates, store: metadata),
+    releaseAnnouncements: ReleaseAnnouncementsController(
+      store: metadata,
+      checks: updates,
+      installedVersion:
+          installedVersion ??
+          () async => (await PackageInfo.fromPlatform()).version,
+      existingInstallation: existingV2Installation,
+    ),
     apkUpdates: apkUpdates,
+    linuxUpdates: LinuxUpdateController(
+      createLinuxInstaller(),
+      checks: updates,
+      beforeRestart: () async {
+        await sessionDrafts.flush();
+        await workspaceDrafts.flush();
+        await locator<AppPreferencesController>().flush();
+        await metadata.flush();
+      },
+      afterRestart: () async {
+        await ServicesBinding.instance.exitApplication(AppExitType.required);
+      },
+    ),
   );
 }
 

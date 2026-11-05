@@ -1757,5 +1757,87 @@
   "updatesUpdateFailed": "업데이트 실패.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "앱 실행 시 업데이트 확인",
+  "settingsAboutCheckOnOpenDescription": "앱이 시작될 때 업데이트를 자동으로 확인합니다",
+  "settingsAboutDismiss": "닫기",
+  "releaseAnnouncementsDoNotShowAgain": "다음 업데이트까지 다시 표시하지 않기",
+  "releaseAnnouncementsTitle": "새로운 소식",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version}의 새로운 소식",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "업데이트 설치 중...",
+  "appShellRestart": "재시작",
+  "settingsAboutUpdateInstalled": "업데이트가 설치되었습니다. 적용하려면 앱을 재시작하세요.",
+  "settingsAboutChecking": "확인 중...",
+  "updatesFailureNetwork": "다운로드가 중단되었습니다. 연결을 확인한 후 다시 시도하세요.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "다운로드를 사용할 수 없습니다. 나중에 다시 시도하세요.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "업데이트를 저장할 수 없습니다. 공간을 확보하고 저장소 권한을 확인하세요.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "업데이트 확인에 실패했습니다. 패키지를 다시 다운로드하세요.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "이 빌드는 설치된 버전보다 최신 버전이 아닙니다.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "이 앱 또는 기기는 이 업데이트를 지원하지 않습니다.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "CodeWalk의 앱 설치를 허용한 후 다시 시도하세요.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "사용 가능한 시스템 설치 프로그램이 없습니다.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "시스템 설치 프로그램이 실패했습니다. 다시 열어 보세요.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "다운로드한 파일이 없습니다. 다시 다운로드하세요.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "업데이트가 다운로드 크기 제한을 초과합니다.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub에서 업데이트 요청을 제한하고 있습니다. 나중에 다시 시도하세요.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "이 설치에서는 자동 설치를 사용할 수 없습니다. 아래 명령을 사용하세요.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "재시작에 실패했습니다. 실행 중인 앱은 계속 사용할 수 있습니다. 다시 시도하세요.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "다운로드 재개",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

@@ -10,8 +10,11 @@ import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_controller.dart';
 import '../features/settings/apk_update_controller.dart';
+import '../features/settings/linux_update_controller.dart';
+import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
+import '../features/settings/update_scheduler.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
@@ -41,8 +44,11 @@ class AppDependencies {
     this.pairing,
     this.diagnostics,
     this.releaseHistory,
+    this.releaseAnnouncements,
     this.updates,
+    this.updateScheduler,
     this.apkUpdates,
+    this.linuxUpdates,
     this.sessions,
     this.historyFactory,
     this.liveDirectory,
@@ -117,8 +123,11 @@ class AppDependencies {
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
+  final ReleaseAnnouncementsController? releaseAnnouncements;
   final UpdateCheckController? updates;
+  final UpdateScheduler? updateScheduler;
   final ApkUpdateController? apkUpdates;
+  final LinuxUpdateController? linuxUpdates;
   NativePairingLinks? links;
   bool _disposed = false;
 
@@ -156,8 +165,11 @@ class AppDependencies {
     hiddenSessions?.dispose();
     modelPreferences?.dispose();
     releaseHistory?.dispose();
+    releaseAnnouncements?.dispose();
+    updateScheduler?.dispose();
     updates?.dispose();
     apkUpdates?.dispose();
+    linuxUpdates?.dispose();
     diagnostics?.dispose();
   }
 }

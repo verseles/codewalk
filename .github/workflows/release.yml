@@ -141,7 +141,10 @@ jobs:
           --build-number "${{ needs.plan.outputs.build_number }}"
 
       - name: Package Linux artifact
-        run: tar -czf "codewalk-linux-${{ matrix.arch }}.tar.gz" -C "build/linux/${{ matrix.arch }}/release/bundle" .
+        run: |
+          mkdir -p "build/linux/${{ matrix.arch }}/release/bundle/updater"
+          cp install.sh "build/linux/${{ matrix.arch }}/release/bundle/updater/install.sh"
+          tar -czf "codewalk-linux-${{ matrix.arch }}.tar.gz" -C "build/linux/${{ matrix.arch }}/release/bundle" .
 
       # The packaged asset itself is launched on its own architecture before
       # it can ship, with HOME and XDG redirected to an owned directory.

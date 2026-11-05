@@ -2210,4 +2210,87 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => '업데이트 실패.';
+
+  @override
+  String get settingsAboutCheckOnOpen => '앱 실행 시 업데이트 확인';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription => '앱이 시작될 때 업데이트를 자동으로 확인합니다';
+
+  @override
+  String get settingsAboutDismiss => '닫기';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '다음 업데이트까지 다시 표시하지 않기';
+
+  @override
+  String get releaseAnnouncementsTitle => '새로운 소식';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version의 새로운 소식';
+  }
+
+  @override
+  String get appShellInstallingUpdate => '업데이트 설치 중...';
+
+  @override
+  String get appShellRestart => '재시작';
+
+  @override
+  String get settingsAboutUpdateInstalled => '업데이트가 설치되었습니다. 적용하려면 앱을 재시작하세요.';
+
+  @override
+  String get settingsAboutChecking => '확인 중...';
+
+  @override
+  String get updatesFailureNetwork => '다운로드가 중단되었습니다. 연결을 확인한 후 다시 시도하세요.';
+
+  @override
+  String get updatesFailureHttp => '다운로드를 사용할 수 없습니다. 나중에 다시 시도하세요.';
+
+  @override
+  String get updatesFailureStorage =>
+      '업데이트를 저장할 수 없습니다. 공간을 확보하고 저장소 권한을 확인하세요.';
+
+  @override
+  String get updatesFailureIntegrity => '업데이트 확인에 실패했습니다. 패키지를 다시 다운로드하세요.';
+
+  @override
+  String get updatesFailureDowngrade => '이 빌드는 설치된 버전보다 최신 버전이 아닙니다.';
+
+  @override
+  String get updatesFailureUnsupported => '이 앱 또는 기기는 이 업데이트를 지원하지 않습니다.';
+
+  @override
+  String get updatesFailureInstallDenied => 'CodeWalk의 앱 설치를 허용한 후 다시 시도하세요.';
+
+  @override
+  String get updatesFailureInstallerMissing => '사용 가능한 시스템 설치 프로그램이 없습니다.';
+
+  @override
+  String get updatesFailureInstaller => '시스템 설치 프로그램이 실패했습니다. 다시 열어 보세요.';
+
+  @override
+  String get updatesFailureFileMissing => '다운로드한 파일이 없습니다. 다시 다운로드하세요.';
+
+  @override
+  String get updatesFailureTooLarge => '업데이트가 다운로드 크기 제한을 초과합니다.';
+
+  @override
+  String get updatesRateLimited => 'GitHub에서 업데이트 요청을 제한하고 있습니다. 나중에 다시 시도하세요.';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      '이 설치에서는 자동 설치를 사용할 수 없습니다. 아래 명령을 사용하세요.';
+
+  @override
+  String get updatesRestartFailed =>
+      '재시작에 실패했습니다. 실행 중인 앱은 계속 사용할 수 있습니다. 다시 시도하세요.';
+
+  @override
+  String get updatesResume => '다운로드 재개';
 }

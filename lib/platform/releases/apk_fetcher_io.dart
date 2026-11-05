@@ -47,7 +47,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       }
     } on TimeoutException {
       throw const ApkDownloadException(ApkUpdateFailure.timeout);
-    } on SocketException catch (error) {
+    } on IOException catch (error) {
       throw ApkDownloadException(ApkUpdateFailure.network, error);
     }
     _activeResponse = null;
@@ -60,34 +60,135 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
     String partPath, {
     required void Function(int received, int? total) onProgress,
     required bool Function() isCancelled,
+    int? expectedBytes,
+    String? expectedSha256,
+  }) async {
+    try {
+      return await _download(
+        uri,
+        partPath,
+        onProgress: onProgress,
+        isCancelled: isCancelled,
+        expectedBytes: expectedBytes,
+        expectedSha256: expectedSha256,
+      );
+    } on FileSystemException catch (error) {
+      throw ApkDownloadException(ApkUpdateFailure.storage, error);
+    }
+  }
+
+  Future<ApkDownloadResult> _download(
+    Uri uri,
+    String partPath, {
+    required void Function(int received, int? total) onProgress,
+    required bool Function() isCancelled,
+    int? expectedBytes,
+    String? expectedSha256,
   }) async {
     _cancelRequested = false;
-    final response = await _open(uri);
-    if (response.statusCode != 200) {
+    final file = File(partPath);
+    final sidecar = File('$partPath.json');
+    for (final path in [partPath, sidecar.path]) {
+      if (FileSystemEntity.isLinkSync(path)) {
+        throw FileSystemException('Update cache must not contain links', path);
+      }
+    }
+    await file.parent.create(recursive: true);
+    var offset = 0;
+    String? validator;
+    final identity = <String, Object?>{
+      'uri': uri.toString(),
+      'bytes': expectedBytes,
+      'sha256': expectedSha256,
+    };
+    if (expectedBytes != null && expectedBytes > 0 && expectedSha256 != null) {
+      try {
+        if (await sidecar.length() > 4096) {
+          throw const FormatException('Oversized partial metadata');
+        }
+        final saved = jsonDecode(await sidecar.readAsString());
+        final length = await file.length();
+        if (saved is Map &&
+            identity.entries.every((e) => saved[e.key] == e.value) &&
+            length > 0 &&
+            length < expectedBytes) {
+          offset = length;
+          final tag = saved['etag'];
+          if (tag is String && tag.startsWith('"') && tag.endsWith('"')) {
+            validator = tag;
+          }
+        }
+      } on Object {
+        // An unidentifiable partial file is replaced, never appended to.
+      }
+    }
+    var response = await _open(uri, offset: offset, validator: validator);
+    if (offset > 0 && response.statusCode == 416) {
+      await _discardResponse(response);
+      offset = 0;
+      response = await _open(uri);
+    }
+    if (response.statusCode == 200) {
+      offset = 0;
+    } else if (offset > 0 && response.statusCode == 206) {
+      final range = response.headers.value(HttpHeaders.contentRangeHeader);
+      final parsed = range == null
+          ? null
+          : RegExp(r'^bytes (\d+)-(\d+)/(\d+)$').firstMatch(range);
+      if (parsed == null ||
+          int.tryParse(parsed.group(1)!) != offset ||
+          int.tryParse(parsed.group(3)!) != expectedBytes ||
+          int.tryParse(parsed.group(2)!) != expectedBytes! - 1 ||
+          (response.contentLength >= 0 &&
+              response.contentLength != expectedBytes - offset)) {
+        await _discardResponse(response);
+        offset = 0;
+        response = await _open(uri);
+        if (response.statusCode != 200) {
+          await _discardResponse(response);
+          throw const ApkDownloadException(ApkUpdateFailure.http);
+        }
+      }
+    } else {
       await _discardResponse(response);
       throw const ApkDownloadException(ApkUpdateFailure.http);
     }
-    final total = response.contentLength >= 0 ? response.contentLength : null;
+    final total =
+        expectedBytes ??
+        (response.contentLength >= 0 ? response.contentLength : null);
     if (total != null && total > maxApkBytes) {
       await _discardResponse(response);
       throw const ApkDownloadException(ApkUpdateFailure.tooLarge);
     }
-
-    final file = File(partPath);
-    await file.parent.create(recursive: true);
+    final etag = response.headers.value(HttpHeaders.etagHeader);
+    await sidecar.writeAsString(
+      jsonEncode({...identity, 'etag': ?etag}),
+      flush: true,
+    );
     final digestSink = _DigestSink();
     final input = sha256.startChunkedConversion(digestSink);
     RandomAccessFile? handle;
-    var received = 0;
+    var received = offset;
     final watch = Stopwatch()..start();
     try {
-      handle = await file.open(mode: FileMode.write);
+      if (offset > 0) {
+        await for (final chunk in file.openRead(0, offset)) {
+          if (_closed || isCancelled()) {
+            throw const ApkDownloadException(ApkUpdateFailure.cancelled);
+          }
+          input.add(chunk);
+        }
+      }
+      handle = await file.open(
+        mode: offset > 0 ? FileMode.append : FileMode.write,
+      );
+      onProgress(received, total);
       await for (final chunk in response.timeout(_inactivity)) {
         if (_closed || isCancelled()) {
           throw const ApkDownloadException(ApkUpdateFailure.cancelled);
         }
         received += chunk.length;
-        if (received > maxApkBytes) {
+        if (received > maxApkBytes || (total != null && received > total)) {
           throw const ApkDownloadException(ApkUpdateFailure.tooLarge);
         }
         if (watch.elapsed > _overall) {
@@ -101,23 +202,25 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       await handle.flush();
       await handle.close();
       handle = null;
-    } on ApkDownloadException {
-      await _discard(handle, file);
+    } on ApkDownloadException catch (error) {
+      await handle?.close();
+      if (error.failure != ApkUpdateFailure.network &&
+          error.failure != ApkUpdateFailure.timeout) {
+        await _discard(null, file);
+      }
       rethrow;
     } on TimeoutException {
-      await _discard(handle, file);
+      await handle?.close();
       throw const ApkDownloadException(ApkUpdateFailure.timeout);
-    } on SocketException catch (error) {
-      await _discard(handle, file);
-      throw ApkDownloadException(ApkUpdateFailure.network, error);
     } on FileSystemException catch (error) {
-      await _discard(handle, file);
+      await handle?.close();
       throw ApkDownloadException(ApkUpdateFailure.storage, error);
     } catch (error) {
-      await _discard(handle, file);
+      await handle?.close();
       throw ApkDownloadException(ApkUpdateFailure.network, error);
+    } finally {
+      _activeResponse = null;
     }
-    _activeResponse = null;
     final digest = digestSink.value;
     if (digest == null) {
       throw const ApkDownloadException(ApkUpdateFailure.checksumUnavailable);
@@ -132,13 +235,19 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       // Best effort: the file is removed below.
     }
     try {
-      await file.delete();
+      if (file.existsSync()) await file.delete();
+      final sidecar = File('${file.path}.json');
+      if (sidecar.existsSync()) await sidecar.delete();
     } on Object {
       // Best effort: a missing part is already clean.
     }
   }
 
-  Future<HttpClientResponse> _open(Uri uri) async {
+  Future<HttpClientResponse> _open(
+    Uri uri, {
+    int offset = 0,
+    String? validator,
+  }) async {
     var current = uri;
     for (var hop = 0; hop <= maxRedirects; hop++) {
       if (!isAllowedReleaseUri(current)) {
@@ -149,7 +258,7 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
         request = await _client.getUrl(current).timeout(_connectTimeout);
       } on TimeoutException {
         throw const ApkDownloadException(ApkUpdateFailure.timeout);
-      } on SocketException catch (error) {
+      } on IOException catch (error) {
         throw ApkDownloadException(ApkUpdateFailure.network, error);
       }
       request.followRedirects = false;
@@ -160,12 +269,18 @@ final class HttpClientApkFetcher implements ApkAssetFetcher {
       }
       request.headers.set(HttpHeaders.userAgentHeader, 'CodeWalk');
       request.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
+      if (offset > 0) {
+        request.headers.set(HttpHeaders.rangeHeader, 'bytes=$offset-');
+        if (validator != null) {
+          request.headers.set(HttpHeaders.ifRangeHeader, validator);
+        }
+      }
       final HttpClientResponse response;
       try {
         response = await request.close().timeout(_headerTimeout);
       } on TimeoutException {
         throw const ApkDownloadException(ApkUpdateFailure.timeout);
-      } on SocketException catch (error) {
+      } on IOException catch (error) {
         throw ApkDownloadException(ApkUpdateFailure.network, error);
       }
       _activeRequest = null;

@@ -60,7 +60,7 @@ List<ReleaseArchiveEntry> parseReleaseArchive(String source) {
     if (current == null) return;
     final text = body.join('\n').trim();
     if (text.isEmpty) throw const FormatException('Empty release section');
-    final block = _announcement(text);
+    final block = parseReleaseAnnouncement(text);
     if (block.notes.isEmpty && block.announcement == null) {
       throw const FormatException('Empty release section');
     }
@@ -99,7 +99,8 @@ List<ReleaseArchiveEntry> parseReleaseArchive(String source) {
   return List.unmodifiable(entries);
 }
 
-({String? announcement, String notes}) _announcement(String body) {
+/// Separates a leading announcement from the remaining release notes.
+({String? announcement, String notes}) parseReleaseAnnouncement(String body) {
   final lines = body.split('\n');
   var index = 0;
   while (index < lines.length && lines[index].trim().isEmpty) {

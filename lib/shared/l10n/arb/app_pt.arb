@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "Falha na atualização.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "Verificar atualizações ao abrir",
+  "settingsAboutCheckOnOpenDescription": "Verificar automaticamente quando o app iniciar",
+  "settingsAboutDismiss": "Dispensar",
+  "releaseAnnouncementsDoNotShowAgain": "Não mostrar novamente até a próxima atualização",
+  "releaseAnnouncementsTitle": "Novidades",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "Novidades da v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "Instalando atualização...",
+  "appShellRestart": "Reiniciar",
+  "settingsAboutUpdateInstalled": "Atualização instalada. Reinicie o app para aplicar.",
+  "settingsAboutChecking": "Verificando...",
+  "updatesFailureNetwork": "Download interrompido. Verifique sua conexão e tente novamente.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "O download está indisponível. Tente novamente mais tarde.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "Não foi possível salvar a atualização. Libere espaço e verifique as permissões de armazenamento.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "Falha na verificação da atualização. Baixe o pacote novamente.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "Esta versão não é mais recente que a versão instalada.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "Este app ou dispositivo não é compatível com esta atualização.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "Permita que o CodeWalk instale apps e tente novamente.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "Nenhum instalador do sistema está disponível.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "O instalador do sistema falhou. Tente abri-lo novamente.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "O arquivo baixado não foi encontrado. Baixe-o novamente.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "A atualização excede o limite de tamanho do download.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "O GitHub está limitando as solicitações de atualização. Tente novamente mais tarde.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "A instalação automática não está disponível para esta instalação. Use o comando abaixo.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "Falha ao reiniciar. O app em execução continua disponível; tente novamente.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "Retomar download.",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

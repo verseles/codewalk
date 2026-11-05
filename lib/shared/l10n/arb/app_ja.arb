@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "アップデートに失敗しました。",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "起動時にアップデートを確認",
+  "settingsAboutCheckOnOpenDescription": "アプリ起動時に自動的に確認します",
+  "settingsAboutDismiss": "閉じる",
+  "releaseAnnouncementsDoNotShowAgain": "次の更新まで表示しない",
+  "releaseAnnouncementsTitle": "新着情報",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version} の新機能",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "アップデートをインストール中...",
+  "appShellRestart": "再起動",
+  "settingsAboutUpdateInstalled": "アップデートがインストールされました。適用するにはアプリを再起動してください。",
+  "settingsAboutChecking": "確認中...",
+  "updatesFailureNetwork": "ダウンロードが中断されました。接続を確認して、もう一度お試しください。",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "ダウンロードを利用できません。しばらくしてからもう一度お試しください。",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "アップデートを保存できません。空き容量を確保し、ストレージの権限を確認してください。",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "アップデートの検証に失敗しました。パッケージを再ダウンロードしてください。",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "このビルドはインストール済みのバージョンより新しくありません。",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "このアプリまたはデバイスはこのアップデートに対応していません。",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "CodeWalkによるアプリのインストールを許可してから、もう一度お試しください。",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "システムインストーラーが利用できません。",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "システムインストーラーに失敗しました。もう一度開いてみてください。",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "ダウンロードしたファイルが見つかりません。再ダウンロードしてください。",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "アップデートがダウンロードサイズの上限を超えています。",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHubがアップデートのリクエストを制限しています。しばらくしてからもう一度お試しください。",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "このインストールでは自動インストールを利用できません。以下のコマンドを使用してください。",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "再起動に失敗しました。実行中のアプリは引き続き利用できます。もう一度お試しください。",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "ダウンロードを再開",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

@@ -19,6 +19,9 @@ import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/sessions_page.dart';
 import '../features/sessions/workspace_draft_controller.dart';
 import '../features/sessions/workspace_draft_page.dart';
+import '../features/settings/release_announcements_host.dart';
+import '../features/settings/update_activity_host.dart';
+import '../features/settings/update_discovery_host.dart';
 import '../shared/l10n/l10n_context.dart';
 import '../shared/layout/window_size_class.dart';
 import '../shared/sessions/session_live_source.dart';
@@ -52,7 +55,15 @@ class AppShell extends StatelessWidget {
       location == '/' || location == '/sessions' || location.startsWith('/s/');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ReleaseAnnouncementsHost(
+    enabled: isWorkspace(location),
+    child: UpdateDiscoveryHost(
+      enabled: isWorkspace(location),
+      child: UpdateActivityHost(child: _build(context)),
+    ),
+  );
+
+  Widget _build(BuildContext context) {
     final l10n = context.v2L10n;
     if (!isWorkspace(location)) {
       // A launch on another page spends the return to the last tab, so a

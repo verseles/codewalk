@@ -8,14 +8,20 @@ import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/app_preferences_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
+import '../../shared/releases/apk_update.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/hosts_filter_target.dart';
 import 'about_settings_page.dart';
+import 'apk_update_controller.dart';
 import 'appearance_settings_page.dart';
 import 'behavior_settings_page.dart';
 import 'diagnostics_settings_page.dart';
 import 'release_history_settings_page.dart';
+import 'release_news_card.dart';
 import 'shortcuts_settings_page.dart';
+import 'update_check_controller.dart';
+import 'update_scheduler.dart';
 import 'updates_settings_page.dart';
 
 enum SettingsSection {
@@ -45,10 +51,17 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
   };
   SettingsSection? _selected;
   bool _wasWide = false;
+  bool _opened = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_opened) {
+      _opened = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.read<UpdateScheduler?>()?.settingsOpened();
+      });
+    }
     final wide = context.windowSizeClass.isAtLeastExpanded;
     if (wide) {
       _selected ??= SettingsSection.appearance;
@@ -127,7 +140,9 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         SettingsSection.logs => const DiagnosticsSettingsPage(),
         SettingsSection.updates => const UpdatesSettingsPage(),
         SettingsSection.releaseHistory => const ReleaseHistorySettingsPage(),
-        SettingsSection.about => const AboutSettingsPage(),
+        SettingsSection.about => AboutSettingsPage(
+          onHistory: () => _select(SettingsSection.releaseHistory),
+        ),
         _ => const AppearanceSettingsPage(),
       },
     );
@@ -179,6 +194,9 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
 
   Widget _master(BuildContext context, bool supportsShortcuts) {
     final l = context.v2L10n;
+    final checks = context.watch<UpdateCheckController?>();
+    final install = context.watch<ApkUpdateController?>();
+    final update = checks?.visibleCandidate;
     final query = _search.text.trim().toLowerCase();
     bool matches(String title, String description, String group) =>
         '$title $description $group'.toLowerCase().contains(query);
@@ -241,6 +259,25 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       children: [
         Text(l.settingsTitle, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
+        if (update != null && checks?.target != null)
+          UpdateCandidateCard(
+            target: checks!.target!,
+            showInstalled: true,
+            candidate: install != null && install.status != ApkUpdateStatus.idle
+                ? install.candidate ?? update
+                : update,
+            install: install,
+            onDismiss: () async {
+              final messenger = ScaffoldMessenger.maybeOf(context);
+              if (!await checks.dismissCandidate()) {
+                showAppSnackBar(messenger, l.settingsStorageError);
+              }
+            },
+          ),
+        if (update == null)
+          ReleaseNewsCard(
+            onHistory: () => _select(SettingsSection.releaseHistory),
+          ),
         TextField(
           key: const ValueKey('settings_navigation_search'),
           controller: _search,

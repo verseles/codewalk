@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "Не удалось обновить.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "Проверять обновления при запуске",
+  "settingsAboutCheckOnOpenDescription": "Автоматически проверять обновления при запуске приложения",
+  "settingsAboutDismiss": "Закрыть",
+  "releaseAnnouncementsDoNotShowAgain": "Не показывать до следующего обновления",
+  "releaseAnnouncementsTitle": "Что нового",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "Что нового в v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "Установка обновления...",
+  "appShellRestart": "Перезагрузить",
+  "settingsAboutUpdateInstalled": "Обновление установлено. Перезапустите приложение для применения.",
+  "settingsAboutChecking": "Проверка...",
+  "updatesFailureNetwork": "Загрузка прервана. Проверьте подключение и попробуйте снова.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "Загрузка недоступна. Попробуйте позже.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "Не удаётся сохранить обновление. Освободите место и проверьте разрешения на доступ к хранилищу.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "Проверка обновления не пройдена. Загрузите пакет ещё раз.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "Эта сборка не новее установленной версии.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "Это приложение или устройство не поддерживает данное обновление.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "Разрешите CodeWalk устанавливать приложения и попробуйте снова.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "Системный установщик недоступен.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "Системный установщик не сработал. Попробуйте открыть его ещё раз.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "Загруженный файл отсутствует. Загрузите его ещё раз.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "Размер обновления превышает ограничение на загрузку.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub ограничивает запросы на обновление. Попробуйте позже.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "Автоматическая установка недоступна для этой установки. Используйте команду ниже.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "Не удалось перезапустить приложение. Оно продолжает работать; попробуйте ещё раз.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "Возобновить загрузку.",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "更新失败。",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "打开时检查更新",
+  "settingsAboutCheckOnOpenDescription": "应用启动时自动检查",
+  "settingsAboutDismiss": "忽略",
+  "releaseAnnouncementsDoNotShowAgain": "下次更新前不再显示",
+  "releaseAnnouncementsTitle": "新功能",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version} 的新内容",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "正在安装更新...",
+  "appShellRestart": "重启",
+  "settingsAboutUpdateInstalled": "更新已安装。重启应用以应用更改。",
+  "settingsAboutChecking": "正在检查...",
+  "updatesFailureNetwork": "下载已中断。请检查网络连接后重试。",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "下载暂不可用。请稍后重试。",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "无法保存更新。请释放空间并检查存储权限。",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "更新验证失败。请重新下载软件包。",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "此构建版本不比已安装的版本新。",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "此应用或设备不支持此更新。",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "请允许 CodeWalk 安装应用，然后重试。",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "没有可用的系统安装程序。",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "系统安装程序失败。请重新打开它。",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "找不到已下载的文件。请重新下载。",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "更新超出下载大小限制。",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub 正在限制更新请求。请稍后重试。",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "此安装方式不支持自动安装。请使用下方命令。",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "重启失败。当前运行的应用仍可使用；请重试。",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "继续下载",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

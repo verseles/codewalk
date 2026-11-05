@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "अपडेट विफल।",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "खोलने पर अपडेट की जांच करें",
+  "settingsAboutCheckOnOpenDescription": "ऐप शुरू होने पर स्वचालित रूप से जांचें",
+  "settingsAboutDismiss": "खारिज करें",
+  "releaseAnnouncementsDoNotShowAgain": "अगले अपडेट तक फिर न दिखाएँ",
+  "releaseAnnouncementsTitle": "नया क्या है",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version} में नया क्या है",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "अपडेट इंस्टॉल हो रहा है...",
+  "appShellRestart": "पुनः आरंभ करें",
+  "settingsAboutUpdateInstalled": "अपडेट इंस्टॉल हो गया। लागू करने के लिए ऐप को पुनरारंभ करें।",
+  "settingsAboutChecking": "जांच की जा रही है...",
+  "updatesFailureNetwork": "डाउनलोड बाधित हो गया। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "डाउनलोड उपलब्ध नहीं है। बाद में फिर कोशिश करें।",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "अपडेट सहेजा नहीं जा सकता। जगह खाली करें और स्टोरेज की अनुमतियाँ जाँचें।",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "अपडेट का सत्यापन विफल हुआ। पैकेज फिर से डाउनलोड करें।",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "यह बिल्ड इंस्टॉल किए गए संस्करण से नया नहीं है।",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "यह ऐप या डिवाइस इस अपडेट का समर्थन नहीं करता।",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "CodeWalk को ऐप इंस्टॉल करने की अनुमति दें, फिर कोशिश करें।",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "कोई सिस्टम इंस्टॉलर उपलब्ध नहीं है।",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "सिस्टम इंस्टॉलर विफल हुआ। इसे फिर से खोलने की कोशिश करें।",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "डाउनलोड की गई फ़ाइल मौजूद नहीं है। इसे फिर से डाउनलोड करें।",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "अपडेट डाउनलोड आकार की सीमा से अधिक है।",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub अपडेट अनुरोधों को सीमित कर रहा है। बाद में फिर कोशिश करें।",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "इस इंस्टॉलेशन के लिए स्वचालित इंस्टॉलेशन उपलब्ध नहीं है। नीचे दिया गया कमांड इस्तेमाल करें।",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "रीस्टार्ट विफल हुआ। आपका चल रहा ऐप अभी भी उपलब्ध है; फिर कोशिश करें।",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "डाउनलोड जारी रखें",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

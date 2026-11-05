@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codewalk/features/settings/apk_update_controller.dart';
@@ -94,6 +95,8 @@ class FakeFetcher implements ApkAssetFetcher {
   Uri? downloaded;
   Exception? failure;
   int downloads = 0;
+  Completer<void>? downloadGate;
+  int cancellations = 0;
 
   @override
   Future<String> fetchText(Uri uri, {int maxBytes = 256 * 1024}) async {
@@ -110,10 +113,13 @@ class FakeFetcher implements ApkAssetFetcher {
     String partPath, {
     required void Function(int received, int? total) onProgress,
     required bool Function() isCancelled,
+    int? expectedBytes,
+    String? expectedSha256,
   }) async {
     if (failure case final error?) throw error;
     downloaded = uri;
     downloads++;
+    await downloadGate?.future;
     store.files[partPath] = downloadSha;
     onProgress(downloadBytes, downloadBytes);
     return ApkDownloadResult(bytes: downloadBytes, sha256: downloadSha);
@@ -123,7 +129,7 @@ class FakeFetcher implements ApkAssetFetcher {
   void close() {}
 
   @override
-  void cancelActive() {}
+  void cancelActive() => cancellations++;
 }
 
 class FakeInstaller implements ApkInstaller {
@@ -183,6 +189,19 @@ void main() {
     expect(controller.status, ApkUpdateStatus.ready);
     expect(fetcher.downloaded, candidate.assetUrl);
     expect(installer.openedPath, isNull);
+  });
+
+  test('a release check cannot cancel an active APK download', () async {
+    fetcher.downloadGate = Completer<void>();
+    final download = controller.start(candidate);
+    await pumpEventQueue();
+    expect(controller.status, ApkUpdateStatus.downloading);
+    await checks.check();
+    expect(fetcher.cancellations, 0);
+    expect(controller.status, ApkUpdateStatus.downloading);
+    fetcher.downloadGate!.complete();
+    await download;
+    expect(controller.status, ApkUpdateStatus.ready);
   });
 
   test('opens the installer and reports installerOpened', () async {

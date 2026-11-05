@@ -4207,6 +4207,162 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Update failed.'**
   String get updatesUpdateFailed;
+
+  /// CodeWalk UI string — settingsAboutCheckOnOpen
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates on open'**
+  String get settingsAboutCheckOnOpen;
+
+  /// CodeWalk UI string — settingsAboutCheckOnOpenDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically check when the app starts'**
+  String get settingsAboutCheckOnOpenDescription;
+
+  /// CodeWalk UI string — settingsAboutDismiss
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get settingsAboutDismiss;
+
+  /// Default-checked post-upgrade dialog suppression checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again until the next update'**
+  String get releaseAnnouncementsDoNotShowAgain;
+
+  /// Post-upgrade announcement dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'What’s new'**
+  String get releaseAnnouncementsTitle;
+
+  /// CodeWalk UI string — settingsAboutChangelog
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog'**
+  String get settingsAboutChangelog;
+
+  /// CodeWalk UI string — settingsAboutWhatsNew
+  ///
+  /// In en, this message translates to:
+  /// **'What\'\'s new in v{version}'**
+  String settingsAboutWhatsNew(String version);
+
+  /// CodeWalk UI string — appShellInstallingUpdate
+  ///
+  /// In en, this message translates to:
+  /// **'Installing update...'**
+  String get appShellInstallingUpdate;
+
+  /// CodeWalk UI string — appShellRestart
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get appShellRestart;
+
+  /// CodeWalk UI string — settingsAboutUpdateInstalled
+  ///
+  /// In en, this message translates to:
+  /// **'Update installed. Restart the app to apply.'**
+  String get settingsAboutUpdateInstalled;
+
+  /// CodeWalk UI string — settingsAboutChecking
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get settingsAboutChecking;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Download interrupted. Check your connection, then try again.'**
+  String get updatesFailureNetwork;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'The download is unavailable. Try again later.'**
+  String get updatesFailureHttp;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot save the update. Free space and check storage permissions.'**
+  String get updatesFailureStorage;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Update verification failed. Download the package again.'**
+  String get updatesFailureIntegrity;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'This build is not newer than the installed version.'**
+  String get updatesFailureDowngrade;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'This app or device does not support this update.'**
+  String get updatesFailureUnsupported;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Allow CodeWalk to install apps, then try again.'**
+  String get updatesFailureInstallDenied;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'No system installer is available.'**
+  String get updatesFailureInstallerMissing;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'The system installer failed. Try opening it again.'**
+  String get updatesFailureInstaller;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded file is missing. Download it again.'**
+  String get updatesFailureFileMissing;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'The update exceeds the download size limit.'**
+  String get updatesFailureTooLarge;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub is limiting update requests. Try again later.'**
+  String get updatesRateLimited;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic installation is unavailable for this installation. Use the command below.'**
+  String get updatesLinuxUnavailable;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Restart failed. Your running app is still available; try again.'**
+  String get updatesRestartFailed;
+
+  /// V2 update check
+  ///
+  /// In en, this message translates to:
+  /// **'Resume download.'**
+  String get updatesResume;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

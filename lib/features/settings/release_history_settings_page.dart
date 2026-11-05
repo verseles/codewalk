@@ -5,8 +5,10 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/releases/app_version.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'release_history_controller.dart';
+import 'update_check_controller.dart';
 
 class ReleaseHistorySettingsPage extends StatefulWidget {
   const ReleaseHistorySettingsPage({super.key});
@@ -40,7 +42,27 @@ class _ReleaseHistorySettingsPageState
   Widget build(BuildContext context) {
     final controller = context.watch<ReleaseHistoryController?>();
     final l = context.v2L10n;
-    final entries = controller?.entries ?? const [];
+    final archived = controller?.entries ?? const [];
+    final catalog =
+        context.watch<UpdateCheckController?>()?.catalog ?? const [];
+    final archivedTags = archived.map((entry) => 'v${entry.version}').toSet();
+    final entries = [
+      for (final entry in archived)
+        (
+          version: AppVersion.tryParse('${entry.version}')!,
+          date: entry.date,
+          notes: entry.notes,
+          announcement: entry.announcement,
+        ),
+      for (final entry in catalog)
+        if (!archivedTags.contains(entry.tag))
+          (
+            version: entry.version,
+            date: entry.publishedAt.toUtc().toIso8601String().substring(0, 10),
+            notes: entry.notes,
+            announcement: entry.announcement,
+          ),
+    ]..sort((a, b) => b.version.compareTo(a.version));
     return ListView(
       key: const ValueKey('settings_release_history_page'),
       padding: const EdgeInsets.all(24),

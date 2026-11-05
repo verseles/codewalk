@@ -25,10 +25,20 @@ final class ApkUpdateController extends ChangeNotifier {
        _checks = checks,
        _installedBuildNumber = installedBuildNumber,
        _packageName = packageName,
-       _isForeground = isForeground {
+       _isForeground = isForeground,
+       _lastChannel = checks.channel {
     _checks.addListener(_onCheckChanged);
-    unawaited(_cleanupStale());
+    _cleanupTask = checks.target == UpdateTarget.androidArm64
+        ? _cleanupStale()
+        : Future.value();
   }
+
+  bool get blocksNotices => const {
+    ApkUpdateStatus.downloading,
+    ApkUpdateStatus.verifying,
+    ApkUpdateStatus.ready,
+    ApkUpdateStatus.handingOff,
+  }.contains(_status);
 
   Future<void> _cleanupStale() async {
     try {
@@ -45,6 +55,8 @@ final class ApkUpdateController extends ChangeNotifier {
   final Future<String> Function() _installedBuildNumber;
   final Future<String> Function() _packageName;
   final bool Function() _isForeground;
+  late final Future<void> _cleanupTask;
+  UpdateChannel _lastChannel;
 
   ApkUpdateStatus _status = ApkUpdateStatus.idle;
   ApkUpdateFailure? _failure;
@@ -57,20 +69,35 @@ final class ApkUpdateController extends ChangeNotifier {
   bool _busy = false;
   bool _disposed = false;
   bool _cancelled = false;
+  bool _cancelInProgress = false;
 
   ApkUpdateStatus get status => _status;
   ApkUpdateFailure? get failure => _failure;
   double get progress => _progress;
   UpdateCandidate? get candidate => _candidate;
   bool get hasVerifiedPackage => _verifiedPath != null;
+  bool hasVerifiedCandidate(UpdateCandidate candidate) =>
+      _verifiedPath != null && _candidate?.tag == candidate.tag;
 
   /// Downloads, verifies and (when foregrounded) opens the installer for the
   /// exact [candidate] selected by [UpdateCheckController].
   Future<void> start(UpdateCandidate candidate) async {
-    if (_disposed || _busy) return;
+    if (_disposed || _busy || _cancelInProgress) return;
     if (_status == ApkUpdateStatus.downloading ||
         _status == ApkUpdateStatus.verifying ||
         _status == ApkUpdateStatus.handingOff) {
+      return;
+    }
+    if (hasVerifiedCandidate(candidate)) {
+      _busy = true;
+      try {
+        _status = ApkUpdateStatus.ready;
+        _failure = null;
+        notifyListeners();
+        await openInstaller();
+      } finally {
+        _busy = false;
+      }
       return;
     }
     _busy = true;
@@ -84,11 +111,19 @@ final class ApkUpdateController extends ChangeNotifier {
     _status = ApkUpdateStatus.downloading;
     notifyListeners();
     try {
+      await _cleanupTask;
+      if (!_current(generation)) return;
       if (await _packageName() != codewalkAndroidApplicationId) {
         _fail(ApkUpdateFailure.unsupported);
         return;
       }
+      if (!_current(generation)) return;
       final buildNumber = int.tryParse(await _installedBuildNumber());
+      if (!_current(generation)) return;
+      if (buildNumber == null) {
+        _fail(ApkUpdateFailure.unsupported);
+        return;
+      }
       final tag = candidate.tag;
       if (!isExactReleaseAssetUri(
         candidate.assetUrl,
@@ -124,15 +159,18 @@ final class ApkUpdateController extends ChangeNotifier {
         _fail(ApkUpdateFailure.manifestInvalid);
         return;
       }
-      if (buildNumber != null && manifest.asset.versionCode <= buildNumber) {
+      if (manifest.asset.versionCode <= buildNumber) {
         _fail(ApkUpdateFailure.downgrade);
         return;
       }
       _expectedSha256 = manifest.asset.sha256;
       final partPath = await _fileStore.partPath(tag);
+      if (!_current(generation)) return;
       final result = await _fetcher.download(
         candidate.assetUrl,
         partPath,
+        expectedBytes: manifest.asset.size,
+        expectedSha256: manifest.asset.sha256,
         onProgress: (received, total) {
           if (!_current(generation)) return;
           final next = total != null && total > 0
@@ -200,6 +238,8 @@ final class ApkUpdateController extends ChangeNotifier {
       return;
     }
     try {
+      _status = ApkUpdateStatus.handingOff;
+      _notify();
       if (!await _fileStore.exists(path)) {
         if (!_current(generation)) return;
         _verifiedPath = null;
@@ -207,8 +247,6 @@ final class ApkUpdateController extends ChangeNotifier {
         return;
       }
       if (!_current(generation)) return;
-      _status = ApkUpdateStatus.handingOff;
-      _notify();
       final digest = await _fileStore.sha256(path);
       if (!_current(generation)) return;
       if (digest == null || digest != expected) {
@@ -250,22 +288,27 @@ final class ApkUpdateController extends ChangeNotifier {
 
   /// Aborts an active transfer and removes its partial file.
   Future<void> cancel() async {
-    if (_disposed) return;
+    if (_disposed || _cancelInProgress) return;
     if (_status == ApkUpdateStatus.idle) return;
-    _cancelled = true;
-    _generation++;
-    _fetcher.cancelActive();
-    _status = ApkUpdateStatus.idle;
-    _failure = null;
-    _progress = 0;
-    final tag = _candidate?.tag;
-    final path = _verifiedPath;
-    _verifiedPath = null;
-    if (tag != null) {
-      await _fileStore.delete(await _fileStore.partPath(tag));
+    _cancelInProgress = true;
+    try {
+      _cancelled = true;
+      _generation++;
+      _fetcher.cancelActive();
+      _status = ApkUpdateStatus.idle;
+      _failure = null;
+      _progress = 0;
+      final tag = _candidate?.tag;
+      final path = _verifiedPath;
+      _verifiedPath = null;
+      if (tag != null) {
+        await _fileStore.delete(await _fileStore.partPath(tag));
+      }
+      if (path != null) await _fileStore.delete(path);
+      _notify();
+    } finally {
+      _cancelInProgress = false;
     }
-    if (path != null) await _fileStore.delete(path);
-    _notify();
   }
 
   /// Retries the last failed candidate, reusing a verified APK when the
@@ -294,10 +337,16 @@ final class ApkUpdateController extends ChangeNotifier {
   }
 
   void _onCheckChanged() {
-    if (_disposed || _status == ApkUpdateStatus.idle) return;
-    final candidate = _checks.candidate;
-    if (_verifiedPath != null) return;
-    if (candidate == null || candidate.tag != _candidate?.tag) {
+    if (_disposed) return;
+    final changed = _checks.channel != _lastChannel;
+    _lastChannel = _checks.channel;
+    final supersededFailure =
+        _status == ApkUpdateStatus.failed &&
+        _checks.status != UpdateCheckStatus.checking &&
+        _checks.candidate?.tag != _candidate?.tag;
+    if ((changed || supersededFailure) &&
+        _status != ApkUpdateStatus.idle &&
+        _verifiedPath == null) {
       unawaited(cancel());
     }
   }

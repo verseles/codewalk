@@ -113,6 +113,8 @@ def inspect_linux(path: Path, target: str) -> dict:
                 name.startswith("data/flutter_assets/") for name in members):
             raise ValueError(f"{path.name}: incomplete bundle (engine or Flutter assets missing)")
         require_v2_aot(path.name, read("lib/libapp.so"))
+        if read("updater/install.sh") != (ROOT / "install.sh").read_bytes():
+            raise ValueError(f"{path.name}: bundled updater differs from the release source")
     return {"architecture": target.removeprefix("linux-"), "signature": "none (Linux bundles are not signed)"}
 
 

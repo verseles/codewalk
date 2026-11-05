@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "Échec de la mise à jour.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "Vérifier les mises à jour à l''ouverture",
+  "settingsAboutCheckOnOpenDescription": "Vérifier automatiquement au démarrage de l''application",
+  "settingsAboutDismiss": "Ignorer",
+  "releaseAnnouncementsDoNotShowAgain": "Ne plus afficher jusqu’à la prochaine mise à jour",
+  "releaseAnnouncementsTitle": "Nouveautés",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "Nouveautés de la v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "Installation de la mise à jour...",
+  "appShellRestart": "Redémarrer",
+  "settingsAboutUpdateInstalled": "Mise à jour installée. Redémarrez l''application pour l''appliquer.",
+  "settingsAboutChecking": "Vérification...",
+  "updatesFailureNetwork": "Téléchargement interrompu. Vérifiez votre connexion, puis réessayez.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "Le téléchargement est indisponible. Réessayez plus tard.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "Impossible d’enregistrer la mise à jour. Libérez de l’espace et vérifiez les autorisations de stockage.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "La vérification de la mise à jour a échoué. Téléchargez à nouveau le paquet.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "Cette version n’est pas plus récente que la version installée.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "Cette application ou cet appareil ne prend pas en charge cette mise à jour.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "Autorisez CodeWalk à installer des applications, puis réessayez.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "Aucun programme d’installation système n’est disponible.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "Le programme d’installation système a échoué. Essayez de le rouvrir.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "Le fichier téléchargé est introuvable. Téléchargez-le à nouveau.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "La mise à jour dépasse la limite de taille de téléchargement.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub limite les demandes de mise à jour. Réessayez plus tard.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "L’installation automatique n’est pas disponible pour cette installation. Utilisez la commande ci-dessous.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "Le redémarrage a échoué. L’application en cours d’exécution reste disponible ; réessayez.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "Reprendre le téléchargement.",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

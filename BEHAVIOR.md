@@ -784,17 +784,36 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** an empty announcement marker cannot replace valid cached notes; announcement-only releases containing text remain valid
 - **Then** versions appear newest first in batches of 20, with highlighted announcements and expandable selectable plain-text notes
 - **Then** opening or refreshing this page neither acknowledges update announcements nor installs an update
+- **Then** v2 release-body entries from the updater catalog are merged with the permanent stable archive in SemVer order; stable archive entries win duplicates, while beta notes never add incompatible headings to `CHANGELOG.md`
 - **Then** disposed or superseded loads cannot publish stale results; unsupported fetch platforms can still display a previously saved copy
 
-- **Given** the user opens Settings > Version and updates
-- **When** the platform is not an MVP native update target (Android arm64, Linux x64, Linux arm64)
-- **Then** the page renders the unsupported-platform notice and offers no update check
-- **When** the platform is a supported native update target
-- **Then** opening the page never starts a network request automatically; the update channel defaults to `stable`, and switching to `beta` is an explicit opt-in persisted under `cw2.updates.channel` (unreadable preferences keep `stable`)
-- **Then** tapping Check for updates reads the public GitHub releases listing (`/repos/verseles/codewalk/releases?per_page=100`) without profile credentials, traversing up to 10 pages (`maxUpdatePageBytes` 2 MiB per page, 8 MiB total, 30 s deadline); any non-200 status, non-identity encoding, exceeded page/byte/deadline bound or invalid JSON fails closed instead of reporting up to date on a partial listing
-- **Then** candidate selection uses strict SemVer 2.0 ordering (`2.0.0-beta.2 < 2.0.0-beta.10 < 2.0.0`), considers only canonical `v2.*` tags, excludes drafts, non-2 majors, `v1.266.0-native.N` cohorts and other prerelease families, allows `v2.0.0-beta.N` (`N >= 1`) only when the `beta` channel is selected and `prerelease` is `true`, and accepts an asset only when its download URL matches `https://github.com/verseles/codewalk/releases/download/<exact-tag>/<target-asset>`
-- **Then** changing the channel or leaving the app cancels any in-flight check and discards its result
-- **Then** when a newer eligible release is found, Android opens the exact verified APK URL (`codewalk-android-arm64.apk`) in the external browser without self-installing, and Linux displays and copies the exact-tag HTTPS installer command (`curl -fsSL https://install.cat/verseles/codewalk | CODEWALK_CHANNEL=<stable|beta> CODEWALK_VERSION=<exact-tag> sh`) without executing it
+- **Given** CodeWalk 2 runs on Android arm64, Linux x64 or Linux arm64
+- **Then** automatic discovery defaults ON under `cw2.updates.checkOnOpen`, checks at startup and hourly while the process is alive, coalesces concurrent requests and reuses a successful result for one hour
+- **Then** Settings entry independently checks at most every 20 minutes even when automatic discovery is disabled; explicit Check bypasses the successful-result cache, while successful silent checks show no up-to-date message
+- **Then** HTTP 403/429 quota responses retain their retry deadline under `cw2.updates.retryAt` across restarts and block automatic, Settings and manual requests until expiry; malformed or implausible deadlines beyond 30 days use a valid reset header or a one-hour fallback instead of permanently disabling discovery
+- **Then** failed silent checks preserve usable candidates/history; a later silent success clears a stale error without presenting a manual-success message
+- **Then** the channel defaults to `stable`; explicit Beta opt-in persists under `cw2.updates.channel`, with unreadable preferences keeping stable
+- **Then** public release discovery sends no profile credentials, traverses up to 10 pages of 100 releases with 2 MiB/page, 8 MiB total and a 30-second deadline, and rejects incomplete, invalid, redirected or non-identity responses
+- **Then** strict SemVer ordering, canonical major-2 tags, exact architecture assets and exact-tag GitHub URLs apply; Beta accepts only `v2.0.0-beta.N` with `N >= 1` and `prerelease: true`, while stable never offers prereleases or v1 cohorts
+- **Then** Settings and About show installed version/build and a dismissible update card; update dismissal persists per tag independently of installed-release news dismissal
+- **Then** installed-release news shows the complete announcement with history/group actions when no visible update takes priority; startup/hourly update and news notices have independent per-version/process flags and foreground/modal guards
+- **Then** the complete v2 API catalog supplies beta history and full announcements; its `cw2.updates.catalog` envelope is capped at 512 KiB, with invalid or oversized refreshes preserving the prior saved copy instead of truncating it
+- **Then** installed-release intervals under `cw2.updates.installedRelease` retain unseen announcements across upgrades and offline launches; incomplete catalog coverage cannot acknowledge an interval
+- **Then** a fresh v2 install establishes a baseline without a cumulative dialog; existing v2 evidence can show the installed release, without reading or importing v1 settings, profiles or credentials
+- **Then** nonempty cumulative batches are acknowledged only by explicit Close with the checkbox checked; Back, barrier dismissal or unchecked Close retain the interval for a later process, while an empty covered interval needs no dialog
+- **Then** cumulative acknowledgment does not dismiss the independent news toast/card; a dialog already shown suppresses duplicate news for its tags only in that process
+- **Then** Android downloads the exact APK in-app, validates its manifest, size, complete SHA-256, application/signer identity and strictly increasing versionCode, and hands a verified file to the system installer for user confirmation
+- **Then** partial identity includes exact URL, size and digest; valid `Range`/`If-Range` responses resume, full responses restart, invalid partial/416 responses restart safely, and reconstructed bytes are hashed in full before installation
+- **Then** transient failures retain resumable partials; explicit cancellation removes them; filesystem failures are reported as storage failures, and errors distinguish transport, HTTP, integrity, downgrade, size and installer failures
+- **Then** an ordinary release check cannot cancel an active transfer; Android channel/check controls protect a pinned verified installation until it is cancelled or its result is dismissed, and the same verified Android candidate can be reopened without downloading again
+- **Then** global progress survives route changes; closing its presentation does not cancel the operation, and a completed Android installer handoff no longer blocks later notices
+- **Then** Linux in-app installation is available only for the running managed v2 bundle with its packaged installer; it verifies exact-tag/architecture manifest and SHA-256 before running that trusted script with an exact tag/channel and migration disabled
+- **Then** Linux partials, sidecars and installer temporaries stay in a private 0700 cache; links cannot redirect writes or APK cleanup, and stale owned partials/installer temporaries are removed after 24 hours without following links
+- **Then** Linux uses staging/rollback, preserves user-data directories, bounds installer waiting and sends process-group termination signals on cancellation/timeout; no Linux package-signature guarantee is claimed
+- **Then** Linux offers restart only after installation succeeds and the installed tag matches; drafts/preferences/metadata flush before relaunch, which inherits the desktop environment and requests exit of the old app
+- **Then** unsupported/older/unmanaged Linux installs retain a copyable exact-tag installer command, and changing channel clears a failed Linux retry target rather than offering a stale beta
+- **When** the platform has no supported native update target
+- **Then** the update page offers no check/install route and the application does not construct Android APK cleanup on that platform
 
 Session-detail routes retain their navigation placeholders; the conversation
 catalog does not fetch history, attach live execution, send prompts or mutate sessions.

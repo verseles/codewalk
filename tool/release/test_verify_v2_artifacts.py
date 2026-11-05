@@ -43,6 +43,7 @@ class ArtifactFixture:
     def linux(self, target, machine=None, libapp=V2_AOT, extra=None):
         path = self.root / f"codewalk-{target}.tar.gz"
         files = {"./codewalk": elf(machine or subject.ELF_MACHINE[target]),
+                 "./updater/install.sh": (subject.ROOT / "install.sh").read_bytes(),
                  "./lib/libapp.so": libapp, "./lib/libflutter_linux_gtk.so": b"engine",
                  "./data/flutter_assets/AssetManifest.bin": b"assets", **(extra or {})}
         with tarfile.open(path, "w:gz") as archive:

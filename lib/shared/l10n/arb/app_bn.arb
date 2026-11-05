@@ -1719,5 +1719,87 @@
   "updatesUpdateFailed": "আপডেট ব্যর্থ।",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "খোলার আপডেটের জন্য চেক করুন",
+  "settingsAboutCheckOnOpenDescription": "অ্যাপটি শুরু হলে স্বয়ংক্রিয়ভাবে পরীক্ষা করুন",
+  "settingsAboutDismiss": "খারিজ",
+  "releaseAnnouncementsDoNotShowAgain": "পরবর্তী আপডেট পর্যন্ত আর দেখাবেন না",
+  "releaseAnnouncementsTitle": "নতুন কী আছে",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "v{version}-এ নতুন কী আছে",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "আপডেট ইনস্টল হচ্ছে...",
+  "appShellRestart": "পুনরায় শুরু করুন",
+  "settingsAboutUpdateInstalled": "আপডেট ইনস্টল করা হয়েছে। আবেদন করতে অ্যাপটি পুনরায় চালু করুন।",
+  "settingsAboutChecking": "পরীক্ষা করা হচ্ছে...",
+  "updatesFailureNetwork": "ডাউনলোড বাধাগ্রস্ত হয়েছে। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "ডাউনলোডটি উপলভ্য নয়। পরে আবার চেষ্টা করুন।",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "আপডেট সংরক্ষণ করা যাচ্ছে না। জায়গা খালি করুন এবং স্টোরেজের অনুমতি পরীক্ষা করুন।",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "আপডেট যাচাই করা যায়নি। প্যাকেজটি আবার ডাউনলোড করুন।",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "এই বিল্ডটি ইনস্টল করা সংস্করণের চেয়ে নতুন নয়।",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "এই অ্যাপ বা ডিভাইসটি এই আপডেট সমর্থন করে না।",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "CodeWalk-কে অ্যাপ ইনস্টল করার অনুমতি দিন, তারপর আবার চেষ্টা করুন।",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "কোনো সিস্টেম ইনস্টলার উপলভ্য নেই।",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "সিস্টেম ইনস্টলারটি ব্যর্থ হয়েছে। আবার খুলে দেখুন।",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "ডাউনলোড করা ফাইলটি নেই। আবার ডাউনলোড করুন।",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "আপডেটটি ডাউনলোডের আকারসীমা ছাড়িয়ে গেছে।",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub আপডেটের অনুরোধ সীমিত করছে। পরে আবার চেষ্টা করুন।",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "এই ইনস্টলেশনের জন্য স্বয়ংক্রিয় ইনস্টল উপলভ্য নয়। নিচের কমান্ডটি ব্যবহার করুন।",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "রিস্টার্ট ব্যর্থ হয়েছে। চালু থাকা অ্যাপটি এখনও ব্যবহার করা যাচ্ছে; আবার চেষ্টা করুন।",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "ডাউনলোড চালিয়ে যান",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

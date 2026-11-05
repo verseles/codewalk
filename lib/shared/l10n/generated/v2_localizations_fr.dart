@@ -2360,4 +2360,102 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'Échec de la mise à jour.';
+
+  @override
+  String get settingsAboutCheckOnOpen =>
+      'Vérifier les mises à jour à l\'ouverture';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'Vérifier automatiquement au démarrage de l\'application';
+
+  @override
+  String get settingsAboutDismiss => 'Ignorer';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Ne plus afficher jusqu’à la prochaine mise à jour';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Nouveautés';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Nouveautés de la v$version';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'Installation de la mise à jour...';
+
+  @override
+  String get appShellRestart => 'Redémarrer';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'Mise à jour installée. Redémarrez l\'application pour l\'appliquer.';
+
+  @override
+  String get settingsAboutChecking => 'Vérification...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'Téléchargement interrompu. Vérifiez votre connexion, puis réessayez.';
+
+  @override
+  String get updatesFailureHttp =>
+      'Le téléchargement est indisponible. Réessayez plus tard.';
+
+  @override
+  String get updatesFailureStorage =>
+      'Impossible d’enregistrer la mise à jour. Libérez de l’espace et vérifiez les autorisations de stockage.';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'La vérification de la mise à jour a échoué. Téléchargez à nouveau le paquet.';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'Cette version n’est pas plus récente que la version installée.';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'Cette application ou cet appareil ne prend pas en charge cette mise à jour.';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'Autorisez CodeWalk à installer des applications, puis réessayez.';
+
+  @override
+  String get updatesFailureInstallerMissing =>
+      'Aucun programme d’installation système n’est disponible.';
+
+  @override
+  String get updatesFailureInstaller =>
+      'Le programme d’installation système a échoué. Essayez de le rouvrir.';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'Le fichier téléchargé est introuvable. Téléchargez-le à nouveau.';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'La mise à jour dépasse la limite de taille de téléchargement.';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHub limite les demandes de mise à jour. Réessayez plus tard.';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'L’installation automatique n’est pas disponible pour cette installation. Utilisez la commande ci-dessous.';
+
+  @override
+  String get updatesRestartFailed =>
+      'Le redémarrage a échoué. L’application en cours d’exécution reste disponible ; réessayez.';
+
+  @override
+  String get updatesResume => 'Reprendre le téléchargement.';
 }

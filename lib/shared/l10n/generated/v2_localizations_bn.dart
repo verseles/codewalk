@@ -2308,4 +2308,101 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'আপডেট ব্যর্থ।';
+
+  @override
+  String get settingsAboutCheckOnOpen => 'খোলার আপডেটের জন্য চেক করুন';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'অ্যাপটি শুরু হলে স্বয়ংক্রিয়ভাবে পরীক্ষা করুন';
+
+  @override
+  String get settingsAboutDismiss => 'খারিজ';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'পরবর্তী আপডেট পর্যন্ত আর দেখাবেন না';
+
+  @override
+  String get releaseAnnouncementsTitle => 'নতুন কী আছে';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version-এ নতুন কী আছে';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'আপডেট ইনস্টল হচ্ছে...';
+
+  @override
+  String get appShellRestart => 'পুনরায় শুরু করুন';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'আপডেট ইনস্টল করা হয়েছে। আবেদন করতে অ্যাপটি পুনরায় চালু করুন।';
+
+  @override
+  String get settingsAboutChecking => 'পরীক্ষা করা হচ্ছে...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'ডাউনলোড বাধাগ্রস্ত হয়েছে। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesFailureHttp =>
+      'ডাউনলোডটি উপলভ্য নয়। পরে আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesFailureStorage =>
+      'আপডেট সংরক্ষণ করা যাচ্ছে না। জায়গা খালি করুন এবং স্টোরেজের অনুমতি পরীক্ষা করুন।';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'আপডেট যাচাই করা যায়নি। প্যাকেজটি আবার ডাউনলোড করুন।';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'এই বিল্ডটি ইনস্টল করা সংস্করণের চেয়ে নতুন নয়।';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'এই অ্যাপ বা ডিভাইসটি এই আপডেট সমর্থন করে না।';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'CodeWalk-কে অ্যাপ ইনস্টল করার অনুমতি দিন, তারপর আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesFailureInstallerMissing =>
+      'কোনো সিস্টেম ইনস্টলার উপলভ্য নেই।';
+
+  @override
+  String get updatesFailureInstaller =>
+      'সিস্টেম ইনস্টলারটি ব্যর্থ হয়েছে। আবার খুলে দেখুন।';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'ডাউনলোড করা ফাইলটি নেই। আবার ডাউনলোড করুন।';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'আপডেটটি ডাউনলোডের আকারসীমা ছাড়িয়ে গেছে।';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHub আপডেটের অনুরোধ সীমিত করছে। পরে আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'এই ইনস্টলেশনের জন্য স্বয়ংক্রিয় ইনস্টল উপলভ্য নয়। নিচের কমান্ডটি ব্যবহার করুন।';
+
+  @override
+  String get updatesRestartFailed =>
+      'রিস্টার্ট ব্যর্থ হয়েছে। চালু থাকা অ্যাপটি এখনও ব্যবহার করা যাচ্ছে; আবার চেষ্টা করুন।';
+
+  @override
+  String get updatesResume => 'ডাউনলোড চালিয়ে যান';
 }

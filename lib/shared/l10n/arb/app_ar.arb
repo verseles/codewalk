@@ -1718,5 +1718,87 @@
   "updatesUpdateFailed": "فشل التحديث.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "التحقق من التحديثات عند الفتح",
+  "settingsAboutCheckOnOpenDescription": "التحقق تلقائياً عند بدء تشغيل التطبيق",
+  "settingsAboutDismiss": "تجاهل",
+  "releaseAnnouncementsDoNotShowAgain": "عدم العرض مجددًا حتى التحديث القادم",
+  "releaseAnnouncementsTitle": "ما الجديد",
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "الجديد في v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "جاري تثبيت التحديث...",
+  "appShellRestart": "إعادة تشغيل",
+  "settingsAboutUpdateInstalled": "تم تثبيت التحديث. أعد تشغيل التطبيق للتطبيق.",
+  "settingsAboutChecking": "جاري التحقق...",
+  "updatesFailureNetwork": "تم إيقاف التنزيل. تحقق من اتصالك ثم حاول مرة أخرى.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "التنزيل غير متاح. حاول مرة أخرى لاحقًا.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "تعذر حفظ التحديث. أفرغ بعض المساحة وتحقق من أذونات التخزين.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "فشل التحقق من التحديث. نزّل الحزمة مرة أخرى.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "هذا الإصدار ليس أحدث من الإصدار المثبّت.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "هذا التطبيق أو الجهاز لا يدعم هذا التحديث.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "اسمح لـ CodeWalk بتثبيت التطبيقات، ثم حاول مرة أخرى.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "لا يتوفر مُثبّت نظام.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "فشل مُثبّت النظام. حاول فتحه مرة أخرى.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "الملف الذي تم تنزيله غير موجود. نزّله مرة أخرى.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "يتجاوز التحديث الحد الأقصى لحجم التنزيل.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "يقيّد GitHub طلبات التحديث. حاول مرة أخرى لاحقًا.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "التثبيت التلقائي غير متاح لهذا التثبيت. استخدم الأمر أدناه.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "فشلت إعادة التشغيل. لا يزال التطبيق قيد التشغيل ومتاحًا؛ حاول مرة أخرى.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "استئناف التنزيل",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

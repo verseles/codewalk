@@ -2307,4 +2307,100 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'اپڈیٹ ناکام۔';
+
+  @override
+  String get settingsAboutCheckOnOpen => 'اوپن پر اپ ڈیٹس کی جانچ کریں۔';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'ایپ کب شروع ہوتی ہے خود بخود چیک کریں۔';
+
+  @override
+  String get settingsAboutDismiss => 'برطرف کرنا';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'اگلی اپ ڈیٹ تک دوبارہ نہ دکھائیں';
+
+  @override
+  String get releaseAnnouncementsTitle => 'نیا کیا ہے';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version میں نیا کیا ہے';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'اپ ڈیٹ انسٹال ہو رہا ہے...';
+
+  @override
+  String get appShellRestart => 'دوبارہ شروع کریں';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'اپ ڈیٹ انسٹال ہو گیا۔ درخواست دینے کے لیے ایپ کو دوبارہ شروع کریں۔';
+
+  @override
+  String get settingsAboutChecking => 'چیک کر رہا ہے...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'ڈاؤن لوڈ رک گیا ہے۔ اپنا کنکشن چیک کریں، پھر دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesFailureHttp =>
+      'ڈاؤن لوڈ دستیاب نہیں ہے۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesFailureStorage =>
+      'اپ ڈیٹ محفوظ نہیں ہو سکی۔ جگہ خالی کریں اور اسٹوریج کی اجازتیں چیک کریں۔';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'اپ ڈیٹ کی توثیق ناکام ہو گئی۔ پیکیج دوبارہ ڈاؤن لوڈ کریں۔';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'یہ بلڈ انسٹال شدہ ورژن سے نیا نہیں ہے۔';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'یہ ایپ یا ڈیوائس اس اپ ڈیٹ کو سپورٹ نہیں کرتی۔';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'CodeWalk کو ایپس انسٹال کرنے کی اجازت دیں، پھر دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesFailureInstallerMissing => 'سسٹم انسٹالر دستیاب نہیں ہے۔';
+
+  @override
+  String get updatesFailureInstaller =>
+      'سسٹم انسٹالر ناکام ہو گیا۔ اسے دوبارہ کھولنے کی کوشش کریں۔';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'ڈاؤن لوڈ کی گئی فائل موجود نہیں ہے۔ اسے دوبارہ ڈاؤن لوڈ کریں۔';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'اپ ڈیٹ ڈاؤن لوڈ کے سائز کی حد سے زیادہ ہے۔';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHub اپ ڈیٹ کی درخواستوں کو محدود کر رہا ہے۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'اس انسٹالیشن کے لیے خودکار انسٹالیشن دستیاب نہیں ہے۔ نیچے دیا گیا کمانڈ استعمال کریں۔';
+
+  @override
+  String get updatesRestartFailed =>
+      'ری اسٹارٹ ناکام ہو گیا۔ آپ کی چلتی ہوئی ایپ اب بھی دستیاب ہے؛ دوبارہ کوشش کریں۔';
+
+  @override
+  String get updatesResume => 'ڈاؤن لوڈ جاری رکھیں';
 }

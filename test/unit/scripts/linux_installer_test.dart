@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codewalk/presentation/providers/settings_provider.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -174,112 +175,147 @@ void main() {
       expect(File('${legacy.path}/.custom-state').existsSync(), isTrue);
     });
 
-    test('Linux update replaces bundle and preserves legacy data', () async {
-      expect(
-        installScript.readAsStringSync(),
-        contains('CODEWALK_INSTALLER_SOURCE_ONLY'),
-      );
+    for (final useLocal in [false, true]) {
+      test('Linux update preserves data (local archive: $useLocal)', () async {
+        expect(
+          installScript.readAsStringSync(),
+          contains('CODEWALK_INSTALLER_SOURCE_ONLY'),
+        );
 
-      final archiveRoot = Directory('${root.path}/archive')
-        ..createSync(recursive: true);
-      final binary = File('${archiveRoot.path}/codewalk')
-        ..writeAsStringSync('#!/usr/bin/env sh\nexit 0\n');
-      final chmod = await Process.run('chmod', <String>['+x', binary.path]);
-      expect(chmod.exitCode, 0, reason: '${chmod.stderr}');
-      final archiveData = Directory('${archiveRoot.path}/data')
-        ..createSync(recursive: true);
-      File(
-        '${archiveData.path}/com.verseles.codewalk.png',
-      ).writeAsStringSync('icon');
-      File('${archiveData.path}/icudtl.dat').writeAsStringSync('icu');
-      final flutterAssets = Directory('${archiveData.path}/flutter_assets')
-        ..createSync(recursive: true);
-      File(
-        '${flutterAssets.path}/AssetManifest.bin',
-      ).writeAsStringSync('assets');
-      final archiveLib = Directory('${archiveRoot.path}/lib')
-        ..createSync(recursive: true);
-      File(
-        '${archiveLib.path}/libflutter_linux_gtk.so',
-      ).writeAsStringSync('runtime');
-      File('${archiveLib.path}/libapp.so').writeAsStringSync('application');
-      final archive = File('${root.path}/fixture.tar.gz');
-      final tar = await Process.run('tar', <String>[
-        '-czf',
-        archive.path,
-        '-C',
-        archiveRoot.path,
-        '.',
-      ]);
-      expect(tar.exitCode, 0, reason: '${tar.stderr}');
-
-      final legacy = Directory('${dataHome.path}/codewalk')
-        ..createSync(recursive: true);
-      File('${legacy.path}/codewalk').writeAsStringSync('old binary');
-      File('${legacy.path}/.installed-version').writeAsStringSync('v1');
-      for (final name in <String>['data', 'lib']) {
-        final directory = Directory('${legacy.path}/$name')
+        final archiveRoot = Directory('${root.path}/archive')
           ..createSync(recursive: true);
-        File('${directory.path}/old').writeAsStringSync(name);
-      }
-      File('${legacy.path}/shared_preferences.json').writeAsStringSync('{}');
-      final cache = Directory('${legacy.path}/chat_cache_v1')
-        ..createSync(recursive: true);
-      File('${cache.path}/payload.json').writeAsStringSync('{}');
-      final previousInstall = Directory('${dataHome.path}/codewalk-app')
-        ..createSync(recursive: true);
-      File('${previousInstall.path}/codewalk').writeAsStringSync('old app');
-      File('${previousInstall.path}/obsolete').writeAsStringSync('remove');
+        final binary = File('${archiveRoot.path}/codewalk')
+          ..writeAsStringSync('#!/usr/bin/env sh\nexit 0\n');
+        final chmod = await Process.run('chmod', <String>['+x', binary.path]);
+        expect(chmod.exitCode, 0, reason: '${chmod.stderr}');
+        final archiveData = Directory('${archiveRoot.path}/data')
+          ..createSync(recursive: true);
+        File(
+          '${archiveData.path}/com.verseles.codewalk.png',
+        ).writeAsStringSync('icon');
+        File('${archiveData.path}/icudtl.dat').writeAsStringSync('icu');
+        final flutterAssets = Directory('${archiveData.path}/flutter_assets')
+          ..createSync(recursive: true);
+        File(
+          '${flutterAssets.path}/AssetManifest.bin',
+        ).writeAsStringSync('assets');
+        final archiveLib = Directory('${archiveRoot.path}/lib')
+          ..createSync(recursive: true);
+        File(
+          '${archiveLib.path}/libflutter_linux_gtk.so',
+        ).writeAsStringSync('runtime');
+        File('${archiveLib.path}/libapp.so').writeAsStringSync('application');
+        final archive = File('${root.path}/fixture.tar.gz');
+        final tar = await Process.run('tar', <String>[
+          '-czf',
+          archive.path,
+          '-C',
+          archiveRoot.path,
+          '.',
+        ]);
+        expect(tar.exitCode, 0, reason: '${tar.stderr}');
 
-      final result = await sourceScript(
-        installScript,
-        'fetch() { cat "\$CODEWALK_TEST_ASSET"; }; '
-        'platform=linux; configure_install_paths; '
-        'version=v2; asset=fixture.tar.gz; REPO=test/repo; '
-        'download_and_install',
-        home: home,
-        dataHome: dataHome,
-        sourceOnlyVariable: 'CODEWALK_INSTALLER_SOURCE_ONLY',
-        extraEnvironment: <String, String>{'CODEWALK_TEST_ASSET': archive.path},
-      );
+        final legacy = Directory('${dataHome.path}/codewalk')
+          ..createSync(recursive: true);
+        File('${legacy.path}/codewalk').writeAsStringSync('old binary');
+        File('${legacy.path}/.installed-version').writeAsStringSync('v1');
+        for (final name in <String>['data', 'lib']) {
+          final directory = Directory('${legacy.path}/$name')
+            ..createSync(recursive: true);
+          File('${directory.path}/old').writeAsStringSync(name);
+        }
+        File('${legacy.path}/shared_preferences.json').writeAsStringSync('{}');
+        final cache = Directory('${legacy.path}/chat_cache_v1')
+          ..createSync(recursive: true);
+        File('${cache.path}/payload.json').writeAsStringSync('{}');
+        final previousInstall = Directory('${dataHome.path}/codewalk-app')
+          ..createSync(recursive: true);
+        File('${previousInstall.path}/codewalk').writeAsStringSync('old app');
+        File('${previousInstall.path}/obsolete').writeAsStringSync('remove');
 
-      expect(result.exitCode, 0, reason: '${result.stderr}');
-      final installed = Directory('${dataHome.path}/codewalk-app');
-      expect(File('${installed.path}/codewalk').existsSync(), isTrue);
-      expect(
-        File('${installed.path}/codewalk').readAsStringSync(),
-        startsWith('#!/usr/bin/env sh'),
-      );
-      expect(File('${installed.path}/obsolete').existsSync(), isFalse);
-      expect(
-        File('${installed.path}/data/com.verseles.codewalk.png').existsSync(),
-        isTrue,
-      );
-      expect(
-        File('${installed.path}/.installed-version').readAsStringSync().trim(),
-        'v2',
-      );
-      expect(
-        Link('${home.path}/.local/bin/codewalk').targetSync(),
-        '${installed.path}/codewalk',
-      );
-      expect(File('${legacy.path}/codewalk').existsSync(), isFalse);
-      expect(Directory('${legacy.path}/data').existsSync(), isFalse);
-      expect(Directory('${legacy.path}/lib').existsSync(), isFalse);
-      expect(
-        File('${legacy.path}/shared_preferences.json').existsSync(),
-        isTrue,
-      );
-      expect(Directory('${legacy.path}/chat_cache_v1').existsSync(), isTrue);
-      expect(
-        dataHome.listSync().where(
-          (entry) =>
-              entry.path.contains('codewalk-app.staged-') ||
-              entry.path.contains('codewalk-app.backup-'),
-        ),
-        isEmpty,
-      );
-    });
+        final result = await sourceScript(
+          installScript,
+          'fetch() { cat "\$CODEWALK_TEST_ASSET"; }; '
+          'platform=linux; configure_install_paths; '
+          'version=v2; asset=fixture.tar.gz; REPO=test/repo; '
+          'download_and_install',
+          home: home,
+          dataHome: dataHome,
+          sourceOnlyVariable: 'CODEWALK_INSTALLER_SOURCE_ONLY',
+          extraEnvironment: <String, String>{
+            'CODEWALK_TEST_ASSET': archive.path,
+            if (useLocal) ...{
+              'CODEWALK_UPDATE_CONTRACT': '1',
+              'CODEWALK_MIGRATION': 'none',
+              'CODEWALK_LOCAL_ARCHIVE': archive.path,
+              'CODEWALK_LOCAL_SHA256': sha256
+                  .convert(archive.readAsBytesSync())
+                  .toString(),
+            },
+          },
+        );
+
+        expect(result.exitCode, 0, reason: '${result.stderr}');
+        final installed = Directory('${dataHome.path}/codewalk-app');
+        expect(File('${installed.path}/codewalk').existsSync(), isTrue);
+        expect(
+          File('${installed.path}/codewalk').readAsStringSync(),
+          startsWith('#!/usr/bin/env sh'),
+        );
+        expect(File('${installed.path}/obsolete').existsSync(), isFalse);
+        expect(
+          File('${installed.path}/data/com.verseles.codewalk.png').existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            '${installed.path}/.installed-version',
+          ).readAsStringSync().trim(),
+          'v2',
+        );
+        expect(
+          Link('${home.path}/.local/bin/codewalk').targetSync(),
+          '${installed.path}/codewalk',
+        );
+        expect(File('${legacy.path}/codewalk').existsSync(), isFalse);
+        expect(Directory('${legacy.path}/data').existsSync(), isFalse);
+        expect(Directory('${legacy.path}/lib').existsSync(), isFalse);
+        expect(
+          File('${legacy.path}/shared_preferences.json').existsSync(),
+          isTrue,
+        );
+        expect(Directory('${legacy.path}/chat_cache_v1').existsSync(), isTrue);
+        expect(
+          dataHome.listSync().where(
+            (entry) =>
+                entry.path.contains('codewalk-app.staged-') ||
+                entry.path.contains('codewalk-app.backup-'),
+          ),
+          isEmpty,
+        );
+        if (useLocal) {
+          final failed = await sourceScript(
+            installScript,
+            'platform=linux; configure_install_paths; version=v2; asset=fixture.tar.gz; download_and_install',
+            home: home,
+            dataHome: dataHome,
+            sourceOnlyVariable: 'CODEWALK_INSTALLER_SOURCE_ONLY',
+            extraEnvironment: {
+              'CODEWALK_UPDATE_CONTRACT': '1',
+              'CODEWALK_MIGRATION': 'none',
+              'CODEWALK_LOCAL_ARCHIVE': archive.path,
+              'CODEWALK_LOCAL_SHA256': '0' * 64,
+            },
+          );
+          expect(failed.exitCode, isNot(0));
+          expect(File('${installed.path}/codewalk').existsSync(), isTrue);
+          expect(
+            Directory('${installed.path}.update-lock').existsSync(),
+            isFalse,
+          );
+        }
+      });
+    }
 
     test('invalid Linux archive leaves existing bundles untouched', () async {
       final archiveRoot = Directory('${root.path}/invalid-archive')

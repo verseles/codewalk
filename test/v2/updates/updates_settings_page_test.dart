@@ -98,6 +98,7 @@ class FakeFetcher implements ApkAssetFetcher {
 
   final FakeStore store;
   Uri? downloaded;
+  int downloads = 0;
 
   @override
   Future<String> fetchText(Uri uri, {int maxBytes = 256 * 1024}) async {
@@ -113,8 +114,11 @@ class FakeFetcher implements ApkAssetFetcher {
     String partPath, {
     required void Function(int received, int? total) onProgress,
     required bool Function() isCancelled,
+    int? expectedBytes,
+    String? expectedSha256,
   }) async {
     downloaded = uri;
+    downloads++;
     store.files[partPath] = _apkSha;
     onProgress(10, 10);
     return const ApkDownloadResult(bytes: 10, sha256: _apkSha);
@@ -161,6 +165,7 @@ void main() {
     WidgetTester tester, {
     required UpdateTarget? target,
     String? body,
+    bool foreground = false,
   }) async {
     final updates = UpdateCheckController(
       source: ImmediateSource(body),
@@ -181,7 +186,7 @@ void main() {
         checks: updates,
         installedBuildNumber: () async => '1',
         packageName: () async => codewalkAndroidApplicationId,
-        isForeground: () => false,
+        isForeground: () => foreground,
       );
       addTearDown(install.dispose);
     }
@@ -240,6 +245,60 @@ void main() {
       );
       expect(lastInstaller!.openedPath, isNull);
       expect(find.byKey(const ValueKey('updates_install')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'returning from Android installer can dismiss and unblock channel controls',
+    (tester) async {
+      final checks = await mount(
+        tester,
+        target: UpdateTarget.androidArm64,
+        body: listing('v2.0.0-beta.2'),
+        foreground: true,
+      );
+      await optInAndCheck(tester);
+      await tester.tap(find.byKey(const ValueKey('updates_download')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('updates_install')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('updates_installer_opened')),
+        findsOneWidget,
+      );
+      final channels = find.byType(SegmentedButton<UpdateChannel>);
+      expect(
+        tester
+            .widget<SegmentedButton<UpdateChannel>>(channels)
+            .onSelectionChanged,
+        isNull,
+      );
+      await tester.tap(find.byKey(const ValueKey('updates_dismiss_install')));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SegmentedButton<UpdateChannel>>(channels)
+            .onSelectionChanged,
+        isNotNull,
+      );
+      expect(lastFetcher!.downloads, 1);
+      expect(find.byKey(const ValueKey('updates_install')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('updates_install')));
+      await tester.pumpAndSettle();
+      expect(lastFetcher!.downloads, 1);
+      expect(
+        find.byKey(const ValueKey('updates_installer_opened')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('updates_dismiss_install')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Stable'));
+      await tester.pumpAndSettle();
+      expect(checks.channel, UpdateChannel.stable);
+      expect(
+        find.byKey(const ValueKey('updates_installer_opened')),
+        findsNothing,
+      );
     },
   );
 
@@ -315,6 +374,9 @@ void main() {
       updateSource: source,
       installedVersion: () async => '2.0.0-beta.1',
     );
+    if (currentUpdateTarget() != UpdateTarget.androidArm64) {
+      expect(graph.apkUpdates, isNull);
+    }
     await graph.preferences.initialize();
     addTearDown(() async {
       await tester.pumpWidget(const SizedBox.shrink());
@@ -343,16 +405,23 @@ void main() {
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('settings_updates_page')), findsOneWidget);
-    expect(source.requests, 0, reason: 'opening the page never checks');
     if (currentUpdateTarget() != null) {
+      expect(source.requests, 1, reason: 'startup checks silently');
+      expect(find.byKey(const ValueKey('updates_up_to_date')), findsNothing);
       expect(find.byKey(const ValueKey('updates_check')), findsOneWidget);
       expect(find.byKey(const ValueKey('updates_unsupported')), findsNothing);
       await tester.tap(find.text('Beta'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('updates_check')));
       await tester.pumpAndSettle();
-      expect(source.requests, 1);
+      expect(source.requests, 2);
       expect(find.byKey(const ValueKey('updates_available')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('settings_detail_back')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('updates_available')), findsOneWidget);
+      await tester.tap(find.text('Dismiss'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('updates_available')), findsNothing);
     }
   });
 }

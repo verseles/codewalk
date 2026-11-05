@@ -1,15 +1,23 @@
-enum ReleaseSourceFailure { unavailable, cancelled, timeout, invalidResponse }
+enum ReleaseSourceFailure {
+  unavailable,
+  cancelled,
+  timeout,
+  invalidResponse,
+  rateLimited,
+}
 
 final class ReleaseSourceResult {
   const ReleaseSourceResult.success(String value)
     : body = value,
-      failure = null;
-  const ReleaseSourceResult.failure(ReleaseSourceFailure value)
+      failure = null,
+      retryAt = null;
+  const ReleaseSourceResult.failure(ReleaseSourceFailure value, {this.retryAt})
     : body = null,
       failure = value;
 
   final String? body;
   final ReleaseSourceFailure? failure;
+  final DateTime? retryAt;
 }
 
 abstract interface class ReleaseSourceTask {
@@ -27,6 +35,7 @@ abstract interface class ReleaseSource {
       '/repos/verseles/codewalk/releases?per_page=$updatePageSize';
   static const maxUpdatePageBytes = 2 * 1024 * 1024;
   static const maxUpdatesBytes = 8 * 1024 * 1024;
+  static const maxRetryDelay = Duration(days: 30);
   ReleaseSourceTask start();
   void close();
 }

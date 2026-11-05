@@ -2289,4 +2289,99 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'فشل التحديث.';
+
+  @override
+  String get settingsAboutCheckOnOpen => 'التحقق من التحديثات عند الفتح';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'التحقق تلقائياً عند بدء تشغيل التطبيق';
+
+  @override
+  String get settingsAboutDismiss => 'تجاهل';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'عدم العرض مجددًا حتى التحديث القادم';
+
+  @override
+  String get releaseAnnouncementsTitle => 'ما الجديد';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'الجديد في v$version';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'جاري تثبيت التحديث...';
+
+  @override
+  String get appShellRestart => 'إعادة تشغيل';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'تم تثبيت التحديث. أعد تشغيل التطبيق للتطبيق.';
+
+  @override
+  String get settingsAboutChecking => 'جاري التحقق...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'تم إيقاف التنزيل. تحقق من اتصالك ثم حاول مرة أخرى.';
+
+  @override
+  String get updatesFailureHttp => 'التنزيل غير متاح. حاول مرة أخرى لاحقًا.';
+
+  @override
+  String get updatesFailureStorage =>
+      'تعذر حفظ التحديث. أفرغ بعض المساحة وتحقق من أذونات التخزين.';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'فشل التحقق من التحديث. نزّل الحزمة مرة أخرى.';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'هذا الإصدار ليس أحدث من الإصدار المثبّت.';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'هذا التطبيق أو الجهاز لا يدعم هذا التحديث.';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'اسمح لـ CodeWalk بتثبيت التطبيقات، ثم حاول مرة أخرى.';
+
+  @override
+  String get updatesFailureInstallerMissing => 'لا يتوفر مُثبّت نظام.';
+
+  @override
+  String get updatesFailureInstaller =>
+      'فشل مُثبّت النظام. حاول فتحه مرة أخرى.';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'الملف الذي تم تنزيله غير موجود. نزّله مرة أخرى.';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'يتجاوز التحديث الحد الأقصى لحجم التنزيل.';
+
+  @override
+  String get updatesRateLimited =>
+      'يقيّد GitHub طلبات التحديث. حاول مرة أخرى لاحقًا.';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'التثبيت التلقائي غير متاح لهذا التثبيت. استخدم الأمر أدناه.';
+
+  @override
+  String get updatesRestartFailed =>
+      'فشلت إعادة التشغيل. لا يزال التطبيق قيد التشغيل ومتاحًا؛ حاول مرة أخرى.';
+
+  @override
+  String get updatesResume => 'استئناف التنزيل';
 }

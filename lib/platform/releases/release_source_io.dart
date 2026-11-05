@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' show Abi;
+import 'dart:io' show HttpDate, HttpException;
 
 import 'package:codewalk_net/codewalk_net_io.dart';
 
@@ -116,6 +117,58 @@ final class _NativeTask implements ReleaseSourceTask {
           cancellation: _cancellation,
         );
         final encoding = response.header('content-encoding');
+        if (response.statusCode == 429 ||
+            (response.statusCode == 403 &&
+                (response.header('x-ratelimit-remaining') == '0' ||
+                    response.header('retry-after') != null))) {
+          final now = DateTime.now();
+          final retry = response.header('retry-after');
+          DateTime? retryAt;
+          final seconds = int.tryParse(retry ?? '');
+          if (seconds != null && seconds >= 0) {
+            try {
+              retryAt = now.add(Duration(seconds: seconds));
+            } on RangeError {
+              // An unrepresentable date falls back to the reset header.
+            }
+          } else if (retry != null) {
+            try {
+              retryAt = HttpDate.parse(retry);
+            } on HttpException {
+              /* Use the reset header or fallback below. */
+            }
+          }
+          if (retryAt != null &&
+              (retryAt.isBefore(now) ||
+                  retryAt.difference(now) > ReleaseSource.maxRetryDelay)) {
+            retryAt = null;
+          }
+          final reset = int.tryParse(
+            response.header('x-ratelimit-reset') ?? '',
+          );
+          if (retryAt == null &&
+              reset != null &&
+              reset > 0 &&
+              reset < 100000000000) {
+            retryAt = DateTime.fromMillisecondsSinceEpoch(
+              reset * 1000,
+              isUtc: true,
+            );
+          }
+          if (retryAt == null ||
+              retryAt.isBefore(now) ||
+              retryAt.difference(now) > ReleaseSource.maxRetryDelay) {
+            retryAt = now.add(const Duration(hours: 1));
+          }
+          response.cancel();
+          complete(
+            ReleaseSourceResult.failure(
+              ReleaseSourceFailure.rateLimited,
+              retryAt: retryAt,
+            ),
+          );
+          return;
+        }
         if (_result.isCompleted ||
             response.statusCode != 200 ||
             (encoding != null && encoding.toLowerCase() != 'identity')) {

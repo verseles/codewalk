@@ -2336,4 +2336,100 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'Не удалось обновить.';
+
+  @override
+  String get settingsAboutCheckOnOpen => 'Проверять обновления при запуске';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'Автоматически проверять обновления при запуске приложения';
+
+  @override
+  String get settingsAboutDismiss => 'Закрыть';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Не показывать до следующего обновления';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Что нового';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Что нового в v$version';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'Установка обновления...';
+
+  @override
+  String get appShellRestart => 'Перезагрузить';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'Обновление установлено. Перезапустите приложение для применения.';
+
+  @override
+  String get settingsAboutChecking => 'Проверка...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'Загрузка прервана. Проверьте подключение и попробуйте снова.';
+
+  @override
+  String get updatesFailureHttp => 'Загрузка недоступна. Попробуйте позже.';
+
+  @override
+  String get updatesFailureStorage =>
+      'Не удаётся сохранить обновление. Освободите место и проверьте разрешения на доступ к хранилищу.';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'Проверка обновления не пройдена. Загрузите пакет ещё раз.';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'Эта сборка не новее установленной версии.';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'Это приложение или устройство не поддерживает данное обновление.';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'Разрешите CodeWalk устанавливать приложения и попробуйте снова.';
+
+  @override
+  String get updatesFailureInstallerMissing =>
+      'Системный установщик недоступен.';
+
+  @override
+  String get updatesFailureInstaller =>
+      'Системный установщик не сработал. Попробуйте открыть его ещё раз.';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'Загруженный файл отсутствует. Загрузите его ещё раз.';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'Размер обновления превышает ограничение на загрузку.';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHub ограничивает запросы на обновление. Попробуйте позже.';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'Автоматическая установка недоступна для этой установки. Используйте команду ниже.';
+
+  @override
+  String get updatesRestartFailed =>
+      'Не удалось перезапустить приложение. Оно продолжает работать; попробуйте ещё раз.';
+
+  @override
+  String get updatesResume => 'Возобновить загрузку.';
 }

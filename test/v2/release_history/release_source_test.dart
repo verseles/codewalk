@@ -34,6 +34,89 @@ class FakeTransport implements EndpointHttpTransport {
 }
 
 void main() {
+  for (final retry in ['invalid date', '172800', '9999999999']) {
+    test('quota deadline survives Retry-After $retry', () async {
+      final reset =
+          DateTime.now().add(const Duration(days: 3)).millisecondsSinceEpoch ~/
+          1000;
+      final source = NativeReleaseSource(
+        transport: FakeTransport(
+          () async => TransportResponse(
+            statusCode: 429,
+            headers: {
+              'retry-after': [retry],
+              'x-ratelimit-reset': ['$reset'],
+            },
+            body: const Stream.empty(),
+            cancel: () {},
+          ),
+        ),
+      );
+      addTearDown(source.close);
+      final result = await source.start().result;
+      expect(result.failure, ReleaseSourceFailure.rateLimited);
+      expect(
+        result.retryAt!.isAfter(DateTime.now().add(const Duration(days: 1))),
+        isTrue,
+      );
+      if (retry != '172800') {
+        expect(
+          result.retryAt,
+          DateTime.fromMillisecondsSinceEpoch(reset * 1000, isUtc: true),
+        );
+      }
+    });
+  }
+
+  test('an implausible reset deadline falls back to one hour', () async {
+    final source = NativeReleaseSource(
+      transport: FakeTransport(
+        () async => TransportResponse(
+          statusCode: 429,
+          headers: const {
+            'x-ratelimit-reset': ['99999999999'],
+          },
+          body: const Stream.empty(),
+          cancel: () {},
+        ),
+      ),
+    );
+    addTearDown(source.close);
+    final before = DateTime.now();
+    final result = await source.start().result;
+    expect(result.failure, ReleaseSourceFailure.rateLimited);
+    expect(
+      result.retryAt!.difference(before),
+      greaterThanOrEqualTo(const Duration(minutes: 59)),
+    );
+    expect(
+      result.retryAt!.difference(before),
+      lessThan(const Duration(minutes: 61)),
+    );
+  });
+  test(
+    'GitHub quota responses carry a retry deadline without reading a body',
+    () async {
+      var cancelled = false;
+      final transport = FakeTransport(
+        () async => TransportResponse(
+          statusCode: 403,
+          headers: const {
+            'x-ratelimit-remaining': ['0'],
+            'retry-after': ['60'],
+          },
+          body: Stream.value(utf8.encode('rate limit')),
+          cancel: () => cancelled = true,
+        ),
+      );
+      final source = NativeReleaseSource(transport: transport);
+      final result = await source.start().result;
+      expect(result.failure, ReleaseSourceFailure.rateLimited);
+      expect(result.retryAt, isNotNull);
+      expect(cancelled, isTrue);
+      source.close();
+    },
+  );
   test(
     'uses public fixed route and never adds profile authentication',
     () async {

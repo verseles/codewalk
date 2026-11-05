@@ -2168,4 +2168,84 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => '更新失败。';
+
+  @override
+  String get settingsAboutCheckOnOpen => '打开时检查更新';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription => '应用启动时自动检查';
+
+  @override
+  String get settingsAboutDismiss => '忽略';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '下次更新前不再显示';
+
+  @override
+  String get releaseAnnouncementsTitle => '新功能';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version 的新内容';
+  }
+
+  @override
+  String get appShellInstallingUpdate => '正在安装更新...';
+
+  @override
+  String get appShellRestart => '重启';
+
+  @override
+  String get settingsAboutUpdateInstalled => '更新已安装。重启应用以应用更改。';
+
+  @override
+  String get settingsAboutChecking => '正在检查...';
+
+  @override
+  String get updatesFailureNetwork => '下载已中断。请检查网络连接后重试。';
+
+  @override
+  String get updatesFailureHttp => '下载暂不可用。请稍后重试。';
+
+  @override
+  String get updatesFailureStorage => '无法保存更新。请释放空间并检查存储权限。';
+
+  @override
+  String get updatesFailureIntegrity => '更新验证失败。请重新下载软件包。';
+
+  @override
+  String get updatesFailureDowngrade => '此构建版本不比已安装的版本新。';
+
+  @override
+  String get updatesFailureUnsupported => '此应用或设备不支持此更新。';
+
+  @override
+  String get updatesFailureInstallDenied => '请允许 CodeWalk 安装应用，然后重试。';
+
+  @override
+  String get updatesFailureInstallerMissing => '没有可用的系统安装程序。';
+
+  @override
+  String get updatesFailureInstaller => '系统安装程序失败。请重新打开它。';
+
+  @override
+  String get updatesFailureFileMissing => '找不到已下载的文件。请重新下载。';
+
+  @override
+  String get updatesFailureTooLarge => '更新超出下载大小限制。';
+
+  @override
+  String get updatesRateLimited => 'GitHub 正在限制更新请求。请稍后重试。';
+
+  @override
+  String get updatesLinuxUnavailable => '此安装方式不支持自动安装。请使用下方命令。';
+
+  @override
+  String get updatesRestartFailed => '重启失败。当前运行的应用仍可使用；请重试。';
+
+  @override
+  String get updatesResume => '继续下载';
 }

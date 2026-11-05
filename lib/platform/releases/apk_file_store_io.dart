@@ -14,7 +14,13 @@ final class ApkFileStoreIo implements ApkFileStore {
 
   final Future<String> Function() _temporaryDirectory;
 
-  Future<String> _root() async => '${await _temporaryDirectory()}/updates';
+  Future<String> _root() async {
+    try {
+      return '${await _temporaryDirectory()}/updates';
+    } on FileSystemException catch (error) {
+      throw ApkDownloadException(ApkUpdateFailure.storage, error);
+    }
+  }
 
   @override
   Future<String> partPath(String tag) async =>
@@ -26,9 +32,14 @@ final class ApkFileStoreIo implements ApkFileStore {
 
   @override
   Future<void> rename(String from, String to) async {
-    final target = File(to);
-    await target.parent.create(recursive: true);
-    await File(from).rename(to);
+    try {
+      final target = File(to);
+      await target.parent.create(recursive: true);
+      await File(from).rename(to);
+      await delete('$from.json');
+    } on FileSystemException catch (error) {
+      throw ApkDownloadException(ApkUpdateFailure.storage, error);
+    }
   }
 
   @override
@@ -36,6 +47,10 @@ final class ApkFileStoreIo implements ApkFileStore {
     try {
       final file = File(path);
       if (file.existsSync()) await file.delete();
+      if (path.endsWith('.part')) {
+        final metadata = File('$path.json');
+        if (metadata.existsSync()) await metadata.delete();
+      }
     } on FileSystemException {
       // Best effort: a missing or locked file is already unusable.
     }
@@ -53,17 +68,15 @@ final class ApkFileStoreIo implements ApkFileStore {
   @override
   Future<void> cleanupStale() async {
     final root = Directory(await _root());
-    if (!root.existsSync()) return;
+    if (!root.existsSync() || FileSystemEntity.isLinkSync(root.path)) return;
     final cutoff = DateTime.now().subtract(const Duration(hours: 24));
-    await for (final entity in root.list(recursive: true)) {
+    await for (final entity in root.list(recursive: true, followLinks: false)) {
       if (entity is! File) continue;
       final path = entity.path;
       try {
-        if (path.endsWith('.part')) {
-          await entity.delete();
-          continue;
-        }
-        if (path.endsWith('.apk') &&
+        if ((path.endsWith('.apk') ||
+                path.endsWith('.part') ||
+                path.endsWith('.part.json')) &&
             entity.statSync().modified.isBefore(cutoff)) {
           await entity.delete();
         }

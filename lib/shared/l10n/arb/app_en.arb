@@ -2866,5 +2866,114 @@
   "updatesUpdateFailed": "Update failed.",
   "@updatesUpdateFailed": {
     "description": "V2 update check"
+  },
+  "settingsAboutCheckOnOpen": "Check for updates on open",
+  "@settingsAboutCheckOnOpen": {
+    "description": "CodeWalk UI string — settingsAboutCheckOnOpen"
+  },
+  "settingsAboutCheckOnOpenDescription": "Automatically check when the app starts",
+  "@settingsAboutCheckOnOpenDescription": {
+    "description": "CodeWalk UI string — settingsAboutCheckOnOpenDescription"
+  },
+  "settingsAboutDismiss": "Dismiss",
+  "@settingsAboutDismiss": {
+    "description": "CodeWalk UI string — settingsAboutDismiss"
+  },
+  "releaseAnnouncementsDoNotShowAgain": "Do not show again until the next update",
+  "@releaseAnnouncementsDoNotShowAgain": {
+    "description": "Default-checked post-upgrade dialog suppression checkbox"
+  },
+  "releaseAnnouncementsTitle": "What’s new",
+  "@releaseAnnouncementsTitle": {
+    "description": "Post-upgrade announcement dialog title"
+  },
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string — settingsAboutChangelog"
+  },
+  "settingsAboutWhatsNew": "What''s new in v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string — settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "appShellInstallingUpdate": "Installing update...",
+  "@appShellInstallingUpdate": {
+    "description": "CodeWalk UI string — appShellInstallingUpdate"
+  },
+  "appShellRestart": "Restart",
+  "@appShellRestart": {
+    "description": "CodeWalk UI string — appShellRestart"
+  },
+  "settingsAboutUpdateInstalled": "Update installed. Restart the app to apply.",
+  "@settingsAboutUpdateInstalled": {
+    "description": "CodeWalk UI string — settingsAboutUpdateInstalled"
+  },
+  "settingsAboutChecking": "Checking...",
+  "@settingsAboutChecking": {
+    "description": "CodeWalk UI string — settingsAboutChecking"
+  },
+  "updatesFailureNetwork": "Download interrupted. Check your connection, then try again.",
+  "@updatesFailureNetwork": {
+    "description": "V2 update check"
+  },
+  "updatesFailureHttp": "The download is unavailable. Try again later.",
+  "@updatesFailureHttp": {
+    "description": "V2 update check"
+  },
+  "updatesFailureStorage": "Cannot save the update. Free space and check storage permissions.",
+  "@updatesFailureStorage": {
+    "description": "V2 update check"
+  },
+  "updatesFailureIntegrity": "Update verification failed. Download the package again.",
+  "@updatesFailureIntegrity": {
+    "description": "V2 update check"
+  },
+  "updatesFailureDowngrade": "This build is not newer than the installed version.",
+  "@updatesFailureDowngrade": {
+    "description": "V2 update check"
+  },
+  "updatesFailureUnsupported": "This app or device does not support this update.",
+  "@updatesFailureUnsupported": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallDenied": "Allow CodeWalk to install apps, then try again.",
+  "@updatesFailureInstallDenied": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstallerMissing": "No system installer is available.",
+  "@updatesFailureInstallerMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureInstaller": "The system installer failed. Try opening it again.",
+  "@updatesFailureInstaller": {
+    "description": "V2 update check"
+  },
+  "updatesFailureFileMissing": "The downloaded file is missing. Download it again.",
+  "@updatesFailureFileMissing": {
+    "description": "V2 update check"
+  },
+  "updatesFailureTooLarge": "The update exceeds the download size limit.",
+  "@updatesFailureTooLarge": {
+    "description": "V2 update check"
+  },
+  "updatesRateLimited": "GitHub is limiting update requests. Try again later.",
+  "@updatesRateLimited": {
+    "description": "V2 update check"
+  },
+  "updatesLinuxUnavailable": "Automatic installation is unavailable for this installation. Use the command below.",
+  "@updatesLinuxUnavailable": {
+    "description": "V2 update check"
+  },
+  "updatesRestartFailed": "Restart failed. Your running app is still available; try again.",
+  "@updatesRestartFailed": {
+    "description": "V2 update check"
+  },
+  "updatesResume": "Resume download.",
+  "@updatesResume": {
+    "description": "V2 update check"
   }
 }

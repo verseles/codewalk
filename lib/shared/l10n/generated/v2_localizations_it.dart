@@ -2360,4 +2360,102 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get updatesUpdateFailed => 'Aggiornamento non riuscito.';
+
+  @override
+  String get settingsAboutCheckOnOpen =>
+      'Controlla aggiornamenti all\'apertura';
+
+  @override
+  String get settingsAboutCheckOnOpenDescription =>
+      'Controlla automaticamente all\'avvio dell\'applicazione';
+
+  @override
+  String get settingsAboutDismiss => 'Ignora';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Non mostrare più fino al prossimo aggiornamento';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Novità';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Novità della v$version';
+  }
+
+  @override
+  String get appShellInstallingUpdate => 'Installazione aggiornamento...';
+
+  @override
+  String get appShellRestart => 'Riavvia';
+
+  @override
+  String get settingsAboutUpdateInstalled =>
+      'Aggiornamento installato. Riavvia l\'applicazione per applicarlo.';
+
+  @override
+  String get settingsAboutChecking => 'Verifica in corso...';
+
+  @override
+  String get updatesFailureNetwork =>
+      'Download interrotto. Controlla la connessione e riprova.';
+
+  @override
+  String get updatesFailureHttp =>
+      'Il download non è disponibile. Riprova più tardi.';
+
+  @override
+  String get updatesFailureStorage =>
+      'Impossibile salvare l\'aggiornamento. Libera spazio e controlla le autorizzazioni di archiviazione.';
+
+  @override
+  String get updatesFailureIntegrity =>
+      'Verifica dell\'aggiornamento non riuscita. Scarica di nuovo il pacchetto.';
+
+  @override
+  String get updatesFailureDowngrade =>
+      'Questa build non è più recente della versione installata.';
+
+  @override
+  String get updatesFailureUnsupported =>
+      'Questa app o questo dispositivo non supporta questo aggiornamento.';
+
+  @override
+  String get updatesFailureInstallDenied =>
+      'Consenti a CodeWalk di installare app, quindi riprova.';
+
+  @override
+  String get updatesFailureInstallerMissing =>
+      'Nessun programma di installazione di sistema disponibile.';
+
+  @override
+  String get updatesFailureInstaller =>
+      'Il programma di installazione di sistema non è riuscito. Prova ad aprirlo di nuovo.';
+
+  @override
+  String get updatesFailureFileMissing =>
+      'Il file scaricato non è presente. Scaricalo di nuovo.';
+
+  @override
+  String get updatesFailureTooLarge =>
+      'L\'aggiornamento supera il limite di dimensione del download.';
+
+  @override
+  String get updatesRateLimited =>
+      'GitHub sta limitando le richieste di aggiornamento. Riprova più tardi.';
+
+  @override
+  String get updatesLinuxUnavailable =>
+      'L\'installazione automatica non è disponibile per questa installazione. Usa il comando qui sotto.';
+
+  @override
+  String get updatesRestartFailed =>
+      'Riavvio non riuscito. L\'app in esecuzione è ancora disponibile; riprova.';
+
+  @override
+  String get updatesResume => 'Riprendi download.';
 }

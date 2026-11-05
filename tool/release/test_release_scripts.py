@@ -3,6 +3,7 @@ import stat
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -66,6 +67,29 @@ class RequireTagAtCommitTests(unittest.TestCase):
 
 
 class CreateV2BetaReleaseTests(unittest.TestCase):
+    def test_curated_notes_are_read_from_the_tag_and_validated(self):
+        for notes, expected in [("> 📣 Approved announcement\n\n- Full notes", 0), ("> 📣 " + "x" * 301, 1)]:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                subprocess.run(["git", "init", "-q", directory], check=True)
+                source = root / "release-notes" / "v2-beta.md"
+                source.parent.mkdir()
+                source.write_text(notes)
+                subprocess.run(["git", "-C", directory, "add", "release-notes/v2-beta.md"], check=True)
+                subprocess.run(["git", "-C", directory, "-c", "user.name=Test", "-c", "user.email=test@example.test",
+                                "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", "commit", "-qm", "notes"], check=True)
+                subprocess.run(["git", "-C", directory, "tag", TAG], check=True)
+                source.write_text("Never publish notes from the working tree")
+                with mock.patch.dict(os.environ, {"GIT_DIR": str(root / ".git")}):
+                    code, calls = self.run_create('case "$1" in api) echo 1;; esac\n')
+                self.assertEqual(code, expected)
+                self.assertNotIn("Never publish", calls)
+                if expected == 0:
+                    self.assertIn("Approved announcement", calls)
+                    self.assertIn("Full notes", calls)
+                else:
+                    self.assertEqual(calls, "")
+
     def run_create(self, stub, files=None):
         return run_with_stub("create_v2_beta_release.sh", "gh", stub, ["owner/repo", TAG], files)
 

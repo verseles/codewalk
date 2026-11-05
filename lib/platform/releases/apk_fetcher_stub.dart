@@ -16,6 +16,8 @@ final class _UnsupportedFetcher implements ApkAssetFetcher {
     String partPath, {
     required void Function(int received, int? total) onProgress,
     required bool Function() isCancelled,
+    int? expectedBytes,
+    String? expectedSha256,
   }) async {
     throw const ApkDownloadException(ApkUpdateFailure.unsupported);
   }

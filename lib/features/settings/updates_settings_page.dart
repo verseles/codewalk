@@ -7,11 +7,17 @@ import 'package:provider/provider.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/releases/apk_update.dart';
+import '../../shared/releases/linux_update.dart';
+import '../../shared/releases/release_source.dart';
 import '../../shared/releases/update_selector.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'apk_update_controller.dart';
+import 'linux_update_controller.dart';
+import 'linux_update_panel.dart';
 import 'update_check_controller.dart';
+import 'update_failure_text.dart';
+import 'update_scheduler.dart';
 
 /// Manual update check: Android downloads and verifies the exact APK in-app,
 /// then hands it to the system installer; Linux shows the installer command.
@@ -38,17 +44,12 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     });
   }
 
-  Future<void> _copy(String command) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    final copied = context.v2L10n.updatesCommandCopied;
-    await Clipboard.setData(ClipboardData(text: command));
-    showAppSnackBar(messenger, copied);
-  }
-
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<UpdateCheckController?>();
     final install = context.watch<ApkUpdateController?>();
+    final scheduler = context.watch<UpdateScheduler?>();
+    final linux = context.watch<LinuxUpdateController?>();
     final l = context.v2L10n;
     final theme = Theme.of(context);
     final children = <Widget>[
@@ -65,15 +66,30 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
       final checking = controller.status == UpdateCheckStatus.checking;
       final candidate = controller.candidate;
       final installBusy =
+          (linux?.busy ?? false) ||
+          linux?.status == LinuxUpdateStatus.ready ||
           install != null &&
-          (install.status == ApkUpdateStatus.downloading ||
-              install.status == ApkUpdateStatus.verifying ||
-              install.status == ApkUpdateStatus.ready ||
-              install.status == ApkUpdateStatus.handingOff ||
-              install.status == ApkUpdateStatus.installerOpened ||
-              (install.status == ApkUpdateStatus.failed &&
-                  install.hasVerifiedPackage));
+              (install.status == ApkUpdateStatus.downloading ||
+                  install.status == ApkUpdateStatus.verifying ||
+                  install.status == ApkUpdateStatus.ready ||
+                  install.status == ApkUpdateStatus.handingOff ||
+                  install.status == ApkUpdateStatus.installerOpened ||
+                  (install.status == ApkUpdateStatus.failed &&
+                      install.hasVerifiedPackage));
       children.addAll([
+        if (scheduler != null)
+          SwitchListTile.adaptive(
+            key: const ValueKey('updates_check_on_open'),
+            title: Text(l.settingsAboutCheckOnOpen),
+            subtitle: Text(l.settingsAboutCheckOnOpenDescription),
+            value: scheduler.enabled,
+            onChanged: (value) async {
+              final messenger = ScaffoldMessenger.maybeOf(context);
+              if (!await scheduler.setEnabled(value)) {
+                showAppSnackBar(messenger, l.settingsStorageError);
+              }
+            },
+          ),
         Text(l.updatesChannel, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         SegmentedButton<UpdateChannel>(
@@ -100,7 +116,9 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
         ],
         if (controller.installedVersion case final version?) ...[
           const SizedBox(height: 16),
-          Text('${l.updatesInstalledVersion}: $version'),
+          Text(
+            '${l.updatesInstalledVersion}: $version${controller.installedBuild == null ? '' : ' (${controller.installedBuild})'}',
+          ),
         ],
         const SizedBox(height: 16),
         Align(
@@ -111,7 +129,11 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
                 ? null
                 : () => unawaited(controller.check()),
             icon: const Icon(Symbols.system_update_alt),
-            label: Text(l.settingsAboutCheckForUpdates),
+            label: Text(
+              checking
+                  ? l.settingsAboutChecking
+                  : l.settingsAboutCheckForUpdates,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -120,13 +142,19 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           Text(l.updatesUpToDate, key: const ValueKey('updates_up_to_date')),
         if (controller.status == UpdateCheckStatus.failed)
           Text(
-            l.updatesCheckFailed,
+            controller.failure == ReleaseSourceFailure.rateLimited
+                ? l.updatesRateLimited
+                : l.updatesCheckFailed,
             key: const ValueKey('updates_failed'),
             style: TextStyle(color: theme.colorScheme.error),
           ),
         if (controller.status == UpdateCheckStatus.available &&
             candidate != null)
-          _available(context, controller.target!, candidate, install),
+          UpdateCandidateCard(
+            target: controller.target!,
+            candidate: candidate,
+            install: install,
+          ),
       ]);
     }
     return ListView(
@@ -135,16 +163,51 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
       children: children,
     );
   }
+}
 
-  Widget _available(
-    BuildContext context,
-    UpdateTarget target,
-    UpdateCandidate candidate,
-    ApkUpdateController? install,
-  ) {
+class UpdateCandidateCard extends StatelessWidget {
+  const UpdateCandidateCard({
+    super.key,
+    required this.target,
+    required this.candidate,
+    required this.install,
+    this.onDismiss,
+    this.showInstalled = false,
+  });
+
+  final UpdateTarget target;
+  final UpdateCandidate candidate;
+  final ApkUpdateController? install;
+  final VoidCallback? onDismiss;
+  final bool showInstalled;
+
+  Future<void> _copy(BuildContext context, String command) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final copied = context.v2L10n.updatesCommandCopied;
+    await Clipboard.setData(ClipboardData(text: command));
+    showAppSnackBar(messenger, copied);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.v2L10n;
+    final checks = context.watch<UpdateCheckController?>();
+    final linux = context.watch<LinuxUpdateController?>();
+    final activeAndroid =
+        target == UpdateTarget.androidArm64 &&
+        install != null &&
+        install!.status != ApkUpdateStatus.idle;
+    final activeLinux =
+        target != UpdateTarget.androidArm64 &&
+        linux != null &&
+        (linux.busy || linux.status == LinuxUpdateStatus.ready);
+    final displayed = activeAndroid
+        ? install!.candidate ?? candidate
+        : activeLinux
+        ? linux.candidate ?? candidate
+        : candidate;
     final theme = Theme.of(context);
-    final command = linuxInstallCommand(candidate);
+    final command = linuxInstallCommand(displayed);
     return Card(
       key: const ValueKey('updates_available'),
       child: Padding(
@@ -153,13 +216,23 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l.settingsAboutUpdateAvailable(candidate.version.toString()),
+              l.settingsAboutUpdateAvailable(displayed.version.toString()),
               style: theme.textTheme.titleMedium,
             ),
+            if (showInstalled && checks?.installedVersion != null)
+              Text(
+                '${l.updatesInstalledVersion}: ${checks!.installedVersion}${checks.installedBuild == null ? '' : ' (${checks.installedBuild})'}',
+              ),
+            if (onDismiss != null && !activeAndroid && !activeLinux)
+              TextButton(
+                onPressed: onDismiss,
+                child: Text(l.settingsAboutDismiss),
+              ),
             const SizedBox(height: 12),
             if (target == UpdateTarget.androidArm64)
-              _androidInstall(context, candidate, install)
+              _androidInstall(context, displayed, install)
             else ...[
+              LinuxUpdatePanel(candidate: displayed),
               Text(l.updatesLinuxInstallHint),
               const SizedBox(height: 8),
               SelectableText(
@@ -172,7 +245,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
               const SizedBox(height: 8),
               TextButton.icon(
                 key: const ValueKey('updates_copy_command'),
-                onPressed: () => unawaited(_copy(command)),
+                onPressed: () => unawaited(_copy(context, command)),
                 icon: const Icon(Symbols.content_copy),
                 label: Text(l.updatesCopyCommand),
               ),
@@ -195,11 +268,12 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     }
     switch (install.status) {
       case ApkUpdateStatus.idle:
+        final verified = install.hasVerifiedCandidate(candidate);
         return FilledButton.icon(
-          key: const ValueKey('updates_download'),
+          key: ValueKey(verified ? 'updates_install' : 'updates_download'),
           onPressed: () => unawaited(install.start(candidate)),
-          icon: const Icon(Symbols.download),
-          label: Text(l.updatesDownload),
+          icon: Icon(verified ? Symbols.install_mobile : Symbols.download),
+          label: Text(verified ? l.updatesInstall : l.updatesDownload),
         );
       case ApkUpdateStatus.downloading:
         final percent = (install.progress * 100).round();
@@ -264,6 +338,11 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
               onPressed: () => unawaited(install.openInstaller()),
               child: Text(l.updatesInstall),
             ),
+            TextButton(
+              key: const ValueKey('updates_dismiss_install'),
+              onPressed: install.dismiss,
+              child: Text(l.settingsAboutDismiss),
+            ),
           ],
         );
       case ApkUpdateStatus.failed:
@@ -271,7 +350,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l.updatesUpdateFailed,
+              apkUpdateFailureText(l, install.failure),
               key: const ValueKey('updates_error'),
               style: TextStyle(color: theme.colorScheme.error),
             ),
@@ -279,8 +358,20 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
             TextButton(
               key: const ValueKey('updates_retry'),
               onPressed: () => unawaited(install.retry()),
-              child: Text(l.updatesRetry),
+              child: Text(
+                install.progress > 0 &&
+                        (install.failure == ApkUpdateFailure.network ||
+                            install.failure == ApkUpdateFailure.timeout)
+                    ? l.updatesResume
+                    : l.updatesRetry,
+              ),
             ),
+            if (install.hasVerifiedPackage)
+              TextButton(
+                key: const ValueKey('updates_dismiss_install'),
+                onPressed: install.dismiss,
+                child: Text(l.settingsAboutDismiss),
+              ),
           ],
         );
     }
