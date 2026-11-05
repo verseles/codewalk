@@ -134,7 +134,7 @@ description of this code.
 
 - **Given** the session tab strip is shown for the first time in this install
 - **When** the strip appears above the chat
-- **Then** a one-time hint explains that a tab can be dragged to reorder and that its menu pins it, changes its icon or closes it
+- **Then** a one-time hint explains that each tab has its own menu to pin it, change its icon or close it, and offers a filled "Don't show again" action
 - **Then** "Don't show again" hides the hint for good and is persisted as `cw2.settings.tabsGestureHintDismissed`; it never returns, and hiding the strip hides the hint with it
 
 ### V2 sub-conversations

@@ -2229,7 +2229,7 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Faites glisser un onglet pour le réordonner ; son menu permet de l’épingler, de changer son icône ou de le fermer.';
+      'Chaque onglet a son menu : l’épingler, changer son icône ou le fermer.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Ne plus afficher';

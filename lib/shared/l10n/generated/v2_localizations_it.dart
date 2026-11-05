@@ -2229,7 +2229,7 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Trascina una scheda per riordinarla; il suo menu la fissa, cambia l’icona o la chiude.';
+      'Ogni scheda ha il suo menu: fissarla, cambiare l’icona o chiuderla.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Non mostrare più';

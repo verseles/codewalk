@@ -2188,7 +2188,7 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Drag a tab to reorder it; use its menu to pin it, change its icon or close it.';
+      'Each tab has its own menu: pin it, change its icon or close it.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Don\'t show again';

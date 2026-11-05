@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "Перетащите вкладку, чтобы изменить порядок; её меню закрепляет, меняет значок или закрывает.",
+  "sessionTabsGestureHint": "У каждой вкладки есть меню: закрепить, сменить значок или закрыть.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

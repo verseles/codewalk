@@ -915,13 +915,14 @@ class _GestureHint extends StatelessWidget {
         ),
         Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: Material(
-            type: MaterialType.transparency,
-            child: TextButton(
-              key: const ValueKey('session-tabs-gesture-hint-dismiss'),
-              onPressed: onDismiss,
-              child: Text(l.sessionTabsGestureHintDismiss),
+          child: FilledButton.tonal(
+            key: const ValueKey('session-tabs-gesture-hint-dismiss'),
+            onPressed: onDismiss,
+            style: FilledButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
             ),
+            child: Text(l.sessionTabsGestureHintDismiss),
           ),
         ),
       ],

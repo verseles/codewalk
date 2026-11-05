@@ -2190,7 +2190,7 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'क्रम बदलने के लिए टैब खींचें; उसे पिन करने, आइकन बदलने या बंद करने के लिए उसका मेन्यू खोलें।';
+      'हर टैब का अपना मेन्यू है: उसे पिन करें, आइकन बदलें या बंद करें।';
 
   @override
   String get sessionTabsGestureHintDismiss => 'दोबारा न दिखाएँ';

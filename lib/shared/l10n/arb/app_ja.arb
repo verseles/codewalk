@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "タブをドラッグして並べ替え、メニューから固定・アイコン変更・閉じるができます。",
+  "sessionTabsGestureHint": "各タブにはメニューがあり、固定・アイコン変更・閉じるができます。",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

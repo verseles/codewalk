@@ -1630,7 +1630,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "탭을 끌어 순서를 바꾸고, 메뉴에서 고정·아이콘 변경·닫기를 할 수 있습니다.",
+  "sessionTabsGestureHint": "각 탭에는 메뉴가 있어 고정, 아이콘 변경, 닫기를 할 수 있습니다.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

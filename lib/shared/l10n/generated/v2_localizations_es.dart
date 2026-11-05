@@ -2218,7 +2218,7 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Arrastra una pestaña para reordenarla; usa su menú para fijarla, cambiar su icono o cerrarla.';
+      'Cada pestaña tiene su menú: fijarla, cambiar su icono o cerrarla.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'No volver a mostrar';

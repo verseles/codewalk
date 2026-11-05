@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "Arrastra una pestaña para reordenarla; usa su menú para fijarla, cambiar su icono o cerrarla.",
+  "sessionTabsGestureHint": "Cada pestaña tiene su menú: fijarla, cambiar su icono o cerrarla.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

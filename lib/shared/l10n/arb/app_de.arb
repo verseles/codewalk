@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "Ziehe einen Tab, um ihn umzusortieren; sein Menü heftet ihn an, ändert das Symbol oder schließt ihn.",
+  "sessionTabsGestureHint": "Jeder Tab hat sein eigenes Menü: anheften, Symbol ändern oder schließen.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

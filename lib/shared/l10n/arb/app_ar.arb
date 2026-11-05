@@ -1618,7 +1618,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "اسحب التبويب لإعادة ترتيبه؛ واستخدم قائمته لتثبيته أو تغيير أيقونته أو إغلاقه.",
+  "sessionTabsGestureHint": "لكل تبويب قائمته: ثبّته، غيّر أيقونته أو أغلقه.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

@@ -2183,7 +2183,7 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'ترتیب بدلنے کے لیے ٹیب گھسیٹیں؛ اس کے مینو سے پن کریں، آئیکن بدلیں یا بند کریں۔';
+      'ہر ٹیب کا اپنا مینو ہے: پن کریں، آئیکن بدلیں یا بند کریں۔';
 
   @override
   String get sessionTabsGestureHintDismiss => 'دوبارہ نہ دکھائیں';

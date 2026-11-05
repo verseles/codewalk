@@ -2166,7 +2166,7 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'اسحب التبويب لإعادة ترتيبه؛ واستخدم قائمته لتثبيته أو تغيير أيقونته أو إغلاقه.';
+      'لكل تبويب قائمته: ثبّته، غيّر أيقونته أو أغلقه.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'لا تُظهر مرة أخرى';

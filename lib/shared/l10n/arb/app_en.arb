@@ -2700,7 +2700,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "Drag a tab to reorder it; use its menu to pin it, change its icon or close it.",
+  "sessionTabsGestureHint": "Each tab has its own menu: pin it, change its icon or close it.",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

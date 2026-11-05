@@ -2208,7 +2208,7 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Перетащите вкладку, чтобы изменить порядок; её меню закрепляет, меняет значок или закрывает.';
+      'У каждой вкладки есть меню: закрепить, сменить значок или закрыть.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Больше не показывать';

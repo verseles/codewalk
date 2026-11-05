@@ -2212,7 +2212,7 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Arraste uma aba para reordenar; use o menu dela para fixar, trocar o ícone ou fechar.';
+      'Cada aba tem o próprio menu: fixar, trocar o ícone ou fechar.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Não mostrar de novo';

@@ -715,6 +715,13 @@ void main() {
 
     final hint = find.byKey(const ValueKey('session-tabs-gesture-hint'));
     expect(hint, findsOneWidget);
+    // The dismissal is a filled action, never bare text over the chat.
+    expect(
+      tester.widget(
+        find.byKey(const ValueKey('session-tabs-gesture-hint-dismiss')),
+      ),
+      isA<FilledButton>(),
+    );
     await tester.tap(
       find.byKey(const ValueKey('session-tabs-gesture-hint-dismiss')),
     );

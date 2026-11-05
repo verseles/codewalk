@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "ক্রম বদলাতে ট্যাব টেনে সরান; পিন করতে, আইকন বদলাতে বা বন্ধ করতে এর মেনু ব্যবহার করুন।",
+  "sessionTabsGestureHint": "প্রতিটি ট্যাবের নিজের মেনু আছে: পিন করুন, আইকন বদলান বা বন্ধ করুন।",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

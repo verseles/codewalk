@@ -2049,7 +2049,7 @@ class V2LocalizationsZh extends V2Localizations {
   String get chatDisplayMenu => '显示';
 
   @override
-  String get sessionTabsGestureHint => '拖动标签页可重新排序；用它的菜单可固定、更换图标或关闭。';
+  String get sessionTabsGestureHint => '每个标签页都有自己的菜单：固定、更换图标或关闭。';
 
   @override
   String get sessionTabsGestureHintDismiss => '不再显示';

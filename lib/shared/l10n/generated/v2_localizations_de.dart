@@ -2231,7 +2231,7 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'Ziehe einen Tab, um ihn umzusortieren; sein Menü heftet ihn an, ändert das Symbol oder schließt ihn.';
+      'Jeder Tab hat sein eigenes Menü: anheften, Symbol ändern oder schließen.';
 
   @override
   String get sessionTabsGestureHintDismiss => 'Nicht mehr anzeigen';

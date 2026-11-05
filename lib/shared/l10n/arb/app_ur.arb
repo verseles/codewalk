@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "ترتیب بدلنے کے لیے ٹیب گھسیٹیں؛ اس کے مینو سے پن کریں، آئیکن بدلیں یا بند کریں۔",
+  "sessionTabsGestureHint": "ہر ٹیب کا اپنا مینو ہے: پن کریں، آئیکن بدلیں یا بند کریں۔",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

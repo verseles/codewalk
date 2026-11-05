@@ -3965,7 +3965,7 @@ abstract class V2Localizations {
   /// First-use hint about tab gestures
   ///
   /// In en, this message translates to:
-  /// **'Drag a tab to reorder it; use its menu to pin it, change its icon or close it.'**
+  /// **'Each tab has its own menu: pin it, change its icon or close it.'**
   String get sessionTabsGestureHint;
 
   /// Dismisses the tab gesture hint for good

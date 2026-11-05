@@ -1619,7 +1619,7 @@
   "@chatDisplayMenu": {
     "description": "Chat overflow entry that opens the display choices"
   },
-  "sessionTabsGestureHint": "拖动标签页可重新排序；用它的菜单可固定、更换图标或关闭。",
+  "sessionTabsGestureHint": "每个标签页都有自己的菜单：固定、更换图标或关闭。",
   "@sessionTabsGestureHint": {
     "description": "First-use hint about tab gestures"
   },

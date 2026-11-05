@@ -2090,8 +2090,7 @@ class V2LocalizationsKo extends V2Localizations {
   String get chatDisplayMenu => '표시';
 
   @override
-  String get sessionTabsGestureHint =>
-      '탭을 끌어 순서를 바꾸고, 메뉴에서 고정·아이콘 변경·닫기를 할 수 있습니다.';
+  String get sessionTabsGestureHint => '각 탭에는 메뉴가 있어 고정, 아이콘 변경, 닫기를 할 수 있습니다.';
 
   @override
   String get sessionTabsGestureHintDismiss => '다시 표시하지 않음';

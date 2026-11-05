@@ -2090,8 +2090,7 @@ class V2LocalizationsJa extends V2Localizations {
   String get chatDisplayMenu => '表示';
 
   @override
-  String get sessionTabsGestureHint =>
-      'タブをドラッグして並べ替え、メニューから固定・アイコン変更・閉じるができます。';
+  String get sessionTabsGestureHint => '各タブにはメニューがあり、固定・アイコン変更・閉じるができます。';
 
   @override
   String get sessionTabsGestureHintDismiss => '今後表示しない';

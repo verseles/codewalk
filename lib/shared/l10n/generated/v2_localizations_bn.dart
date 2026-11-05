@@ -2179,7 +2179,7 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionTabsGestureHint =>
-      'ক্রম বদলাতে ট্যাব টেনে সরান; পিন করতে, আইকন বদলাতে বা বন্ধ করতে এর মেনু ব্যবহার করুন।';
+      'প্রতিটি ট্যাবের নিজের মেনু আছে: পিন করুন, আইকন বদলান বা বন্ধ করুন।';
 
   @override
   String get sessionTabsGestureHintDismiss => 'আর দেখাবেন না';
