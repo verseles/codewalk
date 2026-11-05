@@ -205,7 +205,7 @@ final class LinuxInstallerIo implements LinuxUpdateInstaller {
           await File('$_root/codewalk').resolveSymbolicLinks()) {
         return false;
       }
-      await launchUpdatedLinuxApp(launcher.path);
+      await launchUpdatedLinuxApp(launcher.path, workingDirectory: _home);
       return true;
     } on Object {
       return false;
@@ -249,6 +249,14 @@ Map<String, String> linuxInstallerEnvironment(
 };
 
 /// Relaunch inherits the desktop session, unlike the scrubbed installer process.
-Future<void> launchUpdatedLinuxApp(String executable) async {
-  await Process.start(executable, const [], mode: ProcessStartMode.detached);
+Future<void> launchUpdatedLinuxApp(
+  String executable, {
+  required String workingDirectory,
+}) async {
+  await Process.start(
+    executable,
+    const [],
+    workingDirectory: workingDirectory,
+    mode: ProcessStartMode.detached,
+  );
 }

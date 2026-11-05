@@ -45,7 +45,9 @@ class ArtifactFixture:
         files = {"./codewalk": elf(machine or subject.ELF_MACHINE[target]),
                  "./updater/install.sh": (subject.ROOT / "install.sh").read_bytes(),
                  "./lib/libapp.so": libapp, "./lib/libflutter_linux_gtk.so": b"engine",
-                 "./data/flutter_assets/AssetManifest.bin": b"assets", **(extra or {})}
+                 "./data/flutter_assets/AssetManifest.bin": b"assets",
+                 "./data/flutter_assets/version.json": json.dumps({"version": VERSION}).encode(),
+                 **(extra or {})}
         with tarfile.open(path, "w:gz") as archive:
             for name, data in files.items():
                 info = tarfile.TarInfo(name)

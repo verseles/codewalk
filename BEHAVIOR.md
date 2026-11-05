@@ -810,7 +810,9 @@ foundation described here; planned v2 behavior remains in GitHub Issues.
 - **Then** Linux in-app installation is available only for the running managed v2 bundle with its packaged installer; it verifies exact-tag/architecture manifest and SHA-256 before running that trusted script with an exact tag/channel and migration disabled
 - **Then** Linux partials, sidecars and installer temporaries stay in a private 0700 cache; links cannot redirect writes or APK cleanup, and stale owned partials/installer temporaries are removed after 24 hours without following links
 - **Then** Linux uses staging/rollback, preserves user-data directories, bounds installer waiting and sends process-group termination signals on cancellation/timeout; no Linux package-signature guarantee is claimed
-- **Then** Linux offers restart only after installation succeeds and the installed tag matches; drafts/preferences/metadata flush before relaunch, which inherits the desktop environment and requests exit of the old app
+- **Then** Linux offers restart only after installation succeeds and the installed tag matches; drafts/preferences/metadata flush before relaunch, which starts in the user's home directory, inherits the desktop environment and requests exit of the old app
+- **Then** Linux native startup preserves a usable working directory; if an older updater launches it from a removed installation directory, it recovers to the absolute home directory or `/` before Flutter starts, preserving access to the installed version and saved settings
+- **Then** packaged Linux release validation covers both usable and removed working directories, startup version metadata and preferences retained on disk; applied Beta/theme selections require separate GUI evidence
 - **Then** unsupported/older/unmanaged Linux installs retain a copyable exact-tag installer command, and changing channel clears a failed Linux retry target rather than offering a stale beta
 - **When** the platform has no supported native update target
 - **Then** the update page offers no check/install route and the application does not construct Android APK cleanup on that platform

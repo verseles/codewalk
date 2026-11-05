@@ -5,7 +5,7 @@ import unittest
 from unittest import mock
 
 import smoke_v2_linux_release as subject
-from test_verify_v2_artifacts import LEGACY_AOT, ArtifactFixture
+from test_verify_v2_artifacts import LEGACY_AOT, VERSION, ArtifactFixture
 
 
 class FakeProcess:
@@ -35,12 +35,18 @@ class SmokeTest(unittest.TestCase):
         self.evidence = self.root / "evidence"
         self.launched = []
         self.killed = []
+        self.cwd_by_pid = {}
+        self.repair_deleted = True
+        self.change_valid_cwd = False
+        self.deleted_version = VERSION
+        self.retain_beta = True
         patches = [
             mock.patch.object(subject.platform, "machine", return_value="aarch64"),
             mock.patch.object(subject.shutil, "which", side_effect=lambda name: f"/usr/bin/{name}"),
             mock.patch.dict(subject.os.environ, {"DISPLAY": ":99", "HOME": "/home/owner",
                                                  "XAUTHORITY": "/tmp/xvfb-run.abc/Xauthority"}),
             mock.patch.object(subject.os, "killpg", side_effect=lambda pid, sig: self.killed.append(sig)),
+            mock.patch.object(subject, "process_cwd", side_effect=lambda pid: self.cwd_by_pid[pid]),
         ]
         for patch in patches:
             patch.start()
@@ -49,7 +55,25 @@ class SmokeTest(unittest.TestCase):
     def popen(self, process):
         def start(command, **kwargs):
             self.launched.append((command, kwargs["env"]))
-            return process
+            child = FakeProcess(exits_after=process.exits_after)
+            child.pid += len(self.launched)
+            env = kwargs["env"]
+            deleted = command[0] == "/bin/sh"
+            if deleted:
+                self.cwd_by_pid[child.pid] = (Path(env["HOME"]) if self.repair_deleted
+                                              else Path(kwargs["cwd"]) / "removed-cwd")
+            else:
+                self.cwd_by_pid[child.pid] = (Path(env["HOME"]) if self.change_valid_cwd
+                                              else Path(kwargs["cwd"]))
+            path = subject.preferences_path(env)
+            preferences = json.loads(path.read_text())
+            version = self.deleted_version if deleted else VERSION
+            if version is not None:
+                preferences["cw2.updates.installedRelease"] = json.dumps({"schema": 1, "to": version})
+            if deleted and not self.retain_beta:
+                preferences["cw2.updates.channel"] = "stable"
+            path.write_text(json.dumps(preferences))
+            return child
         return start
 
     def windows(self, found):
@@ -65,9 +89,12 @@ class SmokeTest(unittest.TestCase):
         report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
         self.assertEqual(report["launch"], "passed", report.get("error"))
         self.assertEqual(report["checks"], {"hostArchitecture": "passed", "bundleVerified": "passed",
-                                            "windowVisible": "passed", "aliveAfterSettle": "passed"})
+                                            "windowVisible": "passed", "aliveAfterSettle": "passed",
+                                            "validCwdRetained": "passed", "preferencesRetained": "passed",
+                                            "deletedWindowVisible": "passed", "deletedAliveAfterSettle": "passed",
+                                            "deletedCwdRepaired": "passed", "deletedPreferencesRetained": "passed"})
         self.assertEqual(report["architecture"], "arm64")
-        self.assertEqual(self.killed, [subject.signal.SIGTERM])
+        self.assertEqual(self.killed, [subject.signal.SIGTERM, subject.signal.SIGTERM])
         written = json.loads((self.evidence / "linux-arm64-launch.json").read_text())
         self.assertEqual(written["sha256"], report["sha256"])
 
@@ -83,6 +110,42 @@ class SmokeTest(unittest.TestCase):
         self.assertEqual(env["XAUTHORITY"], "/tmp/xvfb-run.abc/Xauthority")
         self.assertEqual(env["GDK_BACKEND"], "x11")
         self.assertNotIn("FLUTTER_LINUX_RENDERER", env)
+        self.assertEqual(len(self.launched), 2)
+        command, deleted_env = self.launched[1]
+        self.assertEqual(command[0], "/bin/sh")
+        self.assertTrue(command[-1].startswith(deleted_env["HOME"]))
+        self.assertNotEqual(env["HOME"], deleted_env["HOME"])
+
+    def test_a_removed_cwd_must_be_repaired_and_a_valid_one_retained(self):
+        self.repair_deleted = False
+        report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertIn("deleted: native working directory", report["error"])
+        self.assertEqual(len(self.killed), 2)
+        self.change_valid_cwd = True
+        report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertIn("valid: native working directory", report["error"])
+
+    def test_a_window_is_not_enough_without_readable_version_and_retained_preferences(self):
+        for version in (None, "2.0.0-beta.99"):
+            with self.subTest(version=version):
+                self.deleted_version = version
+                report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
+                self.assertEqual(report["launch"], "fail")
+                self.assertIn("read the installed version", report["error"])
+        self.deleted_version = VERSION
+        self.retain_beta = False
+        report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertIn("retain Beta preferences", report["error"])
+
+    def test_missing_bundle_version_is_rejected_before_launch(self):
+        report = self.smoke(self.fixture.linux("linux-arm64", extra={
+            "./data/flutter_assets/version.json": b"{}"}), FakeProcess())
+        self.assertEqual(report["launch"], "fail")
+        self.assertIn("version metadata", report["error"])
+        self.assertEqual(self.launched, [])
 
     def test_no_window_or_an_early_exit_fails(self):
         report = self.smoke(self.fixture.linux("linux-arm64"), FakeProcess(), found=())

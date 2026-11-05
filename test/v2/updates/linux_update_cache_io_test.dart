@@ -169,13 +169,15 @@ void main() {
   }
 
   test(
-    'detached relaunch preserves desktop locale and display credentials',
+    'detached relaunch uses stable cwd and preserves desktop credentials',
     () async {
       final output = '${temporary.path}/environment';
       final marker = '${temporary.path}/complete';
       final launcher = File('${temporary.path}/launcher');
+      final workingDirectory = Directory('${temporary.path}/relaunch');
+      await workingDirectory.create();
       await launcher.writeAsString(
-        '#!/bin/sh\nprintf "%s\\n%s\\n" "\$LANG" "\$XAUTHORITY" > "$output"\nmkdir "$marker"\n',
+        '#!/bin/sh\nprintf "%s\\n%s\\n%s\\n" "\$LANG" "\$XAUTHORITY" "\$(pwd -P)" > "$output"\nmkdir "$marker"\n',
       );
       expect(
         (await Process.run('/bin/chmod', ['700', launcher.path])).exitCode,
@@ -185,12 +187,16 @@ void main() {
           .watch()
           .firstWhere((event) => event.path == marker)
           .timeout(const Duration(seconds: 5));
-      await launchUpdatedLinuxApp(launcher.path);
+      await launchUpdatedLinuxApp(
+        launcher.path,
+        workingDirectory: workingDirectory.path,
+      );
       await completed;
       final values = await File(output).readAsLines();
       expect(values, [
         Platform.environment['LANG'] ?? '',
         Platform.environment['XAUTHORITY'] ?? '',
+        await workingDirectory.resolveSymbolicLinks(),
       ]);
     },
   );
