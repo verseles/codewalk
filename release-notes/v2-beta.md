@@ -1,5 +1,3 @@
-> 📣 CodeWalk 2 now checks for updates automatically, remembers dismissed versions, shows release announcements, resumes interrupted downloads, and supports verified installation on Android and Linux.
-
 ### Updates
 
 - Discover new versions at startup and hourly, with an optional automatic-check setting and independent checks when opening Settings.
@@ -7,6 +5,10 @@
 - Resume interrupted downloads, keep progress visible across screens, and explain verification, storage, network, and installer errors.
 - Verify Android APKs before handing them to the system installer.
 - Install verified Linux updates from managed v2 bundles and restart after saving local state. Older or unmanaged bundles keep the exact-version installer command.
+
+### Validation
+
+- Improve Linux preview validation for disabled pairing controls without changing the app's behavior.
 
 ### Beta scope
 

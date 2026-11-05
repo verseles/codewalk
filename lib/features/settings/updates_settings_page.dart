@@ -19,8 +19,9 @@ import 'update_check_controller.dart';
 import 'update_failure_text.dart';
 import 'update_scheduler.dart';
 
-/// Manual update check: Android downloads and verifies the exact APK in-app,
-/// then hands it to the system installer; Linux shows the installer command.
+/// Native update controls: Android verifies an in-app APK download before
+/// installer handoff; managed Linux bundles install in-app, with an exact-tag
+/// command available for older or unmanaged installations.
 class UpdatesSettingsPage extends StatefulWidget {
   const UpdatesSettingsPage({super.key});
 
