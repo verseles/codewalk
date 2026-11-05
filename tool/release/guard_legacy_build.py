@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Refuses to build the legacy entry point under a CodeWalk 2 version.
 
-main still carries the CodeWalk 1 code (lib/main.dart) as a reuse reference.
-Once its pubspec says 2.x, a default `flutter build` would ship that legacy
-app labelled as v2, so `make web`, `make desktop`, `make android` and the Web
-deploy stop here. v2 artifacts come only from lib/main_v2.dart builds.
+main holds only CodeWalk 2. The Web deploy workflow still builds through the
+legacy path until V1-04 splits it, so a 2.x pubspec stops it here.
+v2 artifacts come only from lib/main_v2.dart builds.
 
 With --web-ref, it also requires the Web deploy to run from refs/heads/main:
 the Pages target is the main preview, and V1-04 must land before any v2 Web

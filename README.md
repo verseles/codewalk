@@ -165,30 +165,26 @@ directory.
 2. Run the app (examples):
 
    ```bash
-   flutter run -d linux
-   flutter run -d chrome
-   flutter run -d android
+   flutter run -d linux --target lib/main_v2.dart
+   flutter run -d chrome --target lib/main_v2.dart
+   flutter run -d android --target lib/main_v2.dart
    ```
 
 3. Build artifacts (examples):
    ```bash
-   flutter build linux
-   flutter build web
+   flutter build linux --target lib/main_v2.dart
+   flutter build web --target lib/main_v2.dart
    ```
 
 ### Make Targets
 
 ```bash
-make check      # deps + codegen + analyze + coverage/v2-tool fixtures + full tests
+make check      # deps + analyze + coverage/v2-tool fixtures + full tests
 make check-fast # same setup, with the fast test selection
-make test-fast  # excludes slow/integration; includes ChatPage smoke scenarios
-make test-chat  # ChatPage smoke + extended scenarios
-make test-web   # browser capability tests; requires Chrome/Chromium
+make test-fast  # excludes slow/integration tests
 make test-coverage-tools # LCOV validation and threshold regression fixtures
 make test-release-tools  # v2 beta release plan, publication guards and tooling
 make coverage   # full tests with coverage + global and protected-file floors
-make web        # build the legacy Flutter web app into build/web (CodeWalk 1 versions only)
-make android    # build the legacy arm64 APK (CodeWalk 1 versions only)
 make release V=beta # main: cut the next v2.0.0-beta.N (DRY_RUN=1 prints the plan only)
 ```
 
@@ -199,21 +195,20 @@ as a prerelease that is never latest. A manual dispatch from `main` with a
 `dry_run_version` builds and verifies the same artifacts without publishing.
 Stable, patch and CodeWalk 1 releases are cut on the `v1` branch.
 
-Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host. `make test-fast` retains the five ChatPage smoke scenarios while the extended suite remains required in full checks. Browser tests run separately via `make test-web` and in CI; set `CHROME_EXECUTABLE` if the browser is not discovered automatically.
+Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host.
 
 The full `make test` suite has a 10-minute execution guard by default. For a
 slower host, `make check TEST_TIMEOUT=15m` retains all tests and individual test
 timeouts while allowing a larger finite suite budget. Guard expiry includes a
 signal diagnostic; it is a failed or incomplete check, not a passing result.
 
-Coverage filtering uses Python 3 and does not require system `lcov`. The gate validates fresh Flutter LCOV records, excludes `.g.dart`, localization, and plugin registrant sources, and enforces the global floor plus the reviewed per-file floors in `tool/ci/coverage_baseline.tsv`. Missing protected sources, inconsistent totals, foreign source paths, or coverage below the configured floors fail the gate; an old filtered artifact is never used as a fallback. Floors are changed deliberately, not regenerated or lowered automatically.
+Coverage filtering uses Python 3 and does not require system `lcov`. The gate validates fresh Flutter LCOV records, excludes `.g.dart`, generated localization, plugin registrant and `packages/` sources, and enforces the 85% floor plus the protected-file floors in `tool/ci/coverage_baseline.tsv`. Package coverage is not gated yet (#477).
 
-When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.
+For a testable Android artifact, follow the `apk` section of `AGENTS.md`.
 
 ### V2 development targets on `main`
 
-The retained app still defaults to `lib/main.dart`. These separate targets select
-the active v2 implementation explicitly:
+The entry point is `lib/main_v2.dart`, and these targets select it explicitly:
 
 ```bash
 make v2-native-check  # all workspace packages, architecture/l10n and VM/CHP tests
@@ -285,62 +280,9 @@ x86_64 split on an Android 16 emulator; the arm64 APK itself is first launched o
 the owner's device. The workflow only produces artifacts: it publishes, tags
 and deploys nothing.
 
-### Web Deploy: Cloudflare Pages or Static Hosting
+### Web
 
-CodeWalk's web build is a static Flutter app. The build does not need Cloudflare secrets or compile-time OpenCode credentials; users add their OpenCode server profile inside the app after opening the deployed site.
-
-1. Build the web app:
-
-   ```bash
-   make web
-   ```
-
-   This runs `flutter build web --release --base-href "/"` and writes the static site to `build/web`.
-
-2. For a subpath deployment, set a base href that starts and ends with `/`:
-
-   ```bash
-   WEB_BASE_HREF="/codewalk/" make web
-   ```
-
-3. Preview the static output locally for root-hosted builds:
-
-   ```bash
-   python3 -m http.server 8080 --directory build/web
-   ```
-
-   If you build with a subpath `WEB_BASE_HREF`, preview it under the same path prefix; otherwise browser asset URLs will not match the local server root.
-
-4. Publish `build/web` to Cloudflare Pages.
-
-   Direct upload with Wrangler:
-
-   ```bash
-   npx wrangler pages deploy build/web --project-name codewalk
-   ```
-
-   Cloudflare Pages Git settings, if your Pages build image has Flutter available:
-
-   ```text
-   Build command: make web
-   Build output directory: build/web
-   Root directory: (leave blank)
-   ```
-
-5. Configure the OpenCode server that the browser app will connect to. For a Pages deployment at `https://your-codewalk.pages.dev`, allow that exact origin:
-
-   ```bash
-   export OPENCODE_SERVER_PASSWORD="choose-a-password"
-   opencode serve --hostname 0.0.0.0 --port 4096 --cors "https://your-codewalk.pages.dev"
-   ```
-
-6. Add a CodeWalk server profile in the web app using your reachable server URL and Basic Auth credentials.
-
-Known limitations:
-
-- An HTTPS-hosted CodeWalk site cannot call a plain HTTP OpenCode server on a LAN IP because browsers block mixed content. Use HTTPS for the OpenCode origin, a trusted reverse proxy/tunnel, or run the CodeWalk web build from a local HTTP origin during private testing.
-- CORS must allow the exact CodeWalk origin when Basic Auth or other credentials are used; do not rely on wildcard CORS for authenticated browser requests.
-- The OpenCode server URL must be reachable from the user's browser, not from Cloudflare's build system.
+The published Web app (`https://codewalk.pages.dev`) is CodeWalk 1 and deploys from the `v1` branch. CodeWalk 2 on the Web comes later in `ROADMAP.md`; `make v2-web` is only a local build check.
 
 ### Server Configuration
 

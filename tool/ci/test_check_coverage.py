@@ -52,7 +52,7 @@ class CoverageGateTest(unittest.TestCase):
 
     def test_filters_generated_sources_without_lcov(self):
         data = record() + record("lib/data/model.g.dart", (0,) * 10)
-        data += record("lib/l10n/generated/app_en.dart", (0,) * 10)
+        data += record("lib/shared/l10n/generated/app_en.dart", (0,) * 10)
         data += record("lib/generated_plugin_registrant.dart", (0,) * 10)
         result = self.run_gate(data)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -60,7 +60,7 @@ class CoverageGateTest(unittest.TestCase):
 
     def test_absolute_sources_share_the_same_policy_and_exclusions(self):
         data = record(str(ROOT / "lib/example.dart"))
-        data += record(str(ROOT / "lib/l10n/app.dart"), (0,) * 10)
+        data += record(str(ROOT / "lib/shared/l10n/generated/app.dart"), (0,) * 10)
         result = self.run_gate(data, baseline="lib/example.dart 50\n")
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -104,15 +104,21 @@ class CoverageGateTest(unittest.TestCase):
         result = self.run_gate(record("./lib//example.dart"), baseline="lib/example.dart 50\n")
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_includes_local_package_libraries_in_coverage(self):
+    def test_excludes_local_package_libraries_from_the_app_run(self):
         source = "packages/codewalk_core/lib/src/ports.dart"
         for name in (source, str(ROOT / source)):
             with self.subTest(name=name):
-                data = record(hits=(0, 0)) + record(name, (1, 1))
+                data = record(hits=(1, 1)) + record(name, (0, 0))
                 result = self.run_gate(data)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn("50.00% (2/4)", result.stdout)
-                self.assertEqual(self.output.read_text(), data)
+                self.assertIn("100.00% (2/2)", result.stdout)
+                self.assertEqual(self.output.read_text(), record(hits=(1, 1)))
+
+    def test_excludes_generated_v2_localizations(self):
+        data = record() + record("lib/shared/l10n/generated/v2_localizations.dart", (0,) * 10)
+        result = self.run_gate(data)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.output.read_text(), record())
 
     def test_package_coverage_preserves_protected_root_floors(self):
         data = record(hits=(0, 0))

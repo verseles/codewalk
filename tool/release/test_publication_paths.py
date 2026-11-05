@@ -88,10 +88,7 @@ def check_read_only(name: str, text: str) -> None:
 
 def check_makefile(text: str) -> None:
     for target in ("web", "desktop", "android"):
-        recipe = re.search(rf"^{target}:\n((?:\t.*\n)+)", text, re.M)
-        assert recipe, f"missing {target} target"
-        first = recipe.group(1).splitlines()[0]
-        assert first == "\t@python3 tool/release/guard_legacy_build.py pubspec.yaml", f"{target} must start with the guard"
+        assert not re.search(rf"^{target}:", text, re.M), f"{target} would publish a build without a v2 target"
     release = re.search(r"^release:\n((?:\t.*\n)+)", text, re.M).group(1)
     assert 'if [ "$(V)" != "beta" ]' in release and "exit 1" in release, "release refuses non-beta"
     assert "tool/release/cut_beta.py" in release, "release uses cut_beta.py"
@@ -140,8 +137,8 @@ class PublicationPathTests(unittest.TestCase):
 
     def test_every_other_workflow_is_read_only(self):
         names = sorted(path.name for path in WORKFLOWS.glob("*.yml") if path.name not in ("release.yml", "web-pages.yml"))
-        self.assertEqual(names, ["ci.yml", "opencode-smoke.yml", "session-overlay-prototype.yml",
-                                 "v2-deferred-web.yml", "v2-device-reliability.yml", "v2-owner-preview.yml"])
+        self.assertEqual(names, ["ci.yml", "opencode-smoke.yml", "v2-deferred-web.yml",
+                                 "v2-device-reliability.yml", "v2-owner-preview.yml"])
         for name in names:
             with self.subTest(name=name):
                 text = read(name)
@@ -160,7 +157,7 @@ class PublicationPathTests(unittest.TestCase):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         check_makefile(text)
         for mutated in (
-            text.replace("web:\n\t@python3 tool/release/guard_legacy_build.py pubspec.yaml\n", "web:\n", 1),
+            text + "\nweb:\n\tflutter build web\n",
             text.replace('if [ "$(V)" != "beta" ]', 'if [ -z "$(V)" ]'),
             text.replace("\tpython3 tool/release/cut_beta.py", "\tgit push --follow-tags; python3 tool/release/cut_beta.py"),
         ):

@@ -1,47 +1,74 @@
-import 'package:codewalk/domain/entities/experience_settings.dart'
-    as legacy_model;
+import 'dart:convert';
+
 import 'package:codewalk/platform/appearance/dynamic_color_adapter.dart';
-import 'package:codewalk/presentation/theme/opencode_theme_presets.dart'
-    as legacy;
 import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/appearance_theme_resolver.dart';
 import 'package:codewalk/shared/theme/opencode_theme_preferences.dart';
 import 'package:codewalk/shared/theme/opencode_theme_presets.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' as mui;
 
 void main() {
-  test(
-    'all 37 presets retain the consolidated v1 palettes and semantic colors',
-    () {
-      expect(openCodeThemePresetOptions(), hasLength(37));
-      for (final preset in openCodeThemePresetOptions()) {
-        final id = openCodeThemePresetKey(preset);
-        final old = legacy_model.openCodeThemePresetFromKey(id)!;
-        expect(openCodeThemePresetFromKey(id), preset);
-        expect(
-          openCodeLightSchemeFor(preset),
-          legacy.openCodeLightSchemeFor(old),
+  test('all 37 presets resolve by key and unknown keys do not', () {
+    expect(openCodeThemePresetOptions(), hasLength(37));
+    for (final preset in openCodeThemePresetOptions()) {
+      expect(
+        openCodeThemePresetFromKey(openCodeThemePresetKey(preset)),
+        preset,
+      );
+    }
+    expect(openCodeThemePresetFromKey('oc-1'), OpenCodeThemePreset.oc2);
+    expect(openCodeThemePresetFromKey('system'), OpenCodeThemePreset.oc2);
+    expect(openCodeThemePresetFromKey('unknown'), isNull);
+  });
+
+  // The palettes are frozen, with no generator left. The value was taken when
+  // all 37 presets still compared equal to the consolidated v1 palettes. A
+  // deliberate palette change updates it.
+  test('the frozen palettes of all presets keep their values', () {
+    String colors(Iterable<Color> values) =>
+        values.map((color) => color.toARGB32()).join(',');
+    String scheme(ColorScheme value) => colors([
+      value.primary,
+      value.onPrimary,
+      value.primaryContainer,
+      value.onPrimaryContainer,
+      value.secondary,
+      value.onSecondary,
+      value.tertiary,
+      value.onTertiary,
+      value.error,
+      value.onError,
+      value.surface,
+      value.onSurface,
+      value.onSurfaceVariant,
+      value.outline,
+      value.outlineVariant,
+    ]);
+    final buffer = StringBuffer();
+    for (final preset in openCodeThemePresetOptions()) {
+      buffer.writeln(openCodeThemePresetKey(preset));
+      buffer.writeln(scheme(openCodeLightSchemeFor(preset)!));
+      buffer.writeln(scheme(openCodeDarkSchemeFor(preset)!));
+      for (final brightness in Brightness.values) {
+        final tokens = openCodeThemeTokensFor(preset, brightness)!;
+        buffer.writeln(
+          colors([
+            tokens.markdownLink,
+            tokens.syntaxKeyword,
+            tokens.surfaceBase,
+          ]),
         );
-        expect(
-          openCodeDarkSchemeFor(preset),
-          legacy.openCodeDarkSchemeFor(old),
-        );
-        for (final brightness in Brightness.values) {
-          final tokens = openCodeThemeTokensFor(preset, brightness)!;
-          final oldTokens = legacy.openCodeThemeTokensFor(old, brightness)!;
-          expect(tokens.markdownLink, oldTokens.markdownLink);
-          expect(tokens.syntaxKeyword, oldTokens.syntaxKeyword);
-          expect(tokens.surfaceBase, oldTokens.surfaceBase);
-        }
       }
-      expect(openCodeThemePresetFromKey('oc-1'), OpenCodeThemePreset.oc2);
-      expect(openCodeThemePresetFromKey('system'), OpenCodeThemePreset.oc2);
-      expect(openCodeThemePresetFromKey('unknown'), isNull);
-    },
-  );
+    }
+    expect(
+      sha256.convert(utf8.encode(buffer.toString())).toString(),
+      '8d39830c2dccd65a6b47c114bb95597260f785f874f28ab0cf07bab6d6cb9856',
+    );
+  });
 
   test('preset precedes dynamic; missing brightness uses seeded contrast', () {
     final dynamic = ColorScheme.fromSeed(seedColor: Colors.green);

@@ -127,11 +127,11 @@ rm -rf "$dir"
 ## Validation
 
 - Prepend `export PATH="$HOME/flutter/bin:$PATH"` to Flutter commands in every shell.
-- The local gate is `make check TEST_JOBS=$(nproc)`, plus `make v2-foundations` when `packages/`, the architecture rules or the CHP changed. Run it once the code is stable.
+- The local gate is `make check TEST_JOBS=$(nproc)`, plus `make v2-native-check` when `packages/`, the architecture rules or the CHP changed. Run it once the code is stable.
 - Do not use `make precommit`. After reviewer micro-fixes, use focused checks; rerun the gate only when a fix touches shared infrastructure, dependencies, generated files, l10n or build configuration.
 - Static text and docs changes need no gate unless they affect build or release instructions.
 - x86_64 is the reference for goldens; known ARM64 differences are tracked in #465, and APKs do not build reliably on ARM64.
-- Coverage floor: 85% of v2 lines. Never lower it to get a green check.
+- Coverage floor: 85% of app lines under `lib/`, plus the file floors in `tool/ci/coverage_baseline.tsv`. Package coverage is not gated yet (#477). Never lower a floor to get a green check.
 
 ## Helper budget
 

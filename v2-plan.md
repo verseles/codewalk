@@ -1319,14 +1319,13 @@ export PATH="$HOME/flutter/bin:$PATH" && flutter test test/<touched area>
 
 # CodeWalk installer changes (V1-05): existing Flutter-based shell fixtures
 sh -n install.sh
-export PATH="$HOME/flutter/bin:$PATH" && flutter test test/unit/scripts/linux_installer_test.dart
+export PATH="$HOME/flutter/bin:$PATH" && flutter test test/v2/updates/linux_installer_test.dart
 # Run the added Windows/macOS acceptance cases on native runners;
 # record their exact commands in V1-05 when the harness is implemented.
 
-# Validation gates: after V2-020C these targets aggregate package/app checks.
-# Tests must import/bootstrap v2 explicitly while main.dart remains legacy.
+# Validation gates.
 export PATH="$HOME/flutter/bin:$PATH" && make check
-export PATH="$HOME/flutter/bin:$PATH" && make test-web
+export PATH="$HOME/flutter/bin:$PATH" && make v2-native-check
 
 # Host (v2.1+): process working directory = repository root, once scripts exist.
 npm --prefix host run typecheck
@@ -1337,7 +1336,6 @@ npm --prefix host run test:contract
 - Android release APKs are built on GitHub Actions x64 runners (ARM64 Linux hosts are unreliable for APK builds). A testable APK for the product owner uses `HEY_CAPTION="<specific caption>" make android` on a supported host.
 - iOS: `export PATH="$HOME/flutter/bin:$PATH" && flutter build ios --no-codesign` on a macOS runner; signed builds after the Apple prerequisite. V2-078 defines the explicit v2 build entry point for every target, including iOS.
 - Desktop: build each OS on its own runner.
-- `make precommit` is not the normal validation command.
 - Run the reviewer workflow after a coherent code stage and its targeted checks. Static docs-only edits follow the project's exemption. Run `make check` at project validation gates, including stable code before its first commit; focused checks suffice for reviewer micro-fixes unless they invalidate that full check. Record exact commands, working directories, entry point and results in the Issue. Never report skipped/pending checks as passing.
 
 ---

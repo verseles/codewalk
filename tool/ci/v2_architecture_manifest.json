@@ -6,23 +6,16 @@
     "entrypoints": ["lib/main_v2.dart"],
     "packagePrefixes": ["codewalk_", "harness_"]
   },
-  "retainedLegacy": [
-    {"path": "lib/core/", "reason": "Retained v1 reference; remove at V2-084."},
-    {"path": "lib/data/", "reason": "Retained v1 reference; remove at V2-084."},
-    {"path": "lib/domain/", "reason": "Retained v1 reference; remove at V2-084."},
-    {"path": "lib/presentation/", "reason": "Retained v1 reference; remove at V2-084."},
-    {"path": "lib/l10n/", "reason": "Retained v1 generated localization; port governed leaves before reuse."},
-    {"path": "lib/main.dart", "reason": "Retained v1 entry point until final cutover."}
-  ],
+  "retainedLegacy": [],
   "vendored": [
     {"path": "third_party/xterm/", "reason": "Existing vendored terminal package; migration has not moved it yet."},
     {"path": "third_party/tailscale/", "reason": "Existing vendored tunnel package; migration has not moved it yet."}
   ],
   "generated": [
-    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","reason":"Offline snapshot port of the consolidated 37-preset registry; reproduced by tool/theme/port_v2_appearance.py."},
-    {"path":"lib/shared/theme/opencode_theme_presets.dart","reason":"Selective theme resolver/token port reproduced offline from the retained consolidated snapshot."},
-    {"path":"lib/shared/theme/opencode_theme_preferences.dart","reason":"Stable preset identity codecs selectively ported from the retained snapshot."},
-    {"path":"lib/shared/theme/brand_colors.dart","reason":"Consolidated brand seeds selectively ported from the retained snapshot."},
+    {"path":"lib/shared/theme/opencode_web_theme_registry.dart","reason":"Frozen snapshot of the consolidated 37-preset registry; its generators stayed on the v1 branch."},
+    {"path":"lib/shared/theme/opencode_theme_presets.dart","reason":"Frozen theme resolver and tokens; the generators stayed on the v1 branch."},
+    {"path":"lib/shared/theme/opencode_theme_preferences.dart","reason":"Frozen preset identity codecs; the generators stayed on the v1 branch."},
+    {"path":"lib/shared/theme/brand_colors.dart","reason":"Frozen brand seeds; the generators stayed on the v1 branch."},
     {"path": "lib/shared/l10n/generated/v2_localizations.dart","reason": "Flutter gen-l10n base class from the governed v2 ARB subset; reproduced by tool/l10n/generate_v2_localizations.py. The exact size exceptions below cover only named generated files; import boundaries remain governed."},
     {"path": "lib/shared/l10n/generated/v2_localizations_ar.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},
     {"path": "lib/shared/l10n/generated/v2_localizations_bn.dart","reason": "Flutter gen-l10n output from the governed v2 ARB subset; reproduced by the isolated scoped generator for V2-020B. No size exception or import-boundary exemption."},

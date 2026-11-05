@@ -39,34 +39,20 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Enforce v2 architecture and retained-reference boundaries
+      - name: Enforce v2 architecture boundaries
         run: make v2-architecture
-
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Verify generated code is committed
-        run: |
-          if git status --porcelain | grep -E '\.g\.dart$' >/dev/null; then
-            echo "::error::Generated files changed. Commit the generated output."
-            git status --porcelain
-            exit 1
-          fi
 
       - name: Analyze (phased gate)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee /tmp/flutter_analyze.log
 
       - name: Enforce analyze issue budget
-        run: bash tool/ci/check_analyze_budget.sh /tmp/flutter_analyze.log 337
+        run: bash tool/ci/check_analyze_budget.sh /tmp/flutter_analyze.log 4
 
       - name: Verify coverage gate fixtures
         run: python3 -m unittest discover -s tool/ci -p test_check_coverage.py
 
       - name: Verify the release plan, publication guards and tooling
         run: python3 -m unittest discover -s tool/release -p 'test_*.py'
-
-      - name: Test browser capabilities
-        run: flutter test --no-pub --platform chrome test/web
 
       - name: Upload analyze report
         uses: actions/upload-artifact@v4
@@ -238,32 +224,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-
       - name: Test shard
         run: flutter test --no-pub -j 4 --total-shards 4 --shard-index ${{ matrix.shard_index }}
-
-  windows_build:
-    needs: quality
-    runs-on: windows-latest
-    timeout-minutes: 25
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Windows debug app
-        run: flutter build windows --debug
 
   coverage:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
@@ -289,16 +251,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-
       - name: Test (full) with coverage
         # -j 4: the 4-vCPU runners oversubscribe at -j 8 and trip 30s test
         # timeouts in I/O-heavy suites; halves contention, still <35min.
         run: flutter test --no-pub --coverage -j 4
 
       - name: Enforce coverage threshold
-        run: bash tool/ci/check_coverage.sh coverage/lcov.info 35
+        run: bash tool/ci/check_coverage.sh coverage/lcov.info 85
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

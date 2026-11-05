@@ -39,8 +39,7 @@ class V2CiAlignmentTests(unittest.TestCase):
                 self.assertNotRegex(block, r"(?m)^    if:", "native gate must always run")
         self.assertNotIn("make v2-foundations", self.ci)
         self.assertNotIn("--platform chrome test/v2", self.ci)
-        # Legacy browser checks retain their independent reference contract.
-        self.assertIn("--platform chrome test/web", section(self.ci, "quality", "  "))
+        self.assertNotIn("test/web", section(self.ci, "quality", "  "))
 
     def test_native_builds_do_not_depend_on_deferred_browser(self):
         builds = section(self.ci, "v2_native_builds", "  ")

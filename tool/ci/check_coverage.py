@@ -40,10 +40,12 @@ def source_name(value):
 
 def excluded(source):
     library_path = source.removeprefix("lib/")
+    # This LCOV comes from the app run, which understates packages: their own
+    # suites run under make v2-native-check, and their coverage is not gated yet (#477).
     if source.startswith("packages/"):
-        library_path = source.split("/", 3)[3]
+        return True
     return (
-        library_path.startswith("l10n/")
+        library_path.startswith("shared/l10n/generated/")
         or source.endswith(".g.dart")
         or source.rsplit("/", 1)[-1] == "generated_plugin_registrant.dart"
     )

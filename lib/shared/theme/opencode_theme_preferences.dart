@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
-// Offline selective port: tool/theme/port_v2_appearance.py
+// Frozen port of the v1 palette; the generators stayed on the v1 branch.
 
 enum OpenCodeThemePreset {
   oc2,

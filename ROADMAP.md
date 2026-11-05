@@ -98,6 +98,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #459 macOS: alvo mínimo em conflito com o Flutter 3.47.9
 - [ ] #457 Guarda de arquitetura com prefixo de import
 - [ ] #445 `cut_beta`: recusar sem `.task-memory`
+- [ ] #477 Piso de cobertura dos pacotes
 - [ ] #433 Dividir os maiores arquivos da v2
 - [ ] #411 Suíte golden do xterm vendorizado
 - [ ] #410 Artefato novo do Task Memory escondido do `git add`

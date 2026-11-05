@@ -1,32 +1,12 @@
-.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-v2-tools test-release-tools test-integration test-shard coverage smoke check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web web desktop android precommit clean release
+.PHONY: help deps icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-coverage-tools test-v2-tools test-release-tools test-shard coverage check check-fast v2-architecture v2-foundations v2-native-check v2-linux-debug v2-android-debug v2-smoke v2-web clean release watch-ci watch-release
 
-APK_DIR = build/app/outputs/flutter-apk
 .PHONY: v2-linux-preview-package v2-linux-preview-smoke v2-android-preview
-APK_PATH = $(APK_DIR)/codewalk.apk
-APK_METADATA_PATH = $(patsubst %/flutter-apk,%/apk/release,$(APK_DIR))/output-metadata.json
-ANDROID_KEY_PROPERTIES = android/key.properties
 ANALYZE_LOG = /tmp/flutter_analyze.log
 TEST_JOBS ?= 4
 TEST_TIMEOUT ?= 10m
 FAST_EXCLUDE_TAGS ?= slow,integration
-ANDROID_BUILD_CODE_OFFSET ?= 2001
 # The Linux preview architecture follows the build host.
 V2_LINUX_ARCH ?= $(if $(filter aarch64 arm64,$(shell uname -m)),arm64,x64)
-WEB_BASE_HREF ?= /
-
-READ_PUBSPEC_VERSION_SH = app_version=$$(awk '/^version:[[:space:]]*/{sub(/^version:[[:space:]]*/, "", $$0); print; exit}' pubspec.yaml); \
-	app_version_name=$$(printf '%s' "$$app_version" | cut -d+ -f1); \
-	app_version_code=$$(printf '%s' "$$app_version" | cut -d+ -f2); \
-	if [ -z "$$app_version" ] || [ "$$app_version_name" = "$$app_version" ] || [ -z "$$app_version_code" ]; then \
-		echo "Unable to parse version from pubspec.yaml (expected name+build)."; \
-		exit 1; \
-	fi;
-
-NEXT_BUILD_CODE_SH = reference_build_code="$(1)"; \
-	next_build_code=$$(( $$(date +%s) + $(ANDROID_BUILD_CODE_OFFSET) )); \
-	if [ "$$next_build_code" -le "$$reference_build_code" ]; then \
-		next_build_code=$$((reference_build_code + 1)); \
-	fi;
 
 # TTY detection: suppress verbose output in non-interactive mode (CI/agents)
 ifneq ($(shell test -t 1 && echo yes),yes)
@@ -42,9 +22,6 @@ help:
 	@echo "CodeWalk Make Targets"
 	@echo ""
 	@echo "  make deps       Install dependencies"
-	@echo "  make gen        Run build_runner"
-	@echo "  make theme-sync Regenerate OpenCode Web theme registry"
-	@echo "  make theme-sync-check  Verify OpenCode Web theme registry is current"
 	@echo "  make icons      Regenerate all icons (icons-tray + icons-app)"
 	@echo "  make icons-tray Regenerate tray icons from tray_mono_master.png"
 	@echo "  make icons-app  Regenerate app icons from original.png"
@@ -53,19 +30,13 @@ help:
 	@echo "  make analyze    Run static analysis + issue budget gate"
 	@echo "  make test       Run full test suite (parallel)"
 	@echo "  make test-fast  Run fast tests only (exclude slow/integration tags)"
-	@echo "  make test-unit  Run unit + presentation tests only"
-	@echo "  make test-widget  Run widget tests only"
-	@echo "  make test-chat  Run ChatPage smoke and extended scenarios"
-	@echo "  make test-web   Run browser capability tests (requires Chrome)"
 	@echo "  make test-coverage-tools  Verify LCOV filtering and coverage gates"
 	@echo "  make test-release-tools  Verify the v2 beta release plan, guards and tooling"
-	@echo "  make test-integration  Run integration-tagged tests only"
 	@echo "  make test-shard SHARD_TOTAL=N SHARD_INDEX=I  Run one sharded test slice"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
-	@echo "  make smoke      Run integration smoke test against OpenCode server"
-	@echo "  make check      deps + gen + analyze + coverage-tool fixtures + test"
-	@echo "  make check-fast deps + gen + analyze + coverage-tool fixtures + test-fast"
-	@echo "  make v2-architecture Check the governed v2 surface and retained-reference boundary"
+	@echo "  make check      deps + analyze + coverage-tool fixtures + test"
+	@echo "  make check-fast deps + analyze + coverage-tool fixtures + test-fast"
+	@echo "  make v2-architecture Check the governed v2 surface"
 	@echo "  make v2-foundations Discover/check every v2 package, guards, bootstrap and Web build"
 	@echo "  make v2-native-check Discover/check v2 packages and VM/CHP tests without a browser"
 	@echo "  make v2-linux-debug Compile main_v2.dart for this Linux host (fresh native outputs)"
@@ -75,25 +46,12 @@ help:
 	@echo "  make v2-android-preview Build the owner preview APK (profile, beside v1) on an x64 host"
 	@echo "  make v2-smoke   Exercise the explicit v2 entry point in widget tests"
 	@echo "  make v2-web     Build the explicit v2 entry point into build/v2/web"
-	@echo "  make web        Build Flutter web app into build/web"
-	@echo "  make desktop    Build desktop app for current host OS"
-	@echo "  make android    Build Android APK (arm64)"
-	@echo "  make precommit  check + android"
 	@echo "  make release V=beta  Cut the next v2.0.0-beta.N on main (DRY_RUN=1 prints the plan only)"
 	@echo "    stable, patch and v1 releases are cut on the v1 branch"
 	@echo "  make clean      Clean and restore dependencies"
 
 deps:
 	flutter pub get $(QUIET)
-
-gen:
-	dart run build_runner build --delete-conflicting-outputs $(QUIET)
-
-theme-sync:
-	python tool/theme/generate_opencode_web_themes.py $(QUIET)
-
-theme-sync-check:
-	python tool/theme/generate_opencode_web_themes.py --check $(QUIET)
 
 icons: icons-tray icons-app
 
@@ -258,7 +216,7 @@ icons-check:
 
 analyze:
 	flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee $(ANALYZE_LOG) $(QUIET)
-	bash tool/ci/check_analyze_budget.sh $(ANALYZE_LOG) 337
+	bash tool/ci/check_analyze_budget.sh $(ANALYZE_LOG) 4
 
 test:
 	timeout --verbose --foreground $(TEST_TIMEOUT) flutter test --no-pub -j $(TEST_JOBS) --fail-fast $(QUIET)
@@ -269,18 +227,6 @@ test-parallel:
 test-fast:
 	flutter test --no-pub -j $(TEST_JOBS) --exclude-tags "$(FAST_EXCLUDE_TAGS)" $(QUIET)
 
-test-unit:
-	flutter test --no-pub -j $(TEST_JOBS) test/unit test/presentation $(QUIET)
-
-test-widget:
-	flutter test --no-pub -j $(TEST_JOBS) test/widget test/widget_test.dart $(QUIET)
-
-test-chat:
-	flutter test --no-pub -j $(TEST_JOBS) test/widget/chat_page_smoke_test.dart test/widget/chat_page_test.dart $(QUIET)
-
-test-web:
-	flutter test --no-pub --platform chrome test/web $(QUIET)
-
 test-coverage-tools:
 	python3 -m unittest discover -s tool/ci -p test_check_coverage.py $(QUIET)
 
@@ -289,9 +235,6 @@ test-v2-tools:
 
 test-release-tools:
 	python3 -m unittest discover -s tool/release -p 'test_*.py' $(QUIET)
-
-test-integration:
-	flutter test --no-pub -j 1 --tags integration test/integration $(QUIET)
 
 test-shard:
 	@if [ -z "$(SHARD_TOTAL)" ] || [ -z "$(SHARD_INDEX)" ]; then \
@@ -302,14 +245,11 @@ test-shard:
 
 coverage:
 	flutter test --no-pub --coverage -j $(TEST_JOBS) $(QUIET)
-	bash tool/ci/check_coverage.sh coverage/lcov.info 35
+	bash tool/ci/check_coverage.sh coverage/lcov.info 85
 
-smoke:
-	bash tool/qa/smoke_test.sh
+check: deps analyze test-coverage-tools test-v2-tools test-release-tools test
 
-check: deps gen analyze test-coverage-tools test-v2-tools test-release-tools test
-
-check-fast: deps gen analyze test-coverage-tools test-fast
+check-fast: deps analyze test-coverage-tools test-fast
 
 # Coexistence: check/check-fast retain the reference suite. These targets
 # explicitly select the active v2 surface; 020CA owns the native MVP aggregate,
@@ -344,137 +284,14 @@ v2-smoke:
 v2-web:
 	flutter build web --no-pub --target lib/main_v2.dart --output build/v2/web
 
-# web, desktop and android build the legacy lib/main.dart; the guard refuses
-# them once pubspec says CodeWalk 2.
-web:
-	@python3 tool/release/guard_legacy_build.py pubspec.yaml
-	flutter build web --release --base-href "$(WEB_BASE_HREF)" $(QUIET)
-	@test -f build/web/index.html || (echo "Missing build/web/index.html after web build"; exit 1)
-	@test -f build/web/flutter_bootstrap.js || (echo "Missing build/web/flutter_bootstrap.js after web build"; exit 1)
-	@echo "Web build ready: build/web/ (base href: $(WEB_BASE_HREF))"
-
-desktop:
-	@python3 tool/release/guard_legacy_build.py pubspec.yaml
-	@set -e; \
-	$(READ_PUBSPEC_VERSION_SH) \
-	if [ "$$OS" = "Windows_NT" ]; then \
-		echo "Detected Windows host. Building Windows desktop app..."; \
-		flutter build windows --release --build-name "$$app_version_name" --build-number "$$app_version_code"; \
-		generated_config="windows/flutter/ephemeral/generated_config.cmake"; \
-		if [ ! -f "$$generated_config" ] || ! grep -F "$$app_version_name+$$app_version_code" "$$generated_config" >/dev/null; then \
-			echo "Desktop build version mismatch: $$generated_config does not reflect $$app_version_name+$$app_version_code"; \
-			exit 1; \
-		fi; \
-		echo "Desktop build ready: build/windows/x64/runner/Release/"; \
-	elif [ "$$(uname -s)" = "Darwin" ]; then \
-		echo "Detected macOS host. Building macOS desktop app..."; \
-		flutter build macos --release --build-name "$$app_version_name" --build-number "$$app_version_code"; \
-		generated_config="macos/Flutter/ephemeral/Flutter-Generated.xcconfig"; \
-		if [ ! -f "$$generated_config" ] || ! grep -F "FLUTTER_BUILD_NAME=$$app_version_name" "$$generated_config" >/dev/null || ! grep -F "FLUTTER_BUILD_NUMBER=$$app_version_code" "$$generated_config" >/dev/null; then \
-			echo "Desktop build version mismatch: $$generated_config does not reflect $$app_version_name+$$app_version_code"; \
-			exit 1; \
-		fi; \
-		echo "Desktop build ready: build/macos/Build/Products/Release/"; \
-	elif [ "$$(uname -s)" = "Linux" ]; then \
-		echo "Detected Linux host. Building Linux desktop app..."; \
-		flutter build linux --release --build-name "$$app_version_name" --build-number "$$app_version_code"; \
-		generated_config="linux/flutter/ephemeral/generated_config.cmake"; \
-		if [ ! -f "$$generated_config" ] || ! grep -F "$$app_version_name+$$app_version_code" "$$generated_config" >/dev/null; then \
-			echo "Desktop build version mismatch: $$generated_config does not reflect $$app_version_name+$$app_version_code"; \
-			exit 1; \
-		fi; \
-		echo "Desktop build ready: build/linux/x64/release/bundle/"; \
-	else \
-		echo "Unsupported host OS for make desktop."; \
-		exit 1; \
-	fi
-
-android:
-	@python3 tool/release/guard_legacy_build.py pubspec.yaml
-	@if [ ! -f "$(ANDROID_KEY_PROPERTIES)" ]; then \
-		echo "Missing $(ANDROID_KEY_PROPERTIES). Refusing to build a debug-signed release APK."; \
-		echo "Create $(ANDROID_KEY_PROPERTIES) with keyAlias/keyPassword/storePassword/storeFile before running make android."; \
-		exit 1; \
-	fi
-	@store_file=$$(awk '/^[[:space:]]*storeFile[[:space:]]*=/{sub(/^[^=]*=/,""); gsub(/\r/, ""); gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); print; exit}' "$(ANDROID_KEY_PROPERTIES)"); \
-	store_password=$$(awk '/^[[:space:]]*storePassword[[:space:]]*=/{sub(/^[^=]*=/,""); gsub(/\r/, ""); gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); print; exit}' "$(ANDROID_KEY_PROPERTIES)"); \
-	key_password=$$(awk '/^[[:space:]]*keyPassword[[:space:]]*=/{sub(/^[^=]*=/,""); gsub(/\r/, ""); gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); print; exit}' "$(ANDROID_KEY_PROPERTIES)"); \
-	key_alias=$$(awk '/^[[:space:]]*keyAlias[[:space:]]*=/{sub(/^[^=]*=/,""); gsub(/\r/, ""); gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); print; exit}' "$(ANDROID_KEY_PROPERTIES)"); \
-	resolved_store_file="$$store_file"; \
-	if [ -z "$$store_file" ] || [ -z "$$store_password" ] || [ -z "$$key_password" ] || [ -z "$$key_alias" ]; then \
-		echo "Incomplete $(ANDROID_KEY_PROPERTIES). Required keys: storeFile, storePassword, keyPassword, keyAlias."; \
-		exit 1; \
-	fi; \
-	case "$$store_file" in \
-		~/*) resolved_store_file="$$HOME/$${store_file#~/}" ;; \
-		/*) \
-			if [ ! -f "$$resolved_store_file" ]; then \
-				home_parent=$$(dirname "$$HOME"); \
-				case "$$store_file" in \
-					"$$home_parent"/*/*) resolved_store_file="$$HOME/$${store_file#$$home_parent/*/}" ;; \
-				esac; \
-			fi; \
-			;; \
-		*) \
-			if [ -f "$$HOME/$$store_file" ]; then \
-				resolved_store_file="$$HOME/$$store_file"; \
-			elif [ -f "$$store_file" ]; then \
-				resolved_store_file="$$store_file"; \
-			elif [ -f "android/$$store_file" ]; then \
-				resolved_store_file="android/$$store_file"; \
-			elif [ -f "android/app/$$store_file" ]; then \
-				resolved_store_file="android/app/$$store_file"; \
-			fi; \
-			;; \
-	esac; \
-	if [ ! -f "$$resolved_store_file" ]; then \
-		echo "Keystore declared in $(ANDROID_KEY_PROPERTIES) not found: $$store_file"; \
-		echo "Expected one of: $$store_file, $$HOME/$$store_file, android/$$store_file, android/app/$$store_file, or the same path under $$HOME"; \
-		exit 1; \
-	fi
-	@set -e; \
-	$(READ_PUBSPEC_VERSION_SH) \
-	$(call NEXT_BUILD_CODE_SH,$$app_version_code) \
-	test_build_code="$$next_build_code"; \
-	flutter build apk --release --target-platform android-arm64 --build-name "$$app_version_name" --build-number "$$test_build_code" $(QUIET); \
-	metadata_file="$(APK_METADATA_PATH)"; \
-	if [ ! -f "$$metadata_file" ]; then \
-		echo "Android build metadata not found: $$metadata_file"; \
-		exit 1; \
-	fi; \
-	metadata_triplet=$$(python3 -c 'import json, sys; data = json.load(open(sys.argv[1])); element = data["elements"][0]; version_code = int(element["versionCode"]); print(f"{element['"'"'versionName'"'"']}|{version_code}|{element['"'"'outputFile'"'"']}")' "$$metadata_file"); \
-	metadata_version_name=$${metadata_triplet%%|*}; \
-	metadata_rest=$${metadata_triplet#*|}; \
-	metadata_version_code=$${metadata_rest%%|*}; \
-	metadata_output_file=$${metadata_triplet##*|}; \
-	if [ "$$metadata_version_name" != "$$app_version_name" ] || [ "$$metadata_version_code" -lt "$$test_build_code" ]; then \
-		echo "Android build version mismatch: expected versionName=$$app_version_name and versionCode at least $$test_build_code but got versionName=$$metadata_version_name outputFile=$$metadata_output_file versionCode=$$metadata_version_code"; \
-		exit 1; \
-	fi; \
-	source_apk="$(APK_DIR)/$$metadata_output_file"; \
-	if [ ! -f "$$source_apk" ] && [ -f "$(APK_DIR)/app-release.apk" ]; then \
-		source_apk="$(APK_DIR)/app-release.apk"; \
-	elif [ ! -f "$$source_apk" ] && [ -f "$(APK_DIR)/app-arm64-v8a-release.apk" ]; then \
-		source_apk="$(APK_DIR)/app-arm64-v8a-release.apk"; \
-	fi; \
-	if [ ! -f "$$source_apk" ]; then \
-		echo "APK output not found (expected $$metadata_output_file in $(APK_DIR))"; \
-		exit 1; \
-	fi; \
-	git_ref=$$(git rev-parse --short HEAD 2>/dev/null || echo local); \
-	if [ -n "$$(git status --porcelain 2>/dev/null)" ]; then dirty_suffix='-dirty'; else dirty_suffix=''; fi; \
-	upload_apk="$(APK_DIR)/codewalk-android-$${app_version_name}+$$metadata_version_code-$$git_ref$$dirty_suffix.apk"; \
-	cp -f "$$source_apk" "$(APK_PATH)"; \
-	cp -f "$$source_apk" "$$upload_apk"; \
-	echo "APK ready (arm64-only): $(APK_PATH)"; \
-	echo "APK upload copy: $$upload_apk"; \
-	echo "APK Android version: $$app_version_name+$$metadata_version_code"; \
-	CAPTION_TEXT="$${HEY_CAPTION:-$$(git log -1 --pretty=%s 2>/dev/null || echo CodeWalk-Android-build)}"; \
-	HEY_ALLOW_DUPLICATE=1 HEY_SYNC=1 ~/bin/hey -f "$$upload_apk" "$$CAPTION_TEXT"
-
-precommit: check icons-check android
-
 # main cuts only v2 betas; stable, patch and v1 releases come from the v1 branch.
+# Detached and agentless: reports through hey, so no agent watches CI (see AGENTS.md).
+watch-ci:
+	@setsid nohup bash tool/ci/notify_run.sh ci.yml failures >/dev/null 2>&1 < /dev/null &
+
+watch-release:
+	@setsid nohup bash tool/ci/notify_run.sh release.yml always >/dev/null 2>&1 < /dev/null &
+
 release:
 	@if [ "$(V)" != "beta" ]; then \
 		echo "main releases only v2 betas: make release V=beta [DRY_RUN=1]. Cut stable, patch and v1 releases on the v1 branch."; \

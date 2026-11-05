@@ -83,6 +83,18 @@ environment:
       // Application-generated files are not part of this synthetic tree.
       fixtureManifest['generated'] = <dynamic>[];
       fixtureManifest['sizeExceptions'] = <dynamic>[];
+      // The real tree holds no legacy code; the guard keeps working for it.
+      fixtureManifest['retainedLegacy'] = <dynamic>[
+        for (final path in const [
+          'lib/core/',
+          'lib/data/',
+          'lib/domain/',
+          'lib/presentation/',
+          'lib/l10n/',
+          'lib/main.dart',
+        ])
+          <String, dynamic>{'path': path, 'reason': 'Synthetic legacy tree.'},
+      ];
       changeManifest?.call(fixtureManifest);
       write(
         'tool/ci/v2_architecture_manifest.json',
