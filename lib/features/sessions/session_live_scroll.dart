@@ -59,6 +59,34 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// Whether the viewport is at the bottom.
   bool get atBottom => distanceToBottom <= bottomEpsilon;
 
+  /// The distance from the top of the window, in logical pixels.
+  double get distanceToTop {
+    if (!controller.hasClients) return 0;
+    final position = controller.position;
+    final distance = position.pixels - position.minScrollExtent;
+    return distance < 0 ? 0 : distance;
+  }
+
+  /// The distance from the bottom beyond which returning to the first message
+  /// is worth its own control, like the retained reference's 360.
+  static const double firstControlDistance = 360;
+
+  /// Whether the control that returns to the first message is offered.
+  ///
+  /// Kept as state because the distance it depends on changes with every
+  /// scroll, and the timeline only rebuilds on a notification.
+  bool _offersJumpToFirst = false;
+  bool get offersJumpToFirst => _offersJumpToFirst;
+
+  /// Recomputes the first-message control from the current state and offset.
+  void _syncJumpToFirst() {
+    final next =
+        !_following && !_revealed && distanceToBottom >= firstControlDistance;
+    if (next == _offersJumpToFirst) return;
+    _offersJumpToFirst = next;
+    notifyListeners();
+  }
+
   /// Whether a gesture of the reader is moving the list right now: a drag,
   /// the fling after it or a wheel. The timeline's own jumps never set it.
   bool get userScrolling =>
@@ -79,6 +107,7 @@ final class SessionLiveScroll extends ChangeNotifier {
     if (!_following && !_revealed) return;
     _following = false;
     _revealed = false;
+    _syncJumpToFirst();
     notifyListeners();
   }
 
@@ -88,6 +117,7 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// the mark of unseen content is cleared. A gesture still in progress keeps
   /// its priority even while it is within the bottom epsilon.
   void onViewportChanged() {
+    _syncJumpToFirst();
     if (_takeReaderMove()) {
       // The reader moved the list and the viewport is no longer at the
       // bottom: the follow stops, so a live update never pulls the content
@@ -142,6 +172,7 @@ final class SessionLiveScroll extends ChangeNotifier {
     _following = false;
     _revealed = true;
     _unreadBelow = false;
+    _syncJumpToFirst();
     notifyListeners();
   }
 
@@ -164,6 +195,7 @@ final class SessionLiveScroll extends ChangeNotifier {
     _following = true;
     _revealed = false;
     _unreadBelow = false;
+    _syncJumpToFirst();
     if (controller.hasClients) {
       runProgrammatic(
         () => controller.jumpTo(controller.position.maxScrollExtent),

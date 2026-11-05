@@ -295,7 +295,9 @@ description of this code.
 - **Then** content that arrives under a reader - a new item, or any resident item that changed, even far below the reader - marks the control, which returns to the newest content and resumes the follow; a removal, a taller header or a smaller viewport, such as an open keyboard, and the settle of a turn do not mark it
 - **Then** a settled answer that does not fit the viewport is offered from its start, and it counts as read, so no control appears for it; when the next turn starts the timeline returns to the newest content; an answer that settled while the reader was elsewhere is never offered later
 - **Then** the control sits at the end edge in both directions
-- **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the control
+- **Then** a second control returns to the first message: it appears above that one once the reader is at least 360 logical pixels away from the bottom and the follow is off, and it lands on the oldest row the window holds
+- **Then** when an older page can still be read, that tap reads exactly one page and lands on its top, like the retained reference; reaching the top again pages further, and the window never pages the whole session at once
+- **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the two controls
 
 ### V2 readable tool and shell results
 

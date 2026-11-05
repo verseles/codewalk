@@ -617,11 +617,22 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               end: 0,
               child: Center(child: _olderPill(context)),
             ),
-          if (_showJumpControl)
+          if (_showJumpControl || _showJumpToFirst)
             PositionedDirectional(
               end: 16,
               bottom: 16,
-              child: _jumpToLatest(context),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (_showJumpToFirst)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _jumpToFirst(context),
+                    ),
+                  if (_showJumpControl) _jumpToLatest(context),
+                ],
+              ),
             ),
         ],
       ),
@@ -713,11 +724,55 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   bool get _showJumpControl =>
       !widget.scroll.following && !widget.scroll.revealed;
 
+  /// Whether the control that returns to the first message is offered, far
+  /// enough from the bottom to be worth it.
+  bool get _showJumpToFirst => widget.scroll.offersJumpToFirst;
+
+  /// The reader asked for the start of the conversation: the follow stops and
+  /// the viewport lands on the oldest row the window holds. When an older page
+  /// can be read, that one page arrives first and the reader lands on its top,
+  /// like the retained reference; the rest still pages in by reaching the top.
+  Future<void> _onJumpToFirst() async {
+    final controller = widget.scroll.controller;
+    widget.scroll.markUserIntent();
+    if (!controller.hasClients) return;
+    // The jump itself asks for nothing: the page this control reads is the
+    // one call below, and a layout that lands at the top must not read
+    // another.
+    _olderArmed = false;
+    widget.scroll.runProgrammatic(
+      () => controller.jumpTo(controller.position.minScrollExtent),
+    );
+    final load = widget.onLoadOlder;
+    if (load == null) return;
+    load();
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || !controller.hasClients) return;
+    _olderArmed = false;
+    widget.scroll.runProgrammatic(
+      () => controller.jumpTo(controller.position.minScrollExtent),
+    );
+  }
+
   /// The reader asked for the newest content: a finished answer that waited
   /// is not offered on top of it.
   void _onJumpToLatest() {
     _revealPending = false;
     widget.scroll.jumpToLatest();
+  }
+
+  /// The control that returns to the first message the window holds.
+  Widget _jumpToFirst(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return FloatingActionButton.small(
+      key: const ValueKey('live-jump-first'),
+      heroTag: 'live-jump-first',
+      tooltip: context.v2L10n.chatGoToFirst,
+      onPressed: _onJumpToFirst,
+      backgroundColor: scheme.surfaceContainerHigh,
+      foregroundColor: scheme.onSurfaceVariant,
+      child: const Icon(Symbols.arrow_upward_rounded),
+    );
   }
 
   /// The control that returns to the newest content, marked when content

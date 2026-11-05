@@ -210,6 +210,56 @@ void main() {
       live.rig.dispose();
     });
 
+    testWidgets('the first-message control appears far from the bottom', (
+      tester,
+    ) async {
+      final live = await _openLive(tester, (ref) => _answers(ref, 40));
+      final list = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
+      final controller = list.controller!;
+      final first = find.byKey(const ValueKey('live-jump-first'));
+      expect(first, findsNothing);
+
+      // A short scroll stays close to the bottom: nothing to return to yet.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 120));
+      await tester.pumpAndSettle();
+      expect(first, findsNothing);
+
+      // The reader is far from the bottom, in the middle of the window.
+      final position = controller.position;
+      controller.jumpTo(
+        position.minScrollExtent +
+            (position.maxScrollExtent - position.minScrollExtent) * 0.25,
+      );
+      await tester.pumpAndSettle();
+      expect(first, findsOneWidget);
+      await tester.tap(first);
+      await tester.pumpAndSettle();
+      expect(controller.offset, controller.position.minScrollExtent);
+      expect(find.text('row 0'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
+
+    testWidgets(
+      'the first-message control is offered in a right-to-left locale',
+      (tester) async {
+        final live = await _openLive(
+          tester,
+          (ref) => _answers(ref, 40),
+          locale: const Locale('ar'),
+        );
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, 600));
+        await tester.pumpAndSettle();
+        final control = find.byKey(const ValueKey('live-jump-first'));
+        expect(control, findsOneWidget);
+        expect(Directionality.of(tester.element(control)), TextDirection.rtl);
+        await tester.pumpWidget(const SizedBox.shrink());
+        live.rig.dispose();
+      },
+    );
+
     testWidgets('the control is offered in a right-to-left locale', (
       tester,
     ) async {

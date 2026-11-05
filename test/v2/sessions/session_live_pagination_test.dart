@@ -157,6 +157,25 @@ double _dyOf(WidgetTester tester, String id) {
 }
 
 void main() {
+  testWidgets('the first-message control reads one older page', (tester) async {
+    final live = await _open(tester);
+    final controller = _controller(tester);
+    controller.jumpTo(controller.position.minScrollExtent + 400);
+    await tester.pumpAndSettle();
+    final control = find.byKey(const ValueKey('live-jump-first'));
+    expect(control, findsOneWidget);
+    await tester.tap(control);
+    await tester.pumpAndSettle();
+    expect(live.handle.olderLoads, 1);
+    expect(live.session.first, 1600);
+    expect(controller.offset, controller.position.minScrollExtent);
+    // The reader is still away from the newest content, so the control back
+    // to it stays offered.
+    expect(find.byKey(const ValueKey('live-jump-latest')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    live.rig.dispose();
+  });
+
   testWidgets('reaching the top reads one older page, with the pill', (
     tester,
   ) async {
