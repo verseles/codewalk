@@ -2071,6 +2071,16 @@ class V2LocalizationsAr extends V2Localizations {
       'استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة.';
 
   @override
+  String get settingsBehaviorLanguage => 'اللغة';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'يتبع الخيار الافتراضي جهازك. تُطبَّق اللغة المختارة فورًا وتبقى بعد إعادة التشغيل.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'افتراضي النظام';
+
+  @override
   String get chatReasoning => 'تفكير...';
 
   @override

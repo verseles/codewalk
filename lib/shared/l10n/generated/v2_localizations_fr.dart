@@ -2128,6 +2128,16 @@ class V2LocalizationsFr extends V2Localizations {
       'Utilisez la vérification orthographique, les suggestions et la correction automatique natives de la plateforme dans le composer de discussion.';
 
   @override
+  String get settingsBehaviorLanguage => 'Langue';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'La valeur par défaut suit l’appareil. La langue choisie s’applique immédiatement et reste après un redémarrage.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'Valeur par défaut du système';
+
+  @override
   String get chatReasoning => 'Raisonnement...';
 
   @override

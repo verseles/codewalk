@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../platform/storage/metadata_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
+import '../shared/l10n/l10n_bridge.dart';
 import '../shared/shortcuts/shortcut_action.dart';
 import '../shared/shortcuts/shortcut_binding_codec.dart';
 import '../shared/theme/chat_appearance.dart';
@@ -12,7 +13,8 @@ import '../shared/theme/theme_preferences.dart';
 
 enum WorkspacePinnedAction { refresh, servers, settings, newChat }
 
-/// Appearance uses only the v2 metadata namespace; locale remains transient.
+/// Appearance uses only the v2 metadata namespace; null locale follows the
+/// device, while a chosen language code survives restarts.
 class AppPreferencesController extends ChangeNotifier {
   AppPreferencesController({
     V2MetadataStore? store,
@@ -268,6 +270,7 @@ class AppPreferencesController extends ChangeNotifier {
 
   Map<String, Object?> get _values => {
     'themeMode': _themeMode.name,
+    'locale': _locale?.languageCode,
     'themePreset': _themePreset == null
         ? null
         : openCodeThemePresetKey(_themePreset!),
@@ -333,6 +336,8 @@ class AppPreferencesController extends ChangeNotifier {
       }
       final preset = value('themePreset');
       if (preset is String) _themePreset = openCodeThemePresetFromKey(preset);
+      final language = value('locale');
+      if (language is String) _locale = localeForLanguageCode(language);
       final density = value('appDensity');
       if (density is String) {
         _density = switch (density) {
@@ -558,7 +563,7 @@ class AppPreferencesController extends ChangeNotifier {
   void setLocale(Locale? value) {
     if (_disposed || _locale == value) return;
     _locale = value;
-    notifyListeners();
+    _changed('locale');
   }
 
   void setDensity(AppDensity value) {

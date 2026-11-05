@@ -1567,6 +1567,18 @@
   "chatBlockResponsePendingTitle": "جارٍ إنشاء الرد",
   "settingsBehaviorComposerSpellCheck": "التدقيق الإملائي في المحرر",
   "settingsBehaviorComposerSpellCheckDescription": "استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة.",
+  "settingsBehaviorLanguage": "اللغة",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "يتبع الخيار الافتراضي جهازك. تُطبَّق اللغة المختارة فورًا وتبقى بعد إعادة التشغيل.",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "افتراضي النظام",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "تفكير...",
   "chatRetryingModelRequest": "إعادة محاولة طلب النموذج...",
   "chatStatusThinking": "جاري التفكير...",

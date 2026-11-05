@@ -2132,6 +2132,16 @@ class V2LocalizationsDe extends V2Localizations {
       'Native Rechtschreibprüfung, Vorschläge und Autokorrektur der Plattform im Chat-Composer verwenden.';
 
   @override
+  String get settingsBehaviorLanguage => 'Sprache';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'Die Systemauswahl folgt dem Gerät. Die gewählte Sprache gilt sofort und bleibt nach einem Neustart erhalten.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'Systemstandard';
+
+  @override
   String get chatReasoning => 'Denkt nach...';
 
   @override

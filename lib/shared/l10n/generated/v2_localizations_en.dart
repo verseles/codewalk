@@ -2091,6 +2091,16 @@ class V2LocalizationsEn extends V2Localizations {
       'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
 
   @override
+  String get settingsBehaviorLanguage => 'Language';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'System default follows your device. A chosen language applies at once and stays after a restart.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'System default';
+
+  @override
   String get chatReasoning => 'Reasoning...';
 
   @override

@@ -1568,6 +1568,18 @@
   "chatBlockResponsePendingTitle": "Генерация ответа",
   "settingsBehaviorComposerSpellCheck": "Проверка орфографии в редакторе",
   "settingsBehaviorComposerSpellCheckDescription": "Использовать встроенную проверку орфографии платформы, подсказки и автозамену в редакторе чата.",
+  "settingsBehaviorLanguage": "Язык",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "По умолчанию используется язык устройства. Выбранный язык применяется сразу и сохраняется после перезапуска.",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "Как в системе",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "Рассуждение...",
   "chatRetryingModelRequest": "Повторная попытка запроса к модели...",
   "chatStatusThinking": "Размышление...",

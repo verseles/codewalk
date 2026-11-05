@@ -2005,6 +2005,16 @@ class V2LocalizationsKo extends V2Localizations {
       '채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다.';
 
   @override
+  String get settingsBehaviorLanguage => '언어';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      '기본값은 기기의 언어를 따릅니다. 선택한 언어는 즉시 적용되고 다시 시작해도 유지됩니다.';
+
+  @override
+  String get settingsLanguageSystemDefault => '시스템 기본값';
+
+  @override
   String get chatReasoning => '추론 중...';
 
   @override

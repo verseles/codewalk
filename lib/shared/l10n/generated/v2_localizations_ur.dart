@@ -2085,6 +2085,16 @@ class V2LocalizationsUr extends V2Localizations {
       'چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔';
 
   @override
+  String get settingsBehaviorLanguage => 'زبان';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'پہلے سے طے شدہ آپ کے ڈیوائس کی پیروی کرتا ہے۔ منتخب زبان فوراً لاگو ہوتی ہے اور دوبارہ شروع کرنے پر بھی برقرار رہتی ہے۔';
+
+  @override
+  String get settingsLanguageSystemDefault => 'سسٹم ڈیفالٹ';
+
+  @override
   String get chatReasoning => 'استدلال...';
 
   @override

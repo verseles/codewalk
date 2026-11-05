@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_preferences_controller.dart';
+import '../../shared/l10n/l10n_bridge.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/widgets/searchable_picker.dart';
 
 /// How the chat behaves, like the retained reference's Behavior section:
 /// whether assistant responses render live or each block once finished, and
@@ -71,6 +73,41 @@ class BehaviorSettingsPage extends StatelessWidget {
                       },
                       key: const ValueKey('settings_chat_render_mode_detail'),
                       style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l.settingsBehaviorLanguage,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l.settingsBehaviorLanguageDescription,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SearchablePickerField<String>(
+                      key: const ValueKey('settings_language_picker'),
+                      label: l.settingsBehaviorLanguage,
+                      value: p.locale?.languageCode ?? '',
+                      options: {
+                        '': l.settingsLanguageSystemDefault,
+                        for (final entry in v2LanguageNames.entries)
+                          entry.key: entry.value,
+                      },
+                      onChanged: (code) =>
+                          p.setLocale(localeForLanguageCode(code)),
                     ),
                   ],
                 ),

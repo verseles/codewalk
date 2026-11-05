@@ -2108,6 +2108,16 @@ class V2LocalizationsRu extends V2Localizations {
       'Использовать встроенную проверку орфографии платформы, подсказки и автозамену в редакторе чата.';
 
   @override
+  String get settingsBehaviorLanguage => 'Язык';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'По умолчанию используется язык устройства. Выбранный язык применяется сразу и сохраняется после перезапуска.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'Как в системе';
+
+  @override
   String get chatReasoning => 'Рассуждение...';
 
   @override

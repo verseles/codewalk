@@ -2119,6 +2119,16 @@ class V2LocalizationsEs extends V2Localizations {
       'Usa la corrección ortográfica, las sugerencias y la autocorrección nativas de la plataforma en el compositor del chat.';
 
   @override
+  String get settingsBehaviorLanguage => 'Idioma';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'El valor predeterminado sigue al dispositivo. El idioma elegido se aplica al instante y se mantiene al reiniciar.';
+
+  @override
+  String get settingsLanguageSystemDefault => 'Predeterminado del sistema';
+
+  @override
   String get chatReasoning => 'Razonando...';
 
   @override

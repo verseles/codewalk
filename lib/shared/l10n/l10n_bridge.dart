@@ -2,6 +2,29 @@ import 'package:flutter/widgets.dart';
 
 import 'generated/v2_localizations.dart';
 
+/// Names of every language in the v2 catalog, written in its own script.
+const v2LanguageNames = <String, String>{
+  'ar': 'العربية',
+  'bn': 'বাংলা',
+  'de': 'Deutsch',
+  'en': 'English',
+  'es': 'Español',
+  'fr': 'Français',
+  'hi': 'हिन्दी',
+  'it': 'Italiano',
+  'ja': '日本語',
+  'ko': '한국어',
+  'pt': 'Português',
+  'ru': 'Русский',
+  'ur': 'اردو',
+  'zh': '中文',
+};
+
+/// A stored language code is honored only while the catalog ships it; null
+/// means the device locale decides.
+Locale? localeForLanguageCode(String? code) =>
+    code != null && v2LanguageNames.containsKey(code) ? Locale(code) : null;
+
 /// Resolves regional variants to the supported language, with English fallback.
 Locale resolveV2Locale(Locale? locale) {
   final language = locale?.languageCode.toLowerCase();

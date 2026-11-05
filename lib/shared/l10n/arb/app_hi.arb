@@ -1568,6 +1568,18 @@
   "chatBlockResponsePendingTitle": "प्रतिक्रिया बनाई जा रही है",
   "settingsBehaviorComposerSpellCheck": "कंपोज़र वर्तनी जांच",
   "settingsBehaviorComposerSpellCheckDescription": "चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।",
+  "settingsBehaviorLanguage": "भाषा",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "डिफ़ॉल्ट आपके डिवाइस का अनुसरण करता है। चुनी गई भाषा तुरंत लागू होती है और पुनः आरंभ पर भी बनी रहती है।",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "सिस्टम डिफ़ॉल्ट",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "तर्क कर रहा है...",
   "chatRetryingModelRequest": "मॉडल अनुरोध का पुनः प्रयास किया जा रहा है...",
   "chatStatusThinking": "सोच रहा है...",

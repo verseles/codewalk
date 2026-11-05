@@ -2592,6 +2592,18 @@
     "description": "CodeWalk UI string — settingsBehaviorComposerSpellCheck"
   },
   "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorLanguage": "Language",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "System default follows your device. A chosen language applies at once and stays after a restart.",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "System default",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "@settingsBehaviorComposerSpellCheckDescription": {
     "description": "CodeWalk UI string — settingsBehaviorComposerSpellCheckDescription"
   },

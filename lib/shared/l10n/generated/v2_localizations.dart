@@ -3800,6 +3800,24 @@ abstract class V2Localizations {
   /// **'Use native platform spell check, suggestions, and autocorrect in the chat composer.'**
   String get settingsBehaviorComposerSpellCheckDescription;
 
+  /// Settings > Behavior language selector title
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsBehaviorLanguage;
+
+  /// Explains that system default follows the device and a chosen language persists
+  ///
+  /// In en, this message translates to:
+  /// **'System default follows your device. A chosen language applies at once and stays after a restart.'**
+  String get settingsBehaviorLanguageDescription;
+
+  /// Language selector option that follows the device locale
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get settingsLanguageSystemDefault;
+
   /// CodeWalk UI string — chatReasoning
   ///
   /// In en, this message translates to:

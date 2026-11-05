@@ -1579,6 +1579,18 @@
   "chatBlockResponsePendingTitle": "응답 생성 중",
   "settingsBehaviorComposerSpellCheck": "작성기 맞춤법 검사",
   "settingsBehaviorComposerSpellCheckDescription": "채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다.",
+  "settingsBehaviorLanguage": "언어",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "기본값은 기기의 언어를 따릅니다. 선택한 언어는 즉시 적용되고 다시 시작해도 유지됩니다.",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "시스템 기본값",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "추론 중...",
   "chatRetryingModelRequest": "모델 요청 재시도 중...",
   "chatStatusThinking": "생각 중...",

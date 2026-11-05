@@ -2005,6 +2005,16 @@ class V2LocalizationsJa extends V2Localizations {
       'チャットコンポーザーでプラットフォーム標準のスペルチェック、候補、自動修正を使用します。';
 
   @override
+  String get settingsBehaviorLanguage => '言語';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      '既定では端末の言語に従います。選んだ言語はすぐに適用され、再起動後も保持されます。';
+
+  @override
+  String get settingsLanguageSystemDefault => '端末の既定';
+
+  @override
   String get chatReasoning => '推論中...';
 
   @override

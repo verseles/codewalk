@@ -2082,6 +2082,16 @@ class V2LocalizationsBn extends V2Localizations {
       'চ্যাট কম্পোজারে প্ল্যাটফর্মের নেটিভ বানান পরীক্ষা, পরামর্শ এবং স্বয়ংক্রিয় সংশোধন ব্যবহার করুন।';
 
   @override
+  String get settingsBehaviorLanguage => 'ভাষা';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'ডিফল্ট আপনার ডিভাইস অনুসরণ করে। নির্বাচিত ভাষা সাথে সাথে প্রযোজ্য হয় এবং পুনরায় চালু করলেও থাকে।';
+
+  @override
+  String get settingsLanguageSystemDefault => 'সিস্টেম ডিফল্ট';
+
+  @override
   String get chatReasoning => 'যুক্তি করছে...';
 
   @override

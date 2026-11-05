@@ -130,6 +130,9 @@ SETTINGS_KEYS = {
     "settingsBehaviorChatRenderModeBlockDescription",
     "settingsBehaviorComposerSpellCheck",
     "settingsBehaviorComposerSpellCheckDescription",
+    "settingsBehaviorLanguage",
+    "settingsBehaviorLanguageDescription",
+    "settingsLanguageSystemDefault",
 }
 for name in (
     "NewConversation", "RefreshData", "FocusInput", "ToggleVoiceInput",

@@ -1,1 +1,0 @@
-decida pelo mais correto (follow-up do review dos cartoes: copy para lease sem outbox com cartoes)

@@ -1568,6 +1568,18 @@
   "chatBlockResponsePendingTitle": "جواب تیار ہو رہا ہے",
   "settingsBehaviorComposerSpellCheck": "کمپوزر ہجے کی جانچ",
   "settingsBehaviorComposerSpellCheckDescription": "چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔",
+  "settingsBehaviorLanguage": "زبان",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "پہلے سے طے شدہ آپ کے ڈیوائس کی پیروی کرتا ہے۔ منتخب زبان فوراً لاگو ہوتی ہے اور دوبارہ شروع کرنے پر بھی برقرار رہتی ہے۔",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "سسٹم ڈیفالٹ",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "استدلال...",
   "chatRetryingModelRequest": "ماڈل کی درخواست کی دوبارہ کوشش کی جا رہی ہے...",
   "chatStatusThinking": "سوچ رہا ہے...",

@@ -2092,6 +2092,16 @@ class V2LocalizationsHi extends V2Localizations {
       'चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।';
 
   @override
+  String get settingsBehaviorLanguage => 'भाषा';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      'डिफ़ॉल्ट आपके डिवाइस का अनुसरण करता है। चुनी गई भाषा तुरंत लागू होती है और पुनः आरंभ पर भी बनी रहती है।';
+
+  @override
+  String get settingsLanguageSystemDefault => 'सिस्टम डिफ़ॉल्ट';
+
+  @override
   String get chatReasoning => 'तर्क कर रहा है...';
 
   @override

@@ -1568,6 +1568,18 @@
   "chatBlockResponsePendingTitle": "Génération de la réponse",
   "settingsBehaviorComposerSpellCheck": "Vérification orthographique du composer",
   "settingsBehaviorComposerSpellCheckDescription": "Utilisez la vérification orthographique, les suggestions et la correction automatique natives de la plateforme dans le composer de discussion.",
+  "settingsBehaviorLanguage": "Langue",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "La valeur par défaut suit l’appareil. La langue choisie s’applique immédiatement et reste après un redémarrage.",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "Valeur par défaut du système",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "Raisonnement...",
   "chatRetryingModelRequest": "Nouvelle tentative de demande de modèle...",
   "chatStatusThinking": "Réflexion...",

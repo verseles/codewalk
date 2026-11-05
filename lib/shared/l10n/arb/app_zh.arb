@@ -1568,6 +1568,18 @@
   "chatBlockResponsePendingTitle": "正在生成回复",
   "settingsBehaviorComposerSpellCheck": "输入框拼写检查",
   "settingsBehaviorComposerSpellCheckDescription": "在聊天输入框中使用平台原生拼写检查、建议和自动更正。",
+  "settingsBehaviorLanguage": "语言",
+  "@settingsBehaviorLanguage": {
+    "description": "Settings > Behavior language selector title"
+  },
+  "settingsBehaviorLanguageDescription": "默认跟随设备语言。所选语言立即生效，并在重启后保留。",
+  "@settingsBehaviorLanguageDescription": {
+    "description": "Explains that system default follows the device and a chosen language persists"
+  },
+  "settingsLanguageSystemDefault": "跟随系统",
+  "@settingsLanguageSystemDefault": {
+    "description": "Language selector option that follows the device locale"
+  },
   "chatReasoning": "推理中...",
   "chatRetryingModelRequest": "正在重试模型请求...",
   "chatStatusThinking": "正在思考...",

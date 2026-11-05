@@ -1966,6 +1966,16 @@ class V2LocalizationsZh extends V2Localizations {
       '在聊天输入框中使用平台原生拼写检查、建议和自动更正。';
 
   @override
+  String get settingsBehaviorLanguage => '语言';
+
+  @override
+  String get settingsBehaviorLanguageDescription =>
+      '默认跟随设备语言。所选语言立即生效，并在重启后保留。';
+
+  @override
+  String get settingsLanguageSystemDefault => '跟随系统';
+
+  @override
   String get chatReasoning => '推理中...';
 
   @override
