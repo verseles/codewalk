@@ -73,12 +73,12 @@ def locate(words, label, *, prefer_exact=False):
 def recognize_screenshot(filename, evidence, command_runner=run):
     """Fixed OCR passes; never concatenate phrases across pass/line IDs."""
     words = parse_ocr(command_runner(["tesseract", str(filename), "stdout", "--psm", "11", "tsv"], timeout=15))
-    for inverted in (False, True):
-        name = "gray-2x-inverted" if inverted else "gray-2x"
+    # Disabled gray labels need more contrast, including when a release notice
+    # adds a dark region to an otherwise light screen.
+    for name, adjustment in (("gray-2x", []), ("gray-2x-inverted", ["-negate"]),
+                             ("gray-2x-contrast", ["-level", "50%,90%"])):
         processed = evidence / f"ocr-{name}.png"
-        command = ["convert", str(filename), "-colorspace", "Gray", "-resize", "200%"]
-        if inverted:
-            command += ["-negate"]
+        command = ["convert", str(filename), "-colorspace", "Gray", *adjustment, "-resize", "200%"]
         command_runner([*command, str(processed)])
         text = command_runner(["tesseract", str(processed), "stdout", "--psm", "6", "tsv"], timeout=15)
         (evidence / f"ocr-{name}.tsv").write_text(text)

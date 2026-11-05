@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -348,8 +349,17 @@ class LinuxPreviewTests(unittest.TestCase):
         words = smoke.recognize_screenshot(self.root / "screenshot.png", self.root, runner)
         self.assertIsNotNone(smoke.locate(words, "Pair"))
         self.assertIsNone(smoke.locate(words, "Missing control"))
-        self.assertEqual(sum(command[0] == "tesseract" for command in calls), 4)
-        self.assertEqual(sum(command[0] == "convert" for command in calls), 3)
+        self.assertEqual(sum(command[0] == "tesseract" for command in calls), 5)
+        self.assertEqual(sum(command[0] == "convert" for command in calls), 4)
+
+    @unittest.skipUnless(shutil.which("convert") and shutil.which("tesseract"), "native OCR runtime required")
+    def test_pairing_screen_with_disabled_button_and_release_notice(self):
+        # Exact failed CI frame: the disabled action was visible but its gray
+        # label was absent from every original OCR pass.
+        screenshot = Path(__file__).parent / "fixtures/linux-pairing-disabled.png"
+        words = smoke.recognize_screenshot(screenshot, self.root)
+        self.assertTrue(smoke.ui_state_matches(words, ["Pair a server", "Pairing link", "Confirm and pair"]))
+        self.assertIsNone(smoke.locate(words, "Missing control"))
 
 
 if __name__ == "__main__":
