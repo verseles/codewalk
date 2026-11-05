@@ -657,7 +657,7 @@ description of this code.
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
-- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes or composer spell check
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes, language or composer spell check
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited
@@ -676,6 +676,15 @@ description of this code.
 - **Then** `mod` resolves to Cmd on macOS and Ctrl elsewhere; explicit Ctrl+Tab remains Ctrl on every platform
 - **Then** the Shortcuts destination is visible on desktop/Web and appears on mobile after physical keyboard input is detected in the current app instance
 - **Then** these CodeWalk-local preferences never write OpenCode `tui.json` keybinds or server configuration
+
+### V2 app language
+
+- **Given** the user opens Settings > Behavior in the explicit v2 app
+- **When** the Language field is opened
+- **Then** "System default" plus the 14 catalog languages appear by native-script name in a searchable list, and the current choice is marked
+- **Then** choosing a language applies it immediately to the whole app, including right-to-left layout for Arabic and Urdu, and keeps it after a restart
+- **Then** the choice persists as its language code at `cw2.settings.locale`; "System default" removes the key and the device locale decides again
+- **Then** a stored code outside the catalog is ignored on load instead of forcing an unsupported locale
 
 ### V2 appearance preferences
 
@@ -819,7 +828,7 @@ description of this code.
 
 Session-detail routes retain their navigation placeholders; the conversation
 catalog does not fetch history, attach live execution, send prompts or mutate sessions.
-Locale changes exposed by the v2 controller remain transient;
+Locale changes exposed by the v2 controller persist under `cw2.settings.locale`;
 other feature-specific settings controls and full rendering parity remain
 in their owning Issues. Hosts, settings and appearance widget/golden tests cover mobile and desktop viewports on
 the Flutter VM; they do not certify installed native targets.

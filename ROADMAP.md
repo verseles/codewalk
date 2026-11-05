@@ -6,7 +6,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 1. UI/UX — lote 1
 
-- [ ] #472 Seletor manual de idioma
 - [ ] #412 Botão de pular para o início da conversa
 - [ ] #475 Toggles de abas e de sessões recentes, dica de gestos e menu rápido no chat
 - [ ] #440 Estado offline visível
