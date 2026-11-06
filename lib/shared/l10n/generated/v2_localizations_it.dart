@@ -2215,7 +2215,7 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Mostra la barra delle schede sopra la chat. Ogni scheda ha il suo menu e può essere trascinata.';
+      'Mostra la barra delle schede sopra la chat. Ogni scheda ha il suo menu.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Sessioni recenti';

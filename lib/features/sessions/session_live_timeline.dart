@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
@@ -65,8 +66,9 @@ class SessionLiveTimeline extends StatefulWidget {
   final WidgetBuilder? topBuilder;
 
   /// Reads the next older page; null when none can be read now. The reader
-  /// asks for it by reaching the top of the list.
-  final VoidCallback? onLoadOlder;
+  /// asks for it by reaching the top of the list, and the jump to the first
+  /// message waits for the page before landing on it.
+  final Future<void> Function()? onLoadOlder;
 
   /// The recovery a failed turn's error card offers; null for none.
   final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
@@ -160,6 +162,12 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// Whether reaching the top may ask for an older page: armed once the
   /// reader is far from the top, so a list that stays near the top asks once.
   bool _olderArmed = false;
+
+  /// Whether a jump to the first message waits for an older page.
+  ///
+  /// A second press while it waits is ignored: the first read is already in
+  /// flight, and its landing belongs to the reader who asked once.
+  bool _jumpToFirstPending = false;
 
   /// The distance from the top within which the reader reached the top, and
   /// the distance that arms it again, in logical pixels; the retained
@@ -278,7 +286,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     final load = widget.onLoadOlder;
     if (!_olderArmed || fromTop > _topReach || load == null) return;
     _olderArmed = false;
-    load();
+    unawaited(load());
   }
 
   /// Whether the list can still move in the direction of the gesture.
@@ -317,8 +325,15 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     final extent = notification.metrics.maxScrollExtent;
     final last = _lastMaxScrollExtent;
     _lastMaxScrollExtent = extent;
-    if (last != null && extent > last && widget.scroll.following) {
-      _requestFollow();
+    if (last != null && extent > last) {
+      if (widget.scroll.following) {
+        _requestFollow();
+      } else {
+        // The growth moves the distance the first-message control depends
+        // on, and no scroll reports it: the control is recomputed once the
+        // layout settles.
+        _afterNextFrame(widget.scroll.syncJumpToFirst);
+      }
     }
     return false;
   }
@@ -733,6 +748,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// can be read, that one page arrives first and the reader lands on its top,
   /// like the retained reference; the rest still pages in by reaching the top.
   Future<void> _onJumpToFirst() async {
+    if (_jumpToFirstPending) return;
     final controller = widget.scroll.controller;
     widget.scroll.markUserIntent();
     if (!controller.hasClients) return;
@@ -745,14 +761,34 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     );
     final load = widget.onLoadOlder;
     if (load == null) return;
-    load();
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || !controller.hasClients) return;
-    _olderArmed = false;
-    widget.scroll.runProgrammatic(
-      () => controller.jumpTo(controller.position.minScrollExtent),
-    );
+    // The page is read after the request, so the jump waits for it and lands
+    // on the first message the window then holds. A move of the reader while
+    // it loads cancels the landing instead of pulling the reader back.
+    final moves = widget.scroll.readerMoves;
+    _jumpToFirstPending = true;
+    try {
+      await load();
+      if (!mounted || !controller.hasClients) return;
+      if (_cancelled(moves)) return;
+      // The window lays out with the page before the landing reads its first
+      // row, and the reader may still move in that frame.
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted || !controller.hasClients) return;
+      if (_cancelled(moves)) return;
+      _olderArmed = false;
+      widget.scroll.runProgrammatic(
+        () => controller.jumpTo(controller.position.minScrollExtent),
+      );
+    } finally {
+      _jumpToFirstPending = false;
+    }
   }
+
+  /// Whether a pending landing on the first message lost the reader: a move
+  /// of the list, or a return to the newest content, the timeline's own one
+  /// included, which would otherwise pull the reader back to the top.
+  bool _cancelled(int moves) =>
+      widget.scroll.readerMoves != moves || widget.scroll.following;
 
   /// The reader asked for the newest content: a finished answer that waited
   /// is not offered on top of it.

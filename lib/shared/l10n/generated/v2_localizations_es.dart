@@ -2204,7 +2204,7 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú y se puede arrastrar.';
+      'Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Sesiones recientes';

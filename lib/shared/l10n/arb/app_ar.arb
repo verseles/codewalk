@@ -1602,7 +1602,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمة وأيضًا يمكن سحبه.",
+  "settingsAppearanceSessionTabsDescription": "أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمته الخاصة.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

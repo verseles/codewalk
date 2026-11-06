@@ -2037,7 +2037,7 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      '在聊天上方显示标签栏。每个标签页都有自己的菜单，并且可以拖动。';
+      '在聊天上方显示标签栏。每个标签页都有自己的菜单。';
 
   @override
   String get settingsAppearanceRecentSessions => '最近会话';

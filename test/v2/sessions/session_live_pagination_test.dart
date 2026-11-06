@@ -196,6 +196,110 @@ void main() {
     live.rig.dispose();
   });
 
+  testWidgets('the first-message control waits for the older page', (
+    tester,
+  ) async {
+    final live = await _open(tester);
+    final controller = _controller(tester);
+    live.session.gate = Completer<void>();
+    controller.jumpTo(controller.position.minScrollExtent + 400);
+    await tester.pumpAndSettle();
+    final control = find.byKey(const ValueKey('live-jump-first'));
+    expect(control, findsOneWidget);
+    final held = controller.position.minScrollExtent;
+    await tester.tap(control);
+    await tester.pump();
+    expect(live.handle.olderLoads, 1);
+    // The reader landed on the rows already held and stays there while the
+    // page is read: the landing waits for it.
+    expect(controller.offset, held);
+    live.session.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(live.session.first, 1600);
+    // The window grew upwards, and the reader landed on the page's first row.
+    expect(controller.position.minScrollExtent, lessThan(held));
+    expect(controller.offset, controller.position.minScrollExtent);
+    await tester.pumpWidget(const SizedBox.shrink());
+    live.rig.dispose();
+  });
+
+  testWidgets("a move while the page is read keeps the reader's place", (
+    tester,
+  ) async {
+    final live = await _open(tester);
+    final controller = _controller(tester);
+    live.session.gate = Completer<void>();
+    controller.jumpTo(controller.position.minScrollExtent + 400);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-jump-first')));
+    await tester.pump();
+    expect(live.handle.olderLoads, 1);
+    // The reader goes back to the middle of the window while the page is
+    // read: the landing is cancelled, not pulled back to the top.
+    final place = controller.position.minScrollExtent + 400;
+    controller.jumpTo(place);
+    await tester.pump();
+    live.session.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(live.session.first, 1600);
+    expect(controller.offset, place);
+    await tester.pumpWidget(const SizedBox.shrink());
+    live.rig.dispose();
+  });
+
+  testWidgets('a second press waits for the page already in flight', (
+    tester,
+  ) async {
+    final live = await _open(tester);
+    final controller = _controller(tester);
+    live.session.gate = Completer<void>();
+    controller.jumpTo(controller.position.minScrollExtent + 400);
+    await tester.pumpAndSettle();
+    final control = find.byKey(const ValueKey('live-jump-first'));
+    await tester.tap(control);
+    await tester.pump();
+    expect(live.handle.olderLoads, 1);
+    // The same control pressed again while the page is read asks nothing
+    // more and does not cancel the landing already in flight.
+    await tester.tap(control, warnIfMissed: false);
+    await tester.pump();
+    expect(live.handle.olderLoads, 1);
+    live.session.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(live.session.first, 1600);
+    expect(controller.offset, controller.position.minScrollExtent);
+    await tester.pumpWidget(const SizedBox.shrink());
+    live.rig.dispose();
+  });
+
+  testWidgets('a return to the newest content cancels the pending landing', (
+    tester,
+  ) async {
+    final live = await _open(tester);
+    final controller = _controller(tester);
+    live.session.gate = Completer<void>();
+    controller.jumpTo(controller.position.minScrollExtent + 400);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('live-jump-first')));
+    await tester.pump();
+    expect(live.handle.olderLoads, 1);
+    // The reader goes back to the newest content while the page is read:
+    // the landing must not pull them to the top once it arrives.
+    await tester.tap(find.byKey(const ValueKey('live-jump-latest')));
+    // The follow runs a pass per frame until it reaches the tail; the page
+    // stays gated meanwhile.
+    for (var i = 0; i < 20; i++) {
+      await tester.pump();
+    }
+    expect(controller.offset, controller.position.maxScrollExtent);
+    live.session.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(live.session.first, 1600);
+    expect(controller.offset, controller.position.maxScrollExtent);
+    await tester.pumpWidget(const SizedBox.shrink());
+    live.rig.dispose();
+  });
+
   testWidgets('an older page keeps the row the reader is reading', (
     tester,
   ) async {

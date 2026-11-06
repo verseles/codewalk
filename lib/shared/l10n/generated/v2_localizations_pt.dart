@@ -2198,7 +2198,7 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Mostra a faixa de abas acima do chat. Cada aba tem o próprio menu e pode ser arrastada.';
+      'Mostra a faixa de abas acima do chat. Cada aba tem o próprio menu.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Sessões recentes';

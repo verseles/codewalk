@@ -3941,7 +3941,7 @@ abstract class V2Localizations {
   /// Explains the session tab strip toggle
   ///
   /// In en, this message translates to:
-  /// **'Show the tab strip above the chat. Each tab has its own menu and can be dragged.'**
+  /// **'Show the tab strip above the chat. Each tab has its own menu.'**
   String get settingsAppearanceSessionTabsDescription;
 
   /// Appearance toggle that shows the Recent sessions section

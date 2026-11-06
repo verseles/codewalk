@@ -2077,7 +2077,7 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      '채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있고 끌어서 옮길 수 있습니다.';
+      '채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있습니다.';
 
   @override
   String get settingsAppearanceRecentSessions => '최근 세션';

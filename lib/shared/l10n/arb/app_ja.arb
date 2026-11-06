@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "チャットの上にタブバーを表示します。各タブにはメニューがあり、ドラッグできます。",
+  "settingsAppearanceSessionTabsDescription": "チャットの上にタブバーを表示します。各タブには独自のメニューがあります。",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

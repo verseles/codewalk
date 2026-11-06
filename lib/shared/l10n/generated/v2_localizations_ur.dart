@@ -2169,7 +2169,7 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے اور اسے گھسیٹا جا سکتا ہے۔';
+      'چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے۔';
 
   @override
   String get settingsAppearanceRecentSessions => 'حالیہ سیشنز';

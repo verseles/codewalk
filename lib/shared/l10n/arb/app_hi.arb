@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है और उसे खींचा जा सकता है।",
+  "settingsAppearanceSessionTabsDescription": "चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है।",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

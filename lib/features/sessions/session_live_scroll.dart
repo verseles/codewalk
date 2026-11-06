@@ -26,6 +26,13 @@ final class SessionLiveScroll extends ChangeNotifier {
   bool _revealed = false;
   bool _programmatic = false;
 
+  /// How many times the reader moved the list.
+  ///
+  /// Counted even when the move changes no state, so a jump that waits for an
+  /// older page knows the reader went elsewhere while it loaded.
+  int _readerMoves = 0;
+  int get readerMoves => _readerMoves;
+
   /// The offset the viewport was at the last time it was observed, so a move
   /// that the timeline did not start is known.
   double? _lastPixels;
@@ -79,7 +86,11 @@ final class SessionLiveScroll extends ChangeNotifier {
   bool get offersJumpToFirst => _offersJumpToFirst;
 
   /// Recomputes the first-message control from the current state and offset.
-  void _syncJumpToFirst() {
+  ///
+  /// A scroll reports itself, but an arrival or a growth of the extent moves
+  /// the distance the control depends on without one, so the timeline asks
+  /// for the recomputation then.
+  void syncJumpToFirst() {
     final next =
         !_following && !_revealed && distanceToBottom >= firstControlDistance;
     if (next == _offersJumpToFirst) return;
@@ -104,10 +115,11 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// so a live update never pulls the content away from the reader.
   void markUserIntent() {
     if (_programmatic) return;
+    _readerMoves++;
     if (!_following && !_revealed) return;
     _following = false;
     _revealed = false;
-    _syncJumpToFirst();
+    syncJumpToFirst();
     notifyListeners();
   }
 
@@ -117,7 +129,7 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// the mark of unseen content is cleared. A gesture still in progress keeps
   /// its priority even while it is within the bottom epsilon.
   void onViewportChanged() {
-    _syncJumpToFirst();
+    syncJumpToFirst();
     if (_takeReaderMove()) {
       // The reader moved the list and the viewport is no longer at the
       // bottom: the follow stops, so a live update never pulls the content
@@ -158,9 +170,13 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// arrived under it is what the reader has to come back to, so the control
   /// is offered again.
   void onContentArrivedAway() {
-    if (_following || _unreadBelow) return;
+    if (_following) return;
     _unreadBelow = true;
     _revealed = false;
+    // The arrival is no longer the reader's revealed place, and it changes
+    // the distance to the bottom, so the first-message control is offered
+    // again.
+    syncJumpToFirst();
     notifyListeners();
   }
 
@@ -172,7 +188,7 @@ final class SessionLiveScroll extends ChangeNotifier {
     _following = false;
     _revealed = true;
     _unreadBelow = false;
-    _syncJumpToFirst();
+    syncJumpToFirst();
     notifyListeners();
   }
 
@@ -195,7 +211,7 @@ final class SessionLiveScroll extends ChangeNotifier {
     _following = true;
     _revealed = false;
     _unreadBelow = false;
-    _syncJumpToFirst();
+    syncJumpToFirst();
     if (controller.hasClients) {
       runProgrammatic(
         () => controller.jumpTo(controller.position.maxScrollExtent),

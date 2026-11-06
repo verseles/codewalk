@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu et peut être glissé.",
+  "settingsAppearanceSessionTabsDescription": "Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

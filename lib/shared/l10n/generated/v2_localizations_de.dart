@@ -2217,7 +2217,7 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü und lässt sich ziehen.';
+      'Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Letzte Sitzungen';

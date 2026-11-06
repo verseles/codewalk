@@ -2077,7 +2077,7 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'チャットの上にタブバーを表示します。各タブにはメニューがあり、ドラッグできます。';
+      'チャットの上にタブバーを表示します。各タブには独自のメニューがあります。';
 
   @override
   String get settingsAppearanceRecentSessions => '最近のセッション';

@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü und lässt sich ziehen.",
+  "settingsAppearanceSessionTabsDescription": "Die Tableiste über dem Chat anzeigen. Jeder Tab hat ein eigenes Menü.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

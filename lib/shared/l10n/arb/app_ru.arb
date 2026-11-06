@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Показывать полосу вкладок над чатом. У каждой вкладки есть меню, и её можно перетаскивать.",
+  "settingsAppearanceSessionTabsDescription": "Показывать полосу вкладок над чатом. У каждой вкладки есть своё меню.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

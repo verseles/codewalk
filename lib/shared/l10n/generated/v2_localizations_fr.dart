@@ -2215,7 +2215,7 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu et peut être glissé.';
+      'Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Sessions récentes';

@@ -2684,7 +2684,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Show the tab strip above the chat. Each tab has its own menu and can be dragged.",
+  "settingsAppearanceSessionTabsDescription": "Show the tab strip above the chat. Each tab has its own menu.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

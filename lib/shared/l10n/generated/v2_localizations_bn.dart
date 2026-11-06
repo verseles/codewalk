@@ -2165,7 +2165,7 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে এবং সেটি টেনে সরানো যায়।';
+      'চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে।';
 
   @override
   String get settingsAppearanceRecentSessions => 'সাম্প্রতিক সেশন';

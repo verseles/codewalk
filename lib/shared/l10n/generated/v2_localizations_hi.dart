@@ -2176,7 +2176,7 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है और उसे खींचा जा सकता है।';
+      'चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है।';
 
   @override
   String get settingsAppearanceRecentSessions => 'हाल के सत्र';

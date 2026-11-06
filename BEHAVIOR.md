@@ -301,7 +301,8 @@ description of this code.
 - **Then** a settled answer that does not fit the viewport is offered from its start, and it counts as read, so no control appears for it; when the next turn starts the timeline returns to the newest content; an answer that settled while the reader was elsewhere is never offered later
 - **Then** the control sits at the end edge in both directions
 - **Then** a second control returns to the first message: it appears above that one once the reader is at least 360 logical pixels away from the bottom and the follow is off, and it lands on the oldest row the window holds
-- **Then** when an older page can still be read, that tap reads exactly one page and lands on its top, like the retained reference; reaching the top again pages further, and the window never pages the whole session at once
+- **Then** when an older page can still be read, that tap reads exactly one page and lands on its top, like the retained reference, waiting for the page to arrive and lay out before the landing; a reader's scroll or return to the newest content cancels the pending landing, while another press of the first-message control leaves it pending; reaching the top again pages further, and the window never pages the whole session at once
+- **Then** an arrival or a growth of the extent under a reader away from the bottom recomputes that first-message control, so it appears or disappears without a scroll
 - **Then** each item is rendered as before; the timeline adds only the scrolling behavior and the two controls
 
 ### V2 readable tool and shell results
@@ -700,7 +701,7 @@ description of this code.
 - **Then** the user can choose system/light/dark mode, one of 37 consolidated OpenCode presets, or the classic palette with brand seeds and contrast
 - **Then** the searchable preset picker and five density tiers work in compact and wide layouts; on narrow screens or enlarged text the segmented choices become fields that open the same searchable picker
 - **Then** the controls use the scoped 14-language catalog, including right-to-left layout
-- **Then** Session tabs and Recent sessions can each be turned off and on, persisted as `cw2.settings.showSessionTabs` and `cw2.settings.showRecentSessions` (on by default); turning tabs off also hides their first-use hint, and the Recent sessions choice also governs the section above the project list
+- **Then** Session tabs and Recent sessions can each be turned off and on, persisted as `cw2.settings.showSessionTabs` and `cw2.settings.showRecentSessions` (on by default); the Session tabs choice explains that each tab has its own menu, turning tabs off also hides their first-use hint, and the Recent sessions choice also governs the section above the project list
 - **Then** the chat's overflow opens Display, a sheet with the same thinking, tool call, composer tip, session tab and Recent session choices, so the workspace can be reshaped without leaving the chat
 
 - **Given** the user changes Settings > Appearance > Text size

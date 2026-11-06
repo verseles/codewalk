@@ -2194,7 +2194,7 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Показывать полосу вкладок над чатом. У каждой вкладки есть меню, и её можно перетаскивать.';
+      'Показывать полосу вкладок над чатом. У каждой вкладки есть своё меню.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Недавние сессии';

@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Mostra a faixa de abas acima do chat. Cada aba tem o próprio menu e pode ser arrastada.",
+  "settingsAppearanceSessionTabsDescription": "Mostra a faixa de abas acima do chat. Cada aba tem o próprio menu.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

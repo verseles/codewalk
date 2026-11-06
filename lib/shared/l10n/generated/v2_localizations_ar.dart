@@ -2152,7 +2152,7 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمة وأيضًا يمكن سحبه.';
+      'أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمته الخاصة.';
 
   @override
   String get settingsAppearanceRecentSessions => 'الجلسات الأخيرة';

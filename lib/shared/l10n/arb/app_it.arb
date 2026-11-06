@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Mostra la barra delle schede sopra la chat. Ogni scheda ha il suo menu e può essere trascinata.",
+  "settingsAppearanceSessionTabsDescription": "Mostra la barra delle schede sopra la chat. Ogni scheda ha il suo menu.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

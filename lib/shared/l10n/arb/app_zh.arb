@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "在聊天上方显示标签栏。每个标签页都有自己的菜单，并且可以拖动。",
+  "settingsAppearanceSessionTabsDescription": "在聊天上方显示标签栏。每个标签页都有自己的菜单。",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

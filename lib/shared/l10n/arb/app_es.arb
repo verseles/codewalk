@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú y se puede arrastrar.",
+  "settingsAppearanceSessionTabsDescription": "Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

@@ -1614,7 +1614,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있고 끌어서 옮길 수 있습니다.",
+  "settingsAppearanceSessionTabsDescription": "채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있습니다.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

@@ -301,6 +301,55 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       live.rig.dispose();
     });
+    testWidgets('an arrival under a revealed answer offers the first control', (
+      tester,
+    ) async {
+      final live = await _openLive(
+        tester,
+        (ref) => [
+          AssistantText(
+            meta: liveMeta(ref, 'a0'),
+            text: 'a long answer ' * 200,
+            complete: true,
+          ),
+        ],
+      );
+      // The answer was revealed from its start, so the control back to it
+      // stays hidden while the answer is the reader's place.
+      expect(find.byKey(const ValueKey('live-jump-first')), findsNothing);
+      expect(find.byKey(const ValueKey('live-jump-latest')), findsNothing);
+      // A second answer arrives while the reader is on the revealed one: the
+      // arrival is the reader's place now, so the control back to the start
+      // is offered.
+      live.handle.emit(
+        SessionLiveView(
+          session: live.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            live.ref,
+            items: [
+              AssistantText(
+                meta: liveMeta(live.ref, 'a0'),
+                text: 'a long answer ' * 200,
+                complete: true,
+              ),
+              AssistantText(
+                meta: liveMeta(live.ref, 'a1'),
+                text: 'second',
+                complete: true,
+              ),
+            ],
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('live-jump-first')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      live.rig.dispose();
+    });
   });
 
   group('the live timeline, streaming and turns', () {

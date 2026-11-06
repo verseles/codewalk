@@ -1603,7 +1603,7 @@
   "@settingsAppearanceSessionTabs": {
     "description": "Appearance toggle that shows the session tab strip"
   },
-  "settingsAppearanceSessionTabsDescription": "চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে এবং সেটি টেনে সরানো যায়।",
+  "settingsAppearanceSessionTabsDescription": "চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে।",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
   },

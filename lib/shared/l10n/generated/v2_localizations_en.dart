@@ -2174,7 +2174,7 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get settingsAppearanceSessionTabsDescription =>
-      'Show the tab strip above the chat. Each tab has its own menu and can be dragged.';
+      'Show the tab strip above the chat. Each tab has its own menu.';
 
   @override
   String get settingsAppearanceRecentSessions => 'Recent sessions';
