@@ -84,6 +84,7 @@ final class EndpointHealthController extends ChangeNotifier {
       // A resume rechecks now, while retaining the server's retry fence.
       for (final record in _records.values) {
         record.nextAt = now;
+        record.lastNetworkCheck = null;
       }
     }
     _sync();
@@ -132,6 +133,30 @@ final class EndpointHealthController extends ChangeNotifier {
     final record = _records[profile.id];
     if (record == null || !canRefresh(profile)) return;
     await _probe(record);
+  }
+
+  /// Recheck saved endpoints after a network signal, without assuming that
+  /// the signal says anything about the reachability of a particular server.
+  void networkChanged({bool routeChanged = false}) {
+    if (_disposed || !_started || !_foreground || !_ready) return;
+    for (final record in _records.values) {
+      final previous = record.assessment;
+      if (previous?.retryDeferred == true ||
+          (previous?.retryAt?.isAfter(now) ?? false)) {
+        continue;
+      }
+      if (!routeChanged &&
+          (record.lastNetworkCheck?.add(interval).isAfter(now) ?? false)) {
+        continue;
+      }
+      if (record.task != null) _cancel(record);
+      if (_canProbe(record, automatic: false)) {
+        record.lastNetworkCheck = now;
+        unawaited(
+          _probe(record, connectionTimeout: const Duration(seconds: 5)),
+        );
+      }
+    }
   }
 
   bool _saved(EndpointProfile profile) =>
@@ -251,7 +276,11 @@ final class EndpointHealthController extends ChangeNotifier {
         (!automatic || !record.nextAt.isAfter(now));
   }
 
-  Future<void> _probe(_HealthRecord record, {bool notify = true}) async {
+  Future<void> _probe(
+    _HealthRecord record, {
+    bool notify = true,
+    Duration? connectionTimeout,
+  }) async {
     final credential = record.credential;
     if (credential == null) return;
     final generation = ++record.generation;
@@ -262,6 +291,7 @@ final class EndpointHealthController extends ChangeNotifier {
       final task = record.task = hosts.prober.start(
         record.profile.endpoint,
         credential.secret,
+        connectionTimeout: connectionTimeout,
       );
       if (notify) _notify();
       result = await task.result;
@@ -335,6 +365,7 @@ final class _HealthRecord {
   EndpointCredentialFailure? credentialFailure;
   EndpointProbeTask? task;
   DateTime? checkedAt;
+  DateTime? lastNetworkCheck;
   int generation = 0;
   int observation = 0;
 }

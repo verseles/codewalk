@@ -95,7 +95,11 @@ abstract interface class EndpointProbeTask {
 }
 
 abstract interface class EndpointProber {
-  EndpointProbeTask start(Uri endpoint, String secret);
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  });
 }
 
 abstract interface class EndpointProfileRepository {

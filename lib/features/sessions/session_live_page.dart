@@ -16,6 +16,7 @@ import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import '../hosts/endpoint_health_view.dart';
 import 'session_composer.dart';
 import 'session_error_card.dart';
 import 'session_form_card.dart';
@@ -192,7 +193,26 @@ class _SessionLivePageState extends State<SessionLivePage>
           key: const ValueKey('live-status'),
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (failure != null) Text(failure) else Text(_phase(l10n, c.phase)),
+            if (failure != null)
+              Text(failure)
+            else if (c.endpointOffline &&
+                c.phase != SessionLivePhase.authRequired &&
+                c.phase != SessionLivePhase.incompatible) ...[
+              Text(switch (c.endpointHealth.credentialFailure == null
+                  ? c.endpointHealth.assessment?.status
+                  : null) {
+                EndpointStatus.authenticationRequired => l10n.hostsAuthRequired,
+                EndpointStatus.belowMinimum ||
+                EndpointStatus.legacyServer ||
+                EndpointStatus.unrecognized ||
+                EndpointStatus.unsupportedPlatform => l10n.liveIncompatible,
+                _ => l10n.statusOffline,
+              }),
+              if (endpointHealthReason(l10n, c.endpointHealth)
+                  case final reason?)
+                Text(reason),
+            ] else
+              Text(_phase(l10n, c.phase)),
             if (view?.stale ?? false) Text(l10n.liveStale),
           ],
         ),

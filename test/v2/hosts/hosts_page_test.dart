@@ -13,10 +13,14 @@ class _TrackingProber extends FakeProber {
   final endpoints = <Uri>[];
   final secrets = <String>[];
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) {
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) {
     endpoints.add(endpoint);
     secrets.add(secret);
-    return super.start(endpoint, secret);
+    return super.start(endpoint, secret, connectionTimeout: connectionTimeout);
   }
 }
 

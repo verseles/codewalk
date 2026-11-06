@@ -76,6 +76,84 @@ void main() {
     final l10n = dependencies.localizations.current;
     expect(find.text(l10n.composerLiveSession), findsNothing);
     expect(find.byKey(const ValueKey('live-status')), findsOneWidget);
+    final hosts = dependencies.hosts;
+    final selected = hosts.profiles.single;
+    hosts.observeAssessment(
+      selected,
+      hosts.credentialFor(selected)!,
+      const EndpointAssessment(EndpointStatus.unreachable),
+    );
+    await tester.pump();
+    final status = find.byKey(const ValueKey('live-status'));
+    expect(
+      find.descendant(of: status, matching: find.text(l10n.statusOffline)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: status, matching: find.text(l10n.liveLive)),
+      findsNothing,
+    );
+    hosts.observeAssessment(
+      selected,
+      hosts.credentialFor(selected)!,
+      const EndpointAssessment(EndpointStatus.compatible),
+    );
+    await tester.pump();
+    expect(
+      find.descendant(of: status, matching: find.text(l10n.liveLive)),
+      findsOneWidget,
+    );
+    for (final assessment in [
+      EndpointStatus.authenticationRequired,
+      EndpointStatus.belowMinimum,
+      EndpointStatus.legacyServer,
+      EndpointStatus.unrecognized,
+      EndpointStatus.unsupportedPlatform,
+    ]) {
+      hosts.observeAssessment(
+        selected,
+        hosts.credentialFor(selected)!,
+        EndpointAssessment(assessment),
+      );
+      await tester.pump();
+      expect(
+        find.descendant(of: status, matching: find.text(l10n.statusOffline)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: status,
+          matching: find.text(
+            assessment == EndpointStatus.authenticationRequired
+                ? l10n.hostsAuthRequired
+                : l10n.liveIncompatible,
+          ),
+        ),
+        findsWidgets,
+      );
+    }
+    hosts.observeAssessment(
+      selected,
+      hosts.credentialFor(selected)!,
+      const EndpointAssessment(EndpointStatus.unreachable),
+    );
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.authRequired,
+        state: liveState(ref),
+      ),
+    );
+    await tester.pump();
+    expect(
+      find.descendant(of: status, matching: find.text(l10n.hostsAuthRequired)),
+      findsOneWidget,
+    );
+    hosts.observeAssessment(
+      selected,
+      hosts.credentialFor(selected)!,
+      const EndpointAssessment(EndpointStatus.compatible),
+    );
     handle.emit(
       SessionLiveView(
         session: ref,

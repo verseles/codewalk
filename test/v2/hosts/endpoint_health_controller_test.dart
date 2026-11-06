@@ -14,9 +14,10 @@ EndpointProfile _profile(String id) => EndpointProfile(
 );
 
 final class _Probe implements EndpointProbeTask {
-  _Probe(this.endpoint, this.secret);
+  _Probe(this.endpoint, this.secret, this.connectionTimeout);
   final Uri endpoint;
   final String secret;
+  final Duration? connectionTimeout;
   final completion = Completer<EndpointAssessment>();
   bool cancelled = false;
   @override
@@ -35,8 +36,12 @@ final class _Probe implements EndpointProbeTask {
 final class _Prober implements EndpointProber {
   final calls = <_Probe>[];
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) {
-    final task = _Probe(endpoint, secret);
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) {
+    final task = _Probe(endpoint, secret, connectionTimeout);
     calls.add(task);
     return task;
   }
@@ -86,6 +91,100 @@ final class _Rig {
 }
 
 void main() {
+  testWidgets('network signals recheck endpoints without inferring health', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      final initial = rig.prober.calls.single;
+      initial.complete(EndpointStatus.compatible);
+      await tester.pump();
+      rig.health.networkChanged();
+      expect(rig.prober.calls, hasLength(2));
+      expect(
+        rig.prober.calls.last.connectionTimeout,
+        const Duration(seconds: 5),
+      );
+      expect(rig.health.view(profile).status, EndpointHealthStatus.online);
+      rig.prober.calls.last.complete(EndpointStatus.unreachable);
+      await tester.pump();
+      expect(rig.health.view(profile).status, EndpointHealthStatus.offline);
+      rig.health.networkChanged();
+      expect(
+        rig.prober.calls,
+        hasLength(2),
+        reason: 'unchanged signals are bounded',
+      );
+      rig.health.networkChanged(routeChanged: true);
+      expect(
+        rig.prober.calls,
+        hasLength(3),
+        reason: 'a returning route rechecks now',
+      );
+      rig.prober.calls.last.complete(EndpointStatus.compatible);
+      await tester.pump();
+      expect(rig.health.view(profile).status, EndpointHealthStatus.online);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('network recheck cancels stale probes and respects fences', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      final stale = rig.prober.calls.single;
+      rig.health.networkChanged();
+      expect(stale.cancelled, isTrue);
+      stale.complete(EndpointStatus.unreachable);
+      rig.prober.calls.last.complete(
+        EndpointStatus.serviceStarting,
+        retryAt: rig.health.now.add(const Duration(seconds: 30)),
+      );
+      await tester.pump();
+      expect(
+        rig.health.view(profile).assessment?.status,
+        EndpointStatus.serviceStarting,
+      );
+      rig.health.networkChanged();
+      expect(rig.prober.calls, hasLength(2));
+      rig.health.setForeground(false);
+      rig.health.networkChanged();
+      expect(rig.prober.calls, hasLength(2));
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('network checks do not mark a reachable local server offline', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final local = EndpointProfile(
+        id: 'profile_local',
+        label: 'Local',
+        endpoint: Uri.parse('http://127.0.0.1:4096/'),
+      );
+      rig.profiles.profiles.add(local);
+      rig.profiles.secrets[local.id] = 'password';
+      await rig.start(tester);
+      rig.prober.calls.single.complete(EndpointStatus.compatible);
+      await tester.pump();
+      rig.health.networkChanged();
+      expect(rig.health.view(local).status, EndpointHealthStatus.online);
+      rig.prober.calls.last.complete(EndpointStatus.compatible);
+      await tester.pump();
+      expect(rig.health.view(local).status, EndpointHealthStatus.online);
+    } finally {
+      rig.dispose();
+    }
+  });
   testWidgets('startup preserves an existing manual Retry-After fence', (
     tester,
   ) async {

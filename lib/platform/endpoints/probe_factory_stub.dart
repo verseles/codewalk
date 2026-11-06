@@ -4,7 +4,11 @@ EndpointProber createEndpointProber() => _UnsupportedProber();
 
 final class _UnsupportedProber implements EndpointProber {
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) => _UnsupportedTask();
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) => _UnsupportedTask();
 }
 
 final class _UnsupportedTask implements EndpointProbeTask {

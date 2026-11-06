@@ -14,6 +14,7 @@ final class LiveWakeCoordinator {
   LiveWakeCoordinator({
     required void Function() wake,
     Stream<Object?>? network,
+    this.onNetworkChanged,
     this.window = const Duration(milliseconds: 300),
   }) : _wake = wake {
     // A failed network feed only ends that feed; the resume wake remains.
@@ -25,11 +26,14 @@ final class LiveWakeCoordinator {
   }
 
   final void Function() _wake;
+  final void Function(bool routeChanged)? onNetworkChanged;
 
   /// Triggers inside one window become a single wake.
   final Duration window;
   StreamSubscription<Object?>? _network;
   Timer? _pending;
+  Timer? _networkPending;
+  bool _networkRouteChanged = false;
   bool _armed = false;
   bool _baseline = false;
   Object? _route;
@@ -51,13 +55,23 @@ final class LiveWakeCoordinator {
     }
   }
 
-  /// The first route is the current network, not a change. Offline (null)
-  /// is only recorded: nothing can reconnect until a network returns.
+  /// The first route is the current network, not a change. Every later signal
+  /// can prompt a server check; only a different, non-null route wakes streams.
   void _networkChanged(Object? route) {
     if (_disposed) return;
-    final changed = _baseline && route != null && route != _route;
+    final observed = _baseline;
+    final changed = observed && route != null && route != _route;
     _baseline = true;
     _route = route;
+    if (observed) {
+      _networkRouteChanged = _networkRouteChanged || changed;
+      _networkPending ??= Timer(window, () {
+        _networkPending = null;
+        final routeChanged = _networkRouteChanged;
+        _networkRouteChanged = false;
+        if (!_disposed) onNetworkChanged?.call(routeChanged && _route != null);
+      });
+    }
     if (changed) _schedule();
   }
 
@@ -73,6 +87,8 @@ final class LiveWakeCoordinator {
     _disposed = true;
     _pending?.cancel();
     _pending = null;
+    _networkPending?.cancel();
+    _networkPending = null;
     unawaited(_network?.cancel());
     _network = null;
   }

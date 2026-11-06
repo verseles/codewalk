@@ -6,14 +6,18 @@ EndpointProber createEndpointProber() => _NativeProber();
 
 final class _NativeProber implements EndpointProber {
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) =>
-      _NativeTask(endpoint, secret);
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) => _NativeTask(endpoint, secret, connectionTimeout: connectionTimeout);
 }
 
 final class _NativeTask implements EndpointProbeTask {
-  _NativeTask(Uri endpoint, String secret) {
+  _NativeTask(Uri endpoint, String secret, {Duration? connectionTimeout}) {
     _transport = IoEndpointHttpTransport(
       endpoint: endpoint,
+      connectionTimeout: connectionTimeout ?? const Duration(seconds: 15),
       headers: basicEndpointHeaders(
         endpoint: endpoint,
         username: 'opencode',

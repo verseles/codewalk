@@ -189,9 +189,12 @@ AppDependencies createAppDependencies({
   }
   // Reconnects every open endpoint stream on a return from the background
   // or a network change.
-  final liveWake = liveDirectory == null
-      ? null
-      : LiveWakeCoordinator(wake: liveDirectory.wake, network: networkChanges);
+  final liveWake = LiveWakeCoordinator(
+    wake: liveDirectory?.wake ?? () {},
+    network: networkChanges,
+    onNetworkChanged: (changed) =>
+        endpointHealth.networkChanged(routeChanged: changed),
+  );
   locator.registerSingleton(
     SessionsController(
       hosts: locator<HostsController>(),

@@ -14,7 +14,11 @@ class GatedProber implements EndpointProber {
   final tasks = <FakeProbeTask>[];
   final replies = <Completer<EndpointAssessment>>[];
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) {
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) {
     final reply = Completer<EndpointAssessment>();
     replies.add(reply);
     final task = FakeProbeTask(reply.future);

@@ -102,7 +102,11 @@ class FakeProber implements EndpointProber {
   final tasks = <FakeProbeTask>[];
   Future<EndpointAssessment>? pendingResult;
   @override
-  EndpointProbeTask start(Uri endpoint, String secret) {
+  EndpointProbeTask start(
+    Uri endpoint,
+    String secret, {
+    Duration? connectionTimeout,
+  }) {
     final task = FakeProbeTask(pendingResult ?? Future.value(assessment));
     tasks.add(task);
     return task;

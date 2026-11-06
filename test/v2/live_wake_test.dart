@@ -6,12 +6,16 @@ import 'dart:async';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/live_wake.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/hosts/endpoint_health_controller.dart';
 import 'package:codewalk/platform/connectivity/network_changes_io.dart';
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nm/nm.dart';
 
+import 'hosts/fakes.dart';
+import 'sessions/fakes.dart';
 import 'sessions/live_fakes.dart';
 
 const _window = Duration(milliseconds: 300);
@@ -104,6 +108,51 @@ void main() {
       expect(wakes, 1);
     });
 
+    testWidgets('network signals recheck health without guessing offline', (
+      tester,
+    ) async {
+      var wakes = 0;
+      var checks = 0;
+      final routeChanges = <bool>[];
+      final network = StreamController<Object?>();
+      addTearDown(network.close);
+      final wake = LiveWakeCoordinator(
+        wake: () => wakes++,
+        network: network.stream,
+        onNetworkChanged: (changed) {
+          checks++;
+          routeChanges.add(changed);
+        },
+      );
+      addTearDown(wake.dispose);
+      network.add('wifi');
+      await tester.pump(_window);
+      expect(checks, 0);
+      network.add(null);
+      await tester.pump(_window);
+      expect(checks, 1);
+      expect(wakes, 0);
+      network
+        ..add('wifi')
+        ..add('wifi');
+      await tester.pump(_window);
+      expect(checks, 2);
+      expect(wakes, 1);
+      network.add('wifi');
+      await tester.pump(_window);
+      expect(
+        checks,
+        3,
+        reason: 'a changed connectivity state can share a route',
+      );
+      expect(routeChanges, [false, true, false]);
+      network.add(null);
+      await tester.pump();
+      wake.dispose();
+      await tester.pump(_window);
+      expect(checks, 3);
+    });
+
     testWidgets('a failed network feed keeps the resume wake', (tester) async {
       var wakes = 0;
       final network = StreamController<Object?>();
@@ -180,6 +229,55 @@ void main() {
     expect(network.hasListener, isFalse);
     expect(directory.closes, 1);
   });
+
+  testWidgets(
+    'the app rechecks its saved server when a network signal arrives',
+    (tester) async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      final prober = FakeProber();
+      final network = StreamController<Object?>();
+      addTearDown(network.close);
+      addTearDown(rig.dispose);
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/'),
+        profileRepository: rig.repository,
+        endpointProber: prober,
+        sessionLiveDirectory: LiveDirectory.new,
+        networkChanges: network.stream,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final hosts = dependencies.hosts;
+      final profile = hosts.profiles.single;
+      expect(
+        dependencies.endpointHealth!.view(profile).status,
+        EndpointHealthStatus.online,
+      );
+      final before = prober.tasks.length;
+      prober.assessment = const EndpointAssessment(EndpointStatus.unreachable);
+      network.add('wifi');
+      await tester.pump();
+      network.add(null);
+      await tester.pump(_window);
+      await tester.pump();
+      expect(prober.tasks.length, before + 1);
+      expect(
+        dependencies.endpointHealth!.view(profile).status,
+        EndpointHealthStatus.offline,
+      );
+      prober.assessment = const EndpointAssessment(EndpointStatus.compatible);
+      network.add('wifi');
+      await tester.pump(_window);
+      await tester.pump();
+      expect(
+        dependencies.endpointHealth!.view(profile).status,
+        EndpointHealthStatus.online,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   group('network routes', () {
     test('a connectivity report is its sorted transports', () {
