@@ -775,9 +775,10 @@ void main() {
         ),
         // Content that is not an answer, so the old answer stays the last.
         for (var i = 0; i < extra; i++)
-          TurnOutcome(
+          Notice(
             meta: liveMeta(ref, 'late$i'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
+            kind: const OpenValue.known(NoticeKind.system),
+            text: 'late notice $i',
           ),
       ];
       final live = await _openLive(tester, turn, settled: false);
@@ -835,9 +836,10 @@ void main() {
           ),
           // Content that is not an answer, so the old answer stays the last.
           for (var i = 0; i < extra; i++)
-            TurnOutcome(
+            Notice(
               meta: liveMeta(ref, 'late$i'),
-              kind: const OpenValue.known(OutcomeKind.succeeded),
+              kind: const OpenValue.known(NoticeKind.system),
+              text: 'late notice $i',
             ),
         ];
         final live = await _openLive(tester, turn, settled: false);
@@ -1111,20 +1113,21 @@ void main() {
           ),
         ],
       );
-      // The tail is an outcome whose reason arrives.
+      // The tail is an outcome whose reason arrives; a succeeded turn has
+      // no row (#469), an interrupted one keeps it.
       await expectMarked(
         (ref) => [
           ..._answers(ref, 39),
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
+            kind: const OpenValue.known(OutcomeKind.interrupted),
           ),
         ],
         (ref) => [
           ..._answers(ref, 39),
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
+            kind: const OpenValue.known(OutcomeKind.interrupted),
             reason: 'the turn ended',
           ),
         ],
@@ -1289,9 +1292,10 @@ void main() {
         tester,
         (ref) => [
           ..._answers(ref, 39),
+          // A succeeded turn has no row (#469); this one shows its outcome.
           TurnOutcome(
             meta: liveMeta(ref, 'o1'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
+            kind: const OpenValue.known(OutcomeKind.interrupted),
           ),
         ],
         settled: false,
@@ -1299,7 +1303,7 @@ void main() {
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await tester.pumpAndSettle();
       final plain = controlColor(tester);
-      // The outcome the row shows changes: the turn did not succeed.
+      // The outcome the row shows changes: the turn failed.
       live.handle.emit(
         SessionLiveView(
           session: live.ref,
@@ -1476,9 +1480,10 @@ void main() {
         // Content that is not an answer, so the settled answer stays the
         // last one a reveal could pull into view.
         for (var i = 0; i < extra; i++)
-          TurnOutcome(
+          Notice(
             meta: liveMeta(ref, 'late$i'),
-            kind: const OpenValue.known(OutcomeKind.succeeded),
+            kind: const OpenValue.known(NoticeKind.system),
+            text: 'late notice $i',
           ),
       ];
       final live = await _openLive(tester, turn, settled: false);

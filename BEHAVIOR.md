@@ -557,7 +557,9 @@ description of this code.
 
 - **Given** a turn finished: every item reached its end, the last answer text is complete and no failure is shown at or after it, and the session is settled or a newer prompt exists
 - **When** the timeline shows it
-- **Then** everything before the harness message that holds the final answer collapses to one header (`2 work messages`) with `Expand`/`Hide`; the final answer stays visible below it; nothing collapses while anything in the turn still streams, after a failure, or without the harness message of the answer
+- **Then** everything before the first answer text of the harness message that holds the final answer collapses to one header (`2 work messages`) with `Expand`/`Hide`, including that message's own reasoning and calls, so a one-message answer collapses its reasoning too; every answer text of that message, and what follows its first one, stays visible below it; nothing collapses while anything in the turn still streams, after a failure at or after the answer, while a compaction in the turn runs or after one failed, or without the harness message of the answer
+- **Then** a completed compaction before the answer collapses with the work, one after it stays a row below the answer, and a failed one keeps the whole turn open
+- **Then** a succeeded turn has no row of its own, live or in the read-only history; the header reports it; failed and interrupted turns keep their rows
 - **Then** once collapsed, a status pulse that briefly reports the session busy, or a rehydration of the same items, keeps the same header and element; new content in that turn, or an item of it that streams again, reopens it
 - **Then** opening a group, a run or a reasoning is the reader's: the timeline does not follow the growth it makes; what the reader opened survives rebuilds and passive refreshes, and a session shown again starts with every finished turn collapsed
 

@@ -97,9 +97,10 @@ List<TimelineItem> _rows(int from, int to) => [
         kind: const OpenValue.known(NoticeKind.system),
         text: 'Notice $i',
       ),
+      // A succeeded turn has no row (#469); an interrupted one keeps it.
       _ => TurnOutcome(
         meta: _meta('o$i'),
-        kind: const OpenValue.known(OutcomeKind.succeeded),
+        kind: const OpenValue.known(OutcomeKind.interrupted),
       ),
     },
 ];

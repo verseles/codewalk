@@ -137,6 +137,11 @@ void main() {
           }
           expect(find.textContaining('do-not-render'), findsNothing);
           expect(find.textContaining('do-not-execute'), findsNothing);
+          // A succeeded turn has no row of its own (#469).
+          expect(
+            find.text(dependencies.localizations.current.liveOutcomeSucceeded),
+            findsNothing,
+          );
           expect(find.byType(TextField), findsNothing);
           expect(
             find.byKey(const ValueKey('history-composer')),

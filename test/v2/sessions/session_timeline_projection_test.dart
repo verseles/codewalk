@@ -121,7 +121,7 @@ void main() {
     expect(_shape(rows), ['u1', 'work(4/2)', 'a1']);
   });
 
-  test('the final answer keeps its whole message', () {
+  test('the final message\'s work before its text joins the group (#469)', () {
     final items = [
       _user('u1'),
       _tool('t1', 'm1'),
@@ -130,7 +130,90 @@ void main() {
       _text('a2', 'm2'),
     ];
     final rows = SessionTimelinePresentation().project(items, settled: true);
-    expect(_shape(rows), ['u1', 'work(1/1)', 'r2', 't2', 'a2']);
+    expect(_shape(rows), ['u1', 'work(3/2)', 'a2']);
+    // A one-message answer collapses its reasoning too.
+    expect(
+      _shape(
+        SessionTimelinePresentation().project([
+          _user('u1'),
+          _think('r1', 'm1'),
+          _text('a1', 'm1'),
+        ], settled: true),
+      ),
+      ['u1', 'work(1/1)', 'a1'],
+    );
+  });
+
+  test('every answer text of the final message stays shown (#469)', () {
+    final items = [
+      _user('u1'),
+      _think('r1', 'm1'),
+      _text('a1', 'm1'),
+      _tool('t1', 'm1'),
+      _think('r2', 'm1'),
+      _text('a2', 'm1'),
+    ];
+    final rows = SessionTimelinePresentation().project(items, settled: true);
+    expect(_shape(rows), ['u1', 'work(1/1)', 'a1', 't1', 'r2', 'a2']);
+  });
+
+  test('a succeeded outcome has no row; other outcomes keep theirs', () {
+    TurnOutcome end(String id, OutcomeKind kind) =>
+        TurnOutcome(meta: _meta(id), kind: OpenValue.known(kind));
+    final items = [
+      ..._turn(),
+      end('o1', OutcomeKind.succeeded),
+      _user('u2'),
+      _text('a2', 'm4'),
+      end('o2', OutcomeKind.interrupted),
+    ];
+    final rows = SessionTimelinePresentation().project(items, settled: true);
+    expect(_shape(rows), ['u1', 'work(4/2)', 'a1', 'u2', 'a2', 'o2']);
+  });
+
+  test('a compaction collapses with the work unless it failed (#469)', () {
+    Notice compaction(ItemStatus status) => Notice(
+      meta: _meta('c1', status: status),
+      kind: const OpenValue.known(NoticeKind.compaction),
+      text: 'summary',
+    );
+    List<String> shape(ItemStatus status) => _shape(
+      SessionTimelinePresentation().project([
+        _user('u1'),
+        compaction(status),
+        ..._turn().skip(1),
+      ], settled: true),
+    );
+    expect(shape(ItemStatus.completed), ['u1', 'work(5/3)', 'a1']);
+    expect(shape(ItemStatus.failed), ['u1', 'c1', 'r1', 'run(t1,t2,t3)', 'a1']);
+    expect(shape(ItemStatus.streaming).first, 'u1');
+    expect(shape(ItemStatus.streaming), contains('c1'));
+    // After the answer: a completed one stays a row below it, a failed one
+    // keeps the turn expanded.
+    List<String> after(ItemStatus status) => _shape(
+      SessionTimelinePresentation().project([
+        ..._turn(),
+        compaction(status),
+      ], settled: true),
+    );
+    expect(after(ItemStatus.completed), ['u1', 'work(4/2)', 'a1', 'c1']);
+    expect(after(ItemStatus.failed), ['u1', 'r1', 'run(t1,t2,t3)', 'a1', 'c1']);
+  });
+
+  test('an item outside any message never hides an answer text', () {
+    final items = [
+      _user('u1'),
+      _text('a1', 'm1'),
+      Notice(
+        meta: _meta('n1'),
+        kind: const OpenValue.known(NoticeKind.system),
+        text: 'between',
+      ),
+      _think('r2', 'm1'),
+      _text('a2', 'm1'),
+    ];
+    final rows = SessionTimelinePresentation().project(items, settled: true);
+    expect(_shape(rows), ['u1', 'a1', 'n1', 'r2', 'a2']);
   });
 
   group('the work never collapses before the turn finished (#273)', () {

@@ -4,6 +4,7 @@ import '../../shared/sessions/session_history_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_history_controller.dart';
 import 'session_message_info.dart';
+import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 
 class SessionHistoryPage extends StatefulWidget {
@@ -46,6 +47,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
         SessionHistoryFailure.invalidCursor => l10n.sessionsInvalidCursor,
         _ => l10n.historyUnavailable,
       };
+      final items = sessionTimelineItems(c.items);
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -68,7 +70,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                     bucket: _rowState,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: c.items.length + 2,
+                      itemCount: items.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Column(
@@ -102,7 +104,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             ],
                           );
                         }
-                        if (index == c.items.length + 1) {
+                        if (index == items.length + 1) {
                           return Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: Column(
@@ -120,12 +122,12 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             ),
                           );
                         }
-                        final item = c.items[index - 1];
+                        final item = items[index - 1];
                         return SessionTimelineTile(
                           key: ValueKey(item.id),
                           item: item,
                           minimizeUnknownShell: true,
-                          messageHeader: opensMessage(c.items, index - 1),
+                          messageHeader: opensMessage(items, index - 1),
                         );
                       },
                     ),

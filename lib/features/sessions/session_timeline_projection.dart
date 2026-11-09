@@ -142,6 +142,7 @@ final class SessionTimelinePresentation {
     bool showToolCalls = true,
     ChatRenderMode renderMode = ChatRenderMode.live,
   }) {
+    items = sessionTimelineItems(items);
     final out = _Rows(
       this,
       showReasoning: showReasoning,
@@ -296,17 +297,21 @@ final class SessionTimelinePresentation {
     return null;
   }
 
-  /// Where the turn's final answer starts: the first item of [message],
-  /// the message that holds the last answer text at [last].
+  /// Where the turn's final answer starts: the first answer text of
+  /// [message], the message that holds the last answer text at [last].
   static int _answerStart(
     List<TimelineItem> items,
     int start,
     int last,
     MessageRef message,
   ) {
-    var first = last;
-    while (first > start && items[first - 1].meta.message?.message == message) {
-      first--;
+    // The message's reasoning and calls before its first answer text are
+    // work too; every answer text of the message stays out of the group,
+    // even past an item outside any message. [last] ends the scan.
+    var first = start;
+    while (items[first] is! AssistantText ||
+        items[first].meta.message?.message != message) {
+      first++;
     }
     return first;
   }
@@ -339,6 +344,13 @@ final class SessionTimelinePresentation {
       if (item case TurnOutcome(:final kind)
           when kind.known == OutcomeKind.failed ||
               kind.known == OutcomeKind.interrupted) {
+        return false;
+      }
+      // The reader must see a compaction that failed, wherever it is.
+      if (item case Notice(
+        kind: OpenValue(known: NoticeKind.compaction),
+        status: OpenValue(known: ItemStatus.failed),
+      )) {
         return false;
       }
     }
@@ -461,3 +473,10 @@ class SessionTimelineScope extends InheritedWidget {
   @override
   bool updateShouldNotify(SessionTimelineScope oldWidget) => false;
 }
+
+/// The items a timeline shows: a succeeded turn needs no row of its own, the
+/// header already reports it; failed and interrupted turns keep theirs.
+List<TimelineItem> sessionTimelineItems(List<TimelineItem> items) => [
+  for (final item in items)
+    if (item is! TurnOutcome || item.kind.known != OutcomeKind.succeeded) item,
+];
