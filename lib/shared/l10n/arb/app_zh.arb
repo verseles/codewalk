@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "服务器已重启，正在恢复",
+  "liveResuming": "已中断；尚未确认继续",
+  "liveStepInterrupted": "回复已中断。",
+  "liveExecutionUnconfirmed": "执行未处于活动状态；结果尚未确认。",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

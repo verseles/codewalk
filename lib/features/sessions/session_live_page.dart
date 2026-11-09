@@ -214,6 +214,12 @@ class _SessionLivePageState extends State<SessionLivePage>
             ] else
               Text(_phase(l10n, c.phase)),
             if (view?.stale ?? false) Text(l10n.liveStale),
+            if (c.executionNotice case final notice?)
+              Text(switch (notice) {
+                SessionExecutionNotice.interrupted => l10n.liveResuming,
+                SessionExecutionNotice.unconfirmed =>
+                  l10n.liveExecutionUnconfirmed,
+              }, key: const ValueKey('live-execution-notice')),
           ],
         ),
       ),
@@ -468,7 +474,13 @@ class _SessionLivePageState extends State<SessionLivePage>
       final retryAt = state?.execution?.kind.known == ExecutionKind.retrying
           ? state?.execution?.retryAt
           : null;
-      final outcome = _outcome(l10n, state?.execution?.lastOutcome);
+      final outcome =
+          state?.execution?.kind.known ==
+                  ExecutionKind.interruptedPendingResume ||
+              c.executionNotice != null ||
+              c.hasInterruptedStep
+          ? null
+          : _outcome(l10n, state?.execution?.lastOutcome);
       // A parent stays idle while its sub-agents run; they are counted here.
       final children =
           state?.work

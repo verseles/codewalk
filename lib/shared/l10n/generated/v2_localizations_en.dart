@@ -757,7 +757,14 @@ class V2LocalizationsEn extends V2Localizations {
       'This server version is not supported for the live view.';
 
   @override
-  String get liveResuming => 'Server restarted, resuming';
+  String get liveResuming => 'Interrupted; continuation not confirmed';
+
+  @override
+  String get liveStepInterrupted => 'Response interrupted.';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'The execution is not active; its outcome is unconfirmed.';
 
   @override
   String get liveRunning => 'Running';

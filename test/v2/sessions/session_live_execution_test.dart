@@ -248,6 +248,65 @@ void main() {
     expect(find.byKey(const ValueKey('live-children')), findsNothing);
   });
 
+  testWidgets('an interrupted step never shows the previous turn outcome', (
+    tester,
+  ) async {
+    final handle = await mount(tester);
+    final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    const succeeded = ExecutionState(
+      kind: OpenValue.known(ExecutionKind.idle),
+      lastOutcome: ExecutionOutcome(
+        OpenValue.known(ExecutionOutcomeKind.succeeded),
+      ),
+    );
+    final prompt = UserInput(
+      meta: liveMeta(ref, 'prompt'),
+      text: 'once',
+      delivery: const OpenValue.known(DeliveryState.delivered),
+    );
+    final notice = Notice(
+      meta: liveMeta(ref, 'interruption'),
+      kind: const OpenValue.known(NoticeKind.interruption),
+      text: '',
+    );
+    Future<void> emit(ExecutionKind kind, List<TimelineItem> items) async {
+      handle.emit(
+        SessionLiveView(
+          session: ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            ref,
+            items: items,
+            execution: ExecutionState(
+              kind: OpenValue.known(kind),
+              lastOutcome: succeeded.lastOutcome,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    await emit(ExecutionKind.idle, [prompt]);
+    expect(find.text(l10n.liveOutcomeSucceeded), findsOneWidget);
+    // The server reported the step aborted: the earlier success is not this
+    // prompt's result, and no local warning repeats the timeline's notice.
+    await emit(ExecutionKind.idle, [prompt, notice]);
+    expect(find.text(l10n.liveOutcomeSucceeded), findsNothing);
+    expect(find.byKey(const ValueKey('live-execution-notice')), findsNothing);
+    // Without any report, a run that disappears says only what was seen.
+    await emit(ExecutionKind.running, [prompt]);
+    await emit(ExecutionKind.idle, [prompt]);
+    expect(find.text(l10n.liveOutcomeSucceeded), findsNothing);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('live-execution-notice')))
+          .data,
+      l10n.liveExecutionUnconfirmed,
+    );
+  });
+
   for (final locale in const [Locale('ar'), Locale('pt')]) {
     testWidgets('the wait reads in ${locale.languageCode} at 2x text', (
       tester,

@@ -342,6 +342,40 @@ void main() {
     expect(history.single, isA<AssistantText>());
   });
 
+  test('an aborted step leaves the notice its history row projects', () {
+    // A server shutdown ends the running step this way without any idle
+    // row, so the notice is the only trace that the response stopped.
+    const aborted = {'type': 'aborted', 'message': 'Step interrupted'};
+    final upsert = projectStepUsage(
+      stepFrame('failed', fields: {'error': aborted}),
+    ).whereType<ItemUpserted>().single;
+    final live = upsert.item;
+    final history = projectOpenCodeHistory(
+      [
+        assistant('step', [textBlock('partial')], fields: {'error': aborted}),
+      ],
+      historyRef,
+      sourceVersion: '2.0.22',
+    );
+    final stored = history.whereType<Notice>().single;
+    expect(history.first, isA<AssistantText>());
+    for (final notice in [live as Notice, stored]) {
+      expect(notice.kind.known, NoticeKind.interruption);
+      expect(notice.status.known, ItemStatus.interrupted);
+      expect(notice.text, isEmpty);
+      expect(notice.meta.anchor, live.meta.anchor);
+    }
+    expect(stored.id, live.id);
+    expect(jsonDecode(live.id.value), [
+      historyRef.storageKey,
+      'msg_step',
+      'interruption',
+      0,
+    ]);
+    // The private error message never reaches the notice.
+    expect(stepUsageManifest(upsert), isNot(contains('Step interrupted')));
+  });
+
   test('failed-step usage requires both cost and tokens', () {
     final both = projectStepUsage(
       stepFrame(
@@ -353,7 +387,7 @@ void main() {
         },
       ),
     );
-    final usage = both.single;
+    final usage = both.whereType<UsageObserved>().single;
     expect(usageOf(usage).aggregationKey, 'step:msg_step');
     expect(
       usage.meta.source.extra?.value,

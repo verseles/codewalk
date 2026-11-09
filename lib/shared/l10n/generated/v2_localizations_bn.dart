@@ -755,7 +755,14 @@ class V2LocalizationsBn extends V2Localizations {
   String get liveIncompatible => 'এই সার্ভার সংস্করণ লাইভ ভিউ সমর্থন করে না।';
 
   @override
-  String get liveResuming => 'সার্ভার পুনরায় চালু হয়েছে, আবার শুরু হচ্ছে';
+  String get liveResuming => 'বাধাগ্রস্ত; পুনরারম্ভ নিশ্চিত নয়';
+
+  @override
+  String get liveStepInterrupted => 'উত্তর বাধাগ্রস্ত হয়েছে।';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'কার্যক্রম সক্রিয় নয়; ফলাফল নিশ্চিত হয়নি।';
 
   @override
   String get liveRunning => 'চলছে';

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'item_ids.dart';
 import 'version_policy.dart';
 
 enum OpenCodeStepUsageProjectionFailure {
@@ -254,6 +257,29 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
           ),
     if (ends && current.currentStep?.message == message)
       StepChanged(meta: eventMeta),
+    if (errorType == 'aborted')
+      ItemUpserted(
+        meta: eventMeta,
+        item: Notice(
+          meta: ItemMeta(
+            id: ItemId(
+              jsonEncode([ref.storageKey, messageId, 'interruption', 0]),
+            ),
+            anchor: openCodeMessageAnchor(messageId!),
+            generation: jsonEncode([
+              'live',
+              ref.storageKey,
+              messageId,
+              position.id,
+              position.epoch,
+            ]),
+            status: const OpenValue.known(ItemStatus.interrupted),
+            source: source,
+          ),
+          kind: const OpenValue.known(NoticeKind.interruption),
+          text: '',
+        ),
+      ),
     if (resumes)
       ExecutionChanged(
         meta: eventMeta,

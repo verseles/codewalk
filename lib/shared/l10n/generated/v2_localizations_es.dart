@@ -767,7 +767,14 @@ class V2LocalizationsEs extends V2Localizations {
       'Esta versión del servidor no es compatible con la vista en vivo.';
 
   @override
-  String get liveResuming => 'Servidor reiniciado, reanudando';
+  String get liveResuming => 'Interrumpida; continuación sin confirmar';
+
+  @override
+  String get liveStepInterrupted => 'Respuesta interrumpida.';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'La ejecución no está activa; el resultado no está confirmado.';
 
   @override
   String get liveRunning => 'En ejecución';

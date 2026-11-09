@@ -726,7 +726,13 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveIncompatible => '이 서버 버전은 실시간 보기를 지원하지 않습니다.';
 
   @override
-  String get liveResuming => '서버가 다시 시작되어 재개하는 중';
+  String get liveResuming => '중단됨; 재개 확인 안 됨';
+
+  @override
+  String get liveStepInterrupted => '응답이 중단되었습니다.';
+
+  @override
+  String get liveExecutionUnconfirmed => '실행이 활성 상태가 아니며 결과가 확인되지 않았습니다.';
 
   @override
   String get liveRunning => '실행 중';

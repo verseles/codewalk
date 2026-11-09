@@ -724,7 +724,13 @@ class V2LocalizationsJa extends V2Localizations {
   String get liveIncompatible => 'このサーバーのバージョンはライブ表示に対応していません。';
 
   @override
-  String get liveResuming => 'サーバーが再起動しました。再開しています';
+  String get liveResuming => '中断しました。再開は未確認です';
+
+  @override
+  String get liveStepInterrupted => '応答が中断されました。';
+
+  @override
+  String get liveExecutionUnconfirmed => '実行はアクティブではありません。結果は未確認です。';
 
   @override
   String get liveRunning => '実行中';

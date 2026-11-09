@@ -576,6 +576,19 @@ List<TimelineItem> projectOpenCodeHistory(
             // failure, not rejected: only the kept prefix is validated.
             text(failure.rawMessage, charge: false);
           }
+          if (errorType == 'aborted') {
+            add(
+              Notice(
+                meta: meta(
+                  'interruption',
+                  0,
+                  status: const OpenValue.known(ItemStatus.interrupted),
+                ),
+                kind: const OpenValue.known(NoticeKind.interruption),
+                text: '',
+              ),
+            );
+          }
         }
         if (message.containsKey('retry')) {
           final retry = map(message['retry']);

@@ -709,7 +709,13 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveIncompatible => '此服务器版本不支持实时视图。';
 
   @override
-  String get liveResuming => '服务器已重启，正在恢复';
+  String get liveResuming => '已中断；尚未确认继续';
+
+  @override
+  String get liveStepInterrupted => '回复已中断。';
+
+  @override
+  String get liveExecutionUnconfirmed => '执行未处于活动状态；结果尚未确认。';
 
   @override
   String get liveRunning => '运行中';

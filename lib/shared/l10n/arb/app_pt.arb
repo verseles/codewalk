@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "Servidor reiniciado, retomando",
+  "liveResuming": "Interrompida; retomada não confirmada",
+  "liveStepInterrupted": "Resposta interrompida.",
+  "liveExecutionUnconfirmed": "A execução não está ativa; o resultado não foi confirmado.",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

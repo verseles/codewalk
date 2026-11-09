@@ -928,7 +928,11 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "Server restarted, resuming",
+  "liveResuming": "Interrupted; continuation not confirmed",
+  "liveStepInterrupted": "Response interrupted.",
+  "@liveStepInterrupted": {"description": "An observed interrupted assistant step, not a terminal turn outcome"},
+  "liveExecutionUnconfirmed": "The execution is not active; its outcome is unconfirmed.",
+  "@liveExecutionUnconfirmed": {"description": "A previously observed execution is inactive without a new confirmed outcome"},
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

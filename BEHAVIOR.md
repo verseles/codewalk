@@ -368,7 +368,11 @@ description of this code.
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server
 - **When** the header shows the session's execution
-- **Then** running, retrying, stopping, resuming after a restart, needing input and idle each have their own label; the last outcome stays beside it
+- **Then** running, retrying, stopping, interrupted by a server shutdown ("Interrupted; continuation not confirmed", never a claim of restart or resume), needing input and idle each have their own label; the last outcome stays beside it, except while an interruption is shown, when it is the previous turn's result and is hidden
+- **When** the server ends the running step as aborted (a shutdown or a Stop)
+- **Then** the timeline shows "Response interrupted." after the partial output, live and in the history with one identity, without the server's message; it never becomes a turn outcome or changes the execution state, and a Stop also keeps its "Last turn interrupted" row
+- **When** a run seen live in this screen reads idle with no new outcome (no outcome row, and no new result in the same read), for example after a restart with no report
+- **Then** the header says only "The execution is not active; its outcome is unconfirmed." (or the shutdown label if a shutdown was seen) for that prompt; it never stops, sends or resumes anything, clears when a new run or outcome arrives or another prompt is sent, and is not repeated while the timeline already shows the interruption for the latest prompt; a cold open, a stale or reconnecting view and an unknown state never raise it
 - **When** the server schedules a retry of the current step
 - **Then** the label reads "Retrying in m:ss" (hours as h:mm:ss), counted down from the deadline the server reported and never longer than the server's own delay counted from arrival; a deadline already past, or one unknown after a reconnect, reads "Retrying" or the hydrated running state
 - **Then** the count ticks once per second only while the screen is shown and the app is in the foreground, and catches up when it returns; the retry's error type is kept, its message is never shown

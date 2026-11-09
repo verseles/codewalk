@@ -369,7 +369,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text(l10n.liveLive), findsOneWidget);
           expect(find.text(l10n.liveResuming), findsOneWidget);
-          expect(find.text(l10n.liveOutcomeFailed), findsOneWidget);
+          // The earlier turn's result is not the interrupted turn's (#423).
+          expect(find.text(l10n.liveOutcomeFailed), findsNothing);
           expect(find.text(l10n.liveOutcomeInterrupted), findsOneWidget);
           expect(find.byKey(const ValueKey('live-needs-you')), findsOneWidget);
           await tester.scrollUntilVisible(

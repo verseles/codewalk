@@ -6,7 +6,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 1. UI/UX — lote 1
 
-- [ ] #441 Aviso de turno interrompido por restart do servidor (inclui #423)
 - [ ] #469 Timeline: agrupar o raciocínio, compactação e marcador final
 
 ## 2. Limpeza logo após o lote 1

@@ -764,7 +764,14 @@ class V2LocalizationsRu extends V2Localizations {
       'Эта версия сервера не поддерживается в режиме реального времени.';
 
   @override
-  String get liveResuming => 'Сервер перезапущен, возобновление';
+  String get liveResuming => 'Прервано; продолжение не подтверждено';
+
+  @override
+  String get liveStepInterrupted => 'Ответ прерван.';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'Выполнение не активно; результат не подтверждён.';
 
   @override
   String get liveRunning => 'Выполняется';

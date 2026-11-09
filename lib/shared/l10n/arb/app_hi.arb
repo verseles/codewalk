@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "सर्वर फिर से शुरू हुआ, जारी किया जा रहा है",
+  "liveResuming": "बाधित; जारी होने की पुष्टि नहीं हुई",
+  "liveStepInterrupted": "उत्तर बाधित हुआ।",
+  "liveExecutionUnconfirmed": "निष्पादन सक्रिय नहीं है; परिणाम की पुष्टि नहीं हुई।",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

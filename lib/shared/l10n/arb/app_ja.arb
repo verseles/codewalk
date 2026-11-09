@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "サーバーが再起動しました。再開しています",
+  "liveResuming": "中断しました。再開は未確認です",
+  "liveStepInterrupted": "応答が中断されました。",
+  "liveExecutionUnconfirmed": "実行はアクティブではありません。結果は未確認です。",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

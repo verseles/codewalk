@@ -768,7 +768,14 @@ class V2LocalizationsIt extends V2Localizations {
       'Questa versione del server non è supportata per la vista in diretta.';
 
   @override
-  String get liveResuming => 'Server riavviato, ripresa in corso';
+  String get liveResuming => 'Interrotta; ripresa non confermata';
+
+  @override
+  String get liveStepInterrupted => 'Risposta interrotta.';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'L’esecuzione non è attiva; l’esito non è confermato.';
 
   @override
   String get liveRunning => 'In esecuzione';

@@ -752,7 +752,13 @@ class V2LocalizationsAr extends V2Localizations {
   String get liveIncompatible => 'إصدار الخادم هذا غير مدعوم للعرض المباشر.';
 
   @override
-  String get liveResuming => 'أُعيد تشغيل الخادم، جارٍ الاستئناف';
+  String get liveResuming => 'تمت المقاطعة؛ لم يُؤكد الاستئناف';
+
+  @override
+  String get liveStepInterrupted => 'تمت مقاطعة الرد.';
+
+  @override
+  String get liveExecutionUnconfirmed => 'التنفيذ غير نشط؛ لم تُؤكد نتيجته.';
 
   @override
   String get liveRunning => 'قيد التشغيل';

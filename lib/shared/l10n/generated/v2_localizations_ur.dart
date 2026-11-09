@@ -757,7 +757,14 @@ class V2LocalizationsUr extends V2Localizations {
       'سرور کا یہ ورژن براہ راست منظر کے لیے معاون نہیں۔';
 
   @override
-  String get liveResuming => 'سرور دوبارہ شروع ہوا، بحال ہو رہا ہے';
+  String get liveResuming => 'روک دیا گیا؛ بحالی کی تصدیق نہیں ہوئی';
+
+  @override
+  String get liveStepInterrupted => 'جواب روک دیا گیا۔';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'عمل درآمد فعال نہیں؛ نتیجے کی تصدیق نہیں ہوئی۔';
 
   @override
   String get liveRunning => 'چل رہا ہے';

@@ -770,7 +770,14 @@ class V2LocalizationsFr extends V2Localizations {
       'Cette version du serveur n’est pas prise en charge pour la vue en direct.';
 
   @override
-  String get liveResuming => 'Serveur redémarré, reprise en cours';
+  String get liveResuming => 'Interrompue ; reprise non confirmée';
+
+  @override
+  String get liveStepInterrupted => 'Réponse interrompue.';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'L’exécution n’est pas active ; son résultat n’est pas confirmé.';
 
   @override
   String get liveRunning => 'En cours';

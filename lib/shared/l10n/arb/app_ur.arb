@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "سرور دوبارہ شروع ہوا، بحال ہو رہا ہے",
+  "liveResuming": "روک دیا گیا؛ بحالی کی تصدیق نہیں ہوئی",
+  "liveStepInterrupted": "جواب روک دیا گیا۔",
+  "liveExecutionUnconfirmed": "عمل درآمد فعال نہیں؛ نتیجے کی تصدیق نہیں ہوئی۔",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

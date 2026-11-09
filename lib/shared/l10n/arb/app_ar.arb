@@ -463,7 +463,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "أُعيد تشغيل الخادم، جارٍ الاستئناف",
+  "liveResuming": "تمت المقاطعة؛ لم يُؤكد الاستئناف",
+  "liveStepInterrupted": "تمت مقاطعة الرد.",
+  "liveExecutionUnconfirmed": "التنفيذ غير نشط؛ لم تُؤكد نتيجته.",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

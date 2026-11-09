@@ -464,7 +464,9 @@
   "@liveIncompatible": {
     "description": "V2 live read-only session view"
   },
-  "liveResuming": "সার্ভার পুনরায় চালু হয়েছে, আবার শুরু হচ্ছে",
+  "liveResuming": "বাধাগ্রস্ত; পুনরারম্ভ নিশ্চিত নয়",
+  "liveStepInterrupted": "উত্তর বাধাগ্রস্ত হয়েছে।",
+  "liveExecutionUnconfirmed": "কার্যক্রম সক্রিয় নয়; ফলাফল নিশ্চিত হয়নি।",
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },

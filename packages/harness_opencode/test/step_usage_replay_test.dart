@@ -35,6 +35,7 @@ void main() {
       };
       final phases = <String, int>{};
       var failures = 0;
+      var interruptions = 0;
       var totals = 0;
       for (final file in files) {
         final capture = jsonDecode(file.readAsStringSync());
@@ -87,9 +88,13 @@ void main() {
             }
             states[session] = state;
             if (type == 'session.step.failed') {
-              // The step emits no item: the turn's outcome carries the error,
-              // and the history row it matches shows no marker for it.
-              expect(projected.whereType<ItemUpserted>(), isEmpty);
+              // Only an aborted step leaves an item, the interruption notice
+              // its history row also projects; any other error reaches the
+              // timeline on the turn's outcome.
+              final notices = [
+                for (final event in projected.whereType<ItemUpserted>())
+                  event.item,
+              ];
               final row = rows[data['assistantMessageID']];
               expect(row, isNotNull, reason: name);
               expect(
@@ -103,6 +108,22 @@ void main() {
                 sourceVersion: '2.0.22',
               );
               expect(history.whereType<UnknownItem>(), isEmpty, reason: name);
+              final aborted = error['type'] == 'aborted';
+              expect(notices, hasLength(aborted ? 1 : 0), reason: name);
+              for (final notice in notices) {
+                expect(notice, isA<Notice>(), reason: name);
+                expect((notice as Notice).kind.known, NoticeKind.interruption);
+                expect(notice.status.known, ItemStatus.interrupted);
+              }
+              expect(
+                notices.map((n) => n.id),
+                history
+                    .whereType<Notice>()
+                    .where((n) => n.kind.known == NoticeKind.interruption)
+                    .map((n) => n.id),
+                reason: name,
+              );
+              if (aborted) interruptions++;
               failures++;
             }
             if (type == 'session.usage.updated' &&
@@ -133,9 +154,10 @@ void main() {
         'session.step.failed': 11,
         'session.usage.updated': 51,
       });
-      // Every failed step matches its history row; four readings in the
-      // restart captures follow steps that precede the recorded log.
-      expect((failures, totals), (11, 47));
+      // Every failed step matches its history row, seven of them aborted;
+      // four readings in the restart captures follow steps that precede the
+      // recorded log.
+      expect((failures, interruptions, totals), (11, 7, 47));
     },
   );
 }

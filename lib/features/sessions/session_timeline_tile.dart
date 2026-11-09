@@ -60,6 +60,14 @@ class SessionTimelineTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final item = this.item;
+    if (item is Notice && item.kind.known == NoticeKind.interruption) {
+      return ConversationTextScale(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Text(l10n.liveStepInterrupted),
+        ),
+      );
+    }
     if (item is TurnOutcome && item.kind.known == OutcomeKind.failed) {
       final error = item.error;
       if (error != null) {

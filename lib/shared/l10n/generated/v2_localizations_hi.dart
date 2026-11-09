@@ -760,7 +760,14 @@ class V2LocalizationsHi extends V2Localizations {
       'यह सर्वर संस्करण लाइव दृश्य के लिए समर्थित नहीं है।';
 
   @override
-  String get liveResuming => 'सर्वर फिर से शुरू हुआ, जारी किया जा रहा है';
+  String get liveResuming => 'बाधित; जारी होने की पुष्टि नहीं हुई';
+
+  @override
+  String get liveStepInterrupted => 'उत्तर बाधित हुआ।';
+
+  @override
+  String get liveExecutionUnconfirmed =>
+      'निष्पादन सक्रिय नहीं है; परिणाम की पुष्टि नहीं हुई।';
 
   @override
   String get liveRunning => 'चल रहा है';

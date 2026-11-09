@@ -41,6 +41,9 @@ enum NoticeKind {
   compaction,
   system,
   workCompletion,
+
+  /// An observed step interruption, not a terminal execution outcome.
+  interruption,
 }
 
 enum OutcomeKind { succeeded, failed, interrupted }

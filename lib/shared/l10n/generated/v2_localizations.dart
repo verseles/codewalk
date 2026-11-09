@@ -1488,8 +1488,20 @@ abstract class V2Localizations {
   /// V2 live read-only session view
   ///
   /// In en, this message translates to:
-  /// **'Server restarted, resuming'**
+  /// **'Interrupted; continuation not confirmed'**
   String get liveResuming;
+
+  /// An observed interrupted assistant step, not a terminal turn outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Response interrupted.'**
+  String get liveStepInterrupted;
+
+  /// A previously observed execution is inactive without a new confirmed outcome
+  ///
+  /// In en, this message translates to:
+  /// **'The execution is not active; its outcome is unconfirmed.'**
+  String get liveExecutionUnconfirmed;
 
   /// V2 live read-only session view
   ///

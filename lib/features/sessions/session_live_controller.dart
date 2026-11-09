@@ -24,6 +24,8 @@ import 'session_selection_host.dart';
 import 'session_selection_memory.dart';
 import 'session_turn_controller.dart';
 
+enum SessionExecutionNotice { interrupted, unconfirmed }
+
 /// Owns one screen's live lease. Prompts and Stop require explicit user actions;
 /// observing, reconnecting and closing never mutate the server.
 class SessionLiveController extends ChangeNotifier
@@ -186,6 +188,85 @@ class SessionLiveController extends ChangeNotifier
   SessionLiveFailure? failure;
   bool opening = false;
   bool _savingPermissionMode = false;
+  bool _observedExecution = false;
+  ItemId? _observedOutcome;
+  ExecutionOutcome? _observedResult;
+  String? _observedGeneration;
+  ItemId? _noticePrompt;
+  SessionExecutionNotice? _executionNotice;
+
+  /// The server reported a step interruption after the last turn outcome.
+  bool get hasInterruptedStep => _interruptedStep();
+
+  /// [sincePrompt] keeps an earlier prompt's interruption from standing for
+  /// the latest prompt's run.
+  bool _interruptedStep({bool sincePrompt = false}) {
+    for (final item in (state?.timeline ?? const <TimelineItem>[]).reversed) {
+      if (item is TurnOutcome || (sincePrompt && item is UserInput)) {
+        return false;
+      }
+      if (item is Notice && item.kind.known == NoticeKind.interruption) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// A local observation, never an execution outcome or permission to resume.
+  SessionExecutionNotice? get executionNotice {
+    if (_interruptedStep(sincePrompt: true) ||
+        state?.execution?.kind.known ==
+            ExecutionKind.interruptedPendingResume) {
+      return null;
+    }
+    final prompt = state?.timeline.whereType<UserInput>().lastOrNull?.id;
+    return prompt == _noticePrompt ? _executionNotice : null;
+  }
+
+  void _observeExecution(SessionLiveView next) {
+    final current = next.state;
+    if (current == null || next.phase != SessionLivePhase.live || next.stale) {
+      return;
+    }
+    final kind = current.execution?.kind.known;
+    final result = current.execution?.lastOutcome;
+    final outcome = current.timeline.whereType<TurnOutcome>().lastOrNull?.id;
+    final prompt = current.timeline.whereType<UserInput>().lastOrNull?.id;
+    void observe() {
+      _observedOutcome = outcome;
+      _observedResult = result;
+      _observedGeneration = current.hydrationGeneration;
+    }
+
+    if (kind == ExecutionKind.interruptedPendingResume) {
+      if (!_observedExecution) observe();
+      _observedExecution = true;
+      _executionNotice = SessionExecutionNotice.interrupted;
+      _noticePrompt = prompt;
+    } else if (kind != null &&
+        kind != ExecutionKind.unknown &&
+        kind != ExecutionKind.idle) {
+      _observedExecution = true;
+      observe();
+      _executionNotice = null;
+    } else if (kind == ExecutionKind.idle) {
+      // A new outcome item, or a new last outcome reported in the same
+      // hydration: a re-read rebuilds the last outcome without proving it is
+      // this run's.
+      final settled =
+          (outcome != null && outcome != _observedOutcome) ||
+          (current.hydrationGeneration == _observedGeneration &&
+              !identical(result, _observedResult));
+      if (settled) {
+        _executionNotice = null;
+      } else if (_observedExecution && _executionNotice == null) {
+        _executionNotice = SessionExecutionNotice.unconfirmed;
+        _noticePrompt = prompt;
+      }
+      _observedExecution = false;
+      observe();
+    }
+  }
 
   /// The lease is open or opening, so a page shown again keeps it instead of
   /// opening another.
@@ -893,6 +974,12 @@ class SessionLiveController extends ChangeNotifier
 
   void _detach() {
     _generation++;
+    _observedExecution = false;
+    _observedOutcome = null;
+    _observedResult = null;
+    _observedGeneration = null;
+    _executionNotice = null;
+    _noticePrompt = null;
     // Another lease starts without this one's switch: it settles nothing.
     _pending = null;
     _restore = null;
@@ -974,6 +1061,7 @@ class SessionLiveController extends ChangeNotifier
         if (_disposed || generation != _generation) return;
         _pruneNotes(next.state);
         _pruneFormDrafts(next.state);
+        _observeExecution(next);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
         _observeModel(next.state?.selection);
