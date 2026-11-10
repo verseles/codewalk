@@ -279,7 +279,13 @@ final class UpdateCheckController extends ChangeNotifier {
       if (!_current(generation)) return;
       _installed = installed;
       if (current != null) {
-        final task = _task = _source.start();
+        // A saved catalog that holds the installed release already has every
+        // older one, so the listing only needs the releases since.
+        final saved = _catalog;
+        final until = saved != null && saved.any((e) => e.tag == 'v$current')
+            ? 'v$current'
+            : null;
+        final task = _task = _source.start(until: until);
         final result = await task.result;
         if (!_current(generation)) return;
         _failure = result.failure;
@@ -301,6 +307,7 @@ final class UpdateCheckController extends ChangeNotifier {
               : UpdateCheckStatus.available;
           try {
             catalog = parseReleaseCatalog(decoded);
+            if (until != null) catalog = mergeReleaseCatalog(catalog, saved!);
           } on FormatException {
             // A bad history must not turn a successful update check into an
             // error or replace a previously complete catalog.

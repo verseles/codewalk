@@ -18,7 +18,7 @@ class ImmediateArchive implements ReleaseSource {
   bool fail = false;
   int requests = 0;
   @override
-  ReleaseSourceTask start() {
+  ReleaseSourceTask start({String? until}) {
     requests++;
     return ImmediateTask(
       fail

@@ -12,7 +12,7 @@ class CountingSource implements ReleaseSource {
   final Duration delay;
   int count = 0;
   @override
-  ReleaseSourceTask start() {
+  ReleaseSourceTask start({String? until}) {
     count++;
     return _Task(delay);
   }

@@ -24,7 +24,7 @@ class ImmediateSource implements ReleaseSource {
   final ReleaseSourceFailure failure;
   int requests = 0;
   @override
-  ReleaseSourceTask start() {
+  ReleaseSourceTask start({String? until}) {
     requests++;
     return ImmediateTask(
       body == null

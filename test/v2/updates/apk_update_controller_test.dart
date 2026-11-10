@@ -43,7 +43,7 @@ final candidate = UpdateCandidate(
 
 class EmptySource implements ReleaseSource {
   @override
-  ReleaseSourceTask start() => _EmptyTask();
+  ReleaseSourceTask start({String? until}) => _EmptyTask();
   @override
   void close() {}
 }

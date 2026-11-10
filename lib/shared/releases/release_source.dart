@@ -43,6 +43,12 @@ abstract interface class ReleaseSource {
   static const maxUpdatePageBytes = 2 * 1024 * 1024;
   static const maxUpdatesBytes = 8 * 1024 * 1024;
   static const maxRetryDelay = Duration(days: 30);
-  ReleaseSourceTask start();
+
+  /// Starts a read. A paginated listing also stops at the page that holds
+  /// the release tagged [until], when the caller already knows every older
+  /// release. This relies on releases being created in version order, as the
+  /// beta cut does: a newer version listed below [until], such as an older
+  /// release recreated later, is not read.
+  ReleaseSourceTask start({String? until});
   void close();
 }

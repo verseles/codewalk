@@ -60,8 +60,8 @@ final class NativeReleaseSource implements ReleaseSource {
   bool _closed = false;
 
   @override
-  ReleaseSourceTask start() {
-    final task = _NativeTask(this);
+  ReleaseSourceTask start({String? until}) {
+    final task = _NativeTask(this, until);
     if (_closed) {
       task.complete(
         const ReleaseSourceResult.failure(ReleaseSourceFailure.unavailable),
@@ -85,8 +85,9 @@ final class NativeReleaseSource implements ReleaseSource {
 }
 
 final class _NativeTask implements ReleaseSourceTask {
-  _NativeTask(this.owner);
+  _NativeTask(this.owner, this.until);
   final NativeReleaseSource owner;
+  final String? until;
   final _result = Completer<ReleaseSourceResult>();
   final _cancellation = RequestCancellation();
   Timer? _deadline;
@@ -202,7 +203,13 @@ final class _NativeTask implements ReleaseSourceTask {
         releases.addAll(entries);
         // The older pages hold only CodeWalk 1 releases, about 9 KB each.
         if (entries.length < ReleaseSource.updatePageSize ||
-            entries.any(_predatesV2)) {
+            entries.any(
+              (release) =>
+                  _predatesV2(release) ||
+                  (until != null &&
+                      release is Map &&
+                      release['tag_name'] == until),
+            )) {
           complete(ReleaseSourceResult.success(jsonEncode(releases)));
           return;
         }

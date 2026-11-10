@@ -38,7 +38,7 @@ class ControlledSource implements ReleaseSource {
   final tasks = <PendingTask>[];
   bool closed = false;
   @override
-  ReleaseSourceTask start() {
+  ReleaseSourceTask start({String? until}) {
     final task = PendingTask();
     tasks.add(task);
     return task;

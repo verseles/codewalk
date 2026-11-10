@@ -284,6 +284,28 @@ void main() {
     },
   );
 
+  test('the listing stops at the page that holds the known tag', () async {
+    final transport = FakeTransport(
+      () async => page([
+        for (var i = ReleaseSource.updatePageSize; i > 0; i--)
+          {
+            'tag_name': 'v2.0.0-beta.${i + 20}',
+            'created_at': '2026-11-20T00:00:00Z',
+          },
+      ]),
+    );
+    final source = NativeReleaseSource(
+      transport: transport,
+      path: ReleaseSource.updatesPath,
+      maxBytes: ReleaseSource.maxUpdatesBytes,
+      paginateReleases: true,
+    );
+    addTearDown(source.close);
+    final result = await source.start(until: 'v2.0.0-beta.25').result;
+    expect(transport.requests, hasLength(1));
+    expect(jsonDecode(result.body!), hasLength(ReleaseSource.updatePageSize));
+  });
+
   for (final (failure, expected) in [
     (TransportFailure.connection, ReleaseSourceFailure.unavailable),
     (TransportFailure.timeout, ReleaseSourceFailure.timeout),

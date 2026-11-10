@@ -68,6 +68,22 @@ List<ReleaseCatalogEntry> parseReleaseCatalog(Object? source) {
   return List.unmodifiable(entries);
 }
 
+/// Completes [fresh], read from the listing down to a release [saved] holds,
+/// with the older entries of [saved], a catalog that was complete when it was
+/// saved. Fresh entries win.
+List<ReleaseCatalogEntry> mergeReleaseCatalog(
+  List<ReleaseCatalogEntry> fresh,
+  List<ReleaseCatalogEntry> saved,
+) {
+  final tags = {for (final entry in fresh) entry.tag};
+  final merged = [
+    ...fresh,
+    for (final entry in saved)
+      if (!tags.contains(entry.tag)) entry,
+  ]..sort((a, b) => b.version.compareTo(a.version));
+  return List.unmodifiable(merged);
+}
+
 List<Map<String, Object>> encodeReleaseCatalog(
   List<ReleaseCatalogEntry> entries,
 ) => [

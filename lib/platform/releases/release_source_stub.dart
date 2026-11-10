@@ -9,7 +9,7 @@ UpdateTarget? currentUpdateTarget() => null;
 
 final class _UnsupportedSource implements ReleaseSource {
   @override
-  ReleaseSourceTask start() => _UnsupportedTask();
+  ReleaseSourceTask start({String? until}) => _UnsupportedTask();
   @override
   void close() {}
 }

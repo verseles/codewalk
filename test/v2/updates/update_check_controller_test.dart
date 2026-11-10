@@ -33,9 +33,14 @@ class PendingTask implements ReleaseSourceTask {
 
 class ControlledSource implements ReleaseSource {
   final tasks = <PendingTask>[];
+  final untils = <String?>[];
   bool closed = false;
   @override
-  ReleaseSourceTask start() => PendingTask().also(tasks.add);
+  ReleaseSourceTask start({String? until}) {
+    untils.add(until);
+    return PendingTask().also(tasks.add);
+  }
+
   @override
   void close() => closed = true;
 }
@@ -266,6 +271,53 @@ void main() {
     updates.dispose();
     restored.dispose();
   });
+
+  test(
+    'a saved catalog holding the installed release limits the read',
+    () async {
+      installed = '2.0.0-beta.2';
+      String releases(List<String> tags) => jsonEncode([
+        for (final release in jsonDecode(listing(tags)) as List)
+          {
+            ...release as Map,
+            'published_at': '2026-11-04T12:00:00Z',
+            'body': 'Notes ${release['tag_name']}',
+          },
+      ]);
+      final updates = controller();
+      await updates.setChannel(UpdateChannel.beta);
+      var check = updates.check();
+      await answer(releases(['v2.0.0-beta.2', 'v2.0.0-beta.1']));
+      await check;
+      expect(source.untils.last, isNull, reason: 'nothing was saved yet');
+
+      final restored = controller();
+      await restored.restore();
+      check = restored.check();
+      await answer(releases(['v2.0.0-beta.3', 'v2.0.0-beta.2']));
+      await check;
+      expect(source.untils.last, 'v2.0.0-beta.2');
+      expect(restored.candidate?.tag, 'v2.0.0-beta.3');
+      expect(restored.catalog!.map((entry) => entry.tag), [
+        'v2.0.0-beta.3',
+        'v2.0.0-beta.2',
+        'v2.0.0-beta.1',
+      ]);
+
+      installed = '2.0.0-beta.9';
+      check = restored.check();
+      await answer(releases(['v2.0.0-beta.3']));
+      await check;
+      expect(
+        source.untils.last,
+        isNull,
+        reason: 'the installed tag is unknown',
+      );
+      expect(restored.catalog!.map((entry) => entry.tag), ['v2.0.0-beta.3']);
+      updates.dispose();
+      restored.dispose();
+    },
+  );
 
   test('news and update dismissals are independent', () async {
     installed = '2.0.0-beta.2';

@@ -11,7 +11,7 @@ import '../storage/storage_fakes.dart';
 
 class Source implements ReleaseSource, ReleaseSourceTask {
   @override
-  ReleaseSourceTask start() => this;
+  ReleaseSourceTask start({String? until}) => this;
   @override
   void close() {}
   @override
