@@ -16,7 +16,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #468 Chips de status do cabeçalho que não importam
 - [ ] #467 Repensar o Refresh
 - [ ] #470 Escolha Steer/Queue no composer
-- [ ] #466 Settings com lugar fixo no celular
 - [ ] #438 Editar servidor pareado
 - [ ] #474 Janela desktop: barra integrada e comportamento ao fechar
 - [ ] #462 Busca na timeline e controles que faltam na toolbar
