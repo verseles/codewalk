@@ -51,6 +51,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #293 Teste de corrida na troca de modelo durante o envio
 - [ ] #425 Capturar troca real de modelo e agente no OpenCode 2.0.22
 - [ ] #443 Atualizar o rodapé de fundação do `BEHAVIOR.md`
+- [ ] #479 Sessões dos projetos abertos pela leitura global do servidor
 
 ## 5. Codex: gates G1, G2 e G5
 
