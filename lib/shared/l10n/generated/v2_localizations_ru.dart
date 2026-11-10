@@ -1558,6 +1558,10 @@ class V2LocalizationsRu extends V2Localizations {
       'Не удалось проверить обновления. Проверьте подключение и повторите попытку.';
 
   @override
+  String get updatesCheckUnreadable =>
+      'GitHub прислал ответ об обновлениях, который CodeWalk не смог прочитать. Повторите попытку позже.';
+
+  @override
   String get updatesDownload => 'Скачать';
 
   @override

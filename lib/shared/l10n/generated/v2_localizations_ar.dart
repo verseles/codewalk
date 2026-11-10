@@ -1529,6 +1529,10 @@ class V2LocalizationsAr extends V2Localizations {
       'تعذّر التحقق من التحديثات. تحقّق من اتصالك وحاول مرة أخرى.';
 
   @override
+  String get updatesCheckUnreadable =>
+      'أرسل GitHub ردًا عن التحديثات لم يتمكن CodeWalk من قراءته. حاول مرة أخرى لاحقًا.';
+
+  @override
   String get updatesDownload => 'تنزيل';
 
   @override

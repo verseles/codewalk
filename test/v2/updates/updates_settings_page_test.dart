@@ -19,15 +19,16 @@ import 'package:provider/provider.dart';
 import '../storage/storage_fakes.dart';
 
 class ImmediateSource implements ReleaseSource {
-  ImmediateSource(this.body);
+  ImmediateSource(this.body, {this.failure = ReleaseSourceFailure.unavailable});
   String? body;
+  final ReleaseSourceFailure failure;
   int requests = 0;
   @override
   ReleaseSourceTask start() {
     requests++;
     return ImmediateTask(
       body == null
-          ? const ReleaseSourceResult.failure(ReleaseSourceFailure.unavailable)
+          ? ReleaseSourceResult.failure(failure)
           : ReleaseSourceResult.success(body!),
     );
   }
@@ -165,10 +166,11 @@ void main() {
     WidgetTester tester, {
     required UpdateTarget? target,
     String? body,
+    ReleaseSourceFailure failure = ReleaseSourceFailure.unavailable,
     bool foreground = false,
   }) async {
     final updates = UpdateCheckController(
-      source: ImmediateSource(body),
+      source: ImmediateSource(body, failure: failure),
       store: V2MetadataStore(backend: FakeMetadataBackend()),
       installedVersion: () async => '2.0.0-beta.1',
       target: target,
@@ -356,6 +358,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(failing.status, UpdateCheckStatus.failed);
     expect(find.byKey(const ValueKey('updates_failed')), findsOneWidget);
+    expect(
+      find.text(
+        'Unable to check for updates. Check your connection and try again.',
+      ),
+      findsOneWidget,
+    );
+
+    await mount(
+      tester,
+      target: UpdateTarget.linuxX64,
+      failure: ReleaseSourceFailure.invalidResponse,
+    );
+    await tester.tap(find.byKey(const ValueKey('updates_check')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'GitHub sent an update answer CodeWalk could not read. Try again later.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('an unsupported platform offers no check', (tester) async {

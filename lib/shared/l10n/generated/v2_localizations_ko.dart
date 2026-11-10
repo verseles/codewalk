@@ -1469,6 +1469,10 @@ class V2LocalizationsKo extends V2Localizations {
   String get updatesCheckFailed => '업데이트를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.';
 
   @override
+  String get updatesCheckUnreadable =>
+      'GitHub에서 CodeWalk가 읽을 수 없는 업데이트 응답을 보냈습니다. 나중에 다시 시도하세요.';
+
+  @override
   String get updatesDownload => '다운로드';
 
   @override

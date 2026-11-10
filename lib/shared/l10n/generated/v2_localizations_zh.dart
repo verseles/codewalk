@@ -1442,6 +1442,9 @@ class V2LocalizationsZh extends V2Localizations {
   String get updatesCheckFailed => '无法检查更新。请检查网络连接后重试。';
 
   @override
+  String get updatesCheckUnreadable => 'GitHub 返回了 CodeWalk 无法读取的更新响应。请稍后重试。';
+
+  @override
   String get updatesDownload => '下载';
 
   @override

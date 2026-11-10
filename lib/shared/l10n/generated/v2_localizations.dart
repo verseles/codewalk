@@ -2913,6 +2913,12 @@ abstract class V2Localizations {
   /// **'Unable to check for updates. Check your connection and try again.'**
   String get updatesCheckFailed;
 
+  /// V2 update check: GitHub answered, but the answer could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub sent an update answer CodeWalk could not read. Try again later.'**
+  String get updatesCheckUnreadable;
+
   /// V2 update check
   ///
   /// In en, this message translates to:

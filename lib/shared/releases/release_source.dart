@@ -29,8 +29,15 @@ abstract interface class ReleaseSource {
   static const maxBodyBytes = 256 * 1024;
   static const url =
       'https://raw.githubusercontent.com/verseles/codewalk/main/CHANGELOG.md';
-  static const updatePageSize = 100;
-  static const updatePageLimit = 10;
+  static const updatePageSize = 20;
+  // About 1,000 releases created since CodeWalk 2 began. The stop rule
+  // usually ends the listing on the first page.
+  static const updatePageLimit = 50;
+
+  /// When `v2.0.0-beta.1`, the first CodeWalk 2 release, was created. GitHub
+  /// lists releases newest first by creation, so no CodeWalk 2 release follows
+  /// one created before this.
+  static final v2FirstReleaseCreated = DateTime.utc(2026, 11, 4, 2, 36, 3);
   static const updatesPath =
       '/repos/verseles/codewalk/releases?per_page=$updatePageSize';
   static const maxUpdatePageBytes = 2 * 1024 * 1024;

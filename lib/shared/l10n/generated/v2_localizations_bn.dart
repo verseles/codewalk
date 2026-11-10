@@ -1539,6 +1539,10 @@ class V2LocalizationsBn extends V2Localizations {
       'আপডেট পরীক্ষা করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
 
   @override
+  String get updatesCheckUnreadable =>
+      'GitHub আপডেটের এমন একটি উত্তর পাঠিয়েছে যা CodeWalk পড়তে পারেনি। পরে আবার চেষ্টা করুন।';
+
+  @override
   String get updatesDownload => 'ডাউনলোড';
 
   @override

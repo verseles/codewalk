@@ -1542,6 +1542,10 @@ class V2LocalizationsUr extends V2Localizations {
       'اپڈیٹس چیک نہیں ہو سکیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔';
 
   @override
+  String get updatesCheckUnreadable =>
+      'GitHub نے اپڈیٹ کا ایسا جواب بھیجا جسے CodeWalk پڑھ نہیں سکا۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
   String get updatesDownload => 'ڈاؤن لوڈ کریں';
 
   @override

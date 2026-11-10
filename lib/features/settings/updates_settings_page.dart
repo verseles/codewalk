@@ -143,9 +143,11 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           Text(l.updatesUpToDate, key: const ValueKey('updates_up_to_date')),
         if (controller.status == UpdateCheckStatus.failed)
           Text(
-            controller.failure == ReleaseSourceFailure.rateLimited
-                ? l.updatesRateLimited
-                : l.updatesCheckFailed,
+            switch (controller.failure) {
+              ReleaseSourceFailure.rateLimited => l.updatesRateLimited,
+              ReleaseSourceFailure.invalidResponse => l.updatesCheckUnreadable,
+              _ => l.updatesCheckFailed,
+            },
             key: const ValueKey('updates_failed'),
             style: TextStyle(color: theme.colorScheme.error),
           ),

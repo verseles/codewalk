@@ -163,10 +163,11 @@ void main() {
     final result = await source.start().result;
     expect(
       transport.request!.path,
-      '/repos/verseles/codewalk/releases?per_page=100',
+      '/repos/verseles/codewalk/releases?per_page=20',
     );
     expect(transport.request!.headers, {'User-Agent': 'CodeWalk'});
     expect(result.body, isNull, reason: 'a body above the limit is refused');
+    expect(result.failure, ReleaseSourceFailure.invalidResponse);
     source.close();
   });
 
@@ -184,8 +185,10 @@ void main() {
       final transport = FakeTransport(
         () async => page(
           ++reads == 1
+              // A CodeWalk 1 release published after CodeWalk 2 started.
               ? List.filled(ReleaseSource.updatePageSize, {
-                  'tag_name': 'v1.265.1',
+                  'tag_name': 'v1.266.0',
+                  'created_at': '2026-11-10T03:02:29Z',
                 })
               : [
                   {
@@ -242,10 +245,65 @@ void main() {
       addTearDown(source.close);
       final result = await source.start().result;
       expect(result.body, isNull);
-      expect(result.failure, ReleaseSourceFailure.unavailable);
+      expect(result.failure, ReleaseSourceFailure.invalidResponse);
       expect(transport.requests, hasLength(ReleaseSource.updatePageLimit));
     },
   );
+
+  test(
+    'the listing stops at the page that reaches before CodeWalk 2',
+    () async {
+      final releases = [
+        for (var i = 0; i < ReleaseSource.updatePageSize; i++)
+          {
+            ...i == ReleaseSource.updatePageSize - 1
+                ? {
+                    'tag_name': 'v1.266.0-native.1',
+                    'created_at': '2026-10-23T15:01:06Z',
+                  }
+                : {
+                    'tag_name':
+                        'v2.0.0-beta.${ReleaseSource.updatePageSize - i}',
+                    'created_at': '2026-11-05T00:00:00Z',
+                  },
+          },
+      ];
+      final transport = FakeTransport(() async => page(releases));
+      final source = NativeReleaseSource(
+        transport: transport,
+        path: ReleaseSource.updatesPath,
+        maxBytes: ReleaseSource.maxUpdatesBytes,
+        paginateReleases: true,
+      );
+      addTearDown(source.close);
+      final result = await source.start().result;
+      expect(transport.requests.map((r) => r.path), [
+        '${ReleaseSource.updatesPath}&page=1',
+      ]);
+      expect(jsonDecode(result.body!), hasLength(ReleaseSource.updatePageSize));
+    },
+  );
+
+  for (final (failure, expected) in [
+    (TransportFailure.connection, ReleaseSourceFailure.unavailable),
+    (TransportFailure.timeout, ReleaseSourceFailure.timeout),
+    (TransportFailure.unexpectedStatus, ReleaseSourceFailure.invalidResponse),
+  ]) {
+    test(
+      'a ${failure.name} transport failure reports ${expected.name}',
+      () async {
+        final source = NativeReleaseSource(
+          transport: FakeTransport(
+            () async => throw TransportException(failure),
+          ),
+          path: ReleaseSource.updatesPath,
+          paginateReleases: true,
+        );
+        addTearDown(source.close);
+        expect((await source.start().result).failure, expected);
+      },
+    );
+  }
 
   test('release pages share one total byte limit', () async {
     var reads = 0;
@@ -259,7 +317,8 @@ void main() {
     final source = NativeReleaseSource(
       transport: transport,
       path: ReleaseSource.updatesPath,
-      maxBytes: 210,
+      // Page one takes 2n + 1 bytes and leaves 9 for page two's 17.
+      maxBytes: 2 * ReleaseSource.updatePageSize + 10,
       paginateReleases: true,
     );
     addTearDown(source.close);
@@ -340,7 +399,7 @@ void main() {
           ),
         );
         final result = await source.start().result;
-        expect(result.failure, ReleaseSourceFailure.unavailable);
+        expect(result.failure, ReleaseSourceFailure.invalidResponse);
         expect(result.body, isNull);
         source.close();
       },

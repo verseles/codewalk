@@ -1340,6 +1340,10 @@
   "@updatesCheckFailed": {
     "description": "V2 update check"
   },
+  "updatesCheckUnreadable": "أرسل GitHub ردًا عن التحديثات لم يتمكن CodeWalk من قراءته. حاول مرة أخرى لاحقًا.",
+  "@updatesCheckUnreadable": {
+    "description": "V2 update check: GitHub answered, but the answer could not be read"
+  },
   "updatesDownload": "تنزيل",
   "@updatesDownload": {
     "description": "V2 update check"

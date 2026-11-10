@@ -262,3 +262,25 @@ ERROR_COPY = {'en': ('Download interrupted. Check your connection, then try agai
 NEW_KEYS += ERROR_KEYS
 for _locale in COPY:
     COPY[_locale] += tuple(_text.replace("'", "''") for _text in ERROR_COPY[_locale])
+
+# The update check got an answer it could not read (#480).
+CHECK_KEYS = ('updatesCheckUnreadable',)
+CHECK_COPY = {
+    'en': ('GitHub sent an update answer CodeWalk could not read. Try again later.',),
+    'pt': ('O GitHub enviou uma resposta de atualização que o CodeWalk não conseguiu ler. Tente novamente mais tarde.',),
+    'es': ('GitHub envió una respuesta de actualización que CodeWalk no pudo leer. Inténtalo de nuevo más tarde.',),
+    'fr': ('GitHub a envoyé une réponse de mise à jour que CodeWalk n’a pas pu lire. Réessayez plus tard.',),
+    'de': ('GitHub hat eine Update-Antwort gesendet, die CodeWalk nicht lesen konnte. Versuche es später erneut.',),
+    'it': ('GitHub ha inviato una risposta di aggiornamento che CodeWalk non è riuscito a leggere. Riprova più tardi.',),
+    'ru': ('GitHub прислал ответ об обновлениях, который CodeWalk не смог прочитать. Повторите попытку позже.',),
+    'ja': ('GitHub から CodeWalk が読み取れない更新情報が返されました。後でもう一度お試しください。',),
+    'ko': ('GitHub에서 CodeWalk가 읽을 수 없는 업데이트 응답을 보냈습니다. 나중에 다시 시도하세요.',),
+    'zh': ('GitHub 返回了 CodeWalk 无法读取的更新响应。请稍后重试。',),
+    'ar': ('أرسل GitHub ردًا عن التحديثات لم يتمكن CodeWalk من قراءته. حاول مرة أخرى لاحقًا.',),
+    'hi': ('GitHub ने अपडेट का ऐसा जवाब भेजा जिसे CodeWalk पढ़ नहीं सका। बाद में फिर से कोशिश करें।',),
+    'bn': ('GitHub আপডেটের এমন একটি উত্তর পাঠিয়েছে যা CodeWalk পড়তে পারেনি। পরে আবার চেষ্টা করুন।',),
+    'ur': ('GitHub نے اپڈیٹ کا ایسا جواب بھیجا جسے CodeWalk پڑھ نہیں سکا۔ بعد میں دوبارہ کوشش کریں۔',),
+}
+NEW_KEYS += CHECK_KEYS
+for _locale in COPY:
+    COPY[_locale] += tuple(_text.replace("'", "''") for _text in CHECK_COPY[_locale])

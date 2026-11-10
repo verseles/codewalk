@@ -200,7 +200,9 @@ final class _NativeTask implements ReleaseSourceTask {
           throw const FormatException('Invalid release page');
         }
         releases.addAll(entries);
-        if (entries.length < ReleaseSource.updatePageSize) {
+        // The older pages hold only CodeWalk 1 releases, about 9 KB each.
+        if (entries.length < ReleaseSource.updatePageSize ||
+            entries.any(_predatesV2)) {
           complete(ReleaseSourceResult.success(jsonEncode(releases)));
           return;
         }
@@ -208,11 +210,34 @@ final class _NativeTask implements ReleaseSourceTask {
           throw const FormatException('Incomplete bounded release listing');
         }
       }
+    } on FormatException {
+      complete(
+        const ReleaseSourceResult.failure(ReleaseSourceFailure.invalidResponse),
+      );
+    } on TransportException catch (error) {
+      complete(
+        ReleaseSourceResult.failure(switch (error.failure) {
+          TransportFailure.timeout => ReleaseSourceFailure.timeout,
+          TransportFailure.bodyTooLarge ||
+          TransportFailure.invalidResponse ||
+          TransportFailure.unexpectedStatus ||
+          TransportFailure.unsupportedContentType =>
+            ReleaseSourceFailure.invalidResponse,
+          _ => ReleaseSourceFailure.unavailable,
+        }),
+      );
     } on Object {
       complete(
         const ReleaseSourceResult.failure(ReleaseSourceFailure.unavailable),
       );
     }
+  }
+
+  static bool _predatesV2(Object? release) {
+    if (release is! Map) return false;
+    final created = release['created_at'];
+    final at = created is String ? DateTime.tryParse(created) : null;
+    return at != null && at.isBefore(ReleaseSource.v2FirstReleaseCreated);
   }
 
   void complete(ReleaseSourceResult value) {

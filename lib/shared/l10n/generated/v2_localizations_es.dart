@@ -1566,6 +1566,10 @@ class V2LocalizationsEs extends V2Localizations {
       'No se pudo buscar actualizaciones. Revisa tu conexión e inténtalo de nuevo.';
 
   @override
+  String get updatesCheckUnreadable =>
+      'GitHub envió una respuesta de actualización que CodeWalk no pudo leer. Inténtalo de nuevo más tarde.';
+
+  @override
   String get updatesDownload => 'Descargar';
 
   @override
