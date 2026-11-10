@@ -151,4 +151,4 @@ rm -rf "$dir"
 - Workmanager 0.10 may run real `systemctl` commands in Linux tests that default to Android. Use a no-op fake or select the test platform explicitly, restoring it in teardown.
 - Translations: change only the needed keys, keep ARB and generated code in sync, and inspect the diff after any regeneration for unintended removals.
 - If `/tmp` is full, export `TMPPREFIX`, `TMPDIR`, `TEMP` and `TMP` to a directory with space on the same filesystem instead of deleting other processes' files.
-- After `dart format`, inspect the hunks and revert churn outside the intended change.
+- After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
