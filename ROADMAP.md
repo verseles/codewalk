@@ -9,7 +9,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 2. Limpeza logo após o lote 1
 
-- [ ] #476 Remover dependências e código Android nativo só da v1
 
 ## 3. UI/UX — restante
 
@@ -96,6 +95,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #433 Dividir os maiores arquivos da v2
 - [ ] #411 Suíte golden do xterm vendorizado
 - [ ] #410 Artefato novo do Task Memory escondido do `git add`
+- [ ] #478 Restos nativos da v1 no Windows, macOS e FileProvider do Android
 
 ## 8. Plataformas e GA
 

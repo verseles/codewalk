@@ -170,7 +170,6 @@ flutter {
 }
 
 dependencies {
-    implementation("androidx.browser:browser:1.9.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     androidTestImplementation("androidx.test:core-ktx:1.6.1")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")

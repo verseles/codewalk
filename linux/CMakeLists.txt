@@ -74,15 +74,6 @@ set_target_properties(${BINARY_NAME}
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
-# tray_manager currently uses libayatana APIs marked as deprecated on recent
-# distros. Keep global -Werror while allowing this plugin warning class.
-if(TARGET tray_manager_plugin)
-  target_compile_options(
-    tray_manager_plugin
-    PRIVATE -Wno-deprecated-declarations
-  )
-endif()
-
 # Clang warns on legacy nlohmann/json UDL whitespace used by
 # flutter_secure_storage_linux's vendored header; keep -Werror globally and
 # relax this single warning class only for this plugin target.

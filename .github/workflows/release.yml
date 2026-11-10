@@ -130,7 +130,7 @@ jobs:
             fi
           done
           sudo apt-get -o Acquire::Retries=3 update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev
 
       - run: flutter pub get
 

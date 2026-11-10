@@ -21,10 +21,8 @@ import android.util.Log
 class CodeWalkApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // MainActivity is not the only entry point: WorkManager's background
-        // engine, the overlay service and the foreground service all start
-        // Dart without an Activity. Application.onCreate covers every one of
-        // them before the first channel call.
+        // Runs before any Flutter engine, so an install updated from an
+        // older version is cured before the first preferences read.
         curePoisonedLargeCachePreferences(this)
     }
 

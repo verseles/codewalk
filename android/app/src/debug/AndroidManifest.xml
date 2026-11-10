@@ -4,11 +4,4 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <application>
-        <activity
-            android:name=".overlay.SessionOverlayTestActivity"
-            android:exported="false"
-            android:hardwareAccelerated="true"
-            android:theme="@style/NormalTheme" />
-    </application>
 </manifest>
