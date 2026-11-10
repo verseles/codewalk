@@ -108,6 +108,8 @@ always installs the latest release.
 
 Installers automatically pick the right release for your platform.
 
+All releases, including the CodeWalk 2 betas (marked as pre-releases), are listed on the [Releases page](https://github.com/verseles/codewalk/releases).
+
 In CodeWalk 2, opt in to **Beta** under **Settings → Version and updates**.
 Automatic checks can be disabled; Settings-entry and manual checks remain
 available. Android downloads and verifies updates in-app before asking the
