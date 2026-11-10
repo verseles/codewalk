@@ -537,7 +537,9 @@ class _SessionComposerState extends State<SessionComposer> {
                 ),
               ),
               SessionComposerStatus(
-                activity: composerActivity(c.live.state, l10n),
+                activity: liveStatus(c.live, l10n),
+                retryAt: liveRetryAt(c.live),
+                now: c.live.clock,
               ),
               // The steer/queue choice shares the selection chips' row, so
               // the composer stays short above a landscape keyboard.

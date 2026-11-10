@@ -198,6 +198,9 @@ class SessionLiveController extends ChangeNotifier
   /// The server reported a step interruption after the last turn outcome.
   bool get hasInterruptedStep => _interruptedStep();
 
+  /// The same, for the latest prompt's run only.
+  bool get hasInterruptedLatestStep => _interruptedStep(sincePrompt: true);
+
   /// [sincePrompt] keeps an earlier prompt's interruption from standing for
   /// the latest prompt's run.
   bool _interruptedStep({bool sincePrompt = false}) {

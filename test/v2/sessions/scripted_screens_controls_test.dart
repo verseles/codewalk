@@ -255,10 +255,8 @@ void main() {
 
       await _steps(tester, scenario.adapter, 4);
       expect(live.phase, SessionLivePhase.reconnecting);
-      expect(
-        find.text('Not up to date; showing the last synced state.'),
-        findsOneWidget,
-      );
+      // One status line: the phase says more than staleness (#468).
+      expect(find.text('Reconnecting…'), findsOneWidget);
       // The synced state is still on screen.
       expect(live.state!.interactions, hasLength(2));
 

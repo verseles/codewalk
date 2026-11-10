@@ -1,3 +1,4 @@
+import 'package:codewalk/features/sessions/session_composer_status.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
@@ -79,14 +80,23 @@ void main() {
     await tester.pump();
   }
 
-  String chip(WidgetTester tester) => tester
-      .widget<Text>(
-        find.descendant(
-          of: find.byKey(const ValueKey('live-execution')),
+  /// What the status bar reads (#468), or null while it shows nothing.
+  String? chip(WidgetTester tester) {
+    final more = find.byKey(const ValueKey('composer-status-more'));
+    final texts = find
+        .descendant(
+          of: find.byKey(const ValueKey('composer-status')),
           matching: find.byType(Text),
-        ),
-      )
-      .data!;
+        )
+        .evaluate()
+        .where(
+          (text) => !more.evaluate().any((button) => _within(text, button)),
+        )
+        .toList();
+    // The switcher keeps the previous label while it fades; the shown one
+    // comes last.
+    return texts.isEmpty ? null : (texts.last.widget as Text).data;
+  }
 
   ErrorInfo error() => ErrorInfo(
     kind: const OpenValue.known(ErrorKind.unknown),
@@ -99,20 +109,107 @@ void main() {
     ticking.value = true;
   });
 
-  testWidgets('each execution state has its own label', (tester) async {
+  testWidgets('the status bar names each execution state', (tester) async {
     final handle = await mount(tester);
     final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    // Idle first: once a run was seen, an idle with no outcome is the
+    // unconfirmed notice instead.
     for (final (kind, label) in [
-      (ExecutionKind.running, l10n.liveRunning),
-      (ExecutionKind.retrying, l10n.liveRetrying),
+      (ExecutionKind.idle, l10n.liveIdle),
+      (ExecutionKind.retrying, l10n.chatRetryingModelRequest),
       (ExecutionKind.interrupting, l10n.liveStopping),
       (ExecutionKind.interruptedPendingResume, l10n.liveResuming),
       (ExecutionKind.waitingForInput, l10n.liveNeedsYou),
-      (ExecutionKind.idle, l10n.liveIdle),
+      (ExecutionKind.idle, l10n.liveExecutionUnconfirmed),
     ]) {
       await show(tester, handle, ExecutionState(kind: OpenValue.known(kind)));
       expect(chip(tester), label, reason: kind.name);
     }
+    // Running shows the work itself, never a "Running" label.
+    await show(
+      tester,
+      handle,
+      const ExecutionState(kind: OpenValue.known(ExecutionKind.running)),
+    );
+    expect(find.text(l10n.liveRunning), findsNothing);
+    expect(find.byKey(const ValueKey('live-execution')), findsNothing);
+  });
+
+  testWidgets('a failed or interrupted last turn shows until it idles clean', (
+    tester,
+  ) async {
+    final handle = await mount(tester);
+    final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    for (final (outcome, label) in [
+      (ExecutionOutcomeKind.failed, l10n.liveOutcomeFailed),
+      (ExecutionOutcomeKind.interrupted, l10n.liveOutcomeInterrupted),
+      (ExecutionOutcomeKind.succeeded, l10n.liveIdle),
+    ]) {
+      await show(
+        tester,
+        handle,
+        ExecutionState(
+          kind: const OpenValue.known(ExecutionKind.idle),
+          lastOutcome: ExecutionOutcome(OpenValue.known(outcome)),
+        ),
+      );
+      expect(chip(tester), label, reason: outcome.name);
+    }
+  });
+
+  testWidgets('an unsupported server reads as Offline', (tester) async {
+    final handle = await mount(tester);
+    final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    handle.emit(
+      SessionLiveView(session: ref, phase: SessionLivePhase.incompatible),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(chip(tester), l10n.statusOffline);
+    expect(
+      liveFailureLabel(l10n, SessionLiveFailure.incompatibleResponse),
+      l10n.statusOffline,
+    );
+    expect(find.text(l10n.liveIncompatible), findsNothing);
+  });
+
+  testWidgets('an earlier interruption never hides the latest failure', (
+    tester,
+  ) async {
+    final handle = await mount(tester);
+    final l10n = await V2Localizations.delegate.load(const Locale('en'));
+    UserInput prompt(String id) => UserInput(
+      meta: liveMeta(ref, id),
+      text: id,
+      delivery: const OpenValue.known(DeliveryState.delivered),
+    );
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          ref,
+          items: [
+            prompt('first'),
+            Notice(
+              meta: liveMeta(ref, 'interruption'),
+              kind: const OpenValue.known(NoticeKind.interruption),
+              text: '',
+            ),
+            prompt('second'),
+          ],
+          execution: const ExecutionState(
+            kind: OpenValue.known(ExecutionKind.idle),
+            lastOutcome: ExecutionOutcome(
+              OpenValue.known(ExecutionOutcomeKind.failed),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(chip(tester), l10n.liveOutcomeFailed);
   });
 
   testWidgets('a reported retry wait counts down, then reads Retrying', (
@@ -167,7 +264,7 @@ void main() {
       handle,
       const ExecutionState(kind: OpenValue.known(ExecutionKind.running)),
     );
-    expect(chip(tester), l10n.liveRunning);
+    expect(chip(tester), isNot(l10n.liveRetrying));
   });
 
   testWidgets('the count pauses while the page does not tick', (tester) async {
@@ -232,20 +329,14 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(chip(tester), l10n.liveIdle);
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('live-children')),
-        matching: find.text(l10n.liveChildrenRunning(2)),
-      ),
-      findsOneWidget,
-    );
+    // Running sub-agents outrank the parent's idle state in the one bar.
+    expect(chip(tester), l10n.liveChildrenRunning(2));
     await show(
       tester,
       handle,
       const ExecutionState(kind: OpenValue.known(ExecutionKind.idle)),
     );
-    expect(find.byKey(const ValueKey('live-children')), findsNothing);
+    expect(chip(tester), l10n.liveIdle);
   });
 
   testWidgets('an interrupted step never shows the previous turn outcome', (
@@ -289,22 +380,18 @@ void main() {
     }
 
     await emit(ExecutionKind.idle, [prompt]);
-    expect(find.text(l10n.liveOutcomeSucceeded), findsOneWidget);
-    // The server reported the step aborted: the earlier success is not this
-    // prompt's result, and no local warning repeats the timeline's notice.
-    await emit(ExecutionKind.idle, [prompt, notice]);
+    // A success is silent (#468); the bar says the session idles.
     expect(find.text(l10n.liveOutcomeSucceeded), findsNothing);
-    expect(find.byKey(const ValueKey('live-execution-notice')), findsNothing);
+    expect(chip(tester), l10n.liveIdle);
+    // The server reported the step aborted: no local warning repeats the
+    // timeline's notice.
+    await emit(ExecutionKind.idle, [prompt, notice]);
+    expect(chip(tester), l10n.liveIdle);
     // Without any report, a run that disappears says only what was seen.
     await emit(ExecutionKind.running, [prompt]);
     await emit(ExecutionKind.idle, [prompt]);
     expect(find.text(l10n.liveOutcomeSucceeded), findsNothing);
-    expect(
-      tester
-          .widget<Text>(find.byKey(const ValueKey('live-execution-notice')))
-          .data,
-      l10n.liveExecutionUnconfirmed,
-    );
+    expect(chip(tester), l10n.liveExecutionUnconfirmed);
   });
 
   for (final locale in const [Locale('ar'), Locale('pt')]) {
@@ -330,4 +417,14 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+}
+
+/// Whether [element] sits inside [ancestor].
+bool _within(Element element, Element ancestor) {
+  var inside = false;
+  element.visitAncestorElements((parent) {
+    inside = parent == ancestor;
+    return !inside;
+  });
+  return inside;
 }

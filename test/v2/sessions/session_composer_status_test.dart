@@ -251,4 +251,50 @@ void main() {
       expect(find.text(tip), findsNothing);
     }
   });
+
+  testWidgets('a label longer than the bar offers its whole text', (
+    tester,
+  ) async {
+    final l10n = await _l10n(tester);
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pump(tester, (
+      kind: ComposerStatusKind.notice,
+      label: l10n.liveExecutionUnconfirmed,
+    ));
+    await tester.pumpAndSettle();
+    final more = find.byKey(const ValueKey('composer-status-more'));
+    expect(more, findsOneWidget);
+    expect(
+      tester.getTopRight(more).dx,
+      greaterThan(
+        tester.getTopRight(find.text(l10n.liveExecutionUnconfirmed)).dx,
+      ),
+    );
+    await tester.tap(more);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('composer-status-whole')),
+        matching: find.text(l10n.liveExecutionUnconfirmed),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text(l10n.chatClose));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('composer-status-whole')), findsNothing);
+
+    // A short label needs no More, and a resolved notice clears at once.
+    await _pump(tester, (kind: ComposerStatusKind.idle, label: l10n.liveIdle));
+    await tester.pumpAndSettle();
+    expect(more, findsNothing);
+    await _pump(tester, (
+      kind: ComposerStatusKind.attention,
+      label: l10n.liveNeedsYou,
+    ));
+    await tester.pump();
+    await _pump(tester, null);
+    expect(find.text(l10n.liveNeedsYou), findsNothing);
+  });
 }

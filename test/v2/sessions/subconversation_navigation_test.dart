@@ -154,6 +154,12 @@ String _location(_App app) =>
     app.dependencies.router.routerDelegate.currentConfiguration.uri.toString();
 
 Future<void> _tap(WidgetTester tester, ToolCall tool) async {
+  // The first-use tab gesture hint floats over the top of the timeline.
+  final hint = find.byKey(const ValueKey('session-tabs-gesture-hint-dismiss'));
+  if (hint.evaluate().isNotEmpty) {
+    await tester.tap(hint);
+    await tester.pump();
+  }
   final card = find.byKey(ValueKey('subagent-open-${tool.id.value}'));
   await tester.ensureVisible(card);
   await tester.tap(card);

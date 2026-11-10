@@ -474,7 +474,7 @@
   "@liveRunning": {
     "description": "V2 live read-only session view"
   },
-  "liveIdle": "Ociosa",
+  "liveIdle": "Ocioso",
   "@liveIdle": {
     "description": "V2 live read-only session view"
   },

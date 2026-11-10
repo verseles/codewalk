@@ -12,12 +12,11 @@ import '../../app/workspace_actions.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
-import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
-import '../hosts/endpoint_health_view.dart';
 import 'session_composer.dart';
+import 'session_composer_status.dart';
 import 'session_error_card.dart';
 import 'session_form_card.dart';
 import 'session_history_controller.dart';
@@ -146,21 +145,14 @@ class _SessionLivePageState extends State<SessionLivePage>
     super.dispose();
   }
 
-  /// The block above the timeline items: the phase, the notices and the
-  /// retry. It scrolls with the items, so a long session keeps its status
-  /// in reach.
+  /// The block above the timeline items. A conversation's state shows only
+  /// in the status bar above its footer (#468); this keeps the permission
+  /// mode and, outside the workspace, which session and server this is.
   Widget _header(
     BuildContext context,
     SessionLiveController c,
     V2Localizations l10n,
     TextTheme textTheme, {
-    required String? failure,
-    required String? execution,
-    required DateTime? retryAt,
-    required int children,
-    required String? outcome,
-    required bool needsYou,
-    required SessionLiveView? view,
     required bool canAct,
   }) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -174,92 +166,14 @@ class _SessionLivePageState extends State<SessionLivePage>
             if (c.permissionModes != null)
               SessionPermissionModeChip(live: c, compact: true),
           ],
-        ),
-      if (!widget.workspaceChrome ||
-          !canAct ||
-          c.phase != SessionLivePhase.live ||
-          (view?.stale ?? false) ||
-          failure != null) ...[
+        )
+      else ...[
         Text(
           canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
           style: textTheme.titleMedium,
         ),
         Text(c.profileLabel, maxLines: 2, overflow: TextOverflow.ellipsis),
       ],
-      Semantics(
-        liveRegion: true,
-        container: true,
-        child: Column(
-          key: const ValueKey('live-status'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (failure != null)
-              Text(failure)
-            else if (c.endpointOffline &&
-                c.phase != SessionLivePhase.authRequired &&
-                c.phase != SessionLivePhase.incompatible) ...[
-              Text(switch (c.endpointHealth.credentialFailure == null
-                  ? c.endpointHealth.assessment?.status
-                  : null) {
-                EndpointStatus.authenticationRequired => l10n.hostsAuthRequired,
-                EndpointStatus.belowMinimum ||
-                EndpointStatus.legacyServer ||
-                EndpointStatus.unrecognized ||
-                EndpointStatus.unsupportedPlatform => l10n.liveIncompatible,
-                _ => l10n.statusOffline,
-              }),
-              if (endpointHealthReason(l10n, c.endpointHealth)
-                  case final reason?)
-                Text(reason),
-            ] else
-              Text(_phase(l10n, c.phase)),
-            if (view?.stale ?? false) Text(l10n.liveStale),
-            if (c.executionNotice case final notice?)
-              Text(switch (notice) {
-                SessionExecutionNotice.interrupted => l10n.liveResuming,
-                SessionExecutionNotice.unconfirmed =>
-                  l10n.liveExecutionUnconfirmed,
-              }, key: const ValueKey('live-execution-notice')),
-          ],
-        ),
-      ),
-      // Outside the live region: it changes on every event.
-      if (view?.lastSyncedAt case final synced?)
-        Text('${l10n.liveLastSynced}: ${_time(context, synced)}'),
-      if (execution != null || outcome != null || children > 0)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              if (execution != null)
-                Chip(
-                  key: const ValueKey('live-execution'),
-                  label: retryAt == null
-                      ? Text(execution)
-                      : _RetryLabel(at: retryAt, now: c.clock),
-                ),
-              if (outcome != null) Chip(label: Text(outcome)),
-              if (children > 0)
-                Chip(
-                  key: const ValueKey('live-children'),
-                  label: Text(l10n.liveChildrenRunning(children)),
-                ),
-            ],
-          ),
-        ),
-      if (needsYou && execution != l10n.liveNeedsYou)
-        Text(l10n.liveNeedsYou, key: const ValueKey('live-needs-you')),
-      if (c.canRetry)
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: TextButton(
-            key: const ValueKey('live-retry'),
-            onPressed: c.retry,
-            child: Text(l10n.liveRetry),
-          ),
-        ),
       const SizedBox(height: 8),
     ],
   );
@@ -368,59 +282,6 @@ class _SessionLivePageState extends State<SessionLivePage>
     }
   }
 
-  String? _failure(V2Localizations l10n, SessionLiveFailure? failure) =>
-      switch (failure) {
-        null => null,
-        SessionLiveFailure.authenticationRequired => l10n.hostsAuthRequired,
-        SessionLiveFailure.timeout => l10n.sessionsTimeout,
-        SessionLiveFailure.rateLimited => l10n.sessionsRateLimited,
-        SessionLiveFailure.notFound => l10n.liveEvicted,
-        SessionLiveFailure.incompatibleResponse => l10n.liveIncompatible,
-        SessionLiveFailure.capacity => l10n.liveCapacity,
-        SessionLiveFailure.sourceChanged => l10n.liveSourceChanged,
-        _ => l10n.liveUnavailable,
-      };
-
-  String _phase(V2Localizations l10n, SessionLivePhase phase) =>
-      switch (phase) {
-        SessionLivePhase.probing ||
-        SessionLivePhase.connecting => l10n.liveConnecting,
-        SessionLivePhase.hydrating => l10n.liveHydrating,
-        SessionLivePhase.live => l10n.liveLive,
-        SessionLivePhase.reconnecting => l10n.liveReconnecting,
-        SessionLivePhase.degraded => l10n.liveDegraded,
-        SessionLivePhase.evicted => l10n.liveEvicted,
-        SessionLivePhase.authRequired => l10n.hostsAuthRequired,
-        SessionLivePhase.incompatible => l10n.liveIncompatible,
-        SessionLivePhase.closed => l10n.liveUnavailable,
-      };
-
-  String? _execution(V2Localizations l10n, ExecutionState? execution) =>
-      switch (execution?.kind.known) {
-        null || ExecutionKind.unknown => null,
-        ExecutionKind.idle => l10n.liveIdle,
-        ExecutionKind.waitingForApproval ||
-        ExecutionKind.waitingForInput => l10n.liveNeedsYou,
-        ExecutionKind.retrying => l10n.liveRetrying,
-        ExecutionKind.interrupting => l10n.liveStopping,
-        ExecutionKind.interruptedPendingResume => l10n.liveResuming,
-        ExecutionKind.running => l10n.liveRunning,
-      };
-
-  String? _outcome(V2Localizations l10n, ExecutionOutcome? outcome) =>
-      switch (outcome?.kind.known) {
-        ExecutionOutcomeKind.succeeded => l10n.liveOutcomeSucceeded,
-        ExecutionOutcomeKind.failed => l10n.liveOutcomeFailed,
-        ExecutionOutcomeKind.interrupted => l10n.liveOutcomeInterrupted,
-        _ => null,
-      };
-
-  String _time(BuildContext context, DateTime date) =>
-      MaterialLocalizations.of(context).formatTimeOfDay(
-        TimeOfDay.fromDateTime(date.toLocal()),
-        alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-      );
-
   Widget _frameBody(BuildContext context, Widget body) =>
       widget.bodyFrame?.call(context, body) ?? body;
 
@@ -453,7 +314,6 @@ class _SessionLivePageState extends State<SessionLivePage>
     builder: (context, child) {
       final c = widget.controller;
       final l10n = context.v2L10n;
-      final view = c.view;
       final state = c.state;
       final cut = c.turnActions?.state.staged == true
           ? c.turnActions?.state.revert?.anchor
@@ -467,29 +327,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                     item.meta.anchor!.compareTo(cut) < 0)
                   item,
             ];
-      // An opened view speaks through its phase; this is an open failure.
-      final failure = _failure(l10n, c.failure);
-      final execution = _execution(l10n, state?.execution);
-      // Only a wait the harness reported is counted down.
-      final retryAt = state?.execution?.kind.known == ExecutionKind.retrying
-          ? state?.execution?.retryAt
-          : null;
-      final outcome =
-          state?.execution?.kind.known ==
-                  ExecutionKind.interruptedPendingResume ||
-              c.executionNotice != null ||
-              c.hasInterruptedStep
-          ? null
-          : _outcome(l10n, state?.execution?.lastOutcome);
-      // A parent stays idle while its sub-agents run; they are counted here.
-      final children =
-          state?.work
-              .where(
-                (w) => w.child != null && w.status.known == WorkStatus.running,
-              )
-              .length ??
-          0;
-      final needsYou = state?.interactions.isNotEmpty ?? false;
       // A settled session has no turn in flight, so a finished answer can be
       // offered to the reader from its start.
       final settled = switch (state?.execution?.kind.known) {
@@ -574,6 +411,8 @@ class _SessionLivePageState extends State<SessionLivePage>
                       ? returnToParentHeight(context)
                       : 0.0) +
                   MediaQuery.paddingOf(context).bottom +
+                  (c.canRetry ? 48.0 : 0.0) +
+                  (c.outbox == null ? SessionComposerStatus.height : 0.0) +
                   (stopButton ? 56.0 : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
               final space = max(0.0, body.maxHeight - pad - chrome);
@@ -596,10 +435,8 @@ class _SessionLivePageState extends State<SessionLivePage>
                   constraints: const BoxConstraints(maxWidth: 960),
                   child: Column(
                     children: [
-                      if (c.loading)
-                        AppIndeterminateBar(
-                          semanticsLabel: l10n.liveConnecting,
-                        ),
+                      // The status bar says what loads; this only shows it.
+                      if (c.loading) const AppIndeterminateBar(),
                       if (c.summary.info.lineage.parent case final parent?)
                         ReturnToParentConversation(parent: parent),
                       Expanded(
@@ -659,13 +496,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                             c,
                             l10n,
                             textTheme,
-                            failure: failure,
-                            execution: execution,
-                            retryAt: retryAt,
-                            children: children,
-                            outcome: outcome,
-                            needsYou: needsYou,
-                            view: view,
                             canAct: canAct,
                           ),
                         ),
@@ -700,10 +530,24 @@ class _SessionLivePageState extends State<SessionLivePage>
                                   ),
                                 ),
                               ),
+                              if (c.canRetry)
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton(
+                                    key: const ValueKey('live-retry'),
+                                    onPressed: c.retry,
+                                    child: Text(l10n.liveRetry),
+                                  ),
+                                ),
                               c.outbox == null
                                   ? Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
+                                        SessionComposerStatus(
+                                          activity: liveStatus(c, l10n),
+                                          retryAt: liveRetryAt(c),
+                                          now: c.clock,
+                                        ),
                                         // Prompt storage is missing, so the
                                         // footer explains that only prompt
                                         // sending is out, whether or not the
@@ -740,91 +584,4 @@ class _SessionLivePageState extends State<SessionLivePage>
       );
     },
   );
-}
-
-/// The retry chip's label: the wait the harness reported, counted down each
-/// second while it lasts, then just "Retrying". The count pauses while the
-/// page does not tick (a hidden tab) or the app is hidden.
-class _RetryLabel extends StatefulWidget {
-  const _RetryLabel({required this.at, required this.now});
-  final DateTime at;
-  final DateTime Function() now;
-
-  @override
-  State<_RetryLabel> createState() => _RetryLabelState();
-}
-
-class _RetryLabelState extends State<_RetryLabel> {
-  Timer? _timer;
-  var _ticking = false;
-  late final AppLifecycleListener _lifecycle;
-
-  @override
-  void initState() {
-    super.initState();
-    _lifecycle = AppLifecycleListener(
-      onStateChange: (_) => setState(_schedule),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _ticking = TickerMode.valuesOf(context).enabled;
-    _schedule();
-  }
-
-  @override
-  void didUpdateWidget(_RetryLabel old) {
-    super.didUpdateWidget(old);
-    if (old.at != widget.at || old.now != widget.now) _schedule();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _lifecycle.dispose();
-    super.dispose();
-  }
-
-  Duration get _left => widget.at.difference(widget.now());
-
-  /// Wakes at the next whole second of the wait, only while it is shown.
-  void _schedule() {
-    _timer?.cancel();
-    _timer = null;
-    final left = _left;
-    final shown = switch (WidgetsBinding.instance.lifecycleState) {
-      AppLifecycleState.hidden ||
-      AppLifecycleState.paused ||
-      AppLifecycleState.detached => false,
-      _ => true,
-    };
-    if (!_ticking || !shown || left <= Duration.zero) return;
-    final part = left.inMicroseconds % Duration.microsecondsPerSecond;
-    _timer = Timer(
-      Duration(microseconds: part == 0 ? Duration.microsecondsPerSecond : part),
-      () {
-        if (mounted) setState(_schedule);
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final left = _left;
-    if (left <= Duration.zero) return Text(l10n.liveRetrying);
-    // Whole seconds, rounded up, so the count never shows a passed second.
-    final seconds =
-        (left.inMicroseconds + Duration.microsecondsPerSecond - 1) ~/
-        Duration.microsecondsPerSecond;
-    final hours = seconds ~/ 3600;
-    final minutes = seconds ~/ 60 % 60;
-    final rest = (seconds % 60).toString().padLeft(2, '0');
-    final time = hours > 0
-        ? '$hours:${minutes.toString().padLeft(2, '0')}:$rest'
-        : '$minutes:$rest';
-    return Text(l10n.liveRetryingIn(time));
-  }
 }

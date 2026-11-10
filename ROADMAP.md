@@ -12,7 +12,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #468 Chips de status do cabeçalho que não importam
 - [ ] #467 Repensar o Refresh
 - [ ] #470 Escolha Steer/Queue no composer
 - [ ] #438 Editar servidor pareado

@@ -780,7 +780,7 @@ class V2LocalizationsPt extends V2Localizations {
   String get liveRunning => 'Em execução';
 
   @override
-  String get liveIdle => 'Ociosa';
+  String get liveIdle => 'Ocioso';
 
   @override
   String get liveOutcomeSucceeded => 'Último turno concluído';

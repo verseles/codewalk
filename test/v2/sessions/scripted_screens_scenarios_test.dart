@@ -92,7 +92,8 @@ void main() {
       final live = await _mount(tester, bridge);
       await _pumpUntil(tester, () => live.phase == SessionLivePhase.live);
       expect(live.phase, SessionLivePhase.live);
-      expect(find.text('Live'), findsOneWidget);
+      // A live view is silent; only trouble shows (#468).
+      expect(find.text('Live'), findsNothing);
 
       await tester.enterText(
         find.byKey(const ValueKey('live-composer-input')),
@@ -107,7 +108,7 @@ void main() {
       expect(sent.operation.known, MutationOperation.prompt);
 
       await _steps(tester, scenario.adapter, 1);
-      expect(find.text('Running'), findsOneWidget);
+      expect(find.text('Running'), findsNothing);
       expect(live.canStop, isTrue);
       expect(find.byKey(const ValueKey('live-stop')), findsOneWidget);
 
@@ -138,7 +139,8 @@ void main() {
       await _steps(tester, scenario.adapter, 3);
       expect(_body(tester, 'assistant'), 'complete answer');
       expect(live.phase, SessionLivePhase.live);
-      expect(find.text('Last turn succeeded'), findsOneWidget);
+      // A success is silent (#468).
+      expect(find.text('Last turn succeeded'), findsNothing);
       expect(scenario.adapter.remainingSteps, 0);
       expect(scenario.adapter.commands, hasLength(1));
     });
@@ -265,7 +267,9 @@ void main() {
       expect(await live.outbox!.entries(live.session), isEmpty);
 
       await _steps(tester, scenario.adapter, 1);
-      expect(find.text('Last turn failed'), findsOneWidget);
+      // One status line: the connection outranks the failed result, which
+      // the bar shows once the view is live again (#468).
+      expect(find.text('Reconnecting…'), findsOneWidget);
       expect(
         live.state!.execution!.lastOutcome!.kind.known,
         ExecutionOutcomeKind.failed,
@@ -305,7 +309,8 @@ void main() {
       // Step 13: the newer read finishes first and hydrates the session.
       await _steps(tester, scenario.adapter, 1);
       expect(live.phase, SessionLivePhase.live);
-      expect(find.text('Live'), findsOneWidget);
+      // A live view is silent; only trouble shows (#468).
+      expect(find.text('Live'), findsNothing);
       final hydrated = live.state!.item(assistantId)! as AssistantText;
       expect(hydrated.complete, isTrue);
       expect(hydrated.prefixMissing, isFalse);

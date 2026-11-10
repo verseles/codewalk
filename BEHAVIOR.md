@@ -79,7 +79,7 @@ description of this code.
 - **When** the health lane runs
 - **Then** every saved server is checked with the read-only compatibility probe at most every 10 seconds on its own lane, never cancelling or borrowing a manual check from the Servers page; a resume rechecks at once, a server `Retry-After` delays the next check, and nothing is probed in the background or while the server catalog is reloading or an edit is pending
 - **Then** a compatible answer shows Online, a check still pending or never completed shows Delayed, and a confirmed failure or a missing, unreadable or expired credential shows Offline with its localized reason and a way to recover (Retry, Servers or credential repair); a cancelled check never proves Offline, and a live stream that is reconnecting is shown separately from server health
-- **Then** an open conversation whose active server is confirmed Offline shows that status and its reason instead of a stale Live label; authentication and incompatibility failures retain their own status
+- **Then** an open conversation whose active server is confirmed Offline says Offline in its status bar, with the reason in the composer's recovery card, never a Live label; an authentication failure keeps its own status, while a server the app cannot use for any other reason, an unsupported version included, reads as Offline: the app never predicts or argues about server versions (owner, 2026-11-10)
 - **Then** a network signal prompts a fresh server check with a five-second connection timeout without using the device's Internet state as proof of server health; repeated same-route signals are bounded to one check per ten seconds, while a new route rechecks immediately; a reachable local or VPN server stays usable, and a failed or cancelled network feed cannot by itself mark a server Offline
 - **Then** the server switcher in the list header shows the active server with that status and opens a searchable list of saved servers; the Servers page has the same search
 - **Then** an Offline active server disables the composer with that reason instead of letting a message be sent
@@ -367,18 +367,18 @@ description of this code.
 ### V2 live session execution state
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server
-- **When** the header shows the session's execution
-- **Then** running, retrying, stopping, interrupted by a server shutdown ("Interrupted; continuation not confirmed", never a claim of restart or resume), needing input and idle each have their own label; the last outcome stays beside it, except while an interruption is shown, when it is the previous turn's result and is hidden
+- **When** the conversation status bar shows the session's execution
+- **Then** retrying, stopping, interrupted by a server shutdown ("Interrupted; continuation not confirmed", never a claim of restart or resume), needing input and idle each have their own label, in the bar's order; the last outcome shows only while idle and never while an interruption is shown, when it is the previous turn's result
 - **When** the server ends the running step as aborted (a shutdown or a Stop)
 - **Then** the timeline shows "Response interrupted." after the partial output, live and in the history with one identity, without the server's message; it never becomes a turn outcome or changes the execution state, and a Stop also keeps its "Last turn interrupted" row
 - **When** a run seen live in this screen reads idle with no new outcome (no outcome row, and no new result in the same read), for example after a restart with no report
-- **Then** the header says only "The execution is not active; its outcome is unconfirmed." (or the shutdown label if a shutdown was seen) for that prompt; it never stops, sends or resumes anything, clears when a new run or outcome arrives or another prompt is sent, and is not repeated while the timeline already shows the interruption for the latest prompt; a cold open, a stale or reconnecting view and an unknown state never raise it
+- **Then** the status bar says only "The execution is not active; its outcome is unconfirmed." (or the shutdown label if a shutdown was seen) for that prompt; it never stops, sends or resumes anything, clears when a new run or outcome arrives or another prompt is sent, and is not repeated while the timeline already shows the interruption for the latest prompt; a cold open, a stale or reconnecting view and an unknown state never raise it
 - **When** the server schedules a retry of the current step
 - **Then** the label reads "Retrying in m:ss" (hours as h:mm:ss), counted down from the deadline the server reported and never longer than the server's own delay counted from arrival; a deadline already past, or one unknown after a reconnect, reads "Retrying" or the hydrated running state
 - **Then** the count ticks once per second only while the screen is shown and the app is in the foreground, and catches up when it returns; the retry's error type is kept, its message is never shown
 - **Then** the next step start of that execution returns it to running, and any execution end clears the wait
 - **When** the session's direct sub-agent sessions run, including after the session itself went idle
-- **Then** the header shows "Sub-agents running: n" beside the session's own state, which stays idle; a sub-agent's start adds it, any end of its execution (a server shutdown too) removes it, and opening or reconnecting the session counts the ones the server lists as running
+- **Then** the status bar shows "Sub-agents running: n" instead of the session's own idle state; a sub-agent's start adds it, any end of its execution (a server shutdown too) removes it, and opening or reconnecting the session counts the ones the server lists as running
 - **Then** only the children the session already follows are counted: direct children, within the existing per-session bound, never by watching them separately
 - **Then** retry coverage is contract-derived (no natural 2.0.22 retry capture) and includes the 2x-text labels in Arabic and Portuguese; the sub-agent count replays the observed background-child capture; installed native/MVP acceptance remains separate
 
@@ -608,14 +608,24 @@ description of this code.
 - **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, or reports no execution state
 - **Then** the field stays editable while the continue is sent, and text typed meanwhile stays, also when the session's tab closes before the send ends
 
-### V2 composer status slot
+### V2 conversation status bar
 
-- **Given** a live session's composer
-- **When** the server reports the session running or retrying
-- **Then** a fixed slot above the field reports what the assistant does: the last call of the message still in flight (its tool name or `$ command`) or its reasoning (by the `**Heading**` it opens with, else `Thinking...`), shown at once; a call outside any message, such as a shell run, counts only while it runs; a retry shows `Retrying model request...`
-- **Then** with nothing more specific it waits 2 seconds, then rotates a prompting tip every 15 seconds (start with the goal, name relevant files, state constraints, ask for a plan, say which checks should pass, share attempts and errors, ask for alternatives or docs updates, add acceptance criteria, pick a focused agent, and similar), or shows `Reasoning...` when Settings > Appearance > Composer tips is off; the choice persists under `cw2.settings.composerTips` (on by default, only `false` is written)
-- **When** the work ends, or the server reports the session waiting for an approval or an answer
-- **Then** the slot clears a second later and keeps its height, so the field does not move
+- **Given** an open conversation, whether or not it can send prompts, a sub-agent's included
+- **When** the conversation has a state to report
+- **Then** one fixed-height line above the composer (or above the footer of a view without one) is the only place that reports it; nothing above the timeline does (#468, owner 2026-11-10); the top keeps only the permission mode control, and outside the workspace the session title and server
+- **Then** the line shows one state at a time, the first that applies in this order (owner, 2026-11-10):
+  1. The view is not live: the reason it could not open, Offline (an unusable server of any kind) or the authentication failure, connecting, loading, reconnecting, not kept up to date, gone from the server, or not up to date
+  2. A question or approval waits for the user: `Waiting for your answer`
+  3. An interruption: a shutdown whose continuation is not confirmed, a run that vanished with no outcome, or a stop requested by another client (a Stop sent here reports itself beside the composer)
+  4. A retry: `Retrying in m:ss`, counted down from the server's deadline, or `Retrying model request...` with no known deadline
+  5. The work in flight: the last call of the message still in flight (its tool name or `$ command`) or its reasoning (by the `**Heading**` it opens with, else `Thinking...`); a call outside any message, such as a shell run, counts only while it runs
+  6. Running sub-agents: `Sub-agents running: n`, also while the session itself idles
+  7. Otherwise, while the assistant works: after 2 seconds a prompting tip, rotated every 15 seconds (start with the goal, name relevant files, state constraints, ask for a plan, say which checks should pass, share attempts and errors, ask for alternatives or docs updates, add acceptance criteria, pick a focused agent, and similar), or `Reasoning...` when Settings > Appearance > Composer tips is off; the choice persists under `cw2.settings.composerTips` (on by default, only `false` is written)
+  8. A last turn that failed or was interrupted, unless the timeline already shows the interruption: `Last turn failed`, `Last turn interrupted`
+  9. Idle: `Idle` (`Ocioso` in Portuguese); a success has no label of its own
+- **Then** a live connection and a running session have no label: `Live` and `Running` never show
+- **Then** states 1, 2, 3 and 8 are announced to screen readers and clear as soon as they no longer apply; work and tips are not announced and clear a second later, so a short gap between activities does not flash
+- **Then** a label longer than the line keeps one line, ends in an ellipsis and offers a thin `More` at the end that opens the whole text; the line keeps its height, so the field does not move
 
 ### V2 composer commands
 

@@ -75,7 +75,9 @@ void main() {
     expect(find.byKey(const ValueKey('live-agent-chip')), findsOneWidget);
     final l10n = dependencies.localizations.current;
     expect(find.text(l10n.composerLiveSession), findsNothing);
-    expect(find.byKey(const ValueKey('live-status')), findsOneWidget);
+    // The conversation's state lives only in the status bar (#468).
+    expect(find.byKey(const ValueKey('live-status')), findsNothing);
+    expect(find.text(l10n.liveLive), findsNothing);
     final hosts = dependencies.hosts;
     final selected = hosts.profiles.single;
     hosts.observeAssessment(
@@ -84,15 +86,12 @@ void main() {
       const EndpointAssessment(EndpointStatus.unreachable),
     );
     await tester.pump();
-    final status = find.byKey(const ValueKey('live-status'));
+    final status = find.byKey(const ValueKey('composer-status'));
     expect(
       find.descendant(of: status, matching: find.text(l10n.statusOffline)),
       findsOneWidget,
     );
-    expect(
-      find.descendant(of: status, matching: find.text(l10n.liveLive)),
-      findsNothing,
-    );
+    expect(find.text(l10n.liveLive), findsNothing);
     hosts.observeAssessment(
       selected,
       hosts.credentialFor(selected)!,
@@ -100,8 +99,8 @@ void main() {
     );
     await tester.pump();
     expect(
-      find.descendant(of: status, matching: find.text(l10n.liveLive)),
-      findsOneWidget,
+      find.descendant(of: status, matching: find.text(l10n.statusOffline)),
+      findsNothing,
     );
     for (final assessment in [
       EndpointStatus.authenticationRequired,
@@ -116,20 +115,22 @@ void main() {
         EndpointAssessment(assessment),
       );
       await tester.pump();
-      expect(
-        find.descendant(of: status, matching: find.text(l10n.statusOffline)),
-        findsNothing,
-      );
+      // The bar never argues about server versions: an unusable server
+      // reads as offline (#468).
       expect(
         find.descendant(
           of: status,
           matching: find.text(
             assessment == EndpointStatus.authenticationRequired
                 ? l10n.hostsAuthRequired
-                : l10n.liveIncompatible,
+                : l10n.statusOffline,
           ),
         ),
-        findsWidgets,
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: status, matching: find.text(l10n.liveIncompatible)),
+        findsNothing,
       );
     }
     hosts.observeAssessment(
@@ -144,7 +145,7 @@ void main() {
         state: liveState(ref),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(
       find.descendant(of: status, matching: find.text(l10n.hostsAuthRequired)),
       findsOneWidget,
@@ -163,8 +164,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text(l10n.composerLiveSession), findsOneWidget);
-    expect(find.text(l10n.liveStale), findsOneWidget);
+    expect(find.text(l10n.composerLiveSession), findsNothing);
+    expect(
+      find.descendant(of: status, matching: find.text(l10n.liveStale)),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a failed turn\'s error card opens its one recovery (V2-055A)', (
@@ -367,12 +371,17 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          expect(find.text(l10n.liveLive), findsOneWidget);
-          expect(find.text(l10n.liveResuming), findsOneWidget);
+          final status = find.byKey(const ValueKey('composer-status'));
+          expect(find.text(l10n.liveLive), findsNothing);
+          // A wait for the user outranks the interruption (#468).
+          expect(
+            find.descendant(of: status, matching: find.text(l10n.liveNeedsYou)),
+            findsOneWidget,
+          );
+          expect(find.text(l10n.liveResuming), findsNothing);
           // The earlier turn's result is not the interrupted turn's (#423).
           expect(find.text(l10n.liveOutcomeFailed), findsNothing);
           expect(find.text(l10n.liveOutcomeInterrupted), findsOneWidget);
-          expect(find.byKey(const ValueKey('live-needs-you')), findsOneWidget);
           await tester.scrollUntilVisible(
             find.byKey(const ValueKey('live-history-limit')),
             -120,
@@ -384,7 +393,7 @@ void main() {
                 .first,
           );
           expect(find.text(l10n.historyLimit), findsOneWidget);
-          expect(find.textContaining(l10n.liveLastSynced), findsOneWidget);
+          expect(find.textContaining(l10n.liveLastSynced), findsNothing);
           // V2-071A: <b> renders rich (bold) with … prefix, not literal tags.
           expect(find.textContaining('Bold body'), findsWidgets);
           expect(find.text('…<b>Bold body</b>'), findsNothing);
@@ -396,15 +405,10 @@ void main() {
           // Without prompt sending there is no next prompt to pick a model
           // or agent for: the composer's chips are absent.
           expect(find.byKey(const ValueKey('live-model-chip')), findsNothing);
-          final status = find.byKey(const ValueKey('live-status'));
-          expect(tester.getSemantics(status), isNotNull);
-          // The clock changes on every event; only phase changes announce.
+          // A wait for the user is announced to screen readers.
           expect(
-            find.descendant(
-              of: status,
-              matching: find.textContaining(l10n.liveLastSynced),
-            ),
-            findsNothing,
+            tester.getSemantics(find.text(l10n.liveNeedsYou)),
+            matchesSemantics(label: l10n.liveNeedsYou, isLiveRegion: true),
           );
 
           // Stop does not depend on a prompt ledger, and shutdown-resuming
@@ -447,9 +451,13 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          expect(find.text(l10n.liveStale), findsOneWidget);
+          // One line: the phase says more than staleness does.
+          expect(find.text(l10n.liveStale), findsNothing);
           // A session set aside says so, not that it never opened.
-          expect(find.text(l10n.liveDegraded), findsOneWidget);
+          expect(
+            find.descendant(of: status, matching: find.text(l10n.liveDegraded)),
+            findsOneWidget,
+          );
           expect(find.text(l10n.liveUnavailable), findsNothing);
           expect(find.textContaining('Bold body'), findsWidgets);
           final retry = find.byKey(const ValueKey('live-retry'));
@@ -692,7 +700,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(handle.stops, hasLength(1));
         expect(find.text(l10n.liveStopIdle), findsOneWidget);
-        expect(find.text(l10n.liveRunning), findsOneWidget);
+        // Running shows as the work in the status bar, not as a label.
+        expect(find.text(l10n.liveRunning), findsNothing);
+        expect(find.byKey(const ValueKey('composer-status')), findsOneWidget);
         expect(tester.takeException(), isNull);
         if (locale.languageCode != 'en') return;
         await tester.enterText(find.byType(TextField), 'Keep');
