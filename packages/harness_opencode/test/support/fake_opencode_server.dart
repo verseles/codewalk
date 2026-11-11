@@ -295,15 +295,17 @@ final class FakeOpenCodeServer {
         return;
       }
     }
-    // A New Chat draft reads the location's defaults when it opens. A script
-    // that declares one of those routes, or whose next exchange is one, keeps
-    // it. Otherwise the read is answered here: no configured agent and no
-    // default model, in the location envelope, and the script does not advance.
+    // A New Chat draft and a live session's pick read the location's defaults
+    // and provider names. A script that declares one of those routes, or whose
+    // next exchange is one, keeps it. Otherwise the read is answered here: no
+    // configured agent, no default model and no provider, in the location
+    // envelope, and the script does not advance.
     final defaultRead =
         request.method == 'GET' &&
         (uri.path.endsWith('/api/config') ||
             uri.path.endsWith('/api/agent') ||
-            uri.path.endsWith('/api/model/default'));
+            uri.path.endsWith('/api/model/default') ||
+            uri.path.endsWith('/api/provider'));
     final declared =
         scenario.routes.any(
           (route) => route.matches(request.method, uri, body, hasBody),
@@ -324,7 +326,9 @@ final class FakeOpenCodeServer {
             ? <Object?>[]
             : {
                 'location': {'directory': directory},
-                if (uri.path.endsWith('/api/agent')) 'data': <Object?>[],
+                if (uri.path.endsWith('/api/agent') ||
+                    uri.path.endsWith('/api/provider'))
+                  'data': <Object?>[],
               },
       );
       return;

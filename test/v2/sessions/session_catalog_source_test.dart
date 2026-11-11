@@ -46,6 +46,9 @@ void main() {
         ],
         '/api/model' => [model('global'), model('preferred')],
         '/api/model/default' => model('global'),
+        '/api/provider' => [
+          {'id': 'provider', 'name': 'Provider'},
+        ],
         _ => throw StateError('unexpected route'),
       };
       request.response.headers.contentType = ContentType.json;
@@ -75,6 +78,7 @@ void main() {
     expect(defaults.agents.map((agent) => agent.id), ['build']);
     expect(defaults.models, hasLength(2));
     expect(defaults.agentModels['build']?.modelId, 'preferred');
+    expect(defaults.providers, {'provider': 'Provider'});
   });
 
   for (final kind in EndpointAuthKind.values) {

@@ -83,6 +83,7 @@ final class WorkspaceDraftSelection extends ChangeNotifier
     selection: _loading ? null : selection,
     models: _defaults.models,
     agents: _defaults.agents,
+    providers: _defaults.providers,
     loading: _loading,
     modelUnavailable: !_loading && _defaults.models.isEmpty
         ? SessionSelectionUnavailable.emptyCatalog

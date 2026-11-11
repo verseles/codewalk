@@ -107,6 +107,20 @@ final class _Server {
   ];
   int catalogStatus = 200;
 
+  /// The location's provider names, default model and configured agent.
+  List<Object?> providerCatalog = [
+    {'id': 'prov', 'name': 'Provider One'},
+  ];
+  Map<String, Object?>? defaultModel = {
+    'id': 'beta',
+    'providerID': 'prov',
+    'name': 'Beta',
+  };
+  String? configuredAgent;
+
+  /// The trailing route segments that answer 503 instead.
+  final failing = <String>{};
+
   /// Every model or agent switch, as `kind:body`.
   final selects = <String>[];
   int selectStatus = 204;
@@ -200,6 +214,30 @@ final class _Server {
         }
       }
       r.response.statusCode = selectStatus;
+      await r.response.close();
+      return;
+    }
+    if (r.method == 'GET' &&
+        (tail == 'provider' ||
+            tail == 'config' ||
+            (tail == 'default' && segments[segments.length - 2] == 'model'))) {
+      expect(r.uri.queryParameters['location[directory]'], '/workspace');
+      r.response.statusCode = failing.contains(tail) ? 503 : 200;
+      r.response.write(
+        jsonEncode(
+          tail == 'config'
+              ? [
+                  {
+                    'type': 'document',
+                    'info': {'default_agent': ?configuredAgent},
+                  },
+                ]
+              : {
+                  'location': {'directory': '/workspace'},
+                  'data': tail == 'provider' ? providerCatalog : defaultModel,
+                },
+        ),
+      );
       await r.response.close();
       return;
     }
@@ -343,13 +381,19 @@ final class _Server {
     await r.response.close();
   }
 
-  /// Sends one ephemeral frame of [type] with [data] to every open stream.
-  Future<void> emit(String type, Map<String, Object?> data) async {
+  /// Sends one ephemeral frame of [type] with [data] to every open stream,
+  /// for [location] when one is given.
+  Future<void> emit(
+    String type,
+    Map<String, Object?> data, {
+    String? location,
+  }) async {
     final seq = ++_seq;
     final frame = {
       'id': 'evt_x$seq',
       'type': type,
       'created': 1000 + seq,
+      'location': ?(location == null ? null : {'directory': location}),
       'data': data,
     };
     for (final stream in streams) {
@@ -3191,6 +3235,85 @@ void main() {
       expect(state.holdsSend, isFalse);
       expect(state.selection?.agentId, 'build');
       expect(state.receipt?.state.known, ReceiptState.rejected);
+    });
+
+    test('a session without a model names the one the server runs', () async {
+      server.sessionModel.remove('ses_one');
+      final handle = await openLive();
+      final state = await when(handle, read);
+      expect(state.selection?.modelId, isNull);
+      // Build names no model of its own: the location's default runs.
+      expect(state.defaultModel, 'Beta');
+      expect(state.providers, {'prov': 'Provider One'});
+      // An agent's own model runs instead, when the location offers it.
+      server.agentCatalog = [
+        {
+          'id': 'build',
+          'name': 'Build',
+          'mode': 'primary',
+          'hidden': false,
+          'model': {'id': 'alpha', 'providerID': 'prov', 'variant': 'high'},
+        },
+        {
+          'id': 'plan',
+          'name': 'Plan',
+          'mode': 'all',
+          'hidden': false,
+          'model': {'id': 'gone', 'providerID': 'prov'},
+        },
+      ];
+      await handle.refreshSelection();
+      // With its variant, since that model lists it.
+      expect(handle.selectionState.defaultModel, 'Alpha#high');
+      // Without an agent the configured one decides; a model the location
+      // does not offer falls back to the default.
+      server.configuredAgent = 'plan';
+      final other = await openLive('ses_two');
+      final second = await when(other, read);
+      expect(second.selection?.agentId, isNull);
+      expect(second.defaultModel, 'Beta');
+    });
+
+    test('a failed read of what decides the default keeps Default', () async {
+      server.sessionModel.remove('ses_one');
+      server.failing.add('config');
+      final handle = await openLive();
+      final state = await when(handle, read);
+      // The configured agent is unknown, so no model is named.
+      expect(state.defaultModel, isNull);
+      expect(state.providers, {'prov': 'Provider One'});
+      expect(state.modelUnavailable, isNull);
+      expect(state.agentUnavailable, isNull);
+      // Without provider names or a default the pick still works.
+      server.failing
+        ..clear()
+        ..addAll(['provider', 'default']);
+      await handle.refreshSelection();
+      final degraded = handle.selectionState;
+      expect(degraded.providers, isEmpty);
+      expect(degraded.defaultModel, isNull);
+      expect(degraded.models, hasLength(2));
+      expect(degraded.modelUnavailable, isNull);
+    });
+
+    test('a catalog change of its location reads the catalog again', () async {
+      final handle = await openLive();
+      await when(handle, read);
+      int models() => server.paths.where((p) => p == '/proxy/api/model').length;
+      expect(models(), 1);
+      // Another location's change and one without a location read nothing.
+      await server.emit('model.updated', {}, location: '/elsewhere');
+      await server.emit('model.updated', {});
+      server.modelCatalog = [...server.modelCatalog.take(1)];
+      await server.emit('agent.updated', {}, location: '/workspace');
+      await when(handle, (s) => s.models.length == 1);
+      expect(models(), 2);
+      server.providerCatalog = [
+        {'id': 'prov', 'name': 'Renamed'},
+      ];
+      await server.emit('provider.updated', {}, location: '/workspace');
+      await when(handle, (s) => s.providers['prov'] == 'Renamed');
+      expect(models(), 3);
     });
 
     test('a missing or empty catalog is reported per half', () async {

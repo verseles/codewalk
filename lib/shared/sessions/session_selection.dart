@@ -41,6 +41,8 @@ final class SessionSelectionState {
     this.selection,
     this.models = const [],
     this.agents = const [],
+    this.defaultModel,
+    this.providers = const {},
     this.loading = false,
     this.modelUnavailable,
     this.agentUnavailable,
@@ -54,6 +56,15 @@ final class SessionSelectionState {
   final Selection? selection;
   final List<ModelEntry> models;
   final List<CatalogEntry> agents;
+
+  /// The name of the model the server runs this session on while it has no
+  /// model of its own: its agent's model, else the location's default; null
+  /// while it is not known.
+  final String? defaultModel;
+
+  /// Provider display names by provider id; a provider not named here shows
+  /// its id.
+  final Map<String, String> providers;
 
   /// The catalog is being read and nothing was read before.
   final bool loading;

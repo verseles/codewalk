@@ -126,11 +126,15 @@ String sessionSelectionLabel(
   if (selection == null) return l10n.liveSelection;
   final modelId = selection.modelId;
   final agentId = selection.agentId;
-  if (modelId == null && agentId == null) return l10n.liveSelectionDefault;
+  final fallback = state.defaultModel;
+  if (modelId == null && agentId == null && fallback == null) {
+    return l10n.liveSelectionDefault;
+  }
   final model = _offeredModel(state, selection);
   final agent = state.agents.where((a) => a.id == agentId).firstOrNull;
+  // Without a model of its own the session runs on the one the server names.
   final modelText = modelId == null
-      ? l10n.liveSelectionDefault
+      ? fallback ?? l10n.liveSelectionDefault
       : [_label(model?.label, modelId), ?selection.modelVariant].join('#');
   final agentText = agentId == null
       ? l10n.liveSelectionDefault
@@ -337,6 +341,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             model.label,
             model.id,
             model.providerId,
+            ?state.providers[model.providerId],
           ].any((text) => text.toLowerCase().contains(query));
       final byKey = {
         for (final model in state.models)
@@ -402,7 +407,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
           subtitle: section == null
               ? null
               : Text(
-                  model.providerId,
+                  state.providers[model.providerId] ?? model.providerId,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -567,7 +572,10 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                   in providers.entries) ...[
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
-                  child: Text(provider, style: theme.textTheme.labelMedium),
+                  child: Text(
+                    state.providers[provider] ?? provider,
+                    style: theme.textTheme.labelMedium,
+                  ),
                 ),
                 for (final entry in models) ...[
                   model(entry),

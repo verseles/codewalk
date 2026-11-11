@@ -89,6 +89,37 @@ void main() {
     ]);
   });
 
+  test('a model, agent or provider change names its location', () async {
+    final harness = Harness('ses_a');
+    final directories = <String>[];
+    final changes = <OpenCodeCatalogChange>[];
+    harness.owner.locationCatalogChanges.listen(directories.add);
+    harness.owner.catalogChanges.listen(changes.add);
+    await harness.connect(1);
+    for (final (type, location) in [
+      ('model.updated', {'directory': '/work/a'}),
+      ('agent.updated', {'directory': '/work/b'}),
+      ('provider.updated', {'directory': '/work/a'}),
+      // Without a location there is nothing to re-read, as in the official
+      // client.
+      ('model.updated', null),
+      ('command.updated', {'directory': '/work/a'}),
+    ]) {
+      await harness.send([
+        {
+          'id': 'evt_$type',
+          'created': 1,
+          'type': type,
+          'location': ?location,
+          'data': <String, Object?>{},
+        },
+      ]);
+    }
+    expect(directories, ['/work/a', '/work/b', '/work/a']);
+    // A catalog change is not a session lifecycle change.
+    expect(changes, isEmpty);
+  });
+
   test('a moved session reaches the catalog', () async {
     final harness = Harness('ses_a');
     final changes = <OpenCodeCatalogChange>[];

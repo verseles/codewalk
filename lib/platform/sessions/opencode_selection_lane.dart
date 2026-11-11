@@ -8,8 +8,9 @@ import '../../shared/sessions/session_selection.dart';
 
 /// The model and agent of the sessions one OpenCode profile watches.
 ///
-/// Each session reads its location's catalog once per live period and keeps
-/// one switch in flight at most. A switch is never sent again on its own: an
+/// Each session reads its location's catalog once per live period, and again
+/// when the endpoint reports that catalog changed, and keeps one switch in
+/// flight at most. A switch is never sent again on its own: an
 /// uncertain one is settled by one read of the session's record, then by a
 /// newer server selection, an explicit refresh or a new pick. It lives in its
 /// own file so the profile slot stays below the architecture guard's
@@ -17,12 +18,17 @@ import '../../shared/sessions/session_selection.dart';
 final class OpenCodeSelectionLane {
   OpenCodeSelectionLane({
     required this.reader,
+    required this.locations,
     required this.client,
     required this.view,
     required this.publish,
   });
 
   final OpenCodeSessionReader reader;
+
+  /// Reads what a session without a model runs on and the provider names;
+  /// the lane owns it.
+  final OpenCodeLocationReader locations;
   final OpenCodeSessionLifecycleClient client;
   final SessionLiveView Function(SessionRef) view;
 
@@ -38,13 +44,19 @@ final class OpenCodeSelectionLane {
     final entry = _entries[ref];
     if (entry == null) return SessionSelectionState(selection: canonical);
     final change = entry.change;
+    // An accepted change shows until the server reports a selection.
+    final selection = change != null && entry.accepted
+        ? change.over(canonical)
+        : canonical;
     return SessionSelectionState(
-      // An accepted change shows until the server reports a selection.
-      selection: change != null && entry.accepted
-          ? change.over(canonical)
-          : canonical,
+      selection: selection,
       models: entry.models,
       agents: entry.agents,
+      // Without a model the server runs the agent's own, else its default.
+      defaultModel:
+          entry.agentModels[selection?.agentId ?? entry.defaultAgent] ??
+          entry.defaultModel,
+      providers: entry.providers,
       loading: entry.reading && !entry.read,
       modelUnavailable: entry.modelUnavailable,
       agentUnavailable: entry.agentUnavailable,
@@ -108,6 +120,27 @@ final class OpenCodeSelectionLane {
     if (entry.needsRead && !entry.reading) {
       entry.needsRead = false;
       unawaited(_readCatalog(ref, entry, current));
+    }
+  }
+
+  /// The endpoint reported that the model, agent or provider catalog of
+  /// [directory] changed: each session there reads its catalog again, as the
+  /// official client does. A session that is reading, or not live, reads
+  /// again once it can.
+  void catalogChanged(String directory) {
+    if (_closed) return;
+    for (final MapEntry(key: ref, value: entry) in _entries.entries.toList()) {
+      final current = view(ref);
+      if (current.state?.info?.project?.canonicalDirectory != directory) {
+        continue;
+      }
+      if (entry.reading ||
+          current.phase != SessionLivePhase.live ||
+          current.stale) {
+        entry.needsRead = true;
+      } else {
+        unawaited(_readCatalog(ref, entry, current));
+      }
     }
   }
 
@@ -287,24 +320,94 @@ final class OpenCodeSelectionLane {
         ..read = true
         ..models = const []
         ..agents = const []
+        ..agentModels = const {}
+        ..defaultAgent = null
+        ..defaultModel = null
+        ..providers = const {}
         ..modelUnavailable = SessionSelectionUnavailable.locationUnknown
         ..agentUnavailable = SessionSelectionUnavailable.locationUnknown;
       return publish(ref);
     }
     entry.reading = true;
     publish(ref);
-    final (models, modelFailure) = await _attempt(
-      () => reader.readModels(directory, cancellation: entry.cancellation),
-    );
-    final (agents, agentFailure) = await _attempt(
-      () => reader.readAgents(directory, cancellation: entry.cancellation),
-    );
+    final cancellation = entry.cancellation;
+    final (
+      (models, modelFailure),
+      (catalog, agentFailure),
+      (configured, configFailure),
+      (fallback, _),
+      (providers, _),
+    ) = await (
+      _attempt(() => reader.readModels(directory, cancellation: cancellation)),
+      _attempt(
+        () => reader.readAgentCatalog(directory, cancellation: cancellation),
+      ),
+      // Only names: without them the pick shows "Default" and provider ids.
+      _attempt(
+        () => locations.readDefaultAgent(
+          directory: directory,
+          cancellation: cancellation,
+        ),
+      ),
+      _attempt(
+        () => locations.readDefaultModelDetails(
+          directory: directory,
+          cancellation: cancellation,
+        ),
+      ),
+      _attempt(
+        () => locations.readProviderNames(
+          directory: directory,
+          cancellation: cancellation,
+        ),
+      ),
+    ).wait;
     entry.reading = false;
     if (_closed || !identical(_entries[ref], entry)) return;
+    ModelEntry? offered(String provider, String id) => models
+        ?.where((model) => model.providerId == provider && model.id == id)
+        .firstOrNull;
+    String name(ModelEntry model) =>
+        model.label.isEmpty ? model.id : model.label;
+    final agents = catalog?.agents;
+    bool listed(String? id) => agents?.any((agent) => agent.id == id) ?? false;
+    // What a session without a model runs on is named only when every read
+    // that decides it succeeded; a failed one keeps "Default".
+    final known = models != null && catalog != null && configFailure == null;
     entry
       ..read = true
       ..models = models ?? const []
       ..agents = agents ?? const []
+      // An agent's own model counts only when the location offers it, as the
+      // server falls back to the default otherwise; its variant only when
+      // that model lists it.
+      ..agentModels = {
+        if (known)
+          for (final MapEntry(key: agent, value: own) in catalog.models.entries)
+            if (offered(own.providerId, own.id) case final model?)
+              agent: [
+                name(model),
+                if (own.variant case final variant?
+                    when model.variants.contains(variant))
+                  variant,
+              ].join('#'),
+      }
+      // The server's own choice of agent: the configured one, else build,
+      // else the first it offers.
+      ..defaultAgent = !known
+          ? null
+          : listed(configured)
+          ? configured
+          : listed('build')
+          ? 'build'
+          : agents?.firstOrNull?.id
+      ..defaultModel = !known || fallback == null
+          ? null
+          : switch (offered(fallback.providerId, fallback.id)) {
+              final model? => name(model),
+              null => fallback.name,
+            }
+      ..providers = providers ?? const {}
       ..modelUnavailable =
           modelFailure ??
           (models!.isEmpty ? SessionSelectionUnavailable.emptyCatalog : null)
@@ -314,8 +417,8 @@ final class OpenCodeSelectionLane {
     publish(ref);
   }
 
-  static Future<(List<T>?, SessionSelectionUnavailable?)> _attempt<T>(
-    Future<List<T>> Function() read,
+  static Future<(T?, SessionSelectionUnavailable?)> _attempt<T>(
+    Future<T> Function() read,
   ) async {
     try {
       return (await read(), null);
@@ -345,6 +448,7 @@ final class OpenCodeSelectionLane {
       entry.dispose();
     }
     _entries.clear();
+    locations.dispose();
   }
 }
 
@@ -392,6 +496,13 @@ final class _SelectionEntry {
   bool verifying = false;
   List<ModelEntry> models = const [];
   List<CatalogEntry> agents = const [];
+
+  /// The model each agent runs a session without a model on, by agent id,
+  /// when it names one the location offers.
+  Map<String, String> agentModels = const {};
+  String? defaultAgent;
+  String? defaultModel;
+  Map<String, String> providers = const {};
   SessionSelectionUnavailable? modelUnavailable;
   SessionSelectionUnavailable? agentUnavailable;
   SessionSelectionPhase phase = SessionSelectionPhase.idle;

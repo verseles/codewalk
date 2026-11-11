@@ -79,6 +79,7 @@ final class DraftDefaults {
     this.agents = const [],
     this.models = const [],
     this.agentModels = const {},
+    this.providers = const {},
   });
 
   /// The agent's display name, or its id when the location does not name it.
@@ -97,6 +98,9 @@ final class DraftDefaults {
   /// Each offered agent's own model, by agent id, when it names one the
   /// location offers; its variant only when that model lists it.
   final Map<String, Selection> agentModels;
+
+  /// Provider display names by provider id; empty when their read failed.
+  final Map<String, String> providers;
 
   bool get isEmpty => agent == null && model == null;
 }

@@ -382,31 +382,74 @@ final class OpenCodeSessionReader {
   Future<List<CatalogEntry>> readAgents(
     String directory, {
     RequestCancellation? cancellation,
-  }) => _readCatalog(
-    directory,
-    'agent',
-    (row) {
-      final agent = _catalogObject(row);
-      final mode = agent['mode'];
-      final hidden = agent['hidden'];
-      final description = agent['description'];
-      if (mode is! String || hidden is! bool) {
-        throw const FormatException('Malformed agent.');
-      }
-      // An agent that is not offered is not projected either.
-      if (hidden || (mode != 'primary' && mode != 'all')) return null;
-      return CatalogEntry(
-        id: _catalogText(agent['id']),
-        kind: const OpenValue.known(CatalogKind.agent),
-        label: _catalogText(agent['name'], empty: true),
-        description: description == null
-            ? null
-            : _catalogText(description, empty: true),
-      );
-    },
-    (agent) => agent.id,
-    cancellation,
-  );
+  }) async =>
+      (await readAgentCatalog(directory, cancellation: cancellation)).agents;
+
+  /// The agents of [readAgents], with the model each one names for itself
+  /// and its optional variant, by agent id, from the same read. A reference
+  /// that cannot be read names no model rather than hiding the agent.
+  Future<
+    ({
+      List<CatalogEntry> agents,
+      Map<String, ({String providerId, String id, String? variant})> models,
+    })
+  >
+  readAgentCatalog(
+    String directory, {
+    RequestCancellation? cancellation,
+  }) async {
+    final rows = await _readCatalog(
+      directory,
+      'agent',
+      (row) {
+        final agent = _catalogObject(row);
+        final mode = agent['mode'];
+        final hidden = agent['hidden'];
+        final description = agent['description'];
+        if (mode is! String || hidden is! bool) {
+          throw const FormatException('Malformed agent.');
+        }
+        // An agent that is not offered is not projected either.
+        if (hidden || (mode != 'primary' && mode != 'all')) return null;
+        final model = agent['model'];
+        final id = model is Map ? model['id'] : null;
+        final provider = model is Map ? model['providerID'] : null;
+        final variant = model is Map ? model['variant'] : null;
+        return (
+          CatalogEntry(
+            id: _catalogText(agent['id']),
+            kind: const OpenValue.known(CatalogKind.agent),
+            label: _catalogText(agent['name'], empty: true),
+            description: description == null
+                ? null
+                : _catalogText(description, empty: true),
+          ),
+          id is String &&
+                  id.isNotEmpty &&
+                  provider is String &&
+                  provider.isNotEmpty
+              ? (
+                  providerId: provider,
+                  id: id,
+                  variant: variant is String && variant.isNotEmpty
+                      ? variant
+                      : null,
+                )
+              : null,
+        );
+      },
+      (row) => row.$1.id,
+      cancellation,
+    );
+    return (
+      agents: List<CatalogEntry>.unmodifiable([for (final row in rows) row.$1]),
+      models:
+          Map<
+            String,
+            ({String providerId, String id, String? variant})
+          >.unmodifiable({for (final (agent, model) in rows) agent.id: ?model}),
+    );
+  }
 
   /// One location's catalog list. The answer names its location, which must
   /// be the one asked for; a row the [project] function skips is not offered.

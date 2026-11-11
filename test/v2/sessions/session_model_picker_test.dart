@@ -73,6 +73,7 @@ void main() {
     Size size = const Size(800, 900),
     Locale locale = const Locale('en'),
     ThemeData? theme,
+    SessionSelectionState? state,
   }) async {
     final seed = ModelPreferenceStore(store: V2MetadataStore(backend: backend));
     await seed.initialize();
@@ -101,10 +102,12 @@ void main() {
     final opening = live.start();
     final handle = directory.grant(ref)
       ..selectionAvailable = true
-      ..selectionState = SessionSelectionState(
-        selection: _selection(_alpha, 'high'),
-        models: [_alpha, _beta, _zen, _gamma],
-      );
+      ..selectionState =
+          state ??
+          SessionSelectionState(
+            selection: _selection(_alpha, 'high'),
+            models: [_alpha, _beta, _zen, _gamma],
+          );
     await opening;
     handle.emit(
       SessionLiveView(
@@ -218,6 +221,48 @@ void main() {
     expect(preferences.favorites(_server), isEmpty);
     expect(row('favorite-prov/beta'), findsNothing);
     expect(switches(handle), isEmpty);
+  });
+
+  testWidgets('providers by name, and the model a default session runs', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      favorites: ['opencode/zen'],
+      state: SessionSelectionState(
+        selection: const Selection(agentId: 'build'),
+        models: [_alpha, _beta, _zen, _gamma],
+        defaultModel: 'Beta',
+        providers: const {'prov': 'Provider One', 'opencode': 'OpenCode Zen'},
+      ),
+    );
+    // Without a model of its own the session names the one the server runs.
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('live-model-chip')),
+        matching: find.text('Beta'),
+      ),
+      findsOneWidget,
+    );
+    await openPicker(tester);
+    expect(find.text('Provider One'), findsOneWidget);
+    // A provider the location does not name shows its id.
+    expect(find.text('other'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: row('favorite-opencode/zen'),
+        matching: find.text('OpenCode Zen'),
+      ),
+      findsOneWidget,
+    );
+    // A search finds a model by its provider's name too.
+    await tester.enterText(
+      find.byKey(const ValueKey('live-selection-search')),
+      'provider one',
+    );
+    await tester.pumpAndSettle();
+    expect(row('model-prov/alpha'), findsOneWidget);
+    expect(row('model-other/gamma'), findsNothing);
   });
 
   testWidgets('a search narrows by name, id or provider', (tester) async {

@@ -16,7 +16,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #474 Janela desktop: barra integrada e comportamento ao fechar
 - [ ] #462 Busca na timeline e controles que faltam na toolbar
 - [ ] #426 Mostrar troca de modelo e agente na timeline
-- [ ] #427 Catálogos atualizados e nome do modelo padrão
 - [ ] #431 Polir a escolha de modelo e agente
 - [ ] #464 Área de toque das ações da mensagem do usuário
 - [ ] #417 Manter o scroll da lista de sessões

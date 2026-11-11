@@ -99,6 +99,7 @@ final class OpenCodeProfileSlot {
   IoSseRecovery? _connection;
   OpenCodeStreamOwner? _owner;
   StreamSubscription<OpenCodeStreamUpdate>? _subscription;
+  StreamSubscription<String>? _catalogs;
   Future<void>? _ready;
   Future<void>? _closing;
   String? version;
@@ -159,6 +160,7 @@ final class OpenCodeProfileSlot {
     );
     _selection = OpenCodeSelectionLane(
       reader: _reader,
+      locations: OpenCodeLocationReader(_transport, harness: harness),
       client: OpenCodeSessionLifecycleClient(
         _transport,
         harness: harness,
@@ -222,6 +224,9 @@ final class OpenCodeProfileSlot {
     _owner = owner;
     _phase = SessionLivePhase.connecting;
     _subscription = owner.updates.listen(_onUpdate);
+    _catalogs = owner.locationCatalogChanges.listen(
+      (directory) => _selection?.catalogChanged(directory),
+    );
     owner.start();
   }
 
@@ -1388,6 +1393,7 @@ final class OpenCodeProfileSlot {
     }
     handles.clear();
     await _subscription?.cancel();
+    await _catalogs?.cancel();
     await _owner?.close();
     await _connection?.close();
     _reader.dispose();

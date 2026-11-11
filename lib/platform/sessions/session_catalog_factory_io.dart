@@ -84,6 +84,9 @@ final class _NativeSource implements SessionCatalogSource {
     final global = await part(
       () => _locations.readDefaultModelDetails(directory: directory),
     );
+    final providers = await part(
+      () => _locations.readProviderNames(directory: directory),
+    );
     ModelEntry? offered(String? provider, String? id) => models
         ?.where((model) => model.providerId == provider && model.id == id)
         .firstOrNull;
@@ -123,6 +126,7 @@ final class _NativeSource implements SessionCatalogSource {
           ),
       ],
       models: models ?? const [],
+      providers: providers ?? const {},
       agentModels: {
         for (final entry in details?.agents ?? const <OpenCodeAgentDetails>[])
           entry.id: runsWith(entry),

@@ -180,6 +180,7 @@ final class OpenCodeStreamOwner {
 
   final _updates = StreamController<OpenCodeStreamUpdate>.broadcast();
   final _catalogChanges = StreamController<OpenCodeCatalogChange>.broadcast();
+  final _locationCatalogs = StreamController<String>.broadcast();
   final _watched = <SessionRef, _Watch>{};
   final _children = <SessionRef, Set<SessionRef>>{};
   StreamSubscription<SseRecoveryUpdate>? _subscription;
@@ -200,6 +201,11 @@ final class OpenCodeStreamOwner {
   /// or not. The catalog listens here so the list can follow a session that
   /// starts, is renamed, is deleted or is moved elsewhere.
   Stream<OpenCodeCatalogChange> get catalogChanges => _catalogChanges.stream;
+
+  /// The directories whose model, agent or provider catalog changed, as the
+  /// endpoint reports them. A report without a location names none, as the
+  /// official client ignores it.
+  Stream<String> get locationCatalogChanges => _locationCatalogs.stream;
 
   Iterable<SessionRef> get watched => List.unmodifiable(_watched.keys);
 
@@ -400,6 +406,7 @@ final class OpenCodeStreamOwner {
     await _subscription?.cancel();
     await _updates.close();
     await _catalogChanges.close();
+    await _locationCatalogs.close();
   }
 
   StreamPosition _position(int seq) => StreamPosition(
@@ -454,6 +461,18 @@ final class OpenCodeStreamOwner {
         return OpenCodeCatalogChange.waiting;
       default:
         return null;
+    }
+  }
+
+  void _emitLocationCatalog(Map<String, Object?> value) {
+    if (_closed || _locationCatalogs.isClosed) return;
+    if (value['type']
+        case 'model.updated' || 'agent.updated' || 'provider.updated') {
+      if (value['location'] case {
+        'directory': final String directory,
+      } when directory.isNotEmpty) {
+        _locationCatalogs.add(directory);
+      }
     }
   }
 
@@ -693,6 +712,7 @@ final class OpenCodeStreamOwner {
     // filter, so a frame the child routing consumes or the watch filter
     // drops still reaches the list.
     _emitCatalogChange(value['type']);
+    _emitLocationCatalog(value);
     final data = value['data'];
     Object? session;
     if (data is Map<String, Object?>) {

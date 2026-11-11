@@ -237,7 +237,10 @@ final class OpenCodeLocationReader {
 
   /// The location default model's complete identity and display label.
   Future<({String id, String providerId, String name})?>
-  readDefaultModelDetails({required String directory}) async {
+  readDefaultModelDetails({
+    required String directory,
+    RequestCancellation? cancellation,
+  }) async {
     _checkOpen();
     _requireDirectory(directory);
     final path = Uri(
@@ -256,7 +259,35 @@ final class OpenCodeLocationReader {
         providerId: provider,
         name: name is String && name.trim().isNotEmpty ? name : id,
       );
-    }, null);
+    }, cancellation);
+  }
+
+  /// The display names of the providers [directory]'s location offers, by
+  /// provider id; a provider without a name is named by its id.
+  Future<Map<String, String>> readProviderNames({
+    required String directory,
+    RequestCancellation? cancellation,
+  }) async {
+    _checkOpen();
+    _requireDirectory(directory);
+    final path = Uri(
+      path: 'api/provider',
+      queryParameters: {'location[directory]': directory},
+    ).toString();
+    return _reads.read(path, (value) {
+      final rows = _located(value, directory)['data'];
+      if (rows is! List || rows.length > maxEntries) {
+        throw const FormatException('Malformed provider list.');
+      }
+      final names = <String, String>{};
+      for (final row in rows) {
+        final provider = _object(row);
+        final id = _text(provider['id']);
+        final name = provider['name'];
+        names[id] = name is String && name.trim().isNotEmpty ? name : id;
+      }
+      return Map.unmodifiable(names);
+    }, cancellation);
   }
 
   /// The display name of agent [id] in [directory]'s location, or null when

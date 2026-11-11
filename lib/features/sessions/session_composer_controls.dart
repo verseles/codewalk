@@ -129,7 +129,7 @@ class SessionComposerControls extends StatelessWidget {
                   null =>
                     selection == null
                         ? l10n.chatChooseModel
-                        : l10n.liveSelectionDefault,
+                        : state.defaultModel ?? l10n.liveSelectionDefault,
                 },
                 tooltip: modelDescription,
                 semantics: modelDescription,

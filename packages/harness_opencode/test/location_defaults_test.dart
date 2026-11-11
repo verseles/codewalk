@@ -258,4 +258,39 @@ void main() {
       );
     },
   );
+
+  test('providers are named by their name, or their id without one', () async {
+    final transport = TestTransport((request) {
+      expect(Uri.parse(request.path).path, 'api/provider');
+      expect(query(request), {'location[directory]': '/work/a'});
+      return response(
+        located('/work/a', [
+          {'id': 'anthropic', 'name': 'Anthropic'},
+          {'id': 'local', 'name': '  '},
+        ]),
+      );
+    });
+    final reader = OpenCodeLocationReader(transport, harness: harness);
+    expect(await reader.readProviderNames(directory: '/work/a'), {
+      'anthropic': 'Anthropic',
+      'local': 'local',
+    });
+  });
+
+  test('the providers of another location are refused', () async {
+    final transport = TestTransport(
+      (_) => response(
+        located('/work/b', [
+          {'id': 'anthropic', 'name': 'Anthropic'},
+        ]),
+      ),
+    );
+    await expectLater(
+      OpenCodeLocationReader(
+        transport,
+        harness: harness,
+      ).readProviderNames(directory: '/work/a'),
+      throwsA(isA<OpenCodeSessionReadException>()),
+    );
+  });
 }
