@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk/app/live_wake.dart';
 import 'package:codewalk/app/workspace_chrome.dart';
 import 'package:codewalk/app/workspace_chrome_controller.dart';
 import 'package:codewalk/features/hosts/endpoint_health_controller.dart';
@@ -9,6 +10,8 @@ import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations_en.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +26,12 @@ import 'fakes.dart';
 import 'live_fakes.dart';
 
 final class _Rig {
-  _Rig(WidgetTester tester) {
-    catalog = CatalogRig(actions: actions, withFeed: false);
+  _Rig(WidgetTester tester, {bool feed = false, Duration? liveMinInterval}) {
+    catalog = CatalogRig(
+      actions: actions,
+      withFeed: feed,
+      liveMinInterval: liveMinInterval ?? Duration.zero,
+    );
     health = EndpointHealthController(
       hosts: catalog.hosts,
       now: () => tester.binding.clock.now().toUtc(),
@@ -103,6 +110,86 @@ final class _Rig {
 }
 
 void main() {
+  testWidgets(
+    'a list catching up spins the hamburger and a server back retries it',
+    (tester) async {
+      final rig = _Rig(
+        tester,
+        feed: true,
+        liveMinInterval: const Duration(minutes: 1),
+      );
+      await rig.start(tester);
+      final recovery = LiveRecovery(
+        health: rig.health,
+        catalog: rig.catalog.sessions,
+        tabs: rig.tabs,
+      );
+      final source = rig.catalog.sources.single;
+      // A zero debounce still needs the fake clock to move.
+      Future<void> tick() => tester.pump(const Duration(milliseconds: 10));
+      // The catch-up read that follows the feed opening.
+      await tick();
+      expect(source.tasks, hasLength(2));
+      source.respond([rig.current]);
+      await tick();
+      expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
+
+      // The feed reconnects (a re-read waits out its minute) and drops.
+      rig.catalog.feed.emit(const SessionCatalogConnection(true));
+      await tick();
+      rig.catalog.feed.emit(const SessionCatalogConnection(false));
+      await tick();
+      expect(rig.catalog.sessions.behind, isTrue);
+      // The list recovers by itself, so the hamburger shows it (#467).
+      expect(rig.chrome.badge.kind, WorkspaceBadgeKind.syncing);
+      final reads = source.tasks.length;
+
+      // The server stops answering, then answers again: the list retries
+      // now instead of waiting out its minute.
+      rig.observe(EndpointStatus.unreachable);
+      await tick();
+      expect(source.tasks, hasLength(reads));
+      rig.observe(EndpointStatus.compatible);
+      await tick();
+      expect(source.tasks, hasLength(reads + 1));
+      source.respond([rig.current]);
+      await tick();
+      // The list read, but its feed is still down: it keeps spinning.
+      expect(rig.catalog.sessions.behind, isTrue);
+      expect(rig.chrome.badge.kind, WorkspaceBadgeKind.syncing);
+      // The feed reconnects and a wake re-reads: the list is current again.
+      rig.catalog.feed.emit(const SessionCatalogConnection(true));
+      await tick();
+      recovery.retry();
+      await tick();
+      source.respond([rig.current]);
+      await tick();
+      expect(rig.catalog.sessions.behind, isFalse);
+      expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
+      recovery.dispose();
+      rig.dispose();
+    },
+  );
+
+  testWidgets('a head read waiting to retry spins the hamburger', (
+    tester,
+  ) async {
+    final rig = _Rig(tester, liveMinInterval: const Duration(minutes: 1));
+    await rig.start(tester);
+    final source = rig.catalog.sources.single;
+    expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
+    // The head read fails for a passing cause: the list retries by itself
+    // after a wait, and the hamburger shows it (#467).
+    final read = rig.catalog.sessions.refresh();
+    source.fail(SessionCatalogFailure.connection);
+    await read;
+    await tester.pump();
+    expect(rig.catalog.sessions.behind, isFalse);
+    expect(rig.catalog.sessions.retrying, isTrue);
+    expect(rig.chrome.badge.kind, WorkspaceBadgeKind.syncing);
+    rig.dispose();
+  });
+
   testWidgets('warning waits five seconds of grace then five of debounce', (
     tester,
   ) async {

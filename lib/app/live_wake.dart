@@ -2,6 +2,73 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../features/hosts/endpoint_health_controller.dart';
+import '../features/sessions/session_tabs_controller.dart';
+import '../features/sessions/sessions_controller.dart';
+
+/// Tries again what gave up, when trying may work (#467): the app returned,
+/// the network changed, or the selected server answers again after it did
+/// not. The list and the open conversations never wait for a manual refresh;
+/// what needs the user (a credential, a session that is gone) is left alone.
+final class LiveRecovery {
+  LiveRecovery({
+    required this.health,
+    required this.catalog,
+    required this.tabs,
+  }) {
+    health.addListener(_healthChanged);
+  }
+
+  final EndpointHealthController health;
+  final SessionsController catalog;
+  final SessionTabsController tabs;
+  String? _profile;
+  bool _sawOffline = false;
+  bool _disposed = false;
+
+  /// Retries the list and the open conversations that gave up, only those
+  /// of [host] when one is given.
+  void retry({String? host}) {
+    if (_disposed) return;
+    catalog.recover();
+    for (final live in tabs.warmViews) {
+      if (live.disposed) continue;
+      if (host != null && live.session.host.value != host) continue;
+      live.recover();
+    }
+  }
+
+  /// Only the selected server confirmed Offline and then answering again
+  /// retries, and only its own conversations: a server just selected, or one
+  /// whose check was merely pending, is not a recovery.
+  void _healthChanged() {
+    if (_disposed) return;
+    final profile = catalog.selectedProfile;
+    if (profile?.id != _profile) {
+      _profile = profile?.id;
+      _sawOffline = false;
+    }
+    if (profile == null) return;
+    switch (health.view(profile).status) {
+      case EndpointHealthStatus.offline:
+        _sawOffline = true;
+      case EndpointHealthStatus.online:
+        if (_sawOffline) {
+          _sawOffline = false;
+          retry(host: profile.id);
+        }
+      case EndpointHealthStatus.delayed:
+        break;
+    }
+  }
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    health.removeListener(_healthChanged);
+  }
+}
+
 /// Asks the live directory to reconnect now when the app returns from the
 /// background or the network changes (`v2-plan.md` §6.10 step 7), instead of
 /// waiting for the retry delay or the 45 s stall watchdog, which remain the

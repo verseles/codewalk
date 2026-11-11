@@ -12,7 +12,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #467 Repensar o Refresh
 - [ ] #470 Escolha Steer/Queue no composer
 - [ ] #438 Editar servidor pareado
 - [ ] #474 Janela desktop: barra integrada e comportamento ao fechar
@@ -49,6 +48,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #425 Capturar troca real de modelo e agente no OpenCode 2.0.22
 - [ ] #443 Atualizar o rodapé de fundação do `BEHAVIOR.md`
 - [ ] #479 Sessões dos projetos abertos pela leitura global do servidor
+- [ ] #482 Retentar sozinho o leitor de contextos e conversas com rate limit
 
 ## 5. Codex: gates G1, G2 e G5
 

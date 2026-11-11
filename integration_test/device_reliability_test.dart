@@ -101,8 +101,11 @@ void main() {
         'failure': list.failure?.name,
         'reconciling': list.reconciling,
         'feed': live.feed,
+        // The list no longer stops retrying (#467): there is no suspension.
         'failures': live.failures,
-        'suspended': live.suspended,
+        // A list waiting out its backoff is told apart from a stuck one.
+        'feedEnds': live.feedEnds,
+        'nextRead': live.nextRead?.toIso8601String(),
         'rows': list.sessions.length,
       };
     }

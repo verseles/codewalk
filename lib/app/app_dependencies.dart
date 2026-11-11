@@ -54,6 +54,7 @@ class AppDependencies {
     this.liveDirectory,
     this.disposeProfileBindings,
     this.liveWake,
+    this.liveRecovery,
     this.permissionModes,
     this.unrestrictedOwnership,
     this.hiddenSessions,
@@ -99,6 +100,10 @@ class AppDependencies {
   /// change.
   final LiveWakeCoordinator? liveWake;
 
+  /// Retries the list and the conversations that gave up when the server
+  /// answers again (#467).
+  final LiveRecovery? liveRecovery;
+
   /// CodeWalk's permission policy (ADR-059). The session chip and its settings
   /// surface belong to V2-047B; the live slot consults it already.
   final PermissionModeStore? permissionModes;
@@ -141,6 +146,7 @@ class AppDependencies {
     disposeProfileBindings?.call();
     // No wake may reach a directory that is closing.
     liveWake?.dispose();
+    liveRecovery?.dispose();
     links?.dispose();
     router.routeInformationProvider.removeListener(_routeChanged);
     workspaceChrome?.dispose();

@@ -188,9 +188,14 @@ AppDependencies createAppDependencies({
     disposeProfileBindings = () => hosts.removeListener(reconcileProfiles);
   }
   // Reconnects every open endpoint stream on a return from the background
-  // or a network change.
+  // or a network change, and retries the list and the conversations that
+  // gave up (#467).
+  LiveRecovery? liveRecovery;
   final liveWake = LiveWakeCoordinator(
-    wake: liveDirectory?.wake ?? () {},
+    wake: () {
+      liveDirectory?.wake();
+      liveRecovery?.retry();
+    },
     network: networkChanges,
     onNetworkChanged: (changed) =>
         endpointHealth.networkChanged(routeChanged: changed),
@@ -220,6 +225,11 @@ AppDependencies createAppDependencies({
     catalog: locator<SessionsController>(),
     workspace: projectStore,
     now: sessionClock,
+  );
+  liveRecovery = LiveRecovery(
+    health: endpointHealth,
+    catalog: locator<SessionsController>(),
+    tabs: sessionTabs,
   );
   // Brings back the server the workspace was left on.
   final workspaceState = workspaceStore ?? WorkspaceStore(store: metadata);
@@ -311,6 +321,7 @@ AppDependencies createAppDependencies({
     liveDirectory: liveDirectory,
     disposeProfileBindings: disposeProfileBindings,
     liveWake: liveWake,
+    liveRecovery: liveRecovery,
     permissionModes: permissionModes,
     hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,

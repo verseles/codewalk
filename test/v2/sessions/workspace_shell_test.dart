@@ -395,6 +395,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(path(), '/hosts');
       await tester.tap(find.byKey(const ValueKey('workspace-back')));
+      await tester.pump();
+      // Opening Servers reloaded them, so the list reads again by itself
+      // (#467); the scripted server answers that read.
+      final pending = _source.tasks.last;
+      if (!pending.completion.isCompleted) {
+        _source.respond(dependencies.sessions!.sessions);
+      }
       await tester.pumpAndSettle();
       expect(path(), '/sessions');
       await showSessionList(tester);
@@ -581,7 +588,9 @@ void main() {
     final l10n = dependencies.localizations.current;
     final source = rig.sources.single;
     source.fail(SessionCatalogFailure.connection);
-    await tester.pumpAndSettle();
+    // pump, not pumpAndSettle: the hamburger spins while the read waits to
+    // retry by itself (#467), and settling would run the clock into it.
+    await tester.pump();
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('workspace-empty')),
@@ -595,7 +604,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(source.tasks, hasLength(2));
     source.fail(SessionCatalogFailure.connection);
-    await tester.pumpAndSettle();
+    // This failure lands after the next frame, so the home shows it one
+    // frame later.
+    await tester.pump();
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('workspace-open-servers')));
     await tester.pumpAndSettle();
     expect(dependencies.router.state.uri.path, '/hosts');

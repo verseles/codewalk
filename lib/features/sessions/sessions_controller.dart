@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
@@ -81,9 +82,24 @@ class SessionsController extends ChangeNotifier {
   SessionRef? _showing;
   (SessionRef, DateTime)? _viewSent;
   bool _liveConnected = false;
-  bool _liveSuspended = false;
+  // The longest wait between automatic retries: liveMinInterval * 2^6.
+  static const _liveMaxBackoff = 6;
   bool _behind = false;
   int _liveFailures = 0;
+  // Feeds that ended before they reported a connection: a feed that cannot
+  // stay open backs off like a failed re-read instead of looping (#467).
+  int _feedEnds = 0;
+  DateTime? _feedLiveSince;
+  // The last drop already counted its short live period.
+  bool _dropCounted = false;
+  // A feed that stayed live for one whole longest wait ended normally, so a
+  // feed can never cycle faster than the cap.
+  Duration get _feedSteady => liveMinInterval * (1 << _liveMaxBackoff);
+  // A recovery asked for during a read runs when that read ends.
+  bool _recoverAfterRead = false;
+  // A failed head read retries by itself after a wait that grows.
+  Timer? _readRetry;
+  int _readFailures = 0;
   int _liveEpoch = 0;
   bool _quietRefreshing = false;
   // The pagination state the last automatic re-read observed.
@@ -558,6 +574,9 @@ class SessionsController extends ChangeNotifier {
   /// not succeed, or the feed that would trigger the next one dropped.
   bool get behind => _behind;
 
+  /// A failed head read waits to try again by itself (#467).
+  bool get retrying => _readRetry != null;
+
   /// The injected clock. The list never reads the wall clock on its own.
   DateTime get now => _now();
 
@@ -565,12 +584,15 @@ class SessionsController extends ChangeNotifier {
   bool get quietRefreshing => _quietRefreshing;
 
   /// The feed's state, for device evidence: whether a feed is held, the
-  /// failed automatic re-reads in a row and whether they stopped.
+  /// failed automatic re-reads in a row, the feeds that ended before they
+  /// connected, and when the next automatic re-read may start.
   @visibleForTesting
-  ({bool feed, int failures, bool suspended}) get liveDiagnostics => (
+  ({bool feed, int failures, int feedEnds, DateTime? nextRead})
+  get liveDiagnostics => (
     feed: _changes != null,
     failures: _liveFailures,
-    suspended: _liveSuspended,
+    feedEnds: _feedEnds,
+    nextRead: _liveEarliestStart,
   );
   Future<void> initialize() => _initialization ??= hosts.load();
   void _notify() {
@@ -585,6 +607,11 @@ class SessionsController extends ChangeNotifier {
     _refreshing = false;
     loading = false;
     if (closeSource) {
+      // The retry streak and a latched recovery belong to this endpoint.
+      _readRetry?.cancel();
+      _readRetry = null;
+      _readFailures = 0;
+      _recoverAfterRead = false;
       _source?.close();
       _source = null;
       _actions?.close();
@@ -646,6 +673,9 @@ class SessionsController extends ChangeNotifier {
       _notify();
       return;
     }
+    // Only the end of a server-list reload resumes what the reload stopped;
+    // other host notifications (health checks) must not skip a wait.
+    final reloaded = _hostLoading;
     _hostLoading = false;
     final old = _profile;
     if (old != null) {
@@ -663,9 +693,38 @@ class SessionsController extends ChangeNotifier {
         _credential = credential;
         if (current != null && !hosts.storageError && !_usable(credential)) {
           failure = SessionCatalogFailure.authenticationRequired;
+        } else if (current != null && !hosts.storageError) {
+          // A repaired password or a new credential reads the list again;
+          // the removed Refresh used to be the way (#467).
+          scheduleMicrotask(() {
+            if (!_disposed && identical(_profile, current)) {
+              unawaited(refresh());
+            }
+          });
         }
       } else {
         _profile = current;
+        // A server-list reload interrupted the head retry or the automatic
+        // re-read; the list resumes them now that it can read again.
+        if (reloaded && !loading) {
+          // The reload cancelled any read and marked the rows previous; with
+          // no Refresh left (#467), the list reads again by itself, keeping
+          // its retry streak.
+          if (failure != SessionCatalogFailure.authenticationRequired &&
+              (!loaded || failure != null)) {
+            // Nothing current is shown: the head read, at once.
+            _readRetry?.cancel();
+            _readRetry = null;
+            unawaited(_refreshShown());
+          } else if (failure == null && (stale || _livePending)) {
+            // A loaded list re-reads quietly, like a server change, so
+            // opening Servers shows no loading bar.
+            _liveTimer?.cancel();
+            _liveTimer = null;
+            _liveEarliestStart = null;
+            _markLiveChange();
+          }
+        }
       }
     }
     _notify();
@@ -725,6 +784,107 @@ class SessionsController extends ChangeNotifier {
     }
     _notify();
     return false;
+  }
+
+  /// Tries now what the list would otherwise try later or not at all: the
+  /// app returned, the network changed or the server answers again (#467).
+  /// A list that failed to load reads again, and one that fell behind re-reads
+  /// without waiting out its retry delay; a rejected credential still needs
+  /// the user.
+  void recover() {
+    if (_disposed || _profile == null) return;
+    // The other open projects' passes stop after repeated failures; a
+    // recovery restarts them, as the removed Refresh did.
+    _contextRefresh.refresh();
+    if (loading || _quietRefreshing) {
+      // The read in flight decides: if it fails, this recovery runs then.
+      _recoverAfterRead = true;
+      if (_quietRefreshing) _livePending = true;
+      return;
+    }
+    if (failure != null) {
+      if (failure != SessionCatalogFailure.authenticationRequired) {
+        _readRetry?.cancel();
+        _readRetry = null;
+        unawaited(refresh());
+      }
+      return;
+    }
+    // A feed that could not open is tried again with the list.
+    if (loaded && _changes == null) unawaited(_ensureChanges());
+    if (!_behind) return;
+    // The wait armed by the last failure is dropped, not added to.
+    _liveTimer?.cancel();
+    _liveTimer = null;
+    _liveEarliestStart = null;
+    _markLiveChange();
+  }
+
+  /// A failed head read that may pass is tried again after a wait that
+  /// doubles from liveMinInterval up to the cap, or at once when a recovery
+  /// was asked for during it; a rejected credential never is.
+  void _afterFailedRead() {
+    final failed = failure;
+    final now = _recoverAfterRead;
+    _recoverAfterRead = false;
+    if (!_passing(failed)) {
+      // A recovery asked for during the read still gets its one read.
+      if (now && failed != SessionCatalogFailure.authenticationRequired) {
+        _recoverLater();
+      }
+      return;
+    }
+    _readFailures = failed == SessionCatalogFailure.rateLimited
+        ? _liveMaxBackoff
+        : math.min(_readFailures + 1, _liveMaxBackoff);
+    _armReadRetry(
+      now ? Duration.zero : liveMinInterval * (1 << _readFailures),
+    );
+  }
+
+  /// Closes the feed's current live period: one that lasted a whole longest
+  /// wait proves the feed works, so the streak of failing feeds starts over
+  /// (its feed's end is then the first of a new streak); a shorter one,
+  /// ended by a drop or by the feed's end, counts as a failing feed, once.
+  /// Returns whether a short period was counted as a failing feed.
+  bool _endLivePeriod() {
+    final since = _feedLiveSince;
+    _feedLiveSince = null;
+    if (since == null) return false;
+    if (!_now().isBefore(since.add(_feedSteady))) {
+      _feedEnds = 0;
+      return false;
+    }
+    _feedEnds++;
+    return true;
+  }
+
+  /// Runs a latched recovery after the current read, for this profile only.
+  void _recoverLater() {
+    final profile = _profile;
+    scheduleMicrotask(() {
+      if (!_disposed && identical(_profile, profile)) recover();
+    });
+  }
+
+  static bool _passing(SessionCatalogFailure? failure) => switch (failure) {
+    SessionCatalogFailure.connection ||
+    SessionCatalogFailure.timeout ||
+    SessionCatalogFailure.unavailable ||
+    SessionCatalogFailure.rateLimited => true,
+    _ => false,
+  };
+
+  /// One pending head retry at a time. It reads the head only, keeping the
+  /// streak, so the wait keeps growing while the cause lasts.
+  void _armReadRetry(Duration wait) {
+    _readRetry?.cancel();
+    _readRetry = Timer(wait, () {
+      _readRetry = null;
+      if (_disposed || loading || !_passing(failure)) return;
+      // The server list may still be loading; its end re-arms the retry.
+      unawaited(_refreshShown());
+    });
   }
 
   /// Reads the list again from its head; the open contexts the list does
@@ -868,13 +1028,14 @@ class SessionsController extends ChangeNotifier {
           _source = null;
           _closeChanges();
         } else if (failure == null) {
-          // A successful authoritative read lifts the suspension, clears the
-          // notice and opens the feed.
+          // A successful authoritative read ends the wait between retries,
+          // clears the notice and opens the feed.
           _liveFailures = 0;
-          _liveSuspended = false;
+          _readFailures = 0;
           if (refresh) {
             // A head read reconciles the whole list; a page append does not.
-            _behind = false;
+            // A dropped feed still misses changes, so it stays behind.
+            if (_changes == null || _liveConnected) _behind = false;
             unawaited(_syncActivity());
             _trackContexts();
           }
@@ -886,6 +1047,14 @@ class SessionsController extends ChangeNotifier {
           _markLiveChange();
         } else if (_activityPending && failure == null) {
           _markLiveChange(rows: false);
+        }
+        if (failure != null && refresh) {
+          _afterFailedRead();
+        } else if (_recoverAfterRead) {
+          // A recovery that arrived during a page or a successful read runs
+          // now that the read is over.
+          _recoverAfterRead = false;
+          _recoverLater();
         }
         _notify();
       }
@@ -959,12 +1128,16 @@ class SessionsController extends ChangeNotifier {
     _changesAcquisition = null;
     _liveTimer?.cancel();
     _liveTimer = null;
+    _readRetry?.cancel();
+    _readRetry = null;
     _livePending = false;
     _activityPending = false;
     _liveConnected = false;
     _quietRefreshing = false;
     _liveFailures = 0;
-    _liveSuspended = false;
+    _feedEnds = 0;
+    _feedLiveSince = null;
+    _dropCounted = false;
     _behind = false;
     _liveEarliestStart = null;
     unawaited(_changesSubscription?.cancel());
@@ -980,6 +1153,15 @@ class SessionsController extends ChangeNotifier {
     _changes = null;
     feed.close();
     _behind = true;
+    // The next feed has not connected yet: its own report decides.
+    _liveConnected = false;
+    // A feed that stayed live for a while ended normally; one that dies soon
+    // after it connects keeps the streak growing. A short period its drop
+    // already counted is not counted again.
+    if (!_endLivePeriod() && !_dropCounted) _feedEnds++;
+    _dropCounted = false;
+    // The next read acquires a new feed; it does not wait for the user.
+    _markLiveChange();
     _notify();
   }
 
@@ -994,6 +1176,13 @@ class SessionsController extends ChangeNotifier {
       case SessionCatalogConnection(:final connected):
         if (connected == _liveConnected) break;
         _liveConnected = connected;
+        // A live period ends at a disconnect; the next one starts over.
+        if (connected) {
+          _feedLiveSince = _now();
+          _dropCounted = false;
+        } else {
+          _dropCounted = _endLivePeriod();
+        }
         if (connected) {
           // A reconnect is not continuity: the list re-reads before it may
           // call itself current.
@@ -1189,7 +1378,7 @@ class SessionsController extends ChangeNotifier {
   /// A change of the list re-reads the rows and then the activity; a change
   /// of the activity alone re-reads only the activity.
   void _markLiveChange({bool rows = true}) {
-    if (_disposed || _liveSuspended) return;
+    if (_disposed) return;
     if (rows) {
       _livePending = true;
     } else {
@@ -1209,7 +1398,7 @@ class SessionsController extends ChangeNotifier {
   /// Runs the automatic re-read when the debounce and the cooldown allow it.
   Future<void> _runLive() async {
     _liveTimer = null;
-    if (_disposed || _liveSuspended) return;
+    if (_disposed) return;
     if (loading || _quietRefreshing) {
       // A read is in flight: the pending latch becomes one final read.
       return;
@@ -1230,6 +1419,9 @@ class SessionsController extends ChangeNotifier {
       return;
     }
     if (!_activityPending) return;
+    // Like the rows, the activity is not read while the servers reload; the
+    // reload end re-arms it.
+    if (hosts.loading) return;
     _activityPending = false;
     _liveEarliestStart = now.add(liveMinInterval);
     await _syncActivity();
@@ -1281,7 +1473,11 @@ class SessionsController extends ChangeNotifier {
     if (source == null || _profile == null) return;
     // The automatic read obeys the same fence as a manual one: an expired or
     // unreadable credential, a loading host list or a storage failure stops it.
-    if (!_ready(createSource: false)) return;
+    // The change is kept, so the end of a server-list reload re-reads it.
+    if (!_ready(createSource: false)) {
+      if (hosts.loading) _livePending = true;
+      return;
+    }
     final generation = _generation;
     final epoch = _liveEpoch;
     // The re-read follows the depth already loaded, inside the existing
@@ -1328,7 +1524,11 @@ class SessionsController extends ChangeNotifier {
       failure = null;
       stale = false;
       _liveFailures = 0;
-      _behind = false;
+      // A dropped feed still misses changes, so the list stays behind until
+      // it reconnects.
+      if (_changes == null || _liveConnected) _behind = false;
+      // A feed that ended is acquired again once the list reads.
+      unawaited(_ensureChanges());
       _viewShown();
       // The activity is read after the rows it marks, which are shown
       // without waiting for it.
@@ -1350,16 +1550,23 @@ class SessionsController extends ChangeNotifier {
       // empties it.
       _liveFailures++;
       _behind = true;
-      if (_liveFailures >= 3 ||
-          (error is SessionCatalogException &&
-              error.failure == SessionCatalogFailure.rateLimited)) {
-        _liveSuspended = true;
+      if (error is SessionCatalogException &&
+          error.failure == SessionCatalogFailure.rateLimited) {
+        // The server asked for room: the longest wait, not a stop.
+        _liveFailures = math.max(_liveFailures, _liveMaxBackoff);
       }
+      // The list tries again by itself after the wait below, which grows
+      // with each failure (#467); nothing waits for a manual refresh.
+      _livePending = true;
     } finally {
       if (_quietCurrent(generation, epoch, source)) {
         _quietRefreshing = false;
-        final backoff = 1 << (_liveFailures.clamp(0, 6));
-        _liveEarliestStart = _now().add(liveMinInterval * backoff);
+        final streak = math.max(_liveFailures, _feedEnds);
+        final backoff = 1 << (streak.clamp(0, _liveMaxBackoff));
+        _liveEarliestStart = _recoverAfterRead
+            ? null
+            : _now().add(liveMinInterval * backoff);
+        _recoverAfterRead = false;
         if (_livePending) {
           // A change that arrived during the read becomes one final read.
           _markLiveChange();
@@ -1370,6 +1577,24 @@ class SessionsController extends ChangeNotifier {
         // A manual page superseded this read on the same profile: the flag is
         // released, but the cooldown and the latch belong to the next read.
         _quietRefreshing = false;
+        // A reconnect superseded it instead: the change it marked runs after
+        // the same cooldown a completed read sets, so reconnects that keep
+        // superseding reads are still spaced by the streak; a recovery asked
+        // for during the read skips that wait, as in the completed branch.
+        // A server-list reload superseded it by generation only: its end
+        // already chose the wait, which this late read must not undo.
+        if (!loading && (_livePending || _activityPending)) {
+          if (_recoverAfterRead) {
+            _liveEarliestStart = null;
+          } else if (epoch != _liveEpoch) {
+            final streak = math.max(_liveFailures, _feedEnds);
+            _liveEarliestStart = _now().add(
+              liveMinInterval * (1 << streak.clamp(0, _liveMaxBackoff)),
+            );
+          }
+          _recoverAfterRead = false;
+          _markLiveChange(rows: _livePending);
+        }
       }
       _notify();
     }

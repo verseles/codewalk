@@ -51,7 +51,7 @@ void main() {
   });
 
   test(
-    'two saved pins retain order; a fourth drops the oldest and survives restart',
+    'saved pins retain order, drop the retired Refresh and survive restart',
     () async {
       final backend = FakeMetadataBackend()
         ..values[_key] = '["refresh","newChat"]';
@@ -60,10 +60,10 @@ void main() {
       );
       addTearDown(preferences.dispose);
       await preferences.initialize();
-      expect(preferences.appBarPins, [
-        WorkspacePinnedAction.refresh,
-        WorkspacePinnedAction.newChat,
-      ]);
+      // Refresh left the toolbar (#467): its saved pin is dropped, not an
+      // unreadable preference.
+      expect(preferences.appBarPins, [WorkspacePinnedAction.newChat]);
+      expect(preferences.canEditAppBarPins, isTrue);
       preferences.setAppBarPinned(WorkspacePinnedAction.servers, true);
       preferences.setAppBarPinned(WorkspacePinnedAction.settings, true);
       await preferences.flush();
@@ -86,7 +86,7 @@ void main() {
     },
   );
 
-  test('oversized valid saved lists retain the latest three actions', () async {
+  test('a saved list keeps its order without the retired Refresh', () async {
     final backend = FakeMetadataBackend()
       ..values[_key] = '["newChat","servers","refresh","settings"]';
     final preferences = AppPreferencesController(
@@ -95,8 +95,8 @@ void main() {
     addTearDown(preferences.dispose);
     await preferences.initialize();
     expect(preferences.appBarPins, [
+      WorkspacePinnedAction.newChat,
       WorkspacePinnedAction.servers,
-      WorkspacePinnedAction.refresh,
       WorkspacePinnedAction.settings,
     ]);
   });
@@ -110,7 +110,7 @@ void main() {
     addTearDown(preferences.dispose);
     await preferences.initialize();
     expect(preferences.canEditAppBarPins, isFalse);
-    preferences.setAppBarPinned(WorkspacePinnedAction.refresh, true);
+    preferences.setAppBarPinned(WorkspacePinnedAction.servers, true);
     preferences.setThemeMode(ThemeMode.dark);
     await preferences.flush();
     expect(preferences.appBarPins, [WorkspacePinnedAction.newChat]);

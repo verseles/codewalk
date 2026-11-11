@@ -1093,6 +1093,23 @@ class SessionLiveController extends ChangeNotifier
     await start();
   }
 
+  /// Reopens a view the transport gave up on when trying again may work: the
+  /// app returned, the network changed or the server answers again (#467).
+  /// A view that needs the user (a credential, a session that is gone, a
+  /// changed server) stays as it is.
+  void recover() {
+    if (!canRetry) return;
+    final passing = switch (failure) {
+      null => view?.phase == SessionLivePhase.degraded,
+      SessionLiveFailure.unavailable ||
+      SessionLiveFailure.timeout ||
+      SessionLiveFailure.connection ||
+      SessionLiveFailure.rateLimited => true,
+      _ => false,
+    };
+    if (passing) unawaited(retry());
+  }
+
   @override
   void dispose() {
     if (_disposed) return;

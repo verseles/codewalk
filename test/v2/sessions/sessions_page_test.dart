@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/project_context_list.dart';
@@ -297,7 +299,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       source.fail(SessionCatalogFailure.connection);
-      await tester.pumpAndSettle();
+      // The hamburger spins while the list recovers (#467), so nothing
+      // settles: the clock passes instead.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.text(l10n.liveStale), findsOneWidget);
       expect(
         find.byKey(ValueKey(source.row('first').info.ref)),
@@ -416,13 +421,11 @@ void main() {
     // The proof is fresh, so the row shows the ownership it proved.
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
-    // A manual refresh in flight: the rows are not the endpoint's current
-    // answer, so the label falls back to unknown.
-    await _openToolbarMenu(tester);
-    await tester.tap(find.widgetWithText(MenuItemButton, 'Refresh'));
+    // A refresh in flight (the shortcut's, since the toolbar has none): the
+    // rows are not the endpoint's current answer, so the label falls back to
+    // unknown.
+    unawaited(dependencies.sessions!.refresh());
     await tester.pump();
-    // The list sits under the drawer, so it is opened again to show its rows.
-    await showSessionList(tester);
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     source.respond([fresh()]);
@@ -436,7 +439,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     source.fail(SessionCatalogFailure.connection);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.text(l10n.liveStale), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);

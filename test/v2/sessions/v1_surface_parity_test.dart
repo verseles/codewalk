@@ -601,15 +601,16 @@ void toolbarGroup() {
     await tester.pumpAndSettle();
     // v1: chat_page_mobile_overflow.dart:230-276 (MenuAnchor / MenuItemButton).
     final items = find.byType(MenuItemButton);
-    // The v1 actions plus the v2 Display sheet entry.
-    expect(items, findsNWidgets(5));
+    // The v1 actions without Refresh, which v2 no longer needs (#467), plus
+    // the v2 Display sheet entry.
+    expect(items, findsNWidgets(4));
     expect(tester.getTopLeft(items.first).dy, greaterThanOrEqualTo(bottom));
     // v1: chat_page_mobile_overflow.dart:245-250 (18dp pins), :261 (dividers).
     final pin = tester.widget<IconButton>(
       find.byKey(const ValueKey('workspace-pin-newChat')),
     );
     expect(pin.iconSize, 18);
-    expect(find.byType(Divider), findsNWidgets(4));
+    expect(find.byType(Divider), findsNWidgets(3));
     // Decision 10 order: undo follows the pinned actions; disabled on home as in v1.
     expect(
       tester
@@ -617,7 +618,7 @@ void toolbarGroup() {
           .onPressed,
       isNull,
     );
-    expect(find.byIcon(Symbols.refresh), findsOneWidget);
+    expect(find.byIcon(Symbols.refresh), findsNothing);
     expect(find.byIcon(Symbols.dns), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

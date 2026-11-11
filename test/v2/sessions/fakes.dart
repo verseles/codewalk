@@ -296,6 +296,9 @@ class LiveCatalogChanges implements SessionCatalogChanges {
 
   void emit(SessionCatalogSignal signal) => _controller.add(signal);
 
+  /// Ends the stream as the endpoint would, without the list closing it.
+  Future<void> end() => _controller.close();
+
   @override
   void close() {
     closes++;

@@ -11,7 +11,7 @@ import '../shared/theme/chat_appearance.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
 import '../shared/theme/theme_preferences.dart';
 
-enum WorkspacePinnedAction { refresh, servers, settings, newChat }
+enum WorkspacePinnedAction { servers, settings, newChat }
 
 /// Appearance uses only the v2 metadata namespace; null locale follows the
 /// device, while a chosen language code survives restarts.
@@ -502,6 +502,8 @@ class AppPreferencesController extends ChangeNotifier {
         }
         final next = <WorkspacePinnedAction>[];
         for (final name in decoded) {
+          // Refresh left the toolbar (#467): a pin saved before is dropped.
+          if (name == 'refresh') continue;
           final action = WorkspacePinnedAction.values
               .where((action) => action.name == name)
               .firstOrNull;

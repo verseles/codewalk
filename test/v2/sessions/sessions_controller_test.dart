@@ -269,7 +269,7 @@ void main() {
   }
 
   test(
-    'credential repair invalidates reads, requires explicit refresh',
+    'credential repair invalidates reads and reads again by itself',
     () async {
       await rig.save('a');
       await rig.sessions.initialize();
@@ -282,11 +282,12 @@ void main() {
       old.respond([old.row('obsolete')]);
       await initial;
       expect(rig.sessions.sessions, isEmpty);
-      expect(rig.sources, hasLength(1));
-      final refresh = rig.sessions.refresh();
-      rig.sources.last.respond([rig.sources.last.row('current')]);
-      await refresh;
+      // No Refresh is left to press (#467): the new credential reads again.
+      await flush();
       expect(rig.sources, hasLength(2));
+      rig.sources.last.respond([rig.sources.last.row('current')]);
+      await flush();
+      expect(rig.sessions.sessions, hasLength(1));
     },
   );
 
@@ -379,6 +380,12 @@ void main() {
         source.respond([source.row('1')]);
         await settle();
       }
+      // The endpoint's feed reports it is connected, like the real lease,
+      // and that connection is covered by one more read.
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
       return rig;
     }
 
@@ -386,11 +393,15 @@ void main() {
       final rig = await loaded();
       final source = rig.sources.single;
       expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
-      expect(source.tasks, hasLength(2), reason: 'the read and the catch-up');
+      expect(
+        source.tasks,
+        hasLength(3),
+        reason: 'the read, the catch-up and the connection',
+      );
 
       rig.feed.emit(const SessionCatalogChanged());
       await settle();
-      expect(source.tasks, hasLength(3), reason: 'the change triggers one read');
+      expect(source.tasks, hasLength(4), reason: 'the change triggers one read');
       source.respond([source.row('1'), source.row('2')]);
       await settle();
       expect(
@@ -462,6 +473,374 @@ void main() {
       expect(rig.sessions.sessions.map((s) => s.info.ref.nativeId), ['ses_1']);
       expect(rig.sessions.behind, isTrue);
       expect(rig.sessions.failure, isNull, reason: 'the catalog failure is its own');
+    });
+
+    test('a failed re-read tries again by itself, however often it fails',
+        () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      // No count of failures stops the list (#467).
+      for (var attempt = 1; attempt <= 5; attempt++) {
+        final before = source.tasks.length;
+        source.fail(SessionCatalogFailure.connection);
+        await settle();
+        expect(rig.sessions.behind, isTrue);
+        expect(
+          source.tasks,
+          hasLength(before + 1),
+          reason: 'retry $attempt needs no new change',
+        );
+      }
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.behind, isFalse);
+      expect(rig.sessions.liveDiagnostics.failures, 0);
+    });
+
+    test('a retry waits longer after each failure and recover skips the wait',
+        () async {
+      final clock = DateTime.utc(2026, 11, 10);
+      final rig = CatalogRig(
+        now: () => clock,
+        liveMinInterval: const Duration(seconds: 2),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      // The catch-up read after the feed opened.
+      source.respond([source.row('1')]);
+      await settle();
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(2), reason: 'a current list has nothing to recover');
+
+      // The cooldown of the read above still runs on the frozen clock, so
+      // the change waits; recover does not.
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      expect(source.tasks, hasLength(2));
+      rig.feed.emit(const SessionCatalogConnection(true));
+      rig.feed.emit(const SessionCatalogConnection(false));
+      await settle();
+      expect(rig.sessions.behind, isTrue);
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(3));
+      source.respond([source.row('1')]);
+      await settle();
+      // A re-read cannot make a dropped feed current.
+      expect(rig.sessions.behind, isTrue);
+      rig.feed.emit(const SessionCatalogConnection(true));
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(4));
+
+      // A rate limit is the longest wait, never a stop.
+      source.fail(SessionCatalogFailure.rateLimited);
+      await settle();
+      expect(rig.sessions.liveDiagnostics.failures, 6);
+      expect(source.tasks, hasLength(4), reason: 'the retry waits its turn');
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(5));
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.behind, isFalse);
+    });
+
+    test('a feed that keeps ending backs off like a failing re-read', () async {
+      var clock = DateTime.utc(2026, 11, 11);
+      final rig = CatalogRig(
+        now: () => clock,
+        liveMinInterval: const Duration(seconds: 2),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      expect(
+        rig.sessions.liveDiagnostics.nextRead,
+        clock.add(const Duration(seconds: 2)),
+      );
+      // A feed that ends before it connects is a failure, not a fresh start:
+      // each read after it waits twice as long (#467).
+      for (var end = 1; end <= 3; end++) {
+        unawaited(rig.feed.end());
+        await settle();
+        expect(rig.sessions.liveDiagnostics.feedEnds, end);
+        // The recovery skips the wait; the streak still sets the next one.
+        rig.sessions.recover();
+        await settle();
+        source.respond([source.row('1')]);
+        await settle();
+        expect(
+          rig.sessions.liveDiagnostics.nextRead,
+          clock.add(const Duration(seconds: 2) * (1 << end)),
+        );
+        expect(rig.feeds, hasLength(end + 1));
+      }
+      // A feed that connects and soon dies again keeps the streak (its
+      // re-read waits out the cooldown).
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
+      unawaited(rig.feed.end());
+      await settle();
+      expect(rig.sessions.liveDiagnostics.feedEnds, 4);
+      rig.sessions.recover();
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      // One that stayed live a whole longest wait (2 s * 2^6) ended
+      // normally, even when it reports the disconnect first: the streak
+      // starts over.
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
+      clock = clock.add(const Duration(seconds: 128));
+      rig.feed.emit(const SessionCatalogConnection(false));
+      unawaited(rig.feed.end());
+      await settle();
+      expect(rig.sessions.liveDiagnostics.feedEnds, 1);
+    });
+
+    test('a short drop counts as a failing feed, once', () async {
+      final clock = DateTime.utc(2026, 11, 11);
+      final rig = CatalogRig(
+        now: () => clock,
+        liveMinInterval: const Duration(seconds: 2),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      // The feed connects and drops at once, without ending (#467).
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
+      rig.feed.emit(const SessionCatalogConnection(false));
+      await settle();
+      expect(rig.sessions.liveDiagnostics.feedEnds, 1);
+      // Its end right after is the same short period: not counted twice.
+      unawaited(rig.feed.end());
+      await settle();
+      expect(rig.sessions.liveDiagnostics.feedEnds, 1);
+      rig.sessions.recover();
+      await settle();
+      source.respond([source.row('1')]);
+      await settle();
+      expect(
+        rig.sessions.liveDiagnostics.nextRead,
+        clock.add(const Duration(seconds: 4)),
+        reason: 'the drop lengthened the wait',
+      );
+    });
+
+    test('a reconnect during a quiet re-read still gets its own read',
+        () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      rig.feed.emit(const SessionCatalogChanged());
+      await settle();
+      final reads = source.tasks.length;
+      // The re-read hangs; the feed drops and reconnects meanwhile.
+      rig.feed.emit(const SessionCatalogConnection(false));
+      rig.feed.emit(const SessionCatalogConnection(true));
+      await settle();
+      expect(source.tasks, hasLength(reads), reason: 'one read at a time');
+      // The superseded read answers late; the reconnect's read follows.
+      source.respond([source.row('1')]);
+      await settle();
+      expect(source.tasks, hasLength(reads + 1));
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.behind, isFalse);
+    });
+
+    test('reads a reconnect supersedes are still spaced by the cooldown',
+        () async {
+      final clock = DateTime.utc(2026, 11, 11);
+      final rig = CatalogRig(
+        now: () => clock,
+        liveMinInterval: const Duration(seconds: 2),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      // The catch-up read is in flight when the stream drops and comes back.
+      rig.feed.emit(const SessionCatalogConnection(true));
+      rig.feed.emit(const SessionCatalogConnection(false));
+      await settle();
+      expect(rig.sessions.liveDiagnostics.feedEnds, 1);
+      // The superseded read answers; its follow-up waits the streak's
+      // cooldown (2 s * 2^1) instead of one debounce (#467).
+      source.respond([source.row('1')]);
+      await settle();
+      expect(
+        rig.sessions.liveDiagnostics.nextRead,
+        clock.add(const Duration(seconds: 4)),
+      );
+    });
+
+    test('a reload that supersedes a quiet re-read keeps its prompt re-read',
+        () async {
+      final clock = DateTime.utc(2026, 11, 11);
+      final rig = CatalogRig(
+        now: () => clock,
+        liveMinInterval: const Duration(seconds: 2),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.respond([source.row('1')]);
+      await read;
+      await settle();
+      // The catch-up read is in flight when the servers reload.
+      expect(rig.sessions.quietRefreshing, isTrue);
+      final reads = source.tasks.length;
+      await rig.hosts.load();
+      await settle();
+      expect(source.tasks, hasLength(reads), reason: 'one read at a time');
+      // The superseded read answers late: it puts no cooldown back, so the
+      // re-read the reload asked for follows at once.
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.liveDiagnostics.nextRead, isNull);
+      expect(source.tasks, hasLength(reads + 1));
+    });
+
+    test('a loaded list that failed reads at once after a reload', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      final read = rig.sessions.refresh();
+      source.fail(SessionCatalogFailure.incompatibleResponse);
+      await read;
+      await settle();
+      expect(rig.sessions.failure, SessionCatalogFailure.incompatibleResponse);
+      final reads = source.tasks.length;
+      await rig.hosts.load();
+      await settle();
+      expect(source.tasks, hasLength(reads + 1));
+    });
+
+    test('a server-list reload re-reads a list it marked previous', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      final reads = source.tasks.length;
+      // Pairing or a profile edit reloads the servers: the rows become
+      // previous results and nothing is left to press (#467).
+      await rig.hosts.load();
+      await settle();
+      expect(source.tasks, hasLength(reads + 1));
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.stale, isFalse);
+      expect(rig.sessions.sessions, hasLength(1));
+    });
+
+    test('a failed head read retries by itself, at once after a recovery',
+        () async {
+      final rig = CatalogRig(
+        withFeed: false,
+        liveMinInterval: const Duration(hours: 1),
+      );
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.fail(SessionCatalogFailure.connection);
+      await read;
+      await settle();
+      expect(rig.sessions.failure, SessionCatalogFailure.connection);
+      expect(source.tasks, hasLength(1), reason: 'the retry waits its turn');
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(2));
+      // A recovery during that read waits for it, then runs at once.
+      rig.sessions.recover();
+      source.fail(SessionCatalogFailure.timeout);
+      await settle();
+      expect(source.tasks, hasLength(3));
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.failure, isNull);
+      expect(rig.sessions.sessions, hasLength(1));
+    });
+
+    test('a feed that ended is acquired again by the next read', () async {
+      final rig = await loaded();
+      final source = rig.sources.single;
+      final reads = source.tasks.length;
+      expect(rig.feeds, hasLength(1));
+      // The stream ended without the list asking for it.
+      unawaited(rig.feed.end());
+      await settle();
+      expect(rig.sessions.behind, isTrue);
+      expect(source.tasks, hasLength(reads + 1), reason: 'no manual refresh');
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.feeds, hasLength(2));
+      // The new feed is followed by its own catch-up read.
+      source.respond([source.row('1')]);
+      await settle();
+      expect(rig.sessions.behind, isFalse);
+    });
+
+    test('recover reads a failed list again but leaves a rejected credential',
+        () async {
+      final rig = CatalogRig();
+      addTearDown(rig.dispose);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      await flush();
+      final read = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      source.fail(SessionCatalogFailure.connection);
+      await read;
+      expect(rig.sessions.failure, SessionCatalogFailure.connection);
+      rig.sessions.recover();
+      await settle();
+      expect(source.tasks, hasLength(2));
+      source.fail(SessionCatalogFailure.authenticationRequired);
+      await settle();
+      expect(
+        rig.sessions.failure,
+        SessionCatalogFailure.authenticationRequired,
+      );
+      final sources = rig.sources.length;
+      rig.sessions.recover();
+      await settle();
+      expect(rig.sources, hasLength(sources), reason: 'the user must act');
     });
 
     test('a burst of changes collapses into one read', () async {
@@ -544,5 +923,34 @@ void main() {
       expect(rig.sessions.sessions, hasLength(1));
       expect(rig.sessions.behind, isFalse);
     });
+  });
+
+  testWidgets('a failing head read waits twice as long each time', (
+    tester,
+  ) async {
+    // The production interval: the waits are 4, 8 and 16 seconds.
+    final rig = CatalogRig(
+      withFeed: false,
+      liveMinInterval: const Duration(seconds: 2),
+    );
+    await rig.save('a');
+    await rig.sessions.initialize();
+    await tester.pump();
+    unawaited(rig.sessions.selectProfile('profile_a'));
+    await tester.pump();
+    final source = rig.sources.single;
+    for (final wait in const [4, 8, 16]) {
+      final reads = source.tasks.length;
+      source.fail(SessionCatalogFailure.connection);
+      await tester.pump();
+      await tester.pump(Duration(seconds: wait - 1));
+      expect(source.tasks, hasLength(reads), reason: 'not before $wait s');
+      await tester.pump(const Duration(seconds: 1));
+      expect(source.tasks, hasLength(reads + 1), reason: 'at $wait s');
+    }
+    source.respond([source.row('1')]);
+    await tester.pump();
+    expect(rig.sessions.failure, isNull);
+    rig.dispose();
   });
 }

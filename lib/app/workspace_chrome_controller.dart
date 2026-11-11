@@ -91,6 +91,13 @@ final class WorkspaceChromeController extends ChangeNotifier {
                 (live.view?.stale ?? false)));
   }
 
+  /// The open conversation or the session list catches up with the server.
+  /// The list recovers by itself (#467), so the hamburger is where it shows.
+  bool get _syncing => _recovering || _catalogSyncing;
+
+  /// The list is behind its feed or waits to retry a failed head read.
+  bool get _catalogSyncing => catalog.behind || catalog.retrying;
+
   DateTime get _graceEnd =>
       (health.resumedAt ?? health.now).add(const Duration(seconds: 5));
   bool get _offline =>
@@ -157,7 +164,7 @@ final class WorkspaceChromeController extends ChangeNotifier {
       }
     }
     if (attention != null) return attention;
-    if (_resuming && _recovering) {
+    if ((_resuming && _recovering) || _catalogSyncing) {
       return const WorkspaceBadge(WorkspaceBadgeKind.syncing);
     }
     return const WorkspaceBadge(WorkspaceBadgeKind.none);
@@ -208,7 +215,7 @@ final class WorkspaceChromeController extends ChangeNotifier {
     _wasForeground = health.foreground;
     _resume = health.resumedAt;
     _profile = profile;
-    if (!_recovering || !health.foreground || !_workspace) {
+    if (!_syncing || !health.foreground || !_workspace) {
       _syncSince = null;
       if (!health.foreground ||
           !_workspace ||
@@ -230,7 +237,7 @@ final class WorkspaceChromeController extends ChangeNotifier {
     _timer?.cancel();
     final deadlines = <DateTime>[];
     if (health.foreground && _workspace) {
-      if ((_offline || _recovering || _resuming) && now.isBefore(_graceEnd)) {
+      if ((_offline || _syncing || _resuming) && now.isBefore(_graceEnd)) {
         deadlines.add(_graceEnd);
       }
       if (_syncSince case final since?) {

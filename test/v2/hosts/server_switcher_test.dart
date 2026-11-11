@@ -126,7 +126,8 @@ void main() {
         expect(rig.workspace.switchingServer, isFalse);
         expect(rig.catalog.sessions.selectedProfile?.id, 'profile_b');
         expect(rig.store.activeProfile, 'profile_b');
-        expect(rig.catalog.sessions.failure, SessionCatalogFailure.connection);
+        // The failed read tries again by itself (#467); this rig waits zero.
+        expect(rig.catalog.sources.last.tasks, hasLength(2));
         expect(
           find.byKey(const ValueKey('server-switcher-search')),
           findsNothing,
@@ -220,30 +221,29 @@ void main() {
   );
 
   testWidgets(
-    'pin controls retain the latest three real actions without executing them',
+    'pin controls pin every real action without executing them',
     (tester) async {
       final rig = _Rig(tester);
       try {
         await rig.start(tester);
         await tester.tap(find.byKey(const ValueKey('workspace-actions')));
         await tester.pumpAndSettle();
-        for (final action in ['refresh', 'servers', 'settings']) {
+        // Refresh left the toolbar: the list and the streams recover by
+        // themselves (#467).
+        expect(find.byKey(const ValueKey('workspace-pin-refresh')), findsNothing);
+        for (final action in ['servers', 'settings']) {
           await tester.tap(find.byKey(ValueKey('workspace-pin-$action')));
           await tester.pump();
         }
         expect(rig.preferences.appBarPins, [
-          WorkspacePinnedAction.refresh,
+          WorkspacePinnedAction.newChat,
           WorkspacePinnedAction.servers,
           WorkspacePinnedAction.settings,
         ]);
         expect(rig.catalog.sources, hasLength(1));
         await tester.tapAt(const Offset(0, 0));
         await tester.pumpAndSettle();
-        expect(
-          find.byKey(const ValueKey('workspace-pinned-newChat')),
-          findsNothing,
-        );
-        for (final action in ['refresh', 'servers', 'settings']) {
+        for (final action in ['newChat', 'servers', 'settings']) {
           expect(
             find.byKey(ValueKey('workspace-pinned-$action')),
             findsOneWidget,

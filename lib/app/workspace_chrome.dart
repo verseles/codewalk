@@ -10,7 +10,6 @@ import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_context.dart';
-import '../shared/sessions/session_live_source.dart';
 import '../shared/widgets/app_indeterminate_progress.dart';
 import '../shared/widgets/app_snack_bar.dart';
 import 'app_preferences_controller.dart';
@@ -119,13 +118,11 @@ class WorkspaceAppBarActions extends StatelessWidget {
   String _label(V2Localizations l, WorkspacePinnedAction action) =>
       switch (action) {
         WorkspacePinnedAction.newChat => l.chatNewChat,
-        WorkspacePinnedAction.refresh => l.chatRefresh,
         WorkspacePinnedAction.servers => l.settingsServersTitle,
         WorkspacePinnedAction.settings => l.settingsTitle,
       };
   IconData _icon(WorkspacePinnedAction action) => switch (action) {
     WorkspacePinnedAction.newChat => Symbols.add_comment,
-    WorkspacePinnedAction.refresh => Symbols.refresh,
     WorkspacePinnedAction.servers => Symbols.dns,
     WorkspacePinnedAction.settings => Symbols.settings,
   };
@@ -136,13 +133,6 @@ class WorkspaceAppBarActions extends StatelessWidget {
         catalog == null || !canOpenWorkspaceDraft(catalog)
             ? null
             : () => openWorkspaceDraft(context),
-      WorkspacePinnedAction.refresh =>
-        catalog == null || catalog.loading
-            ? null
-            : () {
-                context.read<SessionLiveDirectory?>()?.wake();
-                unawaited(catalog.refresh());
-              },
       WorkspacePinnedAction.servers => () => context.push('/hosts'),
       WorkspacePinnedAction.settings => () => context.push('/settings'),
     };
@@ -167,7 +157,6 @@ class WorkspaceAppBarActions extends StatelessWidget {
           ];
     const order = [
       WorkspacePinnedAction.newChat,
-      WorkspacePinnedAction.refresh,
       WorkspacePinnedAction.settings,
       WorkspacePinnedAction.servers,
     ];

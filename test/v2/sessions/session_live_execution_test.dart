@@ -212,6 +212,27 @@ void main() {
     expect(chip(tester), l10n.liveOutcomeFailed);
   });
 
+  testWidgets('recover reopens a view that gave up, not one gone', (
+    tester,
+  ) async {
+    final handle = await mount(tester);
+    final opens = directory.opens.length;
+    // A session gone from the server needs the user, not another try.
+    handle.emit(SessionLiveView(session: ref, phase: SessionLivePhase.evicted));
+    await tester.pump();
+    live.recover();
+    await tester.pump();
+    expect(directory.opens, hasLength(opens));
+    // A view the transport gave up on is opened again (#467).
+    handle.emit(
+      SessionLiveView(session: ref, phase: SessionLivePhase.degraded),
+    );
+    await tester.pump();
+    live.recover();
+    await tester.pump();
+    expect(directory.opens, hasLength(opens + 1));
+  });
+
   testWidgets('a reported retry wait counts down, then reads Retrying', (
     tester,
   ) async {

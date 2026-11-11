@@ -224,8 +224,9 @@ class _SessionsPageState extends State<SessionsPage> {
                 )
               : null,
         ),
-        // Refresh, Settings and Servers are in the toolbar (decision 10); the
-        // retry stays here while the stored profiles cannot be read.
+        // Settings and Servers are in the toolbar (decision 10) and the list
+        // recovers by itself (#467); the retry stays here while the stored
+        // profiles cannot be read.
         if (hosts.storageError)
           Align(
             alignment: AlignmentDirectional.centerStart,
