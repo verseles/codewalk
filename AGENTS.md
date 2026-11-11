@@ -50,10 +50,11 @@ A blocked line stays in place with its blocker noted; take the next line that do
 
 ## `beta`
 
-1. Require a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run the release in parallel with the gate.
-2. `make release V=beta`: bumps the version, commits, creates the tag and pushes atomically. A dry run is `DRY_RUN=1`.
-3. `make watch-release`, then finish with a `hey`. The Release workflow builds, verifies and publishes on its own in about 12 minutes.
-4. Red run: fix it and cut `beta.N+1`; a published tag never moves. Stable and GA releases need their own explicit order.
+1. Rewrite `release-notes/v2-beta.md` for this beta: what changed since the previous beta tag, led by one `> 📣` line in English of at most 300 characters. Show the owner the `> 📣` line and the notes and wait for approval; never cut a beta with stale or unapproved notes. Commit them before the release, which reads them from the tag; a notes-only commit needs no new gate.
+2. Require a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run the release in parallel with the gate.
+3. `make release V=beta`: bumps the version, commits, creates the tag and pushes atomically. A dry run is `DRY_RUN=1`.
+4. `make watch-release`, then finish with a `hey`. The Release workflow builds, verifies and publishes on its own in about 12 minutes.
+5. Red run: fix it and cut `beta.N+1`; a published tag never moves. Stable and GA releases need their own explicit order.
 
 The normal delivery of a beta is the in-app Beta channel. Send an APK link only for a first install, a recovery, or a device without the updater.
 
