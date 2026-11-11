@@ -110,6 +110,7 @@ rm -rf "$dir"
 - `main` is CodeWalk 2 and holds only v2. The entry point is `lib/main_v2.dart` until the cutover (#319).
 - `v1` is frozen, except the final stable `v1.266.0` with Windows and macOS. Check the branch before editing, and never merge whole trees between lines.
 - v2 betas ship Android arm64 and Linux x64/arm64. Web, iOS, Windows and macOS come later in the queue. v2 does not import v1 data.
+- #476 removed the v1-only dependencies. Each returns only with the v2 feature that uses it: voice #307, notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), Tailscale #317, and `window_manager` with the desktop window #474.
 
 ## Web origins
 
