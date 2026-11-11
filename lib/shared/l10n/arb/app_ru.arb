@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "Встраивается в текущий ответ",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "Ждёт окончания ответа",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "Совет: Удерживайте «Отправить», чтобы выбрать между «Направить» и «В очередь»",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "Проверить снова",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

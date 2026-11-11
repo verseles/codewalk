@@ -549,6 +549,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "ينضم إلى الرد الجاري",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "ينتظر حتى ينتهي الرد",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "نصيحة: اضغط مطولًا على إرسال للاختيار بين التوجيه والوضع في الطابور",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "تحقق مرة أخرى",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

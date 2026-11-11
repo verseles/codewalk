@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "進行中の応答に反映します",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "応答が終わるまで待ちます",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "ヒント: 送信を長押しすると、ステアかキューかを選べます",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "再確認",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

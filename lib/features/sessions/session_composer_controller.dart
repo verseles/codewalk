@@ -55,9 +55,10 @@ bool canCancel(OutboxEntry entry) =>
 
 bool canSwitch(OutboxEntry entry) => canCancel(entry);
 
-/// Sends through the live lease's outbox: steer unless the user picks queue
-/// for that send, a fresh command per deliberate send, and only the outbox's
-/// own bounded same-id replay ever posts a prompt again.
+/// Sends through the live lease's outbox in the delivery the caller names
+/// (the user's default, steer unless they chose queue, #470), a fresh
+/// command per deliberate send, and only the outbox's own bounded same-id
+/// replay ever posts a prompt again.
 class SessionComposerController extends ChangeNotifier {
   SessionComposerController({
     required this.live,
@@ -75,7 +76,6 @@ class SessionComposerController extends ChangeNotifier {
   List<OutboxEntry> entries = const [];
   bool unreadable = false;
   bool sending = false;
-  Delivery delivery = Delivery.steer;
   ComposerNotice notice = ComposerNotice.none;
   final busy = <CommandId>{};
 
@@ -132,12 +132,6 @@ class SessionComposerController extends ChangeNotifier {
     _notify();
   }
 
-  void setDelivery(Delivery next) {
-    if (next != Delivery.steer && next != Delivery.queue) return;
-    delivery = next;
-    _notify();
-  }
-
   OutboxEntry? _entry(CommandId id) {
     for (final entry in entries) {
       if (entry.commandId == id) return entry;
@@ -191,17 +185,19 @@ class SessionComposerController extends ChangeNotifier {
   /// meanwhile keeps its saved draft even when it reads the same.
   Future<bool> send(
     String text, {
+    Delivery delivery = Delivery.steer,
     CommandId? commandId,
     bool Function()? isCurrent,
     bool fromDraft = true,
   }) async {
     final outbox = _outbox;
     if (!canSend || outbox == null || text.trim().isEmpty) return false;
+    // Only steer and queue are the user's to choose.
+    final as = delivery == Delivery.queue ? Delivery.queue : Delivery.steer;
     return _submit(
       outbox,
       text,
-      delivery,
-      fromChoice: true,
+      as,
       fromDraft: fromDraft,
       commandId: commandId,
       isCurrent: isCurrent,
@@ -214,7 +210,6 @@ class SessionComposerController extends ChangeNotifier {
     PromptOutbox outbox,
     String text,
     Delivery as, {
-    bool fromChoice = false,
     bool fromDraft = true,
     CommandId? commandId,
     bool Function()? isCurrent,
@@ -256,7 +251,7 @@ class SessionComposerController extends ChangeNotifier {
         if (current) await _refresh();
         return false;
       }
-      if (!current) return _sent(text, fromChoice, fromDraft, as);
+      if (!current) return _sent(text, fromDraft);
       if (entry.state == SubmissionKind.uncertain) {
         notice = ComposerNotice.unconfirmed;
         await _refresh();
@@ -268,26 +263,24 @@ class SessionComposerController extends ChangeNotifier {
           await _refresh();
           return false;
         }
-        return _sent(text, fromChoice, fromDraft, as);
+        return _sent(text, fromDraft);
       }
       await _refresh();
-      return _sent(text, fromChoice, fromDraft, as);
+      return _sent(text, fromDraft);
     } finally {
       sending = false;
       _notify();
     }
   }
 
-  /// A choice changed while this send was in flight is the next one's; a
-  /// send that did not go keeps it for the retry.
-  bool _sent(String text, bool fromChoice, bool fromDraft, Delivery as) {
+  /// Whether the field may be cleared after a send that went.
+  bool _sent(String text, bool fromDraft) {
     // A session closed meanwhile has disposed the draft this would clear;
     // the prompt it sent must not come back as its saved draft.
     if (_disposed) {
       if (fromDraft) live.forgetDraft(text);
       return false;
     }
-    if (fromChoice && delivery == as) delivery = Delivery.steer;
     return true;
   }
 

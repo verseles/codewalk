@@ -164,25 +164,20 @@ void main() {
       expect(await composer.send('hi'), isFalse);
     });
 
-    test(
-      'steer by default, queue only when picked, one command each',
-      () async {
-        final outbox = FakeOutbox();
-        await open(outbox);
-        expect(composer.delivery, Delivery.steer);
-        expect(await composer.send('  hi\n'), isTrue);
-        composer.setDelivery(Delivery.queue);
-        expect(await composer.send('hi'), isTrue);
-        expect(composer.delivery, Delivery.steer);
-        expect(await composer.send('   '), isFalse);
-        expect(outbox.calls, [
-          'submit cmd_1 steer   hi\n',
-          'submit cmd_2 queue hi',
-        ]);
-        composer.setDelivery(Delivery.immediate);
-        expect(composer.delivery, Delivery.steer);
-      },
-    );
+    test('steer by default, queue when asked, one command each', () async {
+      final outbox = FakeOutbox();
+      await open(outbox);
+      expect(await composer.send('  hi\n'), isTrue);
+      expect(await composer.send('hi', delivery: Delivery.queue), isTrue);
+      expect(await composer.send('   '), isFalse);
+      // Only steer and queue are the user's to choose.
+      expect(await composer.send('now', delivery: Delivery.immediate), isTrue);
+      expect(outbox.calls, [
+        'submit cmd_1 steer   hi\n',
+        'submit cmd_2 queue hi',
+        'submit cmd_3 steer now',
+      ]);
+    });
 
     test('a second tap while sending sends nothing', () async {
       final outbox = FakeOutbox()..holdSubmit = Completer();
@@ -262,17 +257,6 @@ void main() {
       expect(composer.entries, isEmpty);
     });
 
-    test('a queue choice made during a send is kept for the next', () async {
-      final outbox = FakeOutbox()..holdSubmit = Completer();
-      await open(outbox);
-      final first = composer.send('hi');
-      await pumpEventQueue();
-      composer.setDelivery(Delivery.queue);
-      outbox.holdSubmit!.complete();
-      await first;
-      expect(composer.delivery, Delivery.queue);
-    });
-
     test(
       'a rejected check keeps the draft even if the ledger read fails',
       () async {
@@ -299,16 +283,6 @@ void main() {
       composer.dispose();
       outbox.holdReconcile!.complete();
       expect(await first, isFalse);
-    });
-
-    test('a check that ends rejected keeps the queue choice', () async {
-      final outbox = FakeOutbox()
-        ..submitState = SubmissionKind.uncertain
-        ..onReconcile = (e) => _with(e, state: SubmissionKind.rejected);
-      await open(outbox);
-      composer.setDelivery(Delivery.queue);
-      expect(await composer.send('hi'), isFalse);
-      expect(composer.delivery, Delivery.queue);
     });
 
     test(
@@ -712,8 +686,7 @@ void main() {
 
     test('a cancel racing delivery shows the delivery', () async {
       await open(outbox);
-      composer.setDelivery(Delivery.queue);
-      await composer.send('Later');
+      await composer.send('Later', delivery: Delivery.queue);
       final entry = composer.entries.single;
       server.beforeChange = () => server.promote(entry.messageId);
       await composer.cancel(entry.commandId);
@@ -724,8 +697,7 @@ void main() {
 
     test('a cancel that wins shows the cancellation', () async {
       await open(outbox);
-      composer.setDelivery(Delivery.queue);
-      await composer.send('Later');
+      await composer.send('Later', delivery: Delivery.queue);
       await composer.cancel(composer.entries.single.commandId);
       expect(composer.notice, ComposerNotice.cancelled);
       expect(server.inbox, isEmpty);

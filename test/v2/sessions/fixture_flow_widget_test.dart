@@ -806,7 +806,6 @@ void main() {
             .isNotEmpty,
         reason: 'primary session streamed text',
       );
-      expect(find.byKey(const ValueKey('live-delivery-steer')), findsOneWidget);
       await tester.enterText(
         find.byKey(const ValueKey('live-composer-input')),
         'First prompt from workspace',
@@ -825,7 +824,6 @@ void main() {
         reason: 'first workspace prompt admitted',
       );
       expect(postedPrompts.first['text'], 'First prompt from workspace');
-      await tester.tap(find.byKey(const ValueKey('live-delivery-steer')));
       await tester.enterText(
         find.byKey(const ValueKey('live-composer-input')),
         'Steer prompt from workspace',

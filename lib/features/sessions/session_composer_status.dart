@@ -50,6 +50,7 @@ List<String> composerTips(V2Localizations l10n) => [
   l10n.chatTipRequestDocs,
   l10n.chatTipAcceptanceCriteria,
   l10n.chatTipUseFocusedAgents,
+  l10n.composerTipHoldSend,
 ];
 
 /// Calls that say nothing about what the assistant does now.

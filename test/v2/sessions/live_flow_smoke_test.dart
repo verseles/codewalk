@@ -660,8 +660,6 @@ void main() {
         'workspace steer while holding',
       );
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('live-delivery-steer')));
-      await tester.pump();
       await tester.tap(find.byKey(const ValueKey('live-composer-send')));
       await pumpSpin(
         tester,

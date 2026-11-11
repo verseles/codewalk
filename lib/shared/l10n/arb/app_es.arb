@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "Entra en la respuesta en curso",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "Espera a que termine la respuesta",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "Consejo: Mantén pulsado Enviar para elegir entre dirigir y encolar",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "Comprobar de nuevo",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

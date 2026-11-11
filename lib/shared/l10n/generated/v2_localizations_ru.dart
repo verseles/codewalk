@@ -837,6 +837,16 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerMoveToQueue => 'Переместить в очередь';
 
   @override
+  String get composerSteerHint => 'Встраивается в текущий ответ';
+
+  @override
+  String get composerQueueHint => 'Ждёт окончания ответа';
+
+  @override
+  String get composerTipHoldSend =>
+      'Совет: Удерживайте «Отправить», чтобы выбрать между «Направить» и «В очередь»';
+
+  @override
   String get composerCheckAgain => 'Проверить снова';
 
   @override

@@ -840,6 +840,16 @@ class V2LocalizationsEs extends V2Localizations {
   String get composerMoveToQueue => 'Mover a la cola';
 
   @override
+  String get composerSteerHint => 'Entra en la respuesta en curso';
+
+  @override
+  String get composerQueueHint => 'Espera a que termine la respuesta';
+
+  @override
+  String get composerTipHoldSend =>
+      'Consejo: Mantén pulsado Enviar para elegir entre dirigir y encolar';
+
+  @override
   String get composerCheckAgain => 'Comprobar de nuevo';
 
   @override

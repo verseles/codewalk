@@ -1016,6 +1016,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "Joins the reply in progress",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "Waits until the reply finishes",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "Tip: Hold Send to choose between steering and queueing",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "Check again",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

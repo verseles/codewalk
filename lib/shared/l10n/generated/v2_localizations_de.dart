@@ -847,6 +847,16 @@ class V2LocalizationsDe extends V2Localizations {
   String get composerMoveToQueue => 'In die Warteschlange';
 
   @override
+  String get composerSteerHint => 'Fließt in die laufende Antwort ein';
+
+  @override
+  String get composerQueueHint => 'Wartet, bis die Antwort fertig ist';
+
+  @override
+  String get composerTipHoldSend =>
+      'Tipp: Halten Sie Senden gedrückt, um zwischen Steuern und Einreihen zu wählen';
+
+  @override
   String get composerCheckAgain => 'Erneut prüfen';
 
   @override

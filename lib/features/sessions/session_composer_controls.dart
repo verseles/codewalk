@@ -15,13 +15,12 @@ import 'session_selection_host.dart';
 
 /// The composer's selection chips, like the retained reference's controls
 /// row (#153): the agent, with the count of permissions waiting for the
-/// user, the model and its variant, then [trailing]. A sub-conversation keeps
-/// its parent's choice: its model shows locked and it has no agent to pick.
+/// user, the model and its variant. A sub-conversation keeps its parent's
+/// choice: its model shows locked and it has no agent to pick.
 class SessionComposerControls extends StatelessWidget {
   const SessionComposerControls({
     super.key,
     required this.live,
-    this.trailing = const [],
     this.agentAnchor,
   });
 
@@ -30,9 +29,6 @@ class SessionComposerControls extends StatelessWidget {
   /// Marks the agent chip, so a `/agent` command opens its menu there.
   final GlobalKey? agentAnchor;
 
-  /// More controls on the same row, after the selection.
-  final List<Widget> trailing;
-
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: live,
@@ -40,7 +36,7 @@ class SessionComposerControls extends StatelessWidget {
       final selects = live.supportsSelection;
       final agentMenu =
           !live.isChild && (selects || live.permissionModes != null);
-      if (!selects && !agentMenu && trailing.isEmpty) {
+      if (!selects && !agentMenu) {
         return const SizedBox.shrink();
       }
       final l10n = context.v2L10n;
@@ -170,7 +166,6 @@ class SessionComposerControls extends StatelessWidget {
                       : null,
                 ),
               ),
-            ...trailing,
           ],
         ),
       );

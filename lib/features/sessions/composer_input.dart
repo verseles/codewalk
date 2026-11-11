@@ -119,6 +119,7 @@ class ComposerSendButton extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     this.onDoubleTap,
+    this.onChoose,
     this.icon = Symbols.send_rounded,
   });
 
@@ -129,13 +130,18 @@ class ComposerSendButton extends StatelessWidget {
 
   /// A double tap while the button has nothing to send (#82).
   final VoidCallback? onDoubleTap;
+
+  /// Opens the delivery choice (#470) on a hold, enabled or not, and on a
+  /// right click. Touch then no longer opens the tooltip; a mouse still shows
+  /// it on hover.
+  final VoidCallback? onChoose;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final enabled = onPressed != null;
-    final button = SizedBox.square(
+    Widget button = SizedBox.square(
       dimension: composerActionSize,
       child: IconButton.filled(
         key: buttonKey,
@@ -157,12 +163,26 @@ class ComposerSendButton extends StatelessWidget {
         icon: Icon(icon, size: 24),
       ),
     );
+    final choose = onChoose;
+    if (choose != null) {
+      button = TooltipTheme(
+        data: TooltipTheme.of(
+          context,
+        ).copyWith(triggerMode: TooltipTriggerMode.manual),
+        child: button,
+      );
+    }
     // A click on Send is part of the field's region, so a desktop field
     // keeps its focus for the next prompt (#174).
     return TextFieldTapRegion(
-      child: onDoubleTap == null
+      child: onDoubleTap == null && choose == null
           ? button
-          : GestureDetector(onDoubleTap: onDoubleTap, child: button),
+          : GestureDetector(
+              onDoubleTap: onDoubleTap,
+              onLongPress: choose,
+              onSecondaryTapUp: choose == null ? null : (_) => choose(),
+              child: button,
+            ),
     );
   }
 }

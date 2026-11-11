@@ -265,4 +265,108 @@ void main() {
       const SpellCheckConfiguration.disabled(),
     );
   });
+
+  testWidgets('holding Send chooses the default delivery (#470)', (
+    tester,
+  ) async {
+    final outbox = FakeOutbox();
+    final opened = await _open(tester, outbox);
+    final preferences = opened.graph.preferences;
+    expect(preferences.composerQueue, isFalse);
+    Future<void> send(String text) async {
+      await tester.enterText(_input, text);
+      await tester.pump();
+      await tester.tap(_send);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> choose(String key) async {
+      await tester.longPress(_send);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey(key)));
+      await tester.pumpAndSettle();
+    }
+
+    // Steer is the default, and no chips offer the choice.
+    expect(find.byKey(const ValueKey('live-delivery-queue')), findsNothing);
+    await send('one');
+    expect(_submits(outbox).last, endsWith(' steer one'));
+
+    // Held while empty, Send still opens the choice; each says what it does,
+    // the current one checked.
+    expect(tester.widget<IconButton>(_send).onPressed, isNull);
+    await tester.longPress(_send);
+    await tester.pumpAndSettle();
+    final l10n = opened.graph.localizations.current;
+    expect(find.text(l10n.composerSteerHint), findsOneWidget);
+    expect(find.text(l10n.composerQueueHint), findsOneWidget);
+    Icon? mark(String key) {
+      final tile = find.descendant(
+        of: find.byKey(ValueKey(key)),
+        matching: find.byType(ListTile),
+      );
+      return tester.widget<ListTile>(tile).leading as Icon?;
+    }
+
+    expect(mark('live-delivery-steer')?.icon, isNotNull);
+    expect(mark('live-delivery-queue')?.icon, isNull);
+    // Dismissing it keeps the default.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.composerQueueHint), findsNothing);
+    expect(preferences.composerQueue, isFalse);
+
+    // Queue becomes the default for every later send, and Send says so.
+    await choose('live-delivery-queue');
+    expect(preferences.composerQueue, isTrue);
+    expect(tester.widget<IconButton>(_send).tooltip, l10n.composerQueue);
+    await send('two');
+    await send('three');
+    expect(_submits(outbox).skip(1), [
+      endsWith(' queue two'),
+      endsWith(' queue three'),
+    ]);
+
+    await choose('live-delivery-steer');
+    expect(preferences.composerQueue, isFalse);
+    expect(tester.widget<IconButton>(_send).tooltip, l10n.composerSend);
+    await send('four');
+    expect(_submits(outbox).last, endsWith(' steer four'));
+  });
+
+  testWidgets('the keys and a right click open the delivery choice (#470)', (
+    tester,
+  ) async {
+    final outbox = FakeOutbox();
+    final opened = await _open(tester, outbox);
+    final l10n = opened.graph.localizations.current;
+    final preferences = opened.graph.preferences;
+    // Shift+F10 from the empty field, which a keyboard user is typing in.
+    await tester.tap(_input);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f10);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.composerQueueHint), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('live-delivery-queue')));
+    await tester.pumpAndSettle();
+    expect(preferences.composerQueue, isTrue);
+
+    // The Menu key opens it too, and so does a right click on Send.
+    await tester.tap(_input);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.composerSteerHint), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('live-delivery-steer')));
+    await tester.pumpAndSettle();
+    expect(preferences.composerQueue, isFalse);
+
+    await tester.tap(_send, buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.composerQueueHint), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+  });
 }

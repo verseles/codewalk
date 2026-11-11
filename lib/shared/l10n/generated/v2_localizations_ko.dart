@@ -795,6 +795,15 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerMoveToQueue => '대기열로 이동';
 
   @override
+  String get composerSteerHint => '진행 중인 응답에 반영합니다';
+
+  @override
+  String get composerQueueHint => '응답이 끝날 때까지 기다립니다';
+
+  @override
+  String get composerTipHoldSend => '팁: 보내기를 길게 눌러 조정과 대기열 중에서 선택하세요';
+
+  @override
   String get composerCheckAgain => '다시 확인';
 
   @override

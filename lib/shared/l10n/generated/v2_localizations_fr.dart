@@ -843,6 +843,16 @@ class V2LocalizationsFr extends V2Localizations {
   String get composerMoveToQueue => 'Mettre en file d’attente';
 
   @override
+  String get composerSteerHint => 'Rejoint la réponse en cours';
+
+  @override
+  String get composerQueueHint => 'Attend la fin de la réponse';
+
+  @override
+  String get composerTipHoldSend =>
+      'Conseil : Maintenez Envoyer pour choisir entre orienter et mettre en file';
+
+  @override
   String get composerCheckAgain => 'Vérifier à nouveau';
 
   @override

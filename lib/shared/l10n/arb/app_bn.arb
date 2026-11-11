@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "চলমান উত্তরে যুক্ত হয়",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "উত্তর শেষ হওয়া পর্যন্ত অপেক্ষা করে",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "পরামর্শ: পরিচালনা বা সারিতে রাখা বেছে নিতে পাঠান চেপে ধরে রাখুন",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "আবার যাচাই",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

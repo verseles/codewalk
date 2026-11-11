@@ -227,6 +227,17 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('composerTips');
   }
 
+  /// Whether a prompt sent while the assistant works waits for the reply
+  /// to finish (queue) instead of joining it (steer, the default, #470).
+  bool _composerQueue = false;
+  bool get composerQueue => _composerQueue;
+
+  void setComposerQueue(bool value) {
+    if (_disposed || _composerQueue == value) return;
+    _composerQueue = value;
+    _changed('composerQueue');
+  }
+
   bool get isDisposed => _disposed;
   bool get hasPhysicalKeyboard => _hasPhysicalKeyboard;
 
@@ -327,6 +338,7 @@ class AppPreferencesController extends ChangeNotifier {
     'showToolCalls': _showToolCalls ? null : false,
     'composerSpellCheck': _composerSpellCheck ? null : false,
     'composerTips': _composerTips ? null : false,
+    'composerQueue': _composerQueue ? true : null,
     'showSessionTabs': _showSessionTabs ? null : false,
     'showRecentSessions': _showRecentSessions ? null : false,
     'tabsGestureHintDismissed': _tabsGestureHintDismissed ? true : null,
@@ -430,6 +442,8 @@ class AppPreferencesController extends ChangeNotifier {
       if (spellCheck is bool) _composerSpellCheck = spellCheck;
       final tips = value('composerTips');
       if (tips is bool) _composerTips = tips;
+      final queue = value('composerQueue');
+      if (queue is bool) _composerQueue = queue;
       final tabs = value('showSessionTabs');
       if (tabs is bool) _showSessionTabs = tabs;
       final recent = value('showRecentSessions');

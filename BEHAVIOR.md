@@ -347,7 +347,7 @@ description of this code.
 
 - **Given** a live v2 session screen opened on native Android/Linux against a verified OpenCode 2.0.22 server, with device storage for the prompt ledger
 - **When** the lease is live and current (not reconnecting, hydrating or stale)
-- **Then** the composer sends plain text with steer by default; queue applies only when picked for that send and returns to steer once a send goes out
+- **Then** the composer sends plain text with steer by default; holding Send, a right click there, or the Menu key or Shift+F10 in the composer chooses steer or queue as the default for every later send, kept on the device; the Steer and Queue chips are gone
 - **Then** each deliberate send is one new command; a second tap, or the same text while its send or automatic check is in flight, sends nothing, and the field is read-only until the send ends
 - **Then** the field clears only once the prompt is recorded as admitted or not confirmed; refusals and rejections keep the text with finite localized copy and never show raw server reasons
 - **Then** a send whose response was lost is checked once automatically under the same id; entries restored from an earlier run are checked only by the user (Check again); "Send again (may duplicate)" forgets the old command first and hands the text back if the new send does not go
@@ -389,7 +389,7 @@ description of this code.
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server with a live, current, known-running or retrying execution
 - **When** the composer draft is empty
-- **Then** its trailing Send action becomes Stop; typing keeps Send with steer/queue, and Stop never clears the draft or partial output
+- **Then** its trailing Send action becomes Stop; typing keeps Send, the delivery choice opens from Send (hold, right click, Menu key, Shift+F10), and Stop never clears the draft or partial output
 - **Then** two unmodified Escape presses within 500 milliseconds while the input is focused also request Stop; the first shows a hint, and composing text, repeated keys and modifiers do not trigger it
 - **When** Stop is deliberately requested
 - **Then** exactly one session-scoped interrupt request is sent, without a body or resume query; it neither resumes parked input nor cancels inbox entries or other sessions

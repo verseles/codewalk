@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:provider/provider.dart';
 
+import '../../app/app_preferences_controller.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
@@ -24,7 +26,8 @@ import 'session_input_history.dart';
 import 'session_stop_button.dart';
 
 /// The live screen's composer: pending inbox chips, entries that still need
-/// the user, the steer/queue choice and the text field. It edits the
+/// the user and the text field, whose Send button, held, chooses steer or
+/// queue (#470). It edits the
 /// session's draft, so typing never rebuilds the timeline, and a reopened
 /// lease or a tab shown again keeps the text.
 class SessionComposer extends StatefulWidget {
@@ -58,6 +61,7 @@ class _SessionComposerState extends State<SessionComposer> {
 
   /// The agent chip, where `/agent` opens its menu.
   final _agentAnchor = GlobalKey();
+  final _sendAnchor = GlobalKey();
 
   /// The field row's height, which the `/` picker above it leaves free.
   double _fieldHeight = composerActionSize;
@@ -246,9 +250,70 @@ class _SessionComposerState extends State<SessionComposer> {
     final sent = draft.text;
     final command = parseSessionBuiltinCommand(sent);
     if (command != null) return _run(command);
-    final clear = await widget.controller.send(sent);
+    final queue = context.read<AppPreferencesController?>()?.composerQueue;
+    final clear = await widget.controller.send(
+      sent,
+      delivery: queue == true ? Delivery.queue : Delivery.steer,
+    );
     // Text typed while the send was pending is the user's, never cleared.
     if (clear && draft.text == sent) draft.clear();
+  }
+
+  /// The delivery choice, opened from the Send button's own position: a hold,
+  /// a right click, or the Menu key or Shift+F10 in the composer (#470).
+  void _chooseSend(AppPreferencesController preferences) {
+    final anchor = _sendAnchor.currentContext;
+    if (anchor == null) return;
+    unawaited(_chooseDelivery(anchor, preferences));
+  }
+
+  /// The default delivery menu, over the Send button: each choice says what
+  /// it does, and the current one is checked.
+  Future<void> _chooseDelivery(
+    BuildContext anchor,
+    AppPreferencesController preferences,
+  ) async {
+    unawaited(Feedback.forLongPress(anchor));
+    final l10n = anchor.v2L10n;
+    final box = anchor.findRenderObject()! as RenderBox;
+    final overlay = Overlay.of(anchor).context.findRenderObject()! as RenderBox;
+    final rect = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
+    final current = preferences.composerQueue ? Delivery.queue : Delivery.steer;
+    PopupMenuItem<Delivery> item(
+      Delivery delivery,
+      String key,
+      String label,
+      String hint,
+    ) => PopupMenuItem<Delivery>(
+      key: ValueKey(key),
+      value: delivery,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Icon(delivery == current ? Symbols.check : null),
+        title: Text(label),
+        subtitle: Text(hint),
+      ),
+    );
+    final picked = await showMenu<Delivery>(
+      context: anchor,
+      position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
+      items: [
+        item(
+          Delivery.steer,
+          'live-delivery-steer',
+          l10n.composerSteer,
+          l10n.composerSteerHint,
+        ),
+        item(
+          Delivery.queue,
+          'live-delivery-queue',
+          l10n.composerQueue,
+          l10n.composerQueueHint,
+        ),
+      ],
+    );
+    if (picked == null) return;
+    preferences.setComposerQueue(picked == Delivery.queue);
   }
 
   String? _notice(V2Localizations l10n, ComposerNotice notice) =>
@@ -465,6 +530,11 @@ class _SessionComposerState extends State<SessionComposer> {
       final notice = _notice(l10n, c.notice);
       final wide = MediaQuery.sizeOf(context).width >= 840;
       final canSend = _canSend;
+      final preferences = context.watch<AppPreferencesController?>();
+      final queue = preferences?.composerQueue ?? false;
+      final choose = preferences == null
+          ? null
+          : () => _chooseSend(preferences);
       return ConstrainedBox(
         constraints: BoxConstraints(maxHeight: max(0, widget.maxHeight)),
         child: SingleChildScrollView(
@@ -541,32 +611,7 @@ class _SessionComposerState extends State<SessionComposer> {
                 retryAt: liveRetryAt(c.live),
                 now: c.live.clock,
               ),
-              // The steer/queue choice shares the selection chips' row, so
-              // the composer stays short above a landscape keyboard.
-              SessionComposerControls(
-                live: c.live,
-                agentAnchor: _agentAnchor,
-                trailing: [
-                  ChoiceChip(
-                    key: const ValueKey('live-delivery-steer'),
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    label: Text(l10n.composerSteer),
-                    selected: c.delivery == Delivery.steer,
-                    visualDensity: VisualDensity.compact,
-                    onSelected: (_) => c.setDelivery(Delivery.steer),
-                  ),
-                  ChoiceChip(
-                    key: const ValueKey('live-delivery-queue'),
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    label: Text(l10n.composerQueue),
-                    selected: c.delivery == Delivery.queue,
-                    visualDensity: VisualDensity.compact,
-                    onSelected: (_) => c.setDelivery(Delivery.queue),
-                  ),
-                ],
-              ),
+              SessionComposerControls(live: c.live, agentAnchor: _agentAnchor),
               SessionCommandPicker(
                 menu: _commands,
                 onRun: _pick,
@@ -574,62 +619,86 @@ class _SessionComposerState extends State<SessionComposer> {
               ),
               SessionFieldHeightReporter(
                 onHeight: _fieldMeasured,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Focus(
-                        onKeyEvent: _key,
-                        onFocusChange: (_) => _escapeAt = null,
-                        child: ComposerBubble(
-                          child: ConversationTextScale(
-                            child: TextField(
-                              key: const ValueKey('live-composer-input'),
-                              controller: _text,
-                              focusNode: widget.focusNode,
-                              // A text that a failed resend hands back needs the
-                              // field untouched until the send ends.
-                              readOnly:
-                                  (c.sending && !_continuing) ||
-                                  c.live.endpointOffline,
-                              minLines: 1,
-                              maxLines: 4,
-                              keyboardType: TextInputType.multiline,
-                              autocorrect: composerSuggests(context),
-                              enableSuggestions: composerSuggests(context),
-                              spellCheckConfiguration:
-                                  composerSpellCheckConfiguration(context),
-                              decoration: composerDecoration(
-                                context,
-                                l10n.composerHint,
+                child: CallbackShortcuts(
+                  bindings: {
+                    if (choose != null) ...{
+                      const SingleActivator(LogicalKeyboardKey.contextMenu):
+                          choose,
+                      const SingleActivator(
+                        LogicalKeyboardKey.f10,
+                        shift: true,
+                      ): choose,
+                    },
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Focus(
+                          onKeyEvent: _key,
+                          onFocusChange: (_) => _escapeAt = null,
+                          child: ComposerBubble(
+                            child: ConversationTextScale(
+                              child: TextField(
+                                key: const ValueKey('live-composer-input'),
+                                controller: _text,
+                                focusNode: widget.focusNode,
+                                // A text that a failed resend hands back needs the
+                                // field untouched until the send ends.
+                                readOnly:
+                                    (c.sending && !_continuing) ||
+                                    c.live.endpointOffline,
+                                minLines: 1,
+                                maxLines: 4,
+                                keyboardType: TextInputType.multiline,
+                                autocorrect: composerSuggests(context),
+                                enableSuggestions: composerSuggests(context),
+                                spellCheckConfiguration:
+                                    composerSpellCheckConfiguration(context),
+                                decoration: composerDecoration(
+                                  context,
+                                  l10n.composerHint,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (c.sending)
-                      SizedBox.square(
-                        dimension: composerActionSize,
-                        child: Center(
-                          child: AppIndeterminateRing(
-                            size: 18,
-                            strokeWidth: 2,
-                            semanticsLabel: l10n.composerSending,
+                      const SizedBox(width: 8),
+                      if (c.sending)
+                        SizedBox.square(
+                          dimension: composerActionSize,
+                          child: Center(
+                            child: AppIndeterminateRing(
+                              size: 18,
+                              strokeWidth: 2,
+                              semanticsLabel: l10n.composerSending,
+                            ),
+                          ),
+                        )
+                      else if (c.live.stopping ||
+                          (c.live.canStop && _text.text.trim().isEmpty))
+                        SessionStopButton(live: c.live)
+                      else
+                        // Holding Send, or a right click there, chooses how a
+                        // prompt sent while the assistant works goes; the keys do
+                        // the same from the composer (#470).
+                        KeyedSubtree(
+                          key: _sendAnchor,
+                          child: ComposerSendButton(
+                            buttonKey: const ValueKey('live-composer-send'),
+                            tooltip: queue
+                                ? l10n.composerQueue
+                                : l10n.composerSend,
+                            icon: queue
+                                ? Symbols.schedule_send
+                                : Symbols.send_rounded,
+                            onPressed: canSend ? _send : null,
+                            onDoubleTap: _canContinue ? _continue : null,
+                            onChoose: choose,
                           ),
                         ),
-                      )
-                    else if (c.live.stopping ||
-                        (c.live.canStop && _text.text.trim().isEmpty))
-                      SessionStopButton(live: c.live)
-                    else
-                      ComposerSendButton(
-                        buttonKey: const ValueKey('live-composer-send'),
-                        tooltip: l10n.composerSend,
-                        onPressed: canSend ? _send : null,
-                        onDoubleTap: _canContinue ? _continue : null,
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

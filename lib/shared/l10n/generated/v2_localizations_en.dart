@@ -829,6 +829,16 @@ class V2LocalizationsEn extends V2Localizations {
   String get composerMoveToQueue => 'Move to queue';
 
   @override
+  String get composerSteerHint => 'Joins the reply in progress';
+
+  @override
+  String get composerQueueHint => 'Waits until the reply finishes';
+
+  @override
+  String get composerTipHoldSend =>
+      'Tip: Hold Send to choose between steering and queueing';
+
+  @override
   String get composerCheckAgain => 'Check again';
 
   @override

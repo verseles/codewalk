@@ -832,6 +832,16 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerMoveToQueue => 'कतार में ले जाएँ';
 
   @override
+  String get composerSteerHint => 'चल रहे जवाब में शामिल होता है';
+
+  @override
+  String get composerQueueHint => 'जवाब पूरा होने तक इंतज़ार करता है';
+
+  @override
+  String get composerTipHoldSend =>
+      'सुझाव: दिशा दें या कतार में डालें चुनने के लिए भेजें को दबाकर रखें';
+
+  @override
   String get composerCheckAgain => 'फिर जाँचें';
 
   @override

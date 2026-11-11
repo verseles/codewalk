@@ -778,6 +778,15 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerMoveToQueue => '移到队列';
 
   @override
+  String get composerSteerHint => '加入正在进行的回复';
+
+  @override
+  String get composerQueueHint => '等待当前回复结束';
+
+  @override
+  String get composerTipHoldSend => '提示：长按发送可在引导和排队之间选择';
+
+  @override
   String get composerCheckAgain => '重新检查';
 
   @override

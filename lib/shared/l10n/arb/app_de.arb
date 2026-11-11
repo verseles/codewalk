@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "Fließt in die laufende Antwort ein",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "Wartet, bis die Antwort fertig ist",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "Tipp: Halten Sie Senden gedrückt, um zwischen Steuern und Einreihen zu wählen",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "Erneut prüfen",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

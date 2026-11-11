@@ -839,6 +839,16 @@ class V2LocalizationsPt extends V2Localizations {
   String get composerMoveToQueue => 'Mover para a fila';
 
   @override
+  String get composerSteerHint => 'Entra na resposta em andamento';
+
+  @override
+  String get composerQueueHint => 'Espera a resposta terminar';
+
+  @override
+  String get composerTipHoldSend =>
+      'Dica: Segure Enviar para escolher entre direcionar e enfileirar';
+
+  @override
   String get composerCheckAgain => 'Verificar de novo';
 
   @override

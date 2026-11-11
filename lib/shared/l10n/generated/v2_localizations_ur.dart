@@ -829,6 +829,16 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerMoveToQueue => 'قطار میں منتقل کریں';
 
   @override
+  String get composerSteerHint => 'جاری جواب میں شامل ہو جاتا ہے';
+
+  @override
+  String get composerQueueHint => 'جواب مکمل ہونے تک انتظار کرتا ہے';
+
+  @override
+  String get composerTipHoldSend =>
+      'مشورہ: رہنمائی یا قطار میں ڈالنے کا انتخاب کرنے کے لیے بھیجیں کو دبائے رکھیں';
+
+  @override
   String get composerCheckAgain => 'دوبارہ جانچیں';
 
   @override

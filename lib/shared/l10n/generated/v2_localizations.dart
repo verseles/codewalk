@@ -1626,6 +1626,24 @@ abstract class V2Localizations {
   /// V2 live session composer
   ///
   /// In en, this message translates to:
+  /// **'Joins the reply in progress'**
+  String get composerSteerHint;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Waits until the reply finishes'**
+  String get composerQueueHint;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Hold Send to choose between steering and queueing'**
+  String get composerTipHoldSend;
+
+  /// V2 live session composer
+  ///
+  /// In en, this message translates to:
   /// **'Check again'**
   String get composerCheckAgain;
 

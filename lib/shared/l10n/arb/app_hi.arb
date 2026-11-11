@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "चल रहे जवाब में शामिल होता है",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "जवाब पूरा होने तक इंतज़ार करता है",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "सुझाव: दिशा दें या कतार में डालें चुनने के लिए भेजें को दबाकर रखें",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "फिर जाँचें",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

@@ -45,13 +45,15 @@ void main() {
         ..setShowReasoning(false)
         ..setShowToolCalls(false)
         ..setComposerSpellCheck(false)
-        ..setComposerTips(false);
+        ..setComposerTips(false)
+        ..setComposerQueue(true);
       await first.flush();
       expect(backend.values['cw2.settings.chatRenderMode'], 'block');
       expect(backend.values['cw2.settings.showReasoning'], false);
       expect(backend.values['cw2.settings.showToolCalls'], false);
       expect(backend.values['cw2.settings.composerSpellCheck'], false);
       expect(backend.values['cw2.settings.composerTips'], false);
+      expect(backend.values['cw2.settings.composerQueue'], true);
 
       final second = controller(backend);
       addTearDown(second.dispose);
@@ -61,13 +63,15 @@ void main() {
       expect(second.showToolCalls, isFalse);
       expect(second.composerSpellCheck, isFalse);
       expect(second.composerTips, isFalse);
+      expect(second.composerQueue, isTrue);
 
       second
         ..setChatRenderMode(ChatRenderMode.live)
         ..setShowReasoning(true)
         ..setShowToolCalls(true)
         ..setComposerSpellCheck(true)
-        ..setComposerTips(true);
+        ..setComposerTips(true)
+        ..setComposerQueue(false);
       await second.flush();
       for (final key in [
         'chatRenderMode',
@@ -75,6 +79,7 @@ void main() {
         'showToolCalls',
         'composerSpellCheck',
         'composerTips',
+        'composerQueue',
       ]) {
         expect(backend.values, isNot(contains('cw2.settings.$key')));
       }
@@ -89,6 +94,7 @@ void main() {
           'cw2.settings.showToolCalls': 0,
           'cw2.settings.composerSpellCheck': 'off',
           'cw2.settings.composerTips': 1,
+          'cw2.settings.composerQueue': 'queue',
         });
       final p = controller(backend);
       addTearDown(p.dispose);
@@ -98,6 +104,7 @@ void main() {
       expect(p.showToolCalls, isTrue);
       expect(p.composerSpellCheck, isTrue);
       expect(p.composerTips, isTrue);
+      expect(p.composerQueue, isFalse);
       expect(backend.writes, isEmpty);
     });
   });

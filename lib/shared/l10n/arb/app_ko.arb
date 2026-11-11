@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "진행 중인 응답에 반영합니다",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "응답이 끝날 때까지 기다립니다",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "팁: 보내기를 길게 눌러 조정과 대기열 중에서 선택하세요",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "다시 확인",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

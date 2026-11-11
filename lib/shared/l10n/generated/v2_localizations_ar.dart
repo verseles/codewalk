@@ -823,6 +823,16 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerMoveToQueue => 'انقل إلى الطابور';
 
   @override
+  String get composerSteerHint => 'ينضم إلى الرد الجاري';
+
+  @override
+  String get composerQueueHint => 'ينتظر حتى ينتهي الرد';
+
+  @override
+  String get composerTipHoldSend =>
+      'نصيحة: اضغط مطولًا على إرسال للاختيار بين التوجيه والوضع في الطابور';
+
+  @override
   String get composerCheckAgain => 'تحقق مرة أخرى';
 
   @override

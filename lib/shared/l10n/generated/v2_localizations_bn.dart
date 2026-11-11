@@ -826,6 +826,16 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerMoveToQueue => 'সারিতে সরান';
 
   @override
+  String get composerSteerHint => 'চলমান উত্তরে যুক্ত হয়';
+
+  @override
+  String get composerQueueHint => 'উত্তর শেষ হওয়া পর্যন্ত অপেক্ষা করে';
+
+  @override
+  String get composerTipHoldSend =>
+      'পরামর্শ: পরিচালনা বা সারিতে রাখা বেছে নিতে পাঠান চেপে ধরে রাখুন';
+
+  @override
   String get composerCheckAgain => 'আবার যাচাই';
 
   @override

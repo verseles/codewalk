@@ -550,6 +550,18 @@
   "@composerMoveToQueue": {
     "description": "V2 live session composer"
   },
+  "composerSteerHint": "Rejoint la réponse en cours",
+  "@composerSteerHint": {
+    "description": "V2 live session composer"
+  },
+  "composerQueueHint": "Attend la fin de la réponse",
+  "@composerQueueHint": {
+    "description": "V2 live session composer"
+  },
+  "composerTipHoldSend": "Conseil : Maintenez Envoyer pour choisir entre orienter et mettre en file",
+  "@composerTipHoldSend": {
+    "description": "V2 live session composer"
+  },
   "composerCheckAgain": "Vérifier à nouveau",
   "@composerCheckAgain": {
     "description": "V2 live session composer"

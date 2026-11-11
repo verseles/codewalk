@@ -144,18 +144,8 @@ void main() {
       expect(tester.widget<TextButton>(find.byKey(_dismissKey)).onPressed, isNull);
       expect(live.canReplyForm(live.state!.interactions.last), isFalse);
 
-      // Delivery toggle is always offered and flips the local choice.
-      final queue = find.byKey(const ValueKey('live-delivery-queue'));
-      await tester.ensureVisible(queue);
-      await tester.tap(queue);
-      await tester.pump();
-      expect(tester.widget<ChoiceChip>(queue).selected, isTrue);
-      expect(
-        tester
-            .widget<ChoiceChip>(find.byKey(const ValueKey('live-delivery-steer')))
-            .selected,
-        isFalse,
-      );
+      // The delivery is chosen by holding Send, not by chips (#470).
+      expect(find.byKey(const ValueKey('live-delivery-queue')), findsNothing);
 
       // Typing makes the send available and posting reaches the adapter.
       await tester.enterText(
@@ -277,13 +267,6 @@ void main() {
       expect(tester.widget<FilledButton>(find.byKey(_allowKey)).onPressed, isNull);
       // Stop is not offered while not live.
       expect(find.byKey(const ValueKey('live-stop')), findsNothing);
-      // The local delivery choice keeps working offline.
-      final queue = find.byKey(const ValueKey('live-delivery-queue'));
-      await tester.ensureVisible(queue);
-      await tester.tap(queue);
-      await tester.pump();
-      expect(tester.widget<ChoiceChip>(queue).selected, isTrue);
-
       expect(scenario.adapter.remainingSteps, 0);
     });
 

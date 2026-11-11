@@ -643,7 +643,12 @@ void main() {
               : TextDirection.ltr,
         );
         final send = find.byKey(const ValueKey('live-composer-send'));
+        // Holding Send makes queue the default (#470).
+        await tester.longPress(send);
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('live-delivery-queue')));
+        await tester.pumpAndSettle();
+        expect(dependencies.preferences.composerQueue, isTrue);
         await tester.enterText(find.byType(TextField), 'Hello');
         await tester.pump();
         await tester.tap(send);

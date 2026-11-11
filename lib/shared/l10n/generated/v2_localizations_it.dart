@@ -841,6 +841,16 @@ class V2LocalizationsIt extends V2Localizations {
   String get composerMoveToQueue => 'Sposta in coda';
 
   @override
+  String get composerSteerHint => 'Entra nella risposta in corso';
+
+  @override
+  String get composerQueueHint => 'Attende la fine della risposta';
+
+  @override
+  String get composerTipHoldSend =>
+      'Suggerimento: Tieni premuto Invia per scegliere tra indirizzare e accodare';
+
+  @override
   String get composerCheckAgain => 'Verifica di nuovo';
 
   @override

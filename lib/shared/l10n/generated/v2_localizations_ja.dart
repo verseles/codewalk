@@ -793,6 +793,15 @@ class V2LocalizationsJa extends V2Localizations {
   String get composerMoveToQueue => 'キューへ移動';
 
   @override
+  String get composerSteerHint => '進行中の応答に反映します';
+
+  @override
+  String get composerQueueHint => '応答が終わるまで待ちます';
+
+  @override
+  String get composerTipHoldSend => 'ヒント: 送信を長押しすると、ステアかキューかを選べます';
+
+  @override
   String get composerCheckAgain => '再確認';
 
   @override
