@@ -120,6 +120,7 @@ rm -rf "$dir"
 
 - Read `BEHAVIOR.md` before substantial planning.
 - Behavior changes follow ADR-023 (contract first) and ADR-058, anchored on `ai-docs-for-opencode-v2/opencode_v2_server.md`, `opencode_v2_web.md` and `opencode_v2_models.md`. The v1 anchors `ai-docs/opencode_*.md` live on the `v1` branch and do not constrain v2.
+- The official OpenCode clients `https://github.com/anomalyco/opencode/tree/dev/packages/cli` and `https://github.com/anomalyco/opencode/tree/dev/packages/app` are the crucial reference for the most correct way to use the v2 API and events. Check how they do it before implementing or changing API calls or event handling.
 - Consult `https://github.com/openchamber/openchamber` only when the official contract is ambiguous; it never overrides official docs or source.
 - For OpenCode or OpenChamber source, inspect GitHub URLs, raw files, commits and pull requests directly, not through the `researcher` subagent.
 - A behavior that cannot align with the official contract is blocked unless an ADR exception documents rationale, risk, rollback or flag, and regression tests.

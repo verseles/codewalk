@@ -1,0 +1,1 @@
+470, steer por padrão,  se o usuário segurar o botão de enviar do composer ele deve escolher o novo padrão steer ou queue. Se não houver dúvidas, flow beta.
