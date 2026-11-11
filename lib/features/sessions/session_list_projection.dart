@@ -4,6 +4,17 @@ import '../../platform/sessions/project_workspace_store.dart';
 import '../../shared/sessions/session_actions.dart';
 import 'session_grouping.dart';
 
+/// The canonical directories [rows] report, in the order they first appear.
+List<String> knownSessionDirectories(Iterable<SessionSummary> rows) {
+  final seen = <String>{};
+  return [
+    for (final row in rows)
+      if (row.info.project?.canonicalDirectory case final directory?
+          when seen.add(directory))
+        directory,
+  ];
+}
+
 /// How long a root session's unread reply is emphasized after it went idle.
 const unreadEmphasis = Duration(hours: 1);
 

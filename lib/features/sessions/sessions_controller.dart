@@ -8,9 +8,12 @@ import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
+import 'session_activity_reader.dart';
+import 'session_commands.dart';
 import 'session_context_refresh.dart';
 import 'session_list_projection.dart';
 import 'session_ownership.dart';
+import 'session_pages.dart';
 
 class SessionsController extends ChangeNotifier {
   SessionsController({
@@ -73,10 +76,12 @@ class SessionsController extends ChangeNotifier {
   // The activity the endpoint last reported: which sessions run and which of
   // the open project group wait for the user. It is read after the rows and
   // on the feed's activity signal, one read at a time.
-  SessionActivity _activity = const SessionActivity();
+  late final _activity = SessionActivityReader(
+    source: () => _disposed ? null : _source,
+    directory: () => selectedProject?.project?.canonicalDirectory,
+    notify: _notify,
+  );
   bool _activityPending = false;
-  bool _activityReading = false;
-  bool _activityAgain = false;
   // The session the live pane shows in the foreground, and the last idle
   // transition sent as viewed for it.
   SessionRef? _showing;
@@ -102,31 +107,13 @@ class SessionsController extends ChangeNotifier {
   int _readFailures = 0;
   int _liveEpoch = 0;
   bool _quietRefreshing = false;
-  // The pagination state the last automatic re-read observed.
-  String? _liveCursor;
-  Set<String> _liveCursors = const {};
-  Set<String> _liveRequested = const {};
-  int _livePagesRead = 0;
-  bool _liveHasMore = false;
-  bool _liveExhausted = false;
-  bool _liveOmitted = false;
   // The session actions: the endpoint's own commands, the local hide and the
   // commands that are in flight.
-  SessionActionSource? _actions;
-  SessionActionSupport _actionSupport = const SessionActionSupport(
-    SessionActionReason.versionUnverified,
+  late final _commands = SessionCommands(
+    notify: _notify,
+    changed: _markLiveChange,
   );
-  final _pendingActions = <SessionRef>{};
-
-  /// The outcome of the last command that did not go through, so the list can
-  /// say so instead of closing the interaction silently.
-  SessionActionOutcome? _actionFailure;
-
-  /// A command whose answer was lost is waiting for its reconciliation.
-  bool _actionPending = false;
-
-  /// A create is in flight.
-  bool _creating = false;
+  SessionActionSource? get _actions => _commands.source;
   SessionActionFilter _filter = SessionActionFilter.active;
 
   /// The project context whose sessions the list reads, or null before one
@@ -195,7 +182,7 @@ class SessionsController extends ChangeNotifier {
     loaded = cached != null;
     failure = null;
     // The pending lists belong to the location of the shown context.
-    _activity = const SessionActivity();
+    _activity.activity = const SessionActivity();
     _armOwnershipDeadline();
     _trackContexts();
     _notify();
@@ -272,7 +259,7 @@ class SessionsController extends ChangeNotifier {
     if (_disposed || source == null || hosts.loading || hosts.storageError) {
       throw const SessionCatalogException(SessionCatalogFailure.cancelled);
     }
-    return source.list(_query(source, null, directory));
+    return source.list(sessionPageQuery(source, null, directory));
   }
 
   void _publishContext(String directory, SessionContextSnapshot snapshot) {
@@ -281,34 +268,12 @@ class SessionsController extends ChangeNotifier {
         source == null ||
         directory == _directory ||
         !_openDirectories.contains(directory) ||
-        snapshot.rows.any((row) => _foreign(row, source, directory))) {
+        snapshot.rows.any((row) => foreignSessionRow(row, source, directory))) {
       return;
     }
     _snapshots[directory] = snapshot;
     _notify();
   }
-
-  /// One page of the list: the server's rows, or one context's.
-  SessionQuery _query(
-    SessionCatalogSource source,
-    String? cursor,
-    String? directory,
-  ) => SessionQuery(
-    limit: 50,
-    cursor: cursor,
-    project: directory == null
-        ? null
-        : ProjectRef(source.harness.host, directory),
-  );
-
-  /// A row of another server, or of another context than the one read.
-  static bool _foreign(
-    SessionSummary row,
-    SessionCatalogSource source,
-    String? directory,
-  ) =>
-      row.info.ref.harnessRef != source.harness ||
-      (directory != null && row.info.project?.canonicalDirectory != directory);
 
   /// The source of the selected server for the project and directory reads,
   /// or null while it is not ready.
@@ -342,30 +307,30 @@ class SessionsController extends ChangeNotifier {
   }
 
   /// The endpoint's support for the session actions.
-  SessionActionSupport get actionSupport => _actionSupport;
+  SessionActionSupport get actionSupport => _commands.support;
 
   /// The outcome of the last command that did not go through.
-  SessionActionOutcome? get actionFailure => _actionFailure;
+  SessionActionOutcome? get actionFailure => _commands.failure;
 
   /// A command whose answer was lost is waiting for the re-read that
   /// reconciles it.
-  bool get actionUncertain => _actionPending;
+  bool get actionUncertain => _commands.uncertain;
 
   /// A change is waiting for its re-read, so the loaded rows may be
   /// outdated and no action is offered.
   bool get reconciling => _livePending;
 
   /// Whether a command for this row is in flight.
-  bool actionPending(SessionRef ref) => _pendingActions.contains(ref);
+  bool actionPending(SessionRef ref) => _commands.pending(ref);
 
   /// Whether a create is in flight.
-  bool get creating => _creating;
+  bool get creating => _commands.creating;
 
   /// Why the create is not offered, in the plan's precedence: the create in
   /// flight, then the endpoint's support, then the currency of the rows.
   SessionActionReason get createReason {
-    if (_creating) return SessionActionReason.commandInFlight;
-    final support = _actionSupport.reason;
+    if (_commands.creating) return SessionActionReason.commandInFlight;
+    final support = _commands.support.reason;
     if (support != SessionActionReason.none) return support;
     if (!loaded || stale || behind || _livePending || _quietRefreshing) {
       return SessionActionReason.listNotCurrent;
@@ -375,16 +340,7 @@ class SessionsController extends ChangeNotifier {
 
   /// The canonical directories the endpoint reported, in the order the server
   /// first showed them. They are the projects the user can start a session in.
-  List<String> get knownDirectories {
-    final seen = <String>{};
-    final directories = <String>[];
-    for (final row in _sessions) {
-      final directory = row.info.project?.canonicalDirectory;
-      if (directory == null || !seen.add(directory)) continue;
-      directories.add(directory);
-    }
-    return directories;
-  }
+  List<String> get knownDirectories => knownSessionDirectories(_sessions);
 
   /// The unread marker of a row, from the endpoint's own epochs.
   SessionViewState viewState(SessionSummary row) =>
@@ -395,17 +351,11 @@ class SessionsController extends ChangeNotifier {
   /// unread marker. A part that was not observed adds no mark, and a list
   /// that is not the endpoint's current answer claims no activity.
   List<SessionActivityMark> activityMarks(SessionSummary row) {
-    final ref = row.info.ref;
     final current = !stale && !behind;
-    final directory = row.info.project?.canonicalDirectory;
     return [
-      if (current &&
-          directory != null &&
-          directory == _activity.directory &&
-          (_activity.waiting?.contains(ref) ?? false))
+      if (current && _activity.activity.waits(row))
         SessionActivityMark.needsYou,
-      if (current && (_activity.running?.contains(ref) ?? false))
-        SessionActivityMark.running,
+      if (current && _activity.activity.runs(row)) SessionActivityMark.running,
       if (viewState(row) == SessionViewState.unread) SessionActivityMark.unread,
     ];
   }
@@ -419,18 +369,10 @@ class SessionsController extends ChangeNotifier {
         _livePending ||
         _quietRefreshing ||
         _activityPending ||
-        _activityReading) {
+        _activity.reading) {
       return null;
     }
-    final ref = row.info.ref;
-    final waitingKnown =
-        row.info.project?.canonicalDirectory == _activity.directory &&
-        _activity.waiting != null;
-    if ((_activity.running?.contains(ref) ?? false) ||
-        (waitingKnown && _activity.waiting!.contains(ref))) {
-      return true;
-    }
-    return _activity.running != null && waitingKnown ? false : null;
+    return _activity.activity.busy(row);
   }
 
   /// The live pane shows [ref] while the app is in the foreground: its
@@ -462,8 +404,8 @@ class SessionsController extends ChangeNotifier {
         idle == null ||
         viewState(row) != SessionViewState.unread ||
         _viewSent == (ref, idle) ||
-        _actionSupport.reason != SessionActionReason.none ||
-        _pendingActions.contains(ref) ||
+        _commands.support.reason != SessionActionReason.none ||
+        _commands.pending(ref) ||
         stale ||
         behind ||
         _livePending) {
@@ -540,7 +482,7 @@ class SessionsController extends ChangeNotifier {
     _chosenProject = (project: project);
     _notify();
     // The pending lists belong to the shown group's location.
-    unawaited(_syncActivity());
+    unawaited(_activity.sync());
   }
 
   /// Reads one session of the selected server directly, for a link to a
@@ -614,29 +556,23 @@ class SessionsController extends ChangeNotifier {
       _recoverAfterRead = false;
       _source?.close();
       _source = null;
-      _actions?.close();
-      _actions = null;
       // The new endpoint has not been observed yet.
-      _actionSupport = const SessionActionSupport(
-        SessionActionReason.versionUnverified,
-      );
+      _commands.close();
       _closeChanges();
       _contextRefresh.cancel();
-      _activity = const SessionActivity();
       _activityPending = false;
       // Only a request of the new endpoint outlives a read of this one.
-      _activityAgain = false;
+      _activity.reset();
       _viewSent = null;
     }
   }
 
   void _clear() {
-    _actionFailure = null;
-    _actionPending = false;
+    _commands.clear();
     _ownershipTimer?.cancel();
     _ownershipTimer = null;
     _sessions = const [];
-    _activity = const SessionActivity();
+    _activity.activity = const SessionActivity();
     _selectedSession = null;
     _chosenProject = null;
     _snapshots.clear();
@@ -773,7 +709,7 @@ class SessionsController extends ChangeNotifier {
     try {
       if (createSource) {
         _source ??= sourceFactory(current, credential!);
-        _actions ??= actionFactory?.call(current, credential!);
+        _commands.source ??= actionFactory?.call(current, credential!);
         if (_actions != null) unawaited(_probeActions());
       }
       return true;
@@ -955,7 +891,7 @@ class SessionsController extends ChangeNotifier {
         identical(source, _source) &&
         identical(task, _task);
     try {
-      task = source.list(_query(source, cursor, directory));
+      task = source.list(sessionPageQuery(source, cursor, directory));
       _task = task;
       final page = await task.result;
       if (!current()) return;
@@ -963,7 +899,8 @@ class SessionsController extends ChangeNotifier {
       if (page.items.length > 50 ||
           page.items.any(
             (row) =>
-                _foreign(row, source, directory) || !refs.add(row.info.ref),
+                foreignSessionRow(row, source, directory) ||
+                !refs.add(row.info.ref),
           )) {
         throw const SessionCatalogException(
           SessionCatalogFailure.incompatibleResponse,
@@ -993,7 +930,7 @@ class SessionsController extends ChangeNotifier {
       // The read reconciled whatever the last command left uncertain, and it
       // observes the endpoint's support again when the last observation was
       // not definitive.
-      _actionPending = false;
+      _commands.uncertain = false;
       unawaited(_probeActions());
       if (refresh) _selectedSession = null;
       _pages++;
@@ -1036,7 +973,7 @@ class SessionsController extends ChangeNotifier {
             // A head read reconciles the whole list; a page append does not.
             // A dropped feed still misses changes, so it stays behind.
             if (_changes == null || _liveConnected) _behind = false;
-            unawaited(_syncActivity());
+            unawaited(_activity.sync());
             _trackContexts();
           }
           unawaited(_ensureChanges());
@@ -1201,65 +1138,29 @@ class SessionsController extends ChangeNotifier {
     if (source == null) return;
     final support = await source.support();
     if (_disposed || !identical(source, _actions)) return;
-    _actionSupport = support;
+    _commands.support = support;
     _notify();
     _viewShown();
   }
 
-  /// Creates a session at the given canonical directory.
-  ///
-  /// The receipt is an admission: the new session reaches the list with the
-  /// next authoritative read, and an uncertain create is reconciled there and
-  /// never resent.
+  /// Creates a session at the given canonical directory; see
+  /// [SessionCommands.create].
   Future<SessionCreateResult> create({
     required String directory,
     String? title,
     Selection? initialSelection,
-  }) async {
-    final source = _actions;
-    if (source == null || _creating) {
-      return const SessionCreateResult(SessionActionOutcome.unavailable);
-    }
-    if (!_ready(createSource: false) ||
-        _actionSupport.reason != SessionActionReason.none ||
-        !loaded ||
-        stale ||
-        behind ||
-        _livePending ||
-        _quietRefreshing) {
-      // Nothing was sent, so the list keeps no failure notice: the dialog
-      // says why the create was refused and the user retries.
-      return const SessionCreateResult(SessionActionOutcome.unavailable);
-    }
-    _creating = true;
-    _actionFailure = null;
-    _notify();
-    try {
-      final result = await source.create(
-        directory: directory,
-        title: title,
-        initialSelection: initialSelection,
-      );
-      final outcome = result.outcome;
-      if (!identical(source, _actions)) {
-        // The profile changed while the create was in flight.
-        return result;
-      }
-      if (outcome == SessionActionOutcome.accepted ||
-          outcome == SessionActionOutcome.uncertain) {
-        // The effect is observed by the authoritative re-read. An uncertain
-        // create is reconciled there and never sent again.
-        _markLiveChange();
-        if (outcome == SessionActionOutcome.uncertain) _actionPending = true;
-      } else {
-        _actionFailure = outcome;
-      }
-      return result;
-    } finally {
-      _creating = false;
-      _notify();
-    }
-  }
+  }) => _commands.create(
+    directory: directory,
+    title: title,
+    initialSelection: initialSelection,
+    current: () =>
+        _ready(createSource: false) &&
+        loaded &&
+        !stale &&
+        !behind &&
+        !_livePending &&
+        !_quietRefreshing,
+  );
 
   /// Renames the row. The effect is observed by the authoritative re-read.
   Future<SessionActionOutcome> rename(SessionSummary row, String title) =>
@@ -1283,92 +1184,26 @@ class SessionsController extends ChangeNotifier {
       _actions?.childCount(row);
 
   /// Hides the row in CodeWalk, or shows it again.
-  Future<bool> setHidden(SessionSummary row, {required bool hidden}) async {
-    final source = _actions;
-    if (source == null) return false;
-    final written = await source.setHidden(row, hidden: hidden);
-    if (!identical(source, _actions)) {
-      // The profile changed while the local hide was in flight.
-      return written;
-    }
-    if (written) {
-      _actionFailure = null;
-    } else {
-      _actionFailure = SessionActionOutcome.unavailable;
-    }
-    _notify();
-    return written;
-  }
+  Future<bool> setHidden(SessionSummary row, {required bool hidden}) =>
+      _commands.setHidden(row, hidden: hidden);
 
-  /// Runs one command for a row.
-  ///
-  /// The row is never patched: the effect is observed by the quiet
-  /// authoritative re-read, and a refused or uncertain command leaves the
-  /// rows exactly as the endpoint last answered.
-  /// Runs one command on [row]. A [quiet] command was not asked for by the
-  /// user, so a refusal or a failure leaves no notice.
+  /// Runs one command on [row] while the profile, the credential and the
+  /// rows are current and still list it; see [SessionCommands.run].
   Future<SessionActionOutcome> _run(
     SessionSummary row,
     Future<SessionActionOutcome> Function(SessionActionSource source) command, {
     bool quiet = false,
-  }) async {
-    final source = _actions;
-    if (source == null) return SessionActionOutcome.unavailable;
-    if (_pendingActions.contains(row.info.ref)) {
-      return SessionActionOutcome.unavailable;
-    }
-    // The intent is validated again right before the send: the profile, the
-    // credential, the endpoint's support, the currency of the rows and the
-    // row's own membership can all have changed while a dialog was open.
-    if (!_ready(createSource: false) ||
-        _actionSupport.reason != SessionActionReason.none ||
-        stale ||
-        behind ||
-        _livePending ||
-        !_sessions.any((current) => current.info.ref == row.info.ref)) {
-      // The intent is no longer authorized, and the user asked for it: the
-      // list says so instead of closing the interaction silently.
-      if (!quiet) {
-        _actionFailure = SessionActionOutcome.unavailable;
-        _notify();
-      }
-      return SessionActionOutcome.unavailable;
-    }
-    _pendingActions.add(row.info.ref);
-    if (!quiet) _actionFailure = null;
-    _notify();
-    try {
-      final outcome = await command(source);
-      if (!identical(source, _actions)) {
-        // The profile changed while the command was in flight: the result
-        // belongs to the old profile and must not touch the new one.
-        return outcome;
-      }
-      if (outcome == SessionActionOutcome.accepted ||
-          outcome == SessionActionOutcome.uncertain) {
-        // The effect is observed by the authoritative re-read. An uncertain
-        // command is reconciled there, never replayed.
-        _markLiveChange();
-      }
-      if (quiet) return outcome;
-      if (outcome == SessionActionOutcome.rejected ||
-          outcome == SessionActionOutcome.unavailable) {
-        _actionFailure = outcome;
-      } else if (outcome == SessionActionOutcome.uncertain) {
-        // The command may already have been applied: the re-read reconciles
-        // it, and the list waits instead of calling it a failure.
-        _actionPending = true;
-      }
-      return outcome;
-    } on ArgumentError {
-      // A local refusal, such as a title over the bound.
-      if (!quiet) _actionFailure = SessionActionOutcome.unavailable;
-      return SessionActionOutcome.unavailable;
-    } finally {
-      _pendingActions.remove(row.info.ref);
-      _notify();
-    }
-  }
+  }) => _commands.run(
+    row,
+    command,
+    quiet: quiet,
+    current: () =>
+        _ready(createSource: false) &&
+        !stale &&
+        !behind &&
+        !_livePending &&
+        lists(row.info.ref),
+  );
 
   /// Arms the automatic re-read.
   ///
@@ -1424,41 +1259,9 @@ class SessionsController extends ChangeNotifier {
     if (hosts.loading) return;
     _activityPending = false;
     _liveEarliestStart = now.add(liveMinInterval);
-    await _syncActivity();
+    await _activity.sync();
     if (!_disposed && (_livePending || _activityPending)) {
       _markLiveChange(rows: _livePending);
-    }
-  }
-
-  /// Reads the activity of the selected profile: the running sessions and
-  /// the sessions of the shown project group that wait for the user. One read
-  /// runs at a time; a request during it becomes one more read. A read of a
-  /// profile that was left is dropped, a request the new profile made during
-  /// it still runs, and a failure leaves its part unknown without touching
-  /// the rows.
-  Future<void> _syncActivity() async {
-    final source = _source;
-    if (_disposed || source == null) return;
-    if (_activityReading) {
-      _activityAgain = true;
-      return;
-    }
-    _activityReading = true;
-    try {
-      do {
-        _activityAgain = false;
-        final directory = selectedProject?.project?.canonicalDirectory;
-        final activity = await source.activity(directory: directory);
-        if (_disposed || !identical(source, _source)) return;
-        _activity = activity;
-        _notify();
-      } while (_activityAgain);
-    } finally {
-      _activityReading = false;
-      if (_activityAgain && !identical(source, _source)) {
-        _activityAgain = false;
-        unawaited(_syncActivity());
-      }
     }
   }
 
@@ -1486,15 +1289,21 @@ class SessionsController extends ChangeNotifier {
     _quietRefreshing = true;
     _notify();
     try {
-      final rows = await _readLivePages(source, generation, epoch, depth);
-      if (rows == null) return;
+      final read = await readSessionPages(
+        source,
+        directory: _directory,
+        depth: depth,
+        current: () => _quietCurrent(generation, epoch, source),
+      );
+      if (read == null) return;
+      final rows = read.rows;
       final selected = _selectedSession;
       _sessions = List.unmodifiable(rows);
       _armOwnershipDeadline();
       // The re-read reconciled whatever the last command left uncertain, and
       // it observes the endpoint's support again when the last observation
       // was not definitive.
-      _actionPending = false;
+      _commands.uncertain = false;
       unawaited(_probeActions());
       // The expanded row survives only while the server still returns that
       // session, and it shows the row the server just returned.
@@ -1508,19 +1317,19 @@ class SessionsController extends ChangeNotifier {
         }
       }
       _selectedSession = fresh;
-      _cursor = _liveCursor;
+      _cursor = read.cursor;
       _received
         ..clear()
-        ..addAll(_liveCursors);
+        ..addAll(read.cursors);
       _requested
         ..clear()
-        ..addAll(_liveRequested);
-      _pages = _livePagesRead;
-      _exhausted = _liveExhausted;
+        ..addAll(read.requested);
+      _pages = read.pages;
+      _exhausted = read.exhausted;
       limited =
-          _liveOmitted ||
-          (_liveHasMore && (rows.length >= 200 || _livePagesRead >= 10));
-      hasMore = _liveHasMore && !limited;
+          read.omitted ||
+          (read.hasMore && (rows.length >= 200 || read.pages >= 10));
+      hasMore = read.hasMore && !limited;
       failure = null;
       stale = false;
       _liveFailures = 0;
@@ -1532,7 +1341,7 @@ class SessionsController extends ChangeNotifier {
       _viewShown();
       // The activity is read after the rows it marks, which are shown
       // without waiting for it.
-      unawaited(_syncActivity());
+      unawaited(_activity.sync());
     } on Object catch (error) {
       if (!_quietCurrent(generation, epoch, source)) return;
       if (error is SessionCatalogException &&
@@ -1598,72 +1407,6 @@ class SessionsController extends ChangeNotifier {
       }
       _notify();
     }
-  }
-
-  /// The pages from the head to [depth], or null when the read was
-  /// superseded. The traversal is validated exactly like a manual read.
-  Future<List<SessionSummary>?> _readLivePages(
-    SessionCatalogSource source,
-    int generation,
-    int epoch,
-    int depth,
-  ) async {
-    final rows = <SessionSummary>[];
-    final refs = <SessionRef>{};
-    final cursors = <String>{};
-    final requested = <String>{};
-    String? cursor;
-    var pages = 0;
-    var omitted = false;
-    final directory = _directory;
-    for (var page = 0; page < depth; page++) {
-      if (cursor != null) requested.add(cursor);
-      final task = source.list(_query(source, cursor, directory));
-      final result = await task.result;
-      if (!_quietCurrent(generation, epoch, source)) return null;
-      if (result.items.length > 50) {
-        throw const SessionCatalogException(
-          SessionCatalogFailure.incompatibleResponse,
-        );
-      }
-      for (final row in result.items) {
-        if (_foreign(row, source, directory) || !refs.add(row.info.ref)) {
-          throw const SessionCatalogException(
-            SessionCatalogFailure.incompatibleResponse,
-          );
-        }
-        if (rows.length < 200) {
-          rows.add(row);
-        } else {
-          omitted = true;
-        }
-      }
-      pages++;
-      final next = result.nextCursor;
-      _liveExhausted = next == null || result.items.length < 50;
-      if (next == null) {
-        _liveCursor = null;
-        _liveCursors = cursors;
-        _liveRequested = requested;
-        _livePagesRead = pages;
-        _liveHasMore = false;
-        _liveOmitted = omitted;
-        return rows;
-      }
-      if (!cursors.add(next)) {
-        throw const SessionCatalogException(
-          SessionCatalogFailure.invalidCursor,
-        );
-      }
-      cursor = next;
-    }
-    _liveCursor = cursor;
-    _liveCursors = cursors;
-    _liveRequested = requested;
-    _livePagesRead = pages;
-    _liveHasMore = true;
-    _liveOmitted = omitted;
-    return rows;
   }
 
   void inspect(SessionRef ref) {

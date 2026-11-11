@@ -1,0 +1,1 @@
+os goldens podem ser corrigidos?  ARM vai ser nossa plataforma padrão por um bom tempo pois não  vi nessa necessidade do neo ficar ligado
