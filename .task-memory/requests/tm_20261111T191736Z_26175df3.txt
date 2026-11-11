@@ -1,0 +1,1 @@
+Quando terminar, corta um beta. Não precisa observar o CI. E já lista para mim quais são as próximas pendências para a gente continuar trabalhando. Ou seja, não perde tempo nem tokens com o que não depende de você. Isso, corrige durante o trabalho, depois manda para o CI e corrige só na próxima de novo.

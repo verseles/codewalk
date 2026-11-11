@@ -1,12 +1,7 @@
-> 📣 Steer is now the default for messages you send while the assistant works. Hold Send to make Queue the default instead.
+> 📣 A session without a model of its own now shows the model the server will actually use, and the model picker names providers instead of showing their ids.
 
-### Composer
+### Model picker
 
-- Messages sent while the assistant works steer the reply in progress by default.
-- Hold Send to choose the default: Steer joins the reply in progress; Queue waits until it finishes. The choice is kept on this device.
-- With Queue as the default, Send shows a scheduled-send icon.
-- The Steer and Queue chips left the composer.
-
-### Sessions
-
-- The session list recovers by itself after failures, rate limits and returns from the background, so the Refresh action left the toolbar (Ctrl/Cmd+R still re-reads).
+- A session that has no model of its own shows the model the server runs it on: its agent's own model, or else the server's default. Before, it showed "Default".
+- Providers appear by name in the model picker, in its search, and in the new-chat picker.
+- The model and agent lists refresh on their own when the server reports a change to its models, agents or providers.
