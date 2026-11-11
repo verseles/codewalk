@@ -50,7 +50,7 @@ A blocked line stays in place with its blocker noted; take the next line that do
 
 ## `beta`
 
-1. Rewrite `release-notes/v2-beta.md` for this beta: what changed since the previous beta tag, led by one `> 📣` line in English of at most 300 characters. Show the owner the `> 📣` line and the notes and wait for approval; never cut a beta with stale or unapproved notes. Commit them before the release, which reads them from the tag; a notes-only commit needs no new gate.
+1. Rewrite `release-notes/v2-beta.md` for this beta: what changed since the previous beta tag, led by one `> 📣` line in English of at most 300 characters. Ask for approval as soon as the beta is ordered, before the gate or any remaining work, so the owner can answer while it runs. When the beta waits on work still in progress, draft the notes from its planned scope, and ask again only if the delivered scope changes them. Never cut a beta with stale or unapproved notes. Commit them before the release, which reads them from the tag; a notes-only commit needs no new gate.
 2. Require a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run the release in parallel with the gate.
 3. `make release V=beta`: bumps the version, commits, creates the tag and pushes atomically. A dry run is `DRY_RUN=1`.
 4. `make watch-release`, then finish with a `hey`. The Release workflow builds, verifies and publishes on its own in about 12 minutes.
