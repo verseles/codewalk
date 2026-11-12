@@ -318,6 +318,14 @@ void main() {
       .color!
       .resolve({})!;
 
+  /// The chip shows a wash of the agent's color over the surface.
+  Color washed(WidgetTester tester, Color agent) => sessionAgentWash(
+    agent,
+    Theme.of(
+      tester.element(find.byKey(const ValueKey('live-model-chip'))),
+    ).colorScheme.surface,
+  );
+
   testWidgets('the draft shows the defaults with the composer chips', (
     tester,
   ) async {
@@ -327,7 +335,7 @@ void main() {
     // One chip names the model and variant on the agent's color (#484).
     expect(chipText('live-model-chip', 'Model 1 high'), findsOneWidget);
     expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
-    expect(chipColor(tester), sessionDefaultAgentColor);
+    expect(chipColor(tester), washed(tester, sessionDefaultAgentColor));
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -342,7 +350,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('live-selection-agent-plan')));
     await tester.pumpAndSettle();
     expect(chipText('live-model-chip', 'Model 2'), findsOneWidget);
-    expect(chipColor(tester), sessionPlanAgentColor);
+    expect(chipColor(tester), washed(tester, sessionPlanAgentColor));
     await tester.tap(find.byKey(const ValueKey('live-model-chip')));
     await tester.pumpAndSettle();
     // Each model's variants sit in a menu on its row (#485).
@@ -384,7 +392,7 @@ void main() {
     await app.workspaceDrafts!.selection.refreshSelection();
     await tester.pumpAndSettle();
     expect(chipText('live-model-chip', 'Model 1 high'), findsOneWidget);
-    expect(chipColor(tester), sessionDefaultAgentColor);
+    expect(chipColor(tester), washed(tester, sessionDefaultAgentColor));
     expect(app.workspaceDrafts!.selection.selection?.agentId, 'build');
     await tester.pumpWidget(const SizedBox());
   });

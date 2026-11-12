@@ -161,8 +161,10 @@ void main() {
       recents: ['other/gamma', 'opencode/zen', 'gone/recent'],
     );
     await openPicker(tester);
-    // One pick (#485): the models first, the agents in the footer below.
-    expect(find.text(l10n.liveSelection), findsOneWidget);
+    // One pick (#485): the models first, the agents in the footer below; no
+    // title takes their room (beta.21), though the panel names its route.
+    expect(find.text(l10n.liveSelection), findsNothing);
+    expect(find.bySemanticsLabel(l10n.liveSelection), findsOneWidget);
     expect(find.text(l10n.liveSelectionAgent), findsOneWidget);
     expect(
       tester.getTopLeft(row('favorite-opencode/zen')).dy,

@@ -112,10 +112,10 @@ void main() {
   testWidgets('the status bar names each execution state', (tester) async {
     final handle = await mount(tester);
     final l10n = await V2Localizations.delegate.load(const Locale('en'));
-    // Idle first: once a run was seen, an idle with no outcome is the
-    // unconfirmed notice instead.
+    // Idle first, which the bar leaves to Send's check (beta.21): once a run
+    // was seen, an idle with no outcome is the unconfirmed notice instead.
     for (final (kind, label) in [
-      (ExecutionKind.idle, l10n.liveIdle),
+      (ExecutionKind.idle, null),
       (ExecutionKind.retrying, l10n.chatRetryingModelRequest),
       (ExecutionKind.interrupting, l10n.liveStopping),
       (ExecutionKind.interruptedPendingResume, l10n.liveResuming),
@@ -143,7 +143,8 @@ void main() {
     for (final (outcome, label) in [
       (ExecutionOutcomeKind.failed, l10n.liveOutcomeFailed),
       (ExecutionOutcomeKind.interrupted, l10n.liveOutcomeInterrupted),
-      (ExecutionOutcomeKind.succeeded, l10n.liveIdle),
+      // A clean idle leaves the bar empty; Send shows the check (beta.21).
+      (ExecutionOutcomeKind.succeeded, null),
     ]) {
       await show(
         tester,
@@ -357,7 +358,9 @@ void main() {
       handle,
       const ExecutionState(kind: OpenValue.known(ExecutionKind.idle)),
     );
-    expect(chip(tester), l10n.liveIdle);
+    // The count lingers a moment like any work, then the idle bar is empty.
+    await tester.pump(SessionComposerStatus.hideDelay);
+    expect(chip(tester), isNull);
   });
 
   testWidgets('an interrupted step never shows the previous turn outcome', (
@@ -403,11 +406,11 @@ void main() {
     await emit(ExecutionKind.idle, [prompt]);
     // A success is silent (#468); the bar says the session idles.
     expect(find.text(l10n.liveOutcomeSucceeded), findsNothing);
-    expect(chip(tester), l10n.liveIdle);
+    expect(chip(tester), isNull);
     // The server reported the step aborted: no local warning repeats the
     // timeline's notice.
     await emit(ExecutionKind.idle, [prompt, notice]);
-    expect(chip(tester), l10n.liveIdle);
+    expect(chip(tester), isNull);
     // Without any report, a run that disappears says only what was seen.
     await emit(ExecutionKind.running, [prompt]);
     await emit(ExecutionKind.idle, [prompt]);

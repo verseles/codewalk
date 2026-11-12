@@ -178,9 +178,10 @@ void composerGroup() {
       ),
     );
     // v1: chat_input_widget.dart:355 (42 dp), :1685 (elevation 1.5 when
-    // sendable), :1728 (send_rounded 24).
+    // sendable), :1728 (24 dp glyph; the owner swapped the plane for an
+    // upward arrow in beta.21).
     expect(tester.getSize(find.byType(IconButton)), const Size(42, 42));
-    expect(tester.widget<Icon>(find.byIcon(Symbols.send_rounded)).size, 24);
+    expect(tester.widget<Icon>(find.byIcon(Symbols.arrow_upward)).size, 24);
     expect(tester.takeException(), isNull);
   });
 }

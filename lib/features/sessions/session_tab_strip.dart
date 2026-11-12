@@ -607,7 +607,12 @@ class _StripState extends State<_Strip> {
     child: SingleChildScrollView(
       key: key,
       scrollDirection: Axis.horizontal,
-      child: Row(children: children),
+      // The tabs stand on the strip's bottom edge, so the selected one meets
+      // the page below with no gap (owner, beta.21).
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: children,
+      ),
     ),
   );
 
@@ -681,6 +686,7 @@ class _StripState extends State<_Strip> {
                 mainAxisSize: widget.shrinkWrap
                     ? MainAxisSize.min
                     : MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (projection.pinned.isNotEmpty && pinnedWidth > 0)
                     SizedBox(

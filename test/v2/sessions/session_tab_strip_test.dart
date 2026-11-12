@@ -137,6 +137,23 @@ void main() {
     },
   );
 
+  for (final size in const [Size(1280, 800), Size(390, 844)]) {
+    testWidgets('tabs stand on the strip\'s bottom edge at ${size.width}', (
+      tester,
+    ) async {
+      _useMemoryPreferences();
+      final app = await _launch(tester, '/s/profile_a/ses_one', size: size);
+      final source = app.rig.sources.single;
+      source.respond([source.row('one', title: 'One', directory: '/work/a')]);
+      await _settle(tester);
+      await _visit(tester, app, ['one']);
+      // The selected tab meets the page below with no gap (owner, beta.21).
+      final strip = tester.getRect(find.byKey(const ValueKey('session-tabs')));
+      expect(tester.getRect(_tab(app, 'one')).bottom, strip.bottom);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   testWidgets('a tab shown again keeps the reader\'s place', (tester) async {
     _useMemoryPreferences();
     final app = await _launch(

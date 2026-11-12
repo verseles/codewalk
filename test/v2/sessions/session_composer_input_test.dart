@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import 'composer_fakes.dart';
@@ -145,6 +146,54 @@ void main() {
     },
   );
 
+  testWidgets(
+    'on a phone a sent message lets the keyboard go (beta.21)',
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    (tester) async {
+      final outbox = FakeOutbox();
+      await _open(tester, outbox);
+      await tester.tap(_input);
+      await tester.enterText(_input, 'Hello');
+      await tester.pump();
+      expect(tester.widget<TextField>(_input).focusNode!.hasFocus, isTrue);
+      await tester.tap(_send);
+      await tester.pumpAndSettle();
+      expect(_submits(outbox).single, endsWith(' Hello'));
+      // The field lets go, so the keyboard closes and the composer folds.
+      expect(tester.widget<TextField>(_input).focusNode!.hasFocus, isFalse);
+    },
+  );
+
+  testWidgets('an idle session shows a check on the empty Send (beta.21)', (
+    tester,
+  ) async {
+    final outbox = FakeOutbox();
+    final opened = await _open(tester, outbox);
+    final l10n = opened.graph.localizations.current;
+    IconData? glyph() => tester
+        .widget<Icon>(find.descendant(of: _send, matching: find.byType(Icon)))
+        .icon;
+    // Idle and empty: a check, still disabled, and the bar does not say Idle.
+    expect(glyph(), Symbols.check);
+    expect(tester.widget<IconButton>(_send).tooltip, l10n.liveIdle);
+    expect(tester.widget<IconButton>(_send).onPressed, isNull);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('composer-status')),
+        matching: find.text(l10n.liveIdle),
+      ),
+      findsNothing,
+    );
+    // Typing brings the arrow back; clearing the field shows the check again.
+    await tester.enterText(_input, 'Hi');
+    await tester.pump();
+    expect(glyph(), Symbols.arrow_upward);
+    expect(tester.widget<IconButton>(_send).tooltip, l10n.composerSend);
+    await tester.enterText(_input, '');
+    await tester.pump();
+    expect(glyph(), Symbols.check);
+  });
+
   testWidgets('a double tap on the empty Send continues once (#82)', (
     tester,
   ) async {
@@ -155,9 +204,13 @@ void main() {
     await tester.tap(_send);
     await tester.pumpAndSettle();
     expect(_submits(outbox), isEmpty);
+    await tester.tap(_input);
+    await tester.pump();
     await _doubleTap(tester, _send);
     expect(_submits(outbox).single, endsWith(' continue'));
     expect(tester.widget<TextField>(_input).controller!.text, isEmpty);
+    // On a phone the accepted Continue lets the keyboard go (beta.21).
+    expect(tester.widget<TextField>(_input).focusNode!.hasFocus, isFalse);
 
     // Only a session the server reports idle continues: not one whose
     // execution is unknown, nor a running one whose Stop is unavailable.
@@ -201,6 +254,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<TextField>(_input).controller!.text, 'next');
     expect(_submits(outbox), hasLength(1));
+    // The next message keeps the keyboard (beta.21).
+    expect(tester.widget<TextField>(_input).focusNode!.hasFocus, isTrue);
   });
 
   testWidgets('the status slot reports the call in flight (#133)', (
@@ -319,6 +374,11 @@ void main() {
     // Queue becomes the default for every later send, and Send says so.
     await choose('live-delivery-queue');
     expect(preferences.composerQueue, isTrue);
+    // An idle session's empty Send shows the check (beta.21); typed text
+    // shows the delivery.
+    expect(tester.widget<IconButton>(_send).tooltip, l10n.liveIdle);
+    await tester.enterText(_input, 'two');
+    await tester.pump();
     expect(tester.widget<IconButton>(_send).tooltip, l10n.composerQueue);
     await send('two');
     await send('three');
@@ -329,6 +389,8 @@ void main() {
 
     await choose('live-delivery-steer');
     expect(preferences.composerQueue, isFalse);
+    await tester.enterText(_input, 'four');
+    await tester.pump();
     expect(tester.widget<IconButton>(_send).tooltip, l10n.composerSend);
     await send('four');
     expect(_submits(outbox).last, endsWith(' steer four'));

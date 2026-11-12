@@ -341,7 +341,11 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
   /// Takes what the session reports now; called before each build that may
   /// change it, so it sets the state without asking for another build.
   void _apply() {
-    final activity = widget.activity;
+    // Idle is said by the composer's Send, a check (owner, beta.21); the bar
+    // shows nothing for it.
+    final activity = widget.activity?.kind == ComposerStatusKind.idle
+        ? null
+        : widget.activity;
     if (activity == null) {
       _show?.cancel();
       _show = null;

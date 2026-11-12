@@ -51,7 +51,10 @@ class SessionModelChip extends StatelessWidget {
               ? l10n.chatChooseModel
               : state.defaultModel ?? l10n.liveSelectionDefault,
       };
-      final background = sessionAgentColor(state.agents, selection?.agentId);
+      final background = sessionAgentWash(
+        sessionAgentColor(state.agents, selection?.agentId),
+        Theme.of(context).colorScheme.surface,
+      );
       final foreground = sessionAgentForeground(background);
       final avatar = busy
           ? AppIndeterminateRing(size: 14, strokeWidth: 2, color: foreground)

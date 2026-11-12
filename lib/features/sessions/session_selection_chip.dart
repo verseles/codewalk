@@ -598,11 +598,10 @@ class _SelectionPanelState extends State<_SelectionPanel> {
       }
 
       final saving = live.modelPreferences;
+      // No title: the lists take its room (owner, beta.21). The sheet's drag
+      // handle spaces its top; the dialog keeps a little room of its own.
       final rows = <Widget>[
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
-          child: Text(l10n.liveSelection, style: theme.textTheme.titleLarge),
-        ),
+        if (!widget.fill) const SizedBox(height: 8),
         if (state.loading || state.phase == SessionSelectionPhase.pending)
           const AppIndeterminateBar(),
         if (notice != null)
@@ -683,36 +682,43 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         if (live.supportsSelection) agents(),
         if (live.permissionModes != null) permissions(),
       ];
-      return SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final fixed = constraints.maxHeight >= 420;
-            final list = ListView(
-              key: const ValueKey('live-selection-list'),
-              shrinkWrap: !widget.fill,
-              padding: const EdgeInsets.only(bottom: 8),
-              children: [
-                ...rows,
-                if (!fixed && footer.isNotEmpty) ...[
-                  const Divider(height: 1),
-                  ...footer,
+      // The title is gone (beta.21); the panel still names its route for a
+      // screen reader.
+      return Semantics(
+        namesRoute: true,
+        explicitChildNodes: true,
+        label: l10n.liveSelection,
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final fixed = constraints.maxHeight >= 420;
+              final list = ListView(
+                key: const ValueKey('live-selection-list'),
+                shrinkWrap: !widget.fill,
+                padding: const EdgeInsets.only(bottom: 8),
+                children: [
+                  ...rows,
+                  if (!fixed && footer.isNotEmpty) ...[
+                    const Divider(height: 1),
+                    ...footer,
+                  ],
                 ],
-              ],
-            );
-            return Column(
-              mainAxisSize: widget.fill ? MainAxisSize.max : MainAxisSize.min,
-              children: [
-                if (widget.fill)
-                  Expanded(child: list)
-                else
-                  Flexible(child: list),
-                if (fixed && footer.isNotEmpty) ...[
-                  const Divider(height: 1),
-                  ...footer,
+              );
+              return Column(
+                mainAxisSize: widget.fill ? MainAxisSize.max : MainAxisSize.min,
+                children: [
+                  if (widget.fill)
+                    Expanded(child: list)
+                  else
+                    Flexible(child: list),
+                  if (fixed && footer.isNotEmpty) ...[
+                    const Divider(height: 1),
+                    ...footer,
+                  ],
                 ],
-              ],
-            );
-          },
+              );
+            },
+          ),
         ),
       );
     },

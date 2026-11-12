@@ -10,9 +10,13 @@ import '../../shared/sessions/server_path.dart';
 /// The width of the accent that marks the selected project or session.
 const _accentWidth = 3.0;
 
-/// Below this width a project row drops its folder and chevron, so the name
+/// Below this width a project row drops its folder, so the name
 /// and the path keep the space that is left.
 const _iconsMinWidth = 48.0;
+
+/// Below this row width the chevron goes too, leaving the name, the count
+/// and the menu.
+const _chevronMinWidth = 160.0;
 
 /// A row of the session list's continuous surface: no card or row-wide
 /// fill, only a thin accent along the start edge while [selected].
@@ -103,7 +107,8 @@ class StartEllipsisPath extends StatelessWidget {
 /// One open project of the server: its name, its path, how many
 /// conversations it holds and the menu that closes it.
 ///
-/// A tap shows the project. The menu, its trailing button, a long press, a
+/// A tap shows the project; on the shown project it folds and unfolds its
+/// conversations instead. The menu, its trailing button, a long press, a
 /// secondary click, the Menu key, Shift+F10 or the semantic action only
 /// open the menu; they never switch to the project.
 class ProjectContextRow extends StatefulWidget {
@@ -116,10 +121,15 @@ class ProjectContextRow extends StatefulWidget {
     required this.compact,
     required this.onTap,
     required this.onClose,
-  });
+    bool? expanded,
+  }) : expanded = expanded ?? active;
 
   final String directory;
   final bool active;
+
+  /// Whether the project's conversations show below it, which points its
+  /// chevron up.
+  final bool expanded;
 
   /// The conversations last read for the project, or null before a read.
   final int? count;
@@ -162,6 +172,8 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
           },
           child: Semantics(
             selected: widget.active,
+            // Only the shown project folds; the others never claim a state.
+            expanded: widget.active ? widget.expanded : null,
             // The menu holds one entry, so the action does what it says.
             customSemanticsActions: {
               CustomSemanticsAction(label: l10n.chatCloseProject(name)):
@@ -220,30 +232,11 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                                 ],
                               ),
                             ),
-                            LayoutBuilder(
-                              builder: (context, constraints) => Row(
-                                children: [
-                                  Expanded(
-                                    child: StartEllipsisPath(
-                                      directory,
-                                      key: ValueKey('project-path-$directory'),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ),
-                                  // The active project shows its conversations
-                                  // below it, so its chevron is up.
-                                  if (constraints.maxWidth >= _iconsMinWidth)
-                                    Icon(
-                                      widget.active
-                                          ? Symbols.expand_less
-                                          : Symbols.expand_more,
-                                    ),
-                                ],
+                            StartEllipsisPath(
+                              directory,
+                              key: ValueKey('project-path-$directory'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -273,6 +266,15 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                               ),
                             ),
                           ),
+                        ),
+                      // Centered on the whole row, beside the count; up while
+                      // the conversations show below.
+                      if (rowConstraints.maxWidth >= _chevronMinWidth)
+                        Icon(
+                          widget.expanded
+                              ? Symbols.expand_less
+                              : Symbols.expand_more,
+                          key: ValueKey('project-chevron-$directory'),
                         ),
                       PopupMenuButton<int>(
                         key: _menu,

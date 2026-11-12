@@ -52,6 +52,11 @@ class _SessionsPageState extends State<SessionsPage> {
   SessionsController? _controller;
   bool _openingHistory = false;
 
+  /// The shown project whose conversations the user folded away by tapping
+  /// it; showing another project drops the fold, and a search shows the rows
+  /// while it lasts.
+  String? _folded;
+
   /// Rebuilds the list when the first unread emphasis ends.
   Timer? _emphasis;
 
@@ -300,8 +305,15 @@ class _SessionsPageState extends State<SessionsPage> {
           ),
       ],
     ];
+    // A fold belongs to the project shown when it was made: the page builds
+    // again on every switch, so another project shown by any route (a tap,
+    // Recent, a preview, a link) drops it.
+    if (_folded != shown) _folded = null;
+    final searching = contexts.query.isNotEmpty;
     for (final directory in contexts.open) {
       final active = directory == shown;
+      // A search always shows the rows it filters.
+      final folded = active && _folded == directory && !searching;
       // A project not read yet has no count and says so.
       final rows = active
           ? (controller.contextRows(directory) == null
@@ -319,10 +331,18 @@ class _SessionsPageState extends State<SessionsPage> {
           count: rows?.length,
           complete: controller.contextComplete(directory),
           compact: compact,
-          onTap: active || contexts.busy
+          expanded: active && !folded,
+          // The shown project folds and unfolds its conversations, except
+          // during a search, whose rows stay; another one is shown, unfolded.
+          onTap: active
+              ? searching
+                    ? null
+                    : () => setState(() => _folded = folded ? null : directory)
+              : contexts.busy
               ? null
               : () async {
                   if (await contexts.activate(directory) && context.mounted) {
+                    setState(() => _folded = null);
                     _showContext(context, controller, contexts, directory);
                   }
                 },
@@ -346,7 +366,9 @@ class _SessionsPageState extends State<SessionsPage> {
                 },
         ),
       );
-      if (active && rows != null) {
+      if (folded) {
+        // Folded by the user: only the row shows.
+      } else if (active && rows != null) {
         final listed = projectSessionList(
           controller.sessions,
           query: contexts.query,

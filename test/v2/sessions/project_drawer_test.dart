@@ -118,6 +118,53 @@ void main() {
     await _closeApp(tester);
   });
 
+  testWidgets('a tap on the shown project folds and unfolds its rows', (
+    tester,
+  ) async {
+    final (dependencies, _, _) = await _open(tester);
+    final row = find.byKey(const ValueKey('project-context-/work/alpha'));
+    final chevron = find.byKey(const ValueKey('project-chevron-/work/alpha'));
+    final session = find.byKey(
+      ValueKey(dependencies.sessions!.sessions.first.info.ref),
+    );
+    expect(session, findsOneWidget);
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_less);
+    // The chevron sits on the row's middle, not on the path line (beta.21).
+    expect(tester.getCenter(chevron).dy, closeTo(tester.getCenter(row).dy, 1));
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(session, findsNothing);
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_more);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(session, findsOneWidget);
+    // A search always shows the rows it filters, even on a folded project.
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(session, findsNothing);
+    _contexts(tester).setQuery('One');
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsWidgets);
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_less);
+    // During a search the tap arms nothing.
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_less);
+    _contexts(tester).setQuery('');
+    await tester.pumpAndSettle();
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_more);
+    // Showing another project by any route drops the fold.
+    final contexts = _contexts(tester);
+    expect(await contexts.openContext('/work/beta'), isTrue);
+    await tester.pumpAndSettle();
+    expect(await contexts.activate('/work/alpha'), isTrue);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Icon>(chevron).icon, Symbols.expand_less);
+    expect(session, findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await _closeApp(tester);
+  });
+
   testWidgets(
     'switching projects keeps the left one as a preview and closing it '
     'keeps the last one open',

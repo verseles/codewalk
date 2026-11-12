@@ -196,6 +196,12 @@ void main() {
   Color chipColor(WidgetTester tester) =>
       tester.widget<ActionChip>(modelChip).color!.resolve({})!;
 
+  /// The chip shows a wash of the agent's color over the surface.
+  Color washed(WidgetTester tester, Color agent) => sessionAgentWash(
+    agent,
+    Theme.of(tester.element(modelChip)).colorScheme.surface,
+  );
+
   testWidgets('one chip shows the model and variant on the agent color', (
     tester,
   ) async {
@@ -204,7 +210,7 @@ void main() {
     expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
     expect(find.byKey(const ValueKey('live-variant-chip')), findsNothing);
     // Build without a color of its own is green.
-    expect(chipColor(tester), sessionDefaultAgentColor);
+    expect(chipColor(tester), washed(tester, sessionDefaultAgentColor));
     // The pending permissions moved into the pick (#485).
     expect(find.byType(Badge), findsNothing);
   });
@@ -229,7 +235,7 @@ void main() {
     }
 
     await pick('plan', [_build, _plan]);
-    expect(chipColor(tester), sessionPlanAgentColor);
+    expect(chipColor(tester), washed(tester, sessionPlanAgentColor));
     final review = CatalogEntry(
       id: 'review',
       kind: const OpenValue.known(CatalogKind.agent),
@@ -237,7 +243,7 @@ void main() {
       color: '#123456',
     );
     await pick('review', [_build, _plan, review]);
-    expect(chipColor(tester), const Color(0xFF123456));
+    expect(chipColor(tester), washed(tester, const Color(0xFF123456)));
     final docs = CatalogEntry(
       id: 'docs',
       kind: const OpenValue.known(CatalogKind.agent),
@@ -245,11 +251,16 @@ void main() {
     );
     await pick('docs', [_build, _plan, review, docs]);
     final docsColor = chipColor(tester);
-    expect(sessionAgentPalette, contains(docsColor));
+    expect([
+      for (final color in sessionAgentPalette) washed(tester, color),
+    ], contains(docsColor));
     // The palette color follows the id alone, never the roster.
     await pick('docs', [docs]);
     expect(chipColor(tester), docsColor);
-    expect(sessionAgentColor([_build, review, docs], 'docs'), docsColor);
+    expect(
+      washed(tester, sessionAgentColor([_build, review, docs], 'docs')),
+      docsColor,
+    );
     // The label reads on any of them.
     expect(sessionAgentForeground(sessionPlanAgentColor), Colors.black);
     expect(sessionAgentForeground(sessionDefaultAgentColor), Colors.white);
@@ -413,7 +424,7 @@ void main() {
     await tester.pump();
     expect(chip('live-model-chip', 'Default'), findsOneWidget);
     // The server's default agent is green.
-    expect(chipColor(tester), sessionDefaultAgentColor);
+    expect(chipColor(tester), washed(tester, sessionDefaultAgentColor));
   });
 
   testWidgets('the model chip retains selection status in its semantics', (

@@ -249,7 +249,11 @@ class _SessionComposerState extends State<SessionComposer> {
     if (!_canContinue) return;
     setState(() => _continuing = true);
     try {
-      await widget.controller.send('continue', fromDraft: false);
+      // Text typed meanwhile is the next message, and keeps the keyboard.
+      if (await widget.controller.send('continue', fromDraft: false) &&
+          _text.text.isEmpty) {
+        _letGo();
+      }
     } finally {
       if (mounted) setState(() => _continuing = false);
     }
@@ -265,8 +269,18 @@ class _SessionComposerState extends State<SessionComposer> {
       sent,
       delivery: queue == true ? Delivery.queue : Delivery.steer,
     );
-    // Text typed while the send was pending is the user's, never cleared.
-    if (clear && draft.text == sent) draft.clear();
+    // Text typed while the send was pending is the user's, never cleared,
+    // and keeps the keyboard.
+    if (clear && draft.text == sent) {
+      draft.clear();
+      _letGo();
+    }
+  }
+
+  /// On a phone the keyboard steps aside once a message is away, so the
+  /// composer folds and the reply has the room; a desktop keeps typing.
+  void _letGo() {
+    if (!_desktop && mounted) _focus.unfocus();
   }
 
   /// The delivery choice, opened from the Send button's own position: a hold,
@@ -563,6 +577,13 @@ class _SessionComposerState extends State<SessionComposer> {
       final canSend = _canSend;
       final preferences = context.watch<AppPreferencesController?>();
       final queue = preferences?.composerQueue ?? false;
+      final status = liveStatus(c.live, l10n);
+      // An idle session says so on Send, a check in place of the arrow, until
+      // the user types or work resumes; the status bar stays quiet (owner,
+      // beta.21). The button keeps its look otherwise.
+      // Spaces alone are no text, as for Continue.
+      final done =
+          status?.kind == ComposerStatusKind.idle && _text.text.trim().isEmpty;
       final choose = preferences == null
           ? null
           : () => _chooseSend(preferences);
@@ -640,7 +661,7 @@ class _SessionComposerState extends State<SessionComposer> {
                 ),
               ),
               SessionComposerStatus(
-                activity: liveStatus(c.live, l10n),
+                activity: status,
                 retryAt: liveRetryAt(c.live),
                 now: c.live.clock,
               ),
@@ -717,12 +738,16 @@ class _SessionComposerState extends State<SessionComposer> {
                             key: _sendAnchor,
                             child: ComposerSendButton(
                               buttonKey: const ValueKey('live-composer-send'),
-                              tooltip: queue
+                              tooltip: done
+                                  ? l10n.liveIdle
+                                  : queue
                                   ? l10n.composerQueue
                                   : l10n.composerSend,
-                              icon: queue
+                              icon: done
+                                  ? Symbols.check
+                                  : queue
                                   ? Symbols.schedule_send
-                                  : Symbols.send_rounded,
+                                  : Symbols.arrow_upward,
                               onPressed: canSend ? _send : null,
                               onDoubleTap: _canContinue ? _continue : null,
                               onChoose: choose,

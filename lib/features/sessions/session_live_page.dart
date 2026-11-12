@@ -457,9 +457,9 @@ class _SessionLivePageState extends State<SessionLivePage>
               // usable field, and their sum never exceeds the body, so a short
               // viewport (keyboard open, landscape) cannot overrun the footer and
               // a pending card can never starve the composer. The other fixed
-              // children of this column (the loading bar, the safe-area inset and
-              // a rendered Stop button) are reserved up front, or the partition
-              // would saturate the body and those would overflow it.
+              // children of this column (the safe-area inset and a rendered Stop
+              // button) are reserved up front, or the partition would saturate
+              // the body and those would overflow it.
               final stopButton = c.outbox == null && (c.canStop || c.stopping);
               // The prompt-less footer also renders the Stop button and, while a
               // Stop waits or failed, its notice: both live outside the partition.
@@ -467,7 +467,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                   c.outbox == null &&
                   c.stopState.phase != SessionStopPhase.ready;
               final chrome =
-                  (c.loading ? 4.0 : 0.0) +
                   (c.summary.info.lineage.parent != null
                       ? returnToParentHeight(context)
                       : 0.0) +
@@ -482,7 +481,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                 0.0,
                 // The open composer's two rows (#484) and the shortest
                 // usable `/` picker above them.
-                max(body.maxHeight * 0.4, min(body.maxHeight - 4, 182)) - pad,
+                max(body.maxHeight * 0.4, min(body.maxHeight, 182)) - pad,
               );
               final cardBudget = hasCards
                   ? min(
@@ -499,8 +498,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                   constraints: const BoxConstraints(maxWidth: 960),
                   child: Column(
                     children: [
-                      // The status bar says what loads; this only shows it.
-                      if (c.loading) const AppIndeterminateBar(),
                       if (c.summary.info.lineage.parent case final parent?)
                         ReturnToParentConversation(parent: parent),
                       if (search.open)
@@ -645,7 +642,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                                       focusNode: _composerFocus,
                                       // Most of the body stays the timeline's; with
                                       // the keyboard over a short body the field
-                                      // wins instead (the 4 is the progress bar).
+                                      // wins instead.
                                       maxHeight: composerBudget,
                                     ),
                             ],

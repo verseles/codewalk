@@ -38,6 +38,11 @@ Color sessionAgentColor(List<CatalogEntry> agents, String? agentId) {
   return sessionAgentPalette[slot % sessionAgentPalette.length];
 }
 
+/// A wash of [agent] over [surface]: the agent stays recognizable without
+/// drawing the eye (owner, beta.21).
+Color sessionAgentWash(Color agent, Color surface) =>
+    Color.alphaBlend(agent.withValues(alpha: 0.35), surface);
+
 /// Black or white, whichever reads better on [background].
 Color sessionAgentForeground(Color background) {
   final luminance = background.computeLuminance();

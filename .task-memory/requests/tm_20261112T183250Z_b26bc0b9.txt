@@ -1,0 +1,11 @@
+Antes vamos cortar um novo beta com as seguintes correções:
+
+- o botão de enviar deve ser uma seta apontando pra cima em vez desse avião feio
+- o título dentro do seletor pode sumir pra dar mais espaço "Model and agent"
+- a cor do fundo do chip que mostra a cor do agente principal deve ser mais lavada pra chamar menos atenção, ou seja enfraquecida
+- entre as abas e a barra de abas tem um pixel fazendo as abas parecerem deslocadas da barra, corrija
+- Sempre que o usuário volta para o aplicativo, o sistema atualiza, e isso está correto. Porém, debaixo da barra de abas, roda uma linha de progresso indeterminada enquanto atualiza. Porém, já existem progresso sinalizado no status do Composer e no menu hambúrguer, portanto essa barra indeterminada debaixo da barra de abas deve desaparecer.
+- depois que uma mensagem for enviada, o foco do teclado/composer deve sumir no celular, assim o teclado some e o composer se encolhe
+- Na barra lateral de sessões clicar em item principal não encolhe nem expande, além disso o ícone que sinaliza expandir/encolher nao está centralizado verticalmente
+
+dúvidas?

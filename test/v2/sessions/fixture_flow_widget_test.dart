@@ -948,7 +948,10 @@ void main() {
       );
 
       // 8. Model switch (`model switch`): open selection dialog, pick variant.
-      // The model chip sits in the composer.
+      // The model chip sits in the composer's open row; on a phone the
+      // composer folded after the send, so a tap on the field opens it.
+      await tester.tap(find.byKey(const ValueKey('live-composer-input')));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const ValueKey('live-model-chip')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('live-model-chip')));

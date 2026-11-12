@@ -262,7 +262,8 @@ class ComposerSendButton extends StatelessWidget {
     required this.onPressed,
     this.onDoubleTap,
     this.onChoose,
-    this.icon = Symbols.send_rounded,
+    // An upward arrow, not v1's plane (owner, beta.21).
+    this.icon = Symbols.arrow_upward,
   });
 
   /// The key of the button itself, so its state can be read.
