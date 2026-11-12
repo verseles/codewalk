@@ -1188,6 +1188,32 @@ void main() {
     });
 
     test(
+      'a take-back is recorded with the fence and survives a reread',
+      () async {
+        final (server, outbox, store) = await queued();
+        // Recorded before the request, so a close meanwhile keeps it (#486).
+        server.beforeChange = () => expect(saved(store)['takenBack'], isTrue);
+        final result = await outbox.cancel(
+          _session,
+          const CommandId('cmd_1'),
+          takeBack: true,
+        );
+        expect(result.entry!.state, SubmissionKind.cancelled);
+        expect(result.entry!.takenBack, isTrue);
+        final read = await outbox.entries(_session);
+        expect(read.single.takenBack, isTrue);
+      },
+    );
+
+    test('a plain cancel and an older ledger are not taken back', () async {
+      final (_, outbox, store) = await queued();
+      expect(saved(store).containsKey('takenBack'), isFalse);
+      final result = await outbox.cancel(_session, const CommandId('cmd_1'));
+      expect(result.entry!.takenBack, isFalse);
+      expect(saved(store).containsKey('takenBack'), isFalse);
+    });
+
+    test(
       '2.2.2 cancellation keeps uncertainty when history cannot prove absence',
       () async {
         final server = _Server();
@@ -1433,6 +1459,55 @@ void main() {
       expect(kept, contains('q_0'));
       expect(kept, isNot(contains('q_1')));
     });
+
+    test('a take-back waits in a full ledger until its text is back', () async {
+      final server = _Server();
+      final outbox = _outbox(_Store(), server.transport);
+      server.changeAnswer = null;
+      for (var i = 0; i < OpenCodePromptOutbox.maxEntries; i++) {
+        await _submit(outbox, command: 'c_$i', delivery: Delivery.queue);
+        await outbox.cancel(_session, CommandId('c_$i'), takeBack: true);
+      }
+      // Every entry still owes its text to the draft (#486).
+      expect((await _submit(outbox, command: 'extra')).refusal, 'full');
+      expect(await outbox.dismiss(_session, const CommandId('c_0')), isTrue);
+      expect((await _submit(outbox, command: 'extra')).sent, isTrue);
+    });
+
+    test('a take-back delivered first still makes room', () async {
+      final server = _Server();
+      final outbox = _outbox(_Store(), server.transport);
+      server.beforeChange = () =>
+          server.promote(server.inbox.single['id']! as String);
+      for (var i = 0; i < OpenCodePromptOutbox.maxEntries; i++) {
+        await _submit(outbox, command: 'c_$i', delivery: Delivery.queue);
+        final result = await outbox.cancel(
+          _session,
+          CommandId('c_$i'),
+          takeBack: true,
+        );
+        expect(result.entry!.state, SubmissionKind.delivered);
+      }
+      // Its text is in the conversation; nothing is owed to the draft.
+      expect((await _submit(outbox, command: 'extra')).sent, isTrue);
+    });
+
+    test(
+      'a take-back of a prompt already cancelled still records it',
+      () async {
+        final (_, outbox, store) = await queued();
+        await outbox.cancel(_session, const CommandId('cmd_1'));
+        expect(saved(store).containsKey('takenBack'), isFalse);
+        final result = await outbox.cancel(
+          _session,
+          const CommandId('cmd_1'),
+          takeBack: true,
+        );
+        expect(result.entry!.state, SubmissionKind.cancelled);
+        expect(result.entry!.takenBack, isTrue);
+        expect(saved(store)['takenBack'], isTrue);
+      },
+    );
 
     test('cancelled entries make room in a full ledger', () async {
       final server = _Server();

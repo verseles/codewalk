@@ -60,6 +60,9 @@ final class SessionDraftStore {
   final _owners = <SessionRef, void Function(String text)>{};
   Timer? _timer;
 
+  /// Writes started and not finished yet: a flush waits for them too.
+  final _writing = <Future<void>>{};
+
   /// The stored draft of [session], or null when it has none or it could not
   /// be read; in that case it is kept and never written over.
   Future<String?> read(SessionRef session) {
@@ -139,12 +142,16 @@ final class SessionDraftStore {
   Future<void> flush() async {
     _timer?.cancel();
     _timer = null;
-    if (_pending.isEmpty) return;
     final batch = Map.of(_pending);
     _pending.clear();
-    await Future.wait([
-      for (final MapEntry(:key, :value) in batch.entries) _write(key, value),
-    ]);
+    for (final MapEntry(:key, :value) in batch.entries) {
+      final write = _write(key, value);
+      _writing.add(write);
+      write.whenComplete(() => _writing.remove(write)).ignore();
+    }
+    // A write an earlier flush started counts too, so whoever waits here
+    // finds every text handed over so far written (#486).
+    if (_writing.isNotEmpty) await Future.wait([..._writing]);
   }
 
   Future<void> _write(SessionRef session, String text) async {

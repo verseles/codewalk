@@ -1593,6 +1593,18 @@ abstract class V2Localizations {
   /// **'Voice input is coming soon'**
   String get composerVoiceSoon;
 
+  /// V2 waiting messages (#486)
+  ///
+  /// In en, this message translates to:
+  /// **'Send now'**
+  String get composerSendNow;
+
+  /// V2 waiting messages (#486)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get composerWaitingEdit;
+
   /// V2 live session composer
   ///
   /// In en, this message translates to:

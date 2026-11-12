@@ -530,6 +530,14 @@
   "@composerVoiceSoon": {
     "description": "V2 live session composer (#484)"
   },
+  "composerSendNow": "지금 보내기",
+  "@composerSendNow": {
+    "description": "V2 waiting messages (#486)"
+  },
+  "composerWaitingEdit": "편집",
+  "@composerWaitingEdit": {
+    "description": "V2 waiting messages (#486)"
+  },
   "composerSend": "보내기",
   "@composerSend": {
     "description": "V2 live session composer"

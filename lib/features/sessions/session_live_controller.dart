@@ -150,6 +150,21 @@ class SessionLiveController extends ChangeNotifier
   /// come back as its draft.
   void forgetDraft(String text) => drafts?.forget(session, text);
 
+  /// Writes the draft to this device now (#486), as safely as anything
+  /// typed: a draft the store cannot keep stays on screen only.
+  Future<void> saveDraft() async => drafts?.flush();
+
+  /// Puts the text of a waiting message the user took back to edit (#486)
+  /// into the draft, after anything already there.
+  void takeBackDraft(String text) {
+    final current = draft.text;
+    final next = current.isEmpty ? text : '$current\n$text';
+    draft.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: next.length),
+    );
+  }
+
   /// Up and Down through the session's sent prompts, kept with the session
   /// so a tab shown again is still where it was. A recalled prompt is not
   /// saved as the draft: the saved draft stays what the user was writing.

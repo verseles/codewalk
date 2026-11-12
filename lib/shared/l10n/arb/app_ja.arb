@@ -530,6 +530,14 @@
   "@composerVoiceSoon": {
     "description": "V2 live session composer (#484)"
   },
+  "composerSendNow": "今すぐ送信",
+  "@composerSendNow": {
+    "description": "V2 waiting messages (#486)"
+  },
+  "composerWaitingEdit": "編集",
+  "@composerWaitingEdit": {
+    "description": "V2 waiting messages (#486)"
+  },
   "composerSend": "送信",
   "@composerSend": {
     "description": "V2 live session composer"

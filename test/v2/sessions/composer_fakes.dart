@@ -20,6 +20,10 @@ final class FakeOutbox implements PromptOutbox {
   OutboxEntry Function(OutboxEntry)? onCancel;
   OutboxEntry Function(OutboxEntry, Delivery)? onSwitch;
   bool dismissOk = true;
+  @override
+  bool steersPending = true;
+  @override
+  bool cancelsPending = true;
   int _ids = 100;
 
   OutboxEntry _get(CommandId id) => list.singleWhere((e) => e.commandId == id);
@@ -86,9 +90,15 @@ final class FakeOutbox implements PromptOutbox {
   }
 
   @override
-  Future<OutboxMutation> cancel(SessionRef session, CommandId commandId) async {
-    calls.add('cancel ${commandId.value}');
-    final next = (onCancel ?? (e) => e)(_get(commandId));
+  Future<OutboxMutation> cancel(
+    SessionRef session,
+    CommandId commandId, {
+    bool takeBack = false,
+  }) async {
+    calls.add('cancel ${commandId.value}${takeBack ? ' takeBack' : ''}');
+    final current = _get(commandId);
+    final marked = takeBack ? withTakenBack(current) : current;
+    final next = (onCancel ?? (e) => e)(marked);
     _put(next);
     return OutboxMutation.recorded(next);
   }
@@ -116,6 +126,7 @@ OutboxEntry entryOf(
   String? reason,
   CancellationFence fence = CancellationFence.none,
   OutboxSource source = OutboxSource.current,
+  bool takenBack = false,
 }) => OutboxEntry(
   session: session,
   commandId: CommandId(command),
@@ -128,6 +139,24 @@ OutboxEntry entryOf(
   reason: reason,
   fence: fence,
   source: source,
+  takenBack: takenBack,
+);
+
+/// [entry], recorded as taken back to edit (#486).
+OutboxEntry withTakenBack(OutboxEntry entry) => OutboxEntry(
+  session: entry.session,
+  commandId: entry.commandId,
+  messageId: entry.messageId,
+  text: entry.text,
+  delivery: entry.delivery,
+  state: entry.state,
+  createdAt: entry.createdAt,
+  updatedAt: entry.updatedAt,
+  reason: entry.reason,
+  replays: entry.replays,
+  fence: entry.fence,
+  source: entry.source,
+  takenBack: true,
 );
 
 /// A pending inbox row as the live projection shapes it.

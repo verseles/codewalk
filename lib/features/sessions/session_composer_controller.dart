@@ -79,8 +79,35 @@ class SessionComposerController extends ChangeNotifier {
   ComposerNotice notice = ComposerNotice.none;
   final busy = <CommandId>{};
 
+  /// Taken-back messages whose text this view put back in the draft (#486);
+  /// never put back twice here, even while the ledger still lists them.
+  final _restoring = <CommandId>{};
+
+  /// Take-backs a view of this app is handing over to the saved draft and
+  /// the ledger, by session and command: a view of the same session opened
+  /// meanwhile leaves them to it instead of putting the text back again.
+  static final _handingOff = <(String, CommandId)>{};
+
+  /// Take-backs this view found another view handing over: left to it for
+  /// good, so this view neither puts them back nor forgets them.
+  final _leftToOthers = <CommandId>{};
+
+  /// Forgets every hand-over in progress, for tests sharing one process.
+  @visibleForTesting
+  static void clearHandOffs() => _handingOff.clear();
+
+  /// The native ids of messages taken back here: their waiting line stays
+  /// hidden until the harness drops them, with no ledger entry left.
+  final _takenBack = <String>{};
+
   SessionRef get session => live.session;
   bool get available => _outbox != null;
+
+  /// The harness can deliver a waiting prompt now (#486).
+  bool get steersPending => _outbox?.steersPending ?? false;
+
+  /// The harness can cancel a waiting prompt, or take it back to edit it.
+  bool get cancelsPending => _outbox?.cancelsPending ?? false;
 
   bool get canSend =>
       _outbox != null &&
@@ -101,6 +128,8 @@ class SessionComposerController extends ChangeNotifier {
   void _liveChanged() {
     final outbox = live.outbox;
     if (identical(outbox, _outbox)) {
+      // The saved draft may just have been read.
+      if (_owesTakenBack) _restoreTakenBack();
       _notify();
       return;
     }
@@ -122,6 +151,7 @@ class SessionComposerController extends ChangeNotifier {
         unreadable = false;
         if (notice == ComposerNotice.unreadable) notice = ComposerNotice.none;
       }
+      _restoreTakenBack();
     } on StateError {
       if (_disposed || !identical(outbox, _outbox)) return;
       unreadable = true;
@@ -139,6 +169,76 @@ class SessionComposerController extends ChangeNotifier {
     return null;
   }
 
+  /// Puts the text of each message the user took back to edit (#486) into
+  /// the draft once the ledger shows it cancelled, and has the ledger forget
+  /// it only once that draft was written on this device, so a crash never
+  /// loses it. Each one comes back once in this view, also when it settled
+  /// after the session was closed and opened again; only a ledger that
+  /// cannot forget it after the draft was written can bring it back once
+  /// more in a later view, never lose it. It waits while a send runs, since
+  /// a send clears the field only while the field holds what it sent, and
+  /// until the saved draft was read, so the two join instead of one
+  /// replacing the other.
+  void _restoreTakenBack() {
+    final outbox = _outbox;
+    if (_disposed || outbox == null || sending || !live.draftSettled) return;
+    for (final entry in entries) {
+      if (!entry.takenBack || entry.state != SubmissionKind.cancelled) {
+        continue;
+      }
+      if (_leftToOthers.contains(entry.commandId)) continue;
+      final claim = (session.storageKey, entry.commandId);
+      if (!_handingOff.add(claim)) {
+        // Another view is handing it over: its text reaches the saved draft,
+        // or stays listed for a later view if that fails.
+        if (!_restoring.contains(entry.commandId)) {
+          _leftToOthers.add(entry.commandId);
+          _takenBack.add(entry.messageId);
+        }
+        continue;
+      }
+      if (_restoring.add(entry.commandId)) {
+        live.takeBackDraft(entry.text);
+        _takenBack.add(entry.messageId);
+        if (notice == ComposerNotice.cancelPending) {
+          notice = ComposerNotice.none;
+        }
+      }
+      unawaited(_handOff(outbox, entry, claim));
+    }
+  }
+
+  /// Whether a taken-back text waits to go back to the draft.
+  bool get _owesTakenBack => entries.any(
+    (entry) =>
+        entry.takenBack &&
+        entry.state == SubmissionKind.cancelled &&
+        !_restoring.contains(entry.commandId) &&
+        !_leftToOthers.contains(entry.commandId),
+  );
+
+  /// Forgets a taken-back entry once the draft holding its text was
+  /// written; a ledger that cannot forget it keeps it for a later read.
+  Future<void> _handOff(
+    PromptOutbox outbox,
+    OutboxEntry entry,
+    (String, CommandId) claim,
+  ) async {
+    final id = entry.commandId;
+    try {
+      await live.saveDraft();
+      if (!await outbox.dismiss(session, id)) return;
+      if (_disposed || !identical(outbox, _outbox)) return;
+      entries = [
+        for (final other in entries)
+          if (other.commandId != id) other,
+      ];
+    } finally {
+      _handingOff.remove(claim);
+    }
+    _notify();
+  }
+
   /// The pending inbox rows, each with this device's entry when it sent it.
   List<ComposerChip> chips(SessionState? state) {
     final cut = live.turnActions?.state.staged == true
@@ -153,7 +253,11 @@ class SessionComposerController extends ChangeNotifier {
         if (cut == null ||
             pending.anchor == null ||
             pending.anchor!.compareTo(cut) < 0)
-          ComposerChip(pending, byMessage[live.nativeMessageOf(pending.id)]),
+          if (live.nativeMessageOf(pending.id) case final native
+              // Cancelled here, it is gone even before the harness says so.
+              when byMessage[native]?.state != SubmissionKind.cancelled &&
+                  !_takenBack.contains(native))
+            ComposerChip(pending, byMessage[native]),
     ];
   }
 
@@ -270,6 +374,9 @@ class SessionComposerController extends ChangeNotifier {
     } finally {
       sending = false;
       _notify();
+      // Once the caller cleared what it sent, a taken-back text that waited
+      // for this send goes back to the field.
+      if (_owesTakenBack) unawaited(Future<void>(_restoreTakenBack));
     }
   }
 
@@ -333,6 +440,8 @@ class SessionComposerController extends ChangeNotifier {
       null => mutationRefusal(result.refusal),
       SubmissionKind.uncertain => ComposerNotice.unconfirmed,
       SubmissionKind.rejected => rejection(entry!.reason),
+      // The text back in the field says it.
+      SubmissionKind.cancelled when entry!.takenBack => ComposerNotice.none,
       SubmissionKind.cancelled => ComposerNotice.cancelled,
       SubmissionKind.delivered when entry!.fence == CancellationFence.settled =>
         ComposerNotice.deliveredFirst,
@@ -341,17 +450,41 @@ class SessionComposerController extends ChangeNotifier {
     };
   }
 
-  Future<void> cancel(CommandId id) => _run(id, (outbox) async {
-    final result = await outbox.cancel(session, id);
-    final entry = result.entry;
-    notice = switch (entry?.state) {
-      null => mutationRefusal(result.refusal),
-      SubmissionKind.cancelled => ComposerNotice.cancelled,
-      SubmissionKind.delivered => ComposerNotice.deliveredFirst,
-      _ when openFence(entry!.fence) => ComposerNotice.cancelPending,
-      _ => ComposerNotice.changeFailed,
-    };
-  });
+  Future<void> cancel(CommandId id) => _cancel(id, takeBack: false);
+
+  /// Cancels a waiting prompt so the user can edit it (#486). The ledger
+  /// records the request, so its text goes to the draft once the harness no
+  /// longer holds it, now or after a later check, even in a session opened
+  /// again; never while it may still be delivered, so it is neither sent nor
+  /// copied twice, nor lost. Returns whether it was cancelled now. Only a
+  /// prompt the harness still holds untouched, of a harness that cancels,
+  /// and never during a send.
+  Future<bool> takeBack(CommandId id) {
+    final entry = _entry(id);
+    if (!cancelsPending || sending || entry == null || !canCancel(entry)) {
+      return Future.value(false);
+    }
+    return _cancel(id, takeBack: true);
+  }
+
+  Future<bool> _cancel(CommandId id, {required bool takeBack}) async {
+    var cancelled = false;
+    await _run(id, (outbox) async {
+      final result = await outbox.cancel(session, id, takeBack: takeBack);
+      final entry = result.entry;
+      cancelled = entry?.state == SubmissionKind.cancelled;
+      notice = switch (entry?.state) {
+        null => mutationRefusal(result.refusal),
+        // The text back in the field says it.
+        SubmissionKind.cancelled when takeBack => ComposerNotice.none,
+        SubmissionKind.cancelled => ComposerNotice.cancelled,
+        SubmissionKind.delivered => ComposerNotice.deliveredFirst,
+        _ when openFence(entry!.fence) => ComposerNotice.cancelPending,
+        _ => ComposerNotice.changeFailed,
+      };
+    });
+    return cancelled;
+  }
 
   Future<void> switchDelivery(CommandId id, Delivery target) =>
       _run(id, (outbox) async {
@@ -401,6 +534,7 @@ class SessionComposerController extends ChangeNotifier {
       busy.remove(id);
       sending = false;
       _notify();
+      if (_owesTakenBack) unawaited(Future<void>(_restoreTakenBack));
     }
   }
 

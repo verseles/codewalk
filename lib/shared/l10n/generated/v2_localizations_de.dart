@@ -832,6 +832,12 @@ class V2LocalizationsDe extends V2Localizations {
   String get composerVoiceSoon => 'Spracheingabe kommt bald';
 
   @override
+  String get composerSendNow => 'Jetzt senden';
+
+  @override
+  String get composerWaitingEdit => 'Bearbeiten';
+
+  @override
   String get composerSend => 'Senden';
 
   @override

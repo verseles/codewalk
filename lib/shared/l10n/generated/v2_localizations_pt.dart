@@ -824,6 +824,12 @@ class V2LocalizationsPt extends V2Localizations {
   String get composerVoiceSoon => 'Entrada por voz chega em breve';
 
   @override
+  String get composerSendNow => 'Enviar agora';
+
+  @override
+  String get composerWaitingEdit => 'Editar';
+
+  @override
   String get composerSend => 'Enviar';
 
   @override

@@ -625,14 +625,24 @@ void main() {
         expect(find.text(l10n.liveSendUnavailable), findsNothing);
         expect(find.byKey(const ValueKey('live-composer')), findsOneWidget);
         expect(
-          find.byKey(const ValueKey('live-chip-cancel-mine')),
+          find.byKey(const ValueKey('live-waiting-cancel-mine')),
           findsOneWidget,
         );
         expect(
-          find.byKey(const ValueKey('live-chip-switch-mine')),
+          find.byKey(const ValueKey('live-waiting-send-mine')),
           findsOneWidget,
         );
-        expect(find.textContaining(l10n.composerOtherClient), findsOneWidget);
+        // Another client's message names its state and origin in its
+        // tooltip, on one line (#486).
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Tooltip &&
+                widget.message ==
+                    '${l10n.composerSteering} · ${l10n.composerOtherClient}',
+          ),
+          findsOneWidget,
+        );
         expect(
           find.byKey(const ValueKey('live-row-check-lost')),
           findsOneWidget,
@@ -663,7 +673,7 @@ void main() {
           endsWith(' queue Hello'),
         );
         expect(find.text('Hello'), findsNothing);
-        final cancel = find.byKey(const ValueKey('live-chip-cancel-mine'));
+        final cancel = find.byKey(const ValueKey('live-waiting-cancel-mine'));
         await tester.ensureVisible(cancel);
         await tester.pumpAndSettle();
         await tester.tap(cancel);

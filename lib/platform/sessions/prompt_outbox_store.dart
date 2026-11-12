@@ -176,8 +176,11 @@ final class OpenCodePromptOutbox implements PromptOutbox {
               (r.state == SubmissionKind.admitted ||
                   r.state == SubmissionKind.delivered ||
                   r.state == SubmissionKind.cancelled) &&
-              // An unfinished cancel stays until it is settled.
-              !_open(r.fence),
+              // An unfinished cancel stays until it is settled, and a
+              // cancelled take-back until its text is back in the draft
+              // (#486).
+              !_open(r.fence) &&
+              !(r.takenBack && r.state == SubmissionKind.cancelled),
         );
         if (evicted.isEmpty) return const OutboxSubmission.refused('full');
         base = base.without(evicted.first);
@@ -368,8 +371,19 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     });
   }
 
+  // The OpenCode inbox cancels a held prompt and changes its delivery.
   @override
-  Future<OutboxMutation> cancel(SessionRef session, CommandId commandId) {
+  bool get steersPending => true;
+
+  @override
+  bool get cancelsPending => true;
+
+  @override
+  Future<OutboxMutation> cancel(
+    SessionRef session,
+    CommandId commandId, {
+    bool takeBack = false,
+  }) {
     final key = keyFor(session);
     return _queue.run(key, () async {
       final read = await _read(key, session);
@@ -388,6 +402,22 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       if ((record.state != SubmissionKind.admitted &&
               record.state != SubmissionKind.uncertain) ||
           (record.fence != CancellationFence.none && !_open(record.fence))) {
+        // Already cancelled, as by a plain cancel just before: the user still
+        // wants its text back (#486).
+        if (takeBack &&
+            record.state == SubmissionKind.cancelled &&
+            !record.takenBack) {
+          final next = record.copyWith(
+            state: record.state,
+            reason: record.reason,
+            updatedAt: _now().toUtc(),
+            takenBack: true,
+          );
+          if (!await _persist(key, session, ledger.replacing(record, next))) {
+            return const OutboxMutation.refused('notPersisted');
+          }
+          return OutboxMutation.recorded(_entry(next));
+        }
         return OutboxMutation.recorded(_entry(record));
       }
       // The server holds another record under this id: deleting it would
@@ -410,6 +440,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
             reason: reason ?? record!.reason,
             fence: fence,
             updatedAt: _now().toUtc(),
+            takenBack: takeBack || record!.takenBack,
           );
       // The fence is durable before anything reaches the wire.
       if (record!.fence == CancellationFence.none &&
@@ -972,6 +1003,7 @@ final class _Record {
     this.notBefore,
     this.endpoint,
     this.bindingRevision,
+    this.takenBack = false,
   });
 
   factory _Record.fromJson(Object? value, SessionRef session) {
@@ -1025,6 +1057,8 @@ final class _Record {
       notBefore: notBefore == null ? null : DateTime.parse(notBefore),
       endpoint: endpoint,
       bindingRevision: revision,
+      // Absent in ledgers written before #486.
+      takenBack: json['takenBack'] as bool? ?? false,
     );
   }
 
@@ -1050,6 +1084,9 @@ final class _Record {
   /// The earliest time of the next replay.
   final DateTime? notBefore;
 
+  /// Cancelled to be edited (#486).
+  final bool takenBack;
+
   OutboxEntry entry(OutboxSource source) => OutboxEntry(
     session: session,
     commandId: commandId,
@@ -1063,6 +1100,7 @@ final class _Record {
     replays: replays,
     fence: fence,
     source: source,
+    takenBack: takenBack,
   );
 
   /// [reason] is replaced, even by null; the replay fields and the delivery
@@ -1075,6 +1113,7 @@ final class _Record {
     CancellationFence? fence,
     DateTime? notBefore,
     Delivery? delivery,
+    bool? takenBack,
   }) => _Record(
     session: session,
     commandId: commandId,
@@ -1093,6 +1132,7 @@ final class _Record {
     notBefore: notBefore ?? this.notBefore,
     endpoint: endpoint,
     bindingRevision: bindingRevision,
+    takenBack: takenBack ?? this.takenBack,
   );
 
   Map<String, Object?> toJson() => {
@@ -1112,5 +1152,6 @@ final class _Record {
     'notBefore': ?notBefore?.toIso8601String(),
     if (endpoint != null) 'endpoint': endpoint.toString(),
     if (bindingRevision != null) 'bindingRevision': bindingRevision,
+    if (takenBack) 'takenBack': true,
   };
 }

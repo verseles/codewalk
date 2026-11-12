@@ -19,6 +19,7 @@ final class OutboxEntry {
     this.replays = 0,
     this.fence = CancellationFence.none,
     this.source = OutboxSource.unknown,
+    this.takenBack = false,
   });
   final SessionRef session;
   final CommandId commandId;
@@ -41,6 +42,10 @@ final class OutboxEntry {
 
   /// Whether this record belongs to the current confirmed server binding.
   final OutboxSource source;
+
+  /// The user cancelled it to edit it (#486): once cancelled, its text goes
+  /// back to the session's draft and the entry is then forgotten.
+  final bool takenBack;
 }
 
 /// [entry] is null when nothing was recorded or sent, so the caller keeps the
@@ -119,8 +124,22 @@ abstract interface class PromptOutbox {
   /// fence is durable before the request and never cleared, so the prompt is
   /// never sent again; the entry ends `cancelled` only when the server no
   /// longer holds it, `delivered` when it was delivered first, and otherwise
-  /// keeps its state with the fence until a later check decides.
-  Future<OutboxMutation> cancel(SessionRef session, CommandId commandId);
+  /// keeps its state with the fence until a later check decides. With
+  /// [takeBack] the entry durably records that the user wants its text back
+  /// to edit (#486), so it survives the session being closed meanwhile.
+  Future<OutboxMutation> cancel(
+    SessionRef session,
+    CommandId commandId, {
+    bool takeBack = false,
+  });
+
+  /// Whether this harness can deliver a waiting (queued) prompt now, as a
+  /// steer, instead of at its turn (#486). Without it the prompt only waits.
+  bool get steersPending;
+
+  /// Whether this harness can cancel a prompt it still holds (#486). Without
+  /// it a waiting prompt can be neither cancelled nor taken back to edit.
+  bool get cancelsPending;
 
   /// Changes the delivery of an admitted, still pending prompt (steering
   /// wakes execution). The recorded delivery follows what the server shows

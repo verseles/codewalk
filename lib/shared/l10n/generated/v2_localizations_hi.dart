@@ -817,6 +817,12 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerVoiceSoon => 'वॉइस इनपुट जल्द आ रहा है';
 
   @override
+  String get composerSendNow => 'अभी भेजें';
+
+  @override
+  String get composerWaitingEdit => 'संपादित करें';
+
+  @override
   String get composerSend => 'भेजें';
 
   @override

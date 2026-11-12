@@ -808,6 +808,12 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerVoiceSoon => 'الإدخال الصوتي قريبًا';
 
   @override
+  String get composerSendNow => 'أرسل الآن';
+
+  @override
+  String get composerWaitingEdit => 'تعديل';
+
+  @override
   String get composerSend => 'إرسال';
 
   @override

@@ -41,7 +41,8 @@ class SessionComposer extends StatefulWidget {
   final SessionComposerController controller;
 
   /// Owned by the session's live controller, so a draft outlives a reopened
-  /// lease and the page.
+  /// lease and the page. It must be that session's draft
+  /// (`SessionLiveController.draft`): a taken-back message returns there.
   final TextEditingController text;
 
   /// The most the composer may take of the page body, which already
@@ -203,6 +204,12 @@ class _SessionComposerState extends State<SessionComposer> {
     if (text != null && draft.text.isEmpty) draft.text = text;
   }
 
+  /// Takes a waiting message back into the field (#486); the session puts
+  /// its text in the draft once the cancel settles.
+  Future<void> _edit(CommandId id) async {
+    if (await widget.controller.takeBack(id) && mounted) _focus.requestFocus();
+  }
+
   void _textChanged() => setState(() {});
 
   /// A local command runs whenever no send is pending; text needs a
@@ -342,8 +349,12 @@ class _SessionComposerState extends State<SessionComposer> {
         ComposerNotice.sourceUnknown => l10n.composerSourceUnknown,
       };
 
-  static String _preview(String text) =>
-      String.fromCharCodes(text.runes.take(200));
+  static String _preview(String text) {
+    final head = text.runes.take(201).toList();
+    return head.length > 200
+        ? '${String.fromCharCodes(head.take(200))}…'
+        : String.fromCharCodes(head);
+  }
 
   Widget _action(
     String key,
@@ -358,83 +369,101 @@ class _SessionComposerState extends State<SessionComposer> {
     onPressed: onPressed,
   );
 
-  Widget _chip(BuildContext context, ComposerChip chip, bool wide) {
+  /// One message the harness holds but has not taken yet (#486): one line,
+  /// pinned above the status bar until it enters the conversation. Tapping it
+  /// takes it back to edit, ✕ cancels it and ↑ delivers it now; each only
+  /// when the harness can, and only for this device's own messages.
+  Widget _waiting(BuildContext context, ComposerChip chip) {
     final l10n = context.v2L10n;
     final c = widget.controller;
     final entry = chip.entry;
     final queued =
         (entry?.delivery ?? chip.pending.delivery.known) == Delivery.queue;
     final fenced = entry != null && openFence(entry.fence);
+    final uncertain = entry?.state == SubmissionKind.uncertain;
     final idle =
         !c.live.stopping &&
         (entry == null || !c.busy.contains(entry.commandId));
     final status = fenced
         ? l10n.composerCancelling
-        : entry?.state == SubmissionKind.uncertain
+        : uncertain
         ? l10n.composerNotConfirmed
         : queued
         ? l10n.composerQueued
         : l10n.composerSteering;
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      key: ValueKey('live-chip-${chip.pending.id.value}'),
-      constraints: BoxConstraints(maxWidth: wide ? 320 : 240),
-      padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 4, 6),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _preview(chip.pending.text),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  entry == null
-                      ? '$status · ${l10n.composerOtherClient}'
-                      : status,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
-            ),
-          ),
-          if (entry != null && idle && canSwitch(entry))
-            _action(
-              'live-chip-switch-${entry.commandId.value}',
-              queued ? Symbols.bolt : Symbols.schedule,
-              queued ? l10n.composerMoveToSteer : l10n.composerMoveToQueue,
-              () => c.switchDelivery(
-                entry.commandId,
-                queued ? Delivery.steer : Delivery.queue,
+    final label = entry == null
+        ? '$status · ${l10n.composerOtherClient}'
+        : status;
+    final cancellable =
+        entry != null && idle && c.cancelsPending && canCancel(entry);
+    final steerable =
+        entry != null && idle && queued && c.steersPending && canSwitch(entry);
+    final checkable = entry != null && idle && (fenced || uncertain);
+    final icon = fenced
+        ? Symbols.hourglass_top
+        : uncertain
+        ? Symbols.help
+        : entry == null
+        ? Symbols.devices
+        : queued
+        ? Symbols.schedule
+        : Symbols.bolt;
+    return Material(
+      key: ValueKey('live-waiting-${chip.pending.id.value}'),
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: Semantics(
+        onTapHint: cancellable && !c.sending ? l10n.composerWaitingEdit : null,
+        child: InkWell(
+          // The field is the send's while it runs.
+          onTap: cancellable && !c.sending
+              ? () => unawaited(_edit(entry.commandId))
+              : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 4, 0),
+              child: Row(
+                children: [
+                  Tooltip(
+                    message: label,
+                    child: Icon(icon, size: 18, semanticLabel: label),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _preview(chip.pending.text).replaceAll('\n', ' '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (checkable)
+                    _action(
+                      'live-waiting-check-${entry.commandId.value}',
+                      Symbols.refresh,
+                      l10n.composerCheckAgain,
+                      () => c.checkAgain(entry.commandId),
+                    ),
+                  if (cancellable)
+                    _action(
+                      'live-waiting-cancel-${entry.commandId.value}',
+                      Symbols.close,
+                      l10n.composerCancel,
+                      () => c.cancel(entry.commandId),
+                    ),
+                  if (steerable)
+                    _action(
+                      'live-waiting-send-${entry.commandId.value}',
+                      Symbols.arrow_upward,
+                      l10n.composerSendNow,
+                      () => c.switchDelivery(entry.commandId, Delivery.steer),
+                    ),
+                ],
               ),
             ),
-          if (entry != null && idle && canCancel(entry))
-            _action(
-              'live-chip-cancel-${entry.commandId.value}',
-              Symbols.close,
-              l10n.composerCancel,
-              () => c.cancel(entry.commandId),
-            ),
-          if (entry != null &&
-              idle &&
-              (fenced || entry.state == SubmissionKind.uncertain))
-            _action(
-              'live-chip-check-${entry.commandId.value}',
-              Symbols.refresh,
-              l10n.composerCheckAgain,
-              () => c.checkAgain(entry.commandId),
-            ),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -529,7 +558,6 @@ class _SessionComposerState extends State<SessionComposer> {
       final chips = c.chips(state);
       final rows = c.rows(state, chips);
       final notice = _notice(l10n, c.notice);
-      final wide = MediaQuery.sizeOf(context).width >= 840;
       final canSend = _canSend;
       final preferences = context.watch<AppPreferencesController?>();
       final queue = preferences?.composerQueue ?? false;
@@ -554,22 +582,24 @@ class _SessionComposerState extends State<SessionComposer> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (chips.isNotEmpty) ...[
-                        Text(
-                          l10n.composerInbox,
-                          style: Theme.of(context).textTheme.labelMedium,
+                      if (chips.isNotEmpty)
+                        // Oldest on top, one line each; past three the
+                        // lines scroll.
+                        ConstrainedBox(
+                          key: const ValueKey('live-waiting'),
+                          constraints: const BoxConstraints(maxHeight: 132),
+                          child: ListView(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(bottom: 4),
+                            children: [
+                              for (final chip in chips)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: _waiting(context, chip),
+                                ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final chip in chips)
-                              _chip(context, chip, wide),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                      ],
                       for (final entry in rows) _row(context, entry),
                     ],
                   ),

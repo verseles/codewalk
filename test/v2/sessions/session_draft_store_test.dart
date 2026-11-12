@@ -143,6 +143,34 @@ void main() {
     expect(await device.store().read(ref), 'before the app leaves');
   });
 
+  test('a flush waits for a write an earlier flush started', () async {
+    final device = _Device();
+    final ref = _ref('s1');
+    final store = SessionDraftStore(
+      payloads: PreferencesPayloadStore(device.metadata),
+      index: device.metadata,
+      delay: const Duration(hours: 1),
+    );
+    await store.read(ref);
+    device.backend
+      ..blockedKey = SessionDraftStore.keyFor(ref)
+      ..entered = Completer<void>()
+      ..release = Completer<void>();
+    store.save(ref, 'taken back');
+    final first = store.flush();
+    await device.backend.entered!.future;
+    // Nothing pending now, but the write is not done: the second waits.
+    var second = false;
+    unawaited(store.flush().then((_) => second = true));
+    await _settle();
+    expect(second, isFalse);
+    device.backend.release!.complete();
+    await first;
+    await _settle();
+    expect(second, isTrue);
+    expect(await device.store().read(ref), 'taken back');
+  });
+
   test('an empty text removes the draft without waiting', () async {
     final device = _Device();
     final ref = _ref('s1');

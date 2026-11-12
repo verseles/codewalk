@@ -778,6 +778,12 @@ class V2LocalizationsJa extends V2Localizations {
   String get composerVoiceSoon => '音声入力は近日対応';
 
   @override
+  String get composerSendNow => '今すぐ送信';
+
+  @override
+  String get composerWaitingEdit => '編集';
+
+  @override
   String get composerSend => '送信';
 
   @override

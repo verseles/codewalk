@@ -811,6 +811,12 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerVoiceSoon => 'ভয়েস ইনপুট শিগগিরই আসছে';
 
   @override
+  String get composerSendNow => 'এখনই পাঠান';
+
+  @override
+  String get composerWaitingEdit => 'সম্পাদনা';
+
+  @override
   String get composerSend => 'পাঠান';
 
   @override

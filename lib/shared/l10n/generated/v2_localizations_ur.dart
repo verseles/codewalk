@@ -814,6 +814,12 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerVoiceSoon => 'آواز سے ان پٹ جلد آ رہا ہے';
 
   @override
+  String get composerSendNow => 'ابھی بھیجیں';
+
+  @override
+  String get composerWaitingEdit => 'ترمیم کریں';
+
+  @override
   String get composerSend => 'بھیجیں';
 
   @override

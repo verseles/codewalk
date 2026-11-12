@@ -432,6 +432,13 @@ final class ScriptedPromptOutbox implements PromptOutbox {
   final _entries = <OutboxEntry>[];
   int _next = 0;
 
+  // Neither a cancel nor a delivery switch is scripted.
+  @override
+  bool get steersPending => false;
+
+  @override
+  bool get cancelsPending => false;
+
   @override
   Future<OutboxSubmission> submit({
     required SessionRef session,
@@ -501,8 +508,9 @@ final class ScriptedPromptOutbox implements PromptOutbox {
   @override
   Future<OutboxMutation> cancel(
     SessionRef session,
-    CommandId commandId,
-  ) async => const OutboxMutation.refused('notScripted');
+    CommandId commandId, {
+    bool takeBack = false,
+  }) async => const OutboxMutation.refused('notScripted');
 
   @override
   Future<OutboxMutation> switchDelivery(

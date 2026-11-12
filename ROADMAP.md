@@ -12,7 +12,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #486 Mensagem em espera fixa acima do composer: uma linha, tocar edita, X cancela, ↑ envia já
 - [ ] #462 Busca na timeline (Ctrl+F, F3)
 - [ ] #426 Mostrar troca de modelo e agente na timeline
 - [ ] #464 Área de toque das ações da mensagem do usuário

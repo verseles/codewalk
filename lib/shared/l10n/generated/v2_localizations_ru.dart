@@ -822,6 +822,12 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerVoiceSoon => 'Голосовой ввод скоро появится';
 
   @override
+  String get composerSendNow => 'Отправить сейчас';
+
+  @override
+  String get composerWaitingEdit => 'Изменить';
+
+  @override
   String get composerSend => 'Отправить';
 
   @override

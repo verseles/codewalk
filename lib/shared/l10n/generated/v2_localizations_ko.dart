@@ -780,6 +780,12 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerVoiceSoon => '음성 입력은 곧 지원됩니다';
 
   @override
+  String get composerSendNow => '지금 보내기';
+
+  @override
+  String get composerWaitingEdit => '편집';
+
+  @override
   String get composerSend => '보내기';
 
   @override

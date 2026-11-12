@@ -763,6 +763,12 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerVoiceSoon => '语音输入即将推出';
 
   @override
+  String get composerSendNow => '立即发送';
+
+  @override
+  String get composerWaitingEdit => '编辑';
+
+  @override
   String get composerSend => '发送';
 
   @override
