@@ -1620,6 +1620,12 @@ void main() {
         );
         expect(server.methods, isNot(contains('PATCH')));
         expect(server.prompts, isEmpty);
+        // The server records the reply before it answers.
+        await waitUntil(
+          () =>
+              a.replyState(req.id).phase ==
+              SessionPermissionReplyPhase.requested,
+        );
         expect(
           a.replyState(req.id).phase,
           SessionPermissionReplyPhase.requested,
