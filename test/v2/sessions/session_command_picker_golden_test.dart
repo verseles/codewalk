@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../support/symbols_font.dart';
 
-/// The `/` picker open over a composer field that holds only `/` (#137),
-/// with the first command highlighted.
+/// The `/` picker open over the open composer whose field holds only `/`
+/// (#137, #484), with the first command highlighted.
 Widget _picker(Locale locale, Brightness brightness, SessionCommandMenu menu) =>
     MaterialApp(
       locale: locale,
@@ -33,24 +33,24 @@ Widget _picker(Locale locale, Brightness brightness, SessionCommandMenu menu) =>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SessionCommandPicker(menu: menu, onRun: (_) {}),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ComposerBubble(
-                            child: TextField(
-                              controller: menu.text,
-                              minLines: 1,
-                              maxLines: 4,
-                              decoration: composerDecoration(
-                                context,
-                                'Type a message',
-                              ),
-                            ),
-                          ),
+                    // The open composer (#484) the picker sits above.
+                    ComposerFrame(
+                      attachTooltip: 'Attach',
+                      voiceTooltip: 'Voice',
+                      field: (context, open) => TextField(
+                        controller: menu.text,
+                        autofocus: true,
+                        minLines: 1,
+                        maxLines: open ? 4 : 1,
+                        decoration: composerDecoration(
+                          context,
+                          'Type / for commands',
                         ),
-                        const SizedBox(width: 8),
-                        ComposerSendButton(tooltip: 'Send', onPressed: () {}),
-                      ],
+                      ),
+                      action: ComposerSendButton(
+                        tooltip: 'Send',
+                        onPressed: () {},
+                      ),
                     ),
                   ],
                 ),
