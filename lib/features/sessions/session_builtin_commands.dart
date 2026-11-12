@@ -8,7 +8,6 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/modal_primary_action_shortcuts.dart';
-import 'session_composer_controls.dart';
 import 'session_live_controller.dart';
 import 'session_selection_chip.dart';
 import 'session_selection_host.dart';
@@ -126,13 +125,12 @@ const SessionTurnActions unboundSessionTurnActions =
     _UnboundSessionTurnActions();
 
 /// Runs [command] from a composer: [live] is the shown session, or null on
-/// the New Chat draft; [agentAnchor] places the agent menu on its chip.
+/// the New Chat draft.
 Future<void> runSessionBuiltinCommand(
   BuildContext context,
   SessionBuiltinCommand command, {
   SessionLiveController? live,
   SessionSelectionHost? selection,
-  GlobalKey? agentAnchor,
   SessionTurnActions turnActions = unboundSessionTurnActions,
 }) async {
   final l10n = context.v2L10n;
@@ -154,14 +152,15 @@ Future<void> runSessionBuiltinCommand(
       if (!canShowSessionSelection(host)) {
         return tell(l10n.commandUnavailableHere);
       }
-      await showSessionSelection(context, host, agents: false);
+      await showSessionSelection(context, host);
     case SessionBuiltinCommand.agent:
+      // The same one pick (#485): the agents sit in its footer.
       if (host == null) return tell(l10n.commandNeedsConversation);
-      final anchor = agentAnchor?.currentContext;
-      if (host.isChild || anchor == null) {
+      if (host.isChild) return tell(l10n.chatModelLockedSubConversation);
+      if (!canShowSessionSelection(host)) {
         return tell(l10n.commandUnavailableHere);
       }
-      await showAgentMenu(anchor, host);
+      await showSessionSelection(context, host);
     case SessionBuiltinCommand.sessions:
       openSessionList(context);
     case SessionBuiltinCommand.help:

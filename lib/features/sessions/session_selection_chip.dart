@@ -6,9 +6,11 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import 'session_agent_color.dart';
 import 'session_live_controller.dart';
 import 'session_selection_host.dart';
 
@@ -108,6 +110,8 @@ String? sessionSelectionStatus(
     return l10n.liveSelectionUnconfirmed;
   }
   if (_notice(state.notice, l10n) case final notice?) return notice;
+  // Taken by the server, not reported yet: the next pick waits for it.
+  if (state.awaitingReport) return l10n.liveSelectionAwaitingReport;
   if (state.loading) return l10n.liveSelectionLoading;
   // A half that can still be picked is no reason to report; the pick
   // explains each half on its own.
@@ -192,15 +196,14 @@ bool canShowSessionSelection(SessionSelectionHost live) =>
     live.canChangeSelection &&
     SessionSelectionChip._openable(live.selectionState);
 
-/// Opens the pick: a bottom sheet on compact widths, a dialog otherwise. The
-/// lists are read again on open; a pick closes it and sends one switch.
-/// Without [agents] it lists the models only, as the composer's model chip
-/// opens it.
+/// Opens the one pick of agent, model, variant and permissions (#485): a
+/// bottom sheet on compact widths, a dialog otherwise. Every entry point (the
+/// composer's chip, `/model`, `/agent`, error recovery) opens it. The lists
+/// are read again on open; a pick closes it and sends one switch.
 Future<void> showSessionSelection(
   BuildContext context,
-  SessionSelectionHost live, {
-  bool agents = true,
-}) async {
+  SessionSelectionHost live,
+) async {
   unawaited(live.refreshSelection());
   final compact = MediaQuery.sizeOf(context).width < 600;
   final pick = compact
@@ -216,7 +219,7 @@ Future<void> showSessionSelection(
             ),
             child: FractionallySizedBox(
               heightFactor: 0.8,
-              child: _SelectionPanel(live: live, agents: agents),
+              child: _SelectionPanel(live: live, fill: true),
             ),
           ),
         )
@@ -225,15 +228,21 @@ Future<void> showSessionSelection(
           builder: (context) => Dialog(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480, maxHeight: 640),
-              child: _SelectionPanel(
-                live: live,
-                agents: agents,
-                autofocus: true,
-              ),
+              child: _SelectionPanel(live: live, autofocus: true),
             ),
           ),
         );
   if (pick == null || !context.mounted) return;
+  // A pick the session can no longer take (its lease is not live, or a
+  // switch it took still awaits the server's report) is said, never dropped
+  // in silence (#431).
+  if (!live.canChangeSelection) {
+    showAppSnackBar(
+      ScaffoldMessenger.maybeOf(context),
+      context.v2L10n.liveSelectionNotApplied,
+    );
+    return;
+  }
   await pick.apply(live);
   if (context.mounted) announceSessionSelection(context, live);
 }
@@ -283,18 +292,24 @@ final class _Pick {
   };
 }
 
-/// The pick's lists. The models open with this server's favorites, then this
+/// The pick (#485). Models come first: this server's favorites, then this
 /// project's recent models, then every model by provider, each offered by
-/// the session's location; a search narrows them by name, id or provider.
+/// the session's location, with its variants in a compact menu on its row; a
+/// search narrows them by name, id or provider. A fixed footer holds the
+/// agents, each on its color, and this session's permission mode with the
+/// count of requests waiting. A part the harness does not offer is not shown.
 class _SelectionPanel extends StatefulWidget {
   const _SelectionPanel({
     required this.live,
-    required this.agents,
+    this.fill = false,
     this.autofocus = false,
   });
 
   final SessionSelectionHost live;
-  final bool agents;
+
+  /// The panel takes its whole height (a sheet) instead of fitting its
+  /// content (a dialog).
+  final bool fill;
   final bool autofocus;
 
   @override
@@ -303,16 +318,36 @@ class _SelectionPanel extends StatefulWidget {
 
 class _SelectionPanelState extends State<_SelectionPanel> {
   final _search = TextEditingController();
+  late final _shown = _SelectionShown(widget.live);
+
+  /// The last permission write failed. It is said beside the switch, since a
+  /// snack bar would sit under the sheet (#485).
+  bool _permissionFailed = false;
 
   @override
   void dispose() {
     _search.dispose();
+    _shown.dispose();
     super.dispose();
+  }
+
+  Future<void> _setAutoApprove(bool value) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final failed = context.v2L10n.livePermissionModeFailed;
+    setState(() => _permissionFailed = false);
+    final applied = await widget.live.setPermissionMode(
+      value ? PermissionMode.allowAll : PermissionMode.ask,
+    );
+    if (mounted) {
+      setState(() => _permissionFailed = !applied);
+    } else if (!applied) {
+      showAppSnackBar(messenger, failed);
+    }
   }
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([widget.live, _search]),
+    listenable: Listenable.merge([_shown, _search]),
     builder: (context, _) {
       final live = widget.live;
       final l10n = context.v2L10n;
@@ -359,12 +394,16 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         (providers[model.providerId] ??= []).add(model);
       }
       void pick(_Pick pick) => Navigator.of(context).pop(pick);
-      // The session's model, with its variant, needs no switch: only an
-      // explicit Auto clears the variant.
+      // The session's own value needs no switch: picking it again closes the
+      // pick and sends nothing (#431); only an explicit Auto clears a
+      // variant.
       void pickModel(ModelEntry model, String? variant) =>
           identical(model, offeredModel) && variant == currentVariant
           ? Navigator.of(context).pop()
           : pick(_Pick.model(model, variant));
+      void pickAgent(CatalogEntry agent) => agent.id == agentId
+          ? Navigator.of(context).pop()
+          : pick(_Pick.agent(agent));
       Widget header(String text) => Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 4),
         child: Text(
@@ -390,6 +429,9 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         final key = SessionLiveController.modelKey(model);
         final selected = identical(model, offeredModel);
         final favorite = favoriteKeys.contains(key);
+        // A tap on the row keeps the session's variant for its own model and
+        // takes the server's default (Auto) for any other.
+        final variant = selected ? currentVariant : null;
         return ListTile(
           key: ValueKey(
             section == null
@@ -415,7 +457,22 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (model.free) _FreeBadge(label: l10n.liveModelFree),
-              if (selected && currentVariant == null)
+              if (model.variants.isNotEmpty || variant != null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: _VariantMenu(
+                    key: ValueKey(
+                      'live-selection-variant-menu-${section ?? 'model'}-$key',
+                    ),
+                    modelKey: key,
+                    variants: model.variants,
+                    current: variant,
+                    autoLabel: l10n.liveSelectionAuto,
+                    enabled: enabled,
+                    onPicked: (picked) => pickModel(model, picked),
+                  ),
+                ),
+              if (selected)
                 const Padding(
                   padding: EdgeInsetsDirectional.only(start: 8),
                   child: Icon(Symbols.check),
@@ -428,7 +485,8 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                     : l10n.liveModelFavoriteAdd,
                 isSelected: favorite,
                 icon: const Icon(Symbols.star_border),
-                selectedIcon: const Icon(Symbols.star),
+                // A Material Symbols glyph is outlined unless it is filled.
+                selectedIcon: const Icon(Symbols.star, fill: 1),
                 onPressed: live.canFavoriteModels
                     ? () => unawaited(
                         live.setFavoriteModel(model, favorite: !favorite),
@@ -437,167 +495,368 @@ class _SelectionPanelState extends State<_SelectionPanel> {
               ),
             ],
           ),
-          onTap: () => pickModel(model, selected ? currentVariant : null),
+          onTap: () => pickModel(model, variant),
         );
       }
 
-      Widget variants(ModelEntry model) {
-        final key = SessionLiveController.modelKey(model);
-        final selected = identical(model, offeredModel);
-        return Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(32, 0, 16, 8),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              // Auto leaves the variant to the server: the one pick that
-              // clears a chosen variant.
-              ChoiceChip(
-                key: ValueKey('live-selection-auto-$key'),
-                label: Text(l10n.liveSelectionAuto),
-                selected: selected && currentVariant == null,
-                onSelected: enabled ? (_) => pickModel(model, null) : null,
-              ),
-              for (final variant in model.variants)
-                ChoiceChip(
-                  key: ValueKey('live-selection-variant-$key#$variant'),
-                  label: Text(variant),
-                  selected: selected && currentVariant == variant,
-                  onSelected: enabled ? (_) => pickModel(model, variant) : null,
-                ),
-            ],
-          ),
-        );
-      }
-
-      final saving = live.modelPreferences;
-      return SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.only(bottom: 16),
+      Widget agents() => Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
-              child: Text(
-                widget.agents ? l10n.liveSelection : l10n.liveSelectionModel,
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-            if (state.loading || state.phase == SessionSelectionPhase.pending)
-              const AppIndeterminateBar(),
-            if (notice != null)
-              ListTile(
-                key: const ValueKey('live-selection-notice'),
-                leading: const Icon(Symbols.info),
-                title: Text(notice),
-                trailing: unconfirmed
-                    ? TextButton(
-                        onPressed: () => unawaited(live.refreshSelection()),
-                        child: Text(l10n.liveSelectionCheckAgain),
-                      )
-                    : null,
-              ),
-            if (widget.agents) ...[
-              header(l10n.liveSelectionAgent),
-              if (state.agentUnavailable case final reason?)
-                unavailable(reason)
-              else
-                for (final agent in state.agents)
-                  ListTile(
-                    key: ValueKey('live-selection-agent-${agent.id}'),
-                    enabled: enabled,
-                    selected: agent.id == agentId,
-                    title: Text(_label(agent.label, agent.id)),
-                    subtitle: agent.description == null
-                        ? null
-                        : Text(
-                            agent.description!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+            Text(l10n.liveSelectionAgent, style: theme.textTheme.labelMedium),
+            const SizedBox(height: 4),
+            if (state.agentUnavailable case final reason?)
+              Text(sessionSelectionReason(reason, l10n))
+            else
+              SingleChildScrollView(
+                key: const ValueKey('live-selection-agents'),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final agent in state.agents)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        child: ChoiceChip(
+                          key: ValueKey('live-selection-agent-${agent.id}'),
+                          showCheckmark: false,
+                          avatar: CircleAvatar(
+                            radius: 6,
+                            backgroundColor: sessionAgentColor(
+                              state.agents,
+                              agent.id,
+                            ),
                           ),
-                    trailing: agent.id == agentId
-                        ? const Icon(Symbols.check)
-                        : null,
-                    onTap: () => pick(_Pick.agent(agent)),
-                  ),
-              if (agentId != null && !state.agents.any((a) => a.id == agentId))
-                current(
-                  agentId,
-                  listed: !state.loading && state.agentUnavailable == null,
+                          label: Text(_label(agent.label, agent.id)),
+                          tooltip: agent.description,
+                          selected: agent.id == agentId,
+                          onSelected: enabled ? (_) => pickAgent(agent) : null,
+                        ),
+                      ),
+                    if (agentId != null &&
+                        !state.agents.any((a) => a.id == agentId))
+                      ChoiceChip(
+                        key: const ValueKey('live-selection-agent-current'),
+                        showCheckmark: false,
+                        label: Text(
+                          !state.loading && state.agentUnavailable == null
+                              ? '$agentId · ${l10n.liveSelectionNotOffered}'
+                              : agentId,
+                        ),
+                        selected: true,
+                        onSelected: null,
+                      ),
+                  ],
                 ),
-              header(l10n.liveSelectionModel),
-            ],
-            if (state.modelUnavailable case final reason?)
-              unavailable(reason)
-            else ...[
-              if (state.models.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 4),
-                  child: TextField(
-                    key: const ValueKey('live-selection-search'),
-                    controller: _search,
-                    autofocus: widget.autofocus,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Symbols.search),
-                      hintText: l10n.liveModelSearch,
-                      isDense: true,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              if (saving != null &&
-                  (saving.unreadable || saving.hasPersistenceError))
-                ListTile(
-                  key: const ValueKey('live-selection-preferences-unsaved'),
-                  leading: const Icon(Symbols.info),
-                  title: Text(l10n.liveModelPreferencesUnsaved),
-                ),
-              // While searching, the matches show once, by provider.
-              if (query.isEmpty && favorites.isNotEmpty) ...[
-                header(l10n.liveModelFavorites),
-                for (final entry in favorites)
-                  model(entry, section: 'favorite'),
-              ],
-              if (query.isEmpty && recents.isNotEmpty) ...[
-                header(l10n.liveModelRecent),
-                for (final entry in recents) model(entry, section: 'recent'),
-              ],
-              if (query.isNotEmpty && providers.isEmpty)
-                ListTile(
-                  key: const ValueKey('live-selection-no-match'),
-                  title: Text(l10n.liveModelNoMatch),
-                ),
-              for (final MapEntry(key: provider, value: models)
-                  in providers.entries) ...[
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
-                  child: Text(
-                    state.providers[provider] ?? provider,
-                    style: theme.textTheme.labelMedium,
-                  ),
-                ),
-                for (final entry in models) ...[
-                  model(entry),
-                  // A chosen variant the model no longer lists can still be
-                  // cleared with Auto.
-                  if (entry.variants.isNotEmpty ||
-                      (identical(entry, offeredModel) &&
-                          currentVariant != null))
-                    variants(entry),
-                ],
-              ],
-            ],
-            if (selection?.modelId case final modelId? when !modelListed)
-              current(
-                [modelId, ?currentVariant].join('#'),
-                listed: !state.loading && state.modelUnavailable == null,
               ),
           ],
         ),
       );
+
+      Widget permissions() {
+        final unrestricted =
+            live.supportsUnrestricted && live.unrestrictedState.inEffect;
+        final mode = live.permissionModeState.mode;
+        final on = unrestricted || mode == PermissionMode.allowAll;
+        final pending = live.pendingPermissions;
+        final detail = [
+          // The session's allow-everything rule decides while it is in
+          // effect; it is turned off from the permission chip.
+          if (unrestricted) l10n.livePermissionModeUnrestricted,
+          if (pending > 0) l10n.liveSelectionPermissionsWaiting(pending),
+        ].join(' · ');
+        return SwitchListTile(
+          key: const ValueKey('live-auto-approve'),
+          title: Text(
+            !unrestricted && mode == null
+                ? l10n.livePermissionModeUnavailable
+                : on
+                ? l10n.chatPermissionAutoApproveOn
+                : l10n.chatPermissionAutoApproveOff,
+          ),
+          subtitle: _permissionFailed
+              ? Text(
+                  [
+                    l10n.livePermissionModeFailed,
+                    detail,
+                  ].where((part) => part.isNotEmpty).join(' · '),
+                  style: TextStyle(color: theme.colorScheme.error),
+                )
+              : detail.isEmpty
+              ? null
+              : Text(detail),
+          value: on,
+          onChanged:
+              unrestricted ||
+                  mode == null ||
+                  live.savingPermissionMode ||
+                  !live.canChangePermissionMode
+              ? null
+              : (value) => unawaited(_setAutoApprove(value)),
+        );
+      }
+
+      final saving = live.modelPreferences;
+      final rows = <Widget>[
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+          child: Text(l10n.liveSelection, style: theme.textTheme.titleLarge),
+        ),
+        if (state.loading || state.phase == SessionSelectionPhase.pending)
+          const AppIndeterminateBar(),
+        if (notice != null)
+          ListTile(
+            key: const ValueKey('live-selection-notice'),
+            leading: const Icon(Symbols.info),
+            title: Text(notice),
+            trailing: unconfirmed
+                ? TextButton(
+                    onPressed: () => unawaited(live.refreshSelection()),
+                    child: Text(l10n.liveSelectionCheckAgain),
+                  )
+                : null,
+          ),
+        if (state.modelUnavailable case final reason?)
+          unavailable(reason)
+        else ...[
+          if (state.models.isNotEmpty)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 4),
+              child: TextField(
+                key: const ValueKey('live-selection-search'),
+                controller: _search,
+                autofocus: widget.autofocus,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Symbols.search),
+                  hintText: l10n.liveModelSearch,
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ),
+          if (saving != null &&
+              (saving.unreadable || saving.hasPersistenceError))
+            ListTile(
+              key: const ValueKey('live-selection-preferences-unsaved'),
+              leading: const Icon(Symbols.info),
+              title: Text(l10n.liveModelPreferencesUnsaved),
+            ),
+          // While searching, the matches show once, by provider.
+          if (query.isEmpty && favorites.isNotEmpty) ...[
+            header(l10n.liveModelFavorites),
+            for (final entry in favorites) model(entry, section: 'favorite'),
+          ],
+          if (query.isEmpty && recents.isNotEmpty) ...[
+            header(l10n.liveModelRecent),
+            for (final entry in recents) model(entry, section: 'recent'),
+          ],
+          if (query.isNotEmpty && providers.isEmpty)
+            ListTile(
+              key: const ValueKey('live-selection-no-match'),
+              title: Text(l10n.liveModelNoMatch),
+            ),
+          for (final MapEntry(key: provider, value: models)
+              in providers.entries) ...[
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
+              child: Text(
+                state.providers[provider] ?? provider,
+                style: theme.textTheme.labelMedium,
+              ),
+            ),
+            for (final entry in models) model(entry),
+          ],
+        ],
+        if (selection?.modelId case final modelId? when !modelListed)
+          current(
+            [modelId, ?currentVariant].join('#'),
+            listed: !state.loading && state.modelUnavailable == null,
+          ),
+      ];
+      // Picking the model and its variant comes first; the agent and the
+      // permission mode stay in reach below the list, fixed when the pick
+      // has room, or at the list's end on a short screen (keyboard open,
+      // large text), where a fixed footer would not fit.
+      final footer = [
+        if (live.supportsSelection) agents(),
+        if (live.permissionModes != null) permissions(),
+      ];
+      return SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fixed = constraints.maxHeight >= 420;
+            final list = ListView(
+              key: const ValueKey('live-selection-list'),
+              shrinkWrap: !widget.fill,
+              padding: const EdgeInsets.only(bottom: 8),
+              children: [
+                ...rows,
+                if (!fixed && footer.isNotEmpty) ...[
+                  const Divider(height: 1),
+                  ...footer,
+                ],
+              ],
+            );
+            return Column(
+              mainAxisSize: widget.fill ? MainAxisSize.max : MainAxisSize.min,
+              children: [
+                if (widget.fill)
+                  Expanded(child: list)
+                else
+                  Flexible(child: list),
+                if (fixed && footer.isNotEmpty) ...[
+                  const Divider(height: 1),
+                  ...footer,
+                ],
+              ],
+            );
+          },
+        ),
+      );
     },
   );
+}
+
+/// Notifies only when something the pick shows changed, so live events that
+/// touch none of it never rebuild its long list (#431).
+final class _SelectionShown extends ChangeNotifier {
+  _SelectionShown(this.live) : _last = _read(live) {
+    live.addListener(_changed);
+  }
+
+  final SessionSelectionHost live;
+  List<Object?> _last;
+
+  void _changed() {
+    final next = _read(live);
+    if (_same(next, _last)) return;
+    _last = next;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    live.removeListener(_changed);
+    super.dispose();
+  }
+
+  static List<Object?> _read(SessionSelectionHost live) {
+    final state = live.selectionState;
+    final selection = state.selection;
+    final preferences = live.modelPreferences;
+    return [
+      selection == null,
+      selection?.modelId,
+      selection?.modelProviderId,
+      selection?.modelVariant,
+      selection?.agentId,
+      state.models,
+      state.agents,
+      state.defaultModel,
+      state.providers,
+      state.loading,
+      state.modelUnavailable,
+      state.agentUnavailable,
+      state.phase,
+      state.notice,
+      state.awaitingReport,
+      live.canChangeSelection,
+      live.canFavoriteModels,
+      live.favoriteModels.join('\n'),
+      live.recentModels.join('\n'),
+      preferences?.unreadable,
+      preferences?.hasPersistenceError,
+      live.pendingPermissions,
+      live.permissionModeState.mode,
+      live.savingPermissionMode,
+      live.canChangePermissionMode,
+      live.supportsUnrestricted && live.unrestrictedState.inEffect,
+    ];
+  }
+
+  /// Lists and maps compare by identity: the catalog replaces them whole.
+  static bool _same(List<Object?> a, List<Object?> b) {
+    for (var i = 0; i < a.length; i++) {
+      final (x, y) = (a[i], b[i]);
+      if (x is List || x is Map ? !identical(x, y) : x != y) return false;
+    }
+    return true;
+  }
+}
+
+/// A model's variants in a compact menu on its row (#485): Auto, which leaves
+/// the variant to the server, and each variant it lists; a chosen variant it
+/// no longer lists stays, so Auto can still clear it.
+class _VariantMenu extends StatelessWidget {
+  const _VariantMenu({
+    super.key,
+    required this.modelKey,
+    required this.variants,
+    required this.current,
+    required this.autoLabel,
+    required this.enabled,
+    required this.onPicked,
+  });
+
+  final String modelKey;
+  final List<String> variants;
+  final String? current;
+  final String autoLabel;
+  final bool enabled;
+  final void Function(String? variant) onPicked;
+
+  @override
+  Widget build(BuildContext context) {
+    const auto = '';
+    final theme = Theme.of(context);
+    final values = [
+      auto,
+      ...variants,
+      if (current case final current? when !variants.contains(current)) current,
+    ];
+    return PopupMenuButton<String>(
+      enabled: enabled,
+      initialValue: current ?? auto,
+      onSelected: (value) => onPicked(value.isEmpty ? null : value),
+      itemBuilder: (context) => [
+        for (final value in values)
+          CheckedPopupMenuItem<String>(
+            key: ValueKey(
+              value.isEmpty
+                  ? 'live-selection-auto-$modelKey'
+                  : 'live-selection-variant-$modelKey#$value',
+            ),
+            value: value,
+            checked: (current ?? auto) == value,
+            child: Text(value.isEmpty ? autoLabel : value),
+          ),
+      ],
+      child: Container(
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 2, 2, 2),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 96),
+              child: Text(
+                current ?? autoLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium,
+              ),
+            ),
+            const Icon(Symbols.arrow_drop_down, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Marks a model whose stated price is zero.

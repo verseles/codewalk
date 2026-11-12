@@ -63,6 +63,7 @@ final class OpenCodeSelectionLane {
       phase: entry.phase,
       notice: entry.notice,
       receipt: entry.receipt,
+      awaitingReport: change != null && entry.accepted,
     );
   }
 

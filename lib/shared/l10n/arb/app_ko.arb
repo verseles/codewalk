@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "서버가 전환을 확인하기를 기다리는 중입니다.",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "응답 대기 중: {count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "공급자가 액세스를 거부함",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"

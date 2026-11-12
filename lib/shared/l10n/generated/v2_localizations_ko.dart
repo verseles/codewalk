@@ -1385,6 +1385,14 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveSelectionCheckAgain => '다시 확인';
 
   @override
+  String get liveSelectionAwaitingReport => '서버가 전환을 확인하기를 기다리는 중입니다.';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return '응답 대기 중: $count';
+  }
+
+  @override
   String get liveErrorAuth => '공급자가 액세스를 거부함';
 
   @override

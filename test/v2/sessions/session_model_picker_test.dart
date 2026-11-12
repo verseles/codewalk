@@ -14,6 +14,7 @@ import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../storage/storage_fakes.dart';
 import 'fakes.dart';
@@ -137,14 +138,11 @@ void main() {
     return (live, handle);
   }
 
-  /// Opens the models-only pick, as `/model` does; the composer's chip opens
-  /// the same pick with the agents too (#484).
+  /// Opens the one pick, as the chip, `/model` and `/agent` do (#485).
   Future<void> openPicker(WidgetTester tester) async {
     final chip = find.byKey(const ValueKey('live-model-chip'));
     final live = tester.widget<SessionModelChip>(find.byType(SessionModelChip));
-    unawaited(
-      showSessionSelection(tester.element(chip), live.live, agents: false),
-    );
+    unawaited(showSessionSelection(tester.element(chip), live.live));
     await tester.pumpAndSettle();
   }
 
@@ -163,9 +161,13 @@ void main() {
       recents: ['other/gamma', 'opencode/zen', 'gone/recent'],
     );
     await openPicker(tester);
-    // The model chip lists models only.
-    expect(find.text(l10n.liveSelectionModel), findsOneWidget);
-    expect(find.text(l10n.liveSelectionAgent), findsNothing);
+    // One pick (#485): the models first, the agents in the footer below.
+    expect(find.text(l10n.liveSelection), findsOneWidget);
+    expect(find.text(l10n.liveSelectionAgent), findsOneWidget);
+    expect(
+      tester.getTopLeft(row('favorite-opencode/zen')).dy,
+      lessThan(tester.getTopLeft(find.text(l10n.liveSelectionAgent)).dy),
+    );
     expect(row('favorite-opencode/zen'), findsOneWidget);
     // A saved name the location does not offer is not shown.
     expect(row('favorite-gone/model'), findsNothing);
@@ -218,6 +220,18 @@ void main() {
     expect(switches(handle), isEmpty);
     expect(preferences.favorites(_server), ['prov/beta']);
     expect(tester.widget<IconButton>(star).isSelected, isTrue);
+    // The star shows filled: a Material Symbols glyph is outlined unless it
+    // is filled (#485).
+    expect(
+      find.descendant(
+        of: star,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Icon && widget.icon == Symbols.star && widget.fill == 1,
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(row('favorite-prov/beta'), findsOneWidget);
     // Unstarring from the favorites removes it again.
     await tester.tap(
@@ -509,8 +523,10 @@ void main() {
       )
       ..emit(handle.current);
     await tester.pumpAndSettle();
-    // The picker offers Auto beside the current model.
+    // The current model's variant menu offers Auto.
     await openPicker(tester);
+    await tester.tap(row('variant-menu-model-prov/alpha'));
+    await tester.pumpAndSettle();
     await tester.tap(row('auto-prov/alpha'));
     await tester.pumpAndSettle();
     expect(switches(handle), ['model:prov/alpha']);
@@ -521,21 +537,21 @@ void main() {
   ) async {
     final (_, handle) = await open(tester);
     await openPicker(tester);
+    // The model's own menu names its variant (#485).
     expect(
-      tester
-          .widget<ChoiceChip>(
-            find.byKey(
-              const ValueKey('live-selection-variant-prov/alpha#high'),
-            ),
-          )
-          .selected,
-      isTrue,
+      find.descendant(
+        of: row('variant-menu-model-prov/alpha'),
+        matching: find.text('high'),
+      ),
+      findsOneWidget,
     );
     await tester.tap(row('model-prov/alpha'));
     await tester.pumpAndSettle();
     expect(row('model-prov/alpha'), findsNothing);
     expect(switches(handle), isEmpty);
     await openPicker(tester);
+    await tester.tap(row('variant-menu-model-prov/alpha'));
+    await tester.pumpAndSettle();
     await tester.tap(row('auto-prov/alpha'));
     await tester.pumpAndSettle();
     expect(switches(handle), ['model:prov/alpha']);

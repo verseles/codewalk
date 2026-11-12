@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "En attente de la confirmation du changement par le serveur.",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "En attente de vous : {count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "Accès refusé par le fournisseur",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"

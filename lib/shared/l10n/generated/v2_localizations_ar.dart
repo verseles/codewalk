@@ -1442,6 +1442,14 @@ class V2LocalizationsAr extends V2Localizations {
   String get liveSelectionCheckAgain => 'تحقّق مرة أخرى';
 
   @override
+  String get liveSelectionAwaitingReport => 'بانتظار تأكيد الخادم للتبديل.';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'بانتظارك: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'رفض المزوّد الوصول';
 
   @override

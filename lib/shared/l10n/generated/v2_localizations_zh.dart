@@ -1359,6 +1359,14 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveSelectionCheckAgain => '再次检查';
 
   @override
+  String get liveSelectionAwaitingReport => '正在等待服务器确认切换。';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return '等待你处理：$count';
+  }
+
+  @override
   String get liveErrorAuth => '提供商拒绝访问';
 
   @override

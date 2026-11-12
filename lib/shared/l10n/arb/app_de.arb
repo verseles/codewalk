@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "Warte darauf, dass der Server den Wechsel bestätigt.",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "Wartet auf dich: {count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "Zugriff vom Anbieter verweigert",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"

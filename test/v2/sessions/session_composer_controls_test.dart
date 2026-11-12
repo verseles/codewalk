@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codewalk/features/sessions/session_agent_color.dart';
 import 'package:codewalk/features/sessions/session_composer_controls.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
+import 'package:codewalk/features/sessions/session_selection_chip.dart';
 import 'package:codewalk/platform/sessions/permission_mode_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
@@ -168,12 +169,27 @@ void main() {
 
   final modelChip = find.byKey(const ValueKey('live-model-chip'));
 
-  /// Opens the agent menu where `/agent` opens it: at the model chip.
-  Future<void> agentMenu(
-    WidgetTester tester,
-    SessionLiveController live,
-  ) async {
-    unawaited(showAgentMenu(tester.element(modelChip), live));
+  final autoApprove = find.byKey(const ValueKey('live-auto-approve'));
+  final pickOpen = find.byKey(const ValueKey('live-selection-search'));
+
+  /// Scrolls the pick's list until [target] is built and shown.
+  Future<void> reach(WidgetTester tester, Finder target) async {
+    await tester.scrollUntilVisible(
+      target,
+      80,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('live-selection-list')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the one pick as the chip, `/model` and `/agent` open it (#485).
+  Future<void> openPick(WidgetTester tester, SessionLiveController live) async {
+    unawaited(showSessionSelection(tester.element(modelChip), live));
     await tester.pumpAndSettle();
   }
 
@@ -183,28 +199,14 @@ void main() {
   testWidgets('one chip shows the model and variant on the agent color', (
     tester,
   ) async {
-    final semantics = tester.ensureSemantics();
     await open(tester, permissions: 2);
     expect(chip('live-model-chip', 'Alpha high'), findsOneWidget);
     expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
     expect(find.byKey(const ValueKey('live-variant-chip')), findsNothing);
     // Build without a color of its own is green.
     expect(chipColor(tester), sessionDefaultAgentColor);
-    // The permissions waiting for the user are counted on the chip, and
-    // screen readers hear the count too.
-    expect(find.bySemanticsLabel(RegExp(r'(^|\D)2(\D|$)')), findsWidgets);
-    final badge = tester.widget<Badge>(
-      find.byKey(const ValueKey('live-permission-badge')),
-    );
-    expect(badge.isLabelVisible, isTrue);
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('live-permission-badge')),
-        matching: find.text('2'),
-      ),
-      findsOneWidget,
-    );
-    semantics.dispose();
+    // The pending permissions moved into the pick (#485).
+    expect(find.byType(Badge), findsNothing);
   });
 
   testWidgets('the chip takes the agent color: own, plan, or the palette', (
@@ -268,35 +270,72 @@ void main() {
     expect(handle.selectionCalls, contains('agent:plan'));
   });
 
-  testWidgets('the agent menu picks an agent over an auto-approve footer', (
+  testWidgets(
+    'the pick\'s footer switches Ask or Allow all and picks an agent',
+    (tester) async {
+      final (live, handle) = await open(tester, permissions: 2);
+      final l10n = V2Localizations.of(
+        tester.element(find.byType(SessionModelChip)),
+      );
+      await openPick(tester, live);
+      // The requests waiting for the user are counted beside the switch.
+      expect(
+        find.text(l10n.liveSelectionPermissionsWaiting(2)),
+        findsOneWidget,
+      );
+      // The switch starts on the acknowledged default (auto-approve), turns it
+      // off for this session and keeps the pick open.
+      expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
+      expect(find.text(l10n.chatPermissionAutoApproveOn), findsOneWidget);
+      await tester.tap(autoApprove);
+      await tester.pumpAndSettle();
+      expect(live.permissionModeState.mode, PermissionMode.ask);
+      expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+      expect(find.text(l10n.chatPermissionAutoApproveOff), findsOneWidget);
+      expect(pickOpen, findsOneWidget);
+      await tester.tap(autoApprove);
+      await tester.pumpAndSettle();
+      expect(live.permissionModeState.mode, PermissionMode.allowAll);
+      // Each agent shows its color.
+      final dot = tester.widget<CircleAvatar>(
+        find.descendant(
+          of: find.byKey(const ValueKey('live-selection-agent-plan')),
+          matching: find.byType(CircleAvatar),
+        ),
+      );
+      expect(dot.backgroundColor, sessionPlanAgentColor);
+      // The current agent sends nothing; another sends one switch and closes.
+      await tester.tap(
+        find.byKey(const ValueKey('live-selection-agent-build')),
+      );
+      await tester.pumpAndSettle();
+      expect(pickOpen, findsNothing);
+      expect(
+        handle.selectionCalls.where((c) => c.startsWith('agent')),
+        isEmpty,
+      );
+      await openPick(tester, live);
+      await tester.tap(find.byKey(const ValueKey('live-selection-agent-plan')));
+      await tester.pumpAndSettle();
+      expect(handle.selectionCalls, contains('agent:plan'));
+      expect(pickOpen, findsNothing);
+    },
+  );
+
+  testWidgets('a pick the session can no longer take is said (#431)', (
     tester,
   ) async {
     final (live, handle) = await open(tester);
     final l10n = V2Localizations.of(
       tester.element(find.byType(SessionModelChip)),
     );
-    await agentMenu(tester, live);
-    expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
-    expect(find.byKey(const ValueKey('live-agent-menu-plan')), findsOneWidget);
-    // The footer starts on the acknowledged default (auto-approve), turns
-    // it off for this session and keeps the menu open.
-    final footer = find.byKey(const ValueKey('live-auto-approve'));
-    expect(tester.widget<SwitchListTile>(footer).value, isTrue);
-    expect(find.text(l10n.chatPermissionAutoApproveOn), findsOneWidget);
-    await tester.tap(footer);
+    await openPick(tester, live);
+    // The server took an earlier switch and has not reported it yet.
+    handle.awaitingEcho = true;
+    await tester.tap(find.byKey(const ValueKey('live-selection-agent-plan')));
     await tester.pumpAndSettle();
-    expect(live.permissionModeState.mode, PermissionMode.ask);
-    expect(tester.widget<SwitchListTile>(footer).value, isFalse);
-    expect(find.text(l10n.chatPermissionAutoApproveOff), findsOneWidget);
-    expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
-    await tester.tap(footer);
-    await tester.pumpAndSettle();
-    expect(live.permissionModeState.mode, PermissionMode.allowAll);
-    // Picking an agent sends one switch and closes the menu.
-    await tester.tap(find.byKey(const ValueKey('live-agent-menu-plan')));
-    await tester.pumpAndSettle();
-    expect(handle.selectionCalls, contains('agent:plan'));
-    expect(find.byKey(const ValueKey('live-agent-menu')), findsNothing);
+    expect(handle.selectionCalls.where((c) => c.startsWith('agent')), isEmpty);
+    expect(find.text(l10n.liveSelectionNotApplied), findsOneWidget);
   });
 
   testWidgets('a sub-conversation keeps its parent\'s choice', (tester) async {
@@ -304,23 +343,7 @@ void main() {
     expect(tester.widget<ActionChip>(modelChip).onPressed, isNull);
   });
 
-  testWidgets('the agent menu shares root coordinates above an inset shell', (
-    tester,
-  ) async {
-    final (live, _) = await open(tester, nestedNavigator: true, keyboard: 300);
-    final anchor = tester.getRect(modelChip);
-    await agentMenu(tester, live);
-    final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
-    expect(menu.left, closeTo(anchor.left, 1));
-    expect(menu.bottom, closeTo(anchor.top - 4, 1));
-    expect(menu.top, greaterThanOrEqualTo(8));
-    expect(menu.bottom, lessThanOrEqualTo(600));
-    await tester.tap(find.byKey(const ValueKey('live-agent-menu-plan')));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('a short keyboard viewport keeps agents and footer reachable', (
+  testWidgets('a short keyboard viewport keeps the footer reachable', (
     tester,
   ) async {
     final (live, handle) = await open(
@@ -328,37 +351,19 @@ void main() {
       size: const Size(800, 240),
       keyboard: 100,
     );
-    await agentMenu(tester, live);
-    final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
-    expect(menu.top, greaterThanOrEqualTo(8));
-    expect(menu.bottom, lessThanOrEqualTo(132));
-    final footer = find.byKey(const ValueKey('live-auto-approve'));
-    await tester.tap(footer);
+    await openPick(tester, live);
+    // Too short for a fixed footer: it ends the list instead.
+    await reach(tester, autoApprove);
+    expect(autoApprove.hitTestable(), findsOneWidget);
+    await tester.tap(autoApprove);
     await tester.pumpAndSettle();
-    expect(tester.widget<SwitchListTile>(footer).value, isFalse);
-    final plan = find.byKey(const ValueKey('live-agent-menu-plan'));
-    final scrollable = find.descendant(
-      of: find.byKey(const ValueKey('live-agent-menu')),
-      matching: find.byType(Scrollable),
-    );
-    await tester.scrollUntilVisible(plan, 48, scrollable: scrollable);
-    await tester.pumpAndSettle();
-    // The list may show less than one whole tile above its fixed footer.
-    final visible = tester.getRect(plan).intersect(tester.getRect(scrollable));
-    expect(visible.height, greaterThan(0));
-    await tester.tapAt(visible.center);
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+    final plan = find.byKey(const ValueKey('live-selection-agent-plan'));
+    await reach(tester, plan);
+    expect(plan.hitTestable(), findsOneWidget);
+    await tester.tap(plan);
     await tester.pumpAndSettle();
     expect(handle.selectionCalls, contains('agent:plan'));
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('the agent menu opens below a chip near the top', (tester) async {
-    final (live, _) = await open(tester, alignment: Alignment.topCenter);
-    final anchor = tester.getRect(modelChip);
-    await agentMenu(tester, live);
-    final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
-    expect(menu.top, closeTo(anchor.bottom + 4, 1));
-    expect(menu.bottom, lessThanOrEqualTo(892));
     expect(tester.takeException(), isNull);
   });
 
@@ -366,7 +371,9 @@ void main() {
     (const Size(390, 844), 350.0, const Locale('ar')),
     (const Size(800, 360), 140.0, const Locale('en')),
   ]) {
-    testWidgets('menu stays usable at 2x text: $size/$locale', (tester) async {
+    testWidgets('the pick stays usable at 2x text: $size/$locale', (
+      tester,
+    ) async {
       final (live, _) = await open(
         tester,
         size: size,
@@ -374,18 +381,20 @@ void main() {
         locale: locale,
         textScale: 2,
       );
-      await agentMenu(tester, live);
-      final menu = tester.getRect(
-        find.byKey(const ValueKey('live-agent-menu')),
-      );
-      expect(menu.top, greaterThanOrEqualTo(8));
-      expect(menu.bottom, lessThanOrEqualTo(size.height - keyboard - 8));
-      expect(menu.left, greaterThanOrEqualTo(8));
-      expect(menu.right, lessThanOrEqualTo(size.width - 8));
-      final footer = find.byKey(const ValueKey('live-auto-approve'));
-      await tester.tap(footer);
+      await openPick(tester, live);
+      await reach(tester, autoApprove);
+      await tester.ensureVisible(autoApprove);
       await tester.pumpAndSettle();
-      expect(tester.widget<SwitchListTile>(footer).value, isFalse);
+      // Shown above the keyboard and really reachable, inside the list's
+      // clip.
+      expect(autoApprove.hitTestable(), findsOneWidget);
+      expect(
+        tester.getCenter(autoApprove).dy,
+        lessThanOrEqualTo(size.height - keyboard),
+      );
+      await tester.tap(autoApprove);
+      await tester.pumpAndSettle();
+      expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
       expect(tester.takeException(), isNull);
     });
   }
@@ -460,7 +469,59 @@ void main() {
       expect(tooltip.message, contains(expected));
       expect(tooltip.message, contains('Alpha#high'));
     }
+    // A switch the server took and has not reported yet says why the chip
+    // waits (#431).
+    handle.selectionState = SessionSelectionState(
+      selection: initial.selection,
+      models: initial.models,
+      agents: initial.agents,
+      awaitingReport: true,
+    );
+    handle.emit(handle.current);
+    await tester.pump();
+    await tester.pump();
+    expect(
+      tester
+          .widget<Tooltip>(
+            find.ancestor(of: modelChip, matching: find.byType(Tooltip)).first,
+          )
+          .message,
+      contains(l10n.liveSelectionAwaitingReport),
+    );
     semantics.dispose();
+  });
+
+  testWidgets('a failed permission write is said inside the pick', (
+    tester,
+  ) async {
+    final backend = FakeMetadataBackend()
+      ..failWrite = PermissionModeStore.overridesKey;
+    policy.dispose();
+    policy = PermissionModeStore(store: V2MetadataStore(backend: backend));
+    await policy.initialize();
+    final (live, _) = await open(tester);
+    final l10n = V2Localizations.of(
+      tester.element(find.byType(SessionModelChip)),
+    );
+    await openPick(tester, live);
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    // The sheet would cover a snack bar, so the switch itself says it.
+    expect(
+      find.descendant(
+        of: autoApprove,
+        matching: find.text(l10n.livePermissionModeFailed),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
+    expect(pickOpen, findsOneWidget);
+    // The next attempt clears it.
+    backend.failWrite = null;
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.livePermissionModeFailed), findsNothing);
+    expect(live.permissionModeState.mode, PermissionMode.ask);
   });
 
   testWidgets('an unreadable permission policy is unavailable, not off', (
@@ -475,7 +536,7 @@ void main() {
     final l10n = V2Localizations.of(
       tester.element(find.byType(SessionModelChip)),
     );
-    await agentMenu(tester, live);
+    await openPick(tester, live);
     expect(find.text(l10n.livePermissionModeUnavailable), findsOneWidget);
     expect(find.text(l10n.chatPermissionAutoApproveOff), findsNothing);
     expect(

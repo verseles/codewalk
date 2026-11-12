@@ -426,7 +426,7 @@ description of this code.
 - **Then** a missing route, required authentication, an unreadable or oversized answer, a failed read, an empty list or a session without a location is reported per half; when neither half can be offered for a reason a retry would not change, the chip stays as a non-interactive affordance whose tooltip and semantics give the reason, and nothing is faked
 - **When** the user picks a model, a variant or an agent
 - **Then** the pick closes and sends exactly one `POST /api/session/<session>/model` or `/agent`; one switch per session is in flight, that session's sends wait for it, and other sessions stay independent; the prompt never carries a selection
-- **Then** an accepted switch shows at once and holds until the server reports a newer selection, and the next pick waits for that report; a refused switch changes nothing and says so; a switch reported and then replaced by another client, before or after its answer, says it was changed elsewhere
+- **Then** an accepted switch shows at once and holds until the server reports a newer selection, and the next pick waits for that report, while the chip's tooltip and the pick say it is waiting for the server to confirm; a pick made while the session lost the ability to switch (the pick still open) sends nothing and says the change was not applied; a refused switch changes nothing and says so; a switch reported and then replaced by another client, before or after its answer, says it was changed elsewhere
 - **Then** an uncertain answer is never resent: a switch the server already reported settles at once, otherwise one read of the session record settles it as applied or not applied; a failed read keeps it unconfirmed, and the session's sends wait until Check again, a newer server selection or a new pick settles it
 - **Then** closing or releasing the lease never switches anything
 - **Then** a sub-conversation's chip shows its inherited model and variant disabled, with a lock
@@ -436,16 +436,16 @@ description of this code.
 ### V2 model picker, favorites and recents
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server that can switch its selection
-- **When** the user taps the composer's model chip, or runs `/model`
-- **Then** the chip opens the pick of agent, model and variant, and `/model` opens it with the models only; either opens as a bottom sheet below 600 dp and a dialog otherwise, with a search field that narrows the models by name, id, provider id or provider name; while searching, each match shows once in its provider's group, and no match says "No models found"
+- **When** the user taps the composer's model chip, or runs `/model` or `/agent`
+- **Then** all three open the same single pick (#485), titled "Model and agent": models and their variants first, agents and the permission mode in its footer; it opens as a bottom sheet below 600 dp and a dialog otherwise, with a search field that narrows the models by name, id, provider id or provider name; while searching, each match shows once in its provider's group, and no match says "No models found"
 - **Then** this server's **Favorites** come first, then this project's **Recent** models, then every model grouped by provider; a favorite or recent the session's location does not offer is not shown, a favorite is not repeated among the recents, and outside its provider's group a row names its provider; providers are named by `GET /api/provider` (`Provider.Info.name`), or by their id when the location does not name them, in this picker and in the new-chat picker
 - **Then** a model is marked **Free** only when the catalog states one untiered price of zero (`Model.Info.cost`, USD per million tokens); a priced, tiered, empty, absent or unreadable price shows no badge, and an unreadable price never fails the catalog
-- **Then** the star on a row adds or removes a favorite without picking the model; favorites are kept on this device per server (shared by its projects, at most 64 per server), and recents per server and project, newest first, at most eight
+- **Then** the star on a row adds or removes a favorite without picking the model, and is filled while the model is a favorite; favorites are kept on this device per server (shared by its projects, at most 64 per server), and recents per server and project, newest first, at most eight
 - **Then** a model joins the recents (followed by the model switched away from) only after a switch this view sent and the server took, including an unconfirmed switch once a later read or report on the same connection confirms it; a switch that was not sent, a refused or not-applied one, or one replaced by a newer pick records nothing, and stars or recents never send a switch
 - **Then** a record that cannot be read is never overwritten: the stars stay disabled and the picker says favorites and recent models cannot be saved; a failed save changes nothing and says the same
 - **When** the user picks a model or a variant
-- **Then** tapping the session's current model keeps its variant and sends nothing; another model is switched to with the server's default variant; a variant chip picks that variant, and **Auto** is the one choice that clears a chosen variant
-- **Then** the composer's chip names no variant when none is chosen (Auto); a chosen variant the model no longer lists can still be cleared with Auto beside the current model in the picker
+- **Then** tapping the session's current model keeps its variant and sends nothing; another model is switched to with the server's default variant; a model that lists variants has a compact variant menu on its own row, which picks that model with that variant, and **Auto** is the one choice that clears a chosen variant; picking the current model and variant again only closes the pick
+- **Then** the composer's chip names no variant when none is chosen (Auto); a chosen variant the model no longer lists can still be cleared with Auto in the current model's menu
 - **Then** technical coverage includes adapter price-projection tests on the 2.0.22 fixture, store persistence/bounds/unreadable tests, picker widget tests, and compact, RTL and wide picker goldens; installed native acceptance remains separate
 
 ### V2 model, agent and variant cycling
@@ -658,19 +658,18 @@ description of this code.
 - **Then** on a physical keyboard Up and Down move the highlight, Enter or Tab runs it, and Escape closes the list until the text changes; with a modifier or during an IME composition the keys keep their usual meaning
 - **When** the user taps a command, picks it with the keyboard, or sends a builtin's name (any case) with Send or Enter
 - **Then** the command runs locally, the field is cleared, and nothing is sent to the server; words after the name are ignored
-- **Then** `/new` opens the New Chat draft; `/model` opens the model picker and `/agent` the agent menu on its chip; `/sessions` opens the list drawer on a phone, or shows the hidden list pane on a wider window; `/help` lists the commands in a dialog that Enter closes; `/thinking` shows or hides reasoning (the Appearance switch) and says which
+- **Then** `/new` opens the New Chat draft; `/model` and `/agent` open the single pick of model, agent and permissions; `/sessions` opens the list drawer on a phone, or shows the hidden list pane on a wider window; `/help` lists the commands in a dialog that Enter closes; `/thinking` shows or hides reasoning (the Appearance switch) and says which
 - **Then** `/undo`, `/redo` and `/compact` run the shown session's turn actions, and say they are not available in this version yet when no session is bound; on the New Chat draft the commands that need a conversation (`/model`, `/agent`, `/undo`, `/redo`, `/compact`) say to send a first message; a sub-conversation's `/model` says its model is its parent's
 - **Then** any other `/word` is sent as an ordinary prompt; the server's own commands are not listed
 
-### V2 agent menu and permission quick switch
+### V2 agents and permission mode in the pick
 
-- **Given** a live session's composer offers an agent menu
-- **When** the user runs `/agent`
-- **Then** a floating list anchored at the model chip shows its offered agents and opens above the chip when there is room, below it or inside the safe viewport otherwise; it uses the root window's coordinates, keeps outside the keyboard and adapts its width to enlarged text, including RTL
-- **Then** picking an agent closes the menu and uses the existing session-selection fence; unreadable agent choices explain why instead of inventing a catalog
-- **Then** the model chip's badge counts only the session's pending permission requests, capped at 99, clears as those requests resolve, and is announced with the chip
-- **Then** a fixed footer switches this session between acknowledged Allow all and Ask while keeping the menu open; it stays disabled during the write, and a failed write reports the failure without changing the acknowledged mode
+- **Given** the single pick of a live session is open (#485, which replaced the floating agent menu)
+- **Then** its footer shows the offered agents as one row of chips, each with its color dot (the same rule as the composer chip) and its description as tooltip; the current agent is selected, and an agent the location does not offer stays visible as not offered here; picking another agent closes the pick and uses the existing session-selection fence, and picking the current one only closes it; unreadable agent choices explain why instead of inventing a catalog
+- **Then** the footer also switches this session between acknowledged Allow all and Ask while keeping the pick open, and names how many of this session's permission requests wait for the user; the switch stays disabled during the write, and a failed write is said under the switch while the pick is open (a snack bar once it is closed) without changing the acknowledged mode
 - **Then** an unreadable or unknown policy says Unavailable and disables the switch; an active Unrestricted rule shows it on and disabled, with its explanation; the header's permission chip retains Use default and the separate Unrestricted controls
+- **Then** the footer stays fixed below the list when the pick is at least 420 dp tall; on a shorter pick (a phone with the keyboard open, or large text) it follows the list's last row instead; the composer's chip carries no permission badge
+- **Then** a harness without agents or a permission mode shows no such part, with no fake control
 
 ### V2 navigation intents and locale
 

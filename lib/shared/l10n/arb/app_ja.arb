@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "サーバーが切り替えを確認するのを待っています。",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "あなたの対応待ち: {count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "プロバイダーがアクセスを拒否しました",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"

@@ -1481,6 +1481,15 @@ class V2LocalizationsFr extends V2Localizations {
   String get liveSelectionCheckAgain => 'Vérifier à nouveau';
 
   @override
+  String get liveSelectionAwaitingReport =>
+      'En attente de la confirmation du changement par le serveur.';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'En attente de vous : $count';
+  }
+
+  @override
   String get liveErrorAuth => 'Accès refusé par le fournisseur';
 
   @override

@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "正在等待服务器确认切换。",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "等待你处理：{count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "提供商拒绝访问",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"

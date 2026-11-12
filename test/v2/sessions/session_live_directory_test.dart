@@ -3087,6 +3087,8 @@ void main() {
       expect(state.selection?.modelVariant, 'high');
       expect(state.selection?.agentId, 'build');
       expect(handle.canChangeSelection, isFalse);
+      // The wait has its own state, so the chip can say why (#431).
+      expect(state.awaitingReport, isTrue);
       expect(server.selects, [
         'model:${jsonEncode({
           'model': {'id': 'alpha', 'providerID': 'prov', 'variant': 'high'},
@@ -3100,6 +3102,7 @@ void main() {
       await until(handle, (v) => v.state?.selection?.modelVariant == 'high');
       expect(handle.selectionState.notice, SessionSelectionNotice.none);
       expect(handle.selectionState.selection?.modelVariant, 'high');
+      expect(handle.selectionState.awaitingReport, isFalse);
       expect(handle.canChangeSelection, isTrue);
     });
 

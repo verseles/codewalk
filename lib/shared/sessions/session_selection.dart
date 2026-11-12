@@ -49,6 +49,7 @@ final class SessionSelectionState {
     this.phase = SessionSelectionPhase.idle,
     this.notice = SessionSelectionNotice.none,
     this.receipt,
+    this.awaitingReport = false,
   });
 
   /// The server's selection, or a change it accepted and has not echoed yet;
@@ -73,6 +74,10 @@ final class SessionSelectionState {
   final SessionSelectionPhase phase;
   final SessionSelectionNotice notice;
   final CommandReceipt? receipt;
+
+  /// The server took a change and has not reported it yet; the next pick
+  /// waits for that report (#431).
+  final bool awaitingReport;
 
   /// A change of this session is in flight or unconfirmed.
   bool get holdsSend => phase != SessionSelectionPhase.idle;

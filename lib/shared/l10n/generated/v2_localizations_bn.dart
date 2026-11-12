@@ -1447,6 +1447,15 @@ class V2LocalizationsBn extends V2Localizations {
   String get liveSelectionCheckAgain => 'আবার যাচাই করুন';
 
   @override
+  String get liveSelectionAwaitingReport =>
+      'সার্ভার পরিবর্তন নিশ্চিত করার অপেক্ষায়।';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'আপনার অপেক্ষায়: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'প্রদানকারী প্রবেশাধিকার প্রত্যাখ্যান করেছে';
 
   @override

@@ -12,11 +12,9 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #485 Seletor único de agente, modelo, variante e permissões; estrela de favorito
 - [ ] #486 Mensagem em espera fixa acima do composer: uma linha, tocar edita, X cancela, ↑ envia já
 - [ ] #462 Busca na timeline (Ctrl+F, F3)
 - [ ] #426 Mostrar troca de modelo e agente na timeline
-- [ ] #431 Polir a escolha de modelo e agente
 - [ ] #464 Área de toque das ações da mensagem do usuário
 - [ ] #487 Dica de gestos das abas cobre o seletor `/` com o teclado aberto
 - [ ] #417 Manter o scroll da lista de sessões

@@ -1451,6 +1451,15 @@ class V2LocalizationsUr extends V2Localizations {
   String get liveSelectionCheckAgain => 'دوبارہ چیک کریں';
 
   @override
+  String get liveSelectionAwaitingReport =>
+      'سرور کی جانب سے تبدیلی کی تصدیق کا انتظار ہے۔';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'آپ کے منتظر: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'فراہم کنندہ نے رسائی مسترد کر دی';
 
   @override

@@ -345,6 +345,11 @@ void main() {
     expect(chipColor(tester), sessionPlanAgentColor);
     await tester.tap(find.byKey(const ValueKey('live-model-chip')));
     await tester.pumpAndSettle();
+    // Each model's variants sit in a menu on its row (#485).
+    await tester.tap(
+      find.byKey(const ValueKey('live-selection-variant-menu-model-p/model_2')),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(const ValueKey('live-selection-variant-p/model_2#max')),
     );
@@ -384,7 +389,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('/agent in the draft opens the agent chip menu', (tester) async {
+  testWidgets('/agent in the draft opens the one pick (#485)', (tester) async {
     await open(tester, defaults: pickable());
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -394,7 +399,10 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('workspace-draft-send')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('live-selection-agent-plan')),
+      findsOneWidget,
+    );
     expect(actions.calls.where((call) => call == 'create'), isEmpty);
     await tester.pumpWidget(const SizedBox());
   });

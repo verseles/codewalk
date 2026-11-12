@@ -164,6 +164,13 @@ void main() {
     expect(find.byType(Dialog), findsOneWidget);
     // The lists are read again when the pick opens.
     expect(handle.selectionCalls, ['refresh']);
+    // Each model's variants sit in a menu on its row (#485).
+    await tester.tap(
+      find.byKey(
+        const ValueKey('live-selection-variant-menu-model-prov/alpha'),
+      ),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(const ValueKey('live-selection-variant-prov/alpha#low')),
     );
@@ -200,7 +207,9 @@ void main() {
     expect(find.text('gone · retired'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('live-selection')));
     await tester.pumpAndSettle();
-    expect(find.text('Not offered here'), findsNWidgets(2));
+    expect(find.text('Not offered here'), findsOneWidget);
+    // The agent's chip in the footer says it too.
+    expect(find.text('retired · Not offered here'), findsOneWidget);
   });
 
   testWidgets('a narrow page uses the compact chip on a wide window', (

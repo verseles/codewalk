@@ -1467,6 +1467,15 @@ class V2LocalizationsRu extends V2Localizations {
   String get liveSelectionCheckAgain => 'Проверить снова';
 
   @override
+  String get liveSelectionAwaitingReport =>
+      'Ожидание подтверждения смены от сервера.';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'Ждут вас: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'Провайдер отказал в доступе';
 
   @override

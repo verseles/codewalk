@@ -2751,6 +2751,18 @@ abstract class V2Localizations {
   /// **'Check again'**
   String get liveSelectionCheckAgain;
 
+  /// V2 live session model and agent selection (#485)
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the server to confirm the switch.'**
+  String get liveSelectionAwaitingReport;
+
+  /// V2 live session model and agent selection (#485)
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you: {count}'**
+  String liveSelectionPermissionsWaiting(int count);
+
   /// V2 typed error cards
   ///
   /// In en, this message translates to:

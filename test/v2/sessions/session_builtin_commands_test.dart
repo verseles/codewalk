@@ -316,8 +316,9 @@ void main() {
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
 
+    // /agent opens the same one pick (#485).
     await _sendTyped(tester, '/agent');
-    expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-selection-search')), findsOneWidget);
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
 

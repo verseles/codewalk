@@ -1384,6 +1384,14 @@ class V2LocalizationsJa extends V2Localizations {
   String get liveSelectionCheckAgain => '再確認';
 
   @override
+  String get liveSelectionAwaitingReport => 'サーバーが切り替えを確認するのを待っています。';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'あなたの対応待ち: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'プロバイダーがアクセスを拒否しました';
 
   @override

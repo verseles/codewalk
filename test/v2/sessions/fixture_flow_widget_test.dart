@@ -953,12 +953,21 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('live-model-chip')));
       await tester.pumpAndSettle();
+      // The model's variants sit in a menu on its row (#485).
+      final variantMenu = find.byKey(
+        const ValueKey(
+          'live-selection-variant-menu-model-opencode/fledge-alpha-free',
+        ),
+      );
+      await tester.ensureVisible(variantMenu);
+      await tester.pumpAndSettle();
+      await tester.tap(variantMenu);
+      await tester.pumpAndSettle();
       final variantFinder = find.byKey(
         const ValueKey(
           'live-selection-variant-opencode/fledge-alpha-free#high',
         ),
       );
-      await tester.ensureVisible(variantFinder);
       await tester.tap(variantFinder);
       await pumpSpin(
         tester,

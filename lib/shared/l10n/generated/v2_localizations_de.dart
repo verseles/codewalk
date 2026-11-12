@@ -1487,6 +1487,15 @@ class V2LocalizationsDe extends V2Localizations {
   String get liveSelectionCheckAgain => 'Erneut prüfen';
 
   @override
+  String get liveSelectionAwaitingReport =>
+      'Warte darauf, dass der Server den Wechsel bestätigt.';
+
+  @override
+  String liveSelectionPermissionsWaiting(int count) {
+    return 'Wartet auf dich: $count';
+  }
+
+  @override
   String get liveErrorAuth => 'Zugriff vom Anbieter verweigert';
 
   @override

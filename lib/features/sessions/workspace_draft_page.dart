@@ -90,9 +90,6 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
       parseSessionBuiltinCommand(c.draft.text) != null ? !c.sending : c.canSend;
 
   /// Runs a local `/` command, which never becomes the first prompt (#137).
-  /// Marks the agent chip, so `/agent` opens its menu there.
-  final _agentAnchor = GlobalKey();
-
   void _run(SessionBuiltinCommand command) {
     widget.controller.draft.clear();
     unawaited(
@@ -100,7 +97,6 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
         context,
         command,
         selection: widget.controller.selection,
-        agentAnchor: _agentAnchor,
       ),
     );
   }
@@ -340,10 +336,7 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                 child: ComposerFrame(
                                   attachTooltip: l10n.composerAttachSoon,
                                   voiceTooltip: l10n.composerVoiceSoon,
-                                  chip: SessionModelChip(
-                                    live: c.selection,
-                                    agentAnchor: _agentAnchor,
-                                  ),
+                                  chip: SessionModelChip(live: c.selection),
                                   field: (context, open) => Focus(
                                     // A physical Enter sends; Shift+Enter
                                     // breaks the line (#174).

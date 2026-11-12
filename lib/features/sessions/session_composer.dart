@@ -59,9 +59,6 @@ class _SessionComposerState extends State<SessionComposer> {
   DateTime? _escapeAt;
   late final SessionCommandMenu _commands = SessionCommandMenu(_text);
 
-  /// The model chip, where `/agent` opens its menu.
-  final _agentAnchor = GlobalKey();
-
   /// The field's focus: the page's, or the composer's own.
   FocusNode? _ownFocus;
   FocusNode get _focus => widget.focusNode ?? (_ownFocus ??= FocusNode());
@@ -224,7 +221,6 @@ class _SessionComposerState extends State<SessionComposer> {
       context,
       command,
       live: widget.controller.live,
-      agentAnchor: _agentAnchor,
       turnActions: widget.controller.live.turn,
     );
   }
@@ -637,10 +633,7 @@ class _SessionComposerState extends State<SessionComposer> {
                   child: ComposerFrame(
                     attachTooltip: l10n.composerAttachSoon,
                     voiceTooltip: l10n.composerVoiceSoon,
-                    chip: SessionModelChip(
-                      live: c.live,
-                      agentAnchor: _agentAnchor,
-                    ),
+                    chip: SessionModelChip(live: c.live),
                     field: (context, open) => Focus(
                       onKeyEvent: _key,
                       onFocusChange: (_) => _escapeAt = null,

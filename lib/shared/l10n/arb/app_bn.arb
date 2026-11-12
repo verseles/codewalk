@@ -1242,6 +1242,19 @@
   "@liveSelectionCheckAgain": {
     "description": "V2 live session model and agent selection"
   },
+  "liveSelectionAwaitingReport": "সার্ভার পরিবর্তন নিশ্চিত করার অপেক্ষায়।",
+  "@liveSelectionAwaitingReport": {
+    "description": "V2 live session model and agent selection (#485)"
+  },
+  "liveSelectionPermissionsWaiting": "আপনার অপেক্ষায়: {count}",
+  "@liveSelectionPermissionsWaiting": {
+    "description": "V2 live session model and agent selection (#485)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveErrorAuth": "প্রদানকারী প্রবেশাধিকার প্রত্যাখ্যান করেছে",
   "@liveErrorAuth": {
     "description": "V2 typed error cards"
