@@ -1,7 +1,5 @@
-> 📣 Search inside a conversation: Ctrl+F opens it, and F3 and Shift+F3 jump between matches.
+> 📣 The conversation now shows when the model or agent changed mid-session.
 
-### Conversation search
+### Timeline
 
-- Ctrl+F opens search in the current conversation. On phones, it is in the ⋮ menu; on a wide window, the toolbar has a search button.
-- F3 and Shift+F3 go to the next and previous match.
-- Matches start from the newest. The match is outlined and brought into view, even inside a finished turn's collapsed work.
+- Switching the model or agent during a session adds a small note at that point in the conversation, both live and in history.
