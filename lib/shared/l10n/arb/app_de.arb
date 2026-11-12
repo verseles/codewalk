@@ -526,9 +526,25 @@
   "@composerAttachSoon": {
     "description": "V2 live session composer (#484)"
   },
-  "composerVoiceSoon": "Spracheingabe kommt bald",
-  "@composerVoiceSoon": {
-    "description": "V2 live session composer (#484)"
+  "composerVoice": "Spracheingabe",
+  "@composerVoice": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceStop": "Spracheingabe beenden",
+  "@composerVoiceStop": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceUnavailable": "Spracheingabe ist auf diesem Gerät nicht verfügbar",
+  "@composerVoiceUnavailable": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceDenied": "Erlaube den Mikrofonzugriff, um die Spracheingabe zu nutzen",
+  "@composerVoiceDenied": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceFailed": "Die Spracheingabe wurde unerwartet beendet",
+  "@composerVoiceFailed": {
+    "description": "V2 composer voice input, native recognizer (#307)"
   },
   "composerSendNow": "Jetzt senden",
   "@composerSendNow": {

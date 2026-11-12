@@ -1587,11 +1587,35 @@ abstract class V2Localizations {
   /// **'Attachments and canned answers are coming soon'**
   String get composerAttachSoon;
 
-  /// V2 live session composer (#484)
+  /// V2 composer voice input, native recognizer (#307)
   ///
   /// In en, this message translates to:
-  /// **'Voice input is coming soon'**
-  String get composerVoiceSoon;
+  /// **'Voice input'**
+  String get composerVoice;
+
+  /// V2 composer voice input, native recognizer (#307)
+  ///
+  /// In en, this message translates to:
+  /// **'Stop voice input'**
+  String get composerVoiceStop;
+
+  /// V2 composer voice input, native recognizer (#307)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input isn’t available on this device'**
+  String get composerVoiceUnavailable;
+
+  /// V2 composer voice input, native recognizer (#307)
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone access to use voice input'**
+  String get composerVoiceDenied;
+
+  /// V2 composer voice input, native recognizer (#307)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input stopped unexpectedly'**
+  String get composerVoiceFailed;
 
   /// V2 waiting messages (#486)
   ///

@@ -826,7 +826,22 @@ class V2LocalizationsFr extends V2Localizations {
       'Les pièces jointes et les réponses types arrivent bientôt';
 
   @override
-  String get composerVoiceSoon => 'La saisie vocale arrive bientôt';
+  String get composerVoice => 'Saisie vocale';
+
+  @override
+  String get composerVoiceStop => 'Arrêter la saisie vocale';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'La saisie vocale n’est pas disponible sur cet appareil';
+
+  @override
+  String get composerVoiceDenied =>
+      'Autorisez l’accès au micro pour utiliser la saisie vocale';
+
+  @override
+  String get composerVoiceFailed =>
+      'La saisie vocale s’est arrêtée de façon inattendue';
 
   @override
   String get composerSendNow => 'Envoyer maintenant';

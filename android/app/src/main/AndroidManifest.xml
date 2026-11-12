@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Voice input through the system's speech recognizer (#307). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:label="${appLabel}"
@@ -77,6 +79,10 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Android 11+ only sees the speech recognizer when it asks (#307). -->
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>

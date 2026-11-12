@@ -760,7 +760,19 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerAttachSoon => '附件和快捷回复即将推出';
 
   @override
-  String get composerVoiceSoon => '语音输入即将推出';
+  String get composerVoice => '语音输入';
+
+  @override
+  String get composerVoiceStop => '停止语音输入';
+
+  @override
+  String get composerVoiceUnavailable => '此设备不支持语音输入';
+
+  @override
+  String get composerVoiceDenied => '请允许访问麦克风以使用语音输入';
+
+  @override
+  String get composerVoiceFailed => '语音输入意外停止';
 
   @override
   String get composerSendNow => '立即发送';

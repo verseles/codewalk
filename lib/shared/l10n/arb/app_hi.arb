@@ -526,9 +526,25 @@
   "@composerAttachSoon": {
     "description": "V2 live session composer (#484)"
   },
-  "composerVoiceSoon": "वॉइस इनपुट जल्द आ रहा है",
-  "@composerVoiceSoon": {
-    "description": "V2 live session composer (#484)"
+  "composerVoice": "वॉइस इनपुट",
+  "@composerVoice": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceStop": "वॉइस इनपुट रोकें",
+  "@composerVoiceStop": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceUnavailable": "इस डिवाइस पर वॉइस इनपुट उपलब्ध नहीं है",
+  "@composerVoiceUnavailable": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceDenied": "वॉइस इनपुट के लिए माइक्रोफ़ोन की अनुमति दें",
+  "@composerVoiceDenied": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceFailed": "वॉइस इनपुट अचानक रुक गया",
+  "@composerVoiceFailed": {
+    "description": "V2 composer voice input, native recognizer (#307)"
   },
   "composerSendNow": "अभी भेजें",
   "@composerSendNow": {

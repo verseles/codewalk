@@ -12,6 +12,7 @@ import '../../shared/sessions/session_actions.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
+import 'composer_voice_button.dart';
 import 'session_builtin_commands.dart';
 import 'session_command_picker.dart';
 import 'session_composer_controls.dart';
@@ -42,6 +43,7 @@ class WorkspaceDraftPage extends StatefulWidget {
 }
 
 class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
+  final _voice = GlobalKey<ComposerVoiceButtonState>();
   final _directory = TextEditingController();
   final _composerFocus = FocusNode();
   late final _commands = SessionCommandMenu(widget.controller.draft);
@@ -101,8 +103,11 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
     );
   }
 
-  /// Sends the first prompt, then opens the session it created.
+  /// Sends the first prompt, then opens the session it created. A dictation
+  /// in flight ends first, so nothing it hears lands after the prompt is
+  /// read.
   void _send(WorkspaceDraftController c) {
+    _voice.currentState?.cancel();
     final command = parseSessionBuiltinCommand(c.draft.text);
     if (command != null) return _run(command);
     _sendPrompt(c);
@@ -335,7 +340,12 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                 onHeight: _fieldMeasured,
                                 child: ComposerFrame(
                                   attachTooltip: l10n.composerAttachSoon,
-                                  voiceTooltip: l10n.composerVoiceSoon,
+                                  voiceTooltip: l10n.composerVoiceUnavailable,
+                                  voice: ComposerVoiceButton(
+                                    key: _voice,
+                                    text: c.draft,
+                                    enabled: !c.sending && !c.endpointOffline,
+                                  ),
                                   chip: SessionModelChip(live: c.selection),
                                   field: (context, open) => Focus(
                                     // A physical Enter sends; Shift+Enter

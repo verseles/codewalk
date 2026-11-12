@@ -26,6 +26,7 @@ import '../shared/sessions/session_live_source.dart';
 import '../shared/theme/app_theme.dart';
 import '../shared/theme/appearance_theme_resolver.dart';
 import '../shared/theme/chat_appearance.dart';
+import '../shared/voice/speech_dictation.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
@@ -127,6 +128,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
           value: dependencies.liveDirectory,
         ),
         Provider<SessionDraftStore?>.value(value: dependencies.sessionDrafts),
+        Provider<SpeechDictation?>.value(value: dependencies.speechDictation),
         ListenableProvider<ModelPreferenceStore?>.value(
           value: dependencies.modelPreferences,
         ),

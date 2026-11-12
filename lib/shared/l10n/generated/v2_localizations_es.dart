@@ -823,7 +823,22 @@ class V2LocalizationsEs extends V2Localizations {
       'Los adjuntos y las respuestas rápidas llegarán pronto';
 
   @override
-  String get composerVoiceSoon => 'La entrada de voz llegará pronto';
+  String get composerVoice => 'Entrada de voz';
+
+  @override
+  String get composerVoiceStop => 'Detener entrada de voz';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'La entrada de voz no está disponible en este dispositivo';
+
+  @override
+  String get composerVoiceDenied =>
+      'Permite el acceso al micrófono para usar la entrada de voz';
+
+  @override
+  String get composerVoiceFailed =>
+      'La entrada de voz se detuvo inesperadamente';
 
   @override
   String get composerSendNow => 'Enviar ahora';

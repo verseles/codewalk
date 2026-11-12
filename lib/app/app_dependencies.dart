@@ -25,6 +25,7 @@ import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
+import '../shared/voice/speech_dictation.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'desktop_window_controller.dart';
@@ -63,6 +64,7 @@ class AppDependencies {
     this.workspace,
     this.sessionDrafts,
     this.modelPreferences,
+    this.speechDictation,
     this.workspaceDrafts,
     this.projectContexts,
     this.desktopWindow,
@@ -131,6 +133,9 @@ class AppDependencies {
 
   /// The favorite and recent models, kept on this device.
   final ModelPreferenceStore? modelPreferences;
+
+  /// Dictation through the platform's own speech recognizer (#307).
+  final SpeechDictation? speechDictation;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;

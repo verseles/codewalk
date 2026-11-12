@@ -829,7 +829,22 @@ class V2LocalizationsDe extends V2Localizations {
   String get composerAttachSoon => 'Anhänge und Textbausteine kommen bald';
 
   @override
-  String get composerVoiceSoon => 'Spracheingabe kommt bald';
+  String get composerVoice => 'Spracheingabe';
+
+  @override
+  String get composerVoiceStop => 'Spracheingabe beenden';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'Spracheingabe ist auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get composerVoiceDenied =>
+      'Erlaube den Mikrofonzugriff, um die Spracheingabe zu nutzen';
+
+  @override
+  String get composerVoiceFailed =>
+      'Die Spracheingabe wurde unerwartet beendet';
 
   @override
   String get composerSendNow => 'Jetzt senden';

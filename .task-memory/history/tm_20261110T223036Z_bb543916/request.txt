@@ -1,7 +1,0 @@
-Vou querer a letra D, mas como fica a questão visual para o usuário saber que está sendo recuperado ou atualizado?
-
-Poderíamos usar:
-• O status que fica acima do composer
-• O pequeno ícone que fica pendurado no alto do menu hambúrguer
-
-O que você acha?

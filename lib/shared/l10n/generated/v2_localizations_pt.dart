@@ -821,7 +821,21 @@ class V2LocalizationsPt extends V2Localizations {
   String get composerAttachSoon => 'Anexos e respostas prontas chegam em breve';
 
   @override
-  String get composerVoiceSoon => 'Entrada por voz chega em breve';
+  String get composerVoice => 'Entrada por voz';
+
+  @override
+  String get composerVoiceStop => 'Parar entrada por voz';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'A entrada por voz não está disponível neste dispositivo';
+
+  @override
+  String get composerVoiceDenied =>
+      'Permita o acesso ao microfone para usar a entrada por voz';
+
+  @override
+  String get composerVoiceFailed => 'A entrada por voz parou inesperadamente';
 
   @override
   String get composerSendNow => 'Enviar agora';

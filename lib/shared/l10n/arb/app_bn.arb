@@ -526,9 +526,25 @@
   "@composerAttachSoon": {
     "description": "V2 live session composer (#484)"
   },
-  "composerVoiceSoon": "ভয়েস ইনপুট শিগগিরই আসছে",
-  "@composerVoiceSoon": {
-    "description": "V2 live session composer (#484)"
+  "composerVoice": "ভয়েস ইনপুট",
+  "@composerVoice": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceStop": "ভয়েস ইনপুট বন্ধ করুন",
+  "@composerVoiceStop": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceUnavailable": "এই ডিভাইসে ভয়েস ইনপুট উপলব্ধ নয়",
+  "@composerVoiceUnavailable": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceDenied": "ভয়েস ইনপুট ব্যবহার করতে মাইক্রোফোনের অনুমতি দিন",
+  "@composerVoiceDenied": {
+    "description": "V2 composer voice input, native recognizer (#307)"
+  },
+  "composerVoiceFailed": "ভয়েস ইনপুট অপ্রত্যাশিতভাবে বন্ধ হয়েছে",
+  "@composerVoiceFailed": {
+    "description": "V2 composer voice input, native recognizer (#307)"
   },
   "composerSendNow": "এখনই পাঠান",
   "@composerSendNow": {

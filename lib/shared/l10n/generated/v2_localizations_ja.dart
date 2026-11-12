@@ -775,7 +775,19 @@ class V2LocalizationsJa extends V2Localizations {
   String get composerAttachSoon => '添付ファイルと定型文は近日対応';
 
   @override
-  String get composerVoiceSoon => '音声入力は近日対応';
+  String get composerVoice => '音声入力';
+
+  @override
+  String get composerVoiceStop => '音声入力を停止';
+
+  @override
+  String get composerVoiceUnavailable => 'このデバイスでは音声入力を利用できません';
+
+  @override
+  String get composerVoiceDenied => '音声入力を使うにはマイクへのアクセスを許可してください';
+
+  @override
+  String get composerVoiceFailed => '音声入力が予期せず停止しました';
 
   @override
   String get composerSendNow => '今すぐ送信';

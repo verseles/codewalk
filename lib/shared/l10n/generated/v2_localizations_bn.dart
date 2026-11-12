@@ -808,7 +808,20 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerAttachSoon => 'সংযুক্তি ও তৈরি উত্তর শিগগিরই আসছে';
 
   @override
-  String get composerVoiceSoon => 'ভয়েস ইনপুট শিগগিরই আসছে';
+  String get composerVoice => 'ভয়েস ইনপুট';
+
+  @override
+  String get composerVoiceStop => 'ভয়েস ইনপুট বন্ধ করুন';
+
+  @override
+  String get composerVoiceUnavailable => 'এই ডিভাইসে ভয়েস ইনপুট উপলব্ধ নয়';
+
+  @override
+  String get composerVoiceDenied =>
+      'ভয়েস ইনপুট ব্যবহার করতে মাইক্রোফোনের অনুমতি দিন';
+
+  @override
+  String get composerVoiceFailed => 'ভয়েস ইনপুট অপ্রত্যাশিতভাবে বন্ধ হয়েছে';
 
   @override
   String get composerSendNow => 'এখনই পাঠান';

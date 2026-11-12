@@ -102,7 +102,8 @@ class ComposerBubble extends StatelessWidget {
 /// sits on top and one row below holds Attach, [chip], Voice and [action].
 /// It opens while anything inside it has focus on a phone, so Tab can reach
 /// the chip, and stays open elsewhere.
-/// Attach and Voice name what is coming and stay disabled until it does.
+/// Attach names what is coming and stays disabled until it does; [voice] is
+/// the mic, or a disabled one with [voiceTooltip] when none is given.
 class ComposerFrame extends StatefulWidget {
   const ComposerFrame({
     super.key,
@@ -110,6 +111,7 @@ class ComposerFrame extends StatefulWidget {
     required this.action,
     required this.attachTooltip,
     required this.voiceTooltip,
+    this.voice,
     this.chip,
   });
 
@@ -118,6 +120,7 @@ class ComposerFrame extends StatefulWidget {
   final Widget action;
   final String attachTooltip;
   final String voiceTooltip;
+  final Widget? voice;
   final Widget? chip;
 
   @override
@@ -125,6 +128,11 @@ class ComposerFrame extends StatefulWidget {
 }
 
 class _ComposerFrameState extends State<ComposerFrame> {
+  /// Moves the mic between the closed and the open row without losing it:
+  /// a dictation in flight, or the keyboard focus that opened the composer,
+  /// stays with it (#307).
+  final _voice = GlobalKey(debugLabel: 'composer voice');
+
   /// Holds the focus of everything inside the frame, never its own.
   final _frame = FocusNode(
     debugLabel: 'composer frame',
@@ -170,7 +178,12 @@ class _ComposerFrameState extends State<ComposerFrame> {
   Widget build(BuildContext context) {
     final open = composerAlwaysOpen || _frame.hasFocus;
     final attach = _soon('composer-attach', Symbols.add, widget.attachTooltip);
-    final voice = _soon('composer-voice', Symbols.mic, widget.voiceTooltip);
+    final voice = KeyedSubtree(
+      key: _voice,
+      child:
+          widget.voice ??
+          _soon('composer-voice', Symbols.mic, widget.voiceTooltip),
+    );
     // The field keeps its place in the first row whether the composer is
     // open or not, so opening never rebuilds it and never drops its focus.
     final field = Expanded(

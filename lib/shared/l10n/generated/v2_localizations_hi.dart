@@ -814,7 +814,21 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerAttachSoon => 'अटैचमेंट और तैयार जवाब जल्द आ रहे हैं';
 
   @override
-  String get composerVoiceSoon => 'वॉइस इनपुट जल्द आ रहा है';
+  String get composerVoice => 'वॉइस इनपुट';
+
+  @override
+  String get composerVoiceStop => 'वॉइस इनपुट रोकें';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'इस डिवाइस पर वॉइस इनपुट उपलब्ध नहीं है';
+
+  @override
+  String get composerVoiceDenied =>
+      'वॉइस इनपुट के लिए माइक्रोफ़ोन की अनुमति दें';
+
+  @override
+  String get composerVoiceFailed => 'वॉइस इनपुट अचानक रुक गया';
 
   @override
   String get composerSendNow => 'अभी भेजें';

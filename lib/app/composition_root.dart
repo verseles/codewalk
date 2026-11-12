@@ -56,6 +56,7 @@ import '../shared/sessions/session_actions.dart';
 import '../shared/sessions/session_catalog_source.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
+import '../shared/voice/speech_dictation.dart';
 import 'app_dependencies.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
@@ -94,6 +95,7 @@ AppDependencies createAppDependencies({
   WorkspaceDraftStore? workspaceDraftStore,
   Stream<Object?>? networkChanges,
   DesktopWindowPort? desktopWindow,
+  SpeechDictation? speechDictation,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -341,6 +343,7 @@ AppDependencies createAppDependencies({
           ),
     sessionDrafts: sessionDrafts,
     modelPreferences: modelPreferences,
+    speechDictation: speechDictation ?? NativeSpeechDictation(),
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),

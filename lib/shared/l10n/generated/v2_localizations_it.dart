@@ -823,7 +823,22 @@ class V2LocalizationsIt extends V2Localizations {
   String get composerAttachSoon => 'Allegati e risposte predefinite in arrivo';
 
   @override
-  String get composerVoiceSoon => 'Input vocale in arrivo';
+  String get composerVoice => 'Input vocale';
+
+  @override
+  String get composerVoiceStop => 'Interrompi input vocale';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'L’input vocale non è disponibile su questo dispositivo';
+
+  @override
+  String get composerVoiceDenied =>
+      'Consenti l’accesso al microfono per usare l’input vocale';
+
+  @override
+  String get composerVoiceFailed =>
+      'L’input vocale si è interrotto inaspettatamente';
 
   @override
   String get composerSendNow => 'Invia ora';

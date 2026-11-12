@@ -819,7 +819,21 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerAttachSoon => 'Вложения и шаблоны ответов скоро появятся';
 
   @override
-  String get composerVoiceSoon => 'Голосовой ввод скоро появится';
+  String get composerVoice => 'Голосовой ввод';
+
+  @override
+  String get composerVoiceStop => 'Остановить голосовой ввод';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'Голосовой ввод недоступен на этом устройстве';
+
+  @override
+  String get composerVoiceDenied =>
+      'Разрешите доступ к микрофону, чтобы использовать голосовой ввод';
+
+  @override
+  String get composerVoiceFailed => 'Голосовой ввод неожиданно остановился';
 
   @override
   String get composerSendNow => 'Отправить сейчас';

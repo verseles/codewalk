@@ -805,7 +805,21 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerAttachSoon => 'المرفقات والردود الجاهزة قريبًا';
 
   @override
-  String get composerVoiceSoon => 'الإدخال الصوتي قريبًا';
+  String get composerVoice => 'الإدخال الصوتي';
+
+  @override
+  String get composerVoiceStop => 'إيقاف الإدخال الصوتي';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'الإدخال الصوتي غير متاح على هذا الجهاز';
+
+  @override
+  String get composerVoiceDenied =>
+      'اسمح بالوصول إلى الميكروفون لاستخدام الإدخال الصوتي';
+
+  @override
+  String get composerVoiceFailed => 'توقف الإدخال الصوتي بشكل غير متوقع';
 
   @override
   String get composerSendNow => 'أرسل الآن';

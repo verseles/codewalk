@@ -811,7 +811,21 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerAttachSoon => 'اٹیچمنٹس اور تیار جوابات جلد آ رہے ہیں';
 
   @override
-  String get composerVoiceSoon => 'آواز سے ان پٹ جلد آ رہا ہے';
+  String get composerVoice => 'آواز سے اندراج';
+
+  @override
+  String get composerVoiceStop => 'آواز سے اندراج روکیں';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'اس ڈیوائس پر آواز سے اندراج دستیاب نہیں';
+
+  @override
+  String get composerVoiceDenied =>
+      'آواز سے اندراج کے لیے مائیکروفون تک رسائی کی اجازت دیں';
+
+  @override
+  String get composerVoiceFailed => 'آواز سے اندراج اچانک رک گیا';
 
   @override
   String get composerSendNow => 'ابھی بھیجیں';

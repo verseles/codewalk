@@ -17,6 +17,7 @@ import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
 import 'composer_input.dart';
+import 'composer_voice_button.dart';
 import 'session_builtin_commands.dart';
 import 'session_command_picker.dart';
 import 'session_composer_controller.dart';
@@ -56,6 +57,7 @@ class SessionComposer extends StatefulWidget {
 }
 
 class _SessionComposerState extends State<SessionComposer> {
+  final _voice = GlobalKey<ComposerVoiceButtonState>();
   TextEditingController get _text => widget.text;
   DateTime? _escapeAt;
   late final SessionCommandMenu _commands = SessionCommandMenu(_text);
@@ -260,6 +262,9 @@ class _SessionComposerState extends State<SessionComposer> {
   }
 
   Future<void> _send() async {
+    // A dictation in flight ends first, so nothing it hears lands after the
+    // text is read.
+    _voice.currentState?.cancel();
     final draft = _text;
     final sent = draft.text;
     final command = parseSessionBuiltinCommand(sent);
@@ -685,7 +690,14 @@ class _SessionComposerState extends State<SessionComposer> {
                   },
                   child: ComposerFrame(
                     attachTooltip: l10n.composerAttachSoon,
-                    voiceTooltip: l10n.composerVoiceSoon,
+                    voiceTooltip: l10n.composerVoiceUnavailable,
+                    voice: ComposerVoiceButton(
+                      key: _voice,
+                      text: _text,
+                      enabled:
+                          !(c.sending && !_continuing) &&
+                          !c.live.endpointOffline,
+                    ),
                     chip: SessionModelChip(live: c.live),
                     field: (context, open) => Focus(
                       onKeyEvent: _key,

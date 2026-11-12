@@ -637,6 +637,18 @@ description of this code.
 - **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, or reports no execution state
 - **Then** the field stays editable while the continue is sent, and text typed meanwhile stays, also when the session's tab closes before the send ends
 
+### V2 voice input
+
+- **Given** a live session's composer or a new chat's draft on Android, iOS, macOS or Web
+- **When** the user taps the mic
+- **Then** the platform's own speech recognizer listens (#307, native slice; CodeWalk sends no audio to a harness, though the platform's service may recognize on its vendor's servers); its first use asks for the microphone (on macOS, speech recognition first, then the microphone; never Bluetooth), and a refusal (on Android or macOS, or the browser's `not-allowed`/`service-not-allowed`) says "Allow microphone access to use voice input" and leaves the mic on to ask again
+- **Then** the words heard so far go into the field at the cursor where the dictation began, each result taking the previous one's place, spaced from the text around them; the recognizer's final words stay; a second tap stops: the ball holds still and the mic takes no tap until the final words arrive or 3 seconds pass, even if the platform's stop fails or it reports the end first, and a stop while the microphone is still being asked for never starts listening; a session that runs out its wait stops the recognizer too
+- **Then** while it listens the mic shows a red ball behind a filled icon in the color that reads on it (v1's active mic): the ball breathes slowly in silence and it and its halo swell with the voice, from the input level the platform reports, scaled to the room's quiet and the voice's peak; with reduced motion the ball holds still; the tooltip says "Stop voice input"
+- **Then** an edit of the field while listening stops the dictation and keeps the user's text; a send ends it before the text is read, and a field that locks (a send in flight, the server offline) ends it too; words that arrive after the end never land; leaving the screen cancels it, and a page, sheet or dialog opened over the composer (the model picker included) ends it at its next words; the composer opening or closing does not
+- **Then** silence or nothing understood ends quietly; a failure says "Voice input stopped unexpectedly", including one Android reports just after it stops listening; a recognizer that stops capturing without a final result still ends within 3 seconds; a device or browser without a recognizer says "Voice input isn't available on this device" and turns the mic off (a browser finds out on its first tap)
+- **Given** Linux or Windows, or a draft while the server is offline or a send is in flight
+- **Then** the mic stays off; on Linux and Windows its tooltip says "Voice input isn't available on this device", while a mic paused by a send or an offline server keeps "Voice input"
+
 ### V2 conversation status bar
 
 - **Given** an open conversation, whether or not it can send prompts, a sub-agent's included

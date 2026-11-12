@@ -55,3 +55,22 @@ SWITCH = {
     "ar": ("تم تبديل النموذج إلى {name}", "تم تبديل الوكيل إلى {name}"),
     "ur": ("ماڈل {name} پر بدل دیا گیا", "ایجنٹ {name} پر بدل دیا گیا"),
 }
+
+# The composer's mic through the platform's speech recognizer (#307).
+VOICE_KEYS = ('composerVoice', 'composerVoiceStop', 'composerVoiceUnavailable', 'composerVoiceDenied', 'composerVoiceFailed')
+VOICE = {
+    "en": ("Voice input", "Stop voice input", "Voice input isn’t available on this device", "Allow microphone access to use voice input", "Voice input stopped unexpectedly"),
+    "pt": ("Entrada por voz", "Parar entrada por voz", "A entrada por voz não está disponível neste dispositivo", "Permita o acesso ao microfone para usar a entrada por voz", "A entrada por voz parou inesperadamente"),
+    "es": ("Entrada de voz", "Detener entrada de voz", "La entrada de voz no está disponible en este dispositivo", "Permite el acceso al micrófono para usar la entrada de voz", "La entrada de voz se detuvo inesperadamente"),
+    "fr": ("Saisie vocale", "Arrêter la saisie vocale", "La saisie vocale n’est pas disponible sur cet appareil", "Autorisez l’accès au micro pour utiliser la saisie vocale", "La saisie vocale s’est arrêtée de façon inattendue"),
+    "de": ("Spracheingabe", "Spracheingabe beenden", "Spracheingabe ist auf diesem Gerät nicht verfügbar", "Erlaube den Mikrofonzugriff, um die Spracheingabe zu nutzen", "Die Spracheingabe wurde unerwartet beendet"),
+    "it": ("Input vocale", "Interrompi input vocale", "L’input vocale non è disponibile su questo dispositivo", "Consenti l’accesso al microfono per usare l’input vocale", "L’input vocale si è interrotto inaspettatamente"),
+    "ru": ("Голосовой ввод", "Остановить голосовой ввод", "Голосовой ввод недоступен на этом устройстве", "Разрешите доступ к микрофону, чтобы использовать голосовой ввод", "Голосовой ввод неожиданно остановился"),
+    "ja": ("音声入力", "音声入力を停止", "このデバイスでは音声入力を利用できません", "音声入力を使うにはマイクへのアクセスを許可してください", "音声入力が予期せず停止しました"),
+    "ko": ("음성 입력", "음성 입력 중지", "이 기기에서는 음성 입력을 사용할 수 없습니다", "음성 입력을 사용하려면 마이크 접근을 허용하세요", "음성 입력이 예기치 않게 중지되었습니다"),
+    "zh": ("语音输入", "停止语音输入", "此设备不支持语音输入", "请允许访问麦克风以使用语音输入", "语音输入意外停止"),
+    "hi": ("वॉइस इनपुट", "वॉइस इनपुट रोकें", "इस डिवाइस पर वॉइस इनपुट उपलब्ध नहीं है", "वॉइस इनपुट के लिए माइक्रोफ़ोन की अनुमति दें", "वॉइस इनपुट अचानक रुक गया"),
+    "bn": ("ভয়েস ইনপুট", "ভয়েস ইনপুট বন্ধ করুন", "এই ডিভাইসে ভয়েস ইনপুট উপলব্ধ নয়", "ভয়েস ইনপুট ব্যবহার করতে মাইক্রোফোনের অনুমতি দিন", "ভয়েস ইনপুট অপ্রত্যাশিতভাবে বন্ধ হয়েছে"),
+    "ar": ("الإدخال الصوتي", "إيقاف الإدخال الصوتي", "الإدخال الصوتي غير متاح على هذا الجهاز", "اسمح بالوصول إلى الميكروفون لاستخدام الإدخال الصوتي", "توقف الإدخال الصوتي بشكل غير متوقع"),
+    "ur": ("آواز سے اندراج", "آواز سے اندراج روکیں", "اس ڈیوائس پر آواز سے اندراج دستیاب نہیں", "آواز سے اندراج کے لیے مائیکروفون تک رسائی کی اجازت دیں", "آواز سے اندراج اچانک رک گیا"),
+}

@@ -777,7 +777,19 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerAttachSoon => '첨부 파일과 상용구는 곧 지원됩니다';
 
   @override
-  String get composerVoiceSoon => '음성 입력은 곧 지원됩니다';
+  String get composerVoice => '음성 입력';
+
+  @override
+  String get composerVoiceStop => '음성 입력 중지';
+
+  @override
+  String get composerVoiceUnavailable => '이 기기에서는 음성 입력을 사용할 수 없습니다';
+
+  @override
+  String get composerVoiceDenied => '음성 입력을 사용하려면 마이크 접근을 허용하세요';
+
+  @override
+  String get composerVoiceFailed => '음성 입력이 예기치 않게 중지되었습니다';
 
   @override
   String get composerSendNow => '지금 보내기';

@@ -812,7 +812,21 @@ class V2LocalizationsEn extends V2Localizations {
       'Attachments and canned answers are coming soon';
 
   @override
-  String get composerVoiceSoon => 'Voice input is coming soon';
+  String get composerVoice => 'Voice input';
+
+  @override
+  String get composerVoiceStop => 'Stop voice input';
+
+  @override
+  String get composerVoiceUnavailable =>
+      'Voice input isn’t available on this device';
+
+  @override
+  String get composerVoiceDenied =>
+      'Allow microphone access to use voice input';
+
+  @override
+  String get composerVoiceFailed => 'Voice input stopped unexpectedly';
 
   @override
   String get composerSendNow => 'Send now';
