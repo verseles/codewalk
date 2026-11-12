@@ -110,6 +110,19 @@ CapabilityContext context({
 
 void main() {
   group('canonical values and scope isolation', () {
+    test('a catalog color is lowercase #rrggbb or absent', () {
+      CatalogEntry entry(String? color) => CatalogEntry(
+        id: 'build',
+        kind: const OpenValue.known(CatalogKind.agent),
+        label: 'Build',
+        color: color,
+      );
+      expect(entry(null).color, isNull);
+      expect(entry('#1E88E5').color, '#1e88e5');
+      expect(() => entry('accent'), throwsArgumentError);
+      expect(() => entry('#fff'), throwsArgumentError);
+    });
+
     test('unknown enum strings remain exact and typed', () {
       final future = OpenValue.parse(' future/support ', Support.values);
       expect(future.known, isNull);
@@ -335,9 +348,9 @@ void main() {
         )) {
           expect(evaluate(contract(), admission: admission).allowed, isFalse);
         }
-      for (final phase in [
-        OperationPhase.promoted,
-        OperationPhase.cancelled,
+        for (final phase in [
+          OperationPhase.promoted,
+          OperationPhase.cancelled,
           OperationPhase.settled,
           OperationPhase.unknown,
         ]) {

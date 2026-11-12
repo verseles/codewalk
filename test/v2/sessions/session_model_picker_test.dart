@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:codewalk/features/sessions/session_composer_controls.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
+import 'package:codewalk/features/sessions/session_selection_chip.dart';
 import 'package:codewalk/platform/sessions/model_preference_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
@@ -12,7 +13,6 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../storage/storage_fakes.dart';
@@ -128,7 +128,7 @@ void main() {
         home: Scaffold(
           body: Align(
             alignment: Alignment.bottomCenter,
-            child: SessionComposerControls(live: live),
+            child: SessionModelChip(live: live),
           ),
         ),
       ),
@@ -137,8 +137,14 @@ void main() {
     return (live, handle);
   }
 
+  /// Opens the models-only pick, as `/model` does; the composer's chip opens
+  /// the same pick with the agents too (#484).
   Future<void> openPicker(WidgetTester tester) async {
-    await tester.tap(find.byKey(const ValueKey('live-model-chip')));
+    final chip = find.byKey(const ValueKey('live-model-chip'));
+    final live = tester.widget<SessionModelChip>(find.byType(SessionModelChip));
+    unawaited(
+      showSessionSelection(tester.element(chip), live.live, agents: false),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -503,14 +509,7 @@ void main() {
       )
       ..emit(handle.current);
     await tester.pumpAndSettle();
-    // The composer's variant menu offers Auto.
-    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('live-variant-auto')), findsOneWidget);
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pumpAndSettle();
-    expect(switches(handle), isEmpty);
-    // So does the picker, beside the current model.
+    // The picker offers Auto beside the current model.
     await openPicker(tester);
     await tester.tap(row('auto-prov/alpha'));
     await tester.pumpAndSettle();

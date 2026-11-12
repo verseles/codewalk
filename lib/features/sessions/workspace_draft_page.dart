@@ -324,15 +324,11 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // The live composer's status slot and selection
-                              // row, so the chips look and work the same
-                              // before and after the first send.
+                              // The live composer's status slot, so the
+                              // composer sits where it will after the first
+                              // send.
                               const SizedBox(
                                 height: SessionComposerStatus.height,
-                              ),
-                              SessionComposerControls(
-                                live: c.selection,
-                                agentAnchor: _agentAnchor,
                               ),
                               SessionCommandPicker(
                                 menu: _commands,
@@ -341,83 +337,83 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                               ),
                               SessionFieldHeightReporter(
                                 onHeight: _fieldMeasured,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Focus(
-                                        // A physical Enter sends; Shift+Enter breaks
-                                        // the line (#174).
-                                        onKeyEvent: (_, event) {
-                                          if (_commands.handleKey(
-                                                event,
-                                                l10n,
-                                                _run,
-                                                shown:
-                                                    sessionCommandPickerHeight(
-                                                      context,
-                                                      pickerRoom,
-                                                    ) >
-                                                    0,
-                                              ) ==
-                                              KeyEventResult.handled) {
-                                            return KeyEventResult.handled;
-                                          }
-                                          if (!isComposerSendKey(
+                                child: ComposerFrame(
+                                  focusNode: _composerFocus,
+                                  attachTooltip: l10n.composerAttachSoon,
+                                  voiceTooltip: l10n.composerVoiceSoon,
+                                  chip: SessionModelChip(
+                                    live: c.selection,
+                                    agentAnchor: _agentAnchor,
+                                  ),
+                                  field: (context, open) => Focus(
+                                    // A physical Enter sends; Shift+Enter
+                                    // breaks the line (#174).
+                                    onKeyEvent: (_, event) {
+                                      if (_commands.handleKey(
                                             event,
-                                            c.draft.value,
-                                          )) {
-                                            return KeyEventResult.ignored;
-                                          }
-                                          if (_canSend(c)) _send(c);
-                                          return KeyEventResult.handled;
-                                        },
-                                        child: ComposerBubble(
-                                          child: ConversationTextScale(
-                                            child: TextField(
-                                              key: const ValueKey(
-                                                'workspace-draft-text',
-                                              ),
-                                              controller: c.draft,
-                                              focusNode: _composerFocus,
-                                              enabled: !c.sending,
-                                              readOnly: c.endpointOffline,
-                                              minLines: 1,
-                                              maxLines: 6,
-                                              keyboardType:
-                                                  TextInputType.multiline,
-                                              textCapitalization:
-                                                  TextCapitalization.sentences,
-                                              autocorrect: composerSuggests(
-                                                context,
-                                              ),
-                                              enableSuggestions:
-                                                  composerSuggests(context),
-                                              spellCheckConfiguration:
-                                                  composerSpellCheckConfiguration(
-                                                    context,
-                                                  ),
-                                              decoration: composerDecoration(
-                                                context,
-                                                l10n.composerHint,
-                                              ),
+                                            l10n,
+                                            _run,
+                                            shown:
+                                                sessionCommandPickerHeight(
+                                                  context,
+                                                  pickerRoom,
+                                                ) >
+                                                0,
+                                          ) ==
+                                          KeyEventResult.handled) {
+                                        return KeyEventResult.handled;
+                                      }
+                                      if (!isComposerSendKey(
+                                        event,
+                                        c.draft.value,
+                                      )) {
+                                        return KeyEventResult.ignored;
+                                      }
+                                      if (_canSend(c)) _send(c);
+                                      return KeyEventResult.handled;
+                                    },
+                                    child: ConversationTextScale(
+                                      child: TextField(
+                                        key: const ValueKey(
+                                          'workspace-draft-text',
+                                        ),
+                                        controller: c.draft,
+                                        focusNode: _composerFocus,
+                                        enabled: !c.sending,
+                                        readOnly: c.endpointOffline,
+                                        minLines: 1,
+                                        maxLines: 6,
+                                        keyboardType: TextInputType.multiline,
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
+                                        autocorrect: composerSuggests(context),
+                                        enableSuggestions: composerSuggests(
+                                          context,
+                                        ),
+                                        spellCheckConfiguration:
+                                            composerSpellCheckConfiguration(
+                                              context,
                                             ),
-                                          ),
+                                        decoration: composerDecoration(
+                                          context,
+                                          open
+                                              ? l10n.composerHintCommands
+                                              : l10n.composerHint,
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    ComposerSendButton(
-                                      buttonKey: const ValueKey(
-                                        'workspace-draft-send',
-                                      ),
-                                      tooltip: c.sending
-                                          ? l10n.composerSending
-                                          : l10n.composerSend,
-                                      onPressed: _canSend(c)
-                                          ? () => _send(c)
-                                          : null,
+                                  ),
+                                  action: ComposerSendButton(
+                                    buttonKey: const ValueKey(
+                                      'workspace-draft-send',
                                     ),
-                                  ],
+                                    tooltip: c.sending
+                                        ? l10n.composerSending
+                                        : l10n.composerSend,
+                                    onPressed: _canSend(c)
+                                        ? () => _send(c)
+                                        : null,
+                                  ),
                                 ),
                               ),
                             ],

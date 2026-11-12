@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/session_agent_color.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
@@ -299,14 +300,27 @@ void main() {
   Finder chipText(String key, String text) =>
       find.descendant(of: find.byKey(ValueKey(key)), matching: find.text(text));
 
+  /// On a phone the composer shows its chip while the field has focus.
+  Future<void> focusComposer(WidgetTester tester) async {
+    await tester.tap(find.byKey(const ValueKey('workspace-draft-text')));
+    await tester.pumpAndSettle();
+  }
+
+  Color chipColor(WidgetTester tester) => tester
+      .widget<ActionChip>(find.byKey(const ValueKey('live-model-chip')))
+      .color!
+      .resolve({})!;
+
   testWidgets('the draft shows the defaults with the composer chips', (
     tester,
   ) async {
     await open(tester, defaults: pickable());
     await tester.pumpAndSettle();
-    expect(chipText('live-agent-chip', 'Build'), findsOneWidget);
-    expect(chipText('live-model-chip', 'Model 1'), findsOneWidget);
-    expect(chipText('live-variant-chip', 'high'), findsOneWidget);
+    await focusComposer(tester);
+    // One chip names the model and variant on the agent's color (#484).
+    expect(chipText('live-model-chip', 'Model 1 high'), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
+    expect(chipColor(tester), sessionDefaultAgentColor);
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -314,18 +328,21 @@ void main() {
       'the pick', (tester) async {
     await open(tester, defaults: pickable());
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
+    await focusComposer(tester);
+    // The chip opens the pick of agent, model and variant.
+    await tester.tap(find.byKey(const ValueKey('live-model-chip')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('live-agent-menu-plan')));
+    await tester.tap(find.byKey(const ValueKey('live-selection-agent-plan')));
     await tester.pumpAndSettle();
-    expect(chipText('live-agent-chip', 'Plan'), findsOneWidget);
     expect(chipText('live-model-chip', 'Model 2'), findsOneWidget);
-    expect(chipText('live-variant-chip', 'Auto'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
+    expect(chipColor(tester), sessionPlanAgentColor);
+    await tester.tap(find.byKey(const ValueKey('live-model-chip')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('live-variant-max')));
+    await tester.tap(
+      find.byKey(const ValueKey('live-selection-variant-p/model_2#max')),
+    );
     await tester.pumpAndSettle();
-    expect(chipText('live-variant-chip', 'max'), findsOneWidget);
+    expect(chipText('live-model-chip', 'Model 2 max'), findsOneWidget);
     // Picking selects nothing on the server and sends nothing.
     expect(actions.calls.where((call) => call == 'create'), isEmpty);
     await startSend(tester, waitForRead: false);
@@ -342,6 +359,7 @@ void main() {
   ) async {
     await open(tester, defaults: pickable());
     await tester.pumpAndSettle();
+    await focusComposer(tester);
     final changed = pickable();
     source.defaults = DraftDefaults(
       agent: 'Plan',
@@ -353,8 +371,8 @@ void main() {
     );
     await app.workspaceDrafts!.selection.refreshSelection();
     await tester.pumpAndSettle();
-    expect(chipText('live-agent-chip', 'Build'), findsOneWidget);
-    expect(chipText('live-model-chip', 'Model 1'), findsOneWidget);
+    expect(chipText('live-model-chip', 'Model 1 high'), findsOneWidget);
+    expect(chipColor(tester), sessionDefaultAgentColor);
     expect(app.workspaceDrafts!.selection.selection?.agentId, 'build');
     await tester.pumpWidget(const SizedBox());
   });
@@ -916,6 +934,9 @@ void main() {
   ) async {
     const size = Size(360, 640);
     await open(tester, size: size);
+    // The first-use tab hint floats over the chat's top, where the open
+    // composer's taller picker reaches on this short screen (#484).
+    app.preferences.setTabsGestureHintDismissed(true);
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(

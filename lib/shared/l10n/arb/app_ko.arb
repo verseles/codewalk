@@ -518,6 +518,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "/를 입력해 명령 사용",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "첨부 파일과 상용구는 곧 지원됩니다",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "음성 입력은 곧 지원됩니다",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "보내기",
   "@composerSend": {
     "description": "V2 live session composer"

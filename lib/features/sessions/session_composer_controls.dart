@@ -10,39 +10,30 @@ import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import 'session_agent_color.dart';
 import 'session_selection_chip.dart';
 import 'session_selection_host.dart';
 
-/// The composer's selection chips, like the retained reference's controls
-/// row (#153): the agent, with the count of permissions waiting for the
-/// user, the model and its variant. A sub-conversation keeps its parent's
-/// choice: its model shows locked and it has no agent to pick.
-class SessionComposerControls extends StatelessWidget {
-  const SessionComposerControls({
-    super.key,
-    required this.live,
-    this.agentAnchor,
-  });
+/// The composer's one selection control (#484): the model and its variant
+/// on the current agent's color, opening the pick of agent, model and
+/// variant. Its badge counts the session's pending permission requests. A
+/// sub-conversation keeps its parent's choice, so its chip shows locked.
+class SessionModelChip extends StatelessWidget {
+  const SessionModelChip({super.key, required this.live, this.agentAnchor});
 
   final SessionSelectionHost live;
 
-  /// Marks the agent chip, so a `/agent` command opens its menu there.
+  /// Marks the chip, so a `/agent` command opens its menu there.
   final GlobalKey? agentAnchor;
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: live,
     builder: (context, _) {
-      final selects = live.supportsSelection;
-      final agentMenu =
-          !live.isChild && (selects || live.permissionModes != null);
-      if (!selects && !agentMenu) {
-        return const SizedBox.shrink();
-      }
+      if (!live.supportsSelection) return const SizedBox.shrink();
       final l10n = context.v2L10n;
       final state = live.selectionState;
       final selection = state.selection;
-      final compact = MediaQuery.sizeOf(context).width < 600;
       final model = offeredSessionModel(state);
       final variant = selection?.modelVariant;
       final pending = live.pendingPermissions;
@@ -51,158 +42,86 @@ class SessionComposerControls extends StatelessWidget {
       final attention =
           state.phase == SessionSelectionPhase.unconfirmed ||
           state.notice != SessionSelectionNotice.none;
-      final picks = live.canChangeSelection && canShowSessionSelection(live);
-      final modelDescription = [
+      final picks =
+          live.canChangeSelection &&
+          canShowSessionSelection(live) &&
+          !live.isChild;
+      final description = [
         l10n.chatChooseModel,
         if (selection != null) sessionSelectionLabel(state, l10n),
         if (live.isChild) l10n.chatModelLockedSubConversation,
         ?sessionSelectionStatus(state, l10n),
       ].join(': ');
-      Widget chip(
-        String key,
-        String label, {
-        required String tooltip,
-        required VoidCallback? onPressed,
-        Widget? avatar,
-        double maxWidth = 200,
-        String? semantics,
-      }) => Semantics(
-        label: semantics,
-        button: semantics == null ? null : true,
-        enabled: semantics == null ? null : onPressed != null,
-        child: Tooltip(
-          message: tooltip,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: compact ? 160 : maxWidth),
-            child: ActionChip(
-              key: ValueKey(key),
-              side: BorderSide.none,
-              shape: const StadiumBorder(),
-              visualDensity: VisualDensity.compact,
-              avatar: avatar,
-              label: Text(
-                label,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
+      final modelText = switch (selection?.modelId) {
+        final modelId? => catalogLabel(model?.label, modelId),
+        null =>
+          selection == null
+              ? l10n.chatChooseModel
+              : state.defaultModel ?? l10n.liveSelectionDefault,
+      };
+      final background = sessionAgentColor(state.agents, selection?.agentId);
+      final foreground = sessionAgentForeground(background);
+      final avatar = busy
+          ? AppIndeterminateRing(size: 14, strokeWidth: 2, color: foreground)
+          : live.isChild
+          ? Icon(Symbols.lock_outline, size: 16, color: foreground)
+          : attention
+          ? Icon(Symbols.info, size: 16, color: foreground)
+          : null;
+      final style = DefaultTextStyle.of(
+        context,
+      ).style.copyWith(color: foreground);
+      return Builder(
+        key: agentAnchor,
+        builder: (anchor) => Semantics(
+          label: description,
+          button: true,
+          enabled: picks,
+          excludeSemantics: true,
+          child: Tooltip(
+            message: description,
+            child: Badge.count(
+              key: const ValueKey('live-permission-badge'),
+              isLabelVisible: pending > 0,
+              count: min(pending, 99),
+              child: ActionChip(
+                key: const ValueKey('live-model-chip'),
+                side: BorderSide.none,
+                shape: const StadiumBorder(),
+                visualDensity: VisualDensity.compact,
+                color: WidgetStatePropertyAll(background),
+                avatar: avatar,
+                label: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: modelText,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      if (variant != null)
+                        TextSpan(
+                          text: ' $variant',
+                          style: TextStyle(
+                            color: foreground.withValues(alpha: 0.78),
+                          ),
+                        ),
+                    ],
+                  ),
+                  style: style,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onPressed: picks
+                    ? () => unawaited(showSessionSelection(context, live))
+                    : null,
               ),
-              onPressed: onPressed,
             ),
           ),
         ),
       );
-      final agentId = selection?.agentId;
-      final agent = state.agents.where((a) => a.id == agentId).firstOrNull;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        // A row that wraps rather than scrolls, so no control hides past the
-        // edge of a phone.
-        child: Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            if (agentMenu)
-              Builder(
-                key: agentAnchor,
-                builder: (anchor) => Badge.count(
-                  key: const ValueKey('live-agent-badge'),
-                  isLabelVisible: pending > 0,
-                  count: min(pending, 99),
-                  child: chip(
-                    'live-agent-chip',
-                    agentId == null
-                        ? (selection == null
-                              ? l10n.chatChooseAgent
-                              : l10n.liveSelectionDefault)
-                        : catalogLabel(agent?.label, agentId),
-                    tooltip: l10n.modelChooseAgent,
-                    onPressed: () => showAgentMenu(anchor, live),
-                  ),
-                ),
-              ),
-            if (selects)
-              chip(
-                'live-model-chip',
-                switch (selection?.modelId) {
-                  final modelId? => catalogLabel(model?.label, modelId),
-                  null =>
-                    selection == null
-                        ? l10n.chatChooseModel
-                        : state.defaultModel ?? l10n.liveSelectionDefault,
-                },
-                tooltip: modelDescription,
-                semantics: modelDescription,
-                maxWidth: 240,
-                avatar: busy
-                    ? const AppIndeterminateRing(size: 14, strokeWidth: 2)
-                    : live.isChild
-                    ? const Icon(Symbols.lock_outline, size: 16)
-                    : attention
-                    ? const Icon(Symbols.info, size: 16)
-                    : null,
-                onPressed: picks && !live.isChild
-                    ? () => unawaited(
-                        showSessionSelection(context, live, agents: false),
-                      )
-                    : null,
-              ),
-            if (selects &&
-                (variant != null || (model?.variants.isNotEmpty ?? false)))
-              Builder(
-                builder: (anchor) => chip(
-                  'live-variant-chip',
-                  variant ?? l10n.liveSelectionAuto,
-                  tooltip: l10n.shortcutNextVariant,
-                  maxWidth: 180,
-                  // A chosen variant the model no longer lists can still be
-                  // cleared with Auto.
-                  onPressed:
-                      picks &&
-                          !live.isChild &&
-                          model != null &&
-                          (model.variants.isNotEmpty || variant != null)
-                      ? () => unawaited(_pickVariant(anchor, live, model))
-                      : null,
-                ),
-              ),
-          ],
-        ),
-      );
     },
   );
-}
-
-/// The variant menu under the variant chip: Auto, which leaves the variant to
-/// the server, and the model's own variants. Dismissing it keeps the variant;
-/// only an explicit Auto clears it (#176).
-Future<void> _pickVariant(
-  BuildContext anchor,
-  SessionSelectionHost live,
-  ModelEntry model,
-) async {
-  final l10n = anchor.v2L10n;
-  final box = anchor.findRenderObject()! as RenderBox;
-  final overlay = Overlay.of(anchor).context.findRenderObject()! as RenderBox;
-  final rect = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
-  final current = live.selectionState.selection?.modelVariant;
-  const none = '';
-  final picked = await showMenu<String>(
-    context: anchor,
-    position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
-    items: [
-      for (final variant in [none, ...model.variants])
-        CheckedPopupMenuItem<String>(
-          key: ValueKey('live-variant-${variant.isEmpty ? 'auto' : variant}'),
-          value: variant,
-          checked: (current ?? none) == variant,
-          child: Text(variant.isEmpty ? l10n.liveSelectionAuto : variant),
-        ),
-    ],
-  );
-  if (picked == null || picked == (current ?? none) || !anchor.mounted) return;
-  await live.selectModel(model, variant: picked.isEmpty ? null : picked);
-  if (anchor.mounted) announceSessionSelection(anchor, live);
 }
 
 /// The agent menu, opening upward from the agent chip like the retained

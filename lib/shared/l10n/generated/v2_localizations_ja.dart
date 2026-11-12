@@ -769,6 +769,15 @@ class V2LocalizationsJa extends V2Localizations {
   String get composerHint => 'メッセージ';
 
   @override
+  String get composerHintCommands => '/ でコマンド';
+
+  @override
+  String get composerAttachSoon => '添付ファイルと定型文は近日対応';
+
+  @override
+  String get composerVoiceSoon => '音声入力は近日対応';
+
+  @override
   String get composerSend => '送信';
 
   @override

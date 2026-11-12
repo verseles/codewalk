@@ -972,7 +972,7 @@ void main() {
           'variant': 'high',
         },
       });
-      // The composer's model and variant chips show the new selection.
+      // The composer's chip shows the new model and variant (#484).
       await emitFrames(tester, rig.server, 0, count: 1);
       bool chipShows(String key, String text) => find
           .descendant(of: find.byKey(ValueKey(key)), matching: find.text(text))
@@ -980,9 +980,7 @@ void main() {
           .isNotEmpty;
       await pumpSpin(
         tester,
-        () =>
-            chipShows('live-model-chip', 'Fledge Alpha Free') &&
-            chipShows('live-variant-chip', 'high'),
+        () => chipShows('live-model-chip', 'Fledge Alpha Free high'),
         reason: 'selection chips updated to Fledge Alpha Free, high',
       );
       final liveScroll = tester

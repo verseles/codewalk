@@ -813,6 +813,15 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerHint => 'Сообщение';
 
   @override
+  String get composerHintCommands => 'Введите / для команд';
+
+  @override
+  String get composerAttachSoon => 'Вложения и шаблоны ответов скоро появятся';
+
+  @override
+  String get composerVoiceSoon => 'Голосовой ввод скоро появится';
+
+  @override
   String get composerSend => 'Отправить';
 
   @override

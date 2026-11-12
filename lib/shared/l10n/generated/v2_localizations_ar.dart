@@ -799,6 +799,15 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerHint => 'رسالة';
 
   @override
+  String get composerHintCommands => 'اكتب / للأوامر';
+
+  @override
+  String get composerAttachSoon => 'المرفقات والردود الجاهزة قريبًا';
+
+  @override
+  String get composerVoiceSoon => 'الإدخال الصوتي قريبًا';
+
+  @override
   String get composerSend => 'إرسال';
 
   @override

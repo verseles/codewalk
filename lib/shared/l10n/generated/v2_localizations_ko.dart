@@ -771,6 +771,15 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerHint => '메시지';
 
   @override
+  String get composerHintCommands => '/를 입력해 명령 사용';
+
+  @override
+  String get composerAttachSoon => '첨부 파일과 상용구는 곧 지원됩니다';
+
+  @override
+  String get composerVoiceSoon => '음성 입력은 곧 지원됩니다';
+
+  @override
   String get composerSend => '보내기';
 
   @override

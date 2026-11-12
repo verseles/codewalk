@@ -805,6 +805,16 @@ class V2LocalizationsEn extends V2Localizations {
   String get composerHint => 'Message';
 
   @override
+  String get composerHintCommands => 'Type / for commands';
+
+  @override
+  String get composerAttachSoon =>
+      'Attachments and canned answers are coming soon';
+
+  @override
+  String get composerVoiceSoon => 'Voice input is coming soon';
+
+  @override
   String get composerSend => 'Send';
 
   @override

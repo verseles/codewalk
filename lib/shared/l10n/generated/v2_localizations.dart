@@ -1575,6 +1575,24 @@ abstract class V2Localizations {
   /// **'Message'**
   String get composerHint;
 
+  /// V2 live session composer (#484)
+  ///
+  /// In en, this message translates to:
+  /// **'Type / for commands'**
+  String get composerHintCommands;
+
+  /// V2 live session composer (#484)
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments and canned answers are coming soon'**
+  String get composerAttachSoon;
+
+  /// V2 live session composer (#484)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is coming soon'**
+  String get composerVoiceSoon;
+
   /// V2 live session composer
   ///
   /// In en, this message translates to:

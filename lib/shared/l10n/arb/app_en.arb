@@ -984,6 +984,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "Type / for commands",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "Attachments and canned answers are coming soon",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "Voice input is coming soon",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "Send",
   "@composerSend": {
     "description": "V2 live session composer"

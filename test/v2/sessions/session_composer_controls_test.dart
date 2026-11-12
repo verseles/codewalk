@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:codewalk/features/sessions/session_agent_color.dart';
 import 'package:codewalk/features/sessions/session_composer_controls.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/platform/sessions/permission_mode_store.dart';
@@ -8,7 +11,6 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../storage/storage_fakes.dart';
@@ -127,7 +129,7 @@ void main() {
     addTearDown(tester.view.reset);
     final controls = Align(
       alignment: alignment,
-      child: SessionComposerControls(live: live),
+      child: SessionModelChip(live: live),
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -164,25 +166,97 @@ void main() {
   Finder chip(String key, String text) =>
       find.descendant(of: find.byKey(ValueKey(key)), matching: find.text(text));
 
-  testWidgets('the agent, model and variant chips show the selection', (
+  final modelChip = find.byKey(const ValueKey('live-model-chip'));
+
+  /// Opens the agent menu where `/agent` opens it: at the model chip.
+  Future<void> agentMenu(
+    WidgetTester tester,
+    SessionLiveController live,
+  ) async {
+    unawaited(showAgentMenu(tester.element(modelChip), live));
+    await tester.pumpAndSettle();
+  }
+
+  Color chipColor(WidgetTester tester) =>
+      tester.widget<ActionChip>(modelChip).color!.resolve({})!;
+
+  testWidgets('one chip shows the model and variant on the agent color', (
     tester,
   ) async {
     await open(tester, permissions: 2);
-    expect(chip('live-agent-chip', 'Build'), findsOneWidget);
-    expect(chip('live-model-chip', 'Alpha'), findsOneWidget);
-    expect(chip('live-variant-chip', 'high'), findsOneWidget);
-    // The permissions waiting for the user are counted on the agent chip.
+    expect(chip('live-model-chip', 'Alpha high'), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
+    expect(find.byKey(const ValueKey('live-variant-chip')), findsNothing);
+    // Build without a color of its own is green.
+    expect(chipColor(tester), sessionDefaultAgentColor);
+    // The permissions waiting for the user are counted on the chip.
     final badge = tester.widget<Badge>(
-      find.byKey(const ValueKey('live-agent-badge')),
+      find.byKey(const ValueKey('live-permission-badge')),
     );
     expect(badge.isLabelVisible, isTrue);
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('live-agent-badge')),
+        of: find.byKey(const ValueKey('live-permission-badge')),
         matching: find.text('2'),
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the chip takes the agent color: own, plan, or the palette', (
+    tester,
+  ) async {
+    final (_, handle) = await open(tester);
+    Future<void> pick(String agent, List<CatalogEntry> agents) async {
+      handle.selectionState = SessionSelectionState(
+        selection: Selection(
+          modelId: 'alpha',
+          modelProviderId: 'prov',
+          agentId: agent,
+        ),
+        models: [_alpha],
+        agents: agents,
+      );
+      handle.emit(handle.current);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    await pick('plan', [_build, _plan]);
+    expect(chipColor(tester), sessionPlanAgentColor);
+    final review = CatalogEntry(
+      id: 'review',
+      kind: const OpenValue.known(CatalogKind.agent),
+      label: 'Review',
+      color: '#123456',
+    );
+    await pick('review', [_build, _plan, review]);
+    expect(chipColor(tester), const Color(0xFF123456));
+    final docs = CatalogEntry(
+      id: 'docs',
+      kind: const OpenValue.known(CatalogKind.agent),
+      label: 'Docs',
+    );
+    await pick('docs', [_build, _plan, review, docs]);
+    expect(chipColor(tester), sessionAgentPalette.first);
+    // The label reads on any of them.
+    expect(sessionAgentForeground(sessionPlanAgentColor), Colors.black);
+    expect(sessionAgentForeground(sessionDefaultAgentColor), Colors.white);
+  });
+
+  testWidgets('the chip opens the pick of agent, model and variant', (
+    tester,
+  ) async {
+    final (_, handle) = await open(tester);
+    await tester.tap(modelChip);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('live-selection-agent-plan')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('live-selection-agent-plan')));
+    await tester.pumpAndSettle();
+    expect(handle.selectionCalls, contains('agent:plan'));
   });
 
   testWidgets('the agent menu picks an agent over an auto-approve footer', (
@@ -190,10 +264,9 @@ void main() {
   ) async {
     final (live, handle) = await open(tester);
     final l10n = V2Localizations.of(
-      tester.element(find.byType(SessionComposerControls)),
+      tester.element(find.byType(SessionModelChip)),
     );
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-    await tester.pumpAndSettle();
+    await agentMenu(tester, live);
     expect(find.byKey(const ValueKey('live-agent-menu')), findsOneWidget);
     expect(find.byKey(const ValueKey('live-agent-menu-plan')), findsOneWidget);
     // The footer starts on the acknowledged default (auto-approve), turns
@@ -217,61 +290,17 @@ void main() {
     expect(find.byKey(const ValueKey('live-agent-menu')), findsNothing);
   });
 
-  testWidgets('the variant menu picks a variant or an explicit Auto', (
-    tester,
-  ) async {
-    final (_, handle) = await open(tester);
-    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(lookupV2Localizations(const Locale('en')).liveSelectionAuto),
-      findsOneWidget,
-    );
-    await tester.tap(find.byKey(const ValueKey('live-variant-low')));
-    await tester.pumpAndSettle();
-    expect(handle.selectionCalls, contains('model:prov/alpha:low'));
-    // Dismissing the menu keeps the variant (#176).
-    final calls = handle.selectionCalls.length;
-    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
-    await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('live-variant-auto')), findsNothing);
-    expect(handle.selectionCalls, hasLength(calls));
-    // Only an explicit Auto clears it.
-    await tester.tap(find.byKey(const ValueKey('live-variant-chip')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('live-variant-auto')));
-    await tester.pumpAndSettle();
-    expect(handle.selectionCalls.last, 'model:prov/alpha');
-  });
-
   testWidgets('a sub-conversation keeps its parent\'s choice', (tester) async {
     await open(tester, id: 'child', parent: 'one');
-    expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
-    expect(
-      tester
-          .widget<ActionChip>(find.byKey(const ValueKey('live-model-chip')))
-          .onPressed,
-      isNull,
-    );
-    expect(
-      tester
-          .widget<ActionChip>(find.byKey(const ValueKey('live-variant-chip')))
-          .onPressed,
-      isNull,
-    );
+    expect(tester.widget<ActionChip>(modelChip).onPressed, isNull);
   });
 
   testWidgets('the agent menu shares root coordinates above an inset shell', (
     tester,
   ) async {
-    await open(tester, nestedNavigator: true, keyboard: 300);
-    final anchor = tester.getRect(
-      find.byKey(const ValueKey('live-agent-chip')),
-    );
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-    await tester.pumpAndSettle();
+    final (live, _) = await open(tester, nestedNavigator: true, keyboard: 300);
+    final anchor = tester.getRect(modelChip);
+    await agentMenu(tester, live);
     final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
     expect(menu.left, closeTo(anchor.left, 1));
     expect(menu.bottom, closeTo(anchor.top - 4, 1));
@@ -285,13 +314,12 @@ void main() {
   testWidgets('a short keyboard viewport keeps agents and footer reachable', (
     tester,
   ) async {
-    final (_, handle) = await open(
+    final (live, handle) = await open(
       tester,
       size: const Size(800, 240),
       keyboard: 100,
     );
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-    await tester.pumpAndSettle();
+    await agentMenu(tester, live);
     final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
     expect(menu.top, greaterThanOrEqualTo(8));
     expect(menu.bottom, lessThanOrEqualTo(132));
@@ -316,12 +344,9 @@ void main() {
   });
 
   testWidgets('the agent menu opens below a chip near the top', (tester) async {
-    await open(tester, alignment: Alignment.topCenter);
-    final anchor = tester.getRect(
-      find.byKey(const ValueKey('live-agent-chip')),
-    );
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-    await tester.pumpAndSettle();
+    final (live, _) = await open(tester, alignment: Alignment.topCenter);
+    final anchor = tester.getRect(modelChip);
+    await agentMenu(tester, live);
     final menu = tester.getRect(find.byKey(const ValueKey('live-agent-menu')));
     expect(menu.top, closeTo(anchor.bottom + 4, 1));
     expect(menu.bottom, lessThanOrEqualTo(892));
@@ -333,15 +358,14 @@ void main() {
     (const Size(800, 360), 140.0, const Locale('en')),
   ]) {
     testWidgets('menu stays usable at 2x text: $size/$locale', (tester) async {
-      await open(
+      final (live, _) = await open(
         tester,
         size: size,
         keyboard: keyboard,
         locale: locale,
         textScale: 2,
       );
-      await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-      await tester.pumpAndSettle();
+      await agentMenu(tester, live);
       final menu = tester.getRect(
         find.byKey(const ValueKey('live-agent-menu')),
       );
@@ -369,8 +393,9 @@ void main() {
     handle.emit(handle.current);
     await tester.pump();
     await tester.pump();
-    expect(chip('live-agent-chip', 'Default'), findsOneWidget);
     expect(chip('live-model-chip', 'Default'), findsOneWidget);
+    // The server's default agent is green.
+    expect(chipColor(tester), sessionDefaultAgentColor);
   });
 
   testWidgets('the model chip retains selection status in its semantics', (
@@ -379,7 +404,7 @@ void main() {
     final semantics = tester.ensureSemantics();
     final (_, handle) = await open(tester);
     final l10n = V2Localizations.of(
-      tester.element(find.byType(SessionComposerControls)),
+      tester.element(find.byType(SessionModelChip)),
     );
     final initial = handle.selectionState;
     for (final (phase, notice, expected) in [
@@ -437,12 +462,11 @@ void main() {
       store: V2MetadataStore(backend: FakeMetadataBackend()..failRead = true),
     );
     await policy.initialize();
-    await open(tester);
+    final (live, _) = await open(tester);
     final l10n = V2Localizations.of(
-      tester.element(find.byType(SessionComposerControls)),
+      tester.element(find.byType(SessionModelChip)),
     );
-    await tester.tap(find.byKey(const ValueKey('live-agent-chip')));
-    await tester.pumpAndSettle();
+    await agentMenu(tester, live);
     expect(find.text(l10n.livePermissionModeUnavailable), findsOneWidget);
     expect(find.text(l10n.chatPermissionAutoApproveOff), findsNothing);
     expect(

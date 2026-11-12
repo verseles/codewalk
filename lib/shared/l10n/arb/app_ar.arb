@@ -517,6 +517,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "اكتب / للأوامر",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "المرفقات والردود الجاهزة قريبًا",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "الإدخال الصوتي قريبًا",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "إرسال",
   "@composerSend": {
     "description": "V2 live session composer"

@@ -518,6 +518,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "کمانڈز کے لیے / لکھیں",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "اٹیچمنٹس اور تیار جوابات جلد آ رہے ہیں",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "آواز سے ان پٹ جلد آ رہا ہے",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "بھیجیں",
   "@composerSend": {
     "description": "V2 live session composer"

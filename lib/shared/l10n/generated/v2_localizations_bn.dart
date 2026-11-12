@@ -802,6 +802,15 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerHint => 'বার্তা';
 
   @override
+  String get composerHintCommands => 'কমান্ডের জন্য / লিখুন';
+
+  @override
+  String get composerAttachSoon => 'সংযুক্তি ও তৈরি উত্তর শিগগিরই আসছে';
+
+  @override
+  String get composerVoiceSoon => 'ভয়েস ইনপুট শিগগিরই আসছে';
+
+  @override
   String get composerSend => 'পাঠান';
 
   @override

@@ -60,7 +60,15 @@ SpellCheckConfiguration composerSpellCheckConfiguration(BuildContext context) {
 bool composerSuggests(BuildContext context) =>
     ChatAppearance.maybeOf(context)?.composerSpellCheck ?? true;
 
-/// The rounded bubble the field sits in, without an outline.
+/// Whether the composer always shows its open layout (#484): everywhere but
+/// a touch-first platform, where it opens while the field has focus.
+bool get composerAlwaysOpen => !const {
+  TargetPlatform.android,
+  TargetPlatform.iOS,
+  TargetPlatform.fuchsia,
+}.contains(defaultTargetPlatform);
+
+/// The rounded bubble the field and its controls sit in, without an outline.
 class ComposerBubble extends StatelessWidget {
   const ComposerBubble({super.key, required this.child});
 
@@ -80,10 +88,133 @@ class ComposerBubble extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: tokens.cardRadius,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(14, 2, 8, 2),
-            child: child,
-          ),
+          child: Padding(padding: const EdgeInsets.all(6), child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// The composer (#484), one bubble for the field and every control. Closed
+/// it is one line: Attach, the field, Voice and [action]. Open, the field
+/// sits on top and one row below holds Attach, [chip], Voice and [action].
+/// It opens while [focusNode] has focus on a phone and stays open elsewhere.
+/// Attach and Voice name what is coming and stay disabled until it does.
+class ComposerFrame extends StatefulWidget {
+  const ComposerFrame({
+    super.key,
+    required this.focusNode,
+    required this.field,
+    required this.action,
+    required this.attachTooltip,
+    required this.voiceTooltip,
+    this.chip,
+  });
+
+  final FocusNode focusNode;
+
+  /// The field, given whether the composer is open.
+  final Widget Function(BuildContext context, bool open) field;
+  final Widget action;
+  final String attachTooltip;
+  final String voiceTooltip;
+  final Widget? chip;
+
+  @override
+  State<ComposerFrame> createState() => _ComposerFrameState();
+}
+
+class _ComposerFrameState extends State<ComposerFrame> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_changed);
+  }
+
+  @override
+  void didUpdateWidget(ComposerFrame old) {
+    super.didUpdateWidget(old);
+    if (old.focusNode != widget.focusNode) {
+      old.focusNode.removeListener(_changed);
+      widget.focusNode.addListener(_changed);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() {
+    if (mounted) setState(() {});
+  }
+
+  Widget _soon(String key, IconData icon, String tooltip) => SizedBox.square(
+    key: ValueKey(key),
+    dimension: composerActionSize,
+    child: IconButton(
+      tooltip: tooltip,
+      onPressed: null,
+      padding: EdgeInsets.zero,
+      icon: Icon(icon, size: 22),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final open = composerAlwaysOpen || widget.focusNode.hasFocus;
+    final attach = _soon('composer-attach', Symbols.add, widget.attachTooltip);
+    final voice = _soon('composer-voice', Symbols.mic, widget.voiceTooltip);
+    // The field keeps its place in the first row whether the composer is
+    // open or not, so opening never rebuilds it and never drops its focus.
+    final field = Expanded(
+      key: const ValueKey('composer-field'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: widget.field(context, open),
+      ),
+    );
+    final chip = widget.chip;
+    const gap = SizedBox(width: 4);
+    // The controls are part of the field's region, so pressing one keeps a
+    // desktop field's focus (#174).
+    return TextFieldTapRegion(
+      child: ComposerBubble(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                if (!open) attach,
+                field,
+                if (!open) ...[voice, gap, widget.action],
+              ],
+            ),
+            // The second row stays in the tree, hidden, while the composer
+            // is closed: a pick opened from the chip moves the focus away,
+            // and the chip must outlive that to apply the pick.
+            Visibility(
+              visible: open,
+              maintainState: true,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    if (open) ...[attach, gap],
+                    if (chip != null)
+                      Flexible(
+                        key: const ValueKey('composer-chip'),
+                        child: chip,
+                      ),
+                    const Spacer(key: ValueKey('composer-spacer')),
+                    if (open) ...[voice, gap, widget.action],
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

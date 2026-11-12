@@ -819,6 +819,16 @@ class V2LocalizationsFr extends V2Localizations {
   String get composerHint => 'Message';
 
   @override
+  String get composerHintCommands => 'Tapez / pour les commandes';
+
+  @override
+  String get composerAttachSoon =>
+      'Les pièces jointes et les réponses types arrivent bientôt';
+
+  @override
+  String get composerVoiceSoon => 'La saisie vocale arrive bientôt';
+
+  @override
   String get composerSend => 'Envoyer';
 
   @override

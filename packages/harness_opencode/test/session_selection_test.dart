@@ -442,6 +442,31 @@ void main() {
       expect(agents.first.metadata, isNull);
     });
 
+    test('an agent keeps only a six-digit hex color of its own', () async {
+      final transport = _Transport(
+        (_) => _response(
+          _catalog([
+            {..._agent('build'), 'color': '#1E88E5'},
+            {..._agent('plan'), 'color': '#aaaaaa'},
+            {..._agent('review'), 'color': 'accent'},
+            {..._agent('docs'), 'color': '#fff'},
+            {..._agent('ops'), 'color': 7},
+            _agent('general'),
+          ]),
+        ),
+      );
+      final agents = await _reader(transport).readAgents('/work/app');
+      // The v1 migration's #aaaaaa stands for a theme name, so no color.
+      expect(agents.map((agent) => agent.color), [
+        '#1e88e5',
+        null,
+        null,
+        null,
+        null,
+        null,
+      ]);
+    });
+
     test('an agent that is not offered is never projected', () async {
       final transport = _Transport(
         (_) => _response(

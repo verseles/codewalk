@@ -518,6 +518,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "Escribe / para comandos",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "Los adjuntos y las respuestas rápidas llegarán pronto",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "La entrada de voz llegará pronto",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "Enviar",
   "@composerSend": {
     "description": "V2 live session composer"

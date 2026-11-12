@@ -59,8 +59,12 @@ class _SessionComposerState extends State<SessionComposer> {
   DateTime? _escapeAt;
   late final SessionCommandMenu _commands = SessionCommandMenu(_text);
 
-  /// The agent chip, where `/agent` opens its menu.
+  /// The model chip, where `/agent` opens its menu.
   final _agentAnchor = GlobalKey();
+
+  /// The field's focus: the page's, or the composer's own.
+  FocusNode? _ownFocus;
+  FocusNode get _focus => widget.focusNode ?? (_ownFocus ??= FocusNode());
   final _sendAnchor = GlobalKey();
 
   /// The field row's height, which the `/` picker above it leaves free.
@@ -190,6 +194,7 @@ class _SessionComposerState extends State<SessionComposer> {
   void dispose() {
     _text.removeListener(_textChanged);
     _commands.dispose();
+    _ownFocus?.dispose();
     super.dispose();
   }
 
@@ -611,7 +616,6 @@ class _SessionComposerState extends State<SessionComposer> {
                 retryAt: liveRetryAt(c.live),
                 now: c.live.clock,
               ),
-              SessionComposerControls(live: c.live, agentAnchor: _agentAnchor),
               SessionCommandPicker(
                 menu: _commands,
                 onRun: _pick,
@@ -630,74 +634,75 @@ class _SessionComposerState extends State<SessionComposer> {
                       ): choose,
                     },
                   },
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Focus(
-                          onKeyEvent: _key,
-                          onFocusChange: (_) => _escapeAt = null,
-                          child: ComposerBubble(
-                            child: ConversationTextScale(
-                              child: TextField(
-                                key: const ValueKey('live-composer-input'),
-                                controller: _text,
-                                focusNode: widget.focusNode,
-                                // A text that a failed resend hands back needs the
-                                // field untouched until the send ends.
-                                readOnly:
-                                    (c.sending && !_continuing) ||
-                                    c.live.endpointOffline,
-                                minLines: 1,
-                                maxLines: 4,
-                                keyboardType: TextInputType.multiline,
-                                autocorrect: composerSuggests(context),
-                                enableSuggestions: composerSuggests(context),
-                                spellCheckConfiguration:
-                                    composerSpellCheckConfiguration(context),
-                                decoration: composerDecoration(
-                                  context,
-                                  l10n.composerHint,
-                                ),
-                              ),
-                            ),
+                  child: ComposerFrame(
+                    focusNode: _focus,
+                    attachTooltip: l10n.composerAttachSoon,
+                    voiceTooltip: l10n.composerVoiceSoon,
+                    chip: SessionModelChip(
+                      live: c.live,
+                      agentAnchor: _agentAnchor,
+                    ),
+                    field: (context, open) => Focus(
+                      onKeyEvent: _key,
+                      onFocusChange: (_) => _escapeAt = null,
+                      child: ConversationTextScale(
+                        child: TextField(
+                          key: const ValueKey('live-composer-input'),
+                          controller: _text,
+                          focusNode: _focus,
+                          // A text that a failed resend hands back needs the
+                          // field untouched until the send ends.
+                          readOnly:
+                              (c.sending && !_continuing) ||
+                              c.live.endpointOffline,
+                          minLines: 1,
+                          maxLines: 4,
+                          keyboardType: TextInputType.multiline,
+                          autocorrect: composerSuggests(context),
+                          enableSuggestions: composerSuggests(context),
+                          spellCheckConfiguration:
+                              composerSpellCheckConfiguration(context),
+                          decoration: composerDecoration(
+                            context,
+                            open
+                                ? l10n.composerHintCommands
+                                : l10n.composerHint,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      if (c.sending)
-                        SizedBox.square(
-                          dimension: composerActionSize,
-                          child: Center(
-                            child: AppIndeterminateRing(
-                              size: 18,
-                              strokeWidth: 2,
-                              semanticsLabel: l10n.composerSending,
+                    ),
+                    action: c.sending
+                        ? SizedBox.square(
+                            dimension: composerActionSize,
+                            child: Center(
+                              child: AppIndeterminateRing(
+                                size: 18,
+                                strokeWidth: 2,
+                                semanticsLabel: l10n.composerSending,
+                              ),
+                            ),
+                          )
+                        : c.live.stopping ||
+                              (c.live.canStop && _text.text.trim().isEmpty)
+                        ? SessionStopButton(live: c.live)
+                        // Holding Send, or a right click there, chooses how a
+                        // prompt sent while the assistant works goes; the keys
+                        // do the same from the composer (#470).
+                        : KeyedSubtree(
+                            key: _sendAnchor,
+                            child: ComposerSendButton(
+                              buttonKey: const ValueKey('live-composer-send'),
+                              tooltip: queue
+                                  ? l10n.composerQueue
+                                  : l10n.composerSend,
+                              icon: queue
+                                  ? Symbols.schedule_send
+                                  : Symbols.send_rounded,
+                              onPressed: canSend ? _send : null,
+                              onDoubleTap: _canContinue ? _continue : null,
+                              onChoose: choose,
                             ),
                           ),
-                        )
-                      else if (c.live.stopping ||
-                          (c.live.canStop && _text.text.trim().isEmpty))
-                        SessionStopButton(live: c.live)
-                      else
-                        // Holding Send, or a right click there, chooses how a
-                        // prompt sent while the assistant works goes; the keys do
-                        // the same from the composer (#470).
-                        KeyedSubtree(
-                          key: _sendAnchor,
-                          child: ComposerSendButton(
-                            buttonKey: const ValueKey('live-composer-send'),
-                            tooltip: queue
-                                ? l10n.composerQueue
-                                : l10n.composerSend,
-                            icon: queue
-                                ? Symbols.schedule_send
-                                : Symbols.send_rounded,
-                            onPressed: canSend ? _send : null,
-                            onDoubleTap: _canContinue ? _continue : null,
-                            onChoose: choose,
-                          ),
-                        ),
-                    ],
                   ),
                 ),
               ),

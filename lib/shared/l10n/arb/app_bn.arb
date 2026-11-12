@@ -518,6 +518,18 @@
   "@composerHint": {
     "description": "V2 live session composer"
   },
+  "composerHintCommands": "কমান্ডের জন্য / লিখুন",
+  "@composerHintCommands": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerAttachSoon": "সংযুক্তি ও তৈরি উত্তর শিগগিরই আসছে",
+  "@composerAttachSoon": {
+    "description": "V2 live session composer (#484)"
+  },
+  "composerVoiceSoon": "ভয়েস ইনপুট শিগগিরই আসছে",
+  "@composerVoiceSoon": {
+    "description": "V2 live session composer (#484)"
+  },
   "composerSend": "পাঠান",
   "@composerSend": {
     "description": "V2 live session composer"

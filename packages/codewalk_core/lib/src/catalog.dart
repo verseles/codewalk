@@ -34,13 +34,30 @@ final class CatalogEntry {
     this.description,
     this.capabilities,
     this.metadata,
-  }) : id = requireText(id);
+    String? color,
+  }) : id = requireText(id),
+       color = _rgbColor(color);
   final String id;
   final OpenValue<CatalogKind> kind;
   final String label;
   final String? description;
   final CapabilitySet? capabilities;
   final CanonicalValue? metadata;
+
+  /// The entry's own display color as lowercase `#rrggbb`, when its harness
+  /// names one (an agent's configured color); clients choose otherwise.
+  final String? color;
+}
+
+final _rgb = RegExp(r'^#[0-9a-f]{6}$');
+
+String? _rgbColor(String? color) {
+  if (color == null) return null;
+  final value = color.toLowerCase();
+  if (!_rgb.hasMatch(value)) {
+    throw ArgumentError.value(color, 'color', 'Expected #rrggbb.');
+  }
+  return value;
 }
 
 final class ModelEntry {

@@ -823,6 +823,15 @@ class V2LocalizationsDe extends V2Localizations {
   String get composerHint => 'Nachricht';
 
   @override
+  String get composerHintCommands => 'Tippe / für Befehle';
+
+  @override
+  String get composerAttachSoon => 'Anhänge und Textbausteine kommen bald';
+
+  @override
+  String get composerVoiceSoon => 'Spracheingabe kommt bald';
+
+  @override
   String get composerSend => 'Senden';
 
   @override

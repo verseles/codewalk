@@ -805,6 +805,15 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerHint => 'پیغام';
 
   @override
+  String get composerHintCommands => 'کمانڈز کے لیے / لکھیں';
+
+  @override
+  String get composerAttachSoon => 'اٹیچمنٹس اور تیار جوابات جلد آ رہے ہیں';
+
+  @override
+  String get composerVoiceSoon => 'آواز سے ان پٹ جلد آ رہا ہے';
+
+  @override
   String get composerSend => 'بھیجیں';
 
   @override

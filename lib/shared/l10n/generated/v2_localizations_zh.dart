@@ -754,6 +754,15 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerHint => '消息';
 
   @override
+  String get composerHintCommands => '输入 / 使用命令';
+
+  @override
+  String get composerAttachSoon => '附件和快捷回复即将推出';
+
+  @override
+  String get composerVoiceSoon => '语音输入即将推出';
+
+  @override
   String get composerSend => '发送';
 
   @override

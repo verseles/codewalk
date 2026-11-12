@@ -71,8 +71,13 @@ void main() {
       ),
       findsNothing,
     );
+    // On a phone the composer opens with focus, and only then shows its one
+    // chip (#484).
+    expect(find.byKey(const ValueKey('live-model-chip')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('live-composer-input')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('live-model-chip')), findsOneWidget);
-    expect(find.byKey(const ValueKey('live-agent-chip')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
     final l10n = dependencies.localizations.current;
     expect(find.text(l10n.composerLiveSession), findsNothing);
     // The conversation's state lives only in the status bar (#468).

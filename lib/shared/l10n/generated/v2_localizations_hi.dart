@@ -808,6 +808,15 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerHint => 'संदेश';
 
   @override
+  String get composerHintCommands => 'कमांड के लिए / टाइप करें';
+
+  @override
+  String get composerAttachSoon => 'अटैचमेंट और तैयार जवाब जल्द आ रहे हैं';
+
+  @override
+  String get composerVoiceSoon => 'वॉइस इनपुट जल्द आ रहा है';
+
+  @override
   String get composerSend => 'भेजें';
 
   @override

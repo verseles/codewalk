@@ -816,6 +816,16 @@ class V2LocalizationsEs extends V2Localizations {
   String get composerHint => 'Mensaje';
 
   @override
+  String get composerHintCommands => 'Escribe / para comandos';
+
+  @override
+  String get composerAttachSoon =>
+      'Los adjuntos y las respuestas rápidas llegarán pronto';
+
+  @override
+  String get composerVoiceSoon => 'La entrada de voz llegará pronto';
+
+  @override
   String get composerSend => 'Enviar';
 
   @override

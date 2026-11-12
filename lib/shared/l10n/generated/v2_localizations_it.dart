@@ -817,6 +817,15 @@ class V2LocalizationsIt extends V2Localizations {
   String get composerHint => 'Messaggio';
 
   @override
+  String get composerHintCommands => 'Digita / per i comandi';
+
+  @override
+  String get composerAttachSoon => 'Allegati e risposte predefinite in arrivo';
+
+  @override
+  String get composerVoiceSoon => 'Input vocale in arrivo';
+
+  @override
   String get composerSend => 'Invia';
 
   @override
