@@ -1,9 +1,11 @@
-> 📣 One picker for everything: agent, model, variant and permissions in one sheet, a compact variant menu per model, and favorites that finally show their star.
 
-### Model picker
+> 📣 Messages waiting to be sent now stay pinned above the composer, one line each: tap to edit, ✕ to cancel, ↑ to send right away.
 
-- The model chip, /model, /agent and "Choose model" all open the same picker.
-- Each model has its own compact variant menu instead of a row of chips.
-- A favorite model now shows a filled star.
-- The agent choice and the Ask / Allow all switch, with the count of pending requests, live in the picker.
-- Picking the model you already use no longer sends a switch, a pick that cannot be applied says why, and the chip says when it is waiting for the server.
+### Waiting messages
+
+- A message the agent has not taken yet stays pinned above the status bar until it shows up in the conversation.
+- A long message fits in one line, ending in "…".
+- Tap it to bring it back into the composer and edit it.
+- ✕ cancels it and ↑ sends it right away instead of waiting its turn. Each button shows only when the server supports it.
+- The Inbox list above the composer is gone.
+
