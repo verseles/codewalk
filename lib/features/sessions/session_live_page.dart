@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
+import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_composer.dart';
 import 'session_composer_status.dart';
@@ -25,8 +27,10 @@ import 'session_live_controller.dart';
 import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
 import 'session_permission_mode_chip.dart';
+import 'session_search_bar.dart';
 import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
+import 'session_timeline_projection.dart';
 import 'sessions_controller.dart';
 import 'subconversation_navigation.dart';
 import 'subconversation_resolver.dart';
@@ -73,6 +77,34 @@ class _SessionLivePageState extends State<SessionLivePage>
   WorkspaceActions? _shown;
 
   void _focusComposer() => _composerFocus.requestFocus();
+
+  /// What the search reads: the items the timeline shows, and whether it
+  /// shows reasoning (#462).
+  List<TimelineItem> _searchItems = const [];
+  bool _searchReasoning = true;
+
+  Set<ItemId> _searchHeld = const {};
+
+  KeyEventResult _searchKey(FocusNode node, KeyEvent event) {
+    final search = widget.controller.search;
+    if (!search.open || event is KeyUpEvent) return KeyEventResult.ignored;
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.f3:
+        search.step(
+          _searchItems,
+          older: !HardwareKeyboard.instance.isShiftPressed,
+          reasoning: _searchReasoning,
+          held: _searchHeld,
+        );
+        return KeyEventResult.handled;
+      case LogicalKeyboardKey.escape when event is KeyDownEvent:
+        search.close();
+        _focusComposer();
+        return KeyEventResult.handled;
+      default:
+        return KeyEventResult.ignored;
+    }
+  }
 
   /// The latest sub-conversation tap; an older one opens nothing and its
   /// reads are cancelled.
@@ -293,25 +325,36 @@ class _SessionLivePageState extends State<SessionLivePage>
     builder: (context, page) {
       final c = widget.controller;
       return KeyboardActionScope(
-        handlers: c.supportsSelection && !c.isChild
-            ? {
-                ShortcutAction.cycleRecentModels: () =>
-                    unawaited(c.cycleModel()),
-                ShortcutAction.cycleVariant: () => unawaited(c.cycleVariant()),
-                ShortcutAction.cycleAgentForward: () =>
-                    unawaited(c.cycleAgent()),
-                ShortcutAction.cycleAgentBackward: () =>
-                    unawaited(c.cycleAgent(reverse: true)),
-              }
-            : const {},
-        child: page!,
+        handlers: {
+          if (c.supportsSelection && !c.isChild) ...{
+            ShortcutAction.cycleRecentModels: () => unawaited(c.cycleModel()),
+            ShortcutAction.cycleVariant: () => unawaited(c.cycleVariant()),
+            ShortcutAction.cycleAgentForward: () => unawaited(c.cycleAgent()),
+            ShortcutAction.cycleAgentBackward: () =>
+                unawaited(c.cycleAgent(reverse: true)),
+          },
+          // Any harness: the search reads the items it already gives (#462).
+          ShortcutAction.searchConversation: c.search.show,
+        },
+        // While the search is open, F3 and Shift+F3 step through it and
+        // Escape closes it from anywhere in the conversation.
+        child: Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onKeyEvent: _searchKey,
+          child: page!,
+        ),
       );
     },
     child: _page(context),
   );
 
   Widget _page(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([widget.controller, widget.controller.turn]),
+    listenable: Listenable.merge([
+      widget.controller,
+      widget.controller.turn,
+      widget.controller.search,
+    ]),
     builder: (context, child) {
       final c = widget.controller;
       final l10n = context.v2L10n;
@@ -342,6 +385,17 @@ class _SessionLivePageState extends State<SessionLivePage>
         ExecutionKind.unknown => false,
       };
       final textTheme = Theme.of(context).textTheme;
+      final search = c.search;
+      final appearance = ChatAppearance.maybeOf(context);
+      final reasoning = appearance?.showReasoning ?? true;
+      final held = SessionTimelinePresentation.heldText(
+        items,
+        settled: settled,
+        renderMode: appearance?.renderMode ?? ChatRenderMode.live,
+      );
+      _searchItems = items;
+      _searchReasoning = reasoning;
+      _searchHeld = held;
       return Scaffold(
         // Inside the workspace the shell owns the only toolbar (decision 8).
         appBar: widget.workspaceChrome
@@ -414,6 +468,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                   MediaQuery.paddingOf(context).bottom +
                   (c.canRetry ? 48.0 : 0.0) +
                   (c.outbox == null ? SessionComposerStatus.height : 0.0) +
+                  (c.search.open ? SessionSearchBar.heightOf(context) : 0.0) +
                   (stopButton ? 56.0 : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
               final space = max(0.0, body.maxHeight - pad - chrome);
@@ -442,8 +497,18 @@ class _SessionLivePageState extends State<SessionLivePage>
                       if (c.loading) const AppIndeterminateBar(),
                       if (c.summary.info.lineage.parent case final parent?)
                         ReturnToParentConversation(parent: parent),
+                      if (search.open)
+                        SessionSearchBar(
+                          search: search,
+                          items: items,
+                          reasoning: reasoning,
+                          held: held,
+                          onClose: _focusComposer,
+                        ),
                       Expanded(
                         child: SessionLiveTimeline(
+                          highlight: search.open ? search.current : null,
+                          reveals: search.reveals,
                           onOpenChild: _openChild,
                           items: items,
                           userTurnActionBuilder: (context, turnItem, isLatest) {

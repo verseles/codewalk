@@ -45,6 +45,8 @@ class SessionLiveTimeline extends StatefulWidget {
     this.onOpenChild,
     this.emptyBuilder,
     this.userTurnActionBuilder,
+    this.highlight,
+    this.reveals = 0,
   });
 
   /// The resident items, in the server's order.
@@ -84,6 +86,12 @@ class SessionLiveTimeline extends StatefulWidget {
   /// Optional builder for a confirmed user turn's inline action.
   final Widget Function(BuildContext context, UserInput item, bool isLatest)?
   userTurnActionBuilder;
+
+  /// The item a search found (#462): its row is outlined.
+  final ItemId? highlight;
+
+  /// Grows each time [highlight] should be scrolled into view.
+  final int reveals;
 
   @override
   State<SessionLiveTimeline> createState() => _SessionLiveTimelineState();
@@ -201,6 +209,100 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
     }
     if (old.settled != widget.settled) _settledChanged();
+    if (widget.highlight == null) {
+      // The search closed or found nothing: a reveal on its way stops, and
+      // the follow it held is the reader's again.
+      _revealRun++;
+      if (old.highlight != null) widget.scroll.releaseHold();
+    } else if (old.reveals != widget.reveals) {
+      final target = widget.highlight!;
+      _afterNextFrame(() => unawaited(_reveal(target)));
+    }
+  }
+
+  /// The context of each row the list built, by row key, for [_reveal].
+  final _rowContexts = <Key, BuildContext>{};
+
+  /// The rows of the last build.
+  List<SessionTimelineRow> _rows = const [];
+
+  /// Each reveal supersedes the one before.
+  int _revealRun = 0;
+
+  /// Brings the row of [target] into view (#462). A finished turn's work
+  /// collapsed behind its answer is opened, so the match itself shows. The
+  /// list builds rows lazily, so it pages toward the row, one viewport at a
+  /// time, for as long as that moves it, until the row is built, then
+  /// aligns it near the top. Its moves are the timeline's own: they load no
+  /// older page, and the follow stays off until the reader moves the list.
+  /// A newer search, a closed search or the reader's own scroll stops it.
+  Future<void> _reveal(ItemId target) async {
+    final run = ++_revealRun;
+    final scroll = widget.scroll;
+    scroll
+      ..markUserIntent()
+      ..holdFollow();
+    final moves = scroll.readerMoves;
+    _olderArmed = false;
+    var opened = false;
+    // Only a safety net: the paging ends when the row is built, when the
+    // list cannot move toward it, or when the reader or the search moves on.
+    for (var pass = 0; pass < 10000; pass++) {
+      if (!mounted ||
+          run != _revealRun ||
+          widget.highlight != target ||
+          scroll.readerMoves != moves ||
+          // The reader jumped to the newest content.
+          scroll.following) {
+        return;
+      }
+      final rows = _rows;
+      var index = rows.indexWhere(
+        (row) => row is SessionItemRow && row.item.id == target,
+      );
+      if (index < 0) {
+        index = rows.indexWhere(
+          (row) => row.items.any((item) => item.id == target),
+        );
+        if (index < 0) return;
+        if (rows[index] case SessionWorkGroupRow(
+          :final id,
+          expanded: false,
+        ) when !opened) {
+          opened = true;
+          setState(() => _presentation.toggle(id));
+          await WidgetsBinding.instance.endOfFrame;
+          continue;
+        }
+      }
+      final shown = _rowContexts[rows[index].key];
+      if (shown != null && shown.mounted) {
+        scroll.runProgrammatic(
+          () => Scrollable.ensureVisible(
+            shown,
+            alignment: 0.24,
+            duration: Duration.zero,
+          ),
+        );
+        return;
+      }
+      final controller = scroll.controller;
+      if (!controller.hasClients) return;
+      final built = [
+        for (final (i, row) in rows.indexed)
+          if (_rowContexts[row.key]?.mounted ?? false) i,
+      ];
+      if (built.isEmpty) return;
+      final position = controller.position;
+      final up = index < built.first;
+      final to =
+          (position.pixels + position.viewportDimension * 0.9 * (up ? -1 : 1))
+              .clamp(position.minScrollExtent, position.maxScrollExtent);
+      // At the end the list can reach: the row is not there.
+      if (to == position.pixels) return;
+      scroll.runProgrammatic(() => position.jumpTo(to));
+      await WidgetsBinding.instance.endOfFrame;
+    }
   }
 
   /// The session settled, or a new turn started.
@@ -494,6 +596,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
         ? null
         : _shownSignature(_project(items, last));
     final rows = _project(items, display);
+    _rows = rows;
+    _rowContexts.removeWhere((_, context) => !context.mounted);
     final signature = _shownSignature(rows);
     final now = before ?? signature;
     // Rows that paged in above the rows the previous build saw are history,
@@ -677,38 +781,58 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   Widget _row(List<SessionTimelineRow> rows, int index, int? answerIndex) {
     final row = rows[index];
     final isAnswer = index == answerIndex;
+    // The match's own row: a search opens a collapsed group to show it.
+    final found =
+        widget.highlight != null &&
+        row is SessionItemRow &&
+        row.item.id == widget.highlight;
     return Builder(
       key: row.key,
       builder: (context) {
         if (isAnswer) _answerContext = context;
-        return switch (row) {
-          SessionItemRow(:final item, :final messageHeader) =>
-            SessionTimelineTile(
-              item: item,
-              errorRecovery: widget.errorRecovery,
-              onOpenChild: widget.onOpenChild,
-              messageHeader: messageHeader,
-              inlineAction:
-                  item is UserInput &&
-                      item.confirmed &&
-                      widget.userTurnActionBuilder != null
-                  ? widget.userTurnActionBuilder!(
-                      context,
-                      item,
-                      item.id == _latestConfirmedUserTurnId(rows),
-                    )
-                  : null,
+        _rowContexts[row.key] = context;
+        // Always the same shape, so a row keeps its state when a search
+        // outlines it.
+        return DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: found
+              ? BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                )
+              : const BoxDecoration(),
+          child: switch (row) {
+            SessionItemRow(:final item, :final messageHeader) =>
+              SessionTimelineTile(
+                item: item,
+                errorRecovery: widget.errorRecovery,
+                onOpenChild: widget.onOpenChild,
+                messageHeader: messageHeader,
+                inlineAction:
+                    item is UserInput &&
+                        item.confirmed &&
+                        widget.userTurnActionBuilder != null
+                    ? widget.userTurnActionBuilder!(
+                        context,
+                        item,
+                        item.id == _latestConfirmedUserTurnId(rows),
+                      )
+                    : null,
+              ),
+            SessionToolRunRow() => SessionToolRun(
+              row: row,
+              onToggle: () => _toggle(row.id),
             ),
-          SessionToolRunRow() => SessionToolRun(
-            row: row,
-            onToggle: () => _toggle(row.id),
-          ),
-          SessionWorkGroupRow() => SessionWorkGroupHeader(
-            row: row,
-            onToggle: () => _toggle(row.id),
-          ),
-          SessionPendingRow() => const SessionGenerationPlaceholder(),
-        };
+            SessionWorkGroupRow() => SessionWorkGroupHeader(
+              row: row,
+              onToggle: () => _toggle(row.id),
+            ),
+            SessionPendingRow() => const SessionGenerationPlaceholder(),
+          },
+        );
       },
     );
   }

@@ -823,6 +823,33 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerWaitingEdit => 'संपादित करें';
 
   @override
+  String get liveSearch => 'बातचीत में खोजें';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$total में से $current';
+  }
+
+  @override
+  String get liveSearchNone => 'कोई परिणाम नहीं';
+
+  @override
+  String get liveSearchOlder => 'पुराना मिलान';
+
+  @override
+  String get liveSearchNewer => 'नया मिलान';
+
+  @override
+  String get liveSearchClose => 'खोज बंद करें';
+
+  @override
+  String get shortcutSearchConversation => 'बातचीत में खोजें';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'खुली बातचीत में टेक्स्ट खोजें; F3 और Shift+F3 मिलानों के बीच ले जाते हैं';
+
+  @override
   String get composerSend => 'भेजें';
 
   @override

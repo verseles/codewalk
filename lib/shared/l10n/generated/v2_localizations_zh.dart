@@ -769,6 +769,33 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerWaitingEdit => '编辑';
 
   @override
+  String get liveSearch => '在对话中搜索';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '第 $current 个，共 $total 个';
+  }
+
+  @override
+  String get liveSearchNone => '无结果';
+
+  @override
+  String get liveSearchOlder => '较早的匹配';
+
+  @override
+  String get liveSearchNewer => '较新的匹配';
+
+  @override
+  String get liveSearchClose => '关闭搜索';
+
+  @override
+  String get shortcutSearchConversation => '在对话中搜索';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      '在当前对话中查找文本；F3 和 Shift+F3 在匹配项之间切换';
+
+  @override
   String get composerSend => '发送';
 
   @override

@@ -538,6 +538,46 @@
   "@composerWaitingEdit": {
     "description": "V2 waiting messages (#486)"
   },
+  "liveSearch": "在对话中搜索",
+  "@liveSearch": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchCount": "第 {current} 个，共 {total} 个",
+  "@liveSearchCount": {
+    "description": "V2 conversation search (#462)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSearchNone": "无结果",
+  "@liveSearchNone": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchOlder": "较早的匹配",
+  "@liveSearchOlder": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchNewer": "较新的匹配",
+  "@liveSearchNewer": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchClose": "关闭搜索",
+  "@liveSearchClose": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversation": "在对话中搜索",
+  "@shortcutSearchConversation": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversationDesc": "在当前对话中查找文本；F3 和 Shift+F3 在匹配项之间切换",
+  "@shortcutSearchConversationDesc": {
+    "description": "V2 conversation search (#462)"
+  },
   "composerSend": "发送",
   "@composerSend": {
     "description": "V2 live session composer"

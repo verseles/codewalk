@@ -817,6 +817,33 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerWaitingEdit => 'সম্পাদনা';
 
   @override
+  String get liveSearch => 'কথোপকথনে খুঁজুন';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$totalটির মধ্যে $current';
+  }
+
+  @override
+  String get liveSearchNone => 'কোনো ফলাফল নেই';
+
+  @override
+  String get liveSearchOlder => 'পুরোনো মিল';
+
+  @override
+  String get liveSearchNewer => 'নতুন মিল';
+
+  @override
+  String get liveSearchClose => 'খোঁজা বন্ধ করুন';
+
+  @override
+  String get shortcutSearchConversation => 'কথোপকথনে খুঁজুন';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'খোলা কথোপকথনে লেখা খুঁজুন; F3 ও Shift+F3 মিলগুলোর মধ্যে সরায়';
+
+  @override
   String get composerSend => 'পাঠান';
 
   @override

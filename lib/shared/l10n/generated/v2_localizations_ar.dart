@@ -814,6 +814,33 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerWaitingEdit => 'تعديل';
 
   @override
+  String get liveSearch => 'البحث في المحادثة';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$current من $total';
+  }
+
+  @override
+  String get liveSearchNone => 'لا نتائج';
+
+  @override
+  String get liveSearchOlder => 'تطابق أقدم';
+
+  @override
+  String get liveSearchNewer => 'تطابق أحدث';
+
+  @override
+  String get liveSearchClose => 'إغلاق البحث';
+
+  @override
+  String get shortcutSearchConversation => 'البحث في المحادثة';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'ابحث عن نص في المحادثة المفتوحة؛ ينتقل F3 وShift+F3 بين التطابقات';
+
+  @override
   String get composerSend => 'إرسال';
 
   @override

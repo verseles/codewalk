@@ -1605,6 +1605,54 @@ abstract class V2Localizations {
   /// **'Edit'**
   String get composerWaitingEdit;
 
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Search conversation'**
+  String get liveSearch;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String liveSearchCount(int current, int total);
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get liveSearchNone;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Older match'**
+  String get liveSearchOlder;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Newer match'**
+  String get liveSearchNewer;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Close search'**
+  String get liveSearchClose;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Search conversation'**
+  String get shortcutSearchConversation;
+
+  /// V2 conversation search (#462)
+  ///
+  /// In en, this message translates to:
+  /// **'Find text in the open conversation; F3 and Shift+F3 move between matches'**
+  String get shortcutSearchConversationDesc;
+
   /// V2 live session composer
   ///
   /// In en, this message translates to:

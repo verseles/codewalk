@@ -838,6 +838,33 @@ class V2LocalizationsDe extends V2Localizations {
   String get composerWaitingEdit => 'Bearbeiten';
 
   @override
+  String get liveSearch => 'Im Gespräch suchen';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$current von $total';
+  }
+
+  @override
+  String get liveSearchNone => 'Keine Treffer';
+
+  @override
+  String get liveSearchOlder => 'Älterer Treffer';
+
+  @override
+  String get liveSearchNewer => 'Neuerer Treffer';
+
+  @override
+  String get liveSearchClose => 'Suche schließen';
+
+  @override
+  String get shortcutSearchConversation => 'Im Gespräch suchen';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'Text im geöffneten Gespräch finden; F3 und Umschalt+F3 springen zwischen Treffern';
+
+  @override
   String get composerSend => 'Senden';
 
   @override

@@ -538,6 +538,46 @@
   "@composerWaitingEdit": {
     "description": "V2 waiting messages (#486)"
   },
+  "liveSearch": "Im Gespräch suchen",
+  "@liveSearch": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchCount": "{current} von {total}",
+  "@liveSearchCount": {
+    "description": "V2 conversation search (#462)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSearchNone": "Keine Treffer",
+  "@liveSearchNone": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchOlder": "Älterer Treffer",
+  "@liveSearchOlder": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchNewer": "Neuerer Treffer",
+  "@liveSearchNewer": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchClose": "Suche schließen",
+  "@liveSearchClose": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversation": "Im Gespräch suchen",
+  "@shortcutSearchConversation": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversationDesc": "Text im geöffneten Gespräch finden; F3 und Umschalt+F3 springen zwischen Treffern",
+  "@shortcutSearchConversationDesc": {
+    "description": "V2 conversation search (#462)"
+  },
   "composerSend": "Senden",
   "@composerSend": {
     "description": "V2 live session composer"

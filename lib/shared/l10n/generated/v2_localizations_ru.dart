@@ -828,6 +828,33 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerWaitingEdit => 'Изменить';
 
   @override
+  String get liveSearch => 'Поиск в разговоре';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$current из $total';
+  }
+
+  @override
+  String get liveSearchNone => 'Нет результатов';
+
+  @override
+  String get liveSearchOlder => 'Более раннее совпадение';
+
+  @override
+  String get liveSearchNewer => 'Более позднее совпадение';
+
+  @override
+  String get liveSearchClose => 'Закрыть поиск';
+
+  @override
+  String get shortcutSearchConversation => 'Поиск в разговоре';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'Найти текст в открытом разговоре; F3 и Shift+F3 переходят между совпадениями';
+
+  @override
   String get composerSend => 'Отправить';
 
   @override

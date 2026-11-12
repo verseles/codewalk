@@ -537,6 +537,46 @@
   "@composerWaitingEdit": {
     "description": "V2 waiting messages (#486)"
   },
+  "liveSearch": "البحث في المحادثة",
+  "@liveSearch": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchCount": "{current} من {total}",
+  "@liveSearchCount": {
+    "description": "V2 conversation search (#462)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSearchNone": "لا نتائج",
+  "@liveSearchNone": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchOlder": "تطابق أقدم",
+  "@liveSearchOlder": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchNewer": "تطابق أحدث",
+  "@liveSearchNewer": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchClose": "إغلاق البحث",
+  "@liveSearchClose": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversation": "البحث في المحادثة",
+  "@shortcutSearchConversation": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversationDesc": "ابحث عن نص في المحادثة المفتوحة؛ ينتقل F3 وShift+F3 بين التطابقات",
+  "@shortcutSearchConversationDesc": {
+    "description": "V2 conversation search (#462)"
+  },
   "composerSend": "إرسال",
   "@composerSend": {
     "description": "V2 live session composer"

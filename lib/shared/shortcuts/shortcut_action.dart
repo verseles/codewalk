@@ -16,7 +16,8 @@ enum ShortcutAction {
   cycleTabsForward('cycle_tabs_forward', 'ctrl+tab'),
   cycleTabsBackward('cycle_tabs_backward', 'ctrl+shift+tab'),
   closeApp('close_app', 'mod+w'),
-  quitApp('quit_app', 'mod+q');
+  quitApp('quit_app', 'mod+q'),
+  searchConversation('search_conversation', 'mod+f');
 
   const ShortcutAction(this.key, this.defaultBinding);
 
@@ -39,6 +40,7 @@ enum ShortcutAction {
     cycleTabsBackward => l.shortcutPreviousTab,
     closeApp => l.shortcutCloseApp,
     quitApp => l.shortcutQuitApp,
+    searchConversation => l.shortcutSearchConversation,
   };
 
   String description(V2Localizations l) => switch (this) {
@@ -57,13 +59,17 @@ enum ShortcutAction {
     cycleTabsBackward => l.shortcutPreviousTabDesc,
     closeApp => l.shortcutCloseAppDesc,
     quitApp => l.shortcutQuitAppDesc,
+    searchConversation => l.shortcutSearchConversationDesc,
   };
 
   String group(V2Localizations l) => switch (this) {
     newChat || cycleTabsForward || cycleTabsBackward => l.shortcutGroupSession,
     refresh => l.shortcutGroupGeneral,
     focusInput || toggleVoiceInput => l.shortcutGroupPrompt,
-    quickOpen || openSettings || escape => l.shortcutGroupNavigation,
+    quickOpen ||
+    openSettings ||
+    escape ||
+    searchConversation => l.shortcutGroupNavigation,
     cycleRecentModels ||
     cycleVariant ||
     cycleAgentForward ||

@@ -538,6 +538,46 @@
   "@composerWaitingEdit": {
     "description": "V2 waiting messages (#486)"
   },
+  "liveSearch": "گفتگو میں تلاش کریں",
+  "@liveSearch": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchCount": "{total} میں سے {current}",
+  "@liveSearchCount": {
+    "description": "V2 conversation search (#462)",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSearchNone": "کوئی نتیجہ نہیں",
+  "@liveSearchNone": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchOlder": "پرانا مماثل",
+  "@liveSearchOlder": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchNewer": "نیا مماثل",
+  "@liveSearchNewer": {
+    "description": "V2 conversation search (#462)"
+  },
+  "liveSearchClose": "تلاش بند کریں",
+  "@liveSearchClose": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversation": "گفتگو میں تلاش کریں",
+  "@shortcutSearchConversation": {
+    "description": "V2 conversation search (#462)"
+  },
+  "shortcutSearchConversationDesc": "کھلی گفتگو میں متن تلاش کریں؛ F3 اور Shift+F3 مماثلتوں کے درمیان لے جاتے ہیں",
+  "@shortcutSearchConversationDesc": {
+    "description": "V2 conversation search (#462)"
+  },
   "composerSend": "بھیجیں",
   "@composerSend": {
     "description": "V2 live session composer"

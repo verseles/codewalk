@@ -251,6 +251,37 @@ final class SessionTimelinePresentation {
     );
   }
 
+  /// The answers and reasoning the Block render mode holds back now, so a
+  /// search does not find what the timeline does not show yet (#462): the
+  /// part of the turn in flight after the first item that has not ended,
+  /// by the same rule [project] publishes with.
+  static Set<ItemId> heldText(
+    List<TimelineItem> items, {
+    required bool settled,
+    required ChatRenderMode renderMode,
+  }) {
+    if (renderMode != ChatRenderMode.block || settled) return const {};
+    items = sessionTimelineItems(items);
+    var start = items.length;
+    while (start > 0 && items[start - 1] is! UserInput) {
+      start--;
+    }
+    // A finished turn shows whole, as [project] may still collapse it
+    // during a brief busy report (its latch): nothing of it is held.
+    final last = _lastText(items, start, items.length);
+    if (last != null && _finished(items, start, items.length, last)) {
+      return const {};
+    }
+    var published = start;
+    while (published < items.length && _ended(items[published])) {
+      published++;
+    }
+    return {
+      for (final item in items.skip(published))
+        if (item is AssistantText || item is Reasoning) item.id,
+    };
+  }
+
   /// Whether an item can be published in the Block render mode: its message
   /// ended, as the harness reported, or, outside any message, it ended. An
   /// item outside any message whose end is unknown, such as the context a

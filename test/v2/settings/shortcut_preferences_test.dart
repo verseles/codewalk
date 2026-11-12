@@ -16,7 +16,8 @@ void main() {
       AppPreferencesController(store: V2MetadataStore(backend: backend));
 
   test('portable modifiers and strict chords retain the imported contract', () {
-    expect(ShortcutAction.values, hasLength(15));
+    // The 15 imported from v1, plus Search conversation (#462).
+    expect(ShortcutAction.values, hasLength(16));
     expect(
       ShortcutBindingCodec.parse('mod+,', platform: TargetPlatform.macOS)!.meta,
       isTrue,

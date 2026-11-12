@@ -231,6 +231,18 @@ class WorkspaceAppBarActions extends StatelessWidget {
               : () => showWorkspaceDisplayMenu(context),
           child: Text(l.chatDisplayMenu),
         ),
+        // v1: chat_page_mobile_overflow.dart:140, the search (#462); a wide
+        // window has it on the toolbar.
+        if (!wide) ...[
+          const Divider(height: 1),
+          MenuItemButton(
+            key: const ValueKey('workspace-search'),
+            leadingIcon: const Icon(Symbols.search),
+            onPressed: live?.search.show,
+            child: Text(l.liveSearch),
+          ),
+          const Divider(height: 1),
+        ],
         // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
         // disabled without a turn to undo; redo and compact need a live session.
         if (!wide) ...[
@@ -288,6 +300,13 @@ class WorkspaceAppBarActions extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // v1: chat_page_chrome.dart:983 (#462).
+              IconButton(
+                key: const ValueKey('workspace-search'),
+                tooltip: l.liveSearch,
+                icon: const Icon(Symbols.search),
+                onPressed: live?.search.show,
+              ),
               IconButton(
                 key: const ValueKey('turn-menu-undo'),
                 tooltip: l.chatUndoLastTurn,

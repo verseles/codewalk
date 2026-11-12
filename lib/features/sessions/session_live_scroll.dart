@@ -116,6 +116,7 @@ final class SessionLiveScroll extends ChangeNotifier {
   void markUserIntent() {
     if (_programmatic) return;
     _readerMoves++;
+    _held = false;
     if (!_following && !_revealed) return;
     _following = false;
     _revealed = false;
@@ -136,7 +137,7 @@ final class SessionLiveScroll extends ChangeNotifier {
       // away from the reader.
       markUserIntent();
     }
-    if (!atBottom || userScrolling) return;
+    if (!atBottom || userScrolling || _held) return;
     if (_following && !_unreadBelow && !_revealed) return;
     _following = true;
     _unreadBelow = false;
@@ -192,6 +193,27 @@ final class SessionLiveScroll extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Keeps the follow off, even at the bottom, until the reader moves the
+  /// list or jumps to the newest content: a search shows a match there and
+  /// new content must not pull it away (#462).
+  void holdFollow() {
+    _held = true;
+    if (!_following) return;
+    _following = false;
+    syncJumpToFirst();
+    notifyListeners();
+  }
+
+  bool _held = false;
+
+  /// Ends [holdFollow] once the search no longer shows a match: at the
+  /// bottom the follow resumes.
+  void releaseHold() {
+    if (!_held) return;
+    _held = false;
+    onViewportChanged();
+  }
+
   /// Runs a programmatic scroll, so the notifications it produces are never
   /// read as the reader's.
   void runProgrammatic(VoidCallback action) {
@@ -208,6 +230,7 @@ final class SessionLiveScroll extends ChangeNotifier {
   /// The jump is a single synchronous move: an animated scroll would trail
   /// the content it is chasing.
   void jumpToLatest() {
+    _held = false;
     _following = true;
     _revealed = false;
     _unreadBelow = false;

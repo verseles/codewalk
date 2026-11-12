@@ -821,6 +821,33 @@ class V2LocalizationsEn extends V2Localizations {
   String get composerWaitingEdit => 'Edit';
 
   @override
+  String get liveSearch => 'Search conversation';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get liveSearchNone => 'No results';
+
+  @override
+  String get liveSearchOlder => 'Older match';
+
+  @override
+  String get liveSearchNewer => 'Newer match';
+
+  @override
+  String get liveSearchClose => 'Close search';
+
+  @override
+  String get shortcutSearchConversation => 'Search conversation';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'Find text in the open conversation; F3 and Shift+F3 move between matches';
+
+  @override
   String get composerSend => 'Send';
 
   @override

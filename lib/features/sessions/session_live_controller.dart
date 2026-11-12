@@ -22,6 +22,7 @@ import 'session_live_scroll.dart';
 import 'session_selection_cycle.dart';
 import 'session_selection_host.dart';
 import 'session_selection_memory.dart';
+import 'session_timeline_search.dart';
 import 'session_turn_controller.dart';
 
 enum SessionExecutionNotice { interrupted, unconfirmed }
@@ -83,6 +84,9 @@ class SessionLiveController extends ChangeNotifier
   /// The timeline's place and follow state, kept with the session so a view
   /// shown again resumes where the reader left it.
   final scroll = SessionLiveScroll();
+
+  /// Find in this conversation (#462), kept with the session like [scroll].
+  final search = SessionTimelineSearch();
 
   /// The unsent prompt, kept with the session so switching tabs keeps it,
   /// and saved on this device through [drafts] so a relaunch restores it.
@@ -1135,6 +1139,7 @@ class SessionLiveController extends ChangeNotifier
     modelPreferences?.removeListener(_notify);
     _detach();
     scroll.dispose();
+    search.dispose();
     _composer?.dispose();
     turn.dispose();
     draft.removeListener(_draftChanged);

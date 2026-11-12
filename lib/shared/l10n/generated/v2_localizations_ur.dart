@@ -820,6 +820,33 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerWaitingEdit => 'ترمیم کریں';
 
   @override
+  String get liveSearch => 'گفتگو میں تلاش کریں';
+
+  @override
+  String liveSearchCount(int current, int total) {
+    return '$total میں سے $current';
+  }
+
+  @override
+  String get liveSearchNone => 'کوئی نتیجہ نہیں';
+
+  @override
+  String get liveSearchOlder => 'پرانا مماثل';
+
+  @override
+  String get liveSearchNewer => 'نیا مماثل';
+
+  @override
+  String get liveSearchClose => 'تلاش بند کریں';
+
+  @override
+  String get shortcutSearchConversation => 'گفتگو میں تلاش کریں';
+
+  @override
+  String get shortcutSearchConversationDesc =>
+      'کھلی گفتگو میں متن تلاش کریں؛ F3 اور Shift+F3 مماثلتوں کے درمیان لے جاتے ہیں';
+
+  @override
   String get composerSend => 'بھیجیں';
 
   @override

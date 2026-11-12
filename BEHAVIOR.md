@@ -673,6 +673,16 @@ description of this code.
 - **Then** the footer stays fixed below the list when the pick is at least 420 dp tall; on a shorter pick (a phone with the keyboard open, or large text) it follows the list's last row instead; the composer's chip carries no permission badge
 - **Then** a harness without agents or a permission mode shows no such part, with no fake control
 
+### V2 conversation search
+
+- **Given** an open live session, on any harness
+- **When** the user presses Ctrl/Cmd+F (Search conversation, configurable in Settings > Shortcuts), picks Search conversation in the ⋮ menu of a narrow window, or the search button on a wide window's toolbar (#462)
+- **Then** a bar above the timeline takes the focus, or takes it back with its text selected when already open; it searches the conversation as loaded on this device, ignoring case: the user's messages, the answers and, while shown, the reasoning; tool calls and history not yet loaded are not searched
+- **Then** matches run from the newest: the newest is first, its row is outlined and scrolled into view (the timeline stops following new content), and the bar says "1 of N", or "No results" with the arrows off
+- **Then** Enter, F3 and ↑ go to the next older match, Shift+Enter, Shift+F3 and ↓ to the next newer one, wrapping at either end; F3 and Shift+F3 work from anywhere in the conversation while the bar is open, and content arriving meanwhile keeps the current match
+- **Then** Escape in the field or ✕ closes the bar, removes the outline and gives the composer the focus
+- **Then** it needs no harness capability: it reads the canonical items every harness gives
+
 ### V2 navigation intents and locale
 
 - **Given** a `codewalk://s/<host>/<session>` link or `/s/<host>/<session>` route is opened

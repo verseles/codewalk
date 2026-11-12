@@ -114,7 +114,9 @@ class _SessionComposerState extends State<SessionComposer> {
         keyboard.isShiftPressed ||
         !_text.value.composing.isCollapsed ||
         widget.controller.sending ||
-        !widget.controller.live.canStop) {
+        !widget.controller.live.canStop ||
+        // An open search takes Escape first, so it never stops a turn (#462).
+        widget.controller.live.search.open) {
       return KeyEventResult.ignored;
     }
     final now = DateTime.now();
