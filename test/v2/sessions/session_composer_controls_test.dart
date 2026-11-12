@@ -183,13 +183,16 @@ void main() {
   testWidgets('one chip shows the model and variant on the agent color', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     await open(tester, permissions: 2);
     expect(chip('live-model-chip', 'Alpha high'), findsOneWidget);
     expect(find.byKey(const ValueKey('live-agent-chip')), findsNothing);
     expect(find.byKey(const ValueKey('live-variant-chip')), findsNothing);
     // Build without a color of its own is green.
     expect(chipColor(tester), sessionDefaultAgentColor);
-    // The permissions waiting for the user are counted on the chip.
+    // The permissions waiting for the user are counted on the chip, and
+    // screen readers hear the count too.
+    expect(find.bySemanticsLabel(RegExp(r'(^|\D)2(\D|$)')), findsWidgets);
     final badge = tester.widget<Badge>(
       find.byKey(const ValueKey('live-permission-badge')),
     );
@@ -201,6 +204,7 @@ void main() {
       ),
       findsOneWidget,
     );
+    semantics.dispose();
   });
 
   testWidgets('the chip takes the agent color: own, plan, or the palette', (
@@ -238,7 +242,12 @@ void main() {
       label: 'Docs',
     );
     await pick('docs', [_build, _plan, review, docs]);
-    expect(chipColor(tester), sessionAgentPalette.first);
+    final docsColor = chipColor(tester);
+    expect(sessionAgentPalette, contains(docsColor));
+    // The palette color follows the id alone, never the roster.
+    await pick('docs', [docs]);
+    expect(chipColor(tester), docsColor);
+    expect(sessionAgentColor([_build, review, docs], 'docs'), docsColor);
     // The label reads on any of them.
     expect(sessionAgentForeground(sessionPlanAgentColor), Colors.black);
     expect(sessionAgentForeground(sessionDefaultAgentColor), Colors.white);

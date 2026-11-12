@@ -258,8 +258,11 @@ def smoke(archive_path, evidence):
             restarted = luminance(window)
             verify_dark_rendering(light, dark, restarted)
             report["rendered_theme_luminance"] = {"light": light, "dark": dark, "restarted_dark": restarted}
+            # The restart reopens settings at the top, under the same card.
+            reveal(window, "Shortcuts")
             click(window, "Shortcuts")
             expect(window, ["Search shortcuts"], "07-shortcuts")
+            reveal(window, "App Logs")
             click(window, "App Logs")
             expect(window, ["Enable app logging", "Logging is disabled"], "08-logs")
             reveal(window, "Version and updates")

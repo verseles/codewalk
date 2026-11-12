@@ -162,6 +162,13 @@ void main() {
         .row('created', directory: '/work/alpha')
         .info
         .ref;
+    // A phone composer opens on the frame after the field takes focus, and
+    // only the open field keeps line breaks (#484), as a real keyboard
+    // types after that frame.
+    await tester.showKeyboard(
+      find.byKey(const ValueKey('workspace-draft-text')),
+    );
+    await tester.pump();
     await tester.enterText(
       find.byKey(const ValueKey('workspace-draft-text')),
       '  first prompt\n',

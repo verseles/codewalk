@@ -123,6 +123,7 @@ final class _NativeSource implements SessionCatalogSource {
             kind: const OpenValue.known(CatalogKind.agent),
             label: entry.name,
             description: entry.description,
+            color: entry.color,
           ),
       ],
       models: models ?? const [],

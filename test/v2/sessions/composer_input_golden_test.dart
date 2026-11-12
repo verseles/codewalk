@@ -34,7 +34,6 @@ Widget _composer(
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: ComposerFrame(
-                  focusNode: focus,
                   attachTooltip: 'Attach',
                   voiceTooltip: 'Voice',
                   chip: ActionChip(

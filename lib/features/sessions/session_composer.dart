@@ -635,7 +635,6 @@ class _SessionComposerState extends State<SessionComposer> {
                     },
                   },
                   child: ComposerFrame(
-                    focusNode: _focus,
                     attachTooltip: l10n.composerAttachSoon,
                     voiceTooltip: l10n.composerVoiceSoon,
                     chip: SessionModelChip(
@@ -656,7 +655,8 @@ class _SessionComposerState extends State<SessionComposer> {
                               (c.sending && !_continuing) ||
                               c.live.endpointOffline,
                           minLines: 1,
-                          maxLines: 4,
+                          // A closed phone composer stays one line.
+                          maxLines: open ? 4 : 1,
                           keyboardType: TextInputType.multiline,
                           autocorrect: composerSuggests(context),
                           enableSuggestions: composerSuggests(context),

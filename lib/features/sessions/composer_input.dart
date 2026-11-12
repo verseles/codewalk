@@ -98,20 +98,18 @@ class ComposerBubble extends StatelessWidget {
 /// The composer (#484), one bubble for the field and every control. Closed
 /// it is one line: Attach, the field, Voice and [action]. Open, the field
 /// sits on top and one row below holds Attach, [chip], Voice and [action].
-/// It opens while [focusNode] has focus on a phone and stays open elsewhere.
+/// It opens while anything inside it has focus on a phone, so Tab can reach
+/// the chip, and stays open elsewhere.
 /// Attach and Voice name what is coming and stay disabled until it does.
 class ComposerFrame extends StatefulWidget {
   const ComposerFrame({
     super.key,
-    required this.focusNode,
     required this.field,
     required this.action,
     required this.attachTooltip,
     required this.voiceTooltip,
     this.chip,
   });
-
-  final FocusNode focusNode;
 
   /// The field, given whether the composer is open.
   final Widget Function(BuildContext context, bool open) field;
@@ -125,24 +123,29 @@ class ComposerFrame extends StatefulWidget {
 }
 
 class _ComposerFrameState extends State<ComposerFrame> {
+  /// Holds the focus of everything inside the frame, never its own.
+  final _frame = FocusNode(
+    debugLabel: 'composer frame',
+    canRequestFocus: false,
+    skipTraversal: true,
+  );
+
   @override
   void initState() {
     super.initState();
-    widget.focusNode.addListener(_changed);
-  }
-
-  @override
-  void didUpdateWidget(ComposerFrame old) {
-    super.didUpdateWidget(old);
-    if (old.focusNode != widget.focusNode) {
-      old.focusNode.removeListener(_changed);
-      widget.focusNode.addListener(_changed);
-    }
+    _frame.addListener(_changed);
+    // A field that already had focus when the frame was built (a draft that
+    // focuses itself) gives the frame no focus change to hear, so the frame
+    // looks once more after its first layout. A closed field is one line,
+    // and a one-line field drops line breaks from what is typed into it.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _changed());
   }
 
   @override
   void dispose() {
-    widget.focusNode.removeListener(_changed);
+    _frame
+      ..removeListener(_changed)
+      ..dispose();
     super.dispose();
   }
 
@@ -163,7 +166,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
 
   @override
   Widget build(BuildContext context) {
-    final open = composerAlwaysOpen || widget.focusNode.hasFocus;
+    final open = composerAlwaysOpen || _frame.hasFocus;
     final attach = _soon('composer-attach', Symbols.add, widget.attachTooltip);
     final voice = _soon('composer-voice', Symbols.mic, widget.voiceTooltip);
     // The field keeps its place in the first row whether the composer is
@@ -179,42 +182,48 @@ class _ComposerFrameState extends State<ComposerFrame> {
     const gap = SizedBox(width: 4);
     // The controls are part of the field's region, so pressing one keeps a
     // desktop field's focus (#174).
-    return TextFieldTapRegion(
-      child: ComposerBubble(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                if (!open) attach,
-                field,
-                if (!open) ...[voice, gap, widget.action],
-              ],
-            ),
-            // The second row stays in the tree, hidden, while the composer
-            // is closed: a pick opened from the chip moves the focus away,
-            // and the chip must outlive that to apply the pick.
-            Visibility(
-              visible: open,
-              maintainState: true,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(
-                  children: [
-                    if (open) ...[attach, gap],
-                    if (chip != null)
-                      Flexible(
+    return Focus(
+      focusNode: _frame,
+      child: TextFieldTapRegion(
+        child: ComposerBubble(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  if (!open) attach,
+                  field,
+                  if (!open) ...[voice, gap, widget.action],
+                ],
+              ),
+              // The second row stays in the tree, hidden, while the composer
+              // is closed: a pick opened from the chip moves the focus away,
+              // and the chip must outlive that to apply the pick.
+              Visibility(
+                visible: open,
+                maintainState: true,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    children: [
+                      if (open) ...[attach, gap],
+                      // The chip may use the whole gap; what it leaves stays
+                      // after it, so the mic and Send keep to the end.
+                      Expanded(
                         key: const ValueKey('composer-chip'),
-                        child: chip,
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: chip ?? const SizedBox.shrink(),
+                        ),
                       ),
-                    const Spacer(key: ValueKey('composer-spacer')),
-                    if (open) ...[voice, gap, widget.action],
-                  ],
+                      if (open) ...[voice, gap, widget.action],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

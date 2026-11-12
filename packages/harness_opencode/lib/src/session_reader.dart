@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
+import 'agent_color.dart';
 import 'execution_projection.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
@@ -423,7 +424,7 @@ final class OpenCodeSessionReader {
             description: description == null
                 ? null
                 : _catalogText(description, empty: true),
-            color: _agentColor(agent['color']),
+            color: openCodeAgentColor(agent['color']),
           ),
           id is String &&
                   id.isNotEmpty &&
@@ -1298,18 +1299,6 @@ String _catalogText(Object? value, {bool empty = false}) {
     throw const FormatException('Malformed catalog text.');
   }
   return value;
-}
-
-/// An agent's configured color: OpenCode 2 keeps six-digit hex only, and its
-/// v1 config migration writes `#aaaaaa` for a theme name it cannot keep, so
-/// that value means no color. Anything else is no color, never a failure.
-String? _agentColor(Object? value) {
-  if (value is! String) return null;
-  final color = value.trim().toLowerCase();
-  if (!RegExp(r'^#[0-9a-f]{6}$').hasMatch(color) || color == '#aaaaaa') {
-    return null;
-  }
-  return color;
 }
 
 /// A model's prices, or null when they cannot be read: a price is shown

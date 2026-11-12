@@ -338,7 +338,6 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                               SessionFieldHeightReporter(
                                 onHeight: _fieldMeasured,
                                 child: ComposerFrame(
-                                  focusNode: _composerFocus,
                                   attachTooltip: l10n.composerAttachSoon,
                                   voiceTooltip: l10n.composerVoiceSoon,
                                   chip: SessionModelChip(
@@ -382,7 +381,9 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                         enabled: !c.sending,
                                         readOnly: c.endpointOffline,
                                         minLines: 1,
-                                        maxLines: 6,
+                                        // A closed phone composer stays
+                                        // one line.
+                                        maxLines: open ? 6 : 1,
                                         keyboardType: TextInputType.multiline,
                                         textCapitalization:
                                             TextCapitalization.sentences,

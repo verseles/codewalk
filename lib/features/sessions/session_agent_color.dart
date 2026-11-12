@@ -7,8 +7,9 @@ const sessionDefaultAgentColor = Color(0xFF2E7D32);
 /// The `plan` agent's color when its harness names none (#484): hot pink.
 const sessionPlanAgentColor = Color(0xFFFF1493);
 
-/// Every other agent without a color of its own takes one of these, by its
-/// place among them, so it keeps its color across screens.
+/// Every other agent without a color of its own takes one of these, chosen
+/// by its id alone, so it keeps its color across screens, projects and
+/// catalog changes.
 const sessionAgentPalette = [
   Color(0xFF1E88E5),
   Color(0xFFF57C00),
@@ -21,8 +22,8 @@ const sessionAgentPalette = [
 /// The color that stands for [agentId] among [agents]: the agent's own when
 /// its harness names one, otherwise green for the default agent (a session
 /// without an agent of its own, or `build`), hot pink for `plan`, and a
-/// palette color for any other. The defaults belong to CodeWalk, so every
-/// harness gets them.
+/// palette color for any other, from its id. The defaults belong to
+/// CodeWalk, so every harness gets them.
 Color sessionAgentColor(List<CatalogEntry> agents, String? agentId) {
   final own = agents.where((agent) => agent.id == agentId).firstOrNull?.color;
   if (own != null) {
@@ -30,16 +31,10 @@ Color sessionAgentColor(List<CatalogEntry> agents, String? agentId) {
   }
   if (agentId == null || agentId == 'build') return sessionDefaultAgentColor;
   if (agentId == 'plan') return sessionPlanAgentColor;
-  final others = [
-    for (final agent in agents)
-      if (agent.color == null && agent.id != 'build' && agent.id != 'plan')
-        agent.id,
-  ];
-  final index = others.indexOf(agentId);
-  // An agent the roster does not list still gets the same color each time.
-  final slot = index >= 0
-      ? index
-      : agentId.codeUnits.fold(0, (sum, unit) => (sum * 31 + unit) & 0xFFFF);
+  final slot = agentId.codeUnits.fold(
+    0,
+    (sum, unit) => (sum * 31 + unit) & 0xFFFF,
+  );
   return sessionAgentPalette[slot % sessionAgentPalette.length];
 }
 

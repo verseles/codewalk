@@ -77,7 +77,6 @@ class SessionModelChip extends StatelessWidget {
           label: description,
           button: true,
           enabled: picks,
-          excludeSemantics: true,
           child: Tooltip(
             message: description,
             child: Badge.count(
@@ -99,12 +98,9 @@ class SessionModelChip extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       if (variant != null)
-                        TextSpan(
-                          text: ' $variant',
-                          style: TextStyle(
-                            color: foreground.withValues(alpha: 0.78),
-                          ),
-                        ),
+                        // Same color as the model, so it keeps the contrast;
+                        // the lighter weight sets it apart.
+                        TextSpan(text: ' $variant'),
                     ],
                   ),
                   style: style,

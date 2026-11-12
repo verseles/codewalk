@@ -95,13 +95,19 @@ void main() {
           ])
         : response(
             located('/work/a', [
-              {'id': 'review', 'mode': 'primary', 'hidden': false},
+              {
+                'id': 'review',
+                'mode': 'primary',
+                'hidden': false,
+                'color': '#1E88E5',
+              },
               {'id': 'build', 'mode': 'primary', 'hidden': false},
               {
                 'id': 'plan',
                 'mode': 'primary',
                 'hidden': false,
                 'model': {'id': 'm', 'providerID': 'p'},
+                'color': '#aaaaaa',
               },
               {'id': 'helper', 'mode': 'subagent', 'hidden': false},
             ]),
@@ -115,6 +121,18 @@ void main() {
     ).readDefaultAgentDetails(directory: '/work/a');
     expect(result?.id, 'plan');
     expect(result?.modelId, 'm');
+  });
+
+  test('each agent keeps only its own six-digit hex color (#484)', () async {
+    final result = await OpenCodeLocationReader(
+      agents(null),
+      harness: harness,
+    ).readAgentDetails(directory: '/work/a');
+    // The v1 migration's #aaaaaa stands for a theme name, so no color.
+    expect(
+      {for (final agent in result.agents) agent.id: agent.color},
+      {'review': '#1e88e5', 'build': null, 'plan': null},
+    );
   });
 
   test('an unselectable configured agent falls back to build', () async {

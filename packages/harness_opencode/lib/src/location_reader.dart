@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
+import 'agent_color.dart';
 import 'json_reads.dart';
 import 'session_reader.dart';
 
@@ -14,6 +15,9 @@ typedef OpenCodeAgentDetails = ({
   String? modelId,
   String? providerId,
   String? variant,
+
+  /// Its configured color as lowercase `#rrggbb`, when it has one.
+  String? color,
 });
 
 /// The endpoint's projects, locations and directories: what a project picker
@@ -224,6 +228,7 @@ final class OpenCodeLocationReader {
           modelId: model == null ? null : _text(model['id']),
           providerId: model == null ? null : _text(model['providerID']),
           variant: model?['variant'] as String?,
+          color: openCodeAgentColor(agent['color']),
         ));
       }
       OpenCodeAgentDetails? named(String? id) =>
