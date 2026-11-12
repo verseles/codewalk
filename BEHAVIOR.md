@@ -420,7 +420,7 @@ description of this code.
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server
 - **When** its live page opens
-- **Then** the composer shows separate agent, model and variant chips above its field, wrapping on a narrow window; catalog labels name the session's own selection, and a missing half is the server default; a session without a model of its own names the model the server runs it on, as the server resolves it: the effective agent's own model (the configured `default_agent` when selectable, else `build`, else the first agent, for a session without an agent) when the location offers it, with its variant when that model lists it, else the location default from `GET /api/model/default`; while the model, agent or config read fails, or no default is known, it shows "Default"; the model's tooltip and semantics retain the whole selection and any pending, unconfirmed or changed-elsewhere status
+- **Then** the composer's open row shows one chip with the model and, after it, its variant, on the current agent's color, with black or white text for contrast; catalog labels name the session's own selection, and a missing half is the server default; a session without a model of its own names the model the server runs it on, as the server resolves it: the effective agent's own model (the configured `default_agent` when selectable, else `build`, else the first agent, for a session without an agent) when the location offers it, with its variant when that model lists it, else the location default from `GET /api/model/default`; while the model, agent or config read fails, or no default is known, it shows "Default"; the model's tooltip and semantics retain the whole selection and any pending, unconfirmed or changed-elsewhere status
 - **Then** the session record supplies the selection, and `session.model.selected` / `session.agent.selected` keep it current; the model reference keeps its provider and variant together
 - **Then** the location's models and agents are read once per live period with `GET /api/model` and `GET /api/agent` scoped to the session's directory, together with `GET /api/config`, `GET /api/model/default` and `GET /api/provider`, and again on an explicit refresh, when the pick opens, and when the server reports `model.updated`, `agent.updated` or `provider.updated` for that directory (a report without a location is ignored, as in the official client); the last three reads only name things, so their failure never makes the pick unavailable; only enabled models, their variant ids (never their settings) and non-hidden primary or all-mode agents are offered, and a value the list does not hold stays visible as not offered here
 - **Then** a missing route, required authentication, an unreadable or oversized answer, a failed read, an empty list or a session without a location is reported per half; when neither half can be offered for a reason a retry would not change, the chip stays as a non-interactive affordance whose tooltip and semantics give the reason, and nothing is faked
@@ -429,14 +429,15 @@ description of this code.
 - **Then** an accepted switch shows at once and holds until the server reports a newer selection, and the next pick waits for that report; a refused switch changes nothing and says so; a switch reported and then replaced by another client, before or after its answer, says it was changed elsewhere
 - **Then** an uncertain answer is never resent: a switch the server already reported settles at once, otherwise one read of the session record settles it as applied or not applied; a failed read keeps it unconfirmed, and the session's sends wait until Check again, a newer server selection or a new pick settles it
 - **Then** closing or releasing the lease never switches anything
-- **Then** a sub-conversation hides its agent chip and shows its inherited model and variant disabled, with a lock on the model
+- **Then** a sub-conversation's chip shows its inherited model and variant disabled, with a lock
+- **Then** the agent's color is the harness's own when it names one (OpenCode: the agent's configured six-digit hex; `#aaaaaa`, which its v1 migration writes for a theme name, means none); otherwise CodeWalk's: green for the default agent (a session without an agent of its own, or `build`), hot pink for `plan`, and for any other a palette color chosen by its id alone, so it keeps it across screens and projects; the new chat's chip follows the same rule
 - **Then** technical coverage includes contract-derived loopback race tests, the chip in 14 locales at compact and wide sizes, 2x text at 360 dp, and the bottom sheet and dialog; no live 2.0.22 switch capture exists yet (#425), switches are not shown in the timeline (#426), and installed native acceptance remains separate
 
 ### V2 model picker, favorites and recents
 
 - **Given** an open native v2 session on a supported OpenCode 2.x server that can switch its selection
-- **When** the user taps the composer's model chip
-- **Then** a models-only picker opens (a bottom sheet below 600 dp, a dialog otherwise) with a search field that narrows the models by name, id, provider id or provider name; while searching, each match shows once in its provider's group, and no match says "No models found"
+- **When** the user taps the composer's model chip, or runs `/model`
+- **Then** the chip opens the pick of agent, model and variant, and `/model` opens it with the models only; either opens as a bottom sheet below 600 dp and a dialog otherwise, with a search field that narrows the models by name, id, provider id or provider name; while searching, each match shows once in its provider's group, and no match says "No models found"
 - **Then** this server's **Favorites** come first, then this project's **Recent** models, then every model grouped by provider; a favorite or recent the session's location does not offer is not shown, a favorite is not repeated among the recents, and outside its provider's group a row names its provider; providers are named by `GET /api/provider` (`Provider.Info.name`), or by their id when the location does not name them, in this picker and in the new-chat picker
 - **Then** a model is marked **Free** only when the catalog states one untiered price of zero (`Model.Info.cost`, USD per million tokens); a priced, tiered, empty, absent or unreadable price shows no badge, and an unreadable price never fails the catalog
 - **Then** the star on a row adds or removes a favorite without picking the model; favorites are kept on this device per server (shared by its projects, at most 64 per server), and recents per server and project, newest first, at most eight
@@ -444,7 +445,7 @@ description of this code.
 - **Then** a record that cannot be read is never overwritten: the stars stay disabled and the picker says favorites and recent models cannot be saved; a failed save changes nothing and says the same
 - **When** the user picks a model or a variant
 - **Then** tapping the session's current model keeps its variant and sends nothing; another model is switched to with the server's default variant; a variant chip picks that variant, and **Auto** is the one choice that clears a chosen variant
-- **Then** the composer's variant chip reads **Auto** when no variant is chosen, and its menu offers Auto and the model's variants; dismissing the menu (barrier tap or Escape) keeps the current variant; a chosen variant the model no longer lists can still be cleared with Auto, from the menu or beside the current model in the picker
+- **Then** the composer's chip names no variant when none is chosen (Auto); a chosen variant the model no longer lists can still be cleared with Auto beside the current model in the picker
 - **Then** technical coverage includes adapter price-projection tests on the 2.0.22 fixture, store persistence/bounds/unreadable tests, picker widget tests, and compact, RTL and wide picker goldens; installed native acceptance remains separate
 
 ### V2 model, agent and variant cycling
@@ -610,7 +611,10 @@ description of this code.
 
 - **Given** a live session's composer or a new chat's draft
 - **When** it renders
-- **Then** the field sits in a rounded bubble without an outline, with a round Send beside it (filled while there is text to send) and, while the session responds and the field is empty, a round dark Stop in its place
+- **Then** one rounded bubble without an outline holds the field and every control (#484): on a phone without focus it is a single line with **+**, the field ("Message"), the mic and the action; while anything inside it has focus on a phone, and always on a desktop, the field ("Type / for commands") sits on top and one row below holds **+**, the model chip, the mic and the action, which keep to the end; nothing sits above the field
+- **Then** the action is a round Send (filled while there is text to send) or, while the session responds and the field is empty, a round dark Stop
+- **Then** **+** (attachments and canned answers) and the mic (voice) are shown disabled, and their tooltips and semantics say the feature is coming
+- **Then** a closed field shows one line and keeps every line of the draft; it opens on the frame after it takes focus, including a field that already had focus when the composer was built
 - **Then** the field uses the platform's native spell check, suggestions and autocorrection unless Settings > Behavior > Composer spell check is off; the choice persists under `cw2.settings.composerSpellCheck` (on by default, only `false` is written) and nothing is sent to another service
 - **When** the on-screen keyboard opens
 - **Then** the field and its Send stay whole above it, on a phone and in landscape
@@ -661,10 +665,10 @@ description of this code.
 ### V2 agent menu and permission quick switch
 
 - **Given** a live session's composer offers an agent menu
-- **When** the user opens its agent chip
-- **Then** a floating list shows its offered agents and opens above the chip when there is room, below it or inside the safe viewport otherwise; it uses the root window's coordinates, keeps outside the keyboard and adapts its width to enlarged text, including RTL
+- **When** the user runs `/agent`
+- **Then** a floating list anchored at the model chip shows its offered agents and opens above the chip when there is room, below it or inside the safe viewport otherwise; it uses the root window's coordinates, keeps outside the keyboard and adapts its width to enlarged text, including RTL
 - **Then** picking an agent closes the menu and uses the existing session-selection fence; unreadable agent choices explain why instead of inventing a catalog
-- **Then** the agent chip's badge counts only the session's pending permission requests, capped at 99, and clears as those requests resolve
+- **Then** the model chip's badge counts only the session's pending permission requests, capped at 99, clears as those requests resolve, and is announced with the chip
 - **Then** a fixed footer switches this session between acknowledged Allow all and Ask while keeping the menu open; it stays disabled during the write, and a failed write reports the failure without changing the acknowledged mode
 - **Then** an unreadable or unknown policy says Unavailable and disables the switch; an active Unrestricted rule shows it on and disabled, with its explanation; the header's permission chip retains Use default and the separate Unrestricted controls
 
