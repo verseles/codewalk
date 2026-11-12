@@ -128,8 +128,8 @@ void main() {
       find.byKey(const ValueKey('composer-attach')),
     );
     final slot = tester.getRect(find.byKey(const ValueKey('composer-chip')));
-    // The bubble pads its content by 6.
-    expect(send.right, closeTo(bubble.right - 6, 0.5));
+    // The bubble pads its content by 4.
+    expect(send.right, closeTo(bubble.right - 4, 0.5));
     // The chip's slot spans everything between Attach and Voice.
     expect(slot.left, closeTo(attach.right + 4, 0.5));
     expect(slot.right, closeTo(voice.left, 0.5));
@@ -138,7 +138,7 @@ void main() {
     await tester.pump();
     expect(
       tester.getRect(find.byKey(const ValueKey('send'))).right,
-      closeTo(bubble.right - 6, 0.5),
+      closeTo(bubble.right - 4, 0.5),
     );
   });
 }

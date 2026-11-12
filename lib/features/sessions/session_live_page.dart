@@ -31,8 +31,9 @@ import 'sessions_controller.dart';
 import 'subconversation_navigation.dart';
 import 'subconversation_resolver.dart';
 
-/// Minimum height the prompt composer keeps beside a resident permission card.
-const double _composerFloor = 56;
+/// Minimum height the prompt composer keeps beside a resident permission card:
+/// the open composer's field and controls rows (#484).
+const double _composerFloor = 104;
 
 /// Live view of one session: it observes the server and sends prompts only
 /// through the composer's outbox. Stop is explicit; it never answers or reverts.
@@ -418,7 +419,9 @@ class _SessionLivePageState extends State<SessionLivePage>
               final space = max(0.0, body.maxHeight - pad - chrome);
               final composerBase = max(
                 0.0,
-                max(body.maxHeight * 0.4, min(body.maxHeight - 4, 136)) - pad,
+                // The open composer's two rows (#484) and the shortest
+                // usable `/` picker above them.
+                max(body.maxHeight * 0.4, min(body.maxHeight - 4, 182)) - pad,
               );
               final cardBudget = hasCards
                   ? min(

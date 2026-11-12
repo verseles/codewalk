@@ -88,7 +88,9 @@ class ComposerBubble extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: tokens.cardRadius,
-          child: Padding(padding: const EdgeInsets.all(6), child: child),
+          // 4 keeps the open composer (two rows) at 98 dp, so a phone with
+          // its keyboard open still has room for the `/` picker (#278).
+          child: Padding(padding: const EdgeInsets.all(4), child: child),
         ),
       ),
     );
