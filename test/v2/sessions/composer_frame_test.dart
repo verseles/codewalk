@@ -80,6 +80,13 @@ void main() {
     expect(open.height, greaterThan(closed.height));
   });
 
+  testWidgets('a desktop composer is always open', (tester) async {
+    await tester.pumpWidget(_frame(field: field, chip: chip));
+    expect(field.hasFocus, isFalse);
+    expect(maxLines(tester), 4);
+    expect(find.byKey(const ValueKey('chip')), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
   testWidgets('focus moving to the chip keeps the composer open', (
     tester,
   ) async {

@@ -42,6 +42,7 @@ void main() {
             'mode': 'primary',
             'hidden': false,
             'model': {'id': 'preferred', 'providerID': 'provider'},
+            'color': '#1E88E5',
           },
         ],
         '/api/model' => [model('global'), model('preferred')],
@@ -76,6 +77,8 @@ void main() {
     expect(defaults.selection?.modelProviderId, 'provider');
     expect(defaults.selection?.modelId, 'preferred');
     expect(defaults.agents.map((agent) => agent.id), ['build']);
+    // The new chat's chip takes the agent's own color, as a live one does.
+    expect(defaults.agents.single.color, '#1e88e5');
     expect(defaults.models, hasLength(2));
     expect(defaults.agentModels['build']?.modelId, 'preferred');
     expect(defaults.providers, {'provider': 'Provider'});
