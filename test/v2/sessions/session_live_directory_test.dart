@@ -1579,6 +1579,15 @@ void main() {
       }
     }
 
+    /// The fake server records a reply before it answers, so the client's
+    /// reading of that answer is awaited on its own.
+    Future<void> waitUntil(bool Function() done) async {
+      final deadline = DateTime.now().add(const Duration(seconds: 3));
+      while (!done() && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
     test(
       'default ON sends one exact once POST and never PATCH/always',
       () async {
@@ -1702,6 +1711,10 @@ void main() {
       );
       final req = view.state!.interactions.single;
       await waitForReplies(1);
+      await waitUntil(
+        () =>
+            a.replyState(req.id).phase == SessionPermissionReplyPhase.refused,
+      );
       expect(server.replies, hasLength(1));
       expect(a.replyState(req.id).phase, SessionPermissionReplyPhase.refused);
       // The card is not removed by the receipt; only the stream removes it.
@@ -1742,6 +1755,11 @@ void main() {
       );
       final req = view.state!.interactions.single;
       await waitForReplies(1);
+      await waitUntil(
+        () =>
+            a.replyState(req.id).phase ==
+            SessionPermissionReplyPhase.unconfirmed,
+      );
       expect(server.replies, hasLength(1));
       expect(
         a.replyState(req.id).phase,
