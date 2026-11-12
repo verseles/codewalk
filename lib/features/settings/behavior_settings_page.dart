@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_preferences_controller.dart';
+import '../../app/desktop_window_controller.dart';
 import '../../shared/l10n/l10n_bridge.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/chat_appearance.dart';
@@ -9,7 +10,8 @@ import '../../shared/widgets/searchable_picker.dart';
 
 /// How the chat behaves, like the retained reference's Behavior section:
 /// whether assistant responses render live or each block once finished, and
-/// whether the composer spell checks.
+/// whether the composer spell checks. On a desktop window it also holds the
+/// integrated title bar and what closing the window does.
 class BehaviorSettingsPage extends StatelessWidget {
   const BehaviorSettingsPage({super.key});
 
@@ -19,6 +21,7 @@ class BehaviorSettingsPage extends StatelessWidget {
     final l = context.v2L10n;
     final mode = p.chatRenderMode;
     final theme = Theme.of(context);
+    final window = context.watch<DesktopWindowController?>() != null;
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -123,6 +126,63 @@ class BehaviorSettingsPage extends StatelessWidget {
                 onChanged: p.setComposerSpellCheck,
               ),
             ),
+            if (window) ...[
+              const SizedBox(height: 12),
+              Card(
+                child: SwitchListTile.adaptive(
+                  key: const ValueKey(
+                    'settings_toggle_integrated_window_chrome',
+                  ),
+                  title: Text(l.settingsBehaviorWindowChrome),
+                  subtitle: Text(l.settingsBehaviorWindowChromeDescription),
+                  value: p.integratedWindowChrome,
+                  onChanged: p.setIntegratedWindowChrome,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l.settingsBehaviorWindowClose,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l.settingsBehaviorWindowCloseDescription,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SegmentedButton<WindowCloseAction>(
+                        key: const ValueKey('settings_window_close_action'),
+                        segments: [
+                          ButtonSegment(
+                            value: WindowCloseAction.close,
+                            label: Text(
+                              MaterialLocalizations.of(
+                                context,
+                              ).closeButtonTooltip,
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: WindowCloseAction.minimize,
+                            label: Text(l.desktopWindowMinimize),
+                          ),
+                        ],
+                        selected: {p.windowCloseAction},
+                        onSelectionChanged: (selection) =>
+                            p.setWindowCloseAction(selection.single),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

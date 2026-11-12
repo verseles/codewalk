@@ -2463,4 +2463,27 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get updatesResume => 'डाउनलोड जारी रखें';
+
+  @override
+  String get desktopWindowMinimize => 'छोटा करें';
+
+  @override
+  String get desktopWindowMaximize => 'बड़ा करें';
+
+  @override
+  String get desktopWindowRestore => 'पहले जैसा करें';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'एकीकृत शीर्षक पट्टी';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'सिस्टम शीर्षक पट्टी की जगह सत्र टैब और विंडो नियंत्रण विंडो के ऊपर दिखते हैं।';
+
+  @override
+  String get settingsBehaviorWindowClose => 'विंडो बंद करने पर';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'बंद करें CodeWalk से बाहर निकलता है। छोटा करें उसे टास्कबार में चलता रखता है।';
 }

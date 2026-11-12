@@ -30,6 +30,8 @@ import '../shared/theme/app_theme.dart';
 import '../shared/theme/theme_preferences.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
+import 'desktop_window_band.dart';
+import 'desktop_window_controller.dart';
 import 'resizable_session_pane.dart';
 import 'workspace_actions.dart';
 import 'workspace_chrome.dart';
@@ -65,6 +67,9 @@ class AppShell extends StatelessWidget {
 
   Widget _build(BuildContext context) {
     final l10n = context.v2L10n;
+    // The window band replaces the system title bar on every page and width.
+    final window = context.watch<DesktopWindowController?>();
+    final band = window != null && window.active ? window : null;
     if (!isWorkspace(location)) {
       // A launch on another page spends the return to the last tab, so a
       // later visit to the list stays there.
@@ -74,18 +79,21 @@ class AppShell extends StatelessWidget {
         '/hosts' || '/pair' => l10n.settingsServersTitle,
         _ => 'CodeWalk',
       };
-      return Scaffold(
-        appBar: AppBar(
-          // A page opened from the list returns to it; one opened by a link
-          // has nothing under it and goes to the list.
-          leading: BackButton(
-            key: const ValueKey('workspace-back'),
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.go('/sessions'),
+      return _banded(
+        band,
+        Scaffold(
+          appBar: AppBar(
+            // A page opened from the list returns to it; one opened by a link
+            // has nothing under it and goes to the list.
+            leading: BackButton(
+              key: const ValueKey('workspace-back'),
+              onPressed: () =>
+                  context.canPop() ? context.pop() : context.go('/sessions'),
+            ),
+            title: Text(title),
           ),
-          title: Text(title),
+          body: child,
         ),
-        body: child,
       );
     }
     final home = location == '/' || location == '/sessions';
@@ -99,7 +107,7 @@ class AppShell extends StatelessWidget {
         ShortcutAction.refresh: () => _refresh(context),
         ShortcutAction.closeApp: () {
           if (!(context.read<WorkspaceActions?>()?.closeTab() ?? false)) {
-            _closeWindow();
+            _closeWindow(context);
           }
         },
         if (_desktop) ShortcutAction.quitApp: _quit,
@@ -121,32 +129,35 @@ class AppShell extends StatelessWidget {
               // The toolbar and chat share traversal; the open drawer keeps
               // its own focus scope and handles Escape before the composer.
               return _WorkspaceEscape(
-                child: Scaffold(
-                  appBar: _WorkspaceAppBar(
-                    bar: AppBar(
-                      toolbarHeight: _toolbarHeight(density, compact: true),
-                      leadingWidth: 42,
-                      titleSpacing: 0,
-                      leading: Builder(
-                        builder: (context) => WorkspaceMenuButton(
-                          openDrawer: Scaffold.of(context).openDrawer,
+                child: _banded(
+                  band,
+                  Scaffold(
+                    appBar: _WorkspaceAppBar(
+                      bar: AppBar(
+                        toolbarHeight: _toolbarHeight(density, compact: true),
+                        leadingWidth: 42,
+                        titleSpacing: 0,
+                        leading: Builder(
+                          builder: (context) => WorkspaceMenuButton(
+                            openDrawer: Scaffold.of(context).openDrawer,
+                          ),
                         ),
+                        title: hasServer
+                            ? const _ToolbarProjectTitle(compact: true)
+                            : const Text('CodeWalk'),
+                        actions: const [WorkspaceAppBarActions(compact: true)],
                       ),
-                      title: hasServer
-                          ? const _ToolbarProjectTitle(compact: true)
-                          : const Text('CodeWalk'),
-                      actions: const [WorkspaceAppBarActions(compact: true)],
                     ),
-                  ),
-                  drawer: const Drawer(
-                    child: _WorkspaceEscape(
-                      child: SafeArea(child: SessionsPage()),
+                    drawer: const Drawer(
+                      child: _WorkspaceEscape(
+                        child: SafeArea(child: SessionsPage()),
+                      ),
                     ),
-                  ),
-                  body: _WorkspaceEscape(
-                    keepFocus: false,
-                    child: _WorkspaceBack(
-                      child: _homeTabs(context, tabs, home),
+                    body: _WorkspaceEscape(
+                      keepFocus: false,
+                      child: _WorkspaceBack(
+                        child: _homeTabs(context, tabs, home),
+                      ),
                     ),
                   ),
                 ),
@@ -155,45 +166,58 @@ class AppShell extends StatelessWidget {
             final preferences = context.watch<AppPreferencesController?>();
             final hidden = preferences?.sessionPaneHidden ?? false;
             final chat = _WorkspaceBack(child: child);
-            return _WorkspaceEscape(
-              child: Scaffold(
-                appBar: _WorkspaceAppBar(
-                  bar: AppBar(
-                    toolbarHeight: _toolbarHeight(density, compact: false),
-                    titleSpacing: AppDensitySpacing.appBarTitleSpacing(density),
-                    leading: IconButton(
-                      key: const ValueKey('workspace-pane-toggle'),
-                      tooltip: hidden
-                          ? l10n.chatOpenSidebar
-                          : l10n.chatHideConversationsSidebar,
-                      icon: Icon(hidden ? Symbols.menu : Symbols.menu_open),
-                      onPressed: preferences == null
-                          ? null
-                          : () => preferences.setSessionPaneHidden(!hidden),
-                    ),
-                    title: hasServer
-                        ? const _ToolbarProjectTitle(compact: false)
-                        : const Text('CodeWalk'),
-                    actions: [
-                      if (hidden) ..._hiddenPaneActions(context, preferences),
-                      const WorkspaceAppBarActions(compact: false),
-                    ],
-                  ),
+            final bar = _WorkspaceAppBar(
+              bar: AppBar(
+                toolbarHeight: _toolbarHeight(density, compact: false),
+                titleSpacing: AppDensitySpacing.appBarTitleSpacing(density),
+                leading: IconButton(
+                  key: const ValueKey('workspace-pane-toggle'),
+                  tooltip: hidden
+                      ? l10n.chatOpenSidebar
+                      : l10n.chatHideConversationsSidebar,
+                  icon: Icon(hidden ? Symbols.menu : Symbols.menu_open),
+                  onPressed: preferences == null
+                      ? null
+                      : () => preferences.setSessionPaneHidden(!hidden),
                 ),
-                body: _tabsAboveWorkspace(
-                  context,
-                  tabs,
-                  location,
-                  hidden
-                      ? chat
-                      : ResizableSessionPane(
-                          preferences: preferences,
-                          resizable: size.isAtLeastExpanded,
-                          pane: const SessionsPage(),
-                          chat: chat,
-                        ),
-                ),
+                title: hasServer
+                    ? const _ToolbarProjectTitle(compact: false)
+                    : const Text('CodeWalk'),
+                actions: [
+                  if (hidden) ..._hiddenPaneActions(context, preferences),
+                  const WorkspaceAppBarActions(compact: false),
+                ],
               ),
+            );
+            final body = hidden
+                ? chat
+                : ResizableSessionPane(
+                    preferences: preferences,
+                    resizable: size.isAtLeastExpanded,
+                    pane: const SessionsPage(),
+                    chat: chat,
+                  );
+            // With the band the tabs lead the window and the toolbar follows
+            // them; otherwise the toolbar leads and the tabs follow.
+            return _WorkspaceEscape(
+              child: band == null
+                  ? Scaffold(
+                      appBar: bar,
+                      body: _tabsAboveWorkspace(context, tabs, location, body),
+                    )
+                  : Scaffold(
+                      body: _tabsAboveWorkspace(
+                        context,
+                        tabs,
+                        location,
+                        body,
+                        band: band,
+                        header: SizedBox(
+                          height: bar.preferredSize.height,
+                          child: bar,
+                        ),
+                      ),
+                    ),
             );
           },
         ),
@@ -215,19 +239,38 @@ class AppShell extends StatelessWidget {
     BuildContext context,
     SessionTabsController? tabs,
     String location,
-    Widget workspace,
-  ) {
-    if (tabs == null) return workspace;
+    Widget workspace, {
+    DesktopWindowController? band,
+    Widget? header,
+  }) {
+    if (tabs == null) {
+      if (band == null) return workspace;
+      return Column(
+        children: [
+          DesktopWindowBand(window: band),
+          ?header,
+          Expanded(child: workspace),
+        ],
+      );
+    }
     final catalog = context.watch<SessionsController?>();
     return SessionTabsAboveWorkspace(
       child: SessionTabsFrame(
         tabs: tabs,
         current: sessionRefOfLocation(location),
         project: catalog?.selectedProject?.project,
+        band: band == null
+            ? null
+            : (strip) => DesktopWindowBand(window: band, strip: strip),
+        header: header,
         child: workspace,
       ),
     );
   }
+
+  /// The window band above a page that does not hold the tabs.
+  static Widget _banded(DesktopWindowController? band, Widget page) =>
+      DesktopWindowBand.over(band, page);
 
   /// Opens the local draft without sending a session command.
   Widget _homeTabs(
@@ -301,10 +344,21 @@ class AppShell extends StatelessWidget {
   static Future<void> Function(AppExitType type) exitApp = (type) =>
       ServicesBinding.instance.exitApplication(type);
 
-  /// mod+W without a tab to close: the window's ordinary close.
-  static void _closeWindow() => unawaited(
-    _desktop ? exitApp(AppExitType.cancelable) : SystemNavigator.pop(),
-  );
+  /// The window's ordinary close: the app quits once nothing objects.
+  static Future<void> closeApp() => exitApp(AppExitType.cancelable);
+
+  /// mod+W without a tab to close: the window's close, which follows the
+  /// close choice on a desktop window that holds its close request.
+  static void _closeWindow(BuildContext context) {
+    final window = context.read<DesktopWindowController?>();
+    unawaited(
+      window != null
+          ? window.requestClose()
+          : _desktop
+          ? closeApp()
+          : SystemNavigator.pop(),
+    );
+  }
 
   /// mod+Q on a desktop: the app quits.
   static void _quit() => unawaited(exitApp(AppExitType.required));

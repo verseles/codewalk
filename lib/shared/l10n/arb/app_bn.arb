@@ -1859,5 +1859,12 @@
   "updatesResume": "ডাউনলোড চালিয়ে যান",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "ছোট করুন",
+  "desktopWindowMaximize": "বড় করুন",
+  "desktopWindowRestore": "আগের আকারে ফেরান",
+  "settingsBehaviorWindowChrome": "সমন্বিত শিরোনাম বার",
+  "settingsBehaviorWindowChromeDescription": "সিস্টেমের শিরোনাম বারের বদলে সেশন ট্যাব ও উইন্ডো নিয়ন্ত্রণ উইন্ডোর উপরে থাকে।",
+  "settingsBehaviorWindowClose": "উইন্ডো বন্ধ করলে",
+  "settingsBehaviorWindowCloseDescription": "বন্ধ করুন CodeWalk থেকে বেরিয়ে যায়। ছোট করুন এটিকে টাস্কবারে চালু রাখে।"
 }

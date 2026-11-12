@@ -1858,5 +1858,12 @@
   "updatesResume": "استئناف التنزيل",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "تصغير",
+  "desktopWindowMaximize": "تكبير",
+  "desktopWindowRestore": "استعادة",
+  "settingsBehaviorWindowChrome": "شريط عنوان مدمج",
+  "settingsBehaviorWindowChromeDescription": "تشغل تبويبات الجلسات وأزرار النافذة أعلى النافذة بدلًا من شريط عنوان النظام.",
+  "settingsBehaviorWindowClose": "عند إغلاق النافذة",
+  "settingsBehaviorWindowCloseDescription": "«إغلاق» ينهي CodeWalk. «تصغير» يبقيه قيد التشغيل في شريط المهام."
 }

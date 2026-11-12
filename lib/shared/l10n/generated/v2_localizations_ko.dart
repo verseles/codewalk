@@ -2345,4 +2345,27 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get updatesResume => '다운로드 재개';
+
+  @override
+  String get desktopWindowMinimize => '최소화';
+
+  @override
+  String get desktopWindowMaximize => '최대화';
+
+  @override
+  String get desktopWindowRestore => '이전 크기로 복원';
+
+  @override
+  String get settingsBehaviorWindowChrome => '통합 제목 표시줄';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      '시스템 제목 표시줄 대신 세션 탭과 창 컨트롤이 창 상단을 차지합니다.';
+
+  @override
+  String get settingsBehaviorWindowClose => '창을 닫을 때';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      '닫기는 CodeWalk를 종료합니다. 최소화는 작업 표시줄에서 계속 실행합니다.';
 }

@@ -4459,6 +4459,48 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Resume download.'**
   String get updatesResume;
+
+  /// Desktop window: desktopWindowMinimize
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get desktopWindowMinimize;
+
+  /// Desktop window: desktopWindowMaximize
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get desktopWindowMaximize;
+
+  /// Desktop window: desktopWindowRestore
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get desktopWindowRestore;
+
+  /// Desktop window: settingsBehaviorWindowChrome
+  ///
+  /// In en, this message translates to:
+  /// **'Integrated title bar'**
+  String get settingsBehaviorWindowChrome;
+
+  /// Desktop window: settingsBehaviorWindowChromeDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Session tabs and window controls take the top of the window instead of the system title bar.'**
+  String get settingsBehaviorWindowChromeDescription;
+
+  /// Desktop window: settingsBehaviorWindowClose
+  ///
+  /// In en, this message translates to:
+  /// **'When closing the window'**
+  String get settingsBehaviorWindowClose;
+
+  /// Desktop window: settingsBehaviorWindowCloseDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Close quits CodeWalk. Minimize keeps it running in the taskbar.'**
+  String get settingsBehaviorWindowCloseDescription;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

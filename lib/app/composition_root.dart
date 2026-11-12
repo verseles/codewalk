@@ -47,6 +47,7 @@ import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/payload_factory.dart';
 import '../platform/storage/preferences_backend.dart';
+import '../platform/window/desktop_window_port.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
 import '../shared/releases/release_source.dart';
@@ -59,6 +60,8 @@ import 'app_dependencies.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
 import 'app_router.dart';
+import 'app_shell.dart';
+import 'desktop_window_controller.dart';
 import 'live_wake.dart';
 import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
@@ -90,6 +93,7 @@ AppDependencies createAppDependencies({
   ProjectWorkspaceStore? projectWorkspaceStore,
   WorkspaceDraftStore? workspaceDraftStore,
   Stream<Object?>? networkChanges,
+  DesktopWindowPort? desktopWindow,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -328,6 +332,13 @@ AppDependencies createAppDependencies({
     workspace: workspace,
     workspaceDrafts: workspaceDrafts,
     projectContexts: projectContexts,
+    desktopWindow: desktopWindow == null
+        ? null
+        : DesktopWindowController(
+            port: desktopWindow,
+            preferences: locator<AppPreferencesController>(),
+            quit: AppShell.closeApp,
+          ),
     sessionDrafts: sessionDrafts,
     modelPreferences: modelPreferences,
     unrestrictedOwnership: unrestrictedOwnership,
@@ -367,14 +378,19 @@ Future<AppDependencies> loadAppDependencies({
   V2MetadataStore? metadataStore,
   bool listenNativeLinks = false,
   bool listenNetwork = false,
+  DesktopWindowPort? desktopWindow,
 }) async {
   final dependencies = createAppDependencies(
     initialLink: initialLink,
     metadataStore:
         metadataStore ?? V2MetadataStore(backend: PreferencesMetadataBackend()),
     networkChanges: listenNetwork ? platformNetworkChanges() : null,
+    desktopWindow: desktopWindow,
   );
   await dependencies.preferences.initialize();
+  // The saved title bar choice is applied before the first frame shows the
+  // window, so the system title bar never flashes.
+  await dependencies.desktopWindow?.attach();
   // A cold read grants no approval authority: the policy is loaded before any
   // session can be watched, and a failed read stays explicit instead of
   // defaulting to Allow all.

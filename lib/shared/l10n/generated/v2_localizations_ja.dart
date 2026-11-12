@@ -2347,4 +2347,27 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get updatesResume => 'ダウンロードを再開';
+
+  @override
+  String get desktopWindowMinimize => '最小化';
+
+  @override
+  String get desktopWindowMaximize => '最大化';
+
+  @override
+  String get desktopWindowRestore => '元のサイズに戻す';
+
+  @override
+  String get settingsBehaviorWindowChrome => '統合タイトルバー';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'システムのタイトルバーの代わりに、セッションタブとウィンドウ操作ボタンをウィンドウ上部に表示します。';
+
+  @override
+  String get settingsBehaviorWindowClose => 'ウィンドウを閉じるとき';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      '「閉じる」は CodeWalk を終了します。「最小化」はタスクバーで実行を続けます。';
 }

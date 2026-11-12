@@ -145,6 +145,10 @@ for name in (
 SETTINGS_NEW_KEYS = (
     "shortcutsUnassigned", "shortcutsUnassign", "shortcutsUnavailable",
     "settingsStorageError", "settingsSearchClear",
+    # The desktop window band and its settings (#474).
+    "desktopWindowMinimize", "desktopWindowMaximize", "desktopWindowRestore",
+    "settingsBehaviorWindowChrome", "settingsBehaviorWindowChromeDescription",
+    "settingsBehaviorWindowClose", "settingsBehaviorWindowCloseDescription",
 )
 KEYS |= SETTINGS_KEYS | set(SETTINGS_NEW_KEYS)
 KEYS |= HOST_KEYS | set(HOST_NEW_KEYS)

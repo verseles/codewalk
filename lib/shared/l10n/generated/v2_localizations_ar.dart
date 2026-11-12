@@ -2438,4 +2438,27 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get updatesResume => 'استئناف التنزيل';
+
+  @override
+  String get desktopWindowMinimize => 'تصغير';
+
+  @override
+  String get desktopWindowMaximize => 'تكبير';
+
+  @override
+  String get desktopWindowRestore => 'استعادة';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'شريط عنوان مدمج';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'تشغل تبويبات الجلسات وأزرار النافذة أعلى النافذة بدلًا من شريط عنوان النظام.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'عند إغلاق النافذة';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      '«إغلاق» ينهي CodeWalk. «تصغير» يبقيه قيد التشغيل في شريط المهام.';
 }

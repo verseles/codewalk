@@ -13,6 +13,9 @@ import '../shared/theme/theme_preferences.dart';
 
 enum WorkspacePinnedAction { servers, settings, newChat }
 
+/// What closing the desktop window does: quit, or keep running minimized.
+enum WindowCloseAction { close, minimize }
+
 /// Appearance uses only the v2 metadata namespace; null locale follows the
 /// device, while a chosen language code survives restarts.
 class AppPreferencesController extends ChangeNotifier {
@@ -216,6 +219,26 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('tabsGestureHintDismissed');
   }
 
+  /// On a desktop window: whether the session tabs and the window controls
+  /// replace the system title bar (on by default), and what closing the
+  /// window does (Close by default).
+  bool _integratedWindowChrome = true;
+  WindowCloseAction _windowCloseAction = WindowCloseAction.close;
+  bool get integratedWindowChrome => _integratedWindowChrome;
+  WindowCloseAction get windowCloseAction => _windowCloseAction;
+
+  void setIntegratedWindowChrome(bool value) {
+    if (_disposed || _integratedWindowChrome == value) return;
+    _integratedWindowChrome = value;
+    _changed('integratedWindowChrome');
+  }
+
+  void setWindowCloseAction(WindowCloseAction value) {
+    if (_disposed || _windowCloseAction == value) return;
+    _windowCloseAction = value;
+    _changed('windowCloseAction');
+  }
+
   /// Whether the composer's status slot rotates tips while the assistant
   /// works; on by default.
   bool _composerTips = true;
@@ -342,6 +365,10 @@ class AppPreferencesController extends ChangeNotifier {
     'showSessionTabs': _showSessionTabs ? null : false,
     'showRecentSessions': _showRecentSessions ? null : false,
     'tabsGestureHintDismissed': _tabsGestureHintDismissed ? true : null,
+    'integratedWindowChrome': _integratedWindowChrome ? null : false,
+    'windowCloseAction': _windowCloseAction == WindowCloseAction.close
+        ? null
+        : _windowCloseAction.name,
     // Shortcut JSON is serialized after hydration, preserving unknown fields.
     'shortcuts': null,
   };
@@ -450,6 +477,15 @@ class AppPreferencesController extends ChangeNotifier {
       if (recent is bool) _showRecentSessions = recent;
       final hint = value('tabsGestureHintDismissed');
       if (hint is bool) _tabsGestureHintDismissed = hint;
+      final chrome = value('integratedWindowChrome');
+      if (chrome is bool) _integratedWindowChrome = chrome;
+      // An unknown stored action keeps Close.
+      final closeAction = value('windowCloseAction');
+      _windowCloseAction =
+          WindowCloseAction.values
+              .where((a) => a.name == closeAction)
+              .firstOrNull ??
+          _windowCloseAction;
       _loggingHydrated = true;
       _diagnostics?.setEnabled(_loggingEnabled);
       _loadFailed = false;

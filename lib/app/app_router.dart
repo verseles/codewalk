@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../features/hosts/hosts_filter_target.dart';
 import '../features/hosts/hosts_page.dart';
@@ -9,6 +10,8 @@ import '../features/settings/settings_shell_page.dart';
 import '../shared/l10n/l10n_context.dart';
 import 'app_navigation_controller.dart';
 import 'app_shell.dart';
+import 'desktop_window_band.dart';
+import 'desktop_window_controller.dart';
 
 GoRouter createAppRouter({
   required AppNavigationController navigation,
@@ -31,8 +34,11 @@ GoRouter createAppRouter({
       final route = navigation.prepareLink(uri);
       return route == uri.toString() ? null : route;
     },
-    errorBuilder: (context, state) =>
-        Scaffold(body: Center(child: Text(context.v2L10n.unsupportedLink))),
+    // Outside the shell, so it brings the window band itself.
+    errorBuilder: (context, state) => DesktopWindowBand.over(
+      context.watch<DesktopWindowController?>(),
+      Scaffold(body: Center(child: Text(context.v2L10n.unsupportedLink))),
+    ),
     routes: [
       ShellRoute(
         builder: (context, state, child) =>

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/app_preferences_controller.dart';
+import '../../app/desktop_window_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/releases/apk_update.dart';
@@ -198,6 +199,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     final install = context.watch<ApkUpdateController?>();
     final update = checks?.visibleCandidate;
     final query = _search.text.trim().toLowerCase();
+    final window = context.watch<DesktopWindowController?>() != null;
     bool matches(String title, String description, String group) =>
         '$title $description $group'.toLowerCase().contains(query);
     final appearanceDescription =
@@ -223,7 +225,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       '${l.settingsBehaviorChatRenderModeLive} '
       '${l.settingsBehaviorChatRenderModeBlock} '
       '${l.settingsBehaviorComposerSpellCheck} '
-      '${l.settingsBehaviorComposerSpellCheckDescription}',
+      '${l.settingsBehaviorComposerSpellCheckDescription}'
+      '${window ? ' ${l.settingsBehaviorWindowChrome} ${l.settingsBehaviorWindowChromeDescription} ${l.settingsBehaviorWindowClose} ${l.settingsBehaviorWindowCloseDescription}' : ''}',
       l.settingsNavigationGroupExperience,
     );
     final shortcuts =

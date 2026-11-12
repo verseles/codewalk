@@ -2492,4 +2492,27 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get updatesResume => 'Retomar download.';
+
+  @override
+  String get desktopWindowMinimize => 'Minimizar';
+
+  @override
+  String get desktopWindowMaximize => 'Maximizar';
+
+  @override
+  String get desktopWindowRestore => 'Restaurar';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'Barra de título integrada';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'As abas de sessão e os controles da janela ocupam o topo da janela no lugar da barra de título do sistema.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'Ao fechar a janela';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'Fechar encerra o CodeWalk. Minimizar o mantém em execução na barra de tarefas.';
 }

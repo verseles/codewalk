@@ -1859,5 +1859,12 @@
   "updatesResume": "Reprendre le téléchargement.",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "Réduire",
+  "desktopWindowMaximize": "Agrandir",
+  "desktopWindowRestore": "Restaurer",
+  "settingsBehaviorWindowChrome": "Barre de titre intégrée",
+  "settingsBehaviorWindowChromeDescription": "Les onglets de session et les commandes de la fenêtre occupent le haut de la fenêtre à la place de la barre de titre du système.",
+  "settingsBehaviorWindowClose": "À la fermeture de la fenêtre",
+  "settingsBehaviorWindowCloseDescription": "Fermer quitte CodeWalk. Réduire le laisse ouvert dans la barre des tâches."
 }

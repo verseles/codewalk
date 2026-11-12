@@ -2463,4 +2463,27 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get updatesResume => 'Resume download.';
+
+  @override
+  String get desktopWindowMinimize => 'Minimize';
+
+  @override
+  String get desktopWindowMaximize => 'Maximize';
+
+  @override
+  String get desktopWindowRestore => 'Restore';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'Integrated title bar';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'Session tabs and window controls take the top of the window instead of the system title bar.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'When closing the window';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'Close quits CodeWalk. Minimize keeps it running in the taskbar.';
 }

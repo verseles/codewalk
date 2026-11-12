@@ -36,6 +36,11 @@ SessionRef? sessionRefOfLocation(String location) {
   return SessionRef(HostId(parts[1]), HarnessInstanceId(parts[1]), parts[2]);
 }
 
+/// The strip's height: v1's kAppTabStripHeightCompact under 600 dp, else
+/// kAppTabStripHeight; the desktop window band shares it.
+double sessionTabStripHeight(BuildContext context) =>
+    MediaQuery.sizeOf(context).width < 600 ? 46.4 : 43.2;
+
 /// Marks a workspace that draws the tab strip above its pane and chat, so the
 /// session pages inside it leave the strip to the workspace.
 class SessionTabsAboveWorkspace extends InheritedWidget {
@@ -59,9 +64,18 @@ class SessionTabsFrame extends StatefulWidget {
     required this.current,
     required this.project,
     required this.child,
+    this.band,
+    this.header,
   });
 
   final SessionTabsController tabs;
+
+  /// The desktop window band that holds the strip, or `null` for the strip
+  /// alone; it still shows, with no strip, when no tab is.
+  final Widget Function(Widget? strip)? band;
+
+  /// What sits between the band and the session, the workspace toolbar.
+  final Widget? header;
 
   /// The session of the route.
   final SessionRef? current;
@@ -357,7 +371,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
         final host =
             widget.current?.host ??
             (profile == null ? null : HostId(profile.id));
-        if (host == null) return widget.child;
+        if (host == null) return _framed(null, widget.child, column: false);
         final tab = _tab;
         final projection = widget.tabs.projection(host, active: widget.current);
         final drafting =
@@ -378,54 +392,68 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
           child: Focus(
             autofocus: true,
             skipTraversal: true,
-            child: Column(
-              children: [
-                if (shown && (preferences?.showSessionTabs ?? true))
-                  _Strip(
-                    tabs: widget.tabs,
-                    projection: projection,
-                    current: widget.current,
-                    drafting: drafting,
-                    draftProject: draftProject,
-                    draftFailed: drafts?.status == WorkspaceDraftStatus.failed,
-                    onActivate: _activate,
-                    onClose: (tab) => unawaited(_close(tab)),
-                    onDraft: (project) => unawaited(_draft(project)),
-                    onRecent: _showRecent,
-                    onInteract: () => _finishSwitcher(commit: false),
-                  ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: widget.child),
-                      if (switcher != null)
-                        _Switcher(
-                          tabs: switcher,
-                          highlight: _highlight,
-                          icons: widget.tabs,
-                        )
-                      // The first-use hint floats over the chat, so it never
-                      // takes room from the composer.
-                      else if (shown &&
-                          showHint &&
-                          (preferences?.showSessionTabs ?? true))
-                        PositionedDirectional(
-                          top: 8,
-                          start: 16,
-                          end: 16,
-                          child: _GestureHint(
-                            onDismiss: () =>
-                                preferences?.setTabsGestureHintDismissed(true),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+            child: _framed(
+              shown && (preferences?.showSessionTabs ?? true)
+                  ? _Strip(
+                      tabs: widget.tabs,
+                      projection: projection,
+                      current: widget.current,
+                      drafting: drafting,
+                      draftProject: draftProject,
+                      draftFailed:
+                          drafts?.status == WorkspaceDraftStatus.failed,
+                      onActivate: _activate,
+                      onClose: (tab) => unawaited(_close(tab)),
+                      onDraft: (project) => unawaited(_draft(project)),
+                      onRecent: _showRecent,
+                      onInteract: () => _finishSwitcher(commit: false),
+                      shrinkWrap: widget.band != null,
+                    )
+                  : null,
+              Stack(
+                children: [
+                  Positioned.fill(child: widget.child),
+                  if (switcher != null)
+                    _Switcher(
+                      tabs: switcher,
+                      highlight: _highlight,
+                      icons: widget.tabs,
+                    )
+                  // The first-use hint floats over the chat, so it never
+                  // takes room from the composer.
+                  else if (shown &&
+                      showHint &&
+                      (preferences?.showSessionTabs ?? true))
+                    PositionedDirectional(
+                      top: 8,
+                      start: 16,
+                      end: 16,
+                      child: _GestureHint(
+                        onDismiss: () =>
+                            preferences?.setTabsGestureHintDismissed(true),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+  /// The strip, or the window band holding it, then the header and [body].
+  /// The column stays while the strip comes and goes, so the session under
+  /// it keeps its state.
+  Widget _framed(Widget? strip, Widget body, {bool column = true}) {
+    final band = widget.band;
+    if (!column && band == null && widget.header == null) return body;
+    return Column(
+      children: [
+        if (band != null) band(strip) else ?strip,
+        ?widget.header,
+        Expanded(child: body),
+      ],
     );
   }
 }
@@ -447,6 +475,7 @@ class _Strip extends StatefulWidget {
     required this.onDraft,
     required this.onRecent,
     required this.onInteract,
+    this.shrinkWrap = false,
   });
   final SessionTabsController tabs;
   final SessionTabProjection projection;
@@ -459,6 +488,10 @@ class _Strip extends StatefulWidget {
   final ValueChanged<ProjectRef> onDraft;
   final VoidCallback onRecent;
   final VoidCallback onInteract;
+
+  /// In the window band the strip takes only the width of its tabs, so the
+  /// band behind it stays free to drag the window.
+  final bool shrinkWrap;
   @override
   State<_Strip> createState() => _StripState();
 }
@@ -582,10 +615,8 @@ class _StripState extends State<_Strip> {
   Widget build(BuildContext context) {
     final projection = widget.projection;
     final hasRegular = projection.groups.isNotEmpty || widget.drafting;
-    // v1 strip heights (kAppTabStripHeightCompact, kAppTabStripHeight).
-    final stripHeight = MediaQuery.sizeOf(context).width < 600 ? 46.4 : 43.2;
     return SizedBox(
-      height: stripHeight,
+      height: sessionTabStripHeight(context),
       child: Material(
         key: const ValueKey('session-tabs'),
         color: Theme.of(context).colorScheme.surfaceContainer,
@@ -647,6 +678,9 @@ class _StripState extends State<_Strip> {
               }
               if (widget.drafting && !draftAdded) regular.add(_draft(usable));
               return Row(
+                mainAxisSize: widget.shrinkWrap
+                    ? MainAxisSize.min
+                    : MainAxisSize.max,
                 children: [
                   if (projection.pinned.isNotEmpty && pinnedWidth > 0)
                     SizedBox(
@@ -656,7 +690,8 @@ class _StripState extends State<_Strip> {
                           _tab(tab, pinnedWidth, pinned: true),
                       ], key: const ValueKey('session-tabs-pinned')),
                     ),
-                  Expanded(
+                  Flexible(
+                    fit: widget.shrinkWrap ? FlexFit.loose : FlexFit.tight,
                     child: _scroll(
                       regular,
                       key: const ValueKey('session-tabs-regular'),

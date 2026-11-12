@@ -2487,4 +2487,27 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get updatesResume => 'Возобновить загрузку.';
+
+  @override
+  String get desktopWindowMinimize => 'Свернуть';
+
+  @override
+  String get desktopWindowMaximize => 'Развернуть';
+
+  @override
+  String get desktopWindowRestore => 'Восстановить';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'Встроенная строка заголовка';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'Вкладки сеансов и кнопки окна занимают верх окна вместо системной строки заголовка.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'При закрытии окна';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      '«Закрыть» завершает CodeWalk. «Свернуть» оставляет его работать на панели задач.';
 }

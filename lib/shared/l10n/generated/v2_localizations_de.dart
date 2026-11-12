@@ -2514,4 +2514,27 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get updatesResume => 'Download fortsetzen.';
+
+  @override
+  String get desktopWindowMinimize => 'Minimieren';
+
+  @override
+  String get desktopWindowMaximize => 'Maximieren';
+
+  @override
+  String get desktopWindowRestore => 'Wiederherstellen';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'Integrierte Titelleiste';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'Sitzungs-Tabs und Fenstersteuerung belegen den oberen Fensterrand statt der Titelleiste des Systems.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'Beim Schließen des Fensters';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'Schließen beendet CodeWalk. Minimieren lässt es in der Taskleiste weiterlaufen.';
 }

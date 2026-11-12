@@ -29,6 +29,7 @@ import '../shared/theme/chat_appearance.dart';
 import 'app_dependencies.dart';
 import 'app_keyboard_shortcuts.dart';
 import 'app_preferences_controller.dart';
+import 'desktop_window_controller.dart';
 import 'workspace_actions.dart';
 import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
@@ -111,6 +112,9 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         ChangeNotifierProvider.value(value: dependencies.hosts),
         ListenableProvider<EndpointHealthController?>.value(
           value: dependencies.endpointHealth,
+        ),
+        ListenableProvider<DesktopWindowController?>.value(
+          value: dependencies.desktopWindow,
         ),
         ListenableProvider<WorkspaceChromeController?>.value(
           value: dependencies.workspaceChrome,

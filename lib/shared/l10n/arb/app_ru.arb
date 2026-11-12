@@ -1859,5 +1859,12 @@
   "updatesResume": "Возобновить загрузку.",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "Свернуть",
+  "desktopWindowMaximize": "Развернуть",
+  "desktopWindowRestore": "Восстановить",
+  "settingsBehaviorWindowChrome": "Встроенная строка заголовка",
+  "settingsBehaviorWindowChromeDescription": "Вкладки сеансов и кнопки окна занимают верх окна вместо системной строки заголовка.",
+  "settingsBehaviorWindowClose": "При закрытии окна",
+  "settingsBehaviorWindowCloseDescription": "«Закрыть» завершает CodeWalk. «Свернуть» оставляет его работать на панели задач."
 }

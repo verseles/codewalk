@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app/composition_root.dart';
 import 'app/v2_bootstrap.dart';
+import 'platform/window/desktop_window.dart';
 
 /// Temporary explicit entry point while the legacy reference is retained.
 Future<void> main([List<String> args = const []]) async {
@@ -22,6 +23,7 @@ Future<void> main([List<String> args = const []]) async {
         initialLink: link,
         listenNativeLinks: true,
         listenNetwork: true,
+        desktopWindow: platformDesktopWindow(),
       ),
     ),
   );

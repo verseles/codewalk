@@ -5,6 +5,7 @@ import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
+import 'package:codewalk/platform/window/desktop_window_port.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:flutter/material.dart';
@@ -31,13 +32,14 @@ Future<void> settleWorkspace(WidgetTester tester) async {
 }
 
 /// Launches the workspace at [link] in a [size] window, in [locale] and at
-/// the [textScale] the platform asks for.
+/// the [textScale] the platform asks for, in [desktopWindow] when given.
 Future<WorkspaceApp> launchWorkspace(
   WidgetTester tester, {
   String link = '/s/profile_a/ses_one',
   Size size = const Size(1280, 800),
   Locale? locale,
   double textScale = 1,
+  DesktopWindowPort? desktopWindow,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -61,8 +63,10 @@ Future<WorkspaceApp> launchWorkspace(
       payloads: payloads,
       index: metadata,
     ),
+    desktopWindow: desktopWindow,
   );
   if (locale != null) dependencies.preferences.setLocale(locale);
+  await dependencies.desktopWindow?.attach();
   await tester.pumpWidget(
     MediaQuery(
       data: MediaQueryData.fromView(

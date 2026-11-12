@@ -1859,5 +1859,12 @@
   "updatesResume": "डाउनलोड जारी रखें",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "छोटा करें",
+  "desktopWindowMaximize": "बड़ा करें",
+  "desktopWindowRestore": "पहले जैसा करें",
+  "settingsBehaviorWindowChrome": "एकीकृत शीर्षक पट्टी",
+  "settingsBehaviorWindowChromeDescription": "सिस्टम शीर्षक पट्टी की जगह सत्र टैब और विंडो नियंत्रण विंडो के ऊपर दिखते हैं।",
+  "settingsBehaviorWindowClose": "विंडो बंद करने पर",
+  "settingsBehaviorWindowCloseDescription": "बंद करें CodeWalk से बाहर निकलता है। छोटा करें उसे टास्कबार में चलता रखता है।"
 }

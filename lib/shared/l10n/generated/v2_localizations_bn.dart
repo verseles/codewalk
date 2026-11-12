@@ -2460,4 +2460,27 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get updatesResume => 'ডাউনলোড চালিয়ে যান';
+
+  @override
+  String get desktopWindowMinimize => 'ছোট করুন';
+
+  @override
+  String get desktopWindowMaximize => 'বড় করুন';
+
+  @override
+  String get desktopWindowRestore => 'আগের আকারে ফেরান';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'সমন্বিত শিরোনাম বার';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'সিস্টেমের শিরোনাম বারের বদলে সেশন ট্যাব ও উইন্ডো নিয়ন্ত্রণ উইন্ডোর উপরে থাকে।';
+
+  @override
+  String get settingsBehaviorWindowClose => 'উইন্ডো বন্ধ করলে';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'বন্ধ করুন CodeWalk থেকে বেরিয়ে যায়। ছোট করুন এটিকে টাস্কবারে চালু রাখে।';
 }

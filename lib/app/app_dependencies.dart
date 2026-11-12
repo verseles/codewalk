@@ -27,6 +27,7 @@ import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import 'app_navigation_controller.dart';
 import 'app_preferences_controller.dart';
+import 'desktop_window_controller.dart';
 import 'live_wake.dart';
 import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
@@ -64,6 +65,7 @@ class AppDependencies {
     this.modelPreferences,
     this.workspaceDrafts,
     this.projectContexts,
+    this.desktopWindow,
   }) {
     router.routeInformationProvider.addListener(_routeChanged);
     _routeChanged();
@@ -83,6 +85,10 @@ class AppDependencies {
 
   /// The project contexts of the selected server and the list preferences.
   final ProjectContextsController? projectContexts;
+
+  /// The Linux window; null on Android, the Web and in tests that do not
+  /// stand in for it.
+  final DesktopWindowController? desktopWindow;
 
   final AppPreferencesController preferences;
   final AppNavigationController navigation;
@@ -156,6 +162,8 @@ class AppDependencies {
     router.dispose();
     pairing?.dispose();
     navigation.dispose();
+    // It listens to the preferences, so it leaves first.
+    desktopWindow?.dispose();
     // It listens to the tabs and the list, so it leaves first.
     workspace?.dispose();
     // The tabs close their live views before the list and the directory.

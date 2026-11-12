@@ -1859,5 +1859,12 @@
   "updatesResume": "Download fortsetzen.",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "Minimieren",
+  "desktopWindowMaximize": "Maximieren",
+  "desktopWindowRestore": "Wiederherstellen",
+  "settingsBehaviorWindowChrome": "Integrierte Titelleiste",
+  "settingsBehaviorWindowChromeDescription": "Sitzungs-Tabs und Fenstersteuerung belegen den oberen Fensterrand statt der Titelleiste des Systems.",
+  "settingsBehaviorWindowClose": "Beim Schließen des Fensters",
+  "settingsBehaviorWindowCloseDescription": "Schließen beendet CodeWalk. Minimieren lässt es in der Taskleiste weiterlaufen."
 }

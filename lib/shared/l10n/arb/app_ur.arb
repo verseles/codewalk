@@ -1859,5 +1859,12 @@
   "updatesResume": "ڈاؤن لوڈ جاری رکھیں",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "چھوٹا کریں",
+  "desktopWindowMaximize": "بڑا کریں",
+  "desktopWindowRestore": "بحال کریں",
+  "settingsBehaviorWindowChrome": "مربوط ٹائٹل بار",
+  "settingsBehaviorWindowChromeDescription": "سسٹم ٹائٹل بار کی جگہ سیشن ٹیبز اور ونڈو کنٹرولز ونڈو کے اوپر دکھائی دیتے ہیں۔",
+  "settingsBehaviorWindowClose": "ونڈو بند کرنے پر",
+  "settingsBehaviorWindowCloseDescription": "بند کریں CodeWalk سے باہر نکل جاتا ہے۔ چھوٹا کریں اسے ٹاسک بار میں چلتا رکھتا ہے۔"
 }

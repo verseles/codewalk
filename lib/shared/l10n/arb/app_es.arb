@@ -1859,5 +1859,12 @@
   "updatesResume": "Reanudar descarga.",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "Minimizar",
+  "desktopWindowMaximize": "Maximizar",
+  "desktopWindowRestore": "Restaurar",
+  "settingsBehaviorWindowChrome": "Barra de título integrada",
+  "settingsBehaviorWindowChromeDescription": "Las pestañas de sesión y los controles de la ventana ocupan la parte superior de la ventana en lugar de la barra de título del sistema.",
+  "settingsBehaviorWindowClose": "Al cerrar la ventana",
+  "settingsBehaviorWindowCloseDescription": "Cerrar sale de CodeWalk. Minimizar lo mantiene en ejecución en la barra de tareas."
 }

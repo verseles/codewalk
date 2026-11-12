@@ -2458,4 +2458,27 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get updatesResume => 'ڈاؤن لوڈ جاری رکھیں';
+
+  @override
+  String get desktopWindowMinimize => 'چھوٹا کریں';
+
+  @override
+  String get desktopWindowMaximize => 'بڑا کریں';
+
+  @override
+  String get desktopWindowRestore => 'بحال کریں';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'مربوط ٹائٹل بار';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'سسٹم ٹائٹل بار کی جگہ سیشن ٹیبز اور ونڈو کنٹرولز ونڈو کے اوپر دکھائی دیتے ہیں۔';
+
+  @override
+  String get settingsBehaviorWindowClose => 'ونڈو بند کرنے پر';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'بند کریں CodeWalk سے باہر نکل جاتا ہے۔ چھوٹا کریں اسے ٹاسک بار میں چلتا رکھتا ہے۔';
 }

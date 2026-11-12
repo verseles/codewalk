@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/main_v2.dart' as entry_point;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
@@ -20,6 +23,22 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      // On a Linux host the entry point drives the real window; the window
+      // manager answers as the GTK plugin does.
+      const channel = MethodChannel('window_manager');
+      final windowCalls = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        call,
+      ) async {
+        windowCalls.add('${call.method} ${call.arguments ?? ''}'.trim());
+        return call.method == 'isMaximized' ? false : null;
+      });
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          null,
+        ),
+      );
 
       try {
         // main calls runApp directly. Establish this test's frame clock before
@@ -32,6 +51,15 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
         expect(find.text('CodeWalk'), findsOneWidget);
         expect(tester.takeException(), isNull);
+        if (Platform.isLinux) {
+          expect(windowCalls, [
+            'ensureInitialized',
+            'isMaximized',
+            startsWith('setTitleBarStyle {titleBarStyle: hidden'),
+            'setPreventClose {isPreventClose: true}',
+          ]);
+          expect(find.byKey(const ValueKey('desktop-window-band')), findsOne);
+        }
         final graph = tester
             .widget<CodeWalkV2Bootstrap>(find.byType(CodeWalkV2Bootstrap))
             .dependencies;

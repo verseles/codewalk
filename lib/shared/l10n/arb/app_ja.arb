@@ -1859,5 +1859,12 @@
   "updatesResume": "ダウンロードを再開",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "最小化",
+  "desktopWindowMaximize": "最大化",
+  "desktopWindowRestore": "元のサイズに戻す",
+  "settingsBehaviorWindowChrome": "統合タイトルバー",
+  "settingsBehaviorWindowChromeDescription": "システムのタイトルバーの代わりに、セッションタブとウィンドウ操作ボタンをウィンドウ上部に表示します。",
+  "settingsBehaviorWindowClose": "ウィンドウを閉じるとき",
+  "settingsBehaviorWindowCloseDescription": "「閉じる」は CodeWalk を終了します。「最小化」はタスクバーで実行を続けます。"
 }

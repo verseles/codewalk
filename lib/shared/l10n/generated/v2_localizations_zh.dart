@@ -2298,4 +2298,27 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get updatesResume => '继续下载';
+
+  @override
+  String get desktopWindowMinimize => '最小化';
+
+  @override
+  String get desktopWindowMaximize => '最大化';
+
+  @override
+  String get desktopWindowRestore => '还原';
+
+  @override
+  String get settingsBehaviorWindowChrome => '集成标题栏';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      '会话标签页和窗口控制按钮代替系统标题栏，位于窗口顶部。';
+
+  @override
+  String get settingsBehaviorWindowClose => '关闭窗口时';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      '“关闭”会退出 CodeWalk。“最小化”会让它在任务栏中继续运行。';
 }

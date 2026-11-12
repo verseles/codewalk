@@ -90,6 +90,8 @@ dependencies:
   image: ^4.8.0
   mobile_scanner: 7.4.2
   zxing_lib: 1.1.4
+  # The Linux integrated title bar and close behavior (#474).
+  window_manager: ^0.5.2
 
 dev_dependencies:
   # Flutter 3.44 pins test_api 0.7.11: test 1.31 requires analyzer <13.

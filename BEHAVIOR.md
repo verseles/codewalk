@@ -69,9 +69,24 @@ description of this code.
 - **Given** a physical keyboard reaches the workspace
 - **When** a configured shortcut has an available handler
 - **Then** `mod+N` opens the project's local New Chat draft, `mod+L` focuses the shown composer and `mod+R` refreshes the list and wakes the existing live views, keeping the draft and conversation open; it is a keyboard shortcut only, with no toolbar or menu action (#467)
-- **Then** `mod+W` closes the shown eligible local tab with its usual neighbour, New Chat and Undo behavior, including when focus is in the toolbar or conversations pane; without an eligible tab it requests the ordinary platform window close, while `mod+Q` requests desktop app exit and stays unconsumed on mobile
+- **Then** `mod+W` closes the shown eligible local tab with its usual neighbour, New Chat and Undo behavior, including when focus is in the toolbar or conversations pane; without an eligible tab it closes the window as the desktop close choice says (see V2 desktop window), else requests the ordinary platform close, while `mod+Q` always requests desktop app exit and stays unconsumed on mobile
 - **Then** a single Escape closes an open overlay or drawer first, else focuses the available composer; the focused composer keeps its own Escape behavior, and dialogs, IME composition and ordinary editing retain priority
 - **Then** Tab and Shift+Tab can leave the toolbar and return through the workspace controls
+
+### V2 desktop window
+
+- **Given** the app runs in a Linux desktop window with Integrated title bar on (the default)
+- **When** the window manager hides its title bar (on GNOME the header bar, keeping the native frame, resize borders and snapping)
+- **Then** a band at the top of every page replaces it: a free area that drags the window and maximizes or restores it on a double click, then Minimize, Maximize/Restore and Close at the right edge in every language
+- **Then** on a workspace at least 600 logical pixels wide the session tab strip sits in that band, taking only its tabs' width and always leaving at least 48 logical pixels free to drag, with the toolbar below it; the tabs keep their own taps, menus and double tap
+- **Then** on a compact window and on Settings, Servers, pairing and error pages the band holds only the free area and the controls; the compact strip stays in the page
+- **Then** a window manager that refuses to hide its title bar keeps it, and no band shows
+- **When** the user turns Integrated title bar off in Settings > Behavior
+- **Then** the system title bar returns at once and the strip goes back below the toolbar; the choice persists as `cw2.settings.integratedWindowChrome` (absent when on)
+- **When** the window is closed by the band's Close, the window manager (its close button, Alt+F4, the taskbar) or `mod+W` without a tab
+- **Then** Settings > Behavior > When closing the window decides: Close (the default) quits CodeWalk, Minimize keeps it running minimized; the choice is read at that moment and persists as `cw2.settings.windowCloseAction` (`minimize`, absent for Close), and an unknown stored value means Close
+- **Then** `mod+Q` and the update restart still quit, a second Close while the app is quitting is the same request, and there is no tray (#309)
+- **Then** Android and the Web have no band, no window choices and no change in layout
 
 ### V2 server health and workspace status
 
@@ -111,7 +126,7 @@ description of this code.
 - **When** a session opens from the list, a link or a tab
 - **Then** it adds a tab, or focuses its tab, keyed by its full identity (server, harness instance, session), so two servers with the same session id keep two tabs; the tab becomes the selected tab of its server
 - **Then** a strip below the app bar shows every tab of the server: pinned tabs first in their own scroll (an inactive pinned tab shows only its icon, the shown one its title), then the other tabs grouped by project in the order their projects first appear, with the shown tab first in its group, without changing the saved order; it keeps the shown tab in view and switches on a tap
-- **Then** on a noncompact workspace the strip spans the sidebar and chat; on a compact workspace it remains above the chat
+- **Then** on a noncompact workspace the strip spans the sidebar and chat, and in the Linux desktop window band it sits above the toolbar (see V2 desktop window); on a compact workspace it remains above the chat
 - **Then** each tab shows its custom icon, else the default one, replaced by a mark while its session fails, waits for an answer or has an unseen reply, with a small running badge while it works
 - **Then** an inline `+` after each project's group opens or switches to that project and shows its local New Chat draft with the composer focused; nothing is created on the server until the first send, and a failed switch shows an error and no draft; on the workspace home the active draft shows as a selected New Chat placeholder in its project's group (in place of that `+`), with no menu, never saved as a tab, and replaced by the session its first send creates
 - **Then** the open projects' recent visible root sessions become tabs automatically: the later of their server update and local open keeps them for three hours; the selected tab, a confirmed running or waiting session and a context-pinned session remain eligible, and unknown activity or a missing partial row never proves idleness or deletion
@@ -686,7 +701,7 @@ description of this code.
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
-- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes, language or composer spell check
+- **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes, language, composer spell check or, on a desktop window, its title bar and close choices
 
 - **Given** the user opens Shortcuts
 - **When** the local bindings are displayed or edited

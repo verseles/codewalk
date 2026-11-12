@@ -2513,4 +2513,27 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get updatesResume => 'Riprendi download.';
+
+  @override
+  String get desktopWindowMinimize => 'Riduci a icona';
+
+  @override
+  String get desktopWindowMaximize => 'Ingrandisci';
+
+  @override
+  String get desktopWindowRestore => 'Ripristina';
+
+  @override
+  String get settingsBehaviorWindowChrome => 'Barra del titolo integrata';
+
+  @override
+  String get settingsBehaviorWindowChromeDescription =>
+      'Le schede delle sessioni e i controlli della finestra occupano la parte superiore della finestra al posto della barra del titolo di sistema.';
+
+  @override
+  String get settingsBehaviorWindowClose => 'Alla chiusura della finestra';
+
+  @override
+  String get settingsBehaviorWindowCloseDescription =>
+      'Chiudi esce da CodeWalk. Riduci a icona lo mantiene attivo nella barra delle applicazioni.';
 }

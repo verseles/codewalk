@@ -1859,5 +1859,12 @@
   "updatesResume": "Riprendi download.",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "Riduci a icona",
+  "desktopWindowMaximize": "Ingrandisci",
+  "desktopWindowRestore": "Ripristina",
+  "settingsBehaviorWindowChrome": "Barra del titolo integrata",
+  "settingsBehaviorWindowChromeDescription": "Le schede delle sessioni e i controlli della finestra occupano la parte superiore della finestra al posto della barra del titolo di sistema.",
+  "settingsBehaviorWindowClose": "Alla chiusura della finestra",
+  "settingsBehaviorWindowCloseDescription": "Chiudi esce da CodeWalk. Riduci a icona lo mantiene attivo nella barra delle applicazioni."
 }

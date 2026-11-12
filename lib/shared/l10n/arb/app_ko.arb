@@ -1897,5 +1897,12 @@
   "updatesResume": "다운로드 재개",
   "@updatesResume": {
     "description": "V2 update check"
-  }
+  },
+  "desktopWindowMinimize": "최소화",
+  "desktopWindowMaximize": "최대화",
+  "desktopWindowRestore": "이전 크기로 복원",
+  "settingsBehaviorWindowChrome": "통합 제목 표시줄",
+  "settingsBehaviorWindowChromeDescription": "시스템 제목 표시줄 대신 세션 탭과 창 컨트롤이 창 상단을 차지합니다.",
+  "settingsBehaviorWindowClose": "창을 닫을 때",
+  "settingsBehaviorWindowCloseDescription": "닫기는 CodeWalk를 종료합니다. 최소화는 작업 표시줄에서 계속 실행합니다."
 }
