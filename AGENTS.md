@@ -64,7 +64,8 @@ This overrides the general `cimonitor` and 60-second rechecks in this project. T
 
 - `make watch-ci` and `make watch-release` start a detached script with no agent. It waits for the run of the current commit and reports through `hey`: CI only on failure, Release always.
 - After starting a watcher, end the turn. Do not use `cimonitor` or `gh run watch`, and do not poll.
-- Look at CI only when `status` is ordered, when a failure was reported, or at the start of the next unit after a reported failure.
+- Look at CI only when `status` is ordered or a failure was reported.
+- A reported CI failure never delays the queue. Fix it in parallel with the next unit, in a commit of its own.
 - The local gate decides whether a commit is ready. CI is a safety net.
 
 ## `apk`: send a test build through `tdl`
@@ -123,9 +124,19 @@ rm -rf "$dir"
 - Read `BEHAVIOR.md` before substantial planning.
 - Behavior changes follow ADR-023 (contract first) and ADR-058, anchored on `ai-docs-for-opencode-v2/opencode_v2_server.md`, `opencode_v2_web.md` and `opencode_v2_models.md`. The v1 anchors `ai-docs/opencode_*.md` live on the `v1` branch and do not constrain v2.
 - The official OpenCode clients `https://github.com/anomalyco/opencode/tree/dev/packages/cli` and `https://github.com/anomalyco/opencode/tree/dev/packages/app` are the crucial reference for the most correct way to use the v2 API and events. Check how they do it before implementing or changing API calls or event handling.
-- Consult `https://github.com/openchamber/openchamber` only when the official contract is ambiguous; it never overrides official docs or source.
+- `https://github.com/openchamber/openchamber` is the secondary reference, a community client that already runs on OpenCode v2. After the official clients, check how it uses the v2 API and events, especially where they are silent or ambiguous. It never overrides official docs or source, and its own server routes (`packages/web/server`) are not OpenCode's API.
 - For OpenCode or OpenChamber source, inspect GitHub URLs, raw files, commits and pull requests directly, not through the `researcher` subagent.
 - A behavior that cannot align with the official contract is blocked unless an ADR exception documents rationale, risk, rollback or flag, and regression tests.
+
+## Harness diversity
+
+CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Claude Code and others follow. Build every feature for that diversity, as ADR-058 and `v2-plan.md` already require (§4 invariants 1, 2, 10 and 12; §6.5 canonical model; §6.7 capability model; §7 capability matrix).
+
+- Widgets and controllers read canonical types from `packages/codewalk_core` and capabilities only. No wire types above `packages/harness_*`, and no branching on the harness name.
+- Gate anything a harness may lack behind a capability, with a defined fallback: a local equivalent when CodeWalk can honestly own it, otherwise no control. Never fake a native capability.
+- When a feature needs data the canonical model lacks, add an optional harness-neutral field to `packages/codewalk_core`, let each adapter fill it, and record the change in `v2-plan.md` §17.
+- Keep the variation at the adapter and capability seam, not in conditionals spread across screens. Defaults that do not depend on a harness, such as CodeWalk's agent colors, live in the app.
+- Every Issue and plan that adds or changes behavior names its capabilities and the fallback for a harness without them.
 
 ## Validation
 

@@ -1,0 +1,1 @@
+Adiciona o repositório do openchamber como fonte secundária de como o opencode v2 faz as coisas

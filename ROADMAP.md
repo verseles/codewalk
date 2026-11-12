@@ -12,7 +12,10 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #462 Busca na timeline e controles que faltam na toolbar
+- [ ] #484 Composer compacto: uma linha embaixo, chip do modelo na cor do agente
+- [ ] #485 Seletor único de agente, modelo, variante e permissões; estrela de favorito
+- [ ] #486 Mensagem em espera fixa acima do composer: uma linha, tocar edita, X cancela, ↑ envia já
+- [ ] #462 Busca na timeline (Ctrl+F, F3)
 - [ ] #426 Mostrar troca de modelo e agente na timeline
 - [ ] #431 Polir a escolha de modelo e agente
 - [ ] #464 Área de toque das ações da mensagem do usuário
@@ -66,6 +69,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #291 Terminal
 - [ ] #286 Subagentes e bandeja de trabalho em segundo plano
 - [ ] #287 Revert, fork e diff
+- [ ] #483 Repensar a triagem de sessões: arquivar, lido/não lido, ocultar e inbox (OpenCode 2.2.7)
 - [ ] #294 Uso, contexto e erros
 - [ ] #307 Voz: STT e leitura em voz alta
 - [ ] #308 Exportar sessão e mensagem, encaminhar
@@ -130,10 +134,9 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - Anexo de PDF para o OpenCode: desligado no escopo aprovado; converta a página em imagem.
 - Task list e progresso de tarefas: o OpenCode 2 não tem todo.
 - Share/copy link e "view tasks": sem rota no 2.0.22.
-- Linhas do painel lateral removidas (Refresh + Settings, "Connect to a running server", "Open projects").
-- Rótulos relativos de data na timeline, trocados por hora.
+- Três linhas do painel lateral: Atualizar + Configurações e "Conectar a um servidor em execução" (as três funções seguem na toolbar) e o rótulo "Projetos abertos".
+- Rótulos relativos de data nas mensagens ("há 5 min", "ontem"), trocados pela hora.
 - Estilo clássico/refinado.
-- "Arquivar" virou "Ocultar no CodeWalk", local.
 - Títulos gerados pelo cliente: vêm do servidor.
 - Importação de dados da v1.
 - Motores de voz Moonshine, Nemotron e Edge experimental, salvo pedido do owner.
