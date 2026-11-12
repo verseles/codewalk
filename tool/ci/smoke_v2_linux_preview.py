@@ -217,6 +217,11 @@ def smoke(archive_path, evidence):
                 run(["xdotool", "key", "--clearmodifiers", "Return"])
             expect(window, ["Pair a server", "Pairing link", "Confirm and pair"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])
+            # A fresh release's What's new card tops the rail and pushes
+            # Shortcuts below the window, so the page is awaited first and the
+            # rail scrolled before both are checked.
+            expect(window, ["Appearance", "Search settings"], "04-settings-open")
+            reveal(window, "Shortcuts")
             expect(window, ["Appearance", "Shortcuts"], "04-settings-wide")
             click(window, "Light")
             deadline = time.monotonic() + 10
