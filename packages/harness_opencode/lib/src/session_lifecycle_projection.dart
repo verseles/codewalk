@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:codewalk_core/codewalk_core.dart';
+
+import 'item_ids.dart';
 
 import 'version_policy.dart';
 
@@ -58,6 +62,10 @@ const _durableVersions = {
 /// selection, so each yields the resident selection with only that half
 /// replaced: the agent id, or the whole model reference (a reference without
 /// a variant clears the variant). `previous` is validated and not copied.
+/// Each switch also yields its note in the conversation (#426): a
+/// [NoticeKind.selectionChanged] [Notice] with only the switched half, under
+/// the id of the message the server records for the event, so the history
+/// read finds the same item.
 List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   Object? value,
   SessionState current, {
@@ -107,6 +115,8 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
 
   SessionInfo? info;
   Selection? selection;
+  // What the switch changed, for its note in the conversation (#426).
+  Selection? switched;
   String? resync;
   final resident = current.selection;
   switch (type) {
@@ -176,6 +186,7 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
     case _agentSelected:
       final agent = _text(data['agent'], nonempty: true);
       if (data['previous'] != null) _text(data['previous'], nonempty: true);
+      switched = Selection(agentId: agent);
       selection = Selection(
         modelId: resident?.modelId,
         modelProviderId: resident?.modelProviderId,
@@ -188,6 +199,11 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
     case _modelSelected:
       final model = _modelRef(data['model']);
       if (data['previous'] != null) _modelRef(data['previous']);
+      switched = Selection(
+        modelId: model.id,
+        modelProviderId: model.providerId,
+        modelVariant: model.variant?.isEmpty ?? true ? null : model.variant,
+      );
       selection = Selection(
         modelId: model.id,
         modelProviderId: model.providerId,
@@ -217,8 +233,49 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
       }),
     ),
   );
+  // The official client shows each switch in the conversation, as the
+  // message the server records for the event (`evt_` becomes `msg_`), so the
+  // live note and the history read are one item.
+  final Notice? note;
+  if (switched == null) {
+    note = null;
+  } else {
+    final messageId = 'msg_${nativeId.substring(4)}';
+    note = Notice(
+      meta: ItemMeta(
+        id: ItemId(jsonEncode([ref.storageKey, messageId, 'notice', 0])),
+        anchor: openCodeMessageAnchor(messageId),
+        generation: jsonEncode([
+          'live',
+          ref.storageKey,
+          messageId,
+          position.id,
+          position.epoch,
+        ]),
+        status: const OpenValue.known(ItemStatus.completed),
+        source: SourceProvenance(
+          harness: ref.harnessRef,
+          version: sourceVersion,
+          nativeType: type,
+          nativeEventId: nativeId,
+          aggregateId: sessionId,
+          aggregateSeq: aggregateSeq,
+          durability: const OpenValue.known(Durability.durable),
+          extra: CanonicalValue({
+            'nativeCreated': created,
+            'nativeDurableVersion': durableVersion,
+            'nativeMessageId': messageId,
+          }),
+        ),
+      ),
+      kind: const OpenValue.known(NoticeKind.selectionChanged),
+      text: '',
+      selection: switched,
+    );
+  }
   return List.unmodifiable([
     if (info != null) SessionInfoChanged(meta: meta, info: info),
+    if (note != null) ItemUpserted(meta: meta, item: note),
     if (selection != null) SelectionChanged(meta: meta, selection: selection),
     if (resync != null) ResyncRequired(meta: meta, reason: resync),
   ]);

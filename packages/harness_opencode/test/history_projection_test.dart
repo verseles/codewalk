@@ -23,6 +23,57 @@ List<TimelineItem> project(
 );
 
 void main() {
+  test('a model or agent switch becomes its note (#426)', () {
+    final items = project([
+      message('s1', 'agent-switched', {'agent': 'plan', 'previous': 'build'}),
+      message('s2', 'model-switched', {
+        'model': {'id': 'model-b', 'providerID': 'p', 'variant': 'high'},
+        'previous': {'id': 'model-a', 'providerID': 'p'},
+      }),
+      message('s3', 'model-switched', {
+        'model': {'id': 'model-c', 'providerID': 'q', 'variant': ''},
+      }),
+    ]);
+    final notes = items.cast<Notice>();
+    expect(notes.map((note) => note.kind.known), [
+      for (var i = 0; i < 3; i++) NoticeKind.selectionChanged,
+    ]);
+    expect(notes[0].selection!.agentId, 'plan');
+    expect(notes[0].selection!.modelId, isNull);
+    expect(
+      [
+        notes[1].selection!.modelId,
+        notes[1].selection!.modelProviderId,
+        notes[1].selection!.modelVariant,
+        notes[1].selection!.agentId,
+      ],
+      ['model-b', 'p', 'high', null],
+    );
+    expect(notes[2].selection!.modelVariant, isNull);
+    // The same id the live event gives the same message.
+    expect(
+      notes[0].id.value,
+      jsonEncode([historyRef.storageKey, 'msg_s1', 'notice', 0]),
+    );
+    for (final malformed in [
+      message('x', 'agent-switched', {'agent': ''}),
+      message('x', 'model-switched', {
+        'model': {'id': 'm'},
+      }),
+      message('x', 'agent-switched', {'agent': 'plan', 'previous': 7}),
+      message('x', 'model-switched', {
+        'model': {'id': 'm', 'providerID': 'p'},
+        'previous': 'model-a',
+      }),
+      message('x', 'model-switched', {
+        'model': {'id': 'm', 'providerID': 'p'},
+        'previous': {'id': 'model-a', 'providerID': 'p', 'variant': 3},
+      }),
+    ]) {
+      expect(() => project([malformed]), throwsFormatException);
+    }
+  });
+
   test('display labels never turn a readable near-cap page into a failure', () {
     final label = 'x' * 250;
     final items = project([

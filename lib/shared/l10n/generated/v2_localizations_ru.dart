@@ -828,6 +828,16 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerWaitingEdit => 'Изменить';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'Модель изменена на $name';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'Агент изменён на $name';
+  }
+
+  @override
   String get liveSearch => 'Поиск в разговоре';
 
   @override

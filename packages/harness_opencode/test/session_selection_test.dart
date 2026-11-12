@@ -123,7 +123,7 @@ SessionState _withSelection(Selection selection) => reduce(
 ).state;
 
 Selection _selectionOf(List<SessionEvent> events) =>
-    (events.single as SelectionChanged).selection;
+    events.whereType<SelectionChanged>().single.selection;
 
 void main() {
   group('the selected events', () {
@@ -155,7 +155,7 @@ void main() {
       // A reference without a variant clears the old one.
       expect(selection.modelVariant, isNull);
       expect(selection.agentId, 'build');
-      final source = events.single.meta.source;
+      final source = events.whereType<SelectionChanged>().single.meta.source;
       expect(source.nativeType, 'session.model.selected');
       expect(source.durability.known, Durability.durable);
     });
@@ -212,10 +212,42 @@ void main() {
         projectLifecycle(
           lifecycleFrame('agent.selected', data: {'agent': 'plan'}),
           current: current,
-        ).single,
+        ).whereType<SelectionChanged>().single,
       ).state;
       expect(next.selection!.agentId, 'plan');
       expect(next.selection!.modelVariant, 'low');
+    });
+
+    test('a switch is also its note, with the history id (#426)', () {
+      final events = projectLifecycle(
+        lifecycleFrame(
+          'model.selected',
+          id: 'evt_switch1',
+          data: {
+            'model': {'id': 'model-b', 'providerID': 'p', 'variant': 'max'},
+          },
+        ),
+        current: _withSelection(resident),
+      );
+      final note = events.whereType<ItemUpserted>().single.item as Notice;
+      expect(note.kind.known, NoticeKind.selectionChanged);
+      expect(note.text, isEmpty);
+      // Only the switched half: the agent did not change.
+      expect(note.selection!.modelId, 'model-b');
+      expect(note.selection!.modelVariant, 'max');
+      expect(note.selection!.agentId, isNull);
+      expect(
+        note.id.value,
+        jsonEncode([historyRef.storageKey, 'msg_switch1', 'notice', 0]),
+      );
+      final agent =
+          projectLifecycle(
+                lifecycleFrame('agent.selected', data: {'agent': 'plan'}),
+                current: _withSelection(resident),
+              ).whereType<ItemUpserted>().single.item
+              as Notice;
+      expect(agent.selection!.agentId, 'plan');
+      expect(agent.selection!.modelId, isNull);
     });
 
     test('malformed switches fail with finite categories', () {
@@ -277,7 +309,12 @@ void main() {
           position: observedPosition(1),
           receivedAt: DateTime.utc(2026, 10, 22),
         );
-        expect(events.single, isA<SelectionChanged>(), reason: phase);
+        expect(events.whereType<SelectionChanged>(), hasLength(1));
+        expect(
+          events.whereType<ItemUpserted>().single.item,
+          isA<Notice>(),
+          reason: phase,
+        );
       }
     });
   });

@@ -817,6 +817,16 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerWaitingEdit => 'সম্পাদনা';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'মডেল $name-এ বদলানো হয়েছে';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'এজেন্ট $name-এ বদলানো হয়েছে';
+  }
+
+  @override
   String get liveSearch => 'কথোপকথনে খুঁজুন';
 
   @override

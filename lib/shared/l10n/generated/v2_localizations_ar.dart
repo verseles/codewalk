@@ -814,6 +814,16 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerWaitingEdit => 'تعديل';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'تم تبديل النموذج إلى $name';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'تم تبديل الوكيل إلى $name';
+  }
+
+  @override
   String get liveSearch => 'البحث في المحادثة';
 
   @override

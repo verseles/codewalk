@@ -821,6 +821,16 @@ class V2LocalizationsEn extends V2Localizations {
   String get composerWaitingEdit => 'Edit';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'Model switched to $name';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'Agent switched to $name';
+  }
+
+  @override
   String get liveSearch => 'Search conversation';
 
   @override

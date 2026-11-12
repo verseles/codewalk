@@ -538,6 +538,24 @@
   "@composerWaitingEdit": {
     "description": "V2 waiting messages (#486)"
   },
+  "liveSwitchedModel": "Modelo cambiado a {name}",
+  "@liveSwitchedModel": {
+    "description": "V2 model and agent switches in the conversation (#426)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "liveSwitchedAgent": "Agente cambiado a {name}",
+  "@liveSwitchedAgent": {
+    "description": "V2 model and agent switches in the conversation (#426)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "liveSearch": "Buscar en la conversación",
   "@liveSearch": {
     "description": "V2 conversation search (#462)"

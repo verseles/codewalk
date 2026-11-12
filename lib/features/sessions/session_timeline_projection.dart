@@ -212,7 +212,17 @@ final class SessionTimelinePresentation {
           (settled || _settled[id] == mark);
       if (collapse) {
         latched[id] = mark;
-        out.group(id, items.sublist(start, answer));
+        // A switch of model or agent made while the turn ran stays in the
+        // conversation, after the collapsed work it interrupted (#426).
+        final work = items.sublist(start, answer);
+        out.group(id, [
+          for (final item in work)
+            if (!_isSwitch(item)) item,
+        ]);
+        out.runs([
+          for (final item in work)
+            if (_isSwitch(item)) item,
+        ]);
         out.runs(items.sublist(answer, end));
         return;
       }
@@ -281,6 +291,9 @@ final class SessionTimelinePresentation {
         if (item is AssistantText || item is Reasoning) item.id,
     };
   }
+
+  static bool _isSwitch(TimelineItem item) =>
+      item is Notice && item.kind.known == NoticeKind.selectionChanged;
 
   /// Whether an item can be published in the Block render mode: its message
   /// ended, as the harness reported, or, outside any message, it ended. An

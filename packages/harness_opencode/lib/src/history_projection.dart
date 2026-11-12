@@ -625,6 +625,52 @@ List<TimelineItem> projectOpenCodeHistory(
             text: text(message['text']),
           ),
         );
+      // A switch of agent or model mid-session (#426), as the official
+      // client shows it; `previous` is validated and not copied.
+      case 'agent-switched':
+        final agent = text(message['agent'], cap: 4096, nonempty: true);
+        if (message['previous'] != null) {
+          text(message['previous'], cap: 4096, nonempty: true);
+        }
+        add(
+          Notice(
+            meta: meta('notice', 0, status: completed),
+            kind: const OpenValue.known(NoticeKind.selectionChanged),
+            text: '',
+            selection: Selection(agentId: agent),
+          ),
+        );
+      case 'model-switched':
+        final model = map(message['model']);
+        final modelId = text(model['id'], cap: 4096, nonempty: true);
+        final provider = text(model['providerID'], cap: 4096, nonempty: true);
+        // An empty variant is none, as the session record reads it.
+        String? variantOf(Map<String, Object?> ref) {
+          final raw = ref['variant'];
+          if (raw == null) return null;
+          final value = text(raw, cap: 4096);
+          return value.isEmpty ? null : value;
+        }
+
+        final variant = variantOf(model);
+        if (message['previous'] != null) {
+          final previous = map(message['previous']);
+          text(previous['id'], cap: 4096, nonempty: true);
+          text(previous['providerID'], cap: 4096, nonempty: true);
+          variantOf(previous);
+        }
+        add(
+          Notice(
+            meta: meta('notice', 0, status: completed),
+            kind: const OpenValue.known(NoticeKind.selectionChanged),
+            text: '',
+            selection: Selection(
+              modelId: modelId,
+              modelProviderId: provider,
+              modelVariant: variant,
+            ),
+          ),
+        );
       case 'compaction':
         final ({ItemStatus status, String text})? compact;
         try {

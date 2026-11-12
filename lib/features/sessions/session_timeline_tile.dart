@@ -9,6 +9,7 @@ import '../../shared/theme/chat_appearance.dart';
 import 'session_error_card.dart';
 import 'session_message_info.dart';
 import 'session_reasoning_body.dart';
+import 'session_switch_note.dart';
 import 'session_tool_result.dart';
 
 /// One read-only timeline item, shared by the history and live views.
@@ -60,6 +61,15 @@ class SessionTimelineTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final item = this.item;
+    if (item case Notice(
+      kind: OpenValue(known: NoticeKind.selectionChanged),
+      :final selection?,
+    )) {
+      return SessionSwitchNote(
+        key: ValueKey('timeline-switch-${item.id.value}'),
+        selection: selection,
+      );
+    }
     if (item is Notice && item.kind.known == NoticeKind.interruption) {
       return ConversationTextScale(
         child: Padding(

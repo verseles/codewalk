@@ -36,3 +36,22 @@ SHORTCUT = {
     "ar": ("البحث في المحادثة", "ابحث عن نص في المحادثة المفتوحة؛ ينتقل F3 وShift+F3 بين التطابقات"),
     "ur": ("گفتگو میں تلاش کریں", "کھلی گفتگو میں متن تلاش کریں؛ F3 اور Shift+F3 مماثلتوں کے درمیان لے جاتے ہیں"),
 }
+
+# Model and agent switches in the conversation (#426).
+SWITCH_KEYS = ("liveSwitchedModel", "liveSwitchedAgent")
+SWITCH = {
+    "en": ("Model switched to {name}", "Agent switched to {name}"),
+    "pt": ("Modelo trocado para {name}", "Agente trocado para {name}"),
+    "es": ("Modelo cambiado a {name}", "Agente cambiado a {name}"),
+    "fr": ("Modèle changé pour {name}", "Agent changé pour {name}"),
+    "de": ("Modell gewechselt zu {name}", "Agent gewechselt zu {name}"),
+    "it": ("Modello cambiato in {name}", "Agente cambiato in {name}"),
+    "ru": ("Модель изменена на {name}", "Агент изменён на {name}"),
+    "ja": ("モデルを {name} に切り替えました", "エージェントを {name} に切り替えました"),
+    "ko": ("모델을 {name}(으)로 전환함", "에이전트를 {name}(으)로 전환함"),
+    "zh": ("模型已切换为 {name}", "智能体已切换为 {name}"),
+    "hi": ("मॉडल {name} पर बदला गया", "एजेंट {name} पर बदला गया"),
+    "bn": ("মডেল {name}-এ বদলানো হয়েছে", "এজেন্ট {name}-এ বদলানো হয়েছে"),
+    "ar": ("تم تبديل النموذج إلى {name}", "تم تبديل الوكيل إلى {name}"),
+    "ur": ("ماڈل {name} پر بدل دیا گیا", "ایجنٹ {name} پر بدل دیا گیا"),
+}

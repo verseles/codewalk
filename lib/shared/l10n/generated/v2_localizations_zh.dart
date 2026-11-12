@@ -769,6 +769,16 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerWaitingEdit => '编辑';
 
   @override
+  String liveSwitchedModel(String name) {
+    return '模型已切换为 $name';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return '智能体已切换为 $name';
+  }
+
+  @override
   String get liveSearch => '在对话中搜索';
 
   @override

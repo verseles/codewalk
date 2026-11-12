@@ -820,6 +820,16 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerWaitingEdit => 'ترمیم کریں';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'ماڈل $name پر بدل دیا گیا';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'ایجنٹ $name پر بدل دیا گیا';
+  }
+
+  @override
   String get liveSearch => 'گفتگو میں تلاش کریں';
 
   @override

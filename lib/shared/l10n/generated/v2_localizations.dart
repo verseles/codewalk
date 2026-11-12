@@ -1605,6 +1605,18 @@ abstract class V2Localizations {
   /// **'Edit'**
   String get composerWaitingEdit;
 
+  /// V2 model and agent switches in the conversation (#426)
+  ///
+  /// In en, this message translates to:
+  /// **'Model switched to {name}'**
+  String liveSwitchedModel(String name);
+
+  /// V2 model and agent switches in the conversation (#426)
+  ///
+  /// In en, this message translates to:
+  /// **'Agent switched to {name}'**
+  String liveSwitchedAgent(String name);
+
   /// V2 conversation search (#462)
   ///
   /// In en, this message translates to:

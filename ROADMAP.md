@@ -12,7 +12,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 3. UI/UX — restante
 
-- [ ] #426 Mostrar troca de modelo e agente na timeline
 - [ ] #464 Área de toque das ações da mensagem do usuário
 - [ ] #487 Dica de gestos das abas cobre o seletor `/` com o teclado aberto
 - [ ] #417 Manter o scroll da lista de sessões

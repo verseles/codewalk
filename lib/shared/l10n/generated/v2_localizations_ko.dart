@@ -786,6 +786,16 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerWaitingEdit => '편집';
 
   @override
+  String liveSwitchedModel(String name) {
+    return '모델을 $name(으)로 전환함';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return '에이전트를 $name(으)로 전환함';
+  }
+
+  @override
   String get liveSearch => '대화에서 검색';
 
   @override

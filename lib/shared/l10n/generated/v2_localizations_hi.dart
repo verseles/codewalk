@@ -823,6 +823,16 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerWaitingEdit => 'संपादित करें';
 
   @override
+  String liveSwitchedModel(String name) {
+    return 'मॉडल $name पर बदला गया';
+  }
+
+  @override
+  String liveSwitchedAgent(String name) {
+    return 'एजेंट $name पर बदला गया';
+  }
+
+  @override
   String get liveSearch => 'बातचीत में खोजें';
 
   @override

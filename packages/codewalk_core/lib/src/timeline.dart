@@ -1,5 +1,6 @@
 import 'errors.dart';
 import 'identity.dart';
+import 'session.dart';
 import 'usage.dart';
 import 'values.dart';
 
@@ -300,6 +301,7 @@ sealed class TimelineItem {
       kind: item.kind,
       text: item.text,
       relatedSession: item.relatedSession,
+      selection: item.selection,
     ),
     final TurnOutcome item => TurnOutcome(
       meta: meta,
@@ -471,11 +473,18 @@ final class Notice extends TimelineItem {
     required this.kind,
     required this.text,
     this.relatedSession,
+    this.selection,
   });
 
   final OpenValue<NoticeKind> kind;
   final String text;
   final SessionRef? relatedSession;
+
+  /// For a [NoticeKind.selectionChanged] notice, what the session switched
+  /// to at this point of the conversation (#426): the agent, or the model
+  /// with its variant. Only the switched half is set; a harness that does
+  /// not report switches never makes one.
+  final Selection? selection;
 }
 
 final class TurnOutcome extends TimelineItem {
