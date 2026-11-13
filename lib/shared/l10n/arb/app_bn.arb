@@ -554,6 +554,10 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
+  "livePermissionServerRule": "সব ক্লায়েন্টের জন্য সার্ভারে সংরক্ষিত। এজেন্ট কিছুই জিজ্ঞেস করে না, Plan মোডেও না।",
+  "@livePermissionServerRule": {
+    "description": "V2 permission switch synced with the server rule (#494)"
+  },
   "composerSendNow": "এখনই পাঠান",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -828,76 +832,12 @@
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
   },
-  "livePermissionMode": "অনুমতি মোড",
-  "@livePermissionMode": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAsk": "জিজ্ঞাসা করুন",
-  "@livePermissionModeAsk": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAllowAll": "সব অনুমতি দিন",
-  "@livePermissionModeAllowAll": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeSession": "এই সেশনের জন্য সেট",
-  "@livePermissionModeSession": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeDefault": "অ্যাপ ডিফল্ট",
-  "@livePermissionModeDefault": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUseDefault": "অ্যাপ ডিফল্ট ব্যবহার করুন",
-  "@livePermissionModeUseDefault": {
-    "description": "V2 manual permission cards"
-  },
   "livePermissionModeUnavailable": "অনুমতি মোড উপলব্ধ নয়",
   "@livePermissionModeUnavailable": {
     "description": "V2 manual permission cards"
   },
   "livePermissionModeFailed": "অনুমতি মোড সংরক্ষণ করা যায়নি।",
   "@livePermissionModeFailed": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestricted": "সীমাহীন",
-  "@livePermissionModeUnrestricted": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedExternal": "CodeWalk-এর বাইরে সেট",
-  "@livePermissionModeUnrestrictedExternal": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOn": "সীমাহীন চালু করুন…",
-  "@livePermissionModeUnrestrictedTurnOn": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOff": "সীমাহীন বন্ধ করুন",
-  "@livePermissionModeUnrestrictedTurnOff": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeRulesRefresh": "সেশনের নিয়ম রিফ্রেশ করুন",
-  "@livePermissionModeRulesRefresh": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTitle": "এই সেশনে সীমাহীন চালু করবেন?",
-  "@liveUnrestrictedTitle": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOverride": "OpenCode এই সেশনের প্রতিটি কাজ জিজ্ঞাসা ছাড়াই চালাবে এবং এজেন্টের জিজ্ঞাসা ও প্রত্যাখ্যানের নিয়ম উপেক্ষা করবে। ইতিমধ্যে অপেক্ষমাণ অনুরোধগুলির এখনও উত্তর প্রয়োজন।",
-  "@liveUnrestrictedOverride": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedChildren": "নতুন চাইল্ড সেশন এই নিয়ম কপি করে। বিদ্যমান চাইল্ড সেশন নিজেদের নিয়ম রাখে, এবং পরে বন্ধ করলে যেগুলি ইতিমধ্যে কপি করেছে সেগুলি বদলায় না।",
-  "@liveUnrestrictedChildren": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOthers": "অন্যান্য ক্লায়েন্ট এই নিয়ম দেখতে ও বদলাতে পারে; CodeWalk শুধু নিজের যোগ করা নিয়মটি সরায়। বন্ধ করলে আগে করা কাজ ফেরানো যায় না।",
-  "@liveUnrestrictedOthers": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedConfirm": "সীমাহীন চালু করুন",
-  "@liveUnrestrictedConfirm": {
     "description": "V2 manual permission cards"
   },
   "liveUnrestrictedRefused": "সেশনের নিয়ম বদলানো হয়নি।",
@@ -910,14 +850,6 @@
   },
   "liveUnrestrictedChangedElsewhere": "সেশনের নিয়ম অন্য কোথাও বদলেছে। CodeWalk সেগুলি ওভাররাইট করেনি।",
   "@liveUnrestrictedChangedElsewhere": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedUnavailable": "সেশনের নিয়ম উপলব্ধ নয়।",
-  "@liveUnrestrictedUnavailable": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTurnedOff": "সীমাহীন বন্ধ হয়েছে। বিদ্যমান চাইল্ড সেশন কপি করা নিয়মটি রাখে।",
-  "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
   },
   "livePermissionChildBadge": "সাব-এজেন্ট",

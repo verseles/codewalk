@@ -277,11 +277,20 @@ class LiveHandle implements SessionLiveHandle, SessionTurnActionSource {
   @override
   bool get canEnableUnrestricted =>
       _unrestrictedReady &&
-      unrestrictedState.phase == SessionUnrestrictedPhase.off;
+      !unrestrictedState.inEffect &&
+      const {
+        SessionUnrestrictedPhase.off,
+        SessionUnrestrictedPhase.conflict,
+      }.contains(unrestrictedState.phase);
   @override
   bool get canDisableUnrestricted =>
       _unrestrictedReady &&
-      unrestrictedState.phase == SessionUnrestrictedPhase.on;
+      unrestrictedState.inEffect &&
+      const {
+        SessionUnrestrictedPhase.on,
+        SessionUnrestrictedPhase.elsewhere,
+        SessionUnrestrictedPhase.conflict,
+      }.contains(unrestrictedState.phase);
   @override
   bool get canRefreshUnrestricted => _unrestrictedReady;
 

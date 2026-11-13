@@ -168,4 +168,22 @@ final class WorkspaceDraftSelection extends ChangeNotifier
   @override
   SessionUnrestrictedState get unrestrictedState =>
       const SessionUnrestrictedState();
+
+  @override
+  bool get canEnableUnrestricted => false;
+
+  @override
+  bool get canDisableUnrestricted => false;
+
+  @override
+  bool get canRefreshUnrestricted => false;
+
+  @override
+  Future<void> enableUnrestricted() async {}
+
+  @override
+  Future<void> disableUnrestricted() async {}
+
+  @override
+  Future<void> refreshUnrestricted() async {}
 }

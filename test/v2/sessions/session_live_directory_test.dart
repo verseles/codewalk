@@ -1125,49 +1125,52 @@ void main() {
     bool live(SessionLiveHandle handle) =>
         handle.current.phase == SessionLivePhase.live;
 
-    test('reconnects each open profile stream once and sends nothing', () async {
-      final directory = createSessionLiveDirectory()!;
-      final second = EndpointProfile(
-        id: 'profile_two',
-        label: 'Two',
-        endpoint: p.endpoint,
-      );
-      final opening = directory.open(
-        profile: p,
-        credential: credential,
-        session: ref('ses_one'),
-      );
-      // A profile still probing has no stream to wake yet.
-      directory.wake();
-      final a = await opening;
-      final b = await directory.open(
-        profile: second,
-        credential: credential,
-        session: SessionRef(
-          HostId(second.id),
-          HarnessInstanceId(second.id),
-          'ses_one',
-        ),
-      );
-      await settle(() => live(a) && live(b));
-      expect(server.events, 2);
-      final ids = a.current.state!.timeline.map((i) => i.meta.id).toList();
-      directory.wake();
-      await settle(() => server.events == 4 && live(a) && live(b));
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      expect(server.events, 4, reason: 'one new stream per profile');
-      expect(server.methods, {'GET'});
-      expect(server.prompts, isEmpty);
-      expect(server.interrupts, isEmpty);
-      expect(
-        a.current.state!.timeline.map((i) => i.meta.id).toList(),
-        ids,
-        reason: 'hydration replaces the timeline without duplicates',
-      );
-      await directory.close();
-      directory.wake();
-      expect(server.events, 4);
-    });
+    test(
+      'reconnects each open profile stream once and sends nothing',
+      () async {
+        final directory = createSessionLiveDirectory()!;
+        final second = EndpointProfile(
+          id: 'profile_two',
+          label: 'Two',
+          endpoint: p.endpoint,
+        );
+        final opening = directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        // A profile still probing has no stream to wake yet.
+        directory.wake();
+        final a = await opening;
+        final b = await directory.open(
+          profile: second,
+          credential: credential,
+          session: SessionRef(
+            HostId(second.id),
+            HarnessInstanceId(second.id),
+            'ses_one',
+          ),
+        );
+        await settle(() => live(a) && live(b));
+        expect(server.events, 2);
+        final ids = a.current.state!.timeline.map((i) => i.meta.id).toList();
+        directory.wake();
+        await settle(() => server.events == 4 && live(a) && live(b));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(server.events, 4, reason: 'one new stream per profile');
+        expect(server.methods, {'GET'});
+        expect(server.prompts, isEmpty);
+        expect(server.interrupts, isEmpty);
+        expect(
+          a.current.state!.timeline.map((i) => i.meta.id).toList(),
+          ids,
+          reason: 'hydration replaces the timeline without duplicates',
+        );
+        await directory.close();
+        directory.wake();
+        expect(server.events, 4);
+      },
+    );
 
     test('leaves a stream stopped for authentication stopped', () async {
       final directory = createSessionLiveDirectory()!;
@@ -1718,8 +1721,7 @@ void main() {
       final req = view.state!.interactions.single;
       await waitForReplies(1);
       await waitUntil(
-        () =>
-            a.replyState(req.id).phase == SessionPermissionReplyPhase.refused,
+        () => a.replyState(req.id).phase == SessionPermissionReplyPhase.refused,
       );
       expect(server.replies, hasLength(1));
       expect(a.replyState(req.id).phase, SessionPermissionReplyPhase.refused);
@@ -2242,7 +2244,7 @@ void main() {
     );
 
     test(
-      'a different binding never inherits another server Unrestricted ownership',
+      'a different binding never inherits ownership; OFF there removes its rule (#494)',
       () async {
         server.sessionRules['ses_one'] = [ask];
         final store = await ledger();
@@ -2274,12 +2276,21 @@ void main() {
         addTearDown(changed.close);
         await until(changed, (view) => view.phase == SessionLivePhase.live);
         await settled(changed);
-        await changed.disableUnrestricted(id: const CommandId('cmd_b_off'));
-        expect(other.patches, isEmpty);
-        expect(other.sessionRules['ses_one'], [ask, wildcard]);
+        // Not CodeWalk's there, yet OFF removes it, keeping the other rules.
         expect(
           changed.unrestrictedState.phase,
           SessionUnrestrictedPhase.elsewhere,
+        );
+        await changed.disableUnrestricted(id: const CommandId('cmd_b_off'));
+        await settled(changed);
+        expect(other.patches, hasLength(1));
+        expect(other.sessionRules['ses_one'], [ask]);
+        expect(changed.unrestrictedState.phase, SessionUnrestrictedPhase.off);
+        // The first server's rule and record are untouched.
+        expect(server.sessionRules['ses_one'], [ask, wildcard]);
+        expect(
+          store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+          isNotNull,
         );
       },
     );
@@ -2311,17 +2322,26 @@ void main() {
     );
 
     test(
-      'a wildcard CodeWalk did not add is never claimed or removed',
+      'a wildcard added elsewhere is never claimed, and OFF removes it (#494)',
       () async {
         server.sessionRules['ses_one'] = [ask, wildcard];
-        final (_, handle) = await openLive(await ledger());
+        final store = await ledger();
+        final (_, handle) = await openLive(store);
         final state = await settled(handle);
         expect(state.phase, SessionUnrestrictedPhase.elsewhere);
         expect(state.inEffect, isTrue);
         expect(handle.canEnableUnrestricted, isFalse);
-        expect(handle.canDisableUnrestricted, isFalse);
+        expect(handle.canDisableUnrestricted, isTrue);
         await handle.disableUnrestricted(id: const CommandId('cmd_off'));
-        expect(server.patches, isEmpty);
+        final off = await settled(handle);
+        expect(server.patches, hasLength(1));
+        expect(server.sessionRules['ses_one'], [ask]);
+        expect(off.phase, SessionUnrestrictedPhase.off);
+        expect(off.notice, SessionUnrestrictedNotice.none);
+        expect(
+          store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
+          isNull,
+        );
       },
     );
 
@@ -2391,7 +2411,7 @@ void main() {
       );
     });
 
-    test('rules changed by another client are never overwritten', () async {
+    test('OFF keeps the rules another client added (#494)', () async {
       server.sessionRules['ses_one'] = [ask];
       final store = await ledger();
       final (_, handle) = await openLive(store);
@@ -2401,17 +2421,13 @@ void main() {
       // Another client inserts a rule before CodeWalk's wildcard.
       const deny = {'action': 'edit', 'resource': '*', 'effect': 'deny'};
       server.sessionRules['ses_one'] = [ask, deny, wildcard];
+      // The trailing allow-everything rule goes; the deny stays.
       await handle.disableUnrestricted(id: const CommandId('cmd_off'));
       final state = await settled(handle);
-      expect(state.phase, SessionUnrestrictedPhase.conflict);
-      expect(state.notice, SessionUnrestrictedNotice.changedElsewhere);
-      expect(state.inEffect, isTrue);
-      expect(server.patches, hasLength(1));
-      expect(server.sessionRules['ses_one'], [ask, deny, wildcard]);
-      expect(
-        store.recordFor(unrestrictedBindingFor(p), ref('ses_one')),
-        isNotNull,
-      );
+      expect(state.phase, SessionUnrestrictedPhase.off);
+      expect(state.inEffect, isFalse);
+      expect(server.patches, hasLength(2));
+      expect(server.sessionRules['ses_one'], [ask, deny]);
       expect(handle.canDisableUnrestricted, isFalse);
     });
 
@@ -2434,6 +2450,8 @@ void main() {
     });
 
     test('the automatic responder never writes rules', () async {
+      // Another client's rule is in effect, so the switch reads ON.
+      server.sessionRules['ses_one'] = [wildcard];
       server.permissions.add({
         'id': 'per_1',
         'sessionID': 'ses_one',
@@ -2464,6 +2482,247 @@ void main() {
       }
       expect(server.replies.single, '{"decision":"once"}');
       expect(server.patches, isEmpty);
+    });
+
+    test(
+      'a session the server says is OFF gets no automatic reply (#494)',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        server.permissions.add({
+          'id': 'per_1',
+          'sessionID': 'ses_one',
+          'action': 'read',
+          'resources': ['src/a.txt'],
+        });
+        final policy = PermissionModeStore(
+          store: V2MetadataStore(backend: FakeMetadataBackend()),
+        );
+        await policy.initialize();
+        addTearDown(policy.dispose);
+        final directory = createSessionLiveDirectory(
+          permissionModes: policy,
+          unrestrictedOwnership: await ledger(),
+        )!;
+        addTearDown(directory.close);
+        final handle = await directory.open(
+          profile: p,
+          credential: credential,
+          session: ref('ses_one'),
+        );
+        addTearDown(handle.close);
+        await until(handle, (v) => v.phase == SessionLivePhase.live);
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        expect(server.replies, isEmpty);
+        // Turning it ON answers the waiting card.
+        await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+        final deadline = DateTime.now().add(const Duration(seconds: 5));
+        while (server.replies.isEmpty && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        expect(server.replies.single, '{"decision":"once"}');
+      },
+    );
+
+    Future<(PermissionModeStore, SessionLiveDirectory)> responder({
+      PermissionMode? local,
+    }) async {
+      final policy = PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      );
+      await policy.initialize();
+      addTearDown(policy.dispose);
+      if (local != null) await policy.setSessionMode(ref('ses_one'), local);
+      final directory = createSessionLiveDirectory(
+        permissionModes: policy,
+        unrestrictedOwnership: await ledger(),
+      )!;
+      addTearDown(directory.close);
+      return (policy, directory);
+    }
+
+    Future<SessionLiveHandle> watch(
+      SessionLiveDirectory directory,
+      String session,
+    ) async {
+      final handle = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref(session),
+      );
+      addTearDown(handle.close);
+      await until(handle, (v) => v.phase == SessionLivePhase.live);
+      return handle;
+    }
+
+    Future<void> answered() async {
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (server.replies.isEmpty && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
+    Map<String, Object?> waiting(String id, String session) => {
+      'id': id,
+      'sessionID': session,
+      'action': 'read',
+      'resources': ['src/a.txt'],
+    };
+
+    test('a server rule ON answers even under a local Ask (#494)', () async {
+      server.sessionRules['ses_one'] = [wildcard];
+      server.permissions.add(waiting('per_1', 'ses_one'));
+      final (_, directory) = await responder(local: PermissionMode.ask);
+      final handle = await watch(directory, 'ses_one');
+      expect((await settled(handle)).inEffect, isTrue);
+      await answered();
+      expect(server.replies.single, '{"decision":"once"}');
+      expect(server.patches, isEmpty);
+    });
+
+    test('a rule that is no longer last reads OFF, answers nothing and can '
+        'be turned ON again (#494)', () async {
+      server.sessionRules['ses_one'] = [wildcard, ask];
+      final store = await ledger();
+      await store.put(
+        unrestrictedBindingFor(p),
+        ref('ses_one'),
+        UnrestrictedOwnership(
+          stage: UnrestrictedStage.owned,
+          base: unrestrictedFingerprint(OpenCodeSessionRules.parse([ask])),
+          owned: unrestrictedFingerprint(
+            OpenCodeSessionRules.parse([ask, wildcard]),
+          ),
+        ),
+      );
+      server.permissions.add(waiting('per_1', 'ses_one'));
+      final policy = PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      );
+      await policy.initialize();
+      addTearDown(policy.dispose);
+      final directory = createSessionLiveDirectory(
+        permissionModes: policy,
+        unrestrictedOwnership: store,
+      )!;
+      addTearDown(directory.close);
+      final handle = await watch(directory, 'ses_one');
+      final state = await settled(handle);
+      expect(state.phase, SessionUnrestrictedPhase.conflict);
+      expect(state.inEffect, isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
+      expect(handle.canEnableUnrestricted, isTrue);
+      await handle.enableUnrestricted(id: const CommandId('cmd_on'));
+      expect(sent(0), [wildcard, ask, wildcard]);
+      final after = await settled(handle);
+      expect(after.phase, SessionUnrestrictedPhase.on);
+      expect(after.inEffect, isTrue);
+      await answered();
+      expect(server.replies.single, '{"decision":"once"}');
+    });
+
+    test(
+      'a child request follows the child\'s own rules once read (#494)',
+      () async {
+        server.children['ses_one'] = ['ses_child'];
+        server.sessionRules['ses_one'] = [wildcard];
+        server.sessionRules['ses_child'] = [ask];
+        server.permissions.add(waiting('per_c1', 'ses_child'));
+        final (_, directory) = await responder();
+        final child = await watch(directory, 'ses_child');
+        expect((await settled(child)).phase, SessionUnrestrictedPhase.off);
+        final parent = await watch(directory, 'ses_one');
+        expect((await settled(parent)).inEffect, isTrue);
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        // The parent is ON, but the child's own rules say OFF.
+        expect(server.replies, isEmpty);
+      },
+    );
+
+    test('an unread child\'s request waits for its own rules (#494)', () async {
+      server.children['ses_one'] = ['ses_child'];
+      server.sessionRules['ses_one'] = [wildcard];
+      server.permissions.add(waiting('per_c1', 'ses_child'));
+      final (_, directory) = await responder();
+      final parent = await watch(directory, 'ses_one');
+      expect((await settled(parent)).inEffect, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      // The child asked, so its own rules do not allow it: the parent's ON
+      // does not answer for it.
+      expect(server.replies, isEmpty);
+    });
+
+    test('closing the child keeps its requests manual (#494)', () async {
+      server.children['ses_one'] = ['ses_child'];
+      server.sessionRules['ses_one'] = [wildcard];
+      server.sessionRules['ses_child'] = [ask];
+      final (_, directory) = await responder();
+      final child = await watch(directory, 'ses_child');
+      expect((await settled(child)).phase, SessionUnrestrictedPhase.off);
+      final parent = await watch(directory, 'ses_one');
+      expect((await settled(parent)).inEffect, isTrue);
+      child.close();
+      await server.emit('permission.asked', waiting('per_c2', 'ses_child'));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
+    });
+
+    test('a child is not answered while its rules are read, even where the '
+        'parent\'s rules cannot be read (#494)', () async {
+      const unreadable = {'action': '*', 'resource': '*', 'effect': 'other'};
+      server.children['ses_one'] = ['ses_child'];
+      server.sessionRules['ses_one'] = [unreadable];
+      server.sessionRules['ses_child'] = [unreadable];
+      final (_, directory) = await responder();
+      final parent = await watch(directory, 'ses_one');
+      expect(
+        (await settled(parent)).phase,
+        SessionUnrestrictedPhase.unavailable,
+      );
+      final child = await watch(directory, 'ses_child');
+      expect(
+        (await settled(child)).phase,
+        SessionUnrestrictedPhase.unavailable,
+      );
+      final gate = server.holdSessionRead = Completer<void>();
+      server.sessionReadHeld = Completer<void>();
+      final refreshing = child.refreshUnrestricted();
+      await server.sessionReadHeld!.future;
+      expect(child.unrestrictedState.busy, isTrue);
+      server.sessionRules['ses_child'] = [ask];
+      await server.emit('permission.asked', waiting('per_c1', 'ses_child'));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
+      server.holdSessionRead = null;
+      gate.complete();
+      await refreshing;
+      expect((await settled(child)).phase, SessionUnrestrictedPhase.off);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
+    });
+
+    test('nothing is answered while the rules are read again (#494)', () async {
+      server.sessionRules['ses_one'] = [wildcard];
+      final (_, directory) = await responder();
+      final handle = await watch(directory, 'ses_one');
+      expect((await settled(handle)).inEffect, isTrue);
+      final gate = server.holdSessionRead = Completer<void>();
+      server.sessionReadHeld = Completer<void>();
+      final refreshing = handle.refreshUnrestricted();
+      await server.sessionReadHeld!.future;
+      expect(handle.unrestrictedState.busy, isTrue);
+      // Another client turned it off; the request arrives before the read.
+      server.sessionRules['ses_one'] = [ask];
+      await server.emit('permission.asked', waiting('per_1', 'ses_one'));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
+      server.holdSessionRead = null;
+      gate.complete();
+      await refreshing;
+      expect((await settled(handle)).inEffect, isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(server.replies, isEmpty);
     });
   });
 
@@ -2593,22 +2852,28 @@ void main() {
       );
     });
 
-    test('live session.permissions frame reconciles unrestricted phase without a manual refresh', () async {
-      server.sessionRules['ses_one'] = [ask];
-      final store = await ledger();
-      final handle = await openLive(store);
-      expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
-      expect((await settled(handle)).inEffect, isFalse);
+    test(
+      'live session.permissions frame reconciles unrestricted phase without a manual refresh',
+      () async {
+        server.sessionRules['ses_one'] = [ask];
+        final store = await ledger();
+        final handle = await openLive(store);
+        expect((await settled(handle)).phase, SessionUnrestrictedPhase.off);
+        expect((await settled(handle)).inEffect, isFalse);
 
-      await server.emit('session.permissions', {
-        'sessionID': 'ses_one',
-        'permissions': [ask, wildcard],
-      });
+        await server.emit('session.permissions', {
+          'sessionID': 'ses_one',
+          'permissions': [ask, wildcard],
+        });
 
-      await until(handle, (v) => handle.unrestrictedState.inEffect);
-      expect(handle.unrestrictedState.phase, SessionUnrestrictedPhase.elsewhere);
-      expect(handle.unrestrictedState.inEffect, isTrue);
-    });
+        await until(handle, (v) => handle.unrestrictedState.inEffect);
+        expect(
+          handle.unrestrictedState.phase,
+          SessionUnrestrictedPhase.elsewhere,
+        );
+        expect(handle.unrestrictedState.inEffect, isTrue);
+      },
+    );
   });
 
   group('child requests in the parent (V2-047B3a)', () {
@@ -2769,31 +3034,28 @@ void main() {
       },
     );
 
-    test(
-      'explicit Ask on child vetoes parent Allow all mode',
-      () async {
-        server.children['ses_one'] = ['ses_child'];
-        server.permissions.add(ask('per_c_child_ask', 'ses_child'));
-        final policy = PermissionModeStore(
-          store: V2MetadataStore(backend: FakeMetadataBackend()),
-        );
-        await policy.initialize();
-        addTearDown(policy.dispose);
-        await policy.setSessionMode(ref('ses_child'), PermissionMode.ask);
-        final directory = createSessionLiveDirectory(permissionModes: policy)!;
-        addTearDown(directory.close);
-        final handle = await openParent(directory);
-        await eventually(() => childRequest(handle, 'per_c_child_ask') != null);
-        await Future<void>.delayed(const Duration(milliseconds: 250));
-        expect(server.replies, isEmpty);
-        expect(
-          server.paths.where(
-            (p) => p.contains('ses_child/permission/per_c_child_ask/reply'),
-          ),
-          isEmpty,
-        );
-      },
-    );
+    test('explicit Ask on child vetoes parent Allow all mode', () async {
+      server.children['ses_one'] = ['ses_child'];
+      server.permissions.add(ask('per_c_child_ask', 'ses_child'));
+      final policy = PermissionModeStore(
+        store: V2MetadataStore(backend: FakeMetadataBackend()),
+      );
+      await policy.initialize();
+      addTearDown(policy.dispose);
+      await policy.setSessionMode(ref('ses_child'), PermissionMode.ask);
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final handle = await openParent(directory);
+      await eventually(() => childRequest(handle, 'per_c_child_ask') != null);
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, isEmpty);
+      expect(
+        server.paths.where(
+          (p) => p.contains('ses_child/permission/per_c_child_ask/reply'),
+        ),
+        isEmpty,
+      );
+    });
 
     test(
       'child explicit Allow all applies when parent has no override under global Ask',
@@ -2945,51 +3207,59 @@ void main() {
       expect(test(), isTrue);
     }
 
-    test('the feed reports the lifecycle of a session nobody watches', () async {
-      server.running.add('ses_one');
-      final directory = createSessionLiveDirectory()!;
-      addTearDown(directory.close);
-      final lease = await directory.catalogChanges(
-        profile: p,
-        credential: credential,
-      );
-      addTearDown(lease.close);
-      final signals = <SessionCatalogSignal>[];
-      lease.signals.listen(signals.add);
-      await eventually(
-        () => signals
-            .whereType<SessionCatalogConnection>()
-            .any((signal) => signal.connected),
-      );
-      // The endpoint keeps one stream: the feed opened no second one.
-      expect(server.events, 1);
-      server.streams.last.write(
-        'data: ${jsonEncode({'type': 'session.created', 'data': {'sessionID': 'ses_two'}})}\n\n',
-      );
-      await server.streams.last.flush();
-      await eventually(
-        () => signals.whereType<SessionCatalogChanged>().isNotEmpty,
-      );
-    });
+    test(
+      'the feed reports the lifecycle of a session nobody watches',
+      () async {
+        server.running.add('ses_one');
+        final directory = createSessionLiveDirectory()!;
+        addTearDown(directory.close);
+        final lease = await directory.catalogChanges(
+          profile: p,
+          credential: credential,
+        );
+        addTearDown(lease.close);
+        final signals = <SessionCatalogSignal>[];
+        lease.signals.listen(signals.add);
+        await eventually(
+          () => signals.whereType<SessionCatalogConnection>().any(
+            (signal) => signal.connected,
+          ),
+        );
+        // The endpoint keeps one stream: the feed opened no second one.
+        expect(server.events, 1);
+        server.streams.last.write(
+          'data: ${jsonEncode({
+            'type': 'session.created',
+            'data': {'sessionID': 'ses_two'},
+          })}\n\n',
+        );
+        await server.streams.last.flush();
+        await eventually(
+          () => signals.whereType<SessionCatalogChanged>().isNotEmpty,
+        );
+      },
+    );
 
-    test('the feed reports the current connection state to a late subscriber',
-        () async {
-      server.running.add('ses_one');
-      final directory = createSessionLiveDirectory()!;
-      addTearDown(directory.close);
-      final lease = await directory.catalogChanges(
-        profile: p,
-        credential: credential,
-      );
-      addTearDown(lease.close);
-      final signals = <SessionCatalogSignal>[];
-      lease.signals.listen(signals.add);
-      await eventually(
-        () => signals
-            .whereType<SessionCatalogConnection>()
-            .any((signal) => signal.connected),
-      );
-    });
+    test(
+      'the feed reports the current connection state to a late subscriber',
+      () async {
+        server.running.add('ses_one');
+        final directory = createSessionLiveDirectory()!;
+        addTearDown(directory.close);
+        final lease = await directory.catalogChanges(
+          profile: p,
+          credential: credential,
+        );
+        addTearDown(lease.close);
+        final signals = <SessionCatalogSignal>[];
+        lease.signals.listen(signals.add);
+        await eventually(
+          () => signals.whereType<SessionCatalogConnection>().any(
+            (signal) => signal.connected,
+          ),
+        );
+      },
+    );
 
     test('the profile stays open while the feed is held', () async {
       server.running.add('ses_one');

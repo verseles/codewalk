@@ -452,23 +452,29 @@ class SessionLiveController extends ChangeNotifier
       phase == SessionLivePhase.live &&
       !(view?.stale ?? true);
 
+  @override
   bool get canEnableUnrestricted =>
       _liveCurrent && (_handle?.canEnableUnrestricted ?? false);
+  @override
   bool get canDisableUnrestricted =>
       _liveCurrent && (_handle?.canDisableUnrestricted ?? false);
+  @override
   bool get canRefreshUnrestricted =>
       _liveCurrent && (_handle?.canRefreshUnrestricted ?? false);
 
+  @override
   Future<void> enableUnrestricted() => _act(
     canEnableUnrestricted,
     (handle) => handle.enableUnrestricted(id: _commandIds()),
   );
 
+  @override
   Future<void> disableUnrestricted() => _act(
     canDisableUnrestricted,
     (handle) => handle.disableUnrestricted(id: _commandIds()),
   );
 
+  @override
   Future<void> refreshUnrestricted() =>
       _act(canRefreshUnrestricted, (handle) => handle.refreshUnrestricted());
 

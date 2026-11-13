@@ -781,6 +781,10 @@ class V2LocalizationsZh extends V2Localizations {
   String get messageSelectText => '选择文本';
 
   @override
+  String get livePermissionServerRule =>
+      '已保存在服务器上，对所有客户端生效。即使在 Plan 模式下，代理也不会询问任何事。';
+
+  @override
   String get composerSendNow => '立即发送';
 
   @override
@@ -980,61 +984,10 @@ class V2LocalizationsZh extends V2Localizations {
   String get livePermissionRejectSend => '发送附注拒绝';
 
   @override
-  String get livePermissionMode => '权限模式';
-
-  @override
-  String get livePermissionModeAsk => '询问';
-
-  @override
-  String get livePermissionModeAllowAll => '全部允许';
-
-  @override
-  String get livePermissionModeSession => '已为此会话设置';
-
-  @override
-  String get livePermissionModeDefault => '应用默认';
-
-  @override
-  String get livePermissionModeUseDefault => '使用应用默认';
-
-  @override
   String get livePermissionModeUnavailable => '权限模式不可用';
 
   @override
   String get livePermissionModeFailed => '无法保存权限模式。';
-
-  @override
-  String get livePermissionModeUnrestricted => '无限制';
-
-  @override
-  String get livePermissionModeUnrestrictedExternal => '在 CodeWalk 之外设置';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOn => '开启无限制…';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOff => '关闭无限制';
-
-  @override
-  String get livePermissionModeRulesRefresh => '刷新会话规则';
-
-  @override
-  String get liveUnrestrictedTitle => '要为此会话开启无限制吗？';
-
-  @override
-  String get liveUnrestrictedOverride =>
-      'OpenCode 将不经询问执行此会话中的所有操作，覆盖代理的询问和拒绝规则。已在等待的请求仍需答复。';
-
-  @override
-  String get liveUnrestrictedChildren =>
-      '新的子会话会复制此规则。现有子会话保留其规则，之后关闭也不会改变已复制该规则的子会话。';
-
-  @override
-  String get liveUnrestrictedOthers =>
-      '其他客户端可以查看和更改此规则；CodeWalk 只会移除自己添加的规则。关闭不会撤销已执行的操作。';
-
-  @override
-  String get liveUnrestrictedConfirm => '开启无限制';
 
   @override
   String get liveUnrestrictedRefused => '会话规则未更改。';
@@ -1044,12 +997,6 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveUnrestrictedChangedElsewhere => '会话规则已在其他地方更改。CodeWalk 未覆盖它们。';
-
-  @override
-  String get liveUnrestrictedUnavailable => '会话规则不可用。';
-
-  @override
-  String get liveUnrestrictedTurnedOff => '已关闭无限制。现有子会话保留其已复制的规则。';
 
   @override
   String get livePermissionChildBadge => '子代理';

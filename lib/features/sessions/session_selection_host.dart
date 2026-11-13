@@ -38,4 +38,13 @@ abstract interface class SessionSelectionHost implements Listenable {
   Future<bool> setPermissionMode(PermissionMode mode);
   bool get supportsUnrestricted;
   SessionUnrestrictedState get unrestrictedState;
+
+  /// The session's own allow-everything rule, which the permission switch
+  /// writes where the server holds it (ADR-059, amended for #494).
+  bool get canEnableUnrestricted;
+  bool get canDisableUnrestricted;
+  bool get canRefreshUnrestricted;
+  Future<void> enableUnrestricted();
+  Future<void> disableUnrestricted();
+  Future<void> refreshUnrestricted();
 }

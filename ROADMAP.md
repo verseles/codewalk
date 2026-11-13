@@ -4,18 +4,12 @@
 
 Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex, depois o que mexe no modelo de domínio.
 
-## 1. UI/UX — lote 1
-
-Beta da timeline (planejada em 2026-11-13):
-
-- [ ] #494 Interruptor de permissão sincronizado com a regra "libera tudo" do servidor; botão ✓✓ do topo removido
-
 ## 2. Limpeza logo após o lote 1
 
 
 ## 3. UI/UX — restante
 
-- [ ] #464 Área de toque das ações da mensagem do usuário
+- [ ] #495 Interruptor de permissão nas sub-conversas (decisão de produto)
 - [ ] #487 Dica de gestos das abas cobre o seletor `/` com o teclado aberto
 - [ ] #417 Manter o scroll da lista de sessões
 - [ ] #418 Manter o lugar de leitura da aba

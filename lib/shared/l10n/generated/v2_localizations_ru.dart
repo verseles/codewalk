@@ -842,6 +842,10 @@ class V2LocalizationsRu extends V2Localizations {
   String get messageSelectText => 'Выделить текст';
 
   @override
+  String get livePermissionServerRule =>
+      'Сохранено на сервере для всех клиентов. Агент ничего не спрашивает, даже в режиме Plan.';
+
+  @override
   String get composerSendNow => 'Отправить сейчас';
 
   @override
@@ -1057,66 +1061,11 @@ class V2LocalizationsRu extends V2Localizations {
   String get livePermissionRejectSend => 'Отправить отказ с заметкой';
 
   @override
-  String get livePermissionMode => 'Режим разрешений';
-
-  @override
-  String get livePermissionModeAsk => 'Спрашивать';
-
-  @override
-  String get livePermissionModeAllowAll => 'Разрешить всё';
-
-  @override
-  String get livePermissionModeSession => 'Задано для этого сеанса';
-
-  @override
-  String get livePermissionModeDefault => 'По умолчанию в приложении';
-
-  @override
-  String get livePermissionModeUseDefault =>
-      'Использовать значение по умолчанию';
-
-  @override
   String get livePermissionModeUnavailable => 'Режим разрешений недоступен';
 
   @override
   String get livePermissionModeFailed =>
       'Не удалось сохранить режим разрешений.';
-
-  @override
-  String get livePermissionModeUnrestricted => 'Без ограничений';
-
-  @override
-  String get livePermissionModeUnrestrictedExternal => 'Задано вне CodeWalk';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOn =>
-      'Включить «Без ограничений»…';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOff =>
-      'Выключить «Без ограничений»';
-
-  @override
-  String get livePermissionModeRulesRefresh => 'Обновить правила сеанса';
-
-  @override
-  String get liveUnrestrictedTitle =>
-      'Включить «Без ограничений» для этого сеанса?';
-
-  @override
-  String get liveUnrestrictedOverride =>
-      'OpenCode будет выполнять все действия в этом сеансе без вопросов, переопределяя правила агента «спрашивать» и «запрещать». Уже ожидающие запросы всё равно требуют ответа.';
-
-  @override
-  String get liveUnrestrictedChildren =>
-      'Новые дочерние сеансы копируют это правило. Существующие дочерние сеансы сохраняют свои правила, и последующее выключение не меняет те, что уже его скопировали.';
-
-  @override
-  String get liveUnrestrictedOthers =>
-      'Другие клиенты могут видеть и менять это правило; CodeWalk удаляет только добавленное им правило. Выключение не отменяет уже выполненные действия.';
-
-  @override
-  String get liveUnrestrictedConfirm => 'Включить «Без ограничений»';
 
   @override
   String get liveUnrestrictedRefused => 'Правила сеанса не изменены.';
@@ -1128,13 +1077,6 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get liveUnrestrictedChangedElsewhere =>
       'Правила сеанса изменены в другом месте. CodeWalk не перезаписал их.';
-
-  @override
-  String get liveUnrestrictedUnavailable => 'Правила сеанса недоступны.';
-
-  @override
-  String get liveUnrestrictedTurnedOff =>
-      '«Без ограничений» выключено. Существующие дочерние сеансы сохраняют скопированное правило.';
 
   @override
   String get livePermissionChildBadge => 'Субагент';

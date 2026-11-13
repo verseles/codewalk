@@ -26,7 +26,6 @@ import 'session_history_page.dart';
 import 'session_live_controller.dart';
 import 'session_live_timeline.dart';
 import 'session_permission_card.dart';
-import 'session_permission_mode_chip.dart';
 import 'session_search_bar.dart';
 import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
@@ -181,8 +180,9 @@ class _SessionLivePageState extends State<SessionLivePage>
   }
 
   /// The block above the timeline items. A conversation's state shows only
-  /// in the status bar above its footer (#468); this keeps the permission
-  /// mode and, outside the workspace, which session and server this is.
+  /// in the status bar above its footer (#468), and its permission switch
+  /// lives in the model and agent picker (#494); outside the workspace this
+  /// says which session and server this is.
   Widget _header(
     BuildContext context,
     SessionLiveController c,
@@ -192,17 +192,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   }) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      if (widget.workspaceChrome)
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            // The model and agent are picked from the composer's chips.
-            if (c.permissionModes != null)
-              SessionPermissionModeChip(live: c, compact: true),
-          ],
-        )
-      else ...[
+      if (!widget.workspaceChrome) ...[
         Text(
           canAct ? l10n.composerLiveSession : l10n.liveReadOnly,
           style: textTheme.titleMedium,
@@ -407,34 +397,14 @@ class _SessionLivePageState extends State<SessionLivePage>
         // Inside the workspace the shell owns the only toolbar (decision 8).
         appBar: widget.workspaceChrome
             ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                // The chips follow this page's width, not the window's: beside the
-                // session list the page is narrower than the window.
-                child: LayoutBuilder(
-                  builder: (context, bar) {
-                    final compact = bar.maxWidth < 600;
-                    return AppBar(
-                      leading: widget.leading,
-                      actions: [
-                        if (c.permissionModes != null)
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 8),
-                            child: SessionPermissionModeChip(
-                              live: c,
-                              compact: compact,
-                            ),
-                          ),
-                      ],
-                      title: Text(
-                        c.summary.info.title.trim().isEmpty
-                            ? l10n.sessionExportUntitled
-                            : c.summary.info.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  },
+            : AppBar(
+                leading: widget.leading,
+                title: Text(
+                  c.summary.info.title.trim().isEmpty
+                      ? l10n.sessionExportUntitled
+                      : c.summary.info.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
         body: _frameBody(

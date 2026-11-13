@@ -8,6 +8,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/sessions/session_unrestricted.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_agent_color.dart';
@@ -331,7 +332,28 @@ class _SelectionPanelState extends State<_SelectionPanel> {
     super.dispose();
   }
 
-  Future<void> _setAutoApprove(bool value) async {
+  @override
+  void initState() {
+    super.initState();
+    // The switch shows the server's word as it is now. The read notifies the
+    // controller, so it starts after this first build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.live.canRefreshUnrestricted) {
+        unawaited(widget.live.refreshUnrestricted());
+      }
+    });
+  }
+
+  /// Writes the session's own rule where the server holds the state, or the
+  /// local mode where it does not.
+  Future<void> _setAutoApprove(bool value, {required bool server}) async {
+    if (server) {
+      setState(() => _permissionFailed = false);
+      await (value
+          ? widget.live.enableUnrestricted()
+          : widget.live.disableUnrestricted());
+      return;
+    }
     final messenger = ScaffoldMessenger.maybeOf(context);
     final failed = context.v2L10n.livePermissionModeFailed;
     setState(() => _permissionFailed = false);
@@ -555,30 +577,55 @@ class _SelectionPanelState extends State<_SelectionPanel> {
       );
 
       Widget permissions() {
-        final unrestricted =
-            live.supportsUnrestricted && live.unrestrictedState.inEffect;
+        // The session's own allow-everything rule decides once the server
+        // has said either way; until then, or where the harness has no
+        // rules, the local default stands (ADR-059, amended for #494).
+        final rules = live.supportsUnrestricted ? live.unrestrictedState : null;
+        final server = switch (rules?.phase) {
+          SessionUnrestrictedPhase.on ||
+          SessionUnrestrictedPhase.elsewhere ||
+          SessionUnrestrictedPhase.conflict ||
+          SessionUnrestrictedPhase.off => rules,
+          _ => null,
+        };
         final mode = live.permissionModeState.mode;
-        final on = unrestricted || mode == PermissionMode.allowAll;
+        final on = server != null
+            ? server.inEffect
+            : mode == PermissionMode.allowAll;
         final pending = live.pendingPermissions;
+        final notice = switch (server?.notice) {
+          SessionUnrestrictedNotice.refused => l10n.liveUnrestrictedRefused,
+          SessionUnrestrictedNotice.unconfirmed =>
+            l10n.liveUnrestrictedUnconfirmed,
+          SessionUnrestrictedNotice.changedElsewhere =>
+            l10n.liveUnrestrictedChangedElsewhere,
+          _ => null,
+        };
         final detail = [
-          // The session's allow-everything rule decides while it is in
-          // effect; it is turned off from the permission chip.
-          if (unrestricted) l10n.livePermissionModeUnrestricted,
+          if (server != null && on) l10n.livePermissionServerRule,
           if (pending > 0) l10n.liveSelectionPermissionsWaiting(pending),
         ].join(' · ');
+        final failure = [
+          if (_permissionFailed) l10n.livePermissionModeFailed,
+          ?notice,
+        ];
+        final busy = server != null ? server.busy : live.savingPermissionMode;
+        final canToggle = server != null
+            ? (on ? live.canDisableUnrestricted : live.canEnableUnrestricted)
+            : mode != null && live.canChangePermissionMode;
         return SwitchListTile(
           key: const ValueKey('live-auto-approve'),
           title: Text(
-            !unrestricted && mode == null
+            server == null && mode == null
                 ? l10n.livePermissionModeUnavailable
                 : on
                 ? l10n.chatPermissionAutoApproveOn
                 : l10n.chatPermissionAutoApproveOff,
           ),
-          subtitle: _permissionFailed
+          subtitle: failure.isNotEmpty
               ? Text(
                   [
-                    l10n.livePermissionModeFailed,
+                    ...failure,
                     detail,
                   ].where((part) => part.isNotEmpty).join(' · '),
                   style: TextStyle(color: theme.colorScheme.error),
@@ -587,13 +634,10 @@ class _SelectionPanelState extends State<_SelectionPanel> {
               ? null
               : Text(detail),
           value: on,
-          onChanged:
-              unrestricted ||
-                  mode == null ||
-                  live.savingPermissionMode ||
-                  !live.canChangePermissionMode
+          onChanged: busy || !canToggle
               ? null
-              : (value) => unawaited(_setAutoApprove(value)),
+              : (value) =>
+                    unawaited(_setAutoApprove(value, server: server != null)),
         );
       }
 
@@ -778,7 +822,13 @@ final class _SelectionShown extends ChangeNotifier {
       live.permissionModeState.mode,
       live.savingPermissionMode,
       live.canChangePermissionMode,
-      live.supportsUnrestricted && live.unrestrictedState.inEffect,
+      live.supportsUnrestricted,
+      live.unrestrictedState.phase,
+      live.unrestrictedState.inEffect,
+      live.unrestrictedState.busy,
+      live.unrestrictedState.notice,
+      live.canEnableUnrestricted,
+      live.canDisableUnrestricted,
     ];
   }
 

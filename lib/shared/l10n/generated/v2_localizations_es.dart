@@ -847,6 +847,10 @@ class V2LocalizationsEs extends V2Localizations {
   String get messageSelectText => 'Seleccionar texto';
 
   @override
+  String get livePermissionServerRule =>
+      'Guardado en el servidor para todos los clientes. El agente no pregunta nada, ni en el modo Plan.';
+
+  @override
   String get composerSendNow => 'Enviar ahora';
 
   @override
@@ -1063,66 +1067,11 @@ class V2LocalizationsEs extends V2Localizations {
   String get livePermissionRejectSend => 'Enviar rechazo con nota';
 
   @override
-  String get livePermissionMode => 'Modo de permisos';
-
-  @override
-  String get livePermissionModeAsk => 'Preguntar';
-
-  @override
-  String get livePermissionModeAllowAll => 'Permitir todo';
-
-  @override
-  String get livePermissionModeSession => 'Definido para esta sesión';
-
-  @override
-  String get livePermissionModeDefault => 'Predeterminado de la app';
-
-  @override
-  String get livePermissionModeUseDefault => 'Usar el valor predeterminado';
-
-  @override
   String get livePermissionModeUnavailable => 'Modo de permisos no disponible';
 
   @override
   String get livePermissionModeFailed =>
       'No se pudo guardar el modo de permisos.';
-
-  @override
-  String get livePermissionModeUnrestricted => 'Sin restricciones';
-
-  @override
-  String get livePermissionModeUnrestrictedExternal =>
-      'Definido fuera de CodeWalk';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOn =>
-      'Activar Sin restricciones…';
-
-  @override
-  String get livePermissionModeUnrestrictedTurnOff =>
-      'Desactivar Sin restricciones';
-
-  @override
-  String get livePermissionModeRulesRefresh => 'Actualizar reglas de la sesión';
-
-  @override
-  String get liveUnrestrictedTitle =>
-      '¿Activar Sin restricciones en esta sesión?';
-
-  @override
-  String get liveUnrestrictedOverride =>
-      'OpenCode ejecutará todas las acciones de esta sesión sin preguntar, anulando las reglas de preguntar y denegar del agente. Las solicitudes que ya esperan siguen necesitando respuesta.';
-
-  @override
-  String get liveUnrestrictedChildren =>
-      'Las nuevas sesiones hijas copian esta regla. Las sesiones hijas existentes conservan sus reglas, y desactivarla después no cambia las hijas que ya la copiaron.';
-
-  @override
-  String get liveUnrestrictedOthers =>
-      'Otros clientes pueden ver y cambiar esta regla; CodeWalk solo elimina la regla que añadió. Desactivarla no deshace las acciones ya realizadas.';
-
-  @override
-  String get liveUnrestrictedConfirm => 'Activar Sin restricciones';
 
   @override
   String get liveUnrestrictedRefused =>
@@ -1135,14 +1084,6 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String get liveUnrestrictedChangedElsewhere =>
       'Las reglas de la sesión cambiaron en otro lugar. CodeWalk no las sobrescribió.';
-
-  @override
-  String get liveUnrestrictedUnavailable =>
-      'Las reglas de la sesión no están disponibles.';
-
-  @override
-  String get liveUnrestrictedTurnedOff =>
-      'Sin restricciones desactivado. Las sesiones hijas existentes conservan la regla que copiaron.';
 
   @override
   String get livePermissionChildBadge => 'Subagente';

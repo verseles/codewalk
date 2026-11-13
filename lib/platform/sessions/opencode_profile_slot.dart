@@ -491,13 +491,31 @@ final class OpenCodeProfileSlot {
         !current.stale;
   }
 
-  bool canEnableUnrestricted(SessionRef ref) =>
-      _unrestrictedReady(ref) &&
-      unrestrictedState(ref).phase == SessionUnrestrictedPhase.off;
+  /// ON appends the rule wherever it is not in effect, a stale record of an
+  /// earlier insertion included (ADR-059, amended for #494).
+  bool canEnableUnrestricted(SessionRef ref) {
+    final state = unrestrictedState(ref);
+    return _unrestrictedReady(ref) &&
+        !state.inEffect &&
+        const {
+          SessionUnrestrictedPhase.off,
+          SessionUnrestrictedPhase.conflict,
+        }.contains(state.phase);
+  }
 
-  bool canDisableUnrestricted(SessionRef ref) =>
-      _unrestrictedReady(ref) &&
-      unrestrictedState(ref).phase == SessionUnrestrictedPhase.on;
+  /// OFF removes the trailing allow-everything rule whoever added it
+  /// (ADR-059, amended for #494), so another device or client can be
+  /// turned off from here.
+  bool canDisableUnrestricted(SessionRef ref) {
+    final state = unrestrictedState(ref);
+    return _unrestrictedReady(ref) &&
+        state.inEffect &&
+        const {
+          SessionUnrestrictedPhase.on,
+          SessionUnrestrictedPhase.elsewhere,
+          SessionUnrestrictedPhase.conflict,
+        }.contains(state.phase);
+  }
 
   bool canRefreshUnrestricted(SessionRef ref) => _unrestrictedReady(ref);
 
@@ -554,6 +572,9 @@ final class OpenCodeProfileSlot {
   ) {
     entry.state = state;
     _publish(ref, view(ref));
+    // A read that lands may open automatic replies held while it was out,
+    // here or in a parent that shows this session's requests.
+    considerAutoApproval();
   }
 
   /// The binding's catalog became unknown: a read or write in flight never
@@ -698,7 +719,8 @@ final class OpenCodeProfileSlot {
   }
 
   /// Appends CodeWalk's allow-everything rule to a fresh read of the rules,
-  /// after the record of that insertion is stored. One attempt; the result is
+  /// after the record of that insertion is stored; a record of an earlier
+  /// insertion that no longer matches is replaced. One attempt; the result is
   /// confirmed by reading the rules again, never by the 204 alone.
   Future<void> enableUnrestricted(SessionRef ref, CommandId id) async {
     final client = _rules;
@@ -714,15 +736,9 @@ final class OpenCodeProfileSlot {
     _markUnrestrictedBusy(ref, entry);
     final rules = await _readRules(ref, entry);
     if (!current()) return _stopUnrestricted(ref, entry, write: true);
-    final record = ledger.recordFor(_unrestrictedBinding, ref);
     final fresh = rules != null && rules.recognized;
-    // Only from a clean state: no wildcard yet, and no record other than an
-    // unapplied insertion over these exact rules.
-    if (!fresh ||
-        rules.endsWithWildcardAllow ||
-        (record != null &&
-            (record.stage != UnrestrictedStage.applying ||
-                unrestrictedFingerprint(rules) != record.base))) {
+    // Only while the rule is not in effect on a read made just now.
+    if (!fresh || rules.endsWithWildcardAllow) {
       // Nothing is written; a readable change is reported as such.
       return _settleUnrestricted(
         ref,
@@ -806,8 +822,9 @@ final class OpenCodeProfileSlot {
     }
   }
 
-  /// Removes only CodeWalk's own insertion, and only while a fresh read still
-  /// matches what CodeWalk wrote; otherwise it warns and writes nothing.
+  /// Removes the trailing allow-everything rule whoever added it (ADR-059,
+  /// amended for #494), keeping every other rule of a read made just before
+  /// the write. Only CodeWalk's own insertion is staged in its record.
   Future<void> disableUnrestricted(SessionRef ref, CommandId id) async {
     final client = _rules;
     final ledger = unrestrictedOwnership;
@@ -824,12 +841,9 @@ final class OpenCodeProfileSlot {
     if (!current()) return _stopUnrestricted(ref, entry, write: true);
     final record = ledger.recordFor(_unrestrictedBinding, ref);
     final fresh = rules != null && rules.recognized;
-    // Any stage counts once the rules match CodeWalk's insertion exactly: an
-    // earlier stage that failed to persist must not strand the rule.
-    if (!fresh ||
-        !rules.endsWithWildcardAllow ||
-        record == null ||
-        unrestrictedFingerprint(rules) != record.owned) {
+    // Read right before the write: nothing to remove, or rules no longer
+    // understood, settle on what the server says.
+    if (!fresh || !rules.endsWithWildcardAllow) {
       return _settleUnrestricted(
         ref,
         entry,
@@ -839,8 +853,18 @@ final class OpenCodeProfileSlot {
             : SessionUnrestrictedNotice.none,
       );
     }
-    final removing = record.at(UnrestrictedStage.removing);
-    if (!await ledger.put(_unrestrictedBinding, ref, removing, when: current)) {
+    // Any stage counts once the rules match CodeWalk's insertion exactly: an
+    // earlier stage that failed to persist must not strand the rule. A rule
+    // added elsewhere is removed as it stands, with no record to stage.
+    final owned =
+        record != null && unrestrictedFingerprint(rules) == record.owned;
+    if (owned &&
+        !await ledger.put(
+          _unrestrictedBinding,
+          ref,
+          record.at(UnrestrictedStage.removing),
+          when: current,
+        )) {
       if (!current()) return _stopUnrestricted(ref, entry, write: true);
       return _settleUnrestricted(
         ref,
@@ -873,9 +897,15 @@ final class OpenCodeProfileSlot {
           receipt: receipt,
         );
       case ReceiptState.rejected || ReceiptState.unavailable:
-        // Definitely not applied: the insertion is still CodeWalk's.
-        final owned = record.at(UnrestrictedStage.owned);
-        await ledger.put(_unrestrictedBinding, ref, owned, when: current);
+        // Definitely not applied: an insertion of CodeWalk's is still its.
+        if (owned) {
+          await ledger.put(
+            _unrestrictedBinding,
+            ref,
+            record.at(UnrestrictedStage.owned),
+            when: current,
+          );
+        }
         if (!current()) return _stopUnrestricted(ref, entry, receipt: receipt);
         await _settleUnrestricted(
           ref,
@@ -1146,9 +1176,11 @@ final class OpenCodeProfileSlot {
     });
   }
 
-  /// The complete gate for answering [request] without the user. Only the
-  /// policy's acknowledged Allow all opens it; every other value keeps the
-  /// manual card, and the request must still be answerable right now.
+  /// The complete gate for answering [request] without the user. Where the
+  /// session's own rules hold the switch, only their rule in effect opens it;
+  /// otherwise only the policy's acknowledged Allow all does. Every other
+  /// value keeps the manual card, and the request must still be answerable
+  /// right now.
   bool _canAutoApprove(SessionRef ref, InteractionRequest request) {
     final policy = permissionModes;
     if (policy == null || !policy.loaded) return false;
@@ -1163,12 +1195,36 @@ final class OpenCodeProfileSlot {
     } else {
       state = policy.effectiveForChild(child: owning, parent: ref);
     }
-    if (!state.answering) return false;
+    // Where the session's own rules hold the switch (ADR-059, amended for
+    // #494), the word of the session that asked decides: its rule in effect
+    // answers, its absence answers nothing. Nothing is answered while the
+    // rules are unread or being read again. A child whose rules are not read
+    // here is not answered: the server asked because they do not allow the
+    // request. Only rules that cannot be read leave the local mode.
+    if (supportsUnrestricted) {
+      final shown = unrestrictedState(ref);
+      final own = owning == ref ? shown : unrestrictedState(owning);
+      if (shown.phase == SessionUnrestrictedPhase.unknown) return false;
+      if (own.busy || shown.busy) return false;
+      if (_decided(own)) {
+        if (!own.inEffect) return false;
+      } else if (_decided(shown)) {
+        return false;
+      } else if (!state.answering) {
+        return false;
+      }
+    } else if (!state.answering) {
+      return false;
+    }
     // The native `once` choice is the only thing this path may send.
     if (request.automaticChoice?.id != 'once') return false;
     if (answered.contains(_requestKey(request))) return false;
     return canReply(ref, request);
   }
+
+  static bool _decided(SessionUnrestrictedState state) =>
+      state.phase != SessionUnrestrictedPhase.unknown &&
+      state.phase != SessionUnrestrictedPhase.unavailable;
 
   /// Re-runs automatic eligibility for watched sessions after a policy change.
   void considerAutoApproval() {

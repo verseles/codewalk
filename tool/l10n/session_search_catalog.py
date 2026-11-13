@@ -92,3 +92,21 @@ BUBBLE = {
     "ar": ("نسخ النص بالكامل", "تحديد النص"),
     "ur": ("پورا متن کاپی کریں", "متن منتخب کریں"),
 }
+
+SERVER_RULE_KEYS = ('livePermissionServerRule',)
+SERVER_RULE = {
+    "en": ("Saved on the server for every client. The agent asks nothing, even in Plan mode.",),
+    "pt": ("Salvo no servidor para todos os clientes. O agente não pergunta nada, nem no modo Plan.",),
+    "es": ("Guardado en el servidor para todos los clientes. El agente no pregunta nada, ni en el modo Plan.",),
+    "fr": ("Enregistré sur le serveur pour tous les clients. L’agent ne demande rien, même en mode Plan.",),
+    "de": ("Auf dem Server für alle Clients gespeichert. Der Agent fragt nichts, auch nicht im Plan-Modus.",),
+    "it": ("Salvato sul server per tutti i client. L’agente non chiede nulla, nemmeno in modalità Plan.",),
+    "ru": ("Сохранено на сервере для всех клиентов. Агент ничего не спрашивает, даже в режиме Plan.",),
+    "ja": ("すべてのクライアント向けにサーバーに保存されます。Plan モードでも、エージェントは何も確認しません。",),
+    "ko": ("모든 클라이언트를 위해 서버에 저장됩니다. Plan 모드에서도 에이전트가 아무것도 묻지 않습니다.",),
+    "zh": ("已保存在服务器上，对所有客户端生效。即使在 Plan 模式下，代理也不会询问任何事。",),
+    "hi": ("सभी क्लाइंट के लिए सर्वर पर सहेजा गया। एजेंट कुछ नहीं पूछता, Plan मोड में भी नहीं।",),
+    "bn": ("সব ক্লায়েন্টের জন্য সার্ভারে সংরক্ষিত। এজেন্ট কিছুই জিজ্ঞেস করে না, Plan মোডেও না।",),
+    "ar": ("محفوظ على الخادم لجميع العملاء. لا يسأل الوكيل عن أي شيء، حتى في وضع Plan.",),
+    "ur": ("تمام کلائنٹس کے لیے سرور پر محفوظ۔ ایجنٹ کچھ نہیں پوچھتا، Plan موڈ میں بھی نہیں۔",),
+}

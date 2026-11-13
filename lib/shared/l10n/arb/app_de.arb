@@ -554,6 +554,10 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
+  "livePermissionServerRule": "Auf dem Server für alle Clients gespeichert. Der Agent fragt nichts, auch nicht im Plan-Modus.",
+  "@livePermissionServerRule": {
+    "description": "V2 permission switch synced with the server rule (#494)"
+  },
   "composerSendNow": "Jetzt senden",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -828,76 +832,12 @@
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
   },
-  "livePermissionMode": "Berechtigungsmodus",
-  "@livePermissionMode": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAsk": "Fragen",
-  "@livePermissionModeAsk": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAllowAll": "Alles erlauben",
-  "@livePermissionModeAllowAll": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeSession": "Für diese Sitzung festgelegt",
-  "@livePermissionModeSession": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeDefault": "App-Standard",
-  "@livePermissionModeDefault": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUseDefault": "App-Standard verwenden",
-  "@livePermissionModeUseDefault": {
-    "description": "V2 manual permission cards"
-  },
   "livePermissionModeUnavailable": "Berechtigungsmodus nicht verfügbar",
   "@livePermissionModeUnavailable": {
     "description": "V2 manual permission cards"
   },
   "livePermissionModeFailed": "Berechtigungsmodus konnte nicht gespeichert werden.",
   "@livePermissionModeFailed": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestricted": "Uneingeschränkt",
-  "@livePermissionModeUnrestricted": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedExternal": "Außerhalb von CodeWalk festgelegt",
-  "@livePermissionModeUnrestrictedExternal": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOn": "Uneingeschränkt aktivieren…",
-  "@livePermissionModeUnrestrictedTurnOn": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOff": "Uneingeschränkt deaktivieren",
-  "@livePermissionModeUnrestrictedTurnOff": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeRulesRefresh": "Sitzungsregeln aktualisieren",
-  "@livePermissionModeRulesRefresh": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTitle": "Uneingeschränkt für diese Sitzung aktivieren?",
-  "@liveUnrestrictedTitle": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOverride": "OpenCode führt jede Aktion in dieser Sitzung ohne Nachfrage aus und setzt die Frage- und Verbotsregeln des Agenten außer Kraft. Bereits wartende Anfragen brauchen weiterhin eine Antwort.",
-  "@liveUnrestrictedOverride": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedChildren": "Neue Untersitzungen übernehmen diese Regel. Bestehende Untersitzungen behalten ihre Regeln, und späteres Deaktivieren ändert keine Untersitzung, die sie schon übernommen hat.",
-  "@liveUnrestrictedChildren": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOthers": "Andere Clients können diese Regel sehen und ändern; CodeWalk entfernt nur die Regel, die es hinzugefügt hat. Deaktivieren macht bereits ausgeführte Aktionen nicht rückgängig.",
-  "@liveUnrestrictedOthers": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedConfirm": "Uneingeschränkt aktivieren",
-  "@liveUnrestrictedConfirm": {
     "description": "V2 manual permission cards"
   },
   "liveUnrestrictedRefused": "Die Sitzungsregeln wurden nicht geändert.",
@@ -910,14 +850,6 @@
   },
   "liveUnrestrictedChangedElsewhere": "Die Sitzungsregeln wurden anderswo geändert. CodeWalk hat sie nicht überschrieben.",
   "@liveUnrestrictedChangedElsewhere": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedUnavailable": "Sitzungsregeln sind nicht verfügbar.",
-  "@liveUnrestrictedUnavailable": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTurnedOff": "Uneingeschränkt deaktiviert. Bestehende Untersitzungen behalten die übernommene Regel.",
-  "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
   },
   "livePermissionChildBadge": "Unteragent",

@@ -1629,6 +1629,12 @@ abstract class V2Localizations {
   /// **'Select text'**
   String get messageSelectText;
 
+  /// V2 permission switch synced with the server rule (#494)
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on the server for every client. The agent asks nothing, even in Plan mode.'**
+  String get livePermissionServerRule;
+
   /// V2 waiting messages (#486)
   ///
   /// In en, this message translates to:
@@ -2016,42 +2022,6 @@ abstract class V2Localizations {
   /// V2 manual permission cards
   ///
   /// In en, this message translates to:
-  /// **'Permission mode'**
-  String get livePermissionMode;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Ask'**
-  String get livePermissionModeAsk;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Allow all'**
-  String get livePermissionModeAllowAll;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Set for this session'**
-  String get livePermissionModeSession;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'App default'**
-  String get livePermissionModeDefault;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Use app default'**
-  String get livePermissionModeUseDefault;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
   /// **'Permission mode unavailable'**
   String get livePermissionModeUnavailable;
 
@@ -2060,66 +2030,6 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Could not save the permission mode.'**
   String get livePermissionModeFailed;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Unrestricted'**
-  String get livePermissionModeUnrestricted;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Set outside CodeWalk'**
-  String get livePermissionModeUnrestrictedExternal;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on Unrestricted…'**
-  String get livePermissionModeUnrestrictedTurnOn;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Turn off Unrestricted'**
-  String get livePermissionModeUnrestrictedTurnOff;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh session rules'**
-  String get livePermissionModeRulesRefresh;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on Unrestricted for this session?'**
-  String get liveUnrestrictedTitle;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'OpenCode will run every action in this session without asking, overriding the agent’s ask and deny rules. Requests already waiting still need an answer.'**
-  String get liveUnrestrictedOverride;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'New child sessions copy this rule. Existing child sessions keep their rules, and turning it off later does not change children that already copied it.'**
-  String get liveUnrestrictedChildren;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Other clients can see and change this rule; CodeWalk only removes the rule it added. Turning it off does not undo actions already taken.'**
-  String get liveUnrestrictedOthers;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on Unrestricted'**
-  String get liveUnrestrictedConfirm;
 
   /// V2 manual permission cards
   ///
@@ -2138,18 +2048,6 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'The session rules changed elsewhere. CodeWalk did not overwrite them.'**
   String get liveUnrestrictedChangedElsewhere;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Session rules are unavailable.'**
-  String get liveUnrestrictedUnavailable;
-
-  /// V2 manual permission cards
-  ///
-  /// In en, this message translates to:
-  /// **'Unrestricted turned off. Existing child sessions keep the rule they copied.'**
-  String get liveUnrestrictedTurnedOff;
 
   /// V2 manual permission cards
   ///

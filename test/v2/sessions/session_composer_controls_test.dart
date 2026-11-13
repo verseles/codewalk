@@ -10,6 +10,7 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -533,6 +534,103 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.livePermissionModeFailed), findsNothing);
     expect(live.permissionModeState.mode, PermissionMode.ask);
+  });
+
+  testWidgets('the switch is the server\'s allow-everything rule (#494)', (
+    tester,
+  ) async {
+    final (live, handle) = await open(tester);
+    final l10n = V2Localizations.of(
+      tester.element(find.byType(SessionModelChip)),
+    );
+    const off = SessionUnrestrictedState(phase: SessionUnrestrictedPhase.off);
+    const on = SessionUnrestrictedState(
+      phase: SessionUnrestrictedPhase.on,
+      inEffect: true,
+    );
+    handle
+      ..unrestrictedAvailable = true
+      ..unrestrictedState = off
+      ..unrestrictedAction = (change) => switch (change) {
+        'enable' => on,
+        'disable' => off,
+        _ => handle.unrestrictedState,
+      };
+    handle.emit(handle.current);
+    await tester.pump();
+    await openPick(tester, live);
+    // Opening the pick reads the rules again.
+    expect(handle.unrestrictedCalls, ['refresh']);
+    // The local default is Allow all, yet the server says OFF.
+    expect(live.permissionModeState.mode, PermissionMode.allowAll);
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(handle.unrestrictedCalls.last, 'enable');
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
+    expect(
+      find.descendant(
+        of: autoApprove,
+        matching: find.text(l10n.livePermissionServerRule),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(handle.unrestrictedCalls.last, 'disable');
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+    // The local mode is never the switch while the server has spoken.
+    expect(live.permissionModeState.mode, PermissionMode.allowAll);
+
+    // A rule another client added reads ON and can be removed.
+    handle.unrestrictedState = const SessionUnrestrictedState(
+      phase: SessionUnrestrictedPhase.elsewhere,
+      inEffect: true,
+    );
+    handle.emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(handle.unrestrictedCalls.last, 'disable');
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+
+    // A rule that is no longer last is not in effect: OFF, and ON adds it.
+    handle.unrestrictedState = const SessionUnrestrictedState(
+      phase: SessionUnrestrictedPhase.conflict,
+    );
+    handle.emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(handle.unrestrictedCalls.last, 'enable');
+
+    // A refused write is said inside the pick, in the error color.
+    handle.unrestrictedState = const SessionUnrestrictedState(
+      phase: SessionUnrestrictedPhase.off,
+      notice: SessionUnrestrictedNotice.refused,
+    );
+    handle.emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: autoApprove,
+        matching: find.text(l10n.liveUnrestrictedRefused),
+      ),
+      findsOneWidget,
+    );
+
+    // While the rules are unread, the local default is the switch.
+    handle.unrestrictedState = const SessionUnrestrictedState();
+    handle.emit(handle.current);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
+    final calls = handle.unrestrictedCalls.length;
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    expect(live.permissionModeState.mode, PermissionMode.ask);
+    expect(handle.unrestrictedCalls, hasLength(calls));
   });
 
   testWidgets('an unreadable permission policy is unavailable, not off', (

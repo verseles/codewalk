@@ -14,6 +14,7 @@ import 'package:codewalk/shared/l10n/l10n_context.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_unrestricted.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -509,6 +510,117 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets(
+    'a new session gets its allow-everything rule before the first prompt',
+    (tester) async {
+      await open(tester);
+      // The app loads the policy at startup; this rig does it by hand.
+      await app.permissionModes!.initialize();
+      await startSend(tester);
+      final summary = source.row('created', directory: '/work/alpha');
+      source.reads.single.$2.completion.complete(summary);
+      await waitFor(tester, () => directory.opens.isNotEmpty);
+      final outbox = FakeOutbox();
+      final handle = directory.grant(summary.info.ref, outbox: outbox);
+      bool? beforePrompt;
+      handle
+        ..unrestrictedAvailable = true
+        ..unrestrictedState = const SessionUnrestrictedState(
+          phase: SessionUnrestrictedPhase.off,
+        )
+        ..unrestrictedAction = (change) {
+          if (change != 'enable') return handle.unrestrictedState;
+          beforePrompt = outbox.calls.every((c) => !c.startsWith('submit '));
+          return const SessionUnrestrictedState(
+            phase: SessionUnrestrictedPhase.on,
+            inEffect: true,
+          );
+        };
+      handle.emit(
+        SessionLiveView(
+          session: summary.info.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(summary.info.ref),
+          lastSyncedAt: DateTime.utc(2026, 10, 25),
+        ),
+      );
+      await waitFor(tester, () => outbox.list.isNotEmpty);
+      expect(handle.unrestrictedCalls, ['enable']);
+      expect(beforePrompt, isTrue);
+      expect(outbox.list.single.text, '  first prompt\n');
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('a failed first rules read still writes the rule once read', (
+    tester,
+  ) async {
+    await open(tester);
+    await app.permissionModes!.initialize();
+    await startSend(tester);
+    final summary = source.row('created', directory: '/work/alpha');
+    source.reads.single.$2.completion.complete(summary);
+    await waitFor(tester, () => directory.opens.isNotEmpty);
+    final outbox = FakeOutbox();
+    final handle = directory.grant(summary.info.ref, outbox: outbox)
+      ..unrestrictedAvailable = true
+      ..unrestrictedState = const SessionUnrestrictedState(
+        phase: SessionUnrestrictedPhase.unavailable,
+      );
+    handle.unrestrictedAction = (change) => change == 'enable'
+        ? const SessionUnrestrictedState(
+            phase: SessionUnrestrictedPhase.on,
+            inEffect: true,
+          )
+        : handle.unrestrictedState;
+    handle.emit(
+      SessionLiveView(
+        session: summary.info.ref,
+        phase: SessionLivePhase.live,
+        state: liveState(summary.info.ref),
+        lastSyncedAt: DateTime.utc(2026, 10, 25),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(outbox.list, isEmpty);
+    // The read is tried again and says OFF: the rule goes first.
+    handle.unrestrictedState = const SessionUnrestrictedState(
+      phase: SessionUnrestrictedPhase.off,
+    );
+    handle.emit(handle.current);
+    await waitFor(tester, () => outbox.list.isNotEmpty);
+    expect(handle.unrestrictedCalls, ['enable']);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('unread rules hold the first prompt for a few seconds only', (
+    tester,
+  ) async {
+    await open(tester);
+    await startSend(tester);
+    final summary = source.row('created', directory: '/work/alpha');
+    source.reads.single.$2.completion.complete(summary);
+    await waitFor(tester, () => directory.opens.isNotEmpty);
+    final outbox = FakeOutbox();
+    final handle = directory.grant(summary.info.ref, outbox: outbox)
+      ..unrestrictedAvailable = true;
+    handle.emit(
+      SessionLiveView(
+        session: summary.info.ref,
+        phase: SessionLivePhase.live,
+        state: liveState(summary.info.ref),
+        lastSyncedAt: DateTime.utc(2026, 10, 25),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(outbox.list, isEmpty);
+    await tester.pump(const Duration(seconds: 3));
+    await waitFor(tester, () => outbox.list.isNotEmpty);
+    // Nothing was known, so nothing was written.
+    expect(handle.unrestrictedCalls, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'navigation while the first outbox write waits cancels delivery',

@@ -554,6 +554,10 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
+  "livePermissionServerRule": "تمام کلائنٹس کے لیے سرور پر محفوظ۔ ایجنٹ کچھ نہیں پوچھتا، Plan موڈ میں بھی نہیں۔",
+  "@livePermissionServerRule": {
+    "description": "V2 permission switch synced with the server rule (#494)"
+  },
   "composerSendNow": "ابھی بھیجیں",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -828,76 +832,12 @@
   "@livePermissionRejectSend": {
     "description": "V2 manual permission cards"
   },
-  "livePermissionMode": "اجازت موڈ",
-  "@livePermissionMode": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAsk": "پوچھیں",
-  "@livePermissionModeAsk": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeAllowAll": "سب کی اجازت دیں",
-  "@livePermissionModeAllowAll": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeSession": "اس سیشن کے لیے مقرر",
-  "@livePermissionModeSession": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeDefault": "ایپ ڈیفالٹ",
-  "@livePermissionModeDefault": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUseDefault": "ایپ ڈیفالٹ استعمال کریں",
-  "@livePermissionModeUseDefault": {
-    "description": "V2 manual permission cards"
-  },
   "livePermissionModeUnavailable": "اجازت موڈ دستیاب نہیں",
   "@livePermissionModeUnavailable": {
     "description": "V2 manual permission cards"
   },
   "livePermissionModeFailed": "اجازت موڈ محفوظ نہیں ہو سکا۔",
   "@livePermissionModeFailed": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestricted": "بغیر پابندی",
-  "@livePermissionModeUnrestricted": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedExternal": "CodeWalk کے باہر مقرر",
-  "@livePermissionModeUnrestrictedExternal": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOn": "بغیر پابندی آن کریں…",
-  "@livePermissionModeUnrestrictedTurnOn": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeUnrestrictedTurnOff": "بغیر پابندی آف کریں",
-  "@livePermissionModeUnrestrictedTurnOff": {
-    "description": "V2 manual permission cards"
-  },
-  "livePermissionModeRulesRefresh": "سیشن کے قواعد ریفریش کریں",
-  "@livePermissionModeRulesRefresh": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTitle": "اس سیشن کے لیے بغیر پابندی آن کریں؟",
-  "@liveUnrestrictedTitle": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOverride": "OpenCode اس سیشن کی ہر کارروائی بغیر پوچھے چلائے گا اور ایجنٹ کے پوچھنے اور انکار کے قواعد کو نظرانداز کرے گا۔ پہلے سے منتظر درخواستوں کو اب بھی جواب درکار ہے۔",
-  "@liveUnrestrictedOverride": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedChildren": "نئے چائلڈ سیشن یہ قاعدہ کاپی کرتے ہیں۔ موجودہ چائلڈ سیشن اپنے قواعد رکھتے ہیں، اور بعد میں آف کرنے سے وہ سیشن نہیں بدلتے جنہوں نے اسے کاپی کر لیا ہے۔",
-  "@liveUnrestrictedChildren": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedOthers": "دوسرے کلائنٹ یہ قاعدہ دیکھ اور بدل سکتے ہیں؛ CodeWalk صرف اپنا شامل کردہ قاعدہ ہٹاتا ہے۔ آف کرنے سے پہلے کی گئی کارروائیاں واپس نہیں ہوتیں۔",
-  "@liveUnrestrictedOthers": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedConfirm": "بغیر پابندی آن کریں",
-  "@liveUnrestrictedConfirm": {
     "description": "V2 manual permission cards"
   },
   "liveUnrestrictedRefused": "سیشن کے قواعد تبدیل نہیں ہوئے۔",
@@ -910,14 +850,6 @@
   },
   "liveUnrestrictedChangedElsewhere": "سیشن کے قواعد کہیں اور تبدیل ہوئے۔ CodeWalk نے انہیں اوور رائٹ نہیں کیا۔",
   "@liveUnrestrictedChangedElsewhere": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedUnavailable": "سیشن کے قواعد دستیاب نہیں ہیں۔",
-  "@liveUnrestrictedUnavailable": {
-    "description": "V2 manual permission cards"
-  },
-  "liveUnrestrictedTurnedOff": "بغیر پابندی آف ہو گیا۔ موجودہ چائلڈ سیشن کاپی کیا گیا قاعدہ رکھتے ہیں۔",
-  "@liveUnrestrictedTurnedOff": {
     "description": "V2 manual permission cards"
   },
   "livePermissionChildBadge": "ذیلی ایجنٹ",
