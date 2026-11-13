@@ -137,7 +137,7 @@ class PublicationPathTests(unittest.TestCase):
 
     def test_every_other_workflow_is_read_only(self):
         names = sorted(path.name for path in WORKFLOWS.glob("*.yml") if path.name not in ("release.yml", "web-pages.yml"))
-        self.assertEqual(names, ["ci.yml", "opencode-smoke.yml", "v2-deferred-web.yml",
+        self.assertEqual(names, ["ci.yml", "goldens.yml", "opencode-smoke.yml", "v2-deferred-web.yml",
                                  "v2-device-reliability.yml", "v2-owner-preview.yml"])
         for name in names:
             with self.subTest(name=name):

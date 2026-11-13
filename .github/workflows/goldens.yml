@@ -1,0 +1,45 @@
+name: Goldens
+
+# Golden references are x86_64 renders (test/flutter_test_config.dart), and an
+# ARM host draws text and icons a little differently. This renders every
+# golden again on the CI architecture and returns the files, for a person to
+# inspect and commit. It never commits anything itself.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.47.9"
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Render the goldens
+        run: |
+          files=$(grep -rl --include='*_test.dart' 'matchesGoldenFile' test)
+          flutter test --no-pub -j 4 --update-goldens $files
+
+      - name: Return the goldens
+        uses: actions/upload-artifact@v4
+        with:
+          name: goldens-x86_64-${{ github.run_id }}
+          path: test/**/goldens/*.png
+          if-no-files-found: error
+          retention-days: 7
