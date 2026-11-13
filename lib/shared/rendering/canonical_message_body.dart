@@ -27,6 +27,7 @@ class CanonicalMessageBody extends StatelessWidget {
     this.onTapFilePath,
     this.onCopyCode,
     this.bodyStyle,
+    this.onCopyInlineCode,
   });
 
   final String source;
@@ -39,6 +40,9 @@ class CanonicalMessageBody extends StatelessWidget {
 
   /// The style of running text, see [MarkdownContent.bodyStyle].
   final TextStyle? bodyStyle;
+
+  /// See [MarkdownContent.onCopyInlineCode].
+  final ValueChanged<String>? onCopyInlineCode;
 
   Widget _rich(BuildContext context, String verbatimSource) {
     return MarkdownContent(
@@ -56,6 +60,7 @@ class CanonicalMessageBody extends StatelessWidget {
           : null,
       onCopyCode: onCopyCode,
       bodyStyle: bodyStyle,
+      onCopyInlineCode: onCopyInlineCode,
     );
   }
 

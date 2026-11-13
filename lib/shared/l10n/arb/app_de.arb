@@ -546,6 +546,14 @@
   "@composerVoiceFailed": {
     "description": "V2 composer voice input, native recognizer (#307)"
   },
+  "messageCopyAll": "Gesamten Text kopieren",
+  "@messageCopyAll": {
+    "description": "V2 message bubble options (#492)"
+  },
+  "messageSelectText": "Text auswählen",
+  "@messageSelectText": {
+    "description": "V2 message bubble options (#492)"
+  },
   "composerSendNow": "Jetzt senden",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

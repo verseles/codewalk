@@ -44,7 +44,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.errorRecovery,
     this.onOpenChild,
     this.emptyBuilder,
-    this.userTurnActionBuilder,
+    this.userTurnRevert,
     this.highlight,
     this.reveals = 0,
   });
@@ -83,9 +83,11 @@ class SessionLiveTimeline extends StatefulWidget {
   /// Null for none.
   final WidgetBuilder? emptyBuilder;
 
-  /// Optional builder for a confirmed user turn's inline action.
-  final Widget Function(BuildContext context, UserInput item, bool isLatest)?
-  userTurnActionBuilder;
+  /// A confirmed user turn's revert, offered in its message menu (#492);
+  /// [isLatest] tells the latest turn (undo) from an older one (rewind and
+  /// edit). Null, or a null result, offers none.
+  final SessionBubbleAction? Function(UserInput item, bool isLatest)?
+  userTurnRevert;
 
   /// The item a search found (#462): its row is outlined.
   final ItemId? highlight;
@@ -815,12 +817,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 errorRecovery: widget.errorRecovery,
                 onOpenChild: widget.onOpenChild,
                 messageHeader: messageHeader,
-                inlineAction:
-                    item is UserInput &&
-                        item.confirmed &&
-                        widget.userTurnActionBuilder != null
-                    ? widget.userTurnActionBuilder!(
-                        context,
+                revert: item is UserInput && item.confirmed
+                    ? widget.userTurnRevert?.call(
                         item,
                         item.id == _latestConfirmedUserTurnId(rows),
                       )

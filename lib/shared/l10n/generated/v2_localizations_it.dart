@@ -841,6 +841,12 @@ class V2LocalizationsIt extends V2Localizations {
       'L’input vocale si è interrotto inaspettatamente';
 
   @override
+  String get messageCopyAll => 'Copia tutto il testo';
+
+  @override
+  String get messageSelectText => 'Seleziona testo';
+
+  @override
   String get composerSendNow => 'Invia ora';
 
   @override

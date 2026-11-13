@@ -5,7 +5,6 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 final _created = DateTime.utc(2026, 10, 27, 12);
 
@@ -271,7 +270,6 @@ void main() {
               delivery: const OpenValue.known(DeliveryState.delivered),
             ),
             messageHeader: true,
-            inlineAction: const Icon(Symbols.more_horiz),
           ),
         ),
       ),
@@ -282,9 +280,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a user turn action sits left of its bubble, centred on it', (
-    tester,
-  ) async {
+  testWidgets('a user bubble has no action beside it (#492)', (tester) async {
     await tester.pumpWidget(
       _surface(
         SizedBox(
@@ -296,18 +292,12 @@ void main() {
               delivery: const OpenValue.known(DeliveryState.delivered),
             ),
             messageHeader: true,
-            inlineAction: const Icon(
-              Symbols.undo_rounded,
-              key: ValueKey('user-action'),
-            ),
           ),
         ),
       ),
     );
-    final action = tester.getRect(find.byKey(const ValueKey('user-action')));
-    final bubble = tester.getRect(find.byType(Card));
-    expect(action.right, lessThanOrEqualTo(bubble.left));
-    expect(action.center.dy, closeTo(bubble.center.dy, 0.5));
-    expect(bubble.right, closeTo(400, 0.5));
+    // Revert lives in the message menu; nothing floats left of the bubble.
+    expect(find.byType(IconButton), findsNothing);
+    expect(tester.getRect(find.byType(Card)).right, closeTo(400, 0.5));
   });
 }

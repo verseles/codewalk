@@ -828,6 +828,12 @@ class V2LocalizationsUr extends V2Localizations {
   String get composerVoiceFailed => 'آواز سے اندراج اچانک رک گیا';
 
   @override
+  String get messageCopyAll => 'پورا متن کاپی کریں';
+
+  @override
+  String get messageSelectText => 'متن منتخب کریں';
+
+  @override
   String get composerSendNow => 'ابھی بھیجیں';
 
   @override

@@ -822,6 +822,12 @@ class V2LocalizationsAr extends V2Localizations {
   String get composerVoiceFailed => 'توقف الإدخال الصوتي بشكل غير متوقع';
 
   @override
+  String get messageCopyAll => 'نسخ النص بالكامل';
+
+  @override
+  String get messageSelectText => 'تحديد النص';
+
+  @override
   String get composerSendNow => 'أرسل الآن';
 
   @override

@@ -841,6 +841,12 @@ class V2LocalizationsEs extends V2Localizations {
       'La entrada de voz se detuvo inesperadamente';
 
   @override
+  String get messageCopyAll => 'Copiar todo el texto';
+
+  @override
+  String get messageSelectText => 'Seleccionar texto';
+
+  @override
   String get composerSendNow => 'Enviar ahora';
 
   @override

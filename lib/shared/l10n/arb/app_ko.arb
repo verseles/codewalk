@@ -546,6 +546,14 @@
   "@composerVoiceFailed": {
     "description": "V2 composer voice input, native recognizer (#307)"
   },
+  "messageCopyAll": "전체 텍스트 복사",
+  "@messageCopyAll": {
+    "description": "V2 message bubble options (#492)"
+  },
+  "messageSelectText": "텍스트 선택",
+  "@messageSelectText": {
+    "description": "V2 message bubble options (#492)"
+  },
   "composerSendNow": "지금 보내기",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

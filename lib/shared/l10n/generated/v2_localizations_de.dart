@@ -847,6 +847,12 @@ class V2LocalizationsDe extends V2Localizations {
       'Die Spracheingabe wurde unerwartet beendet';
 
   @override
+  String get messageCopyAll => 'Gesamten Text kopieren';
+
+  @override
+  String get messageSelectText => 'Text auswählen';
+
+  @override
   String get composerSendNow => 'Jetzt senden';
 
   @override

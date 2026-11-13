@@ -838,6 +838,12 @@ class V2LocalizationsPt extends V2Localizations {
   String get composerVoiceFailed => 'A entrada por voz parou inesperadamente';
 
   @override
+  String get messageCopyAll => 'Copiar todo o texto';
+
+  @override
+  String get messageSelectText => 'Selecionar texto';
+
+  @override
   String get composerSendNow => 'Enviar agora';
 
   @override

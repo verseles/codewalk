@@ -831,6 +831,12 @@ class V2LocalizationsHi extends V2Localizations {
   String get composerVoiceFailed => 'वॉइस इनपुट अचानक रुक गया';
 
   @override
+  String get messageCopyAll => 'पूरा टेक्स्ट कॉपी करें';
+
+  @override
+  String get messageSelectText => 'टेक्स्ट चुनें';
+
+  @override
   String get composerSendNow => 'अभी भेजें';
 
   @override

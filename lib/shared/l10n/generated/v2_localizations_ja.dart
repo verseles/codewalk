@@ -790,6 +790,12 @@ class V2LocalizationsJa extends V2Localizations {
   String get composerVoiceFailed => '音声入力が予期せず停止しました';
 
   @override
+  String get messageCopyAll => 'テキストをすべてコピー';
+
+  @override
+  String get messageSelectText => 'テキストを選択';
+
+  @override
   String get composerSendNow => '今すぐ送信';
 
   @override

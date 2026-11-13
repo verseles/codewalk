@@ -792,6 +792,12 @@ class V2LocalizationsKo extends V2Localizations {
   String get composerVoiceFailed => '음성 입력이 예기치 않게 중지되었습니다';
 
   @override
+  String get messageCopyAll => '전체 텍스트 복사';
+
+  @override
+  String get messageSelectText => '텍스트 선택';
+
+  @override
   String get composerSendNow => '지금 보내기';
 
   @override

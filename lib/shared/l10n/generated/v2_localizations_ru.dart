@@ -836,6 +836,12 @@ class V2LocalizationsRu extends V2Localizations {
   String get composerVoiceFailed => 'Голосовой ввод неожиданно остановился';
 
   @override
+  String get messageCopyAll => 'Скопировать весь текст';
+
+  @override
+  String get messageSelectText => 'Выделить текст';
+
+  @override
   String get composerSendNow => 'Отправить сейчас';
 
   @override

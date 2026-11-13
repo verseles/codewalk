@@ -557,11 +557,23 @@ description of this code.
 - **Then** an admitted compaction leaves the pending list when its matching start is observed; HTTP admission alone never proves completion
 - **Then** native zero-cost fixtures cover idle and busy admission, successful and failed terminal events and busy revert refusals; projection and stream-owner regressions cover duplicate delivery and hydration races; in-app undo, redo and compact controls remain separate work
 
+### V2 message gestures
+
+- **Given** a user or agent message in the live or history timeline (#492)
+- **When** the user double taps or double clicks it
+- **Then** its whole canonical text, Markdown kept, is copied and "Copied to clipboard" shows; single taps on its links, file paths, elapsed chip and copy buttons are not delayed, and a double tap on one of them still ends with the whole message copied
+- **When** the user long presses it, right clicks it, or presses the Menu key or Shift+F10 on it (messages join keyboard traversal and show a focus outline)
+- **Then** a menu offers Undo this turn (the latest confirmed user turn) or Rewind and edit from here (older ones), only on the user's own confirmed turns in the live view and only while the session can revert, then Copy all text and Select text; screen readers get the same options as actions on the message
+- **When** the user picks Select text
+- **Then** that message alone becomes selectable, all of it selected with native handles and its toolbar; dragging the handles and using the toolbar keep the mode, which ends with one Escape, a tap outside, a tap in another selectable item, or a copy from its toolbar; outside this mode a message's text is not selectable, so the long press stays the menu's
+- **When** the user taps inline `code` in a message
+- **Then** only that code is copied, with the same notice; code inside a link's text keeps opening the link, and fenced code blocks keep their own copy button
+
 ### V2 message elapsed time and details
 
 - **Given** a live or history timeline shows the parts (text, reasoning, tools) of an assistant message
 - **When** the first part of that message is rendered
-- **Then** a user turn's header shows only its clock time, with no sender label (screen readers still announce `You`) and no elapsed chip, and a user turn with no time has no header; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header; a user turn's undo (latest turn) or rewind-and-edit (older turns) action sits to the left of the bubble, as in v1, outside the header, and history shows none
+- **Then** a user turn's header shows only its clock time, with no sender label (screen readers still announce `You`) and no elapsed chip, and a user turn with no time has no header; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header; nothing floats beside the bubble: a user turn's undo (latest turn) or rewind-and-edit (older turns) lives in its message menu (#492), and history offers neither
 - **Then** the details dialog lists the elapsed time, model, provider, the reported token total (only when input and output are known), cost in USD, and "Step started #1" / "Step finished #1: reason • tokens • cost" (a v2 message is one model step); with nothing known it says "No metadata available"; it scrolls, closes with its button, the barrier or Escape
 - **Then** live parts learn the model, agent and start of the running step when it starts; when the step ends or fails they receive the completion time, usage and finish reason; a retried step on the same message resets them to the new attempt
 - **Then** history reads the same facts from the assistant record; an unexpected, oversized or malformed display value is unknown and never rejects the page

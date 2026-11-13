@@ -32,6 +32,7 @@ import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'session_switch_note.dart';
 import 'session_timeline_projection.dart';
+import 'session_timeline_tile.dart';
 import 'sessions_controller.dart';
 import 'subconversation_navigation.dart';
 import 'subconversation_resolver.dart';
@@ -517,38 +518,25 @@ class _SessionLivePageState extends State<SessionLivePage>
                             reveals: search.reveals,
                             onOpenChild: _openChild,
                             items: items,
-                            userTurnActionBuilder: (context, turnItem, isLatest) {
-                              final tooltip = isLatest
-                                  ? l10n.msgInfoUndoThisTurn
-                                  : l10n.chatMessageRewindEdit;
-                              return IconButton(
-                                key: ValueKey(
-                                  'user-turn-action-${turnItem.id.value}',
-                                ),
-                                icon: Icon(
-                                  isLatest
-                                      ? Symbols.undo_rounded
-                                      : Symbols.settings_backup_restore,
-                                ),
-                                // v1 density: a 48 dp target with a 24 dp glyph.
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 48,
-                                  minHeight: 48,
-                                ),
-                                splashRadius: 18,
-                                tooltip: tooltip,
-                                onPressed: c.turn.canUndo
-                                    ? () => unawaited(
-                                        c.turn.stageUndo(
-                                          target: turnItem,
-                                          context: context,
-                                        ),
-                                      )
-                                    : null,
-                              );
-                            },
+                            // A turn reverts from its message menu, where
+                            // the session can (#492).
+                            userTurnRevert: (turnItem, isLatest) =>
+                                c.turn.canUndo
+                                ? SessionBubbleAction(
+                                    label: isLatest
+                                        ? l10n.msgInfoUndoThisTurn
+                                        : l10n.chatMessageRewindEdit,
+                                    icon: isLatest
+                                        ? Symbols.undo_rounded
+                                        : Symbols.settings_backup_restore,
+                                    onSelected: (context) => unawaited(
+                                      c.turn.stageUndo(
+                                        target: turnItem,
+                                        context: context,
+                                      ),
+                                    ),
+                                  )
+                                : null,
                             emptyBuilder: _empty(c, l10n),
                             scroll: widget.controller.scroll,
                             settled: settled,

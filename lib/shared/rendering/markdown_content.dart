@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -6,6 +7,7 @@ import '../theme/app_shapes.dart';
 import '../theme/opencode_theme_presets.dart';
 import 'file_path_detector.dart';
 import 'file_path_markdown.dart';
+import 'inline_code_copy.dart';
 import 'message_render_budget.dart';
 import 'render_basic_html.dart';
 import 'render_code_block.dart';
@@ -38,6 +40,7 @@ class MarkdownContent extends StatefulWidget {
     this.enableCodeHighlight = false,
     this.maxRichCharsForRender = MessageRenderBudget.richRenderMaxChars,
     this.bodyStyle,
+    this.onCopyInlineCode,
   });
 
   final String source;
@@ -56,12 +59,71 @@ class MarkdownContent extends StatefulWidget {
   /// and headings their own.
   final TextStyle? bodyStyle;
 
+  /// Copies an inline code span on a tap; inline code is plain when null.
+  final ValueChanged<String>? onCopyInlineCode;
+
   @override
   State<MarkdownContent> createState() => _MarkdownContentState();
 }
 
 class _MarkdownContentState extends State<MarkdownContent> {
   void _onFile(FilePathMatch file) => widget.onFile?.call(file);
+
+  /// One tap recognizer per inline code text, kept across rebuilds because
+  /// the Markdown body keeps its spans until the source changes.
+  final _codeTaps = <String, TapGestureRecognizer>{};
+
+  /// The code texts the latest parse of the body used; after the frame that
+  /// parsed, the recognizers it no longer uses are let go.
+  final _codesInUse = <String>{};
+  bool _pruneScheduled = false;
+
+  /// The link flags of the source last parsed for them, since the body
+  /// itself parses again only when its source or style changes.
+  (String, bool, bool)? _linkedFor;
+  List<bool> _linked = const [];
+
+  List<bool> _linkFlags(md.ExtensionSet extensionSet) {
+    final key = (widget.source, widget.allowBasicHtml, widget.enableMath);
+    if (_linkedFor != key) {
+      _linkedFor = key;
+      _linked = inlineCodeInLinks(widget.source, extensionSet);
+    }
+    return _linked;
+  }
+
+  GestureRecognizer _codeTap(String code) {
+    _codesInUse.add(code);
+    if (!_pruneScheduled) {
+      _pruneScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _pruneCodeTaps());
+    }
+    return _codeTaps.putIfAbsent(
+      code,
+      () =>
+          TapGestureRecognizer()
+            ..onTap = () => widget.onCopyInlineCode?.call(code),
+    );
+  }
+
+  void _pruneCodeTaps() {
+    _pruneScheduled = false;
+    if (!mounted) return;
+    _codeTaps.removeWhere((code, recognizer) {
+      if (_codesInUse.contains(code)) return false;
+      recognizer.dispose();
+      return true;
+    });
+    _codesInUse.clear();
+  }
+
+  @override
+  void dispose() {
+    for (final recognizer in _codeTaps.values) {
+      recognizer.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +210,20 @@ class _MarkdownContentState extends State<MarkdownContent> {
       );
     }
 
+    final extensionSet = md.ExtensionSet(
+      [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
+      [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
+    );
+    if (widget.onCopyInlineCode != null) {
+      builders['code'] = InlineCodeCopyBuilder(
+        recognizerFor: _codeTap,
+        linked: _linkFlags(extensionSet),
+      );
+    }
+
     return MarkdownBody(
       data: widget.source,
-      extensionSet: md.ExtensionSet(
-        [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
-        [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
-      ),
+      extensionSet: extensionSet,
       styleSheet: styleSheet,
       builders: builders,
       paddingBuilders: paddingBuilders,

@@ -775,6 +775,12 @@ class V2LocalizationsZh extends V2Localizations {
   String get composerVoiceFailed => '语音输入意外停止';
 
   @override
+  String get messageCopyAll => '复制全部文本';
+
+  @override
+  String get messageSelectText => '选择文本';
+
+  @override
   String get composerSendNow => '立即发送';
 
   @override

@@ -1617,6 +1617,18 @@ abstract class V2Localizations {
   /// **'Voice input stopped unexpectedly'**
   String get composerVoiceFailed;
 
+  /// V2 message bubble options (#492)
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all text'**
+  String get messageCopyAll;
+
+  /// V2 message bubble options (#492)
+  ///
+  /// In en, this message translates to:
+  /// **'Select text'**
+  String get messageSelectText;
+
   /// V2 waiting messages (#486)
   ///
   /// In en, this message translates to:

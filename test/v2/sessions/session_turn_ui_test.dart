@@ -33,18 +33,19 @@ final class _FakePort implements SessionTurnActionPort {
   SessionTurnUnavailable? unavailable(SessionTurnAction action) => null;
 
   @override
-  Future<SessionTurnResult> stage(ItemId boundary, {required CommandId id}) async {
+  Future<SessionTurnResult> stage(
+    ItemId boundary, {
+    required CommandId id,
+  }) async {
     staged.add(boundary);
     state = SessionTurnState(
       phase: SessionTurnPhase.idle,
       revert: RevertState(
         kind: const OpenValue.known(RevertKind.staged),
         boundary: boundary,
-        anchor: nextAnchor ??
-            MessageAnchor(
-              message: MessageRef('msg_2'),
-              orderKey: 'msg_2',
-            ),
+        anchor:
+            nextAnchor ??
+            MessageAnchor(message: MessageRef('msg_2'), orderKey: 'msg_2'),
       ),
     );
     return const SessionTurnResult(applied: true);
@@ -77,111 +78,131 @@ UserInput _turn(
   required SessionRef ref,
   String? text,
   bool confirmed = true,
-}) =>
-    UserInput(
-      meta: ItemMeta(
-        id: ItemId(jsonEncode([ref.storageKey, message, 'user', 0])),
-        generation: 'history',
-        status: const OpenValue.known(ItemStatus.completed),
-        source: SourceProvenance(
-          harness: ref.harnessRef,
-          version: '2.0.22',
-          nativeType: 'user',
-        ),
-        anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
-      ),
-      text: text ?? 'text of $message',
-      delivery: const OpenValue.known(DeliveryState.delivered),
-      confirmed: confirmed,
-    );
+}) => UserInput(
+  meta: ItemMeta(
+    id: ItemId(jsonEncode([ref.storageKey, message, 'user', 0])),
+    generation: 'history',
+    status: const OpenValue.known(ItemStatus.completed),
+    source: SourceProvenance(
+      harness: ref.harnessRef,
+      version: '2.0.22',
+      nativeType: 'user',
+    ),
+    anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
+  ),
+  text: text ?? 'text of $message',
+  delivery: const OpenValue.known(DeliveryState.delivered),
+  confirmed: confirmed,
+);
 
 AssistantText _answer(
   String message, {
   required SessionRef ref,
   required String text,
-}) =>
-    AssistantText(
-      meta: ItemMeta(
-        id: ItemId(jsonEncode([ref.storageKey, message, 'assistant', 0])),
-        generation: 'history',
-        status: const OpenValue.known(ItemStatus.completed),
-        source: SourceProvenance(
-          harness: ref.harnessRef,
-          version: '2.0.22',
-          nativeType: 'assistant',
-        ),
-        anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
-      ),
-      text: text,
-      complete: true,
-    );
+}) => AssistantText(
+  meta: ItemMeta(
+    id: ItemId(jsonEncode([ref.storageKey, message, 'assistant', 0])),
+    generation: 'history',
+    status: const OpenValue.known(ItemStatus.completed),
+    source: SourceProvenance(
+      harness: ref.harnessRef,
+      version: '2.0.22',
+      nativeType: 'assistant',
+    ),
+    anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
+  ),
+  text: text,
+  complete: true,
+);
 
 void main() {
-  testWidgets('timeline shows inline undo on latest user and rewind on older user',
-      (tester) async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final directory = LiveDirectory();
-    final summary = CatalogSource(profile('a')).row('one');
-    final ref = summary.info.ref;
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: summary,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
+  testWidgets(
+    'a user message menu offers undo on the latest turn and rewind on older ones (#492)',
+    (tester) async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
 
-    final port = _FakePort();
-    final start = live.start();
-    final handle = directory.grant(ref, turnActions: port);
-    await start;
+      final port = _FakePort();
+      final start = live.start();
+      final handle = directory.grant(ref, turnActions: port);
+      await start;
 
-    final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
-    final ans1 = _answer('ans_1', ref: ref, text: 'First response');
-    final user2 = _turn('msg_2', ref: ref, text: 'Second user prompt');
-    final ans2 = _answer('ans_2', ref: ref, text: 'Second response');
+      final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
+      final ans1 = _answer('ans_1', ref: ref, text: 'First response');
+      final user2 = _turn('msg_2', ref: ref, text: 'Second user prompt');
+      final ans2 = _answer('ans_2', ref: ref, text: 'Second response');
 
-    handle.emit(
-      SessionLiveView(
-        session: ref,
-        phase: SessionLivePhase.live,
-        state: liveState(ref, items: [user1, ans1, user2, ans2]),
-      ),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: V2Localizations.localizationsDelegates,
-        supportedLocales: V2Localizations.supportedLocales,
-        home: Scaffold(
-          body: SessionLivePage(controller: live),
+      handle.emit(
+        SessionLiveView(
+          session: ref,
+          phase: SessionLivePhase.live,
+          state: liveState(ref, items: [user1, ans1, user2, ans2]),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
 
-    // Check user 1 inline action: older confirmed user has "Rewind and edit from here"
-    final olderBtn = find.byKey(ValueKey('user-turn-action-${user1.id.value}'));
-    expect(olderBtn, findsOneWidget);
-    final olderWidget = tester.widget<IconButton>(olderBtn);
-    expect(olderWidget.tooltip, 'Rewind and edit from here');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(body: SessionLivePage(controller: live)),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    // Check user 2 inline action: latest confirmed user has "Undo this turn"
-    final latestBtn = find.byKey(ValueKey('user-turn-action-${user2.id.value}'));
-    expect(latestBtn, findsOneWidget);
-    final latestWidget = tester.widget<IconButton>(latestBtn);
-    expect(latestWidget.tooltip, 'Undo this turn');
+      // The action no longer floats beside the bubble (#492).
+      expect(
+        find.byKey(ValueKey('user-turn-action-${user1.id.value}')),
+        findsNothing,
+      );
+      final revert = find.byKey(const ValueKey('message-menu-revert'));
 
-    // Tap latest undo action
-    port.nextAnchor = user2.meta.anchor;
-    await tester.tap(latestBtn);
-    await tester.pumpAndSettle();
+      // An older confirmed turn offers "Rewind and edit from here".
+      await tester.longPress(find.text('First user prompt'));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: revert,
+          matching: find.text('Rewind and edit from here'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tapAt(Offset.zero);
+      await tester.pumpAndSettle();
 
-    expect(port.staged, [user2.id]);
-    expect(live.draft.text, 'Second user prompt');
-  });
+      // The agent's message offers no revert.
+      await tester.longPress(find.text('First response'));
+      await tester.pumpAndSettle();
+      expect(revert, findsNothing);
+      expect(find.byKey(const ValueKey('message-menu-copy')), findsOneWidget);
+      await tester.tapAt(Offset.zero);
+      await tester.pumpAndSettle();
+
+      // The latest confirmed turn offers "Undo this turn", which stages it.
+      await tester.longPress(find.text('Second user prompt'));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: revert, matching: find.text('Undo this turn')),
+        findsOneWidget,
+      );
+      port.nextAnchor = user2.meta.anchor;
+      await tester.tap(revert);
+      await tester.pumpAndSettle();
+
+      expect(port.staged, [user2.id]);
+      expect(live.draft.text, 'Second user prompt');
+    },
+  );
 
   testWidgets('undo and redo reflect in the timeline at once', (tester) async {
     final rig = CatalogRig();
@@ -220,9 +241,7 @@ void main() {
       MaterialApp(
         localizationsDelegates: V2Localizations.localizationsDelegates,
         supportedLocales: V2Localizations.supportedLocales,
-        home: Scaffold(
-          body: SessionLivePage(controller: live),
-        ),
+        home: Scaffold(body: SessionLivePage(controller: live)),
       ),
     );
     await tester.pumpAndSettle();
@@ -241,12 +260,12 @@ void main() {
 
     // Redo publishes the full view, as the turn lane does; the cut turn is back at once.
     port.onRedo = () => handle.emit(
-          SessionLiveView(
-            session: ref,
-            phase: SessionLivePhase.live,
-            state: liveState(ref, items: [user1, ans1, user2, ans2]),
-          ),
-        );
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(ref, items: [user1, ans1, user2, ans2]),
+      ),
+    );
     await live.turn.redoAll();
     await tester.pumpAndSettle();
     expect(find.text('Second user prompt'), findsOneWidget);
@@ -324,7 +343,9 @@ void main() {
                 ),
               ],
               child: Scaffold(
-                appBar: AppBar(actions: [WorkspaceAppBarActions(compact: width < 600)]),
+                appBar: AppBar(
+                  actions: [WorkspaceAppBarActions(compact: width < 600)],
+                ),
               ),
             ),
           ),

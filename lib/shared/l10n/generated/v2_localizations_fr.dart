@@ -844,6 +844,12 @@ class V2LocalizationsFr extends V2Localizations {
       'La saisie vocale s’est arrêtée de façon inattendue';
 
   @override
+  String get messageCopyAll => 'Copier tout le texte';
+
+  @override
+  String get messageSelectText => 'Sélectionner le texte';
+
+  @override
   String get composerSendNow => 'Envoyer maintenant';
 
   @override

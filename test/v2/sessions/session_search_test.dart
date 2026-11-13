@@ -261,17 +261,20 @@ void main() {
         .widget<Text>(find.byKey(const ValueKey('live-search-count')))
         .data!;
 
-    bool outlined(WidgetTester tester, String text) {
-      final box = tester.widget<DecoratedBox>(
-        find
-            .ancestor(
-              of: find.textContaining(text),
-              matching: find.byType(DecoratedBox),
-            )
-            .first,
-      );
-      return (box.decoration as BoxDecoration).border != null;
-    }
+    // Whether any box around [text] draws an outline: the row's search
+    // outline, beside the message's own focus box.
+    bool outlined(WidgetTester tester, String text) => tester
+        .widgetList<DecoratedBox>(
+          find.ancestor(
+            of: find.textContaining(text),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .any(
+          (box) =>
+              box.decoration is BoxDecoration &&
+              (box.decoration as BoxDecoration).border != null,
+        );
 
     testWidgets('Ctrl+F finds, Enter and F3 go older, Escape closes', (
       tester,

@@ -829,6 +829,12 @@ class V2LocalizationsEn extends V2Localizations {
   String get composerVoiceFailed => 'Voice input stopped unexpectedly';
 
   @override
+  String get messageCopyAll => 'Copy all text';
+
+  @override
+  String get messageSelectText => 'Select text';
+
+  @override
   String get composerSendNow => 'Send now';
 
   @override

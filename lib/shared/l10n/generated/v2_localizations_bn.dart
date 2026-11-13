@@ -824,6 +824,12 @@ class V2LocalizationsBn extends V2Localizations {
   String get composerVoiceFailed => 'ভয়েস ইনপুট অপ্রত্যাশিতভাবে বন্ধ হয়েছে';
 
   @override
+  String get messageCopyAll => 'সব লেখা কপি করুন';
+
+  @override
+  String get messageSelectText => 'লেখা নির্বাচন করুন';
+
+  @override
   String get composerSendNow => 'এখনই পাঠান';
 
   @override
