@@ -34,6 +34,7 @@ Ask only for a product decision or a required human action, with lettered option
 - Issue #446 indexes the 285 v1 behavior sections. Read only the section your line needs: `git show origin/v1:BEHAVIOR.md`.
 - Keep what the user sees and feels: gestures, placement, flow, wording and feedback. Drop workarounds, heuristics, protocol mechanics and excess settings.
 - Write what is kept as `UX to preserve` in the Issue, in v2 terms, and implement from that. When the result of the filter is a real product doubt, ask.
+- Read v1's implementation for lessons (platform quirks, pinned versions, pitfalls, what failed), then write v2 code fresh: modern APIs, v2's architecture and tests. Never copy v1 code, even adapted; improve on it whenever possible.
 - Pixel-level visual parity with v1 is not a goal (owner, 2026-11-05).
 
 ## `avançar`, unit by unit
