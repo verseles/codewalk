@@ -12,8 +12,7 @@ Widget _surface(Widget content) => MaterialApp(
 );
 
 Finder _richContaining(String content) => find.byWidgetPredicate(
-  (widget) =>
-      widget is RichText && widget.text.toPlainText().contains(content),
+  (widget) => widget is RichText && widget.text.toPlainText().contains(content),
 );
 
 void main() {
@@ -23,8 +22,10 @@ void main() {
       expect(d.kind, RenderDecisionKind.empty);
     });
     test('64k boundary and 64k+1 fallback', () {
-      final ok = List.filled(MessageRenderBudget.richRenderMaxChars, 'a')
-          .join();
+      final ok = List.filled(
+        MessageRenderBudget.richRenderMaxChars,
+        'a',
+      ).join();
       expect(MessageRenderBudget.decide(ok).kind, RenderDecisionKind.rich);
       final over = '${ok}a';
       final d = MessageRenderBudget.decide(over);
@@ -43,22 +44,16 @@ void main() {
       tester,
     ) async {
       const source = '# Title\n\n- item';
-      await tester.pumpWidget(
-        _surface(const MarkdownContent(source: source)),
-      );
+      await tester.pumpWidget(_surface(const MarkdownContent(source: source)));
       expect(_richContaining('Title'), findsOneWidget);
       expect(_richContaining('item'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Assistant HTML <b> renders rich when allowed', (
-      tester,
-    ) async {
+    testWidgets('Assistant HTML <b> renders rich when allowed', (tester) async {
       const source = '<b>Bold body</b>';
       await tester.pumpWidget(
-        _surface(
-          const MarkdownContent(source: source, allowBasicHtml: true),
-        ),
+        _surface(const MarkdownContent(source: source, allowBasicHtml: true)),
       );
       await tester.pumpAndSettle();
       expect(_richContaining('Bold body'), findsWidgets);
@@ -85,12 +80,12 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('unsupported <script> stays safe (no HTML execution)', (tester) async {
+    testWidgets('unsupported <script> stays safe (no HTML execution)', (
+      tester,
+    ) async {
       const source = '<script>alert(1)</script>';
       await tester.pumpWidget(
-        _surface(
-          const MarkdownContent(source: source, allowBasicHtml: true),
-        ),
+        _surface(const MarkdownContent(source: source, allowBasicHtml: true)),
       );
       await tester.pumpAndSettle();
       // Fail-closed: unsupported tags never render as HTML nor execute.
@@ -102,9 +97,7 @@ void main() {
     testWidgets('currency and shell vars stay literal', (tester) async {
       const source = r'$100 and $PATH stay text';
       await tester.pumpWidget(
-        _surface(
-          const MarkdownContent(source: source, enableMath: true),
-        ),
+        _surface(const MarkdownContent(source: source, enableMath: true)),
       );
       await tester.pumpAndSettle();
       expect(_richContaining(r'$100'), findsOneWidget);
@@ -114,9 +107,7 @@ void main() {
     testWidgets('inline math renders, malformed falls back', (tester) async {
       const source = r'Inline $E = mc^2$ and malformed $\frac{1}{';
       await tester.pumpWidget(
-        _surface(
-          const MarkdownContent(source: source, enableMath: true),
-        ),
+        _surface(const MarkdownContent(source: source, enableMath: true)),
       );
       await tester.pumpAndSettle();
       // Valid math produces a math widget; malformed falls back to raw text
@@ -127,21 +118,68 @@ void main() {
     testWidgets('progress bar renders determinate', (tester) async {
       const source = '<progress value="40" max="100"></progress>';
       await tester.pumpWidget(
-        _surface(
-          const MarkdownContent(source: source, allowBasicHtml: true),
-        ),
+        _surface(const MarkdownContent(source: source, allowBasicHtml: true)),
       );
       await tester.pumpAndSettle();
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('progress bars take the full width of the message (#493)', (
+      tester,
+    ) async {
+      for (final (source, reduced) in [
+        ('<progress value="40" max="100"></progress>', false),
+        ('Step <progress value="2" max="5"></progress> of five', false),
+        ('<progress aria-label="Loading"></progress>', false),
+        ('<progress aria-label="Loading"></progress>', true),
+      ]) {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(disableAnimations: reduced),
+            child: _surface(
+              SizedBox(
+                width: 300,
+                child: MarkdownContent(source: source, allowBasicHtml: true),
+              ),
+            ),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+        final bar = find.byWidgetPredicate(
+          (widget) =>
+              widget is LinearProgressIndicator ||
+              widget.runtimeType.toString() == 'AppIndeterminateBar',
+        );
+        expect(
+          tester.getSize(bar.first).width,
+          closeTo(300, 0.5),
+          reason: source,
+        );
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('a progress-only table column keeps a readable bar', (
+      tester,
+    ) async {
+      const source =
+          '| |\n|---|\n| <progress value="40" max="100"></progress> |';
+      await tester.pumpWidget(
+        _surface(const MarkdownContent(source: source, allowBasicHtml: true)),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byType(LinearProgressIndicator)).width,
+        greaterThanOrEqualTo(160),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('basicHtmlProgressValue matrix', (tester) async {
       expect(basicHtmlProgressValue({'value': '40', 'max': '100'}), 0.4);
-      expect(
-        basicHtmlProgressValue({'value': '-5', 'max': '100'}),
-        0.0,
-      );
+      expect(basicHtmlProgressValue({'value': '-5', 'max': '100'}), 0.0);
       expect(basicHtmlProgressValue({'max': '0'}), isNull);
       expect(
         basicHtmlProgressValue({'value': '2.5e1', 'max': '100'}),
@@ -175,10 +213,7 @@ void main() {
       const source = '```unknownlang123\ncode\n```';
       await tester.pumpWidget(
         _surface(
-          const MarkdownContent(
-            source: source,
-            enableCodeHighlight: true,
-          ),
+          const MarkdownContent(source: source, enableCodeHighlight: true),
         ),
       );
       await tester.pumpAndSettle();
@@ -193,12 +228,7 @@ void main() {
       ).join();
       final source = '```dart\n$big\n```';
       await tester.pumpWidget(
-        _surface(
-          MarkdownContent(
-            source: source,
-            enableCodeHighlight: true,
-          ),
-        ),
+        _surface(MarkdownContent(source: source, enableCodeHighlight: true)),
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
@@ -212,9 +242,7 @@ void main() {
         'y',
       ).join();
       await tester.pumpWidget(
-        _surface(
-          CanonicalMessageBody(source: big, complete: true),
-        ),
+        _surface(CanonicalMessageBody(source: big, complete: true)),
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('truncated'), findsWidgets);
@@ -223,9 +251,7 @@ void main() {
 
     testWidgets('images stay text without network', (tester) async {
       const source = '![alt](https://example.test/a.png)';
-      await tester.pumpWidget(
-        _surface(const MarkdownContent(source: source)),
-      );
+      await tester.pumpWidget(_surface(const MarkdownContent(source: source)));
       expect(find.byType(Image), findsNothing);
       expect(find.textContaining('alt'), findsWidgets);
       expect(tester.takeException(), isNull);

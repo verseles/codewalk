@@ -391,26 +391,32 @@ class BasicHtmlProgressBuilder extends MarkdownElementBuilder {
                 '')
             .trim();
     final label = rawLabel.isEmpty ? _inProgressLabel(context) : rawLabel;
-    return SizedBox(
-      width: 160,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        // A progress without a value is bounded like every indeterminate
-        // indicator (#117).
-        child: value == null
-            ? AppIndeterminateBar(
-                minHeight: 6,
-                color: colors.primary,
-                backgroundColor: colors.surfaceContainerHighest,
-                semanticsLabel: label.isEmpty ? null : label,
-              )
-            : LinearProgressIndicator(
-                value: value,
-                minHeight: 6,
-                color: colors.primary,
-                backgroundColor: colors.surfaceContainerHighest,
-                semanticsLabel: label.isEmpty ? null : label,
-              ),
+    // As wide as the message's column (#493), on a line of its own; a table
+    // sizing its columns from their content still measures 160 dp, since the
+    // bar itself measures nothing.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 160),
+      child: SizedBox(
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          // A progress without a value is bounded like every indeterminate
+          // indicator (#117).
+          child: value == null
+              ? AppIndeterminateBar(
+                  minHeight: 6,
+                  color: colors.primary,
+                  backgroundColor: colors.surfaceContainerHighest,
+                  semanticsLabel: label.isEmpty ? null : label,
+                )
+              : LinearProgressIndicator(
+                  value: value,
+                  minHeight: 6,
+                  color: colors.primary,
+                  backgroundColor: colors.surfaceContainerHighest,
+                  semanticsLabel: label.isEmpty ? null : label,
+                ),
+        ),
       ),
     );
   }
