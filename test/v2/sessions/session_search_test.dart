@@ -371,7 +371,15 @@ void main() {
             complete: true,
           ),
           asked('u2', 'second question'),
-          answered('a2', 'last answer'),
+          // Tall enough that revealing the first turn leaves the bottom,
+          // whatever the rows' own padding.
+          answered(
+            'a2',
+            [
+              'last answer',
+              for (var i = 0; i < 30; i++) 'line $i',
+            ].join('\n\n'),
+          ),
         ],
       );
       // The finished turn's work is collapsed behind its answer.
@@ -386,7 +394,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('the hidden needle'), findsOneWidget);
       expect(outlined(tester, 'the hidden needle'), isTrue);
-      // At the bottom, the follow stays off until the reader moves.
+      // While the search shows the match, the follow stays off.
       expect(live.scroll.following, isFalse);
       // From the composer, Escape closes the search and stops nothing.
       await tester.tap(find.byKey(const ValueKey('live-composer-input')));
