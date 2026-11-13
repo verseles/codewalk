@@ -64,12 +64,13 @@ class RenderCodeBlockBuilder extends MarkdownElementBuilder {
         onCopySource: () => onCopyCode(code),
       );
     }
+    final body = Theme.of(context).textTheme.bodyMedium;
     final inheritedStyle =
-        preferredStyle ??
-        parentStyle ??
-        Theme.of(context).textTheme.bodyMedium ??
-        const TextStyle();
+        preferredStyle ?? parentStyle ?? body ?? const TextStyle();
     final style = inheritedStyle.copyWith(
+      // A block keeps the body size where running text is larger (#489).
+      fontSize: body?.fontSize,
+      letterSpacing: body?.letterSpacing,
       fontFamily: 'monospace',
       color: themeTokens.markdownCodeBlock,
       backgroundColor: Colors.transparent,

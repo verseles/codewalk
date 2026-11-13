@@ -17,6 +17,12 @@ import 'session_tool_result.dart';
 double timelineSideInset(BuildContext context) =>
     MediaQuery.sizeOf(context).width < 600 ? 8 : 16;
 
+/// The running text of the user's and the agent's messages: one Material
+/// step above the app's body text (#489). The conversation text scale still
+/// multiplies it.
+TextStyle? conversationBodyStyle(BuildContext context) =>
+    Theme.of(context).textTheme.bodyLarge;
+
 /// One read-only timeline item, shared by the history and live views.
 ///
 /// V2-071A: text-bearing canonical items render rich Markdown/math/HTML/
@@ -274,6 +280,7 @@ class SessionTimelineTile extends StatelessWidget {
             source: text,
             complete: true,
             allowBasicHtml: false,
+            bodyStyle: conversationBodyStyle(context),
             onTapLink: onTapLink,
             onTapFilePath: onTapFilePath,
             onCopyCode: onCopyCode,
@@ -287,6 +294,7 @@ class SessionTimelineTile extends StatelessWidget {
             complete: complete,
             prefixMissing: prefixMissing,
             allowBasicHtml: true,
+            bodyStyle: conversationBodyStyle(context),
             onTapLink: onTapLink,
             onTapFilePath: onTapFilePath,
             onCopyCode: onCopyCode,

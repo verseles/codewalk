@@ -37,6 +37,7 @@ class MarkdownContent extends StatefulWidget {
     this.enableMermaid = false,
     this.enableCodeHighlight = false,
     this.maxRichCharsForRender = MessageRenderBudget.richRenderMaxChars,
+    this.bodyStyle,
   });
 
   final String source;
@@ -48,6 +49,12 @@ class MarkdownContent extends StatefulWidget {
   final bool enableMermaid;
   final bool enableCodeHighlight;
   final int maxRichCharsForRender;
+
+  /// The style of running text (paragraphs, lists, quotes, tables and inline
+  /// code, which keeps its smaller ratio, file paths included); the theme's
+  /// `bodyMedium` when null. Fenced code blocks keep the theme's body size,
+  /// and headings their own.
+  final TextStyle? bodyStyle;
 
   @override
   State<MarkdownContent> createState() => _MarkdownContentState();
@@ -73,13 +80,41 @@ class _MarkdownContentState extends State<MarkdownContent> {
         String.fromCharCodes(
           widget.source.runes.take(widget.maxRichCharsForRender),
         ),
+        style: widget.bodyStyle,
         maxLines: MessageRenderBudget.plainFallbackMaxLines,
         overflow: TextOverflow.ellipsis,
       );
     }
 
+    // The style sheet derives running text from `bodyMedium`.
+    final body = widget.bodyStyle;
+    final sheet = body == null
+        ? theme
+        : theme.copyWith(
+            textTheme: theme.textTheme.copyWith(
+              bodyMedium: theme.textTheme.bodyMedium?.merge(body) ?? body,
+            ),
+          );
+    // Tables match v1: a rounded themed border and a raised header row.
+    final styleSheet = MarkdownStyleSheet.fromTheme(sheet).copyWith(
+      tableHead: sheet.textTheme.bodyMedium?.copyWith(
+        color: tokens.textBase,
+        fontWeight: FontWeight.bold,
+      ),
+      tableBody: sheet.textTheme.bodyMedium?.copyWith(color: tokens.textBase),
+      tableHeadCellsDecoration: BoxDecoration(color: tokens.surfaceRaised),
+      tableBorder: TableBorder.all(
+        color: tokens.border.withValues(alpha: 0.7),
+        borderRadius: AppShapes.borderExtraSmall,
+      ),
+      tableColumnWidth: const IntrinsicColumnWidth(),
+    );
+
     final builders = <String, MarkdownElementBuilder>{
-      'filepath': FilePathBuilder(onFile: _onFile),
+      'filepath': FilePathBuilder(
+        onFile: _onFile,
+        inlineCodeStyle: styleSheet.code,
+      ),
     };
     final paddingBuilders = <String, MarkdownPaddingBuilder>{};
     final inlineSyntaxes = <md.InlineSyntax>[
@@ -119,20 +154,7 @@ class _MarkdownContentState extends State<MarkdownContent> {
         [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
         [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
       ),
-      // Tables match v1: a rounded themed border and a raised header row.
-      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-        tableHead: theme.textTheme.bodyMedium?.copyWith(
-          color: tokens.textBase,
-          fontWeight: FontWeight.bold,
-        ),
-        tableBody: theme.textTheme.bodyMedium?.copyWith(color: tokens.textBase),
-        tableHeadCellsDecoration: BoxDecoration(color: tokens.surfaceRaised),
-        tableBorder: TableBorder.all(
-          color: tokens.border.withValues(alpha: 0.7),
-          borderRadius: AppShapes.borderExtraSmall,
-        ),
-        tableColumnWidth: const IntrinsicColumnWidth(),
-      ),
+      styleSheet: styleSheet,
       builders: builders,
       paddingBuilders: paddingBuilders,
       onTapLink: widget.onLink == null

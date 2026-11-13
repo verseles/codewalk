@@ -193,6 +193,94 @@ void main() {
       expect(MediaQuery.textScalerOf(header).scale(10), 10);
     });
 
+    testWidgets(
+      'message text is one step larger, under the conversation scale',
+      (tester) async {
+        ItemMeta meta(String id) => ItemMeta(
+          id: ItemId(id),
+          generation: 'test',
+          status: OpenValue.unknown('test'),
+          source: SourceProvenance(
+            harness: const HarnessRef(HostId('h'), HarnessInstanceId('test')),
+            version: '2.0.22',
+            nativeType: 'test',
+          ),
+        );
+        for (final scale in [1.0, 1.5]) {
+          await tester.pumpWidget(
+            _localized(
+              ChatAppearance(
+                mathRendering: true,
+                conversationTextScale: scale,
+                child: Column(
+                  children: [
+                    SessionTimelineTile(
+                      item: UserInput(
+                        meta: meta('test/u1'),
+                        text: 'Asked',
+                        delivery: const OpenValue.known(
+                          DeliveryState.delivered,
+                        ),
+                      ),
+                    ),
+                    SessionTimelineTile(
+                      item: AssistantText(
+                        meta: meta('test/a1'),
+                        text:
+                            'Answered `qq` and `lib/main.dart`\n\n'
+                            '```\nfenced\n```',
+                        complete: true,
+                      ),
+                    ),
+                    SessionTimelineTile(
+                      item: Reasoning(
+                        meta: meta('test/r1'),
+                        text: 'Thought',
+                        complete: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          double size(String text) {
+            final rich = tester
+                .widgetList<RichText>(find.byType(RichText))
+                .firstWhere((rich) => rich.text.toPlainText().contains(text));
+            // The size the span holding [text] resolves to, inherited downward.
+            double? found;
+            void visit(InlineSpan span, double? inherited) {
+              final own = span.style?.fontSize ?? inherited;
+              if (span is TextSpan && (span.text ?? '').contains(text)) {
+                found ??= own;
+              }
+              if (span is TextSpan) {
+                for (final child in span.children ?? const <InlineSpan>[]) {
+                  visit(child, own);
+                }
+              }
+            }
+
+            visit(rich.text, null);
+            return rich.textScaler.scale(found!);
+          }
+
+          // #489: 16 sp for both sides of the conversation, times the scale.
+          expect(size('Asked'), closeTo(16 * scale, 1e-9));
+          expect(size('Answered'), closeTo(16 * scale, 1e-9));
+          // Other items keep the body size.
+          expect(size('Thought'), closeTo(14 * scale, 1e-9));
+          // Inline code keeps its ratio to the larger text, a backticked file
+          // path included; a fenced block keeps the body size.
+          expect(size('qq'), closeTo(16 * 0.85 * scale, 1e-9));
+          expect(size('lib/main.dart'), closeTo(16 * 0.85 * scale, 1e-9));
+          expect(size('fenced'), closeTo(14 * scale, 1e-9));
+        }
+      },
+    );
+
     testWidgets('the picker shrinks above the keyboard', (tester) async {
       tester.view.physicalSize = const Size(640, 360);
       tester.view.devicePixelRatio = 1;

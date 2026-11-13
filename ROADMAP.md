@@ -8,7 +8,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 Beta da timeline (planejada em 2026-11-13):
 
-- [ ] #489 Texto da conversa um passo maior
 - [ ] #490 Trabalho recolhido como uma linha simples
 - [ ] #492 Gestos do balão: toque duplo copia, toque longo abre opções, código inline copia (substitui #464)
 - [ ] #493 Progresso com largura total dentro das mensagens

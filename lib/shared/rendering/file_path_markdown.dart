@@ -33,9 +33,13 @@ class FilePathSyntax extends md.InlineSyntax {
 
 /// Builds clickable file spans without retaining gesture resources itself.
 class FilePathBuilder extends MarkdownElementBuilder {
-  FilePathBuilder({required this.onFile});
+  FilePathBuilder({required this.onFile, this.inlineCodeStyle});
 
   final ValueChanged<FilePathMatch> onFile;
+
+  /// The style sheet's inline code style, so a backticked path matches the
+  /// other inline code around it; the theme's when null.
+  final TextStyle? inlineCodeStyle;
 
   @override
   Widget? visitElementAfterWithContext(
@@ -55,7 +59,8 @@ class FilePathBuilder extends MarkdownElementBuilder {
       ),
       onFile: onFile,
       style: element.attributes['inlineCode'] == 'true'
-          ? MarkdownStyleSheet.fromTheme(Theme.of(context)).code
+          ? inlineCodeStyle ??
+                MarkdownStyleSheet.fromTheme(Theme.of(context)).code
           : parentStyle ?? preferredStyle,
     );
   }

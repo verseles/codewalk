@@ -26,6 +26,7 @@ class CanonicalMessageBody extends StatelessWidget {
     this.onTapLink,
     this.onTapFilePath,
     this.onCopyCode,
+    this.bodyStyle,
   });
 
   final String source;
@@ -35,6 +36,9 @@ class CanonicalMessageBody extends StatelessWidget {
   final void Function(String text, String href, String? title)? onTapLink;
   final void Function(String path, int? line, int? col)? onTapFilePath;
   final ValueChanged<String>? onCopyCode;
+
+  /// The style of running text, see [MarkdownContent.bodyStyle].
+  final TextStyle? bodyStyle;
 
   Widget _rich(BuildContext context, String verbatimSource) {
     return MarkdownContent(
@@ -51,6 +55,7 @@ class CanonicalMessageBody extends StatelessWidget {
                 onTapFilePath!(match.path, match.lineNumber, match.columnNumber)
           : null,
       onCopyCode: onCopyCode,
+      bodyStyle: bodyStyle,
     );
   }
 
@@ -70,6 +75,7 @@ class CanonicalMessageBody extends StatelessWidget {
           children: [
             Text(
               '${prefixMissing ? '…' : ''}$truncated',
+              style: bodyStyle,
               maxLines: MessageRenderBudget.plainFallbackMaxLines,
               overflow: TextOverflow.ellipsis,
             ),
@@ -106,7 +112,12 @@ class CanonicalMessageBody extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('…', maxLines: 1, overflow: TextOverflow.clip),
+            Text(
+              '…',
+              style: bodyStyle,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+            ),
             body,
           ],
         );
