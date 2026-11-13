@@ -110,6 +110,38 @@ class SessionTimelineTile extends StatelessWidget {
         selection: selection,
       );
     }
+    // Reminders the harness adds, other system notes, a compaction that did
+    // not fail and unknown parts are light lines, like the switch notes, so
+    // the conversation leads (#491).
+    final light = switch (item) {
+      Notice(
+        kind: OpenValue(known: NoticeKind.system || NoticeKind.continuation),
+      ) =>
+        item.text,
+      // A compaction says nothing until it ends: its card stands till then.
+      Notice(
+        kind: OpenValue(known: NoticeKind.compaction),
+        status: OpenValue(known: final status),
+      )
+          when status != ItemStatus.failed && item.text.trim().isNotEmpty =>
+        item.text,
+      UnknownItem() => l10n.chatMessageMessagePartUnavailable,
+      _ => null,
+    };
+    if (light != null) {
+      // A note with nothing to say, such as an instructions update that
+      // rendered empty, takes no room.
+      if (light.trim().isEmpty) return const SizedBox.shrink();
+      return SessionLightNote(
+        key: ValueKey('timeline-note-${item.id.value}'),
+        text: light,
+        // An unknown part has nothing more to show.
+        rich: item is Notice,
+        onTapLink: onTapLink,
+        onTapFilePath: onTapFilePath,
+        onCopyCode: onCopyCode,
+      );
+    }
     if (item is Notice && item.kind.known == NoticeKind.interruption) {
       return ConversationTextScale(
         child: Padding(
@@ -665,6 +697,87 @@ class _MessageBubbleState extends State<_MessageBubble> {
                     )
                   : const BoxDecoration(),
               child: content,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One light line in the timeline (#491): a small info mark and the text in
+/// one muted line, the whole of it on a tap.
+class SessionLightNote extends StatefulWidget {
+  const SessionLightNote({
+    super.key,
+    required this.text,
+    this.rich = true,
+    this.onTapLink,
+    this.onTapFilePath,
+    this.onCopyCode,
+  });
+
+  final String text;
+
+  /// Whether the open note renders its text as Markdown, selectable, with
+  /// links, file paths and code copy working.
+  final bool rich;
+  final void Function(String text, String href, String? title)? onTapLink;
+  final void Function(String path, int? line, int? col)? onTapFilePath;
+  final ValueChanged<String>? onCopyCode;
+
+  @override
+  State<SessionLightNote> createState() => _SessionLightNoteState();
+}
+
+class _SessionLightNoteState extends State<SessionLightNote> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final text = widget.text.trim();
+    return ConversationTextScale(
+      child: Semantics(
+        button: true,
+        expanded: _open,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => setState(() => _open = !_open),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Symbols.info, size: 16, color: muted),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: _open && widget.rich
+                      ? SelectionArea(
+                          child: CanonicalMessageBody(
+                            source: text,
+                            complete: true,
+                            allowBasicHtml: false,
+                            bodyStyle: theme.textTheme.labelMedium?.copyWith(
+                              color: muted,
+                            ),
+                            onTapLink: widget.onTapLink,
+                            onTapFilePath: widget.onTapFilePath,
+                            onCopyCode: widget.onCopyCode,
+                          ),
+                        )
+                      : Text(
+                          _open ? text : text.replaceAll(RegExp(r'\s+'), ' '),
+                          maxLines: _open ? null : 1,
+                          overflow: _open ? null : TextOverflow.ellipsis,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: muted,
+                          ),
+                        ),
+                ),
+              ],
             ),
           ),
         ),

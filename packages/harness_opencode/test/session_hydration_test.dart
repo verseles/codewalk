@@ -207,11 +207,16 @@ void main() {
     expect(execution.lastOutcome!.kind.known, ExecutionOutcomeKind.succeeded);
 
     // History is chronological; the delivered steer prompt stays only there.
+    // The synthetic row is a pending notice, never pending input (#491).
     final timeline = snapshot.timeline!;
     expect(
       [for (final i in timeline.values) messageOf(i.id)],
-      ['msg_h1', 'msg_h2', 'msg_h3', 'msg_z1', 'msg_z1'],
+      ['msg_h1', 'msg_h2', 'msg_h3', 'msg_s1', 'msg_z1', 'msg_z1'],
     );
+    final reminder = timeline.values.whereType<Notice>().single;
+    expect(messageOf(reminder.id), 'msg_s1');
+    expect(reminder.status.known, ItemStatus.pending);
+    expect(reminder.kind.known, NoticeKind.continuation);
     expect(timeline.values.whereType<TurnOutcome>(), hasLength(1));
     final admitted = timeline.values.whereType<UserInput>().last;
     expect(admitted.delivery.known, DeliveryState.accepted);
@@ -222,13 +227,10 @@ void main() {
     expect(snapshot.nextHistoryCursor, isNotNull);
 
     final pending = snapshot.pending!.values;
-    expect(
-      [for (final p in pending) messageOf(p.id)],
-      ['msg_q1', 'msg_s1', 'msg_z1'],
-    );
+    expect([for (final p in pending) messageOf(p.id)], ['msg_q1', 'msg_z1']);
     expect(
       [for (final p in pending) p.delivery.known],
-      [Delivery.queue, Delivery.queue, Delivery.steer],
+      [Delivery.queue, Delivery.steer],
     );
 
     final interactions = snapshot.interactions!.values;
@@ -449,7 +451,10 @@ void main() {
     }
     final ids = [for (final item in state.timeline) item.id.value];
     expect(ids.toSet(), hasLength(ids.length));
-    expect([for (final p in state.pending) messageOf(p.id)], ['msg_s1']);
+    expect(state.pending, isEmpty);
+    expect(state.timeline.whereType<Notice>().map((n) => n.status.known), [
+      ItemStatus.pending,
+    ]);
     expect(
       state.timeline
           .whereType<UserInput>()

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import 'package:harness_opencode/src/history_projection.dart';
+import 'package:harness_opencode/src/inbox_projection.dart'
+    show openCodeInboxRow;
 import 'package:test/test.dart';
 
 import 'history_test_data.dart';
@@ -296,21 +298,26 @@ void main() {
     expect(state.pending, isEmpty);
   });
 
-  test('synthetic continuations become notices on delivery', () {
+  test('synthetic continuations are notices from admission (#491)', () {
     final frame = inboxFrame('enqueued', item: syntheticItem('continue'));
-    expect(projectInbox(frame).single, isA<PendingInputChanged>());
+    final admitted = itemOf(projectInbox(frame).single) as Notice;
+    expect(admitted.id, noticeId);
+    expect(admitted.kind.known, NoticeKind.continuation);
+    expect(admitted.status.known, ItemStatus.pending);
+    expect(admitted.text, 'continue');
     var state = applyInbox(frame, empty, 1);
-    expect(state.pending.single.id, noticeId);
+    expect(state.pending, isEmpty);
     final delivered = projectInbox(
       inboxFrame('delivered', id: 'evt_d'),
       current: state,
       seq: 2,
     );
-    final notice = itemOf(delivered.first) as Notice;
+    final notice = itemOf(delivered.single) as Notice;
     expect(notice.id, noticeId);
     expect(notice.kind.known, NoticeKind.continuation);
     expect(notice.status.known, ItemStatus.completed);
     expect(notice.text, 'continue');
+    expect(notice.generation, admitted.generation);
     state = applyInbox(inboxFrame('delivered', id: 'evt_d'), state, 2);
     expect(projectInbox(frame, current: state, seq: 3), isEmpty);
 
@@ -325,6 +332,85 @@ void main() {
     expect(history.status, notice.status);
     expect((history as Notice).text, notice.text);
     expect(history.kind, notice.kind);
+  });
+
+  test('a cancelled synthetic row stops pending', () {
+    final frame = inboxFrame('enqueued', item: syntheticItem('continue'));
+    final state = applyInbox(frame, empty, 1);
+    final cancelled = projectInbox(
+      inboxFrame('cancelled', id: 'evt_c'),
+      current: state,
+      seq: 2,
+    );
+    final notice = itemOf(cancelled.single) as Notice;
+    expect(notice.status.known, ItemStatus.interrupted);
+    // Admitted again under its ID, it starts over and can be delivered.
+    var again = applyInbox(inboxFrame('cancelled', id: 'evt_c'), state, 2);
+    again = applyInbox(
+      inboxFrame('enqueued', id: 'evt_e2', item: syntheticItem('again')),
+      again,
+      3,
+    );
+    final readmitted = again.timeline.whereType<Notice>().single;
+    expect(readmitted.status.known, ItemStatus.pending);
+    expect(readmitted.text, 'again');
+    again = applyInbox(inboxFrame('delivered', id: 'evt_d2'), again, 4);
+    expect(
+      again.timeline.whereType<Notice>().single.status.known,
+      ItemStatus.completed,
+    );
+  });
+
+  test('system reminders show without their envelope (#491)', () {
+    const wrapped =
+        '<system-reminder>\nYou are in Plan mode. Do not edit.\n</system-reminder>';
+    final live =
+        itemOf(
+              projectInbox(
+                inboxFrame('enqueued', item: syntheticItem(wrapped)),
+              ).single,
+            )
+            as Notice;
+    expect(live.text, 'You are in Plan mode. Do not edit.');
+    final history = projectOpenCodeHistory(
+      [
+        message('s', 'synthetic', {'text': wrapped}),
+        message('y', 'system', {'text': wrapped}),
+        message('u', 'user', {'text': wrapped}),
+        message('p', 'synthetic', {'text': 'before $wrapped'}),
+        message('t', 'synthetic', {'text': '$wrapped$wrapped'}),
+      ],
+      historyRef,
+      sourceVersion: '2.0.22',
+    );
+    final notices = history.whereType<Notice>().map((n) => n.text).toList();
+    expect(notices, [
+      'You are in Plan mode. Do not edit.',
+      'You are in Plan mode. Do not edit.',
+      // Only a text wholly inside one envelope loses it.
+      'before $wrapped',
+      '$wrapped$wrapped',
+    ]);
+    // The user's own text stays as typed.
+    expect(history.whereType<UserInput>().single.text, wrapped);
+  });
+
+  test('an inbox read shows a synthetic row as a pending notice', () {
+    final row = openCodeInboxRow(
+      {
+        'id': 'msg_in',
+        'sessionID': historyRef.nativeId,
+        'time': {'created': 1000},
+        ...syntheticItem('<system-reminder>Plan mode</system-reminder>'),
+      },
+      historyRef,
+      sourceVersion: '2.0.22',
+      generation: 'hydration',
+    );
+    expect(row.pending, isNull);
+    final notice = row.items.single as Notice;
+    expect(notice.status.known, ItemStatus.pending);
+    expect(notice.text, 'Plan mode');
   });
 
   test('user rows and context markers match the history projection', () {

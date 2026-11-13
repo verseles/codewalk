@@ -558,6 +558,15 @@ description of this code.
 - **Then** an admitted compaction leaves the pending list when its matching start is observed; HTTP admission alone never proves completion
 - **Then** native zero-cost fixtures cover idle and busy admission, successful and failed terminal events and busy revert refusals; projection and stream-owner regressions cover duplicate delivery and hydration races; in-app undo, redo and compact controls remain separate work
 
+### V2 light notices
+
+- **Given** the harness adds a reminder to the conversation, such as OpenCode's Plan mode notes when the agent switches (`synthetic` inbox rows), or a system note (#491)
+- **When** the timeline shows it, from its admission on, live or from history
+- **Then** it is a light line like the agent and model switch notes: an info mark and muted small text on one line with an ellipsis, centered, with no card and no error color; a tap opens the whole note, rendered as Markdown with links, file paths and code copy working, and a second tap folds it
+- **Then** a text wholly inside one `<system-reminder>` envelope shows without the envelope; any other text, and anything the user typed, stays as written; the row's description and metadata are never shown
+- **Then** the reminder is never pending input: the composer shows no waiting pill for it, a cancelled reminder stays as a stopped note, and one admitted again under the same ID starts over
+- **Then** reminders never keep a finished turn's work open and stay in sight beside the folded work; a system note, a compaction that ended with a summary, and an unknown part are light lines too, while a compaction that failed, or has nothing to say yet, keeps its card
+
 ### V2 message gestures
 
 - **Given** a user or agent message in the live or history timeline (#492)

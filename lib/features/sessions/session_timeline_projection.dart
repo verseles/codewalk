@@ -213,15 +213,16 @@ final class SessionTimelinePresentation {
       if (collapse) {
         latched[id] = mark;
         // A switch of model or agent made while the turn ran stays in the
-        // conversation, after the collapsed work it interrupted (#426).
+        // conversation, after the collapsed work it interrupted (#426), as
+        // does a reminder the harness added there (#491).
         final work = items.sublist(start, answer);
         out.group(id, [
           for (final item in work)
-            if (!_isSwitch(item)) item,
+            if (!_staysOut(item)) item,
         ]);
         out.runs([
           for (final item in work)
-            if (_isSwitch(item)) item,
+            if (_staysOut(item)) item,
         ]);
         out.runs(items.sublist(answer, end));
         return;
@@ -295,12 +296,24 @@ final class SessionTimelinePresentation {
   static bool _isSwitch(TimelineItem item) =>
       item is Notice && item.kind.known == NoticeKind.selectionChanged;
 
+  /// A reminder or system note the harness adds (#491): a light line, never
+  /// work in flight, whatever its own status.
+  static bool _isReminder(TimelineItem item) =>
+      item is Notice &&
+      (item.kind.known == NoticeKind.continuation ||
+          item.kind.known == NoticeKind.system);
+
+  /// Notes that stay in the conversation when the work around them folds.
+  static bool _staysOut(TimelineItem item) =>
+      _isSwitch(item) || _isReminder(item);
+
   /// Whether an item can be published in the Block render mode: its message
   /// ended, as the harness reported, or, outside any message, it ended. An
   /// item outside any message whose end is unknown, such as the context a
   /// prompt carries, is not the response: holding it would hold the whole
   /// turn behind it.
   static bool _ended(TimelineItem item) {
+    if (_isReminder(item)) return true;
     final message = item.meta.message;
     if (message != null) return message.completed != null;
     return switch (item.status.known) {
@@ -373,6 +386,7 @@ final class SessionTimelinePresentation {
     if (!(items[last] as AssistantText).complete) return false;
     for (var index = start; index < end; index++) {
       final item = items[index];
+      if (_isReminder(item)) continue;
       switch (item.status.known) {
         case ItemStatus.pending || ItemStatus.streaming:
           return false;

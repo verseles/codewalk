@@ -105,6 +105,31 @@ void main() {
     expect(_shape(rows), ['u1', 'r1', 'run(t1,t2,t3)', 'a1']);
   });
 
+  test('a reminder neither holds the fold nor hides in it (#491)', () {
+    Notice reminder(String id, ItemStatus status) => Notice(
+      meta: _meta(id, status: status),
+      kind: const OpenValue.known(NoticeKind.continuation),
+      text: 'You are in Plan mode.',
+    );
+    // A reminder admitted after the answer, still pending or cancelled,
+    // leaves the finished work folded.
+    for (final status in [ItemStatus.pending, ItemStatus.interrupted]) {
+      final rows = SessionTimelinePresentation().project([
+        ..._turn(),
+        reminder('n1', status),
+      ], settled: true);
+      expect(_shape(rows), ['u1', 'work(4/2)', 'a1', 'n1'], reason: '$status');
+    }
+    // One added among the work stays in sight after the folded work.
+    final turn = _turn();
+    final rows = SessionTimelinePresentation().project([
+      ...turn.take(3),
+      reminder('n2', ItemStatus.completed),
+      ...turn.skip(3),
+    ], settled: true);
+    expect(_shape(rows), ['u1', 'work(4/2)', 'n2', 'a1']);
+  });
+
   test('a finished turn collapses its work behind the answer', () {
     final presentation = SessionTimelinePresentation();
     var rows = presentation.project(_turn(), settled: true);

@@ -988,9 +988,10 @@ final class OpenCodeSessionReader {
     final admissions = <TimelineItem>[];
     final pending = <PendingInput>[];
     for (final row in inbox) {
-      final entry = row.pending;
-      if (entry == null || promoted.contains(messageOf(entry.id))) continue;
-      pending.add(entry);
+      // A synthetic row holds a notice and no pending input.
+      final id = row.pending?.id ?? row.items.firstOrNull?.id;
+      if (id == null || promoted.contains(messageOf(id))) continue;
+      if (row.pending case final entry?) pending.add(entry);
       admissions.addAll(row.items);
     }
     final interactions = [...permissions, ...forms, ...childPermissions];

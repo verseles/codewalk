@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'item_ids.dart';
+import 'notice_text.dart';
 import 'version_policy.dart';
 
 enum OpenCodeInboxProjectionFailure {
@@ -45,8 +46,9 @@ const _itemTypes = {'user', 'synthetic', 'compaction', 'move'};
 /// list; nothing is invented from an ID-only frame.
 ///
 /// Following the composer model, a `steer` user prompt becomes a timeline
-/// [UserInput] at admission, while queued prompts and synthetic continuations
-/// stay pending until delivered (or switched to steer). Native history orders
+/// [UserInput] at admission, while queued prompts stay pending until
+/// delivered (or switched to steer). A synthetic continuation is a [Notice]
+/// from its admission and never pending input (#491). Native history orders
 /// user rows by delivery and never contains cancelled input, so this keeps the
 /// live order and contents equal to history without moving or deleting rows.
 /// Item IDs equal the history projection's IDs. Compaction and move control
@@ -133,7 +135,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   final residentUser = user as UserInput?;
   PendingInput? pendingEntry;
   for (final entry in current.pending) {
-    if (entry.id == userId || entry.id == noticeId) pendingEntry = entry;
+    if (entry.id == userId) pendingEntry = entry;
   }
 
   final source = SourceProvenance(
@@ -220,15 +222,28 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   DeliveryState admitted(String mode) =>
       mode == 'steer' ? DeliveryState.accepted : DeliveryState.queued;
 
+  // A synthetic row is a reminder OpenCode adds for the model (the Plan mode
+  // notes when the agent switches): a light notice in the timeline from its
+  // admission, never input waiting to be sent (#491).
+  Notice syntheticNotice(String text, ItemStatus status, String generation) =>
+      Notice(
+        meta: meta(noticeId, generation, status),
+        kind: const OpenValue.known(NoticeKind.continuation),
+        text: openCodeNoticeText(text),
+      );
+
   switch (type) {
     case _enqueued:
       if (itemType == 'compaction' || itemType == 'move') return const [];
       if (itemType == 'synthetic') {
-        if (notice != null) {
-          removePending();
-        } else {
-          putPending(noticeId, text, delivery!);
+        // A cancelled reminder admitted again under its ID starts over; a
+        // pending or delivered one never regresses.
+        if (notice == null || notice.status.known == ItemStatus.interrupted) {
+          items.add(
+            syntheticNotice(text, ItemStatus.pending, liveGeneration()),
+          );
         }
+        removePending();
       } else if (residentUser != null && !residentOpen && !residentCancelled) {
         // A replayed admission never regresses settled input.
         removePending();
@@ -272,7 +287,11 @@ List<SessionEvent> projectOpenCodeInboxEvent(
         }
       }
     case _delivered:
-      if (residentOpen) {
+      if (notice is Notice && notice.status.known == ItemStatus.pending) {
+        items.add(
+          syntheticNotice(notice.text, ItemStatus.completed, notice.generation),
+        );
+      } else if (residentOpen) {
         items.add(
           userInput(
             residentUser.text,
@@ -282,19 +301,19 @@ List<SessionEvent> projectOpenCodeInboxEvent(
         );
       } else if (residentUser == null && notice == null) {
         if (pendingEntry == null) return const [];
-        items.add(
-          pendingEntry.id == userId
-              ? userInput(pendingEntry.text, DeliveryState.delivered)
-              : Notice(
-                  meta: meta(noticeId, liveGeneration(), ItemStatus.completed),
-                  kind: const OpenValue.known(NoticeKind.continuation),
-                  text: pendingEntry.text,
-                ),
-        );
+        items.add(userInput(pendingEntry.text, DeliveryState.delivered));
       }
       removePending();
     case _cancelled:
-      if (residentOpen) {
+      if (notice is Notice && notice.status.known == ItemStatus.pending) {
+        items.add(
+          syntheticNotice(
+            notice.text,
+            ItemStatus.interrupted,
+            notice.generation,
+          ),
+        );
+      } else if (residentOpen) {
         items.add(
           userInput(
             residentUser.text,
@@ -345,8 +364,9 @@ _inboxItem(Map<String, Object?> item) {
 /// One row of `GET /api/session/{id}/inbox` for hydration, with the live
 /// producer's identities and admission rules: a steer user prompt is an
 /// admitted [UserInput] (plus its context marker) and pending; queued prompts
-/// and synthetic continuations are pending only; compaction and move rows are
-/// validated and yield nothing. Whether a row was already promoted into
+/// are pending only; a synthetic continuation is a pending [Notice], never
+/// pending input (#491); compaction and move rows are validated and yield
+/// nothing. Whether a row was already promoted into
 /// history is the caller's decision.
 ({PendingInput? pending, List<TimelineItem> items}) openCodeInboxRow(
   Object? value,
@@ -382,6 +402,24 @@ _inboxItem(Map<String, Object?> item) {
   );
   final steer = item.delivery == 'steer';
   final id = itemId(item.type == 'user' ? 'user' : 'notice', 0);
+  if (item.type == 'synthetic') {
+    return (
+      pending: null,
+      items: [
+        Notice(
+          meta: ItemMeta(
+            anchor: openCodeMessageAnchor(inboxId),
+            id: id,
+            generation: generation,
+            status: const OpenValue.known(ItemStatus.pending),
+            source: source,
+          ),
+          kind: const OpenValue.known(NoticeKind.continuation),
+          text: openCodeNoticeText(item.text),
+        ),
+      ],
+    );
+  }
   final pending = PendingInput(
     anchor: openCodeMessageAnchor(inboxId),
     id: id,

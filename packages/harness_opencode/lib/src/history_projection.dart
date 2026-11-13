@@ -5,6 +5,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'compaction_projection.dart';
 import 'error_projection.dart';
 import 'item_ids.dart';
+import 'notice_text.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
 
@@ -622,7 +623,7 @@ List<TimelineItem> projectOpenCodeHistory(
             kind: OpenValue.known(
               type == 'synthetic' ? NoticeKind.continuation : NoticeKind.system,
             ),
-            text: text(message['text']),
+            text: openCodeNoticeText(text(message['text'])),
           ),
         );
       // A switch of agent or model mid-session (#426), as the official

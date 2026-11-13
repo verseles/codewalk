@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'item_ids.dart';
+import 'notice_text.dart';
 import 'version_policy.dart';
 
 enum OpenCodeNoticeProjectionFailure {
@@ -157,7 +158,7 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
           source: source,
         ),
         kind: OpenValue.known(kind),
-        text: text,
+        text: openCodeNoticeText(text),
       ),
     ),
   ]);
