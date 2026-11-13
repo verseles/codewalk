@@ -419,7 +419,7 @@ void timelineGroup() {
     );
   }
 
-  testWidgets('a user header shows You and the clock, with no elapsed chip', (
+  testWidgets('a user header shows only the clock, with no elapsed chip', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -434,7 +434,8 @@ void timelineGroup() {
         ),
       ),
     );
-    expect(find.text('You'), findsOneWidget);
+    // The bubble names no sender (#488).
+    expect(find.text('You'), findsNothing);
     expect(find.text(clockOf(tester)), findsOneWidget);
     expect(find.byType(MessageElapsedChip), findsNothing);
     expect(tester.takeException(), isNull);
@@ -465,7 +466,7 @@ void timelineGroup() {
   testWidgets('an assistant without time, duration or action has no header', (
     tester,
   ) async {
-    // Without a header the body starts 14 dp below the card's top edge; an
+    // Without a header the body starts 8 dp below the row's top edge; an
     // empty header row and its 8 dp gap would move it down.
     await tester.pumpWidget(
       _timelineSurface(
@@ -484,18 +485,18 @@ void timelineGroup() {
         ),
       ),
     );
-    double bodyOffset(int card) =>
+    double bodyOffset(int row) =>
         tester
             .getTopLeft(
               find.descendant(
-                of: find.byType(Card).at(card),
+                of: find.byType(SessionTimelineTile).at(row),
                 matching: find.text('Body'),
               ),
             )
             .dy -
-        tester.getTopLeft(find.byType(Card).at(card)).dy;
-    expect(bodyOffset(0), closeTo(14, 0.5));
-    expect(bodyOffset(1), closeTo(14, 0.5));
+        tester.getTopLeft(find.byType(SessionTimelineTile).at(row)).dy;
+    expect(bodyOffset(0), closeTo(8, 0.5));
+    expect(bodyOffset(1), closeTo(8, 0.5));
     expect(find.byType(MessageElapsedChip), findsNothing);
     expect(tester.takeException(), isNull);
   });

@@ -88,6 +88,7 @@ Future<SessionLiveScroll> _pump(
   bool showReasoning = true,
   bool showToolCalls = true,
   bool settle = true,
+  ItemId? highlight,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -111,6 +112,7 @@ Future<SessionLiveScroll> _pump(
             scroll: rules,
             settled: settled,
             emptyBuilder: empty,
+            highlight: highlight,
           ),
         ),
       ),
@@ -125,6 +127,38 @@ V2Localizations _l10n(WidgetTester tester) =>
     V2Localizations.of(tester.element(find.byType(SessionLiveTimeline)));
 
 void main() {
+  testWidgets('a search match on cardless agent text is outlined around it', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _turn('1'),
+      settled: true,
+      highlight: const ItemId('a1'),
+    );
+    final answer = find.text('answer 1');
+    final outline = find.ancestor(
+      of: answer,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is DecoratedBox &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration as BoxDecoration).border != null,
+      ),
+    );
+    expect(outline, findsOneWidget);
+    final border =
+        (tester.widget<DecoratedBox>(outline).decoration as BoxDecoration)
+            .border!
+            .top;
+    // Drawn outside the row, so it never covers text with no card (#488).
+    expect(border.strokeAlign, BorderSide.strokeAlignOutside);
+    final row = tester.getRect(outline);
+    expect(tester.getRect(answer).left, greaterThanOrEqualTo(row.left));
+    // The 8 dp side margin of a phone leaves room for the 2 dp stroke.
+    expect(row.left, greaterThanOrEqualTo(border.width));
+  });
+
   testWidgets('a finished turn shows its work as one header to open', (
     tester,
   ) async {

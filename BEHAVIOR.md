@@ -560,14 +560,16 @@ description of this code.
 
 - **Given** a live or history timeline shows the parts (text, reasoning, tools) of an assistant message
 - **When** the first part of that message is rendered
-- **Then** a user turn's header shows `You` and its clock time with no elapsed chip; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header; a user turn's undo (latest turn) or rewind-and-edit (older turns) action sits to the left of the bubble, as in v1, outside the header, and history shows none
+- **Then** a user turn's header shows only its clock time, with no sender label (screen readers still announce `You`) and no elapsed chip, and a user turn with no time has no header; an assistant header shows its clock time at the start and a compact elapsed chip at the end, from the harness's own message creation to completion (`200ms`, `3s`, `1m 5s`, `2h`), or `…` while the message runs or its times disagree; the chip keeps a 48-pixel target and opens the details either way; an assistant message with no time, duration or action has no header; a user turn's undo (latest turn) or rewind-and-edit (older turns) action sits to the left of the bubble, as in v1, outside the header, and history shows none
 - **Then** the details dialog lists the elapsed time, model, provider, the reported token total (only when input and output are known), cost in USD, and "Step started #1" / "Step finished #1: reason • tokens • cost" (a v2 message is one model step); with nothing known it says "No metadata available"; it scrolls, closes with its button, the barrier or Escape
 - **Then** live parts learn the model, agent and start of the running step when it starts; when the step ends or fails they receive the completion time, usage and finish reason; a retried step on the same message resets them to the new attempt
 - **Then** history reads the same facts from the assistant record; an unexpected, oversized or malformed display value is unknown and never rejects the page
 
 - **Given** the refined visual style
 - **When** timeline cards render
-- **Then** assistant-side cards (text, reasoning, tools, notices) have no border and slightly tighter vertical padding, while the user's turns keep the hairline frame; cards follow theme, density, text-size and width changes on rebuild
+- **Then** the agent's text has no card: no fill, no border and no inset of its own beside it, so it sits on the page; reasoning, tools and notices keep borderless cards with slightly tighter vertical padding; the user's turn keeps its tinted bubble, right-aligned, with no outline (#488); everything follows theme, density, text-size and width changes on rebuild
+- **Then** below 600 dp wide, the live and history timelines keep an 8 dp side margin instead of 16 dp, so the agent's text reaches close to the screen's edge; wider screens keep 16 dp and the 760 dp reading width
+- **Then** a search match is outlined just outside its row, so the outline never covers text that has no card
 
 ### V2 work groups, tool runs and loading
 

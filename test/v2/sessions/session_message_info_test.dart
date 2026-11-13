@@ -214,7 +214,7 @@ void main() {
     expect(find.text('No metadata available'), findsOneWidget);
   });
 
-  testWidgets('assistant parts are borderless; user turns keep the frame', (
+  testWidgets('assistant text has no card; the user bubble has no outline', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -239,21 +239,27 @@ void main() {
         ),
       ),
     );
-    final cards = tester.widgetList<Card>(find.byType(Card)).toList();
-    BorderSide side(Card card) =>
-        (card.shape as RoundedRectangleBorder?)?.side ??
-        const BorderSide(width: 1);
-    expect(side(cards[0]).width, 1);
-    expect(side(cards[1]), BorderSide.none);
+    // Only the user's bubble is a card, and it has no outline (#488).
+    final card = tester.widget<Card>(find.byType(Card));
+    expect((card.shape! as RoundedRectangleBorder).side, BorderSide.none);
+    expect(
+      find.ancestor(of: find.text('Hello'), matching: find.byType(Card)),
+      findsNothing,
+    );
+    // The agent's text has no inset of its own beside it.
+    final tile = tester.getRect(find.byType(SessionTimelineTile).last);
+    final text = tester.getRect(find.text('Hello'));
+    expect(text.left, tile.left);
     // Without the header flag the message details stay out of the row.
     expect(find.byType(MessageElapsedChip), findsNothing);
   });
 
-  testWidgets('a narrow user header keeps its label semantic at text scale 2', (
+  testWidgets('a user bubble names no sender but screen readers hear it', (
     tester,
   ) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(
       _surface(
         SizedBox(
@@ -271,15 +277,9 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    expect(
-      find.ancestor(
-        of: find.text('You'),
-        matching: find.byWidgetPredicate(
-          (widget) => widget is Semantics && widget.properties.header == true,
-        ),
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('You'), findsNothing);
+    expect(find.bySemanticsLabel(RegExp('^You')), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('a user turn action sits left of its bubble, centred on it', (

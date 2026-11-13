@@ -69,7 +69,10 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                   child: PageStorage(
                     bucket: _rowState,
                     child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: timelineSideInset(context),
+                        vertical: 16,
+                      ),
                       itemCount: items.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {

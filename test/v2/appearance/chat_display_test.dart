@@ -188,7 +188,7 @@ void main() {
           ),
         ),
       );
-      final body = tester.element(find.byType(Card));
+      final body = tester.element(find.text('Body'));
       expect(MediaQuery.textScalerOf(body).scale(10), 15);
       expect(MediaQuery.textScalerOf(header).scale(10), 10);
     });

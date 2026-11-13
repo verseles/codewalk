@@ -645,6 +645,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       widget.headerBuilder,
     ];
     final lead = leads.length;
+    final side = timelineSideInset(context);
     return ListenableBuilder(
       listenable: widget.scroll,
       builder: (context, _) => Stack(
@@ -669,14 +670,14 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                             when _olderCount > 0)
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              padding: EdgeInsets.fromLTRB(side, 16, side, 0),
                               child: top(context),
                             ),
                           ),
                         // Older history, built from the center outwards: index
                         // 0 is the row right above the center.
                         SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: side),
                           sliver: SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) => _row(
@@ -696,7 +697,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                         ),
                         SliverPadding(
                           key: _centerKey,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                          padding: EdgeInsets.fromLTRB(side, 16, side, 16),
                           sliver: SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
@@ -797,9 +798,12 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
           position: DecorationPosition.foreground,
           decoration: found
               ? BoxDecoration(
+                  // Outside the row, so it never covers text that sits
+                  // on the page with no card around it.
                   border: Border.all(
                     color: Theme.of(context).colorScheme.primary,
                     width: 2,
+                    strokeAlign: BorderSide.strokeAlignOutside,
                   ),
                   borderRadius: BorderRadius.circular(12),
                 )

@@ -405,7 +405,12 @@ void main() {
     expect(live.handle.current.state!.timeline, hasLength(200));
     live.handle.olderAction = () => live.session.page(live.handle);
     final retry = find.byKey(const ValueKey('live-older-retry'));
+    // The extent above the laid-out rows is an estimate that firms up once
+    // the rows near the top are built, so the first reveal may fall short.
     await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
     await tester.tap(retry);
     await tester.pumpAndSettle();
     expect(live.session.first, 1600);

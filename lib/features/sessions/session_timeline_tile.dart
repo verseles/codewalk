@@ -12,6 +12,11 @@ import 'session_reasoning_body.dart';
 import 'session_switch_note.dart';
 import 'session_tool_result.dart';
 
+/// The timeline's side margin: narrow on a phone, so the agent's text,
+/// which has no card, reaches close to the screen's edge.
+double timelineSideInset(BuildContext context) =>
+    MediaQuery.sizeOf(context).width < 600 ? 8 : 16;
+
 /// One read-only timeline item, shared by the history and live views.
 ///
 /// V2-071A: text-bearing canonical items render rich Markdown/math/HTML/
@@ -121,43 +126,32 @@ class SessionTimelineTile extends StatelessWidget {
             TimeOfDay.fromDateTime(created.toLocal()),
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           );
-    // An assistant message without a time, a duration or an action has no
-    // header at all, so it takes no space above its body.
-    final headerShown =
-        item is! AssistantText || clock != null || message != null;
+    // A message without a time, a duration or an action has no header at
+    // all, so it takes no space above its body. The user's bubble names no
+    // sender: its color and side already do.
+    final headerShown = switch (item) {
+      AssistantText() => clock != null || message != null,
+      UserInput() => clock != null,
+      _ => true,
+    };
     final body = Padding(
-      // Compact bubble padding matching v1 density
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+      // The agent's text sits on the page, with no card and no inset of its
+      // own; every other item keeps the compact bubble padding.
+      padding: item is AssistantText
+          ? const EdgeInsets.symmetric(vertical: 8)
+          : const EdgeInsets.fromLTRB(14, 10, 14, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (headerShown) ...[
             if (item is UserInput || item is AssistantText)
-              // v1 chat_message_content.dart: the user header is "You" and the
-              // time; an assistant message has no label, only the time, and its
+              // A message's header is its time; an assistant message's
               // duration ends the line.
               Row(
                 children: [
                   Expanded(
                     child: Row(
                       children: [
-                        if (item is UserInput) ...[
-                          Flexible(
-                            child: Semantics(
-                              header: true,
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
                         if (clock != null)
                           Flexible(
                             child: Text(
@@ -197,11 +191,9 @@ class SessionTimelineTile extends StatelessWidget {
         ],
       ),
     );
-    // Asymmetric bubble radius with tighter trailing corner for messaging feel
+    // Asymmetric bubble radius with tighter trailing corner for messaging
+    // feel; the fill alone sets the bubble apart, with no outline.
     final shape = RoundedRectangleBorder(
-      side: isUser && theme.cardTheme.shape is RoundedRectangleBorder
-          ? (theme.cardTheme.shape! as RoundedRectangleBorder).side
-          : BorderSide.none,
       borderRadius: BorderRadius.circular(16).copyWith(
         bottomRight: isUser
             ? const Radius.circular(4)
@@ -211,23 +203,25 @@ class SessionTimelineTile extends StatelessWidget {
             : const Radius.circular(16),
       ),
     );
-    final tile = Card(
-      color: isUser
-          ? colorScheme.primaryContainer.withValues(alpha: 0.7)
-          : null,
-      shape: shape,
-      clipBehavior: child != null ? Clip.antiAlias : Clip.none,
-      child: child != null
-          ? Semantics(
-              button: true,
-              child: InkWell(
-                key: ValueKey('subagent-open-${item.id.value}'),
-                onTap: () => child(item as ToolCall),
-                child: body,
-              ),
-            )
-          : body,
-    );
+    final tile = item is AssistantText
+        ? body
+        : Card(
+            color: isUser
+                ? colorScheme.primaryContainer.withValues(alpha: 0.7)
+                : null,
+            shape: shape,
+            clipBehavior: child != null ? Clip.antiAlias : Clip.none,
+            child: child != null
+                ? Semantics(
+                    button: true,
+                    child: InkWell(
+                      key: ValueKey('subagent-open-${item.id.value}'),
+                      onTap: () => child(item as ToolCall),
+                      child: body,
+                    ),
+                  )
+                : body,
+          );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -237,7 +231,17 @@ class SessionTimelineTile extends StatelessWidget {
             : min(760.0, maxW);
         final bubble = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: candidateW),
-          child: ConversationTextScale(child: tile),
+          child: ConversationTextScale(
+            // The sender is no longer written on the bubble; screen readers
+            // still hear it.
+            child: isUser
+                ? Semantics(
+                    container: true,
+                    label: l10n.chatMessageYou,
+                    child: tile,
+                  )
+                : tile,
+          ),
         );
         final action = inlineAction;
         // As v1: the action sits left of the bubble, centred on it, and the
