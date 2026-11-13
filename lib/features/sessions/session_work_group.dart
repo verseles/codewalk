@@ -13,8 +13,9 @@ import 'session_timeline_projection.dart';
 import 'session_tool_details_dialog.dart';
 import 'session_tool_result.dart';
 
-/// The header of a finished turn's work, like the retained reference's: how
-/// many messages the work spans and the control that shows or hides it.
+/// The header of a finished turn's work: how many messages the work spans
+/// and the control that shows or hides it, as one quiet line with no surface
+/// of its own, so the user's and the agent's messages lead (#490).
 class SessionWorkGroupHeader extends StatelessWidget {
   const SessionWorkGroupHeader({
     super.key,
@@ -29,57 +30,35 @@ class SessionWorkGroupHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final tokens = theme.surfaceTokens;
+    final quiet = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
     final title = row.messageCount == 1
         ? l10n.chatWorkMessageOne
         : l10n.chatWorkMessagesMultiple(row.messageCount);
     return ConversationTextScale(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: DecoratedBox(
-          key: ValueKey('work-group-${row.id}'),
-          decoration: BoxDecoration(
-            color: tokens.mutedControlSurface,
-            borderRadius: tokens.cardRadius,
-            border: Border.all(
-              color: tokens.separator,
-              width: tokens.enabledBorderWidth,
+      child: Row(
+        key: ValueKey('work-group-${row.id}'),
+        children: [
+          Flexible(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: quiet,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
-            child: Row(
-              children: [
-                Icon(
-                  Symbols.account_tree_rounded,
-                  size: 18,
-                  color: scheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  key: ValueKey('work-group-toggle-${row.id}'),
-                  onPressed: onToggle,
-                  child: Text(
-                    row.expanded ? l10n.chatWorkHide : l10n.chatWorkExpand,
-                  ),
-                ),
-              ],
+          const SizedBox(width: 4),
+          TextButton(
+            key: ValueKey('work-group-toggle-${row.id}'),
+            onPressed: onToggle,
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              textStyle: theme.textTheme.bodySmall,
             ),
+            child: Text(row.expanded ? l10n.chatWorkHide : l10n.chatWorkExpand),
           ),
-        ),
+        ],
       ),
     );
   }

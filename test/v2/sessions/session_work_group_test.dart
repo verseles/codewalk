@@ -167,6 +167,34 @@ void main() {
     final header = find.byKey(const ValueKey('work-group-work-r1'));
     expect(header, findsOneWidget);
     expect(find.text(l10n.chatWorkMessagesMultiple(2)), findsOneWidget);
+    // One quiet line (#490): no surface, no icon, small muted text.
+    expect(
+      find.descendant(of: header, matching: find.byType(DecoratedBox)),
+      findsNothing,
+    );
+    expect(
+      find.ancestor(
+        of: header,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              ((widget.decoration as BoxDecoration).color != null ||
+                  (widget.decoration as BoxDecoration).border != null),
+        ),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: header, matching: find.byType(Icon)),
+      findsNothing,
+    );
+    final count = tester.widget<Text>(
+      find.text(l10n.chatWorkMessagesMultiple(2)),
+    );
+    final theme = Theme.of(tester.element(header));
+    expect(count.style?.fontSize, theme.textTheme.bodySmall?.fontSize);
+    expect(count.style?.color, theme.colorScheme.onSurfaceVariant);
     expect(find.text('answer 1'), findsOneWidget);
     expect(find.text('thinking 1'), findsNothing);
     final toggle = find.byKey(const ValueKey('work-group-toggle-work-r1'));
