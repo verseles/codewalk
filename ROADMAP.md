@@ -6,6 +6,15 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 1. UI/UX — lote 1
 
+Beta da timeline (planejada em 2026-11-13):
+
+- [ ] #488 Texto do agente sem cartão, mais perto da borda; balão do usuário sem "You" e sem borda
+- [ ] #489 Texto da conversa um passo maior
+- [ ] #490 Trabalho recolhido como uma linha simples
+- [ ] #492 Gestos do balão: toque duplo copia, toque longo abre opções, código inline copia (substitui #464)
+- [ ] #493 Progresso com largura total dentro das mensagens
+- [ ] #491 Lembretes de sistema viram avisos leves na timeline, não balões pendentes
+- [ ] #494 Interruptor de permissão sincronizado com a regra "libera tudo" do servidor; botão ✓✓ do topo removido
 
 ## 2. Limpeza logo após o lote 1
 

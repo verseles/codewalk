@@ -1,0 +1,20 @@
+Vamos planejar o próximo beta, será sobre a timeline:
+
+- As mensagens do agents não  devem ter mais fundo
+- Devem perder o enchimento interno, se aproximando mais da borda do aparelho.
+- As letras devem ser um pouco maiores do que atualmente, inclusive as do usuário também.
+- Certas mensagens ainda nao são tratadas e aparecem em vermelho,  devem aparecer na timeline como um aviso leve similar a outros. ex: <system-reminder> You are in Plan mode...
+- mensagens/balão tipo "5 work messages       Expand" devem virar uma linha simples sem fundo e sem muito destaque para priorizar visualmente mensagens do usuario e do agente, removendo inclusive fundo e enchimento
+- mensagens do usuario já tem balao e fundo diferente e fica alinha a direita, não precisa do título "You" e nem de uma borda diferenciada, atualmente há uma fina borda sólida 
+- no alto de toda conversa tem um pequeno botão ícone com vv (check check) que ao clicar aparece 4 itens de menu (Ask,Allow all,Turn on Unrestricted...,Refresh session rules) eu não faço ideia do que se trata e porque existe
+
+
+- duplo clique em um balão deve copiar todo o texto
+- clique em um texto  ̀assim ̀ deve copiar o conteúdo. 
+- progresso dentro dos balões deve ter width 100% por padrão 
+- clicar e segurar um balão deve ter opções
+- opção para reverter até aquela mensagem (removendo o botão flutuante que existe atualmente a esquerda)
+- opção para copiar todo o texto
+- opção para selecionar texto, permitindo selecionar apenas uma parte do texto para copiar...
+
+[Owner decision, later message] Sim, ele deve sair, e o botão existente deve mapear com o servidor Ask(off)/Allow All(toggle on), on é o padrão caso não tenha informação do servidor, ao definir, sincronizar com o servidor
