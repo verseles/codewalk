@@ -1,3 +1,4 @@
+import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/features/sessions/session_subagent_capsule.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -12,6 +13,137 @@ void main() {
   final capsule = find.byKey(const ValueKey('subagent-capsule'));
   final count = find.byKey(const ValueKey('subagent-count'));
   final popin = find.byKey(const ValueKey('subagent-popin'));
+
+  testWidgets('robot floats inside the unchanged timeline viewport', (
+    tester,
+  ) async {
+    final rig = await SubagentCapsuleRig.mount(tester, fullPage: true);
+    final timeline = find.byType(SessionLiveTimeline);
+    final before = tester.getRect(timeline);
+    rig.emit([rig.work('runner', WorkStatus.running)]);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(timeline), before);
+    final robot = tester.getRect(capsule);
+    expect(before.contains(robot.topLeft), isTrue);
+    expect(before.contains(robot.bottomRight), isTrue);
+    // A drag next to the robot still reaches the timeline scrollable.
+    final beside = Offset(before.left + 30, robot.center.dy);
+    final hits = tester.hitTestOnBinding(beside).path;
+    final scroll = tester.renderObject(find.byType(CustomScrollView).first);
+    expect(hits.any((entry) => entry.target == scroll), isTrue);
+    rig.emit([]);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(timeline), before);
+    expect(capsule, findsNothing);
+  });
+
+  testWidgets(
+    'latest content clears robot and jump controls preserve its state',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 480);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final rig = await SubagentCapsuleRig.mount(tester, fullPage: true);
+      rig.emit(
+        [rig.work('runner', WorkStatus.running)],
+        items: [
+          for (var i = 0; i < 30; i++)
+            AssistantText(
+              meta: liveMeta(rig.parent, 'a$i'),
+              text: 'Message $i',
+              complete: true,
+            ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      final capsuleState = tester.state(find.byType(SessionSubagentCapsule));
+      final last = find.text('Message 29');
+      expect(last, findsOneWidget);
+      expect(
+        tester.getBottomRight(last).dy,
+        lessThanOrEqualTo(tester.getTopLeft(capsule).dy),
+      );
+      final scroll = rig.live.scroll;
+      scroll.markUserIntent();
+      scroll.controller.jumpTo(scroll.controller.position.minScrollExtent);
+      await tester.pumpAndSettle();
+      final jump = find.byKey(const ValueKey('live-jump-latest'));
+      expect(jump, findsOneWidget);
+      expect(
+        tester.getBottomRight(jump).dy,
+        lessThan(tester.getTopLeft(capsule).dy),
+      );
+      expect(
+        tester.state(find.byType(SessionSubagentCapsule)),
+        same(capsuleState),
+      );
+      await tester.tap(jump);
+      await tester.pumpAndSettle();
+      expect(
+        tester.state(find.byType(SessionSubagentCapsule)),
+        same(capsuleState),
+      );
+      expect(
+        tester.getBottomRight(last).dy,
+        lessThanOrEqualTo(tester.getTopLeft(capsule).dy),
+      );
+      tester.view.physicalSize = const Size(390, 240);
+      await tester.pumpAndSettle();
+      scroll.markUserIntent();
+      scroll.controller.jumpTo(scroll.controller.position.minScrollExtent);
+      await tester.pumpAndSettle();
+      final viewport = tester.getRect(find.byType(SessionLiveTimeline));
+      for (final control in [
+        capsule,
+        jump,
+        find.byKey(const ValueKey('live-jump-first')),
+      ]) {
+        expect(viewport.contains(tester.getTopLeft(control)), isTrue);
+        expect(viewport.contains(tester.getBottomRight(control)), isTrue);
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final brightness in Brightness.values) {
+    testWidgets('capsule and pop-in use the local $brightness theme', (
+      tester,
+    ) async {
+      final theme = ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.orange,
+          brightness: brightness,
+        ),
+        useMaterial3: true,
+      );
+      final rig = await SubagentCapsuleRig.mount(tester, localTheme: theme);
+      rig.emit([rig.work('runner', WorkStatus.running)]);
+      await tester.pumpAndSettle();
+      final button = tester.widget<FilledButton>(capsule);
+      final context = tester.element(capsule);
+      final style = button.style!;
+      expect(
+        style.backgroundColor!.resolve({}),
+        theme.colorScheme.secondaryContainer,
+      );
+      expect(
+        style.foregroundColor!.resolve({}),
+        theme.colorScheme.onSecondaryContainer,
+      );
+      expect(Theme.of(context).brightness, brightness);
+      await tester.tap(capsule);
+      await tester.pumpAndSettle();
+      final row = find.byKey(
+        ValueKey(
+          'subagent-row-${rig.work('runner', WorkStatus.running).child!.storageKey}',
+        ),
+      );
+      expect(Theme.of(tester.element(row)).colorScheme, theme.colorScheme);
+      expect(tester.takeException(), isNull);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+    });
+  }
 
   testWidgets(
     'no child means no robot; completed children keep it without count',

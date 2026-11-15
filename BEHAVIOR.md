@@ -165,7 +165,8 @@ description of this code.
 - **Then** it keeps the full composer and Stop, a `Return to parent conversation` control stays visible above its timeline, and its model, agent and variant show the child's own choice, locked
 - **Then** returning (the control, or the system back on a phone before the drawer/background order) goes to the immediate parent, one level at a time, and the parent shows the same rows where the reader left them, or its newest content when it was following, even after it grew meanwhile
 - **When** a session has direct sub-agents
-- **Then** a robot capsule stays above the composer and status strip; its badge counts distinct executing or human-waiting children, and disappears at zero while the capsule remains available for child history
+- **Then** a robot capsule floats over the bottom end of the timeline, above the composer and status strip, without reserving a full-width row; its badge counts distinct executing or human-waiting children, and disappears at zero while the capsule remains available for child history
+- **Then** the capsule and its pop-in follow the selected theme; timeline content stays scrollable beside the capsule and its last row can scroll clear of it; navigation buttons sit above it, or alongside it when the timeline is short
 - **Then** its anchored pop-in separates Active from Completed; an unknown outcome stays in Active and is never presented as completed, while known child rows remain available when a bounded or incomplete read omits them
 - **Then** opening a row shows that child's full conversation; child permission requests and question forms can be answered from the parent, while the child's transcript details stay in the child and forms are never answered automatically
 

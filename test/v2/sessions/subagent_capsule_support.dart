@@ -25,6 +25,7 @@ class SubagentCapsuleRig {
     double scale = 1,
     bool fullPage = false,
     ThemeMode themeMode = ThemeMode.light,
+    ThemeData? localTheme,
   }) async {
     final catalog = CatalogRig();
     await catalog.save('a');
@@ -59,23 +60,30 @@ class SubagentCapsuleRig {
           maxScaleFactor: scale,
           child: child!,
         ),
-        home: fullPage
-            ? SessionLivePage(controller: live, ownsController: false)
-            : Scaffold(
-                body: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      const Expanded(child: SizedBox()),
-                      SessionSubagentCapsule(
-                        live: live,
-                        onOpen: rig.opened.add,
+        home: Builder(
+          builder: (context) {
+            final page = fullPage
+                ? SessionLivePage(controller: live, ownsController: false)
+                : Scaffold(
+                    body: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          const Expanded(child: SizedBox()),
+                          SessionSubagentCapsule(
+                            live: live,
+                            onOpen: rig.opened.add,
+                          ),
+                          const SizedBox(height: 120),
+                        ],
                       ),
-                      const SizedBox(height: 120),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
+                  );
+            return localTheme == null
+                ? page
+                : Theme(data: localTheme, child: page);
+          },
+        ),
       ),
     );
     await tester.pump();
@@ -103,12 +111,18 @@ class SubagentCapsuleRig {
     List<InteractionRequest> interactions = const [],
     SessionLivePhase phase = SessionLivePhase.live,
     bool stale = false,
+    List<TimelineItem> items = const [],
   }) => handle.emit(
     SessionLiveView(
       session: parent,
       phase: phase,
       stale: stale,
-      state: liveState(parent, work: work, interactions: interactions),
+      state: liveState(
+        parent,
+        work: work,
+        interactions: interactions,
+        items: items,
+      ),
     ),
   );
 }

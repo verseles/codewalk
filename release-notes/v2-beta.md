@@ -1,7 +1,7 @@
-> 📣 Keep sub-agents one tap away: revisit active and completed conversations, return to the parent without losing your place, and handle child questions and approvals from the main timeline.
+> 📣 Sub-agents now float over the conversation without stealing a row from the timeline, with colors that follow your theme.
 
 ### Sub-agents
 
-- A robot capsule opens active and completed child conversations, including after reconnecting or reopening a session.
-- Open a child's full conversation and return to its parent without losing your place. Child permission requests and questions stay actionable from the parent.
-- Unknown child status remains active; only a known terminal outcome appears as completed.
+- The robot capsule floats above the composer, leaving the timeline visible and scrollable beside it.
+- The capsule and its pop-in follow the selected theme, including light and dark colors.
+- Timeline navigation buttons stay accessible above the robot, or alongside it in short viewports.

@@ -463,7 +463,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                   (c.outbox == null ? SessionComposerStatus.height : 0.0) +
                   (c.search.open ? SessionSearchBar.heightOf(context) : 0.0) +
                   (stopButton ? 56.0 : 0.0) +
-                  (hasSubagents ? SessionSubagentCapsule.height : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
               final space = max(0.0, body.maxHeight - pad - chrome);
               final composerBase = max(
@@ -502,6 +501,12 @@ class _SessionLivePageState extends State<SessionLivePage>
                           models: c.selectionState.models,
                           agents: c.selectionState.agents,
                           child: SessionLiveTimeline(
+                            bottomEndOverlay: hasSubagents
+                                ? SessionSubagentCapsule(
+                                    live: c,
+                                    onOpen: _openRosterChild,
+                                  )
+                                : null,
                             highlight: search.open ? search.current : null,
                             reveals: search.reveals,
                             onOpenChild: _openChild,
@@ -551,14 +556,6 @@ class _SessionLivePageState extends State<SessionLivePage>
                           ),
                         ),
                       ),
-                      if (hasSubagents)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: SessionSubagentCapsule(
-                            live: c,
-                            onOpen: _openRosterChild,
-                          ),
-                        ),
                       SafeArea(
                         top: false,
                         child: Padding(

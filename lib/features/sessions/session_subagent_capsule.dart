@@ -97,6 +97,10 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
         anchor.localToGlobal(Offset.zero, ancestor: overlay) & anchor.size;
     _open = true;
     final parent = widget.live.session;
+    final themes = InheritedTheme.capture(
+      from: context,
+      to: Navigator.of(context, rootNavigator: true).context,
+    );
     final l10n = context.v2L10n;
     try {
       final child = await showGeneralDialog<SessionRef>(
@@ -145,42 +149,44 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
                   parent: parent,
                   onOpen: (ref) => Navigator.of(dialogContext).pop(ref),
                 );
-                return Stack(
-                  children: [
-                    Positioned(
-                      left: left.clamp(
-                        12.0,
-                        max(12.0, constraints.maxWidth - width - 12),
-                      ),
-                      top: max(top, bottom - height),
-                      width: width,
-                      height: height,
-                      child: CallbackShortcuts(
-                        bindings: {
-                          const SingleActivator(
-                            LogicalKeyboardKey.escape,
-                          ): () =>
-                              Navigator.of(dialogContext).pop(),
-                        },
-                        child: FocusTraversalGroup(
-                          child: SizedBox(
-                            key: const ValueKey('subagent-popin'),
-                            child: height >= 160
-                                ? panel
-                                : ClipRect(
-                                    child: SingleChildScrollView(
-                                      primary: false,
-                                      child: SizedBox(
-                                        height: 160,
-                                        child: panel,
+                return themes.wrap(
+                  Stack(
+                    children: [
+                      Positioned(
+                        left: left.clamp(
+                          12.0,
+                          max(12.0, constraints.maxWidth - width - 12),
+                        ),
+                        top: max(top, bottom - height),
+                        width: width,
+                        height: height,
+                        child: CallbackShortcuts(
+                          bindings: {
+                            const SingleActivator(
+                              LogicalKeyboardKey.escape,
+                            ): () =>
+                                Navigator.of(dialogContext).pop(),
+                          },
+                          child: FocusTraversalGroup(
+                            child: SizedBox(
+                              key: const ValueKey('subagent-popin'),
+                              child: height >= 160
+                                  ? panel
+                                  : ClipRect(
+                                      child: SingleChildScrollView(
+                                        primary: false,
+                                        child: SizedBox(
+                                          height: 160,
+                                          child: panel,
+                                        ),
                                       ),
                                     ),
-                                  ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
@@ -211,6 +217,7 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
           )
           .length;
       final l10n = context.v2L10n;
+      final colors = Theme.of(context).colorScheme;
       return SizedBox(
         height: SessionSubagentCapsule.height,
         child: Align(
@@ -222,6 +229,10 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
               key: const ValueKey('subagent-capsule'),
               focusNode: _focus,
               style: FilledButton.styleFrom(
+                backgroundColor: colors.secondaryContainer,
+                foregroundColor: colors.onSecondaryContainer,
+                elevation: 3,
+                shadowColor: colors.shadow,
                 minimumSize: const Size(48, 48),
                 shape: const StadiumBorder(),
                 padding: const EdgeInsets.symmetric(horizontal: 14),

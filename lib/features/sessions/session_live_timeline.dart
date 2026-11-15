@@ -43,6 +43,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.topBuilder,
     this.errorRecovery,
     this.onOpenChild,
+    this.bottomEndOverlay,
     this.emptyBuilder,
     this.userTurnRevert,
     this.highlight,
@@ -74,6 +75,9 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// The recovery a failed turn's error card offers; null for none.
   final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
+
+  /// A floating action above the footer, below the timeline's jump controls.
+  final Widget? bottomEndOverlay;
 
   /// Opens the sub-conversation of a subagent card; null for none.
   final ValueChanged<ToolCall>? onOpenChild;
@@ -720,6 +724,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                             ),
                           ),
                         ),
+                        // Content can scroll clear of the floating action without
+                        // giving up any of the timeline viewport beside it.
+                        if (widget.bottomEndOverlay != null && rows.isNotEmpty)
+                          const SliverToBoxAdapter(child: SizedBox(height: 56)),
                         if (rows.isEmpty && widget.emptyBuilder != null)
                           SliverFillRemaining(
                             hasScrollBody: false,
@@ -739,21 +747,48 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               end: 0,
               child: Center(child: _olderPill(context)),
             ),
-          if (_showJumpControl || _showJumpToFirst)
+          if (_showJumpControl ||
+              _showJumpToFirst ||
+              widget.bottomEndOverlay != null)
             PositionedDirectional(
+              top: 0,
               end: 16,
-              bottom: 16,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (_showJumpToFirst)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _jumpToFirst(context),
+              bottom: widget.bottomEndOverlay == null ? 16 : 4,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Short timelines keep all controls reachable side by side.
+                  final horizontal =
+                      widget.bottomEndOverlay != null &&
+                      constraints.maxHeight < 156;
+                  return Align(
+                    alignment: AlignmentDirectional.bottomEnd,
+                    widthFactor: 1,
+                    child: Flex(
+                      direction: horizontal ? Axis.horizontal : Axis.vertical,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (_showJumpToFirst)
+                          Padding(
+                            padding: EdgeInsetsDirectional.only(
+                              bottom: horizontal ? 0 : 8,
+                              end: horizontal ? 8 : 0,
+                            ),
+                            child: _jumpToFirst(context),
+                          ),
+                        if (_showJumpControl) _jumpToLatest(context),
+                        if (widget.bottomEndOverlay case final overlay?) ...[
+                          if (_showJumpControl || _showJumpToFirst)
+                            SizedBox(
+                              height: horizontal ? 0 : 8,
+                              width: horizontal ? 8 : 0,
+                            ),
+                          overlay,
+                        ],
+                      ],
                     ),
-                  if (_showJumpControl) _jumpToLatest(context),
-                ],
+                  );
+                },
               ),
             ),
         ],
