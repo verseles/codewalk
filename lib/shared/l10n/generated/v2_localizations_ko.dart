@@ -12,6 +12,32 @@ class V2LocalizationsKo extends V2Localizations {
   V2LocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => '하위 에이전트';
+
+  @override
+  String get liveSubagentsActive => '활성';
+
+  @override
+  String get liveSubagentsCompleted => '완료';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '활성 하위 에이전트 $count개';
+  }
+
+  @override
+  String get liveSubagentsEmpty => '하위 에이전트가 없습니다.';
+
+  @override
+  String get liveSubagentsUnknown => '상태 미확인';
+
+  @override
+  String get liveSubagentsCancelled => '취소됨';
+
+  @override
+  String get liveSubagentsRecent => '최근 하위 대화';
+
+  @override
   String get chatAddServerToStart => '대화를 시작하려면 서버를 추가하세요.';
 
   @override

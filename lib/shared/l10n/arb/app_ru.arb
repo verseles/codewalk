@@ -1,5 +1,13 @@
 {
   "@@locale": "ru",
+  "liveSubagentsTitle": "Субагенты",
+  "liveSubagentsActive": "Активные",
+  "liveSubagentsCompleted": "Завершённые",
+  "liveSubagentsCount": "Активных субагентов: {count}",
+  "liveSubagentsEmpty": "Субагентов нет.",
+  "liveSubagentsUnknown": "Статус не подтверждён",
+  "liveSubagentsCancelled": "Отменено",
+  "liveSubagentsRecent": "Недавние дочерние беседы",
   "chatAddServerToStart": "Добавьте сервер, чтобы начать общение.",
   "chatConversation": "Беседа",
   "chatConversations": "Беседы",

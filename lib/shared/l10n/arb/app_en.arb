@@ -1,5 +1,14 @@
 {
   "@@locale": "en",
+  "liveSubagentsTitle": "Sub-agents",
+  "liveSubagentsActive": "Active",
+  "liveSubagentsCompleted": "Completed",
+  "liveSubagentsCount": "{count} active sub-agents",
+  "@liveSubagentsCount": {"description": "Accessible label for the subagent capsule; counts executing or awaiting a human reply.", "placeholders": {"count": {"type": "int"}}},
+  "liveSubagentsEmpty": "No sub-agents here.",
+  "liveSubagentsUnknown": "Status unconfirmed",
+  "liveSubagentsCancelled": "Cancelled",
+  "liveSubagentsRecent": "Recent sub-conversations",
   "chatAddServerToStart": "Add a server to start chatting.",
   "@chatAddServerToStart": {
     "description": "CodeWalk UI string — chatAddServerToStart"

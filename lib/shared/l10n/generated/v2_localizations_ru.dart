@@ -12,6 +12,32 @@ class V2LocalizationsRu extends V2Localizations {
   V2LocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'Субагенты';
+
+  @override
+  String get liveSubagentsActive => 'Активные';
+
+  @override
+  String get liveSubagentsCompleted => 'Завершённые';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return 'Активных субагентов: $count';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'Субагентов нет.';
+
+  @override
+  String get liveSubagentsUnknown => 'Статус не подтверждён';
+
+  @override
+  String get liveSubagentsCancelled => 'Отменено';
+
+  @override
+  String get liveSubagentsRecent => 'Недавние дочерние беседы';
+
+  @override
   String get chatAddServerToStart => 'Добавьте сервер, чтобы начать общение.';
 
   @override

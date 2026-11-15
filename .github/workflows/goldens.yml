@@ -34,7 +34,7 @@ jobs:
       - name: Render the goldens
         run: |
           files=$(grep -rl --include='*_test.dart' 'matchesGoldenFile' test)
-          flutter test --no-pub -j 4 --update-goldens $files
+          flutter test --no-pub -j 4 --update-goldens $files tool/goldens/subagent_capsule_test.dart
 
       - name: Return the goldens
         uses: actions/upload-artifact@v4

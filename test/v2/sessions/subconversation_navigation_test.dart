@@ -195,7 +195,98 @@ Future<void> _answerChildren(
   await _settle(tester);
 }
 
+Future<void> _tapRoster(
+  WidgetTester tester,
+  _App app,
+  LiveHandle handle,
+) async {
+  final parent = _ref(app, 'parent');
+  final child = _ref(app, 'kid');
+  handle.emit(
+    SessionLiveView(
+      session: parent,
+      phase: SessionLivePhase.live,
+      state: liveState(
+        parent,
+        work: [
+          WorkItem(
+            id: const WorkId('roster-kid'),
+            owner: SessionOwner(child, origin: parent),
+            parent: parent,
+            child: child,
+            status: const OpenValue.known(WorkStatus.completed),
+            completionScope: const OpenValue.known(CompletionScope.child),
+            title: 'Roster child',
+          ),
+        ],
+      ),
+    ),
+  );
+  await _settle(tester);
+  await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
+  await _settle(tester);
+  await tester.tap(find.text('Roster child'));
+  await _settle(tester);
+}
+
 void main() {
+  testWidgets('roster opens the exact child without timeline pairing', (
+    tester,
+  ) async {
+    final app = await _launch(tester);
+    final handle = await _show(tester, app, 'parent', []);
+    await _tapRoster(tester, app, handle);
+    expect(_location(app), '/s/profile_a/ses_parent');
+    expect(
+      app.rig.sources.single.queries.where((q) => q.parent != null),
+      isEmpty,
+    );
+    await _answerRead(tester, app, 'kid', _child(app, 'kid'));
+    expect(_location(app), '/s/profile_a/ses_kid');
+    await _show(tester, app, 'kid', []);
+    expect(
+      find.byKey(const ValueKey('subconversation-return')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('subconversation-return')));
+    await _settle(tester);
+    expect(_location(app), '/s/profile_a/ses_parent');
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('roster rejects a child whose re-read contradicts the parent', (
+    tester,
+  ) async {
+    final app = await _launch(tester);
+    final handle = await _show(tester, app, 'parent', []);
+    await _tapRoster(tester, app, handle);
+    await _answerRead(
+      tester,
+      app,
+      'kid',
+      _child(app, 'kid', parent: 'elsewhere'),
+    );
+    expect(_location(app), '/s/profile_a/ses_parent');
+    expect(find.text(app.l10n.chatNoSubConversationFound), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('navigation overtakes a pending roster read', (tester) async {
+    final app = await _launch(tester);
+    final handle = await _show(tester, app, 'parent', []);
+    await _tapRoster(tester, app, handle);
+    final read = app.rig.sources.single.reads.last.$2;
+    app.dependencies.router.go('/hosts');
+    await _settle(tester);
+    if (!read.completion.isCompleted) {
+      read.completion.complete(_child(app, 'kid'));
+    }
+    await _settle(tester);
+    expect(_location(app), '/hosts');
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('an observed child opens after its direct read', (tester) async {
     final app = await _launch(tester);
     final tool = _tool(

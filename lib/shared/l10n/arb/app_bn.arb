@@ -1,5 +1,13 @@
 {
   "@@locale": "bn",
+  "liveSubagentsTitle": "সাব-এজেন্ট",
+  "liveSubagentsActive": "সক্রিয়",
+  "liveSubagentsCompleted": "সম্পন্ন",
+  "liveSubagentsCount": "{count}টি সক্রিয় সাব-এজেন্ট",
+  "liveSubagentsEmpty": "এখানে কোনো সাব-এজেন্ট নেই।",
+  "liveSubagentsUnknown": "অবস্থা নিশ্চিত নয়",
+  "liveSubagentsCancelled": "বাতিল",
+  "liveSubagentsRecent": "সাম্প্রতিক উপ-কথোপকথন",
   "chatAddServerToStart": "চ্যাটিং শুরু করতে একটি সার্ভার যোগ করুন।",
   "chatConversation": "কথোপকথন",
   "chatConversations": "কথোপকথন",

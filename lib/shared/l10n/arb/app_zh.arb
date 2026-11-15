@@ -1,5 +1,13 @@
 {
   "@@locale": "zh",
+  "liveSubagentsTitle": "子代理",
+  "liveSubagentsActive": "活动中",
+  "liveSubagentsCompleted": "已完成",
+  "liveSubagentsCount": "{count} 个活动子代理",
+  "liveSubagentsEmpty": "此处没有子代理。",
+  "liveSubagentsUnknown": "状态未确认",
+  "liveSubagentsCancelled": "已取消",
+  "liveSubagentsRecent": "最近的子对话",
   "chatAddServerToStart": "添加服务器以开始聊天。",
   "chatConversation": "会话",
   "chatConversations": "会话",

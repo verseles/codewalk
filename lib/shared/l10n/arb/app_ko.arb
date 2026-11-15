@@ -1,5 +1,13 @@
 {
   "@@locale": "ko",
+  "liveSubagentsTitle": "하위 에이전트",
+  "liveSubagentsActive": "활성",
+  "liveSubagentsCompleted": "완료",
+  "liveSubagentsCount": "활성 하위 에이전트 {count}개",
+  "liveSubagentsEmpty": "하위 에이전트가 없습니다.",
+  "liveSubagentsUnknown": "상태 미확인",
+  "liveSubagentsCancelled": "취소됨",
+  "liveSubagentsRecent": "최근 하위 대화",
   "chatAddServerToStart": "대화를 시작하려면 서버를 추가하세요.",
   "chatConversation": "대화",
   "chatConversations": "대화 목록",

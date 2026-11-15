@@ -158,6 +158,11 @@ KEYS |= DIAGNOSTICS_KEYS | set(DIAGNOSTICS_NEW_KEYS)
 KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
 KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
 KEYS |= LIVE_PORT_KEYS | set(LIVE_NEW_KEYS)
+KEYS |= {
+    "liveSubagentsTitle", "liveSubagentsActive", "liveSubagentsCompleted",
+    "liveSubagentsCount", "liveSubagentsEmpty", "liveSubagentsUnknown",
+    "liveSubagentsCancelled", "liveSubagentsRecent",
+}
 KEYS |= set(COMPOSER_NEW_KEYS)
 KEYS |= set(SEARCH_NEW_KEYS) | set(SWITCH_KEYS) | set(VOICE_KEYS) | set(BUBBLE_KEYS) | set(SERVER_RULE_KEYS)
 KEYS |= COMMAND_PORT_KEYS | set(COMMAND_NEW_KEYS)

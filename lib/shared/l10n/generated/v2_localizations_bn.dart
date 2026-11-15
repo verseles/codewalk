@@ -12,6 +12,32 @@ class V2LocalizationsBn extends V2Localizations {
   V2LocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'সাব-এজেন্ট';
+
+  @override
+  String get liveSubagentsActive => 'সক্রিয়';
+
+  @override
+  String get liveSubagentsCompleted => 'সম্পন্ন';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$countটি সক্রিয় সাব-এজেন্ট';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'এখানে কোনো সাব-এজেন্ট নেই।';
+
+  @override
+  String get liveSubagentsUnknown => 'অবস্থা নিশ্চিত নয়';
+
+  @override
+  String get liveSubagentsCancelled => 'বাতিল';
+
+  @override
+  String get liveSubagentsRecent => 'সাম্প্রতিক উপ-কথোপকথন';
+
+  @override
   String get chatAddServerToStart => 'চ্যাটিং শুরু করতে একটি সার্ভার যোগ করুন।';
 
   @override

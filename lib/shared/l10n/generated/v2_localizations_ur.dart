@@ -12,6 +12,32 @@ class V2LocalizationsUr extends V2Localizations {
   V2LocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'ذیلی ایجنٹ';
+
+  @override
+  String get liveSubagentsActive => 'فعال';
+
+  @override
+  String get liveSubagentsCompleted => 'مکمل';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$count فعال ذیلی ایجنٹ';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'یہاں کوئی ذیلی ایجنٹ نہیں ہے۔';
+
+  @override
+  String get liveSubagentsUnknown => 'حالت غیر مصدقہ ہے';
+
+  @override
+  String get liveSubagentsCancelled => 'منسوخ';
+
+  @override
+  String get liveSubagentsRecent => 'حالیہ ذیلی گفتگو';
+
+  @override
   String get chatAddServerToStart =>
       'چیٹنگ شروع کرنے کے لیے ایک سرور شامل کریں۔';
 

@@ -936,7 +936,8 @@ void main() {
       session: ref('ses_one'),
     );
     List<SessionRef?> running(SessionLiveView v) => [
-      for (final w in v.state?.work ?? const <WorkItem>[]) w.child,
+      for (final w in v.state?.work ?? const <WorkItem>[])
+        if (w.status.known == WorkStatus.running) w.child,
     ];
     await until(
       parent,
@@ -946,6 +947,11 @@ void main() {
     expect(parent.current.state!.execution!.kind.known, ExecutionKind.idle);
     await server.execution('ses_child', 'succeeded');
     await until(parent, (v) => running(v).isEmpty);
+    expect(parent.current.state!.work.single.child, ref('ses_child'));
+    expect(
+      parent.current.state!.work.single.status.known,
+      WorkStatus.completed,
+    );
     await server.execution('ses_child', 'started');
     await until(parent, (v) => running(v).length == 1);
     expect(parent.current.state!.execution!.kind.known, ExecutionKind.idle);

@@ -1,4 +1,12 @@
 {
+  "liveSubagentsTitle": "الوكلاء الفرعيون",
+  "liveSubagentsActive": "نشطون",
+  "liveSubagentsCompleted": "مكتملون",
+  "liveSubagentsCount": "{count} وكلاء فرعيون نشطون",
+  "liveSubagentsEmpty": "لا يوجد وكلاء فرعيون هنا.",
+  "liveSubagentsUnknown": "الحالة غير مؤكدة",
+  "liveSubagentsCancelled": "ملغى",
+  "liveSubagentsRecent": "المحادثات الفرعية الأخيرة",
   "chatAddServerToStart": "أضف خادماً لبدء الدردشة.",
   "chatConversation": "المحادثة",
   "chatConversations": "المحادثات",

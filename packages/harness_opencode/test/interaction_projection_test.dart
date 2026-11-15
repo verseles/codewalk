@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 
 import 'history_test_data.dart';
 import 'interaction_test_data.dart';
+import 'text_reasoning_test_data.dart' show observedPosition;
 
 Matcher failsWith(OpenCodeInteractionProjectionFailure failure) => throwsA(
   isA<OpenCodeInteractionProjectionException>()
@@ -183,6 +184,37 @@ void main() {
       'confirmed': const BooleanAnswer(true),
     });
     expect(request.validateResponse(FormResponse(answers)), isEmpty);
+  });
+
+  test('child question forms stay manual and keep owning-session identity', () {
+    final child = SessionRef(historyRef.host, historyRef.harness, 'ses_child');
+    final opened = projectOpenCodeInteractionEvent(
+      interactionFrame('form.created', formData(session: child.nativeId)),
+      empty,
+      sourceVersion: '2.0.22',
+      position: observedPosition(1),
+      receivedAt: DateTime.utc(2026, 11, 14),
+      child: child,
+    );
+    final request = requestOf(opened);
+    expect(request.owner, SessionOwner(child, origin: historyRef));
+    expect(request.requiresInput, isTrue);
+    expect(request.autoApprovable, isFalse);
+    expect(request.automaticChoice, isNull);
+    final state = reduce(empty, opened!).state;
+    final closed = projectOpenCodeInteractionEvent(
+      interactionFrame('form.cancelled', {
+        'sessionID': child.nativeId,
+        'id': 'frm_a',
+      }, id: 'evt_closed'),
+      state,
+      sourceVersion: '2.0.22',
+      position: observedPosition(2),
+      receivedAt: DateTime.utc(2026, 11, 14),
+      child: child,
+    );
+    expect(resolutionOf(closed).owner, SessionOwner(child, origin: historyRef));
+    expect(reduce(state, closed!).state.interactions, isEmpty);
   });
 
   test('every native field type and condition maps to Core', () {

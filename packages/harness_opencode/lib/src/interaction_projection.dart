@@ -54,10 +54,10 @@ const _globalSession = 'global';
 /// resolves as cancelled. Form answers, request messages and native metadata
 /// are validated but never copied, and the frame location is never read.
 ///
-/// With [child], only that child session's permission events are projected
+/// With [child], only that child session's permission and form events are projected
 /// into the parent [current]: the owner keeps the child's identity with the
 /// parent as origin (ADR-059 §6), so a reply still goes to the child's route.
-/// Child forms stay in the child's own view.
+/// Human requests stay actionable in the parent without forwarding child text.
 SessionEvent? projectOpenCodeInteractionEvent(
   Object? value,
   SessionState current, {
@@ -77,8 +77,7 @@ SessionEvent? projectOpenCodeInteractionEvent(
   final ref = current.ref;
   final DomainOwner owner;
   if (child != null) {
-    if (!permission ||
-        child == ref ||
+    if (child == ref ||
         child.harnessRef != ref.harnessRef ||
         sessionText != child.nativeId) {
       return null;
@@ -305,12 +304,16 @@ InteractionRequest openCodePendingPermission(
 }
 
 /// The pending request of one row from `GET /api/session/{id}/form`.
-InteractionRequest openCodePendingForm(Object? row, SessionRef ref) {
+InteractionRequest openCodePendingForm(
+  Object? row,
+  SessionRef ref, {
+  SessionRef? origin,
+}) {
   final form = _object(row);
   if (_text(form['sessionID'], nonempty: true) != ref.nativeId) {
     _fail(OpenCodeInteractionProjectionFailure.malformed);
   }
-  return _formRequest(form, SessionOwner(ref), {});
+  return _formRequest(form, SessionOwner(ref, origin: origin), {});
 }
 
 /// True for a duplicate ask; a different resident kind is a conflict.

@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'execution_replay_test.dart' show refOf;
 import 'execution_test_data.dart' show executionFrame;
 import 'history_test_data.dart';
+import 'interaction_test_data.dart' show formData, interactionFrame;
 import 'session_reader_test.dart' show TestTransport, response;
 import 'support/fixture_replay.dart';
 
@@ -81,6 +82,10 @@ final class Reads {
 
   /// The direct children the listing returns.
   List<String> children = const [];
+  int? childrenStatus;
+  final childOutcomes = <String, String>{};
+  final childRecords = <String, Map<String, Object?>>{};
+  final missingChildRecords = <String>{};
 
   /// Holds the active-map answer already read until completed.
   Completer<void>? activeGate;
@@ -90,7 +95,18 @@ final class Reads {
     if (gate != null) await gate!.future;
     final uri = Uri.parse(request.path);
     final tail = uri.pathSegments.last;
+    if (uri.pathSegments.length == 3) {
+      if (missingChildRecords.contains(tail)) {
+        return response({'error': 'missing child'}, status: 404);
+      }
+      if (childRecords[tail] case final child?) {
+        return response({'data': child});
+      }
+    }
     if (uri.queryParameters.containsKey('parentID')) {
+      if (childrenStatus case final status?) {
+        return response({'error': 'child listing unavailable'}, status: status);
+      }
       return response({
         'data': [
           for (final child in children)
@@ -99,6 +115,7 @@ final class Reads {
               'parentID': session,
               'title': 'Child',
               'projectID': 'global',
+              'outcome': ?childOutcomes[child],
               'time': {'created': 1, 'updated': 1},
             },
         ],
@@ -136,7 +153,7 @@ final class Reads {
 }
 
 final class Harness {
-  Harness(String session, {bool observeChildren = false})
+  Harness(String session, {bool observeChildren = false, int maxChildren = 64})
     : ref = refOf(session),
       reads = Reads(session) {
     owner = OpenCodeStreamOwner(
@@ -148,6 +165,7 @@ final class Harness {
       now: () => DateTime.utc(2026, 10, 14),
       delay: (_) async {},
       observeChildren: observeChildren,
+      maxChildren: maxChildren,
     )..start();
     owner.updates.listen(updates.add);
   }
@@ -743,9 +761,215 @@ void main() {
 
   group('running children', () {
     const running = {'type': 'running'};
+    const repairFrame = {
+      'id': 'evt_bad',
+      'type': 'session.permissions',
+      'data': {'sessionID': 'ses_a', 'permissions': 'not_a_list'},
+    };
+    Map<String, Object?> childRecord(String id, {String? outcome}) => {
+      'id': id,
+      'parentID': 'ses_a',
+      'title': 'Verified $id',
+      'projectID': 'global',
+      'outcome': ?outcome,
+      'time': {'created': 1, 'updated': 2},
+    };
     List<SessionRef?> children(Harness h) => [
-      for (final w in h.state.work) w.child,
+      for (final w in h.state.work)
+        if (w.status.known == WorkStatus.running) w.child,
     ];
+
+    for (final keepRunning in [false, true]) {
+      test(
+        'new children displace terminal residents, ongoing=$keepRunning',
+        () async {
+          final h = Harness('ses_a', observeChildren: true, maxChildren: 2);
+          h.reads.children = ['ses_old', 'ses_done'];
+          h.reads.childOutcomes.addAll({
+            'ses_old': 'succeeded',
+            'ses_done': 'succeeded',
+          });
+          if (keepRunning) {
+            h.reads.active = {
+              'data': {
+                'ses_old': {'type': 'running'},
+              },
+            };
+          }
+          h.owner.watch(h.ref);
+          await h.connect(1);
+          expect(h.state.work, hasLength(2));
+          h.reads.children = ['ses_new', 'ses_done'];
+          h.reads.active = {
+            'data': {
+              if (keepRunning) 'ses_old': {'type': 'running'},
+              'ses_new': {'type': 'running'},
+            },
+          };
+          await h.send([
+            {
+              'type': 'session.created',
+              'data': {'sessionID': 'ses_new', 'parentID': 'ses_a'},
+            },
+          ]);
+          expect(h.state.work, hasLength(2));
+          expect(children(h), contains(refOf('ses_new')));
+          if (keepRunning) expect(children(h), contains(refOf('ses_old')));
+          await h.send([
+            interactionFrame('form.created', formData(session: 'ses_new')),
+          ]);
+          expect(
+            h.state.interactions.single.owner,
+            SessionOwner(refOf('ses_new'), origin: h.ref),
+          );
+        },
+      );
+    }
+
+    test('a failed child listing never degrades a readable parent', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.reads.childrenStatus = 500;
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      expect(h.connection.released, [1]);
+      expect(h.state.execution!.kind.known, ExecutionKind.idle);
+      expect(
+        h.reads.paths.map((path) => Uri.parse(path).path),
+        contains('api/session/ses_a/message'),
+      );
+      expect(
+        h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+        isNot(contains(ConnectionKind.degraded)),
+      );
+    });
+
+    test('offline child deletions free the follow budget', () async {
+      final h = Harness('ses_a', observeChildren: true, maxChildren: 2);
+      h.reads.children = ['ses_old', 'ses_done'];
+      h.reads.childOutcomes.addAll({
+        'ses_old': 'succeeded',
+        'ses_done': 'succeeded',
+      });
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      expect(h.state.work, hasLength(2));
+      h.connection.drop();
+      await h.settle();
+      h.reads.children = [];
+      h.reads.missingChildRecords.addAll(['ses_old', 'ses_done']);
+      await h.connect(2);
+      expect(h.state.work, isEmpty);
+
+      h.connection.drop();
+      await h.settle();
+      h.reads.paths.clear();
+      h.reads.children = ['ses_new'];
+      h.reads.active = const {
+        'data': {'ses_new': running},
+      };
+      await h.connect(3);
+      expect(children(h), [refOf('ses_new')]);
+      expect(
+        h.reads.paths.map((path) => Uri.parse(path).path),
+        isNot(contains('api/session/ses_old')),
+      );
+      await h.send([
+        interactionFrame('form.created', formData(session: 'ses_new')),
+      ]);
+      expect(
+        h.state.interactions.single.owner,
+        SessionOwner(refOf('ses_new'), origin: h.ref),
+      );
+    });
+
+    test('a failed listing refreshes each followed child record', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.reads.children = ['ses_done'];
+      h.reads.childOutcomes['ses_done'] = 'succeeded';
+      h.reads.childRecords['ses_done'] = childRecord(
+        'ses_done',
+        outcome: 'succeeded',
+      );
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      expect(h.state.work.single.status.known, WorkStatus.completed);
+
+      h.connection.drop();
+      await h.settle();
+      h.reads.childrenStatus = 500;
+      await h.connect(2);
+      expect(h.state.work.single.status.known, WorkStatus.completed);
+      expect(h.state.work.single.title, 'Verified ses_done');
+      expect(h.connection.released, [1, 2]);
+      expect(
+        h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+        isNot(contains(ConnectionKind.degraded)),
+      );
+    });
+
+    test(
+      'an adoption during hydration survives the earlier snapshot',
+      () async {
+        final h = Harness('ses_a', observeChildren: true, maxChildren: 2);
+        h.reads.children = ['ses_old'];
+        h.reads.childRecords['ses_new'] = childRecord('ses_new');
+        h.owner.watch(h.ref);
+        await h.connect(1);
+        // The transport releases frames only after its initial hydration gate.
+        h.reads.paths.clear();
+        final gate = h.reads.activeGate = Completer<void>();
+        await h.send([repairFrame]);
+        expect(h.reads.paths, contains('api/session/active'));
+        h.reads.active = const {
+          'data': {'ses_new': running},
+        };
+        await h.send([
+          {
+            'type': 'session.created',
+            'data': {'sessionID': 'ses_new', 'parentID': 'ses_a'},
+          },
+        ]);
+        h.reads.activeGate = null;
+        gate.complete();
+        await h.settle();
+        await h.settle();
+        expect(children(h), contains(refOf('ses_new')));
+        await h.send([
+          interactionFrame('form.created', formData(session: 'ses_new')),
+        ]);
+        expect(
+          h.state.interactions.single.owner,
+          SessionOwner(refOf('ses_new'), origin: h.ref),
+        );
+      },
+    );
+
+    test('a newer child request survives a missing record snapshot', () async {
+      final h = Harness('ses_a', observeChildren: true);
+      h.reads.children = ['ses_c'];
+      h.owner.watch(h.ref);
+      await h.connect(1);
+      h.reads.children = [];
+      h.reads.missingChildRecords.add('ses_c');
+      final gate = h.reads.activeGate = Completer<void>();
+      await h.send([repairFrame]);
+      await h.send([
+        interactionFrame('form.created', formData(session: 'ses_c')),
+      ]);
+      expect(h.state.interactions, hasLength(1));
+      h.reads.activeGate = null;
+      gate.complete();
+      await h.settle();
+      expect(h.state.interactions, hasLength(1));
+      await h.send([
+        interactionFrame('form.cancelled', {
+          'sessionID': 'ses_c',
+          'id': 'frm_a',
+        }, id: 'evt_cancel'),
+      ]);
+      expect(h.state.interactions, isEmpty);
+    });
+
     const deleted = {
       'id': 'evt_del',
       'type': 'session.deleted',
@@ -771,6 +995,7 @@ void main() {
       await h.send([deleted]);
       expect(h.state.connection.kind.known, ConnectionKind.live);
       expect(children(h), isEmpty);
+      expect(h.state.work, isEmpty, reason: 'deleted rows are not history');
     });
 
     test('a child deleted mid-hydration is not left running', () async {
@@ -797,6 +1022,11 @@ void main() {
       await h.settle();
       expect(h.state.connection.kind.known, ConnectionKind.live);
       expect(children(h), isEmpty);
+      expect(
+        h.state.work,
+        isEmpty,
+        reason: 'an older snapshot cannot resurrect it',
+      );
     });
 
     test('a child deleted during a repair is not left running', () async {
@@ -827,6 +1057,11 @@ void main() {
       await h.settle();
       expect(h.state.connection.kind.known, ConnectionKind.live);
       expect(children(h), isEmpty);
+      expect(
+        h.state.work,
+        isEmpty,
+        reason: 'repair preserves the deletion barrier',
+      );
     });
 
     test('a followed running child outlives a listing that omits it', () async {
@@ -848,6 +1083,32 @@ void main() {
       // Still followed: its end reaches the parent.
       await h.send([executionFrame('succeeded', session: 'ses_c')]);
       expect(children(h), isEmpty);
+      expect(h.state.work.single.child, refOf('ses_c'));
+      expect(h.state.work.single.status.known, WorkStatus.completed);
     });
+
+    test(
+      'child question forms are surfaced and settled in the parent',
+      () async {
+        final h = Harness('ses_a', observeChildren: true);
+        h.reads.children = ['ses_c'];
+        h.owner.watch(h.ref);
+        await h.connect(1);
+        await h.send([
+          interactionFrame('form.created', formData(session: 'ses_c')),
+        ]);
+        final request = h.state.interactions.single;
+        expect(request.owner, SessionOwner(refOf('ses_c'), origin: h.ref));
+        expect(request.requiresInput, isTrue);
+        expect(request.autoApprovable, isFalse);
+        await h.send([
+          interactionFrame('form.cancelled', {
+            'sessionID': 'ses_c',
+            'id': 'frm_a',
+          }, id: 'evt_cancel'),
+        ]);
+        expect(h.state.interactions, isEmpty);
+      },
+    );
   });
 }

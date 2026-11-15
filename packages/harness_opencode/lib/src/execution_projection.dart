@@ -238,29 +238,32 @@ List<SessionEvent> projectOpenCodeRetryEvent(
   ]);
 }
 
-/// The parent's record of a direct [child] the server shows running. A
-/// parent's own execution says nothing about its children (it goes idle
-/// while they run), so they are counted on the parent instead.
-WorkItem openCodeRunningChild(
+/// A verified child's own activity or last outcome, never its parent's result.
+WorkItem openCodeChildWork(
   SessionRef child,
-  SessionRef parent, {
+  SessionRef parent,
+  WorkStatus status, {
+  String? title,
+  ErrorInfo? error,
   SourceProvenance? source,
 }) => WorkItem(
   id: WorkId(jsonEncode(['child', child.storageKey])),
   owner: SessionOwner(child, origin: parent),
   child: child,
   parent: parent,
-  status: const OpenValue.known(WorkStatus.running),
+  status: OpenValue.known(status),
   completionScope: const OpenValue.known(CompletionScope.child),
+  title: title,
+  error: error,
   source: source,
 );
 
 /// Projects one 2.0.22 execution lifecycle event of a direct [child] onto
 /// the work of the [current] parent, without owning a stream or clock.
 ///
-/// `started` adds the child's running record and every end removes it,
-/// a shutdown too: the child is not running, and a resumed child starts
-/// again. The parent's own execution is never touched. Returns null for
+/// Terminal records remain available to the parent's subagent history.
+/// A shutdown is unconfirmed, not a successful completion; resumption starts
+/// the child again. The parent's own execution is never touched. Returns null for
 /// other types and sessions, or when the record already matches.
 WorkChanged? projectOpenCodeChildExecutionEvent(
   Object? value,
@@ -274,17 +277,25 @@ WorkChanged? projectOpenCodeChildExecutionEvent(
   if (header == null) return null;
   final (:type, :data, :nativeId, :created, :aggregateId, :aggregateSeq) =
       header;
-  if (type == _failed) _error(data['error']);
+  final error = type == _failed ? _error(data['error'], typed: true) : null;
   if (type == _interrupted &&
       !_reasons.contains(_text(data['reason'], cap: _idLimit))) {
     _fail(OpenCodeExecutionProjectionFailure.unsupportedValue);
   }
-  final running = type == _started;
+  final status = switch (type) {
+    _started => WorkStatus.running,
+    _succeeded => WorkStatus.completed,
+    _failed => WorkStatus.failed,
+    _interrupted when data['reason'] == 'shutdown' => WorkStatus.unknown,
+    _interrupted => WorkStatus.cancelled,
+    _ => WorkStatus.unknown,
+  };
+  final previous = current.work.where((w) => w.child == child).firstOrNull;
   final others = [
     for (final item in current.work)
       if (item.child != child) item,
   ];
-  if (running == (others.length != current.work.length)) return null;
+  if (previous?.status.known == status && type != _failed) return null;
   final source = SourceProvenance(
     harness: current.ref.harnessRef,
     version: sourceVersion,
@@ -307,7 +318,14 @@ WorkChanged? projectOpenCodeChildExecutionEvent(
     ),
     items: [
       ...others,
-      if (running) openCodeRunningChild(child, current.ref, source: source),
+      openCodeChildWork(
+        child,
+        current.ref,
+        status,
+        title: previous?.title,
+        error: error,
+        source: source,
+      ),
     ],
   );
 }

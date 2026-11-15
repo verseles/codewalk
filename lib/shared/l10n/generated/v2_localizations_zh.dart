@@ -12,6 +12,32 @@ class V2LocalizationsZh extends V2Localizations {
   V2LocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => '子代理';
+
+  @override
+  String get liveSubagentsActive => '活动中';
+
+  @override
+  String get liveSubagentsCompleted => '已完成';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$count 个活动子代理';
+  }
+
+  @override
+  String get liveSubagentsEmpty => '此处没有子代理。';
+
+  @override
+  String get liveSubagentsUnknown => '状态未确认';
+
+  @override
+  String get liveSubagentsCancelled => '已取消';
+
+  @override
+  String get liveSubagentsRecent => '最近的子对话';
+
+  @override
   String get chatAddServerToStart => '添加服务器以开始聊天。';
 
   @override

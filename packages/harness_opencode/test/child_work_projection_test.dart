@@ -95,6 +95,13 @@ void main() {
         3,
       );
       expect(running(ended), [other], reason: '$phase $reason');
+      final record = ended.work.singleWhere((w) => w.child == child);
+      expect(record.status.known, switch ((phase, reason)) {
+        ('succeeded', _) => WorkStatus.completed,
+        ('failed', _) => WorkStatus.failed,
+        ('interrupted', 'shutdown') => WorkStatus.unknown,
+        _ => WorkStatus.cancelled,
+      });
     }
   });
 
@@ -103,9 +110,46 @@ void main() {
     expect(project(executionFrame('started'), parent), isNull);
     expect(project(retryFrame(session: 'ses_child'), parent), isNull);
     expect(
-      project(executionFrame('succeeded', session: 'ses_child'), parent),
-      isNull,
+      project(
+        executionFrame('succeeded', session: 'ses_child'),
+        parent,
+      )?.items.single.status.known,
+      WorkStatus.completed,
     );
+  });
+
+  test('a retained terminal child can run again and keeps its title', () {
+    final initial = reduce(
+      SessionState(historyRef),
+      WorkChanged(
+        meta: EventMeta(
+          owner: SessionOwner(historyRef),
+          position: observedPosition(0),
+          receivedAt: received,
+          source: SourceProvenance(
+            harness: historyRef.harnessRef,
+            version: '2.0.22',
+            nativeType: 'fixture',
+          ),
+        ),
+        items: [
+          openCodeChildWork(
+            child,
+            historyRef,
+            WorkStatus.completed,
+            title: 'Review',
+          ),
+        ],
+      ),
+    ).state;
+    final restarted = apply(
+      initial,
+      executionFrame('started', session: 'ses_child'),
+      1,
+    );
+    expect(restarted.work.single.title, 'Review');
+    expect(running(restarted), [child]);
+    expect(restarted.execution, isNull);
   });
 
   test('malformed child frames fail by category', () {

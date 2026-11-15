@@ -24,8 +24,6 @@ import 'unrestricted_ownership_store.dart';
 /// The per-profile runtime of one OpenCode v2 endpoint: the
 /// authenticated transport, the session reader, the single global event
 /// stream and everything a live session or the session catalog needs from it.
-/// It lives in its own file so the live directory stays readable and below the
-/// architecture guard's file-size limit.
 final class OpenCodeProfileSlot {
   OpenCodeProfileSlot(
     this.profile,

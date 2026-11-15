@@ -12,6 +12,32 @@ class V2LocalizationsAr extends V2Localizations {
   V2LocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'الوكلاء الفرعيون';
+
+  @override
+  String get liveSubagentsActive => 'نشطون';
+
+  @override
+  String get liveSubagentsCompleted => 'مكتملون';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$count وكلاء فرعيون نشطون';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'لا يوجد وكلاء فرعيون هنا.';
+
+  @override
+  String get liveSubagentsUnknown => 'الحالة غير مؤكدة';
+
+  @override
+  String get liveSubagentsCancelled => 'ملغى';
+
+  @override
+  String get liveSubagentsRecent => 'المحادثات الفرعية الأخيرة';
+
+  @override
   String get chatAddServerToStart => 'أضف خادماً لبدء الدردشة.';
 
   @override

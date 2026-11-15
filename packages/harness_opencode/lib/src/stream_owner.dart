@@ -332,37 +332,38 @@ final class OpenCodeStreamOwner {
   }
 
   void _adopt(SessionRef parent, Iterable<SessionRef> children) {
-    final known = _children.putIfAbsent(parent, () => <SessionRef>{});
-    for (final child in children) {
-      if (child == parent || child.harnessRef != harness) continue;
-      if (known.length >= maxChildren && !known.contains(child)) break;
-      known.add(child);
-    }
+    _reconcileChildren(parent, [...children, ...?_children[parent]]);
   }
 
   void _reconcileChildren(SessionRef parent, Iterable<SessionRef> listed) {
     final active = store.read(parent);
-    // A child the parent already holds a request or a running record for
-    // stays followed even when the listed page no longer reaches it.
-    final residentChildren = {
+    final resident = {
+      if (active != null)
+        for (final work in active.work)
+          if (work.parent == parent && work.child != null) work.child!: work,
+    };
+    // Ongoing work and human requests outrank the recent page. Old terminal
+    // rows must not consume the follow budget ahead of a newly created child.
+    final priority = {
       if (active != null)
         for (final r in active.interactions)
           if (r.owner is SessionOwner &&
               (r.owner as SessionOwner).origin == parent)
             (r.owner as SessionOwner).session,
-      if (active != null)
-        for (final w in active.work)
-          if (w.parent == parent && w.child != null) w.child!,
+      for (final entry in resident.entries)
+        if (entry.value.status.known == WorkStatus.running ||
+            entry.value.status.known == WorkStatus.waiting ||
+            entry.value.status.known == WorkStatus.queued)
+          entry.key,
+      // A creation frame can precede its first work projection or listed row.
+      for (final child in _children[parent] ?? const <SessionRef>{})
+        if (!resident.containsKey(child)) child,
     };
     final next = <SessionRef>{};
-    for (final child in residentChildren) {
+    for (final child in [...priority, ...listed, ...resident.keys]) {
       if (child == parent || child.harnessRef != harness) continue;
       next.add(child);
-    }
-    for (final child in listed) {
-      if (child == parent || child.harnessRef != harness) continue;
-      if (next.length >= maxChildren && !next.contains(child)) break;
-      next.add(child);
+      if (next.length == maxChildren) break;
     }
     _children[parent] = next;
   }
@@ -572,16 +573,29 @@ final class OpenCodeStreamOwner {
           readStart: readStart,
         );
         try {
+          List<SessionSummary>? childSummaries;
           if (observeChildren) {
             // Installed before the children's pending reads, so frames that
             // arrive meanwhile are held and replayed in order.
-            final listed = await reader.listChildSessions(
-              ref,
-              cancellation: cancellation,
-            );
+            try {
+              childSummaries = await reader.listChildSummaries(
+                ref,
+                cancellation: cancellation,
+              );
+            } on OpenCodeSessionReadException catch (error) {
+              if (error.failure == OpenCodeSessionReadFailure.cancelled) {
+                rethrow;
+              }
+              // Failure to discover children does not make the parent unreadable.
+              // Refresh followed records individually instead of losing their outcomes.
+              childSummaries = const [];
+            }
             if (!_current(ref, watch, generation) || watch.stalled) return;
-            _reconcileChildren(ref, listed);
+            _reconcileChildren(ref, childSummaries.map((s) => s.info.ref));
           }
+          final followed = observeChildren
+              ? Set<SessionRef>.of(_children[ref] ?? const <SessionRef>{})
+              : const <SessionRef>{};
           final snapshot = await reader.hydrateSession(
             ref,
             hydrationGeneration: '$generation',
@@ -590,9 +604,9 @@ final class OpenCodeStreamOwner {
             historyLimit: historyPageLimit,
             now: _now,
             cancellation: cancellation,
-            children: observeChildren
-                ? (_children[ref] ?? const <SessionRef>{})
-                : const <SessionRef>[],
+            children: followed,
+            childSummaries: childSummaries,
+            residentInteractions: store.read(ref)?.interactions ?? const [],
           );
           if (!_current(ref, watch, generation) || watch.stalled) return;
           final result = store.applySnapshot(ref, snapshot);
@@ -619,6 +633,24 @@ final class OpenCodeStreamOwner {
             child == null
                 ? _apply(ref, value, seq)
                 : _applyChild(ref, child, value, seq);
+          }
+          final current = store.read(ref);
+          if (current != null && followed.isNotEmpty) {
+            final resident = {
+              for (final work in current.work)
+                if (work.parent == ref && work.child != null) work.child!,
+              for (final request in current.interactions)
+                if (request.owner case SessionOwner(
+                  :final session,
+                  :final origin,
+                ))
+                  if (origin == ref) session,
+            };
+            // A missing record frees its slot only after newer events replay.
+            // Children adopted after this read began belong to the next repair.
+            _children[ref]?.removeWhere(
+              (child) => followed.contains(child) && !resident.contains(child),
+            );
           }
           _handle(ref, result.effects);
           return;
@@ -763,7 +795,7 @@ final class OpenCodeStreamOwner {
   }
 
   /// Adopts a child created under a watched parent and forwards a child's
-  /// permission frames to every watched parent that follows it.
+  /// human-request frames to every watched parent that follows it.
   void _routeChild(
     SessionRef ref,
     Map<String, Object?> data,
@@ -781,7 +813,10 @@ final class OpenCodeStreamOwner {
         return;
       }
       final parent = SessionRef(harness.host, harness.harness, parentId);
-      if (_watched.containsKey(parent)) _adopt(parent, [ref]);
+      if (_watched.containsKey(parent)) {
+        _adopt(parent, [ref]);
+        _repair(parent);
+      }
       return;
     }
     if (type == 'session.deleted') {
@@ -789,6 +824,31 @@ final class OpenCodeStreamOwner {
           in _children.entries.toList()) {
         if (!known.remove(ref)) continue;
         final state = store.read(parent);
+        // Even an empty work set needs the deletion's read barrier: a snapshot
+        // already in flight may still carry the child it read before deletion.
+        if (state != null) {
+          final result = store.apply(
+            parent,
+            WorkChanged(
+              meta: EventMeta(
+                owner: SessionOwner(parent),
+                position: _position(seq),
+                receivedAt: _now(),
+                source: SourceProvenance(
+                  harness: harness,
+                  version: sourceVersion,
+                  nativeType: 'session.deleted',
+                ),
+              ),
+              items: [
+                for (final work in state.work)
+                  if (work.child != ref) work,
+              ],
+            ),
+          );
+          _emit(OpenCodeSessionUpdated(parent, result.state, result.effects));
+          _handle(parent, result.effects);
+        }
         final owned =
             state != null &&
             (state.interactions.any(
@@ -807,6 +867,9 @@ final class OpenCodeStreamOwner {
     }
     if (type != 'permission.asked' &&
         type != 'permission.replied' &&
+        type != 'form.created' &&
+        type != 'form.replied' &&
+        type != 'form.cancelled' &&
         !(type is String && type.startsWith('session.execution.'))) {
       return;
     }

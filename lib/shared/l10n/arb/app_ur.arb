@@ -1,5 +1,13 @@
 {
   "@@locale": "ur",
+  "liveSubagentsTitle": "ذیلی ایجنٹ",
+  "liveSubagentsActive": "فعال",
+  "liveSubagentsCompleted": "مکمل",
+  "liveSubagentsCount": "{count} فعال ذیلی ایجنٹ",
+  "liveSubagentsEmpty": "یہاں کوئی ذیلی ایجنٹ نہیں ہے۔",
+  "liveSubagentsUnknown": "حالت غیر مصدقہ ہے",
+  "liveSubagentsCancelled": "منسوخ",
+  "liveSubagentsRecent": "حالیہ ذیلی گفتگو",
   "chatAddServerToStart": "چیٹنگ شروع کرنے کے لیے ایک سرور شامل کریں۔",
   "chatConversation": "بات چیت",
   "chatConversations": "بات چیت",

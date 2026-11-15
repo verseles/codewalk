@@ -12,6 +12,32 @@ class V2LocalizationsHi extends V2Localizations {
   V2LocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'उप-एजेंट';
+
+  @override
+  String get liveSubagentsActive => 'सक्रिय';
+
+  @override
+  String get liveSubagentsCompleted => 'पूर्ण';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$count सक्रिय उप-एजेंट';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'यहाँ कोई उप-एजेंट नहीं है।';
+
+  @override
+  String get liveSubagentsUnknown => 'स्थिति की पुष्टि नहीं हुई';
+
+  @override
+  String get liveSubagentsCancelled => 'रद्द';
+
+  @override
+  String get liveSubagentsRecent => 'हाल की उप-बातचीत';
+
+  @override
   String get chatAddServerToStart => 'चैटिंग शुरू करने के लिए एक सर्वर जोड़ें।';
 
   @override

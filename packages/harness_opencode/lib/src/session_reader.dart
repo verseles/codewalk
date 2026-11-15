@@ -545,6 +545,20 @@ final class OpenCodeSessionReader {
     SessionRef parent, {
     int limit = maxChildSessions,
     RequestCancellation? cancellation,
+  }) async => [
+    for (final child in await listChildSummaries(
+      parent,
+      limit: limit,
+      cancellation: cancellation,
+    ))
+      child.info.ref,
+  ];
+
+  /// Keeps titles and the child's own terminal outcome for the recent roster.
+  Future<List<SessionSummary>> listChildSummaries(
+    SessionRef parent, {
+    int limit = maxChildSessions,
+    RequestCancellation? cancellation,
   }) async {
     _checkOpen();
     if (parent.harnessRef != harness) {
@@ -574,16 +588,18 @@ final class OpenCodeSessionReader {
       if (rows.length > limit) {
         throw const FormatException('Child page exceeds its item limit.');
       }
-      final children = <SessionRef>[];
+      final children = <SessionSummary>[];
+      final seen = <SessionRef>{};
       for (final row in rows) {
-        final info = projectOpenCodeSession(row, harness).info;
+        final summary = projectOpenCodeSession(row, harness);
+        final info = summary.info;
         if (info.lineage.parent != parent || info.ref == parent) {
           throw const FormatException('Child row names another parent.');
         }
-        if (children.contains(info.ref)) {
+        if (!seen.add(info.ref)) {
           throw const FormatException('Duplicate child session.');
         }
-        children.add(info.ref);
+        children.add(summary);
       }
       return children;
     }, cancellation);
@@ -806,6 +822,8 @@ final class OpenCodeSessionReader {
     DateTime Function()? now,
     RequestCancellation? cancellation,
     Iterable<SessionRef> children = const [],
+    Iterable<SessionSummary>? childSummaries,
+    Iterable<InteractionRequest> residentInteractions = const [],
   }) async {
     _checkOpen();
     final childRefs = children.toList();
@@ -868,6 +886,23 @@ final class OpenCodeSessionReader {
       return (value, started, completed);
     }
 
+    // The child budget bounds memory; four workers also bound network pressure
+    // without serializing up to 128 reads behind the parent's generation gate.
+    Future<void> forChildren(
+      Iterable<SessionRef> refs,
+      Future<void> Function(SessionRef) read,
+    ) async {
+      final iterator = refs.iterator;
+      Future<void> worker() async {
+        while (iterator.moveNext()) {
+          final child = iterator.current;
+          await read(child);
+        }
+      }
+
+      await Future.wait([for (var i = 0; i < 4; i++) worker()]);
+    }
+
     List<Object?> list(Object? value) {
       if (value is! Map<String, Object?> || value['data'] is! List) {
         throw const FormatException('Malformed list response.');
@@ -903,6 +938,34 @@ final class OpenCodeSessionReader {
       },
     );
     final (summary, revert, selection) = record;
+    final childRecords = {
+      for (final child in childSummaries ?? const <SessionSummary>[])
+        if (child.info.lineage.parent == ref &&
+            child.info.ref.harnessRef == harness)
+          child.info.ref: child,
+    };
+    final missingChildren = <SessionRef>{};
+    if (childSummaries != null) {
+      // A bounded newest page can omit a child already followed. Refresh that
+      // child's own record instead of deleting it or guessing its last outcome.
+      await forChildren(childRefs.where((c) => !childRecords.containsKey(c)), (
+        child,
+      ) async {
+        try {
+          final item = await readSession(child, cancellation: cancellation);
+          if (item.info.lineage.parent == ref) {
+            childRecords[child] = item;
+          } else {
+            missingChildren.add(child);
+          }
+        } on OpenCodeSessionReadException catch (error) {
+          if (error.failure == OpenCodeSessionReadFailure.cancelled) rethrow;
+          if (error.failure == OpenCodeSessionReadFailure.notFound) {
+            missingChildren.add(child);
+          }
+        }
+      });
+    }
     final generation = jsonEncode([
       'hydration',
       ref.storageKey,
@@ -948,9 +1011,13 @@ final class OpenCodeSessionReader {
     // Children's pending requests join the parent's authoritative collection,
     // owned by the child with the parent as origin, so a re-hydration never
     // drops them and a request raised before connecting is still shown.
-    final childPermissions = <InteractionRequest>[];
+    final childRequests = <SessionRef, List<InteractionRequest>>{};
+    final failedReads = <(SessionRef, InteractionKind)>{};
     var childEnd = formEnd;
-    for (final child in childRefs) {
+    await forChildren(childRefs.where((c) => !missingChildren.contains(c)), (
+      child,
+    ) async {
+      final requests = childRequests[child] = <InteractionRequest>[];
       try {
         final (rows, _, end) = await timed(
           Uri(
@@ -963,15 +1030,38 @@ final class OpenCodeSessionReader {
             ],
           ),
         );
-        childPermissions.addAll(rows);
+        requests.addAll(rows);
         if (end.isAfter(childEnd)) childEnd = end;
       } on OpenCodeSessionReadException catch (error) {
         // Explicit cancellation halts the entire hydration. Any read failure
         // on a child (deleted, 500, timeout, malformed) is skipped so a child
         // issue never degrades or sets aside the parent session.
         if (error.failure == OpenCodeSessionReadFailure.cancelled) rethrow;
+        if (error.failure != OpenCodeSessionReadFailure.notFound) {
+          failedReads.add((child, InteractionKind.permission));
+        }
       }
-    }
+      try {
+        final (rows, _, end) = await timed(
+          Uri(
+            pathSegments: ['api', 'session', child.nativeId, 'form'],
+          ).toString(),
+          (value) => _projected(
+            () => [
+              for (final row in list(value))
+                openCodePendingForm(row, child, origin: ref),
+            ],
+          ),
+        );
+        requests.addAll(rows);
+        if (end.isAfter(childEnd)) childEnd = end;
+      } on OpenCodeSessionReadException catch (error) {
+        if (error.failure == OpenCodeSessionReadFailure.cancelled) rethrow;
+        if (error.failure != OpenCodeSessionReadFailure.notFound) {
+          failedReads.add((child, InteractionKind.form));
+        }
+      }
+    });
 
     String? messageOf(ItemId id) {
       try {
@@ -994,7 +1084,19 @@ final class OpenCodeSessionReader {
       if (row.pending case final entry?) pending.add(entry);
       admissions.addAll(row.items);
     }
-    final interactions = [...permissions, ...forms, ...childPermissions];
+    // A failed child endpoint cannot keep settled parent/sibling cards alive.
+    // Only that endpoint's resident requests remain unconfirmed; Core's
+    // read-start and per-request removal fences still protect newer events.
+    final interactions = [
+      ...permissions,
+      ...forms,
+      for (final child in childRefs) ...?childRequests[child],
+      for (final request in residentInteractions)
+        if (request.owner case SessionOwner(:final session, :final origin))
+          if (origin == ref &&
+              failedReads.contains((session, request.kind.known)))
+            request,
+    ];
     final identities = {
       for (final request in interactions) request.identityKey,
     };
@@ -1050,13 +1152,25 @@ final class OpenCodeSessionReader {
         ),
         boundary: boundary('session.active', activeStart, activeEnd),
       ),
-      // The given children the active map shows running; the parent's own
-      // entry says nothing about them.
+      // Active membership overrides an older outcome. Absence alone never
+      // proves completion; unknown records remain available without a badge.
       work: SnapshotCollection(
         values: [
           for (final child in childRefs)
-            if (active.contains(child.nativeId))
-              openCodeRunningChild(child, ref),
+            if (!missingChildren.contains(child))
+              openCodeChildWork(
+                child,
+                ref,
+                active.contains(child.nativeId)
+                    ? WorkStatus.running
+                    : switch (childRecords[child]?.outcome) {
+                        SessionOutcome.succeeded => WorkStatus.completed,
+                        SessionOutcome.failed => WorkStatus.failed,
+                        SessionOutcome.interrupted => WorkStatus.cancelled,
+                        null => WorkStatus.unknown,
+                      },
+                title: childRecords[child]?.info.title,
+              ),
         ],
         boundary: boundary('session.active', activeStart, activeEnd),
         complete: true,

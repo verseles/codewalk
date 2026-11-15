@@ -29,6 +29,7 @@ import 'session_permission_card.dart';
 import 'session_search_bar.dart';
 import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
+import 'session_subagent_capsule.dart';
 import 'session_switch_note.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
@@ -121,6 +122,21 @@ class _SessionLivePageState extends State<SessionLivePage>
         context,
         widget.controller,
         tool,
+        current: () => mounted && tap == _childTap,
+        lookup: lookup,
+      ),
+    );
+  }
+
+  void _openRosterChild(SessionRef child) {
+    final tap = ++_childTap;
+    _childLookup?.cancel();
+    final lookup = _childLookup = SubconversationLookup();
+    unawaited(
+      openSubconversationFromRoster(
+        context,
+        widget.controller,
+        child,
         current: () => mounted && tap == _childTap,
         lookup: lookup,
       ),
@@ -437,6 +453,7 @@ class _SessionLivePageState extends State<SessionLivePage>
               final stopNotice =
                   c.outbox == null &&
                   c.stopState.phase != SessionStopPhase.ready;
+              final hasSubagents = subagentWork(state).isNotEmpty;
               final chrome =
                   (c.summary.info.lineage.parent != null
                       ? returnToParentHeight(context)
@@ -446,6 +463,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                   (c.outbox == null ? SessionComposerStatus.height : 0.0) +
                   (c.search.open ? SessionSearchBar.heightOf(context) : 0.0) +
                   (stopButton ? 56.0 : 0.0) +
+                  (hasSubagents ? SessionSubagentCapsule.height : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
               final space = max(0.0, body.maxHeight - pad - chrome);
               final composerBase = max(
@@ -533,6 +551,14 @@ class _SessionLivePageState extends State<SessionLivePage>
                           ),
                         ),
                       ),
+                      if (hasSubagents)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: SessionSubagentCapsule(
+                            live: c,
+                            onOpen: _openRosterChild,
+                          ),
+                        ),
                       SafeArea(
                         top: false,
                         child: Padding(
@@ -585,9 +611,18 @@ class _SessionLivePageState extends State<SessionLivePage>
                                         // footer explains that only prompt
                                         // sending is out, whether or not the
                                         // cards above it can still reply.
-                                        Text(
-                                          l10n.liveSendUnavailable,
-                                          key: const ValueKey('live-composer'),
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxHeight: composerBudget,
+                                          ),
+                                          child: SingleChildScrollView(
+                                            child: Text(
+                                              l10n.liveSendUnavailable,
+                                              key: const ValueKey(
+                                                'live-composer',
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                         if (c.canStop || c.stopping)
                                           SessionStopButton(live: c),

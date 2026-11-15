@@ -123,6 +123,54 @@ abstract class V2Localizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @liveSubagentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-agents'**
+  String get liveSubagentsTitle;
+
+  /// No description provided for @liveSubagentsActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get liveSubagentsActive;
+
+  /// No description provided for @liveSubagentsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get liveSubagentsCompleted;
+
+  /// Accessible label for the subagent capsule; counts executing or awaiting a human reply.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active sub-agents'**
+  String liveSubagentsCount(int count);
+
+  /// No description provided for @liveSubagentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No sub-agents here.'**
+  String get liveSubagentsEmpty;
+
+  /// No description provided for @liveSubagentsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Status unconfirmed'**
+  String get liveSubagentsUnknown;
+
+  /// No description provided for @liveSubagentsCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get liveSubagentsCancelled;
+
+  /// No description provided for @liveSubagentsRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent sub-conversations'**
+  String get liveSubagentsRecent;
+
   /// CodeWalk UI string — chatAddServerToStart
   ///
   /// In en, this message translates to:

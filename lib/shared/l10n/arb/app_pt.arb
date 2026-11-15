@@ -1,5 +1,13 @@
 {
   "@@locale": "pt",
+  "liveSubagentsTitle": "Subagentes",
+  "liveSubagentsActive": "Ativos",
+  "liveSubagentsCompleted": "Concluídos",
+  "liveSubagentsCount": "{count} subagentes ativos",
+  "liveSubagentsEmpty": "Nenhum subagente aqui.",
+  "liveSubagentsUnknown": "Estado não confirmado",
+  "liveSubagentsCancelled": "Cancelado",
+  "liveSubagentsRecent": "Sub-conversas recentes",
   "chatAddServerToStart": "Adicione um servidor para começar a conversar.",
   "chatConversation": "Conversa",
   "chatConversations": "Conversas",

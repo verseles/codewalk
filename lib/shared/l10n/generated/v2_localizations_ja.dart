@@ -12,6 +12,32 @@ class V2LocalizationsJa extends V2Localizations {
   V2LocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'サブエージェント';
+
+  @override
+  String get liveSubagentsActive => '実行中';
+
+  @override
+  String get liveSubagentsCompleted => '完了';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '実行中のサブエージェント: $count';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'サブエージェントはありません。';
+
+  @override
+  String get liveSubagentsUnknown => '状態未確認';
+
+  @override
+  String get liveSubagentsCancelled => 'キャンセル済み';
+
+  @override
+  String get liveSubagentsRecent => '最近のサブ会話';
+
+  @override
   String get chatAddServerToStart => 'チャットを開始するにはサーバーを追加してください。';
 
   @override

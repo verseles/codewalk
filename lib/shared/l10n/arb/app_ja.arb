@@ -1,5 +1,13 @@
 {
   "@@locale": "ja",
+  "liveSubagentsTitle": "サブエージェント",
+  "liveSubagentsActive": "実行中",
+  "liveSubagentsCompleted": "完了",
+  "liveSubagentsCount": "実行中のサブエージェント: {count}",
+  "liveSubagentsEmpty": "サブエージェントはありません。",
+  "liveSubagentsUnknown": "状態未確認",
+  "liveSubagentsCancelled": "キャンセル済み",
+  "liveSubagentsRecent": "最近のサブ会話",
   "chatAddServerToStart": "チャットを開始するにはサーバーを追加してください。",
   "chatConversation": "会話",
   "chatConversations": "会話一覧",

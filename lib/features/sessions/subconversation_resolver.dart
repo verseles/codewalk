@@ -42,6 +42,35 @@ typedef SubconversationChoice = ({
   List<SessionSummary>? listed,
 });
 
+/// A roster already names its child; opening it still re-reads the exact
+/// lineage, with the same cancellation and timeout as a timeline lookup.
+Future<bool> verifySubconversation({
+  required SessionRef parent,
+  required SessionRef child,
+  required SessionCatalogSource source,
+  required bool Function() current,
+  required SubconversationLookup lookup,
+}) async {
+  if (child == parent || child.harnessRef != parent.harnessRef) return false;
+  try {
+    final task = source.read(child);
+    lookup._track(task.cancel);
+    final row = await Future.any([
+      task.result,
+      lookup._whenCancelled.future.then<SessionSummary>(
+        (_) => throw StateError('Sub-conversation lookup cancelled'),
+      ),
+    ]).timeout(subconversationTimeout);
+    return current() &&
+        !lookup._cancelled &&
+        row.info.ref == child &&
+        row.info.lineage.parent == parent;
+  } on Object {
+    lookup.cancel();
+    return false;
+  }
+}
+
 /// The sub-conversation a tapped subagent call opens: a direct child of
 /// [parent], or null when none can be told apart, which is better than
 /// opening the wrong one.

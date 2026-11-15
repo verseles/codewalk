@@ -12,6 +12,32 @@ class V2LocalizationsIt extends V2Localizations {
   V2LocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String get liveSubagentsTitle => 'Sottoagenti';
+
+  @override
+  String get liveSubagentsActive => 'Attivi';
+
+  @override
+  String get liveSubagentsCompleted => 'Completati';
+
+  @override
+  String liveSubagentsCount(int count) {
+    return '$count sottoagenti attivi';
+  }
+
+  @override
+  String get liveSubagentsEmpty => 'Nessun sottoagente qui.';
+
+  @override
+  String get liveSubagentsUnknown => 'Stato non confermato';
+
+  @override
+  String get liveSubagentsCancelled => 'Annullato';
+
+  @override
+  String get liveSubagentsRecent => 'Conversazioni secondarie recenti';
+
+  @override
   String get chatAddServerToStart =>
       'Aggiungi un server per iniziare a chattare.';
 

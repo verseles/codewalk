@@ -96,6 +96,51 @@ Future<void> openSubconversation(
   router.go(sessionTabLocation(child));
 }
 
+/// Opens a verified roster entry without inventing a tool call or pairing it
+/// with timeline text. Navigation or a newer tap wins over the pending read.
+Future<void> openSubconversationFromRoster(
+  BuildContext context,
+  SessionLiveController live,
+  SessionRef child, {
+  required bool Function() current,
+  required SubconversationLookup lookup,
+}) async {
+  final parent = live.session;
+  final source = context.read<SessionsController?>()?.sourceFor(parent);
+  final router = GoRouter.of(context);
+  final routes = router.routeInformationProvider;
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final missing = context.v2L10n.chatNoSubConversationFound;
+  var moved = false;
+  void navigated() {
+    moved = true;
+    lookup.cancel();
+  }
+
+  bool leads() => current() && !moved;
+  routes.addListener(navigated);
+  var verified = false;
+  try {
+    if (source != null) {
+      verified = await verifySubconversation(
+        parent: parent,
+        child: child,
+        source: source,
+        current: leads,
+        lookup: lookup,
+      );
+    }
+  } finally {
+    routes.removeListener(navigated);
+  }
+  if (!leads()) return;
+  if (verified) {
+    router.go(sessionTabLocation(child));
+  } else if (messenger?.mounted ?? false) {
+    showAppSnackBar(messenger, missing);
+  }
+}
+
 /// The height of [ReturnToParentConversation] at the current text size, so
 /// the page can set it aside before sharing out the rest.
 double returnToParentHeight(BuildContext context) =>

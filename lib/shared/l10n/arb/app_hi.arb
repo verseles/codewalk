@@ -1,5 +1,13 @@
 {
   "@@locale": "hi",
+  "liveSubagentsTitle": "उप-एजेंट",
+  "liveSubagentsActive": "सक्रिय",
+  "liveSubagentsCompleted": "पूर्ण",
+  "liveSubagentsCount": "{count} सक्रिय उप-एजेंट",
+  "liveSubagentsEmpty": "यहाँ कोई उप-एजेंट नहीं है।",
+  "liveSubagentsUnknown": "स्थिति की पुष्टि नहीं हुई",
+  "liveSubagentsCancelled": "रद्द",
+  "liveSubagentsRecent": "हाल की उप-बातचीत",
   "chatAddServerToStart": "चैटिंग शुरू करने के लिए एक सर्वर जोड़ें।",
   "chatConversation": "बातचीत",
   "chatConversations": "बातचीत",

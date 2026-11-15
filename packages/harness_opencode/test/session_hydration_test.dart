@@ -516,7 +516,14 @@ void main() {
     final work = snapshot.work!;
     expect(work.complete, isTrue);
     expect(work.boundary.source!.nativeType, 'session.active');
-    final item = work.values.single;
+    final item = work.values.singleWhere(
+      (w) => w.status.known == WorkStatus.running,
+    );
+    expect(work.values, hasLength(2));
+    expect(
+      work.values.singleWhere((w) => w.child == child('ses_done')).status.known,
+      WorkStatus.unknown,
+    );
     expect(item.child, child('ses_child'));
     expect(item.parent, historyRef);
     expect(item.status.known, WorkStatus.running);
@@ -529,7 +536,10 @@ void main() {
       readStart: observedPosition(10),
     );
     final state = store.applySnapshot(historyRef, snapshot).state;
-    expect(state.work.single.child, child('ses_child'));
+    expect(
+      state.work.singleWhere((w) => w.status.known == WorkStatus.running).child,
+      child('ses_child'),
+    );
     expect(state.execution!.kind.known, ExecutionKind.idle);
     // Without children, the work is an authoritative empty list.
     expect((await hydrate(Server())).work!.values, isEmpty);
