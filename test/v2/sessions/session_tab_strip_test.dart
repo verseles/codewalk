@@ -3,6 +3,9 @@ import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/project_icon_view.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
+import 'package:codewalk/features/sessions/session_tab_chip.dart';
+import 'package:codewalk/platform/sessions/session_tabs_store.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -15,6 +18,7 @@ import 'package:shared_preferences_platform_interface/in_memory_shared_preferenc
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 import '../hosts/fakes.dart';
+import '../storage/storage_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
 
@@ -38,6 +42,7 @@ Future<_App> _launch(
   WidgetTester tester,
   String link, {
   Size size = const Size(1280, 800),
+  V2MetadataStore? store,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -53,6 +58,7 @@ Future<_App> _launch(
     endpointProber: FakeProber(),
     sessionCatalogFactory: rig.create,
     sessionLiveDirectory: () => directory,
+    metadataStore: store,
   );
   await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
   await _settle(tester);
@@ -554,6 +560,91 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('the close key on a shown child returns to its parent', (
+    tester,
+  ) async {
+    _useMemoryPreferences();
+    final app = await _launch(tester, '/sessions');
+    final source = app.rig.sources.single;
+    source.respond([
+      source.row('parent', title: 'Parent', directory: '/w'),
+      source.row('kid', title: 'Kid', directory: '/w', parent: 'parent'),
+    ]);
+    await _settle(tester);
+    await _visit(tester, app, ['parent']);
+    final tabs = app.dependencies.sessionTabs!;
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_parent']);
+
+    // The child is visited, never tabbed: the strip shows the parent's tab
+    // as the selected one while the child is on screen.
+    app.dependencies.router.go('/s/profile_a/ses_kid');
+    await _settle(tester);
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_parent']);
+    expect(tabs.selectedFor(const HostId('profile_a'))?.nativeId, 'ses_parent');
+    expect(
+      tester
+          .widget<SessionTabChip>(
+            find.ancestor(
+              of: _tab(app, 'parent'),
+              matching: find.byType(SessionTabChip),
+            ),
+          )
+          .selected,
+      isTrue,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyW);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await _settle(tester);
+    expect(_location(app), '/s/profile_a/ses_parent');
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_parent']);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a saved child tab is not a launch tab; the list stays', (
+    tester,
+  ) async {
+    // A tab an older build saved for the child, selected on its server.
+    final backend = FakeMetadataBackend();
+    final store = V2MetadataStore(backend: backend);
+    const ref = SessionRef(
+      HostId('profile_a'),
+      HarnessInstanceId('profile_a'),
+      'ses_kid',
+    );
+    backend.values[SessionTabsStore.key] = SessionTabsStore.encode(
+      SessionTabsState(
+        tabs: const [
+          SessionTab(
+            ref: ref,
+            project: ProjectRef(HostId('profile_a'), '/w'),
+            title: 'Kid',
+            lastOpenedAtMs: 1,
+          ),
+        ],
+        selected: {const HostId('profile_a'): ref},
+      ),
+    );
+    final app = await _launch(tester, '/sessions', store: store);
+    final source = app.rig.sources.single;
+    source.respond([
+      source.row('parent', title: 'Parent', directory: '/w'),
+      source.row('kid', title: 'Kid', directory: '/w', parent: 'parent'),
+    ]);
+    await _settle(tester);
+    // The saved child never navigates: the list stays on the list, and the
+    // record leaves once the rows prove the child.
+    expect(_location(app), '/sessions');
+    expect(
+      app.dependencies.sessionTabs!.tabs.any((tab) => tab.ref == ref),
+      isFalse,
+    );
+    expect(app.dependencies.sessionTabs!.takeRemoved(), isEmpty);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('the close key closes the current tab', (tester) async {
     _useMemoryPreferences();
     final app = await _launch(tester, '/s/profile_a/ses_three');
@@ -698,6 +789,66 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final newDraft in [false, true]) {
+    testWidgets(
+      'cold child restore respects primary tabs and new draft ($newDraft)',
+      (tester) async {
+        final backend = FakeMetadataBackend();
+        final store = V2MetadataStore(backend: backend);
+        const root = SessionRef(
+          HostId('profile_a'),
+          HarnessInstanceId('profile_a'),
+          'ses_parent',
+        );
+        const child = SessionRef(
+          HostId('profile_a'),
+          HarnessInstanceId('profile_a'),
+          'ses_kid',
+        );
+        backend.values[SessionTabsStore.key] = SessionTabsStore.encode(
+          SessionTabsState(
+            tabs: const [
+              SessionTab(
+                ref: root,
+                project: null,
+                title: 'Parent',
+                lastOpenedAtMs: 1,
+              ),
+              SessionTab(
+                ref: child,
+                project: null,
+                title: 'Kid',
+                lastOpenedAtMs: 2,
+              ),
+            ],
+            selected: {const HostId('profile_a'): child},
+          ),
+        );
+        final app = await _launch(tester, '/sessions', store: store);
+        final source = app.rig.sources.single;
+        source.respond([source.row('parent', title: 'Parent')]);
+        await _settle(tester);
+        expect(_location(app), '/sessions');
+        if (newDraft) {
+          await tester.tap(find.byKey(const ValueKey('workspace-new-chat')));
+          await _settle(tester);
+        }
+        final read = source.reads.firstWhere((entry) => entry.$1 == child);
+        read.$2.completion.complete(source.row('kid', parent: 'parent'));
+        await _settle(tester);
+        expect(
+          _location(app),
+          newDraft ? '/sessions' : '/s/profile_a/ses_parent',
+        );
+        expect(
+          app.dependencies.sessionTabs!.tabs.any((tab) => tab.ref == child),
+          isFalse,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 
   testWidgets('a restart restores the tabs and returns to the selected one', (
     tester,

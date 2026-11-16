@@ -258,8 +258,10 @@ class ProjectContextsController extends ChangeNotifier {
   );
 
   /// The route shows [summary]: it becomes the view of its context, and the
-  /// context it belongs to becomes the shown one.
-  void recordView(SessionSummary summary) {
+  /// context it belongs to becomes the shown one. A child session is visited
+  /// from its parent and never remembered: [remember] false still opens the
+  /// context it belongs to, but leaves the remembered view where it was.
+  void recordView(SessionSummary summary, {bool remember = true}) {
     final profile = catalog.selectedProfile?.id;
     final directory = summary.info.project?.canonicalDirectory;
     if (_disposed ||
@@ -273,7 +275,7 @@ class ProjectContextsController extends ChangeNotifier {
       if (_busy) return;
       unawaited(openContext(directory));
     }
-    _views[directory] = summary.info.ref;
+    if (remember) _views[directory] = summary.info.ref;
   }
 
   /// The drawer shows the list or the draft of the active context.
@@ -289,6 +291,7 @@ class ProjectContextsController extends ChangeNotifier {
   ) async {
     final profile = catalog.selectedProfile?.id;
     if (_disposed || _busy || profile == null || !available) return false;
+    _tabs?.takeLaunchTab();
     _busy = true;
     _startToken++;
     _starting = false;

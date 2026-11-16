@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -13,6 +14,32 @@ void main() {
   late CatalogRig rig;
   setUp(() => rig = CatalogRig());
   tearDown(() => rig.dispose());
+
+  for (final withActions in [false, true]) {
+    test(
+      'principal rows exclude children while raw catalog retains them ($withActions)',
+      () async {
+        if (withActions) {
+          rig.dispose();
+          rig = CatalogRig(actions: FakeActionSource());
+        }
+        await rig.save('a');
+        await rig.sessions.initialize();
+        final loading = rig.sessions.selectProfile('profile_a');
+        final source = rig.sources.single;
+        final child = source.row('child', parent: 'root');
+        source.respond([source.row('root'), child]);
+        await loading;
+        expect(rig.sessions.sessions.map((row) => row.info.ref.nativeId), [
+          'ses_root',
+        ]);
+        rig.sessions.setFilter(SessionActionFilter.all);
+        expect(rig.sessions.sessions, hasLength(1));
+        expect(rig.sessions.loadedSessions, hasLength(2));
+        expect(rig.sessions.findSession(child.info.ref), child);
+      },
+    );
+  }
 
   test(
     'explicit selection waits for settled credentials; no automatic reads',

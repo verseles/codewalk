@@ -11,6 +11,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_visibility.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_controller.dart';
@@ -386,11 +387,14 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
       }
       if (_viewed != ref) {
         // The shown session is the view of its project, which becomes the
-        // project the list shows.
+        // project the list shows. A child is visited from its parent and
+        // never becomes the remembered view.
         _viewed = ref;
         final contexts = context.read<ProjectContextsController?>();
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) contexts?.recordView(summary);
+          if (mounted) {
+            contexts?.recordView(summary, remember: isPrimarySummary(summary));
+          }
         });
       }
       if (tabs != null && _opened != ref) {

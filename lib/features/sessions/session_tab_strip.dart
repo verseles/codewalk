@@ -100,7 +100,12 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
 
   bool _closeShown() {
     final tab = _tab;
-    if (tab == null) return false;
+    if (tab == null) {
+      final parent = _childParent;
+      if (parent == null) return false;
+      context.go(sessionTabLocation(parent));
+      return true;
+    }
     unawaited(_close(tab));
     return true;
   }
@@ -113,6 +118,19 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
 
   SessionTab? get _tab =>
       widget.tabs.tabs.where((tab) => tab.ref == widget.current).firstOrNull;
+
+  SessionRef? get _childParent =>
+      widget.current == null ? null : widget.tabs.parentOf(widget.current!);
+
+  SessionRef? get _shownTab {
+    var ref = widget.current;
+    final seen = <SessionRef>{};
+    while (ref != null && seen.add(ref)) {
+      if (widget.tabs.tabs.any((tab) => tab.ref == ref)) return ref;
+      ref = widget.tabs.parentOf(ref);
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -341,7 +359,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             for (final tab in recent)
               ListTile(
                 key: ValueKey('session-tabs-recent-${tab.ref.storageKey}'),
-                selected: tab.ref == widget.current,
+                selected: tab.ref == _shownTab,
                 leading: SessionTabGlyph(tab: tab, tabs: widget.tabs),
                 title: Text(
                   _title(context, tab),
@@ -374,7 +392,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             (profile == null ? null : HostId(profile.id));
         if (host == null) return _framed(null, widget.child, column: false);
         final tab = _tab;
-        final projection = widget.tabs.projection(host, active: widget.current);
+        final projection = widget.tabs.projection(host, active: _shownTab);
         final drafting =
             widget.current == null && drafts?.isDraftActive == true;
         final directory = drafts?.currentKey?.canonicalDirectory;
@@ -383,12 +401,15 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             : ProjectRef(host, directory);
         final shown = projection.ordered.isNotEmpty || drafting;
         final switcher = _switcher;
+        // A shown child holds no tab: closing it returns to its parent, the
+        // way Back does, instead of falling through to the window.
+        final childParent = tab == null ? _childParent : null;
         return KeyboardActionScope(
           handlers: {
             ShortcutAction.cycleTabsForward: () => _cycle(reverse: false),
             ShortcutAction.cycleTabsBackward: () => _cycle(reverse: true),
-            if (tab != null)
-              ShortcutAction.closeApp: () => unawaited(_close(tab)),
+            if (tab != null || childParent != null)
+              ShortcutAction.closeApp: _closeShown,
           },
           child: Focus(
             autofocus: true,
@@ -398,7 +419,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
                   ? _Strip(
                       tabs: widget.tabs,
                       projection: projection,
-                      current: widget.current,
+                      current: _shownTab,
                       drafting: drafting,
                       draftProject: draftProject,
                       draftFailed:
@@ -841,6 +862,9 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
     super.initState();
     widget.tabs.addListener(_changed);
     widget.catalog?.hosts.addListener(_changed);
+    // The rows decide whether a saved tab may open, so their arrival retries
+    // the launch.
+    widget.catalog?.addListener(_changed);
     // Usually read before the first frame already; the read is shared.
     unawaited(widget.tabs.initialize());
     WidgetsBinding.instance.addPostFrameCallback((_) => _changed());
@@ -856,6 +880,8 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
     if (oldWidget.catalog != widget.catalog) {
       oldWidget.catalog?.hosts.removeListener(_changed);
       widget.catalog?.hosts.addListener(_changed);
+      oldWidget.catalog?.removeListener(_changed);
+      widget.catalog?.addListener(_changed);
     }
     // A link to a session opened the app: the launch tab is spent.
     if (!widget.home) widget.tabs.takeLaunchTab();
@@ -865,6 +891,7 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
   void dispose() {
     widget.tabs.removeListener(_changed);
     widget.catalog?.hosts.removeListener(_changed);
+    widget.catalog?.removeListener(_changed);
     // Leaving the workspace before the launch tab opened spends it, so a
     // later return to the list stays there.
     widget.tabs.takeLaunchTab();
@@ -899,13 +926,24 @@ class _SessionTabsWatcherState extends State<SessionTabsWatcher> {
       widget.tabs.takeLaunchTab();
       return;
     }
-    final hosts = widget.catalog?.hosts;
-    // Waits for the saved tabs and servers, so a removed server's tab is
-    // pruned before it could be shown.
-    if (!widget.tabs.loaded || hosts == null || !hosts.loaded) return;
-    if (hosts.loading) return;
+    final catalog = widget.catalog;
+    final hosts = catalog?.hosts;
+    // Waits for the saved tabs, the servers and the loaded rows, so a tab an
+    // older build saved for a child is pruned before it could be shown. A
+    // list that failed proves nothing about any row, so it opens as before.
+    if (!widget.tabs.loaded ||
+        hosts == null ||
+        !hosts.loaded ||
+        hosts.loading ||
+        widget.tabs.launchPending ||
+        !(catalog?.loaded ?? false) && catalog?.failure == null) {
+      return;
+    }
     final tab = widget.tabs.takeLaunchTab();
-    if (tab != null && hosts.profiles.any((p) => p.id == tab.host.value)) {
+    if (tab == null) return;
+    // A child is visited from its parent, never from a saved tab.
+    if (catalog?.findSession(tab)?.info.lineage.parent != null) return;
+    if (hosts.profiles.any((p) => p.id == tab.host.value)) {
       context.go(sessionTabLocation(tab));
     }
   }

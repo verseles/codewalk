@@ -1,7 +1,8 @@
-> 📣 Project icons now appear in the workspace and session tabs, with your chosen tab icons and theme intact.
+> 📣 Keep your workspace focused: subagent conversations stay out of tabs and the sidebar, while the robot chip keeps their full history one tap away.
 
-### Project icons
+### Focused session navigation
 
-- Project images from the server appear in project rows, the picker, session tabs, and New Chat drafts.
-- Custom tab icons and attention marks keep their priority; missing or unavailable images use the themed folder icon.
-- Project image loading is bounded and can recover when an image changes at the same URL.
+- Only main conversations appear in the sidebar, project counts, and session tabs.
+- Visit subagents through the robot chip without creating a tab or changing the parent selection.
+- Return to the parent with Back or Ctrl+W while preserving the conversation and reading position.
+- Older child tabs disappear once identified, and hidden or subagent-only agents remain excluded from the main agent picker.

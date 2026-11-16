@@ -41,10 +41,19 @@ SessionSummary _row(
   String? harness,
   String? directory,
   String? title,
+  String? parent,
 }) => SessionSummary(
   info: SessionInfo(
     ref: SessionRef(HostId(host), HarnessInstanceId(harness ?? host), id),
-    lineage: const SessionLineage(),
+    lineage: SessionLineage(
+      parent: parent == null
+          ? null
+          : SessionRef(
+              HostId(host),
+              HarnessInstanceId(harness ?? host),
+              parent,
+            ),
+    ),
     title: title ?? id,
     ownership: const OwnershipInfo.unknown(reason: 'not observed'),
     project: directory == null ? null : ProjectRef(HostId(host), directory),
@@ -95,6 +104,33 @@ void main() {
     // Restoring never writes.
     expect(backend.writes, writes);
     expect(backend.values[SessionTabsStore.key], saved);
+  });
+
+  test('a child session never becomes a tab', () async {
+    final backend = _MemoryBackend();
+    final tabs = _tabs(backend);
+    expect(
+      await tabs.open(_row('a', 'ses_root', directory: '/p', title: 'Root')),
+      SessionTabOpen.opened,
+    );
+    final writes = backend.writes;
+    // Opening a child writes nothing, adds no tab and selects nothing.
+    expect(
+      await tabs.open(
+        _row('a', 'ses_kid', directory: '/p', title: 'Kid', parent: 'ses_root'),
+      ),
+      SessionTabOpen.subagent,
+    );
+    expect(backend.writes, writes);
+    expect([for (final tab in tabs.tabs) tab.ref.nativeId], ['ses_root']);
+    expect(tabs.selectedFor(const HostId('a'))?.nativeId, 'ses_root');
+    expect(
+      tabs.deleted(
+        const SessionRef(HostId('a'), HarnessInstanceId('a'), 'ses_kid'),
+      ),
+      isFalse,
+    );
+    tabs.dispose();
   });
 
   test('two servers with the same session id keep two tabs', () async {
@@ -470,6 +506,172 @@ void main() {
       await tabs.initialize();
       return tabs;
     }
+
+    for (final failWrite in [false, true]) {
+      test(
+        'a direct read excludes a restored child (write failure: $failWrite)',
+        () async {
+          final source = await selectA();
+          final tabs = await restore([source.row('kid')]);
+          addTearDown(tabs.dispose);
+          final oldTab = tabs.tabs.single;
+          backend.failWrite = failWrite;
+          source.respond(const []);
+          await pumpEventQueue();
+          source.reads.single.$2.completion.complete(
+            source.row('kid', parent: 'parent'),
+          );
+          await pumpEventQueue();
+          expect(tabs.tabs, isEmpty);
+          expect(tabs.recent(oldTab.ref.host), isEmpty);
+          expect(tabs.selectedFor(oldTab.ref.host), isNull);
+          expect(tabs.deleted(oldTab.ref), isFalse);
+          expect(tabs.takeRemoved(), isEmpty);
+          expect(await tabs.reopen(oldTab, index: 0, select: true), isFalse);
+          if (!failWrite) {
+            final restored = _tabs(backend);
+            await restored.initialize();
+            expect(restored.tabs, isEmpty);
+            restored.dispose();
+          }
+        },
+      );
+    }
+
+    test(
+      'failed child cleanup cannot consume capacity or become a neighbour',
+      () async {
+        final source = await selectA();
+        final rows = [
+          for (var i = 0; i < SessionTabsStore.maxTabs; i++) source.row('$i'),
+        ];
+        final tabs = await restore(rows);
+        addTearDown(tabs.dispose);
+        backend.failWrite = true;
+        source.respond([
+          for (var i = 0; i < rows.length; i++)
+            source.row('$i', parent: i == 0 ? 'root' : null),
+        ]);
+        await pumpEventQueue();
+        expect(tabs.tabs, hasLength(SessionTabsStore.maxTabs - 1));
+        backend.failWrite = false;
+        expect(await tabs.open(source.row('new')), SessionTabOpen.opened);
+        expect(tabs.tabs, hasLength(SessionTabsStore.maxTabs));
+        final restored = _tabs(backend);
+        await restored.initialize();
+        expect(
+          restored.tabs.any((tab) => tab.ref == rows.first.info.ref),
+          isFalse,
+        );
+        restored.dispose();
+      },
+    );
+
+    test('loaded root overrides remembered child lineage', () async {
+      final source = await selectA();
+      final tabs = await restore([source.row('kid')]);
+      addTearDown(tabs.dispose);
+      backend.failWrite = true;
+      source.respond(const []);
+      await pumpEventQueue();
+      source.reads.single.$2.completion.complete(
+        source.row('kid', parent: 'root'),
+      );
+      await pumpEventQueue();
+      expect(tabs.tabs, isEmpty);
+      final refresh = rig.sessions.refresh();
+      source.respond([source.row('kid')]);
+      await refresh;
+      expect(tabs.parentOf(source.row('kid').info.ref), isNull);
+      expect(tabs.tabs, hasLength(1));
+    });
+
+    for (final child in [false, true]) {
+      test(
+        'restore waits for direct read then selects a primary (child: $child)',
+        () async {
+          final source = await selectA();
+          final tabs = await restore([
+            source.row('root'),
+            source.row('unknown'),
+          ]);
+          addTearDown(tabs.dispose);
+          backend.failWrite = true;
+          source.respond([source.row('root')]);
+          await pumpEventQueue();
+          expect(tabs.launchPending, isTrue);
+          source.reads.single.$2.completion.complete(
+            source.row('unknown', parent: child ? 'root' : null),
+          );
+          await pumpEventQueue();
+          expect(tabs.launchPending, isFalse);
+          expect(
+            tabs.takeLaunchTab()?.nativeId,
+            child ? 'ses_root' : 'ses_unknown',
+          );
+        },
+      );
+    }
+
+    test(
+      'a restored child tab is dropped, with its selection repaired',
+      () async {
+        final source = await selectA();
+        // A tab an older build saved for the child, selected on its server:
+        // this controller never writes one, so the record is seeded directly.
+        SessionRef ref(String id) => SessionRef(
+          const HostId('profile_a'),
+          const HarnessInstanceId('profile_a'),
+          'ses_$id',
+        );
+
+        final legacy = SessionTabsState(
+          tabs: [
+            SessionTab(
+              ref: ref('other'),
+              project: const ProjectRef(HostId('profile_a'), '/w'),
+              title: 'Other',
+              lastOpenedAtMs: 1,
+            ),
+            SessionTab(
+              ref: ref('root'),
+              project: const ProjectRef(HostId('profile_a'), '/w'),
+              title: 'Root',
+              lastOpenedAtMs: 2,
+            ),
+            SessionTab(
+              ref: ref('kid'),
+              project: const ProjectRef(HostId('profile_a'), '/w'),
+              title: 'Kid',
+              lastOpenedAtMs: 3,
+            ),
+          ],
+          selected: {const HostId('profile_a'): ref('kid')},
+        );
+        backend.values[SessionTabsStore.key] = SessionTabsStore.encode(legacy);
+        final tabs = _tabs(backend, catalog: rig.sessions);
+        addTearDown(tabs.dispose);
+        await tabs.initialize();
+        expect(
+          tabs.selectedFor(const HostId('profile_a'))?.nativeId,
+          'ses_kid',
+        );
+        source.respond([
+          source.row('root', title: 'Root'),
+          source.row('kid', title: 'Kid', parent: 'root'),
+          source.row('other', title: 'Other'),
+        ]);
+        await pumpEventQueue();
+        // The child leaves without the removal notice and without being
+        // reported as deleted: its route, if any, stays open.
+        expect(tabs.tabs.any((tab) => tab.ref.nativeId == 'ses_kid'), isFalse);
+        expect(tabs.takeRemoved(), isEmpty);
+        expect(tabs.deleted(ref('kid')), isFalse);
+        final selected = tabs.selectedFor(const HostId('profile_a'));
+        expect(selected?.nativeId, isNot('ses_kid'));
+        expect(['ses_root', 'ses_other'], contains(selected?.nativeId));
+      },
+    );
 
     test(
       'queued old-binding not-found cannot remove a tab after URL editing',

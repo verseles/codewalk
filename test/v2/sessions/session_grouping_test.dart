@@ -36,16 +36,13 @@ SessionSummary _row(
   updatedAt: DateTime.utc(2026, 10, 19),
 );
 
-/// The nested list as text: `header:<dir>`, then `<id>@<depth>`, with `!`
-/// when the row's parent is not drawn above it.
+/// The grouped list as text: `header:<dir>`, then `<id>` for each row.
 List<String> _shape(List<SessionListItem> items) => [
   for (final item in items)
     switch (item) {
       SessionGroupHeader(:final group) =>
         'header:${group.project?.canonicalDirectory}',
-      SessionRow(:final session, :final depth, :final parentElsewhere) =>
-        '${session.info.ref.nativeId.substring(4)}@$depth'
-            '${parentElsewhere ? '!' : ''}',
+      SessionRow(:final session) => session.info.ref.nativeId.substring(4),
     },
 ];
 
@@ -130,7 +127,7 @@ void main() {
     );
   });
 
-  group('nesting', () {
+  group('primary rows', () {
     test('rows without a lineage keep the grouped sequence', () {
       expect(
         _shape(
@@ -139,11 +136,11 @@ void main() {
             _row('b', directory: '/w'),
           ]),
         ),
-        ['header:/w', 'a@0', 'b@0'],
+        ['header:/w', 'a', 'b'],
       );
     });
 
-    test('the recorded three-level lineage nests recursively', () {
+    test('a child is never drawn, even under its loaded parent', () {
       // The ids and the directory of the 2.0.22 capture
       // d/foreground-nested.json; the endpoint's newest-first order lists
       // the grandchild first.
@@ -159,11 +156,11 @@ void main() {
             _row(root, directory: dir),
           ]),
         ),
-        ['header:$dir', '$root@0', '$child@1', '$grandchild@2'],
+        ['header:$dir', root],
       );
     });
 
-    test('the parent stays where the server put it', () {
+    test('the roots keep the order and the position the server gave them', () {
       expect(
         _shape(
           sessionListItems([
@@ -174,11 +171,11 @@ void main() {
             _row('z', directory: '/w'),
           ]),
         ),
-        ['header:/w', 'x@0', 'y@0', 'p@0', 'c@1', 'z@0'],
+        ['header:/w', 'x', 'y', 'p', 'z'],
       );
     });
 
-    test('the siblings keep the server order under their parent', () {
+    test('the roots of one parent keep the server order among themselves', () {
       expect(
         _shape(
           sessionListItems([
@@ -188,27 +185,24 @@ void main() {
             _row('c1', directory: '/w', parent: 'p'),
           ]),
         ),
-        ['header:/w', 'p@0', 'c2@1', 'c1@1', 'g@2'],
+        ['header:/w', 'p'],
       );
     });
 
-    test(
-      'a child whose parent is not loaded stays where the server put it',
-      () {
-        expect(
-          _shape(
-            sessionListItems([
-              _row('a', directory: '/w'),
-              _row('c', directory: '/w', parent: 'gone'),
-              _row('b', directory: '/w'),
-            ]),
-          ),
-          ['header:/w', 'a@0', 'c@0!', 'b@0'],
-        );
-      },
-    );
+    test('a child whose parent is not loaded is not drawn either', () {
+      expect(
+        _shape(
+          sessionListItems([
+            _row('a', directory: '/w'),
+            _row('c', directory: '/w', parent: 'gone'),
+            _row('b', directory: '/w'),
+          ]),
+        ),
+        ['header:/w', 'a', 'b'],
+      );
+    });
 
-    test('a child never leaves the group the server attributed it to', () {
+    test('a child never keeps its group when its parent sits in another', () {
       expect(
         _shape(
           sessionListItems([
@@ -217,15 +211,26 @@ void main() {
             _row('u', parent: 'p'),
           ]),
         ),
-        ['header:/two', 'c@0!', 'header:/one', 'p@0', 'header:null', 'u@0!'],
+        ['header:/one', 'p'],
       );
     });
 
-    test('the sessions without a project nest among themselves', () {
+    test('a group whose sessions are all children is not shown', () {
+      expect(
+        _shape(
+          sessionListItems([
+            _row('c', directory: '/two', parent: 'p'),
+            _row('p', directory: '/one'),
+          ]),
+        ),
+        ['header:/one', 'p'],
+      );
+    });
+
+    test('the sessions without a project are only their roots', () {
       expect(_shape(sessionListItems([_row('c', parent: 'p'), _row('p')])), [
         'header:null',
-        'p@0',
-        'c@1',
+        'p',
       ]);
     });
 
@@ -237,14 +242,16 @@ void main() {
             _row('a', directory: '/w'),
           ]),
         ),
-        ['header:/w', 'f@0', 'a@0'],
+        ['header:/w', 'f', 'a'],
       );
     });
 
-    test('every row of a lineage that loops stays where the server put it', () {
+    test('a row whose lineage names a parent is a child, even in a loop', () {
+      // A lineage that loops still names a parent, so it is a child: the
+      // rule never invents a root, and the group holds no primary row.
       expect(
         _shape(sessionListItems([_row('s', directory: '/w', parent: 's')])),
-        ['header:/w', 's@0!'],
+        isEmpty,
       );
       expect(
         _shape(
@@ -254,34 +261,27 @@ void main() {
             _row('b', directory: '/w', parent: 'a'),
           ]),
         ),
-        ['header:/w', 'a@0!', 'x@0', 'b@0!'],
+        ['header:/w', 'x'],
       );
-      // A row that hangs off the loop still nests under its own parent.
+    });
+
+    test('with one group open, the others show their header alone', () {
       expect(
         _shape(
-          sessionListItems([
-            _row('t', directory: '/w', parent: 'b'),
-            _row('a', directory: '/w', parent: 'c'),
-            _row('b', directory: '/w', parent: 'a'),
-            _row('c', directory: '/w', parent: 'b'),
-          ]),
+          sessionListItems(
+            [
+              _row('a', directory: '/one'),
+              _row('c', directory: '/one', parent: 'a'),
+              _row('b', directory: '/two'),
+            ],
+            open: (project: const ProjectRef(HostId('host-a'), '/one')),
+          ),
         ),
-        ['header:/w', 'a@0!', 'b@0!', 't@1', 'c@0!'],
+        ['header:/one', 'a', 'header:/two'],
       );
     });
 
-    test('the depth has no cap in the model', () {
-      final rows = [
-        for (var i = 5; i >= 0; i--)
-          _row('n$i', directory: '/w', parent: i == 0 ? null : 'n${i - 1}'),
-      ];
-      expect(_shape(sessionListItems(rows)), [
-        'header:/w',
-        for (var i = 0; i <= 5; i++) 'n$i@$i',
-      ]);
-    });
-
-    test('every loaded row is drawn exactly once under its own parent', () {
+    test('every primary row is drawn exactly once, in the server order', () {
       final random = Random(397);
       const directories = ['/one', '/two', null];
       for (var run = 0; run < 300; run++) {
@@ -303,32 +303,37 @@ void main() {
         final drawn = items.whereType<SessionRow>().toList();
         expect(
           drawn.map((row) => row.session.info.ref).toList()..sort(_byId),
-          rows.map((row) => row.info.ref).toList()..sort(_byId),
+          [
+            for (final row in rows)
+              if (row.info.lineage.parent == null) row.info.ref,
+          ]..sort(_byId),
         );
+        // Each group that holds a primary row is shown, once, and its rows
+        // keep the order the server gave them.
+        var expectedGroup = -1;
         final groups = groupSessionsByProject(rows);
-        expect(items.whereType<SessionGroupHeader>(), hasLength(groups.length));
-        var header = -1;
-        final stack = <SessionRef>[];
+        final shown = items.whereType<SessionGroupHeader>().toList();
+        expect(shown, hasLength(groups.where(_holdsPrimary).length));
         for (final item in items) {
           if (item is SessionGroupHeader) {
-            header++;
-            stack.clear();
+            expectedGroup++;
+            while (!_holdsPrimary(groups[expectedGroup])) {
+              expectedGroup++;
+            }
+            expect(item.group.project, groups[expectedGroup].project);
             continue;
           }
           final row = item as SessionRow;
           final info = row.session.info;
-          expect(info.project, groups[header].project);
-          expect(
-            row.parentElsewhere,
-            row.depth == 0 && info.lineage.parent != null,
-          );
-          stack.length = row.depth;
-          if (row.depth > 0) expect(stack.last, info.lineage.parent);
-          stack.add(info.ref);
+          expect(info.project, groups[expectedGroup].project);
+          expect(info.lineage.parent, isNull);
         }
       }
     });
   });
 }
+
+bool _holdsPrimary(SessionGroup group) =>
+    group.sessions.any((session) => session.info.lineage.parent == null);
 
 int _byId(SessionRef a, SessionRef b) => a.nativeId.compareTo(b.nativeId);

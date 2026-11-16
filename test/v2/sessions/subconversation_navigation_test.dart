@@ -10,6 +10,7 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../hosts/fakes.dart';
@@ -235,6 +236,9 @@ void main() {
   ) async {
     final app = await _launch(tester);
     final handle = await _show(tester, app, 'parent', []);
+    final tabs = app.dependencies.sessionTabs!;
+    final before = tabs.tabs.map((tab) => tab.ref).toList();
+    final selected = tabs.selectedFor(_ref(app, 'parent').host);
     await _tapRoster(tester, app, handle);
     expect(_location(app), '/s/profile_a/ses_parent');
     expect(
@@ -244,6 +248,10 @@ void main() {
     await _answerRead(tester, app, 'kid', _child(app, 'kid'));
     expect(_location(app), '/s/profile_a/ses_kid');
     await _show(tester, app, 'kid', []);
+    expect(tabs.tabs.map((tab) => tab.ref), before);
+    expect(tabs.selectedFor(_ref(app, 'parent').host), selected);
+    expect(tabs.isWarm(_ref(app, 'parent')), isTrue);
+    expect(tabs.isWarm(_ref(app, 'kid')), isTrue);
     expect(
       find.byKey(const ValueKey('subconversation-return')),
       findsOneWidget,
@@ -254,6 +262,25 @@ void main() {
     expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  testWidgets(
+    'close shortcut returns from a roster child absent from the list',
+    (tester) async {
+      final app = await _launch(tester);
+      final handle = await _show(tester, app, 'parent', []);
+      await _tapRoster(tester, app, handle);
+      await _answerRead(tester, app, 'kid', _child(app, 'kid'));
+      await _show(tester, app, 'kid', []);
+      expect(app.dependencies.sessions!.findSession(_ref(app, 'kid')), isNull);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await _settle(tester);
+      expect(_location(app), '/s/profile_a/ses_parent');
+      expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('roster rejects a child whose re-read contradicts the parent', (
     tester,

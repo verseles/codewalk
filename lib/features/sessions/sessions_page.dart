@@ -19,6 +19,7 @@ import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_visibility.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/server_switcher.dart';
 import 'project_context_list.dart';
@@ -34,11 +35,6 @@ import 'session_list_projection.dart';
 import 'session_ownership.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_page.dart';
-
-/// The start indent of one nesting level, and the deepest level the list
-/// indents: deeper rows still nest, at the cap's indent.
-const _nestingIndent = 16.0;
-const _nestingMaxLevels = 3;
 
 /// The conversations an inactive project previews from its last read.
 const _previewRows = 3;
@@ -330,7 +326,9 @@ class _SessionsPageState extends State<SessionsPage> {
           directory: directory,
           icon: controller.projects.iconAt(directory),
           active: active,
-          count: rows?.length,
+          // The count names the conversations the project lists: only the
+          // primary ones, the same rows an open project shows.
+          count: rows?.where(isPrimarySummary).length,
           complete: controller.contextComplete(directory),
           compact: compact,
           expanded: active && !folded,
@@ -414,7 +412,7 @@ class _SessionsPageState extends State<SessionsPage> {
 
   /// The whole server's list, grouped by the project the server attributed
   /// each session to; the groups follow the rows the server returned, and
-  /// inside a group a child is drawn under the parent its record names.
+  /// only primary sessions appear inside each group.
   List<WidgetBuilder> _serverRows(
     BuildContext context,
     SessionsController controller,
@@ -690,54 +688,6 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  /// A nested row: indented from the start edge by its depth, up to a cap
-  /// that keeps a phone's content width, with a guide along the start edge.
-  /// The directional insets mirror in a right-to-left locale.
-  Widget _nested(
-    BuildContext context,
-    SessionSummary row,
-    int depth,
-    Widget child,
-  ) {
-    if (depth == 0) return child;
-    final level = depth.clamp(1, _nestingMaxLevels);
-    return Padding(
-      key: ValueKey('session-nesting-${row.info.ref.storageKey}'),
-      padding: EdgeInsetsDirectional.only(
-        start: _nestingIndent * (level - 1) + 8,
-      ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: BorderDirectional(
-            start: BorderSide(
-              width: 2,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
-        ),
-        // The border paints over the box, so the padding clears it.
-        child: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 8),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  /// The lineage of a child row: a nested child, or a child whose parent is
-  /// not drawn above it.
-  Widget _lineage(BuildContext context, SessionSummary row, String text) =>
-      Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          text,
-          key: ValueKey('session-lineage-${row.info.ref.storageKey}'),
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      );
-
   Widget _sessionRow(
     BuildContext context,
     SessionsController controller,
@@ -748,32 +698,20 @@ class _SessionsPageState extends State<SessionsPage> {
     SessionRef? current,
     bool emphasized = false,
   }) {
-    final l10n = context.v2L10n;
     final row = item.session;
-    final lineage = item.depth > 0
-        ? l10n.sessionsChildSession
-        : item.parentElsewhere
-        ? l10n.sessionsChildParentElsewhere
-        : null;
     final pinned = contexts?.isPinned(row) ?? false;
-    return _nested(
+    return _row(
       context,
+      controller,
+      available,
+      compact,
       row,
-      item.depth,
-      _row(
-        context,
-        controller,
-        available,
-        compact,
-        row,
-        lineage: lineage,
-        selected: row.info.ref == current,
-        emphasized: emphasized,
-        pinned: pinned,
-        onPin: contexts == null || row.info.project == null
-            ? null
-            : (pin) => unawaited(contexts.setPinned(row, pinned: pin)),
-      ),
+      selected: row.info.ref == current,
+      emphasized: emphasized,
+      pinned: pinned,
+      onPin: contexts == null || row.info.project == null
+          ? null
+          : (pin) => unawaited(contexts.setPinned(row, pinned: pin)),
     );
   }
 
@@ -783,7 +721,6 @@ class _SessionsPageState extends State<SessionsPage> {
     bool available,
     bool compact,
     SessionSummary row, {
-    String? lineage,
     bool selected = false,
     bool emphasized = false,
     bool pinned = false,
@@ -898,7 +835,6 @@ class _SessionsPageState extends State<SessionsPage> {
                             ),
                           ),
                         ),
-                        if (lineage != null) _lineage(context, row, lineage),
                         if (controller.activityMarks(row) case final marks
                             when marks.isNotEmpty)
                           _activityMarks(context, row, marks),

@@ -17,6 +17,7 @@ import 'session_builtin_commands.dart';
 import 'session_command_picker.dart';
 import 'session_composer_controls.dart';
 import 'session_composer_status.dart';
+import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
 
@@ -30,6 +31,7 @@ bool canOpenWorkspaceDraft(SessionsController catalog) =>
 void openWorkspaceDraft(BuildContext context) {
   final controller = context.read<WorkspaceDraftController?>();
   if (controller == null) return;
+  context.read<SessionTabsController?>()?.takeLaunchTab();
   Scaffold.maybeOf(context)?.closeDrawer();
   context.go('/sessions');
   unawaited(controller.openDraft());

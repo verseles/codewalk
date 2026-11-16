@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../platform/sessions/session_tabs_store.dart';
 
+import '../../shared/sessions/session_visibility.dart';
+
 /// What the tabs know of one loaded session of the selected server.
 @immutable
 final class SessionTabCandidate {
@@ -59,13 +61,17 @@ const sessionTabWindow = Duration(hours: 3);
 /// the user opens it, when it is pinned, or when the server reports an
 /// update strictly newer than the one known at its close; the first update
 /// seen for a closed session without one only sets it. Hidden and child
-/// sessions are never added, and a session that is not loaded proves
-/// nothing, so its tab stays. Tabs keep their order and new ones follow,
+/// sessions are never added, and a child tab never stays either: it leaves
+/// even when selected, pinned, busy or recent, and a dropped selection moves
+/// to the next kept tab of its server, in the strip's stored order. A
+/// session absent from the rows keeps its tab unless [children] carries
+/// direct-read proof of parentage. Tabs keep their order and new ones follow,
 /// the most recent first, while [SessionTabsStore.maxTabs] allows: a full
 /// strip never drops a tab to make room. Each directory of [fallbacks] whose
 /// rows are known and that holds no tab gets its most recent visible
 /// session once, which counts as opened now so it stays its window. Tabs of
-/// [frozen] and of other servers are left as they are.
+/// other servers are left as they are. [frozen] protects primary or unproven
+/// tabs; a proven child leaves even while frozen.
 SessionTabReconciliation reconcileSessionTabs({
   required SessionTabsState state,
   required HostId host,
@@ -74,6 +80,7 @@ SessionTabReconciliation reconcileSessionTabs({
   Set<String> fallbacks = const {},
   Set<String> knownDirectories = const {},
   Set<SessionRef> frozen = const {},
+  Set<SessionRef> children = const {},
 }) {
   // A session is recent while strictly inside the window, so a tab leaves
   // exactly at its expiry.
@@ -88,10 +95,23 @@ SessionTabReconciliation reconcileSessionTabs({
   int? latest(int? a, int? b) => a == null || (b != null && b > a) ? b : a;
 
   var changed = false;
+  var droppedSelected = false;
   final tabs = <SessionTab>[];
   for (final tab in state.tabs) {
     final candidate = candidates[tab.ref];
-    if (tab.ref.host != host || frozen.contains(tab.ref) || candidate == null) {
+    if (tab.ref.host != host) {
+      tabs.add(tab);
+      continue;
+    }
+    // A child is visited from its parent, never tabbed: whatever else keeps
+    // a tab - the selection, a pin, a busy run, its recency - does not apply.
+    if (children.contains(tab.ref) ||
+        candidate != null && !isPrimarySummary(candidate.row)) {
+      changed = true;
+      if (tab.ref == selected) droppedSelected = true;
+      continue;
+    }
+    if (frozen.contains(tab.ref) || candidate == null) {
       tabs.add(tab);
       continue;
     }
@@ -126,6 +146,7 @@ SessionTabReconciliation reconcileSessionTabs({
       if (candidate.row.info.ref.host == host &&
           !open.contains(candidate.row.info.ref) &&
           !frozen.contains(candidate.row.info.ref) &&
+          !children.contains(candidate.row.info.ref) &&
           candidate.row.info.lineage.parent == null &&
           !candidate.hidden)
         candidate,
@@ -208,10 +229,30 @@ SessionTabReconciliation reconcileSessionTabs({
     changed = true;
   }
 
+  // The dropped child that was the selection hands it to the next kept tab
+  // of its server, in the strip's stored order, or clears the selection.
+  final nextSelected = <HostId, SessionRef>{...state.selected};
+  if (droppedSelected) {
+    // The stored order first: a kept tab of the server, else a fresh one.
+    SessionRef? next;
+    for (final tab in [...tabs, ...added]) {
+      if (tab.ref.host == host) {
+        next = tab.ref;
+        break;
+      }
+    }
+    if (next == null) {
+      nextSelected.remove(host);
+    } else {
+      nextSelected[host] = next;
+    }
+  }
+
   return SessionTabReconciliation(
     state: changed
         ? state.copyWith(
             tabs: [...tabs, ...added],
+            selected: droppedSelected ? nextSelected : null,
             // A tab open again is not closed.
             suppressed: [
               for (final entry in suppressed.values)

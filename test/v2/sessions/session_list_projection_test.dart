@@ -61,14 +61,20 @@ void main() {
     expect(_ids(filterSessions(rows, hidden, SessionActionFilter.active)), [
       'other',
     ]);
-    expect(
-      _ids(filterSessions(rows, hidden, SessionActionFilter.hidden)),
-      hasLength(5),
-    );
-    expect(filterSessions(rows, hidden, SessionActionFilter.all), rows);
+    // Only primary sessions are rows: a child is reached from its parent,
+    // never from a filter.
+    expect(_ids(filterSessions(rows, hidden, SessionActionFilter.hidden)), [
+      'root',
+    ]);
+    // The rows of the loop name a parent, so they are children: the
+    // primary rows are the root and the unrelated one.
+    expect(_ids(filterSessions(rows, hidden, SessionActionFilter.all)), [
+      'root',
+      'other',
+    ]);
   });
 
-  test('search keeps title matches, pins lead, children nest per band', () {
+  test('search keeps title matches and pins lead; children never appear', () {
     final rows = [
       _row('a', title: 'Fix login', updated: 3),
       _row('b', title: 'Write docs', updated: 5),
@@ -76,24 +82,21 @@ void main() {
       _row('d', title: 'FIX build', updated: 1),
     ];
     final pinned = {_ref('d')};
-    final list = projectSessionList(
+    final searched = projectSessionList(
       rows,
       query: '  fix ',
       sort: SessionListSort.recent,
       pinned: (row) => pinned.contains(row.info.ref),
     );
-    expect(_ids(list.map((e) => e.session)), ['d', 'c', 'a']);
-    // The parent did not match: the child stays a top-level row that names
-    // its parent elsewhere.
-    expect(list[1].parentElsewhere, isTrue);
+    expect(_ids(searched.map((e) => e.session)), ['d', 'a']);
     final all = projectSessionList(
       rows,
       query: '',
       sort: SessionListSort.recent,
       pinned: (row) => pinned.contains(row.info.ref),
     );
-    expect(_ids(all.map((e) => e.session)), ['d', 'b', 'c', 'a']);
-    expect(all[2].depth, 1);
+    expect(_ids(all.map((e) => e.session)), ['d', 'b', 'a']);
+    expect(all.any((row) => row.session.info.lineage.parent != null), isFalse);
   });
 
   test('sorts by update, creation or title; missing times keep order', () {

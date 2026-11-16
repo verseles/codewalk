@@ -565,6 +565,36 @@ void main() {
     );
 
     test(
+      'a viewed child opens its context without becoming its view',
+      () async {
+        rig = _Rig();
+        await rig.open(
+          (source) => [
+            source.row('root', directory: '/z'),
+            source.row('kid', directory: '/z', parent: 'root'),
+          ],
+        );
+        final root = rig.source.row('root', directory: '/z');
+        final kid = rig.source.row('kid', directory: '/z', parent: 'root');
+        rig.contexts.recordView(root);
+        await settle();
+        expect(rig.contexts.viewOf('/z'), root.info.ref);
+
+        // The child is visited from its parent: the context it belongs to
+        // opens, but the remembered view stays on the root.
+        rig.contexts.recordView(kid, remember: false);
+        await settle();
+        expect(rig.contexts.active, '/z');
+        expect(rig.contexts.viewOf('/z'), root.info.ref);
+
+        // Remembered as usual, the view moves.
+        rig.contexts.recordView(kid);
+        await settle();
+        expect(rig.contexts.viewOf('/z'), kid.info.ref);
+      },
+    );
+
+    test(
       'unreadable contexts are never written; the list reads it all',
       () async {
         rig = _Rig(unreadable: true);

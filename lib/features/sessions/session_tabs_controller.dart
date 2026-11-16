@@ -7,13 +7,17 @@ import '../../platform/sessions/project_workspace_store.dart';
 import '../../platform/sessions/session_tab_icon_store.dart';
 import '../../platform/sessions/session_tabs_store.dart';
 import '../../shared/sessions/session_catalog_source.dart';
+import '../../shared/sessions/session_visibility.dart';
 import 'session_live_controller.dart';
 import 'session_tab_projection.dart';
 import 'session_tab_reconciler.dart';
 import 'sessions_controller.dart';
 
 /// What opening a session did to its tab.
-enum SessionTabOpen { opened, focused, full, unsaved }
+///
+/// [subagent] opens nothing: a session the endpoint attributes to a parent
+/// is visited from its parent, never tabbed.
+enum SessionTabOpen { opened, focused, full, unsaved, subagent }
 
 /// The open session tabs of the workspace.
 ///
@@ -61,6 +65,8 @@ class SessionTabsController extends ChangeNotifier {
   final _warm = <SessionRef, SessionLiveController>{};
   final _checked = <SessionRef>{};
   final _reads = <SessionRef, SessionReadTask>{};
+  // Direct reads can prove a restored tab is a child outside the loaded list.
+  final _childParents = <SessionRef, SessionRef>{};
   final _bindings = <String, EndpointProfile>{};
   final _removed = <String>[];
 
@@ -108,9 +114,23 @@ class SessionTabsController extends ChangeNotifier {
   bool get unreadable => _store.unreadable;
   bool get hasPersistenceError => _store.hasPersistenceError;
 
-  List<SessionTab> get tabs => _store.state.tabs;
+  List<SessionTab> get tabs => [
+    for (final tab in _store.state.tabs)
+      if (parentOf(tab.ref) == null) tab,
+  ];
 
-  SessionRef? selectedFor(HostId host) => _store.state.selected[host];
+  SessionRef? parentOf(SessionRef ref) {
+    final row = _catalog?.findSession(ref);
+    if (row != null) return row.info.lineage.parent;
+    final live = _warm[ref];
+    if (live != null) return live.summary.info.lineage.parent;
+    return _childParents[ref];
+  }
+
+  SessionRef? selectedFor(HostId host) {
+    final selected = _store.state.selected[host];
+    return selected == null || parentOf(selected) != null ? null : selected;
+  }
 
   /// The tabs of [project] on [host], in visual order.
   List<SessionTab> visible(HostId host, ProjectRef? project) => [
@@ -151,14 +171,31 @@ class SessionTabsController extends ChangeNotifier {
   /// The tab [takeLaunchTab] would return, without spending it.
   SessionRef? get launchTab {
     if (_launched) return null;
-    final latest = tabs.fold<SessionTab?>(
+    final latest = _store.state.tabs.fold<SessionTab?>(
       null,
       (latest, tab) =>
           latest == null || tab.lastOpenedAtMs > latest.lastOpenedAtMs
           ? tab
           : latest,
     );
-    return latest == null ? null : selectedFor(latest.ref.host);
+    if (latest == null) return null;
+    if (_store.state.selected[latest.ref.host] == null) return null;
+    return selectedFor(latest.ref.host) ??
+        recent(latest.ref.host).firstOrNull?.ref;
+  }
+
+  /// An absent restored row must finish its direct read before launch.
+  bool get launchPending {
+    final ref = launchTab;
+    if (ref == null) return false;
+    if (_reads.containsKey(ref)) return true;
+    final catalog = _catalog;
+    return catalog != null &&
+        catalog.loaded &&
+        catalog.failure == null &&
+        catalog.selectedProfile?.id == ref.host.value &&
+        catalog.findSession(ref) == null &&
+        !_checked.contains(ref);
   }
 
   /// Whether the tab of [ref] left because its server said the session no
@@ -174,12 +211,23 @@ class SessionTabsController extends ChangeNotifier {
   }
 
   /// Adds the tab of [summary], or focuses it when it is open already, and
-  /// makes it the selected tab of its server.
+  /// makes it the selected tab of its server. A child session gets no tab:
+  /// it is opened from its parent and read through the route, so nothing is
+  /// written and no selection changes.
   Future<SessionTabOpen> open(SessionSummary summary) async {
     if (_disposed) return SessionTabOpen.unsaved;
     final ref = summary.info.ref;
+    if (!isPrimarySummary(summary)) {
+      if (_store.state.tabs.any((tab) => tab.ref == ref)) {
+        _childParents[ref] = summary.info.lineage.parent!;
+        await _remove({ref}, keepWarm: true);
+      }
+      return SessionTabOpen.subagent;
+    }
+    _childParents.remove(ref);
     var result = SessionTabOpen.unsaved;
     final saved = await _store.update((state) {
+      state = _withoutChildren(state);
       final index = state.tabs.indexWhere((tab) => tab.ref == ref);
       if (index < 0 && state.tabs.length >= SessionTabsStore.maxTabs) {
         result = SessionTabOpen.full;
@@ -364,7 +412,9 @@ class SessionTabsController extends ChangeNotifier {
     bool pin = false,
   }) async {
     final project = tab.project;
-    if (_disposed || !_frozen.add(tab.ref)) return false;
+    if (_disposed || parentOf(tab.ref) != null || !_frozen.add(tab.ref)) {
+      return false;
+    }
     try {
       final at = pin && project != null
           ? (profile: tab.ref.host.value, directory: project.canonicalDirectory)
@@ -376,6 +426,7 @@ class SessionTabsController extends ChangeNotifier {
         pinned = result;
       }
       final saved = await _store.update((state) {
+        state = _withoutChildren(state);
         if (state.tabs.any((other) => other.ref == tab.ref)) return null;
         if (state.tabs.length >= SessionTabsStore.maxTabs) return null;
         final next = [...state.tabs];
@@ -411,20 +462,47 @@ class SessionTabsController extends ChangeNotifier {
     SessionTabsState state,
     SessionRef ref,
     bool Function(SessionTab)? pinned,
-  ) => SessionTabProjection(
-    tabs: state.tabs,
-    host: ref.host,
-    isPinned: pinned ?? isPinned,
-    // The closed tab is the shown one, so the strip order leads with it.
-    active: ref,
-  ).neighbour(ref);
+  ) {
+    final projection = SessionTabProjection(
+      tabs: state.tabs.where((tab) => parentOf(tab.ref) == null),
+      host: ref.host,
+      isPinned: pinned ?? isPinned,
+      active: ref,
+    );
+    return parentOf(ref) == null
+        ? projection.neighbour(ref)
+        : projection.ordered.firstOrNull?.ref;
+  }
+
+  // Retry failed child cleanup in the same transaction as an explicit open,
+  // so invisible legacy tabs cannot consume capacity or become selected.
+  // A pin left by failed cleanup stays inert: child rows and tabs exclude it.
+  SessionTabsState _withoutChildren(SessionTabsState state) {
+    final kept = [
+      for (final tab in state.tabs)
+        if (parentOf(tab.ref) == null) tab,
+    ];
+    if (kept.length == state.tabs.length) return state;
+    final selected = {...state.selected};
+    for (final entry in state.selected.entries) {
+      if (parentOf(entry.value) == null) continue;
+      final next = kept.where((tab) => tab.ref.host == entry.key).firstOrNull;
+      if (next == null) {
+        selected.remove(entry.key);
+      } else {
+        selected[entry.key] = next.ref;
+      }
+    }
+    return state.copyWith(tabs: kept, selected: selected);
+  }
 
   /// Removes the tabs of [refs], or the tabs [where] picks, at the store's
   /// turn, recording each as closed when [suppress] is given; the closed
   /// records [forget] picks are dropped in the same write. A removed
   /// selected tab hands its selection to its neighbour. The removed tabs,
   /// empty when nothing was saved, and the tab each removed selected tab
-  /// handed its selection to.
+  /// handed its selection to. [keepWarm] leaves the live views of the
+  /// removed tabs open, for a removal that must not end an open route.
   Future<
     ({List<SessionTab> removed, Map<SessionRef, SessionRef?> selectedAfter})
   >
@@ -435,6 +513,7 @@ class SessionTabsController extends ChangeNotifier {
     SessionTabSuppression Function(SessionTab tab)? suppress,
     bool Function(SessionTabSuppression entry)? forget,
     bool Function(SessionTab)? pinned,
+    bool keepWarm = false,
   }) async {
     var removed = <SessionTab>[];
     final selectedAfter = <SessionRef, SessionRef?>{};
@@ -482,8 +561,10 @@ class SessionTabsController extends ChangeNotifier {
         selectedAfter: const <SessionRef, SessionRef?>{},
       );
     }
-    for (final tab in removed) {
-      _release(_warm.remove(tab.ref));
+    if (!keepWarm) {
+      for (final tab in removed) {
+        _release(_warm.remove(tab.ref));
+      }
     }
     return (removed: removed, selectedAfter: selectedAfter);
   }
@@ -589,6 +670,7 @@ class SessionTabsController extends ChangeNotifier {
       if (retired.contains(ref.host.value)) _reads.remove(ref)?.cancel();
     }
     _checked.removeWhere((ref) => retired.contains(ref.host.value));
+    _childParents.removeWhere((ref, _) => retired.contains(ref.host.value));
     _deleted.removeWhere((ref) => retired.contains(ref.host.value));
     for (final ref in _warm.keys.toList()) {
       if (retired.contains(ref.host.value)) _release(_warm.remove(ref));
@@ -601,6 +683,9 @@ class SessionTabsController extends ChangeNotifier {
         catalog.failure != null) {
       return;
     }
+    // A tab an older build saved for a child leaves here, whatever else
+    // the rows prove.
+    unawaited(_evictChildTabs(profile));
     final host = HostId(profile.id);
     final rows = {for (final row in catalog.sessions) row.info.ref: row};
     // A listed tab takes its row's newer title and project, without
@@ -646,8 +731,15 @@ class SessionTabsController extends ChangeNotifier {
       }
 
       task.result.then(
-        (_) {
-          settle();
+        (row) {
+          if (!settle() || _disposed || row.info.ref != tab.ref) return;
+          if (row.info.lineage.parent case final parent?) {
+            _childParents[tab.ref] = parent;
+            unawaited(_evictChildTabs(profile));
+          } else {
+            _childParents.remove(tab.ref);
+          }
+          _notify();
         },
         onError: (Object error) {
           if (!settle() || _disposed) return;
@@ -655,6 +747,8 @@ class SessionTabsController extends ChangeNotifier {
             failure: SessionCatalogFailure.notFound,
           )) {
             _drop(tab.ref, profile);
+          } else {
+            _notify();
           }
         },
       );
@@ -683,6 +777,37 @@ class SessionTabsController extends ChangeNotifier {
         !hosts.storageError &&
         hosts.pendingBindingChange != profile.id &&
         hosts.isCurrentProfile(profile);
+  }
+
+  /// Drops the tabs of [profile] whose loaded row proves a child session. A
+  /// tab an older build saved for a child leaves without the removal notice
+  /// and without ending an open route: the child's live view stays warm,
+  /// because the user may be inside it, and the least-recently-shown release
+  /// still bounds the cache.
+  Future<void> _evictChildTabs(EndpointProfile profile) async {
+    if (!_currentBinding(profile)) return;
+    final host = HostId(profile.id);
+    final children = <SessionTab>[];
+    for (final tab in _store.state.tabs) {
+      if (tab.ref.host != host) continue;
+      if (parentOf(tab.ref) != null) children.add(tab);
+    }
+    if (children.isEmpty) return;
+    // A pin can never keep a child: it is lifted first, best-effort, so the
+    // neighbour the selection hands to is chosen among the primary tabs.
+    final unpinned = <SessionRef>{};
+    for (final tab in children) {
+      final pin = _pinOf(tab);
+      if (pin == null) continue;
+      final lifted = await _setPin(pin, tab.ref, pinned: false);
+      if (lifted ?? false) unpinned.add(tab.ref);
+    }
+    await _remove(
+      {for (final tab in children) tab.ref},
+      isCurrent: () => _currentBinding(profile),
+      pinned: (tab) => unpinned.contains(tab.ref) || isPinned(tab),
+      keepWarm: true,
+    );
   }
 
   Future<void> _drop(SessionRef ref, EndpointProfile profile) async {
@@ -813,6 +938,10 @@ class SessionTabsController extends ChangeNotifier {
               fallbacks: fallbacks,
               knownDirectories: known,
               frozen: {..._frozen},
+              children: {
+                for (final tab in state.tabs)
+                  if (parentOf(tab.ref) != null) tab.ref,
+              },
             );
             return result!.state;
           })

@@ -2,14 +2,18 @@ import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
+import 'package:codewalk/platform/sessions/session_tabs_store.dart';
+import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 import '../hosts/fakes.dart';
+import '../storage/storage_fakes.dart';
 import 'fakes.dart';
 import 'live_fakes.dart';
 import 'workspace_support.dart';
@@ -27,6 +31,7 @@ Future<_Open> _open(
   String link, {
   Size size = const Size(1280, 800),
   CatalogRig? rig,
+  V2MetadataStore? store,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -44,6 +49,7 @@ Future<_Open> _open(
     endpointProber: FakeProber(),
     sessionCatalogFactory: rig.create,
     sessionLiveDirectory: () => directory,
+    metadataStore: store,
   );
   await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
   await _settle(tester);
@@ -168,6 +174,66 @@ void main() {
     await _settle(tester);
     expect(app.dependencies.router.state.uri.path, '/s/profile_a/ses_one');
     expect(find.byType(SessionLivePage), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a link to a child opens it without a tab', (tester) async {
+    final app = await _open(tester, '/s/profile_a/ses_kid');
+    final source = app.rig.sources.single;
+    source.respond([
+      source.row('parent', title: 'Parent', directory: '/w'),
+      source.row('kid', title: 'Kid', directory: '/w', parent: 'parent'),
+    ]);
+    await _settle(tester);
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    expect(app.dependencies.sessionTabs!.tabs, isEmpty);
+    expect(_notice, findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a stale child tab is dropped while the child stays open', (
+    tester,
+  ) async {
+    // A tab an older build saved for the child, selected on its server.
+    final backend = FakeMetadataBackend();
+    final store = V2MetadataStore(backend: backend);
+    const ref = SessionRef(
+      HostId('profile_a'),
+      HarnessInstanceId('profile_a'),
+      'ses_kid',
+    );
+    backend.values[SessionTabsStore.key] = SessionTabsStore.encode(
+      SessionTabsState(
+        tabs: const [
+          SessionTab(
+            ref: ref,
+            project: ProjectRef(HostId('profile_a'), '/w'),
+            title: 'Kid',
+            lastOpenedAtMs: 1,
+          ),
+        ],
+        selected: {const HostId('profile_a'): ref},
+      ),
+    );
+    final app = await _open(tester, '/s/profile_a/ses_kid', store: store);
+    final source = app.rig.sources.single;
+    source.respond([
+      source.row('parent', title: 'Parent', directory: '/w'),
+      source.row('kid', title: 'Kid', directory: '/w', parent: 'parent'),
+    ]);
+    await _settle(tester);
+    // The child's conversation stays on screen: only the saved tab leaves,
+    // without a notice and without the view being closed.
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    final page = tester.widget<SessionLivePage>(find.byType(SessionLivePage));
+    expect(page.controller.summary.info.title, 'Kid');
+    expect(
+      app.dependencies.sessionTabs!.tabs.any((tab) => tab.ref == ref),
+      isFalse,
+    );
+    expect(_notice, findsNothing);
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

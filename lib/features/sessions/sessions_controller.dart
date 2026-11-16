@@ -143,12 +143,11 @@ class SessionsController extends ChangeNotifier {
   EndpointProfile? get selectedProfile => _profile;
   List<SessionSummary> get sessions {
     final source = _actions;
-    if (source == null || _filter == SessionActionFilter.all) return _sessions;
     // Hiding a parent hides its loaded descendants too.
     return filterSessions(
       _sessions,
-      effectivelyHidden(_sessions, source.isHidden),
-      _filter,
+      source == null ? const {} : effectivelyHidden(_sessions, source.isHidden),
+      source == null ? SessionActionFilter.all : _filter,
     );
   }
 

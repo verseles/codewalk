@@ -2,6 +2,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import '../../platform/sessions/project_workspace_store.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/sessions/session_visibility.dart';
 import 'session_grouping.dart';
 
 /// The canonical directories [rows] report, in the order they first appear.
@@ -46,27 +47,32 @@ Set<SessionRef> effectivelyHidden(
   return result;
 }
 
-/// The rows the filter keeps: the visible ones, the hidden ones, or all.
+/// The rows the filter keeps: the visible primary ones, the hidden primary
+/// ones, or every primary one. A session the endpoint attributes to a parent
+/// is never a row of any filter.
 List<SessionSummary> filterSessions(
   List<SessionSummary> rows,
   Set<SessionRef> hidden,
   SessionActionFilter filter,
 ) => switch (filter) {
-  SessionActionFilter.all => rows,
+  SessionActionFilter.all => [
+    for (final row in rows)
+      if (isPrimarySummary(row)) row,
+  ],
   SessionActionFilter.active => [
     for (final row in rows)
-      if (!hidden.contains(row.info.ref)) row,
+      if (isPrimarySummary(row) && !hidden.contains(row.info.ref)) row,
   ],
   SessionActionFilter.hidden => [
     for (final row in rows)
-      if (hidden.contains(row.info.ref)) row,
+      if (isPrimarySummary(row) && hidden.contains(row.info.ref)) row,
   ],
 };
 
 /// The list of one project context as the drawer shows it: the search keeps
 /// the rows whose title contains the query, ignoring case; pinned rows come
-/// first, then the rest; each band is ordered by [sort] and nests children
-/// under their loaded parent.
+/// first, then the rest; each band is ordered by [sort]. Only primary
+/// sessions are listed: a child is reached from its parent, never from here.
 ///
 /// A missing time keeps the server's order among the rows that miss it,
 /// after the rows that have one, so the order is stable.
@@ -76,23 +82,23 @@ List<SessionRow> projectSessionList(
   required SessionListSort sort,
   required bool Function(SessionSummary row) pinned,
 }) {
+  final listed = [
+    for (final row in rows)
+      if (isPrimarySummary(row)) row,
+  ];
   final needle = query.trim().toLowerCase();
   final matching = needle.isEmpty
-      ? rows
+      ? listed
       : [
-          for (final row in rows)
+          for (final row in listed)
             if (row.info.title.toLowerCase().contains(needle)) row,
         ];
   final ordered = sortSessions(matching, sort);
   return [
-    ...nestSessionRows([
-      for (final row in ordered)
-        if (pinned(row)) row,
-    ]),
-    ...nestSessionRows([
-      for (final row in ordered)
-        if (!pinned(row)) row,
-    ]),
+    for (final row in ordered)
+      if (pinned(row)) SessionRow(row),
+    for (final row in ordered)
+      if (!pinned(row)) SessionRow(row),
   ];
 }
 

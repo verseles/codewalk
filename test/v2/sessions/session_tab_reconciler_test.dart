@@ -72,6 +72,22 @@ List<String> _ids(SessionTabsState? state) => [
 void main() {
   const window = 3 * _hour;
 
+  test('proven children leave even when frozen or absent from the list', () {
+    final result = reconcileSessionTabs(
+      state: SessionTabsState(
+        tabs: [_tab('child'), _tab('root')],
+        selected: {_host: _ref('child')},
+      ),
+      host: _host,
+      nowMs: _now,
+      candidates: const {},
+      children: {_ref('child')},
+      frozen: {_ref('child')},
+    );
+    expect(_ids(result.state), ['root']);
+    expect(result.state!.selected[_host], _ref('root'));
+  });
+
   test('a session updated within three hours gets a tab, an older one not', () {
     final result = _run(SessionTabsState(), [
       _candidate(_row('edge', updated: _now - window)),
@@ -152,6 +168,47 @@ void main() {
       _candidate(_row('other', updated: _now), hidden: true, pinned: true),
     ]);
     expect(_ids(result.state), ['shown']);
+  });
+
+  test('a child tab never stays: not selected, pinned, busy or recent', () {
+    final state = SessionTabsState(
+      tabs: [
+        _tab('root', opened: _now - 1, updated: _now - 1),
+        _tab('kid_selected', opened: _now - 1, updated: _now - 1),
+        _tab('kid_pinned', opened: _now - 1, updated: _now - 1),
+        _tab('kid_busy', opened: _now - 1, updated: _now - 1),
+        _tab('kid_recent', opened: _now, updated: _now),
+      ],
+      selected: {_host: _ref('kid_selected')},
+    );
+    final result = _run(state, [
+      _candidate(_row('root', updated: _now - 1)),
+      _candidate(_row('kid_selected', updated: _now - 1, parent: 'root')),
+      _candidate(
+        _row('kid_pinned', updated: _now - 1, parent: 'root'),
+        pinned: true,
+      ),
+      _candidate(
+        _row('kid_busy', updated: _now - 1, parent: 'root'),
+        busy: true,
+      ),
+      _candidate(_row('kid_recent', updated: _now, parent: 'root')),
+    ]);
+    expect(_ids(result.state), ['root']);
+    // The selection the dropped child held moves to the kept tab.
+    expect(result.state!.selected[_host], _ref('root'));
+  });
+
+  test('a dropped child selection leaves no selected tab behind', () {
+    final state = SessionTabsState(
+      tabs: [_tab('kid', opened: _now)],
+      selected: {_host: _ref('kid')},
+    );
+    final result = _run(state, [
+      _candidate(_row('kid', updated: _now, parent: 'gone')),
+    ]);
+    expect(result.state!.tabs, isEmpty);
+    expect(result.state!.selected.containsKey(_host), isFalse);
   });
 
   test('new tabs follow the kept ones, the most recent first', () {
