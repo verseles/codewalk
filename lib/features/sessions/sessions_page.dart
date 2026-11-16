@@ -23,6 +23,7 @@ import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/server_switcher.dart';
 import 'project_context_list.dart';
 import 'project_contexts_controller.dart';
+import 'project_icon_view.dart';
 import 'project_picker_dialog.dart';
 import 'session_actions_menu.dart';
 import 'session_drawer_header.dart';
@@ -327,6 +328,7 @@ class _SessionsPageState extends State<SessionsPage> {
         (context) => ProjectContextRow(
           key: ValueKey('project-row-$directory'),
           directory: directory,
+          icon: controller.projects.iconAt(directory),
           active: active,
           count: rows?.length,
           complete: controller.contextComplete(directory),
@@ -552,8 +554,8 @@ class _SessionsPageState extends State<SessionsPage> {
                       // width below, so its trailing folders stay visible.
                       Row(
                         children: [
-                          Icon(
-                            Symbols.folder_open,
+                          ProjectIconView(
+                            source: controller.projects.iconFor(group.project),
                             color: selected ? theme.colorScheme.primary : null,
                           ),
                           const SizedBox(width: 8),

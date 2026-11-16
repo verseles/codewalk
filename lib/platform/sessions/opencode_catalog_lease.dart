@@ -14,6 +14,7 @@ final class OpenCodeCatalogLease implements SessionCatalogChanges {
   OpenCodeCatalogLease(this._owner, this._release) {
     _changes = _owner.catalogChanges.listen(
       (change) => _add(switch (change) {
+        OpenCodeCatalogChange.project => const ProjectCatalogChanged(),
         OpenCodeCatalogChange.started ||
         OpenCodeCatalogChange.waiting => const SessionActivityChanged(),
         _ => const SessionCatalogChanged(),

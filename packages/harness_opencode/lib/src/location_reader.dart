@@ -32,11 +32,13 @@ final class OpenCodeLocationReader {
     required this.harness,
     this.deadline = const Duration(seconds: 20),
     this.maxBodyBytes = 1024 * 1024,
+    this.maxProjectBodyBytes = 8 * 1024 * 1024,
     this.maxEntries = 10000,
     this.maxFindResults = 200,
   }) : _endpoint = transport.endpoint {
     if (deadline <= Duration.zero ||
         maxBodyBytes <= 0 ||
+        maxProjectBodyBytes <= 0 ||
         maxEntries <= 0 ||
         maxFindResults <= 0 ||
         harness.host.value.isEmpty ||
@@ -49,6 +51,7 @@ final class OpenCodeLocationReader {
   final HarnessRef harness;
   final Duration deadline;
   final int maxBodyBytes;
+  final int maxProjectBodyBytes;
   final int maxEntries;
   final int maxFindResults;
   final Uri _endpoint;
@@ -63,41 +66,68 @@ final class OpenCodeLocationReader {
   /// The directories of the projects the endpoint knows, in its order: each
   /// project's directory, then its sandboxes. The project id is only an
   /// annotation; a directory listed twice keeps its first place.
-  Future<List<ProjectRef>> listProjects({
+  Future<List<ProjectInfo>> listProjects({
     RequestCancellation? cancellation,
   }) async {
     _checkOpen();
-    return _reads.read('api/project', (value) {
-      if (value is! List || value.length > maxEntries) {
-        throw const FormatException('Malformed project list.');
-      }
-      final seen = <String>{};
-      final result = <ProjectRef>[];
-      void add(String directory, String id) {
-        if (seen.add(directory)) {
-          result.add(
-            ProjectRef(harness.host, directory, upstreamProjectId: id),
-          );
+    return _reads.read(
+      'api/project',
+      (value) {
+        if (value is! List || value.length > maxEntries) {
+          throw const FormatException('Malformed project list.');
         }
-      }
+        final seen = <String>{};
+        final result = <ProjectInfo>[];
+        void add(String directory, String id, Uri? icon) {
+          if (seen.add(directory)) {
+            result.add(
+              ProjectInfo(
+                ProjectRef(harness.host, directory, upstreamProjectId: id),
+                icon: icon,
+              ),
+            );
+          }
+        }
 
-      for (final row in value) {
-        final project = _object(row);
-        final id = _text(project['id']);
-        final sandboxes = project['sandboxes'];
-        if (sandboxes is! List || sandboxes.length > maxEntries) {
-          throw const FormatException('Malformed project sandboxes.');
+        for (final row in value) {
+          final project = _object(row);
+          final id = _text(project['id']);
+          final sandboxes = project['sandboxes'];
+          if (sandboxes is! List || sandboxes.length > maxEntries) {
+            throw const FormatException('Malformed project sandboxes.');
+          }
+          final icon = _projectIcon(project['icon']);
+          add(_text(project['canonical']), id, icon);
+          for (final sandbox in sandboxes) {
+            add(_text(sandbox), id, icon);
+          }
+          if (result.length > maxEntries) {
+            throw const FormatException('Project list limit.');
+          }
         }
-        add(_text(project['canonical']), id);
-        for (final sandbox in sandboxes) {
-          add(_text(sandbox), id);
-        }
-        if (result.length > maxEntries) {
-          throw const FormatException('Project list limit.');
-        }
-      }
-      return result;
-    }, cancellation);
+        return result;
+      },
+      cancellation,
+      maxBytes: maxProjectBodyBytes,
+    );
+  }
+
+  /// Match the official avatar precedence before exposing harness-neutral data.
+  /// A broken override never reveals the image it deliberately replaced.
+  static Uri? _projectIcon(Object? value) {
+    if (value is! Map) return null;
+    final override = value['override'];
+    final color = value['color'];
+    final source = override is String && override.isNotEmpty
+        ? override
+        : color is String && color.isNotEmpty
+        ? null
+        : value['url'];
+    if (source is! String || source.isEmpty || source.length > 65536) {
+      return null;
+    }
+    final uri = Uri.tryParse(source);
+    return uri?.hasScheme == true ? uri : null;
   }
 
   /// Resolves [directory], or the endpoint's default location when it is

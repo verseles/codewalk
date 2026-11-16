@@ -14,7 +14,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #417 Manter o scroll da lista de sessões
 - [ ] #418 Manter o lugar de leitura da aba
 - [ ] #447 Onboarding e tour de primeiro uso
-- [ ] #451 Ícones de projeto e cores de abas
+- [ ] #451 Cores de abas por projeto (ícones implementados; cores pendentes)
 - [ ] #452 Sessões e catálogo instantâneos após reiniciar
 - [ ] #301 Canned answers
 - [ ] #448 Data saver no celular

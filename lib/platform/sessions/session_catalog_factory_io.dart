@@ -136,7 +136,7 @@ final class _NativeSource implements SessionCatalogSource {
   }
 
   @override
-  SessionCatalogRead<List<ProjectRef>> projects() => _NativeRequest(
+  SessionCatalogRead<List<ProjectInfo>> projects() => _NativeRequest(
     (cancellation) => _locations.listProjects(cancellation: cancellation),
   );
   @override

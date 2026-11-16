@@ -377,13 +377,13 @@ packages:
     source: hosted
     version: "4.2.2"
   flutter_svg:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: "35882981abcbfb8c15b286f0cd690ff25bac12d95eff3e25ee207f37d4c42e7f"
+      sha256: "455a22036f8d1b7c74f53283c8644d6af2f6f7c9ec72c7b06a2ff70fb3954a54"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.4.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -1229,10 +1229,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "4dca4feb77dc3ec7f6e27e49c53241eb8217f55e4f9b12599a27f8903bca5682"
+      sha256: "4c9d2e7121eea8b4f160e6e435900a0ae7214cfc97c2d6cf84c25532b789b50d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.0"
+    version: "1.3.4"
   vector_math:
     dependency: transitive
     description:

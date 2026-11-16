@@ -34,6 +34,11 @@ final class SessionActivityChanged extends SessionCatalogSignal {
   const SessionActivityChanged();
 }
 
+/// Project presentation changed; session rows and activity remain untouched.
+final class ProjectCatalogChanged extends SessionCatalogSignal {
+  const ProjectCatalogChanged();
+}
+
 /// The feed's transport state: the endpoint's stream is connected, or it is
 /// not. A reconnect is not continuity: the catalog re-reads the list.
 final class SessionCatalogConnection extends SessionCatalogSignal {

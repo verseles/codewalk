@@ -292,7 +292,7 @@ void main() {
     await tester.pumpAndSettle();
     rig.sources.single.projectReads.single.completion.complete([
       for (var i = 0; i < 40; i++)
-        ProjectRef(const HostId('profile_a'), '/srv/p$i'),
+        ProjectInfo(ProjectRef(const HostId('profile_a'), '/srv/p$i')),
     ]);
     await tester.pumpAndSettle();
     for (var i = 0; i < 30; i++) {
@@ -507,8 +507,8 @@ void main() {
     expect(find.byType(Dialog), findsOneWidget);
     expect(tester.getSize(find.byType(ProjectPickerDialog)).width, 390);
     rig.sources.single.projectReads.single.completion.complete([
-      const ProjectRef(HostId('profile_a'), '/work/beta'),
-      const ProjectRef(HostId('profile_a'), '/srv/tools'),
+      const ProjectInfo(ProjectRef(HostId('profile_a'), '/work/beta')),
+      const ProjectInfo(ProjectRef(HostId('profile_a'), '/srv/tools')),
     ]);
     await tester.pumpAndSettle();
     await tester.enterText(

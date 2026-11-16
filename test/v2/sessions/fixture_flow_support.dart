@@ -523,6 +523,15 @@ List<FixtureRoute> sessionRoutes({
         times: times,
       );
   return [
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
+        path: '/api/project',
+        status: 200,
+        response: <Object?>[],
+      ),
+      times: times,
+    ),
     if (directory != null) ...[
       located('/api/permission/request'),
       located('/api/form'),

@@ -72,14 +72,89 @@ void main() {
     });
     final reader = OpenCodeLocationReader(transport, harness: harness);
     final projects = await reader.listProjects();
-    expect(projects.map((p) => p.canonicalDirectory), [
+    expect(projects.map((p) => p.ref.canonicalDirectory), [
       '/work/app',
       '/work/app-tree',
       '/',
     ]);
-    expect(projects.first.host, harness.host);
-    expect(projects.first.upstreamProjectId, 'prj_a');
+    expect(projects.first.ref.host, harness.host);
+    expect(projects.first.ref.upstreamProjectId, 'prj_a');
     reader.dispose();
+  });
+
+  test(
+    'project images follow official precedence and every sandbox shares it',
+    () async {
+      const url = 'data:image/png;base64,AQID';
+      const override = 'https://example.com/override.svg';
+      final cases = <(Object?, String?)>[
+        (null, null),
+        ('malformed', null),
+        ({'url': url}, url),
+        ({'url': url, 'override': override, 'color': 'blue'}, override),
+        ({'url': url, 'override': '', 'color': ''}, url),
+        ({'url': url, 'color': 'blue'}, null),
+        ({'url': url, 'override': 'x' * 65537}, null),
+        ({'url': url, 'override': '%broken'}, null),
+      ];
+      for (final (icon, expected) in cases) {
+        final reader = OpenCodeLocationReader(
+          TestTransport(
+            (_) => response([
+              {
+                'id': 'p',
+                'canonical': '/app',
+                'sandboxes': ['/tree', '/app'],
+                'icon': icon,
+              },
+            ]),
+          ),
+          harness: harness,
+        );
+        final projects = await reader.listProjects();
+        expect(projects.map((p) => p.ref.canonicalDirectory), [
+          '/app',
+          '/tree',
+        ]);
+        expect(projects.first.icon?.toString(), expected);
+        expect(identical(projects.first.icon, projects.last.icon), isTrue);
+        reader.dispose();
+      }
+    },
+  );
+
+  test('icon-bearing lists have a separate finite body budget', () async {
+    final body = [
+      for (var i = 0; i < 20; i++)
+        {
+          'id': 'p$i',
+          'canonical': '/app$i',
+          'sandboxes': <String>[],
+          'icon': {'url': 'data:image/png;base64,${'A' * 60000}'},
+        },
+    ];
+    final transport = TestTransport((_) => response(body));
+    final reader = OpenCodeLocationReader(transport, harness: harness);
+    expect(await reader.listProjects(), hasLength(20));
+    reader.dispose();
+    final bounded = OpenCodeLocationReader(
+      transport,
+      harness: harness,
+      maxProjectBodyBytes: 1024,
+    );
+    await expectLater(
+      bounded.listProjects(),
+      throwsA(failure(OpenCodeSessionReadFailure.bodyTooLarge)),
+    );
+    bounded.dispose();
+    expect(
+      () => OpenCodeLocationReader(
+        transport,
+        harness: harness,
+        maxProjectBodyBytes: 0,
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('a location resolves to the directory the endpoint keys', () async {

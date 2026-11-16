@@ -152,13 +152,13 @@ class CatalogSource implements SessionCatalogSource {
   }
 
   /// The directory reads, each held until a test settles it.
-  final projectReads = <CatalogRead<List<ProjectRef>>>[];
+  final projectReads = <CatalogRead<List<ProjectInfo>>>[];
   final locationReads = <(String?, CatalogRead<ProjectRef>)>[];
   final listReads = <(String, String?, CatalogRead<List<FileEntry>>)>[];
   final findReads = <(String, String, CatalogRead<List<FileEntry>>)>[];
   @override
-  CatalogRead<List<ProjectRef>> projects() {
-    final read = CatalogRead<List<ProjectRef>>();
+  CatalogRead<List<ProjectInfo>> projects() {
+    final read = CatalogRead<List<ProjectInfo>>();
     projectReads.add(read);
     return read;
   }

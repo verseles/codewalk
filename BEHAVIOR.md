@@ -127,7 +127,7 @@ description of this code.
 - **Then** it adds a tab, or focuses its tab, keyed by its full identity (server, harness instance, session), so two servers with the same session id keep two tabs; the tab becomes the selected tab of its server
 - **Then** a strip below the app bar shows every tab of the server: pinned tabs first in their own scroll (an inactive pinned tab shows only its icon, the shown one its title), then the other tabs grouped by project in the order their projects first appear, with the shown tab first in its group, without changing the saved order; it keeps the shown tab in view and switches on a tap
 - **Then** on a noncompact workspace the strip spans the sidebar and chat, and in the Linux desktop window band it sits above the toolbar (see V2 desktop window); on a compact workspace it remains above the chat
-- **Then** each tab shows its custom icon, else the default one, replaced by a mark while its session fails, waits for an answer or has an unseen reply, with a small running badge while it works
+- **Then** each tab shows its custom icon, else the project's image supplied by the server, else the themed folder icon, replaced by a mark while its session fails, waits for an answer or has an unseen reply, with a small running badge while it works; pinned tabs, the recent-tab switcher, the New Chat draft and the Change icon preview use the same project image, without changing tab colors
 - **Then** an inline `+` after each project's group opens or switches to that project and shows its local New Chat draft with the composer focused; nothing is created on the server until the first send, and a failed switch shows an error and no draft; on the workspace home the active draft shows as a selected New Chat placeholder in its project's group (in place of that `+`), with no menu, never saved as a tab, and replaced by the session its first send creates
 - **Then** the open projects' recent visible root sessions become tabs automatically: the later of their server update and local open keeps them for three hours; the selected tab, a confirmed running or waiting session and a context-pinned session remain eligible, and unknown activity or a missing partial row never proves idleness or deletion
 - **Then** existing tabs keep their saved order, new candidates append by recency while there is room, and opening a project without an eligible tab adds its most recent visible, non-suppressed root session once
@@ -198,6 +198,15 @@ description of this code.
 - **Then** the selected project, the shown session and its Recent row carry a thin accent along the start edge with emphasized foreground text; activity marks stay compact foreground badges, and a completed root reply not seen yet keeps a subtle highlight for one hour (never on child sessions)
 - **Then** rows use touch spacing on compact windows and denser spacing beside the chat; session rows never render diff-stat pseudo summaries
 - **Then** a session row's menu offers Pin or Unpin for its project context; the pin is saved locally only for that server and project
+
+### V2 project icons
+
+- **Given** the selected server supplies an optional project image
+- **When** a project row, grouped header, matching picker result or default session-tab icon is shown
+- **Then** its existing icon slot shows that image, including SVG and supported raster formats; custom session icons and attention marks keep precedence
+- **Then** a missing, invalid, oversized or unavailable image keeps the themed folder or source glyph, without blocking the project or its conversations; a harness without project images needs no extra capability or control
+- **Then** project metadata is shared by the selected server's surfaces, refreshed on project updates, reconnection or explicit refresh, and discarded when its server binding changes; a project-only update does not reload session rows, and an unavailable metadata read keeps the last successful images
+- **Then** images use a bounded memory cache; HTTPS image requests carry no server credentials, and a later rebuild can retry the same URL after its cached entry expires; image bytes are not saved with project identity or session-tab preferences
 
 ### V2 project picker
 

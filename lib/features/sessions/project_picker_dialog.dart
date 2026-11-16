@@ -11,6 +11,7 @@ import '../../shared/sessions/server_path.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'project_context_list.dart';
 import 'project_contexts_controller.dart';
+import 'project_icon_view.dart';
 import 'project_picker_controller.dart';
 import 'sessions_controller.dart';
 
@@ -351,12 +352,15 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
           key: ValueKey('project-picker-${entry.directory}'),
           dense: true,
           selected: entry.directory == active,
-          leading: Icon(switch (entry.source) {
-            ProjectPickerSource.open => Symbols.folder_special,
-            ProjectPickerSource.closed => Symbols.history,
-            ProjectPickerSource.server => Symbols.folder,
-            ProjectPickerSource.found => Symbols.search,
-          }),
+          leading: ProjectIconView(
+            source: entry.icon,
+            fallback: switch (entry.source) {
+              ProjectPickerSource.open => Symbols.folder_special,
+              ProjectPickerSource.closed => Symbols.history,
+              ProjectPickerSource.server => Symbols.folder,
+              ProjectPickerSource.found => Symbols.search,
+            },
+          ),
           title: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: StartEllipsisPath(
             entry.directory,

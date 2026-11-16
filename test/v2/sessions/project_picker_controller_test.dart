@@ -87,8 +87,8 @@ void main() {
     await open();
     expect(contexts.active, '/work/web');
     source().projectReads.single.completion.complete([
-      const ProjectRef(_host, '/work/web'),
-      const ProjectRef(_host, '/srv/tools'),
+      const ProjectInfo(ProjectRef(_host, '/work/web')),
+      const ProjectInfo(ProjectRef(_host, '/srv/tools')),
     ]);
     await settle();
     expect(

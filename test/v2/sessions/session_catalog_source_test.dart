@@ -380,7 +380,7 @@ void main() {
     );
     addTearDown(source.close);
     expect(
-      (await source.projects().result).single.canonicalDirectory,
+      (await source.projects().result).single.ref.canonicalDirectory,
       '/work/app',
     );
     expect((await source.location().result).canonicalDirectory, '/home/me');

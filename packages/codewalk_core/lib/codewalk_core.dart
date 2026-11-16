@@ -4,6 +4,7 @@
 library;
 
 export 'src/identity.dart';
+export 'src/project.dart';
 export 'src/ownership.dart';
 export 'src/values.dart';
 export 'src/errors.dart';

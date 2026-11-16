@@ -14,9 +14,10 @@ enum ProjectPickerSource { open, closed, server, found }
 
 @immutable
 final class ProjectPickerEntry {
-  const ProjectPickerEntry(this.directory, this.source);
+  const ProjectPickerEntry(this.directory, this.source, {this.icon});
   final String directory;
   final ProjectPickerSource source;
+  final Uri? icon;
   String get name => serverPathName(directory);
 }
 
@@ -98,19 +99,14 @@ class ProjectPickerController extends ChangeNotifier {
   void start() {
     final source = catalog.directorySource;
     if (source == null || _disposed) return;
-    final read = source.projects();
     unawaited(
-      read.result.then(
-        (projects) {
-          if (_disposed || _dismissed) return;
-          _serverProjects = [
-            for (final project in projects) project.canonicalDirectory,
-          ];
-          _notify();
-        },
-        // The known contexts and the manual path still work without them.
-        onError: (Object _) {},
-      ),
+      catalog.projects.read(refresh: true).then((projects) {
+        if (_disposed || _dismissed) return;
+        _serverProjects = [
+          for (final project in projects) project.ref.canonicalDirectory,
+        ];
+        _notify();
+      }),
     );
   }
 
@@ -121,16 +117,32 @@ class ProjectPickerController extends ChangeNotifier {
     final known = <ProjectPickerEntry>[
       for (final directory in contexts.open)
         if (seen.add(directory))
-          ProjectPickerEntry(directory, ProjectPickerSource.open),
+          ProjectPickerEntry(
+            directory,
+            ProjectPickerSource.open,
+            icon: catalog.projects.iconAt(directory),
+          ),
       for (final directory in contexts.closed)
         if (seen.add(directory))
-          ProjectPickerEntry(directory, ProjectPickerSource.closed),
+          ProjectPickerEntry(
+            directory,
+            ProjectPickerSource.closed,
+            icon: catalog.projects.iconAt(directory),
+          ),
       for (final directory in _serverProjects)
         if (seen.add(directory))
-          ProjectPickerEntry(directory, ProjectPickerSource.server),
+          ProjectPickerEntry(
+            directory,
+            ProjectPickerSource.server,
+            icon: catalog.projects.iconAt(directory),
+          ),
       for (final directory in _found)
         if (seen.add(directory))
-          ProjectPickerEntry(directory, ProjectPickerSource.found),
+          ProjectPickerEntry(
+            directory,
+            ProjectPickerSource.found,
+            icon: catalog.projects.iconAt(directory),
+          ),
       // A completed folder stays the exact result of its own path, which is
       // not searched again.
       if (_completed case final completed?
@@ -394,6 +406,12 @@ class ProjectPickerController extends ChangeNotifier {
       _browseToken++;
       _searchRead?.cancel();
       _browseRead?.cancel();
+      _notify();
+    } else {
+      _serverProjects = [
+        for (final project in catalog.projects.entries)
+          project.ref.canonicalDirectory,
+      ];
       _notify();
     }
   }

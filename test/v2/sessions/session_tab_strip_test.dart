@@ -1,6 +1,7 @@
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/project_icon_view.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
@@ -109,6 +110,66 @@ String _location(_App app) =>
     app.dependencies.router.routerDelegate.currentConfiguration.uri.toString();
 
 void main() {
+  for (final size in const [Size(1280, 800), Size(390, 844)]) {
+    testWidgets('project icon reaches tabs and recent rows at ${size.width}', (
+      tester,
+    ) async {
+      _useMemoryPreferences();
+      final app = await _launch(tester, '/s/profile_a/ses_one', size: size);
+      final source = app.rig.sources.single;
+      source.respond([source.row('one', directory: '/work/a')]);
+      await _settle(tester);
+      await _visit(tester, app, ['one']);
+      final uri = Uri.dataFromString(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="red"/></svg>',
+        mimeType: 'image/svg+xml',
+      );
+      source.projectReads.single.completion.complete([
+        ProjectInfo(ProjectRef(source.harness.host, '/work/a'), icon: uri),
+      ]);
+      await _settle(tester);
+      final image = find.descendant(
+        of: _tab(app, 'one'),
+        matching: find.byType(ProjectIconView),
+      );
+      expect(tester.widget<ProjectIconView>(image).source, uri);
+      final tabs = app.dependencies.sessionTabs!;
+      final tab = tabs.tabs.single;
+      expect(await tabs.setIcon(tab, 'bug'), isTrue);
+      await _settle(tester);
+      expect(
+        find.descendant(
+          of: _tab(app, 'one'),
+          matching: find.byIcon(Symbols.bug_report),
+        ),
+        findsOneWidget,
+      );
+      expect(image, findsNothing);
+      expect(await tabs.setIcon(tab, null), isTrue);
+      await _settle(tester);
+      expect(image, findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey('session-tabs-recent-button')),
+      );
+      await _settle(tester);
+      final recent = find.byKey(
+        ValueKey('session-tabs-recent-${_ref(app, 'one').storageKey}'),
+      );
+      expect(
+        tester
+            .widget<ProjectIconView>(
+              find.descendant(
+                of: recent,
+                matching: find.byType(ProjectIconView),
+              ),
+            )
+            .source,
+        uri,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   testWidgets(
     'the strip shows all server tabs grouped by project and switches',
     (tester) async {

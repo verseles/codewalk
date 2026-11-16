@@ -68,6 +68,9 @@ class _SessionTabMenuState extends State<SessionTabMenu> {
     final result = await showSessionTabIconPicker(
       context,
       currentPresetId: tabs.iconFor(tab.ref),
+      projectIcon: context.read<SessionsController?>()?.projects.iconFor(
+        tab.project,
+      ),
     );
     if (result == null || !mounted) return;
     final contexts = context.read<ProjectContextsController?>();

@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/server_path.dart';
+import 'project_icon_view.dart';
 
 /// The width of the accent that marks the selected project or session.
 const _accentWidth = 3.0;
@@ -115,6 +116,7 @@ class ProjectContextRow extends StatefulWidget {
   const ProjectContextRow({
     super.key,
     required this.directory,
+    this.icon,
     required this.active,
     required this.count,
     required this.complete,
@@ -125,6 +127,7 @@ class ProjectContextRow extends StatefulWidget {
   }) : expanded = expanded ?? active;
 
   final String directory;
+  final Uri? icon;
   final bool active;
 
   /// Whether the project's conversations show below it, which points its
@@ -205,8 +208,8 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                                 children: [
                                   if (constraints.maxWidth >=
                                       _iconsMinWidth) ...[
-                                    Icon(
-                                      Symbols.folder_open,
+                                    ProjectIconView(
+                                      source: widget.icon,
                                       color: widget.active
                                           ? theme.colorScheme.primary
                                           : null,

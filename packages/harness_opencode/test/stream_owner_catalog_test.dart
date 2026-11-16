@@ -26,6 +26,22 @@ void main() {
     },
   );
 
+  test('project updates have their own payload-free signal', () async {
+    final harness = Harness('ses_a');
+    final changes = <OpenCodeCatalogChange>[];
+    harness.owner.catalogChanges.listen(changes.add);
+    await harness.connect(1);
+    await harness.send([
+      {
+        'id': 'evt_project',
+        'created': 1,
+        'type': 'project.updated',
+        'data': {'id': 'p', 'canonical': '/app', 'sandboxes': <String>[]},
+      },
+    ]);
+    expect(changes, [OpenCodeCatalogChange.project]);
+  });
+
   test('every lifecycle kind is reported once', () async {
     final harness = Harness('ses_a');
     final changes = <OpenCodeCatalogChange>[];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import 'project_icon_view.dart';
 import 'session_tab_icons.dart';
 
 class SessionTabIconSelection {
@@ -13,12 +14,14 @@ class SessionTabIconSelection {
 Future<SessionTabIconSelection?> showSessionTabIconPicker(
   BuildContext context, {
   required String? currentPresetId,
+  Uri? projectIcon,
 }) {
   return showDialog<SessionTabIconSelection>(
     context: context,
     builder: (dialogContext) {
       final content = _SessionTabIconPickerContent(
         currentPresetId: currentPresetId,
+        projectIcon: projectIcon,
       );
       final availableSize = MediaQuery.sizeOf(dialogContext);
       if (availableSize.width < 600 || availableSize.height < 620) {
@@ -55,9 +58,13 @@ Future<SessionTabIconSelection?> showSessionTabIconPicker(
 }
 
 class _SessionTabIconPickerContent extends StatelessWidget {
-  const _SessionTabIconPickerContent({required this.currentPresetId});
+  const _SessionTabIconPickerContent({
+    required this.currentPresetId,
+    this.projectIcon,
+  });
 
   final String? currentPresetId;
+  final Uri? projectIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +116,7 @@ class _SessionTabIconPickerContent extends StatelessWidget {
   }
 
   Widget _projectIcon(BuildContext context, {required double size}) {
-    return Icon(Symbols.folder_open, size: size);
+    return ProjectIconView(source: projectIcon, size: size);
   }
 
   Widget _tile(

@@ -46,6 +46,7 @@ enum OpenCodeCatalogChange {
   idled,
   started,
   waiting,
+  project,
 }
 
 sealed class OpenCodeStreamUpdate {
@@ -430,6 +431,8 @@ final class OpenCodeStreamOwner {
   static OpenCodeCatalogChange? _catalogChangeOf(Object? type) {
     if (type is! String) return null;
     switch (type) {
+      case 'project.updated':
+        return OpenCodeCatalogChange.project;
       case 'session.created':
         return OpenCodeCatalogChange.created;
       case 'session.forked':

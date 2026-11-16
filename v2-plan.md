@@ -627,6 +627,8 @@ Rules: a URL is an alias, not an identity; a session that moves directories keep
 
 ### 6.5 Canonical domain model (representative)
 
+Project listings carry `ProjectInfo(ProjectRef ref, {Uri? icon})`: optional, harness-neutral presentation metadata separate from project identity. Adapters supply an image when available; other harnesses retain the themed folder/source glyph. This read-only presentation field adds no capability or editing control and is not persisted in `ProjectRef`, tab preferences or the CHP identity schema.
+
 ```dart
 sealed class TimelineItem {
   ItemId get id; String? get turnId; ItemStatus get status; Provenance get source;
@@ -1449,6 +1451,7 @@ Implementation will contradict some details. When it does:
 
 | Date | Change | Affects | Reason |
 |---|---|---|---|
+| 2026-11-16 | Add optional canonical `ProjectInfo.icon` outside `ProjectRef`; share the selected server's project images across project rows, picker results and session tabs, preserving custom session icons and attention marks. Adapters normalize their image source; absent or unreadable images keep the themed glyph, without a new capability or editing control. Metadata and bounded image caches remain ephemeral | §6.5; ADR-058; `packages/codewalk_core`, `packages/harness_opencode`; icon-only slice of #451 | Owner requested the project icon, including tabs. Official OpenCode project listings provide image metadata; the location identity does not. Project tab colors remain pending |
 | 2026-11-15 | Float the robot capsule over the timeline instead of reserving a footer row; preserve the selected theme in its pop-in and place navigation alongside it in short viewports | §5.7; presentation only, canonical model and capabilities unchanged | Owner reported a full-width black strip and theme mismatch; timeline keeps its viewport and content can scroll clear of the robot |
 | 2026-11-14 | Replace the subagent header chip/sheet/pane with a bottom-end robot capsule and anchored Active/Completed pop-in; retain child outcomes for history and surface child question forms alongside child permissions in the parent | §5.7; #286 bounded UI slice; canonical WorkItem and interaction ownership unchanged | Owner specified placement above composer/status, persistent completed access, full child navigation with Back, and human requests in the principal conversation; approved flow and beta notes. Background shells, move-all, stop-all and permission-policy redesign #495 remain separate |
 | 2026-10-02 | Initial plan; D01, D02, D04, D05 decided with the product owner; D07, D15 decided by the orchestrator (delegated) | All | Planning round with 16 independent plans and local verification |

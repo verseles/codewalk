@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../platform/sessions/session_tabs_store.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_activity.dart';
+import 'project_icon_view.dart';
 import 'session_tab_icons.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
@@ -68,15 +69,21 @@ class SessionTabGlyph extends StatelessWidget {
           alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: [
-            Icon(
-              glyph,
-              size: 19,
-              color: failed
-                  ? scheme.error
-                  : waiting
-                  ? scheme.tertiary
-                  : null,
-            ),
+            if (glyph == Symbols.folder_open && preset == null)
+              ProjectIconView(
+                source: catalog?.projects.iconFor(tab.project),
+                size: 19,
+              )
+            else
+              Icon(
+                glyph,
+                size: 19,
+                color: failed
+                    ? scheme.error
+                    : waiting
+                    ? scheme.tertiary
+                    : null,
+              ),
             if (busy)
               PositionedDirectional(
                 end: -3,

@@ -18,6 +18,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'project_contexts_controller.dart';
+import 'project_icon_view.dart';
 import 'session_tab_chip.dart';
 import 'session_tab_menu.dart';
 import 'session_tab_projection.dart';
@@ -578,12 +579,16 @@ class _StripState extends State<_Strip> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    widget.draftFailed
-                        ? Symbols.error_outline
-                        : Symbols.folder_open,
-                    size: 18,
-                  ),
+                  if (widget.draftFailed)
+                    const Icon(Symbols.error_outline, size: 18)
+                  else
+                    ProjectIconView(
+                      source: context
+                          .watch<SessionsController?>()
+                          ?.projects
+                          .iconFor(widget.draftProject),
+                      size: 18,
+                    ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(

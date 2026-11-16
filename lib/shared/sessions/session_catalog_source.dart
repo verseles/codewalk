@@ -43,7 +43,7 @@ abstract interface class SessionCatalogSource {
   Future<SessionActivity> activity({String? directory});
 
   /// The directories of the projects this server knows.
-  SessionCatalogRead<List<ProjectRef>> projects();
+  SessionCatalogRead<List<ProjectInfo>> projects();
 
   /// Resolves [directory], or the server's default location when it is null,
   /// to the directory the server keys it by.

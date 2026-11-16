@@ -24,7 +24,7 @@ final class _UnsupportedSource implements SessionCatalogSource {
       const DraftDefaults();
 
   @override
-  SessionCatalogRead<List<ProjectRef>> projects() => _UnsupportedRequest();
+  SessionCatalogRead<List<ProjectInfo>> projects() => _UnsupportedRequest();
   @override
   SessionCatalogRead<ProjectRef> location({String? directory}) =>
       _UnsupportedRequest();

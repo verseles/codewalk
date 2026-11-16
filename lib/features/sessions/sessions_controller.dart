@@ -3,11 +3,13 @@ import 'dart:math' as math;
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/hosts_controller.dart';
+import 'project_catalog.dart';
 import 'session_activity_reader.dart';
 import 'session_commands.dart';
 import 'session_context_refresh.dart';
@@ -29,6 +31,7 @@ class SessionsController extends ChangeNotifier {
   }
   final HostsController hosts;
   final SessionCatalogFactory sourceFactory;
+  late final projects = ProjectCatalog(notify: _notify);
 
   /// The endpoint's session lifecycle feed, when the platform has one. It is
   /// the endpoint's single event stream, shared with the live sessions: the
@@ -556,6 +559,7 @@ class SessionsController extends ChangeNotifier {
       _recoverAfterRead = false;
       _source?.close();
       _source = null;
+      projects.bind(null);
       // The new endpoint has not been observed yet.
       _commands.close();
       _closeChanges();
@@ -709,6 +713,7 @@ class SessionsController extends ChangeNotifier {
     try {
       if (createSource) {
         _source ??= sourceFactory(current, credential!);
+        projects.bind(_source);
         _commands.source ??= actionFactory?.call(current, credential!);
         if (_actions != null) unawaited(_probeActions());
       }
@@ -729,6 +734,7 @@ class SessionsController extends ChangeNotifier {
   /// the user.
   void recover() {
     if (_disposed || _profile == null) return;
+    projects.changed();
     // The other open projects' passes stop after repeated failures; a
     // recovery restarts them, as the removed Refresh did.
     _contextRefresh.refresh();
@@ -826,6 +832,7 @@ class SessionsController extends ChangeNotifier {
   /// Reads the list again from its head; the open contexts the list does
   /// not show are read again too, even after their reads stopped failing.
   Future<void> refresh() {
+    if (!_disposed) unawaited(projects.read(refresh: true));
     if (!_disposed) _contextRefresh.refresh();
     return _refreshShown();
   }
@@ -963,6 +970,7 @@ class SessionsController extends ChangeNotifier {
         if (failure == SessionCatalogFailure.authenticationRequired) {
           source.close();
           _source = null;
+          projects.bind(null);
           _closeChanges();
         } else if (failure == null) {
           // A successful authoritative read ends the wait between retries,
@@ -1108,6 +1116,8 @@ class SessionsController extends ChangeNotifier {
       case SessionCatalogChanged():
         _markLiveChange();
         _contextRefresh.changed();
+      case ProjectCatalogChanged():
+        projects.changed();
       case SessionActivityChanged():
         _markLiveChange(rows: false);
       case SessionCatalogConnection(:final connected):
@@ -1123,6 +1133,7 @@ class SessionsController extends ChangeNotifier {
         if (connected) {
           // A reconnect is not continuity: the list re-reads before it may
           // call itself current.
+          projects.changed();
           _liveEpoch++;
           _markLiveChange();
           _contextRefresh.changed();
@@ -1352,6 +1363,7 @@ class SessionsController extends ChangeNotifier {
         failure = SessionCatalogFailure.authenticationRequired;
         source.close();
         _source = null;
+        projects.bind(null);
         _closeChanges();
         return;
       }
