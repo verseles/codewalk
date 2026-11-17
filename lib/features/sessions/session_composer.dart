@@ -580,6 +580,12 @@ class _SessionComposerState extends State<SessionComposer> {
       final rows = c.rows(state, chips);
       final notice = _notice(l10n, c.notice);
       final canSend = _canSend;
+      final waitingForLive =
+          !c.canSend &&
+          !c.live.endpointOffline &&
+          !c.sending &&
+          !c.unreadable &&
+          !c.live.stopping;
       final preferences = context.watch<AppPreferencesController?>();
       final queue = preferences?.composerQueue ?? false;
       final status = liveStatus(c.live, l10n);
@@ -656,12 +662,6 @@ class _SessionComposerState extends State<SessionComposer> {
                           child: Text(l10n.composerCheckAgain),
                         ),
                       ),
-                    if (!c.canSend &&
-                        !c.live.endpointOffline &&
-                        !c.sending &&
-                        !c.unreadable &&
-                        !c.live.stopping)
-                      Text(l10n.composerOffline),
                   ],
                 ),
               ),
@@ -755,7 +755,9 @@ class _SessionComposerState extends State<SessionComposer> {
                                   : queue
                                   ? l10n.composerQueue
                                   : l10n.composerSend,
-                              icon: done
+                              icon: waitingForLive
+                                  ? Symbols.hourglass_empty
+                                  : done
                                   ? Symbols.check
                                   : queue
                                   ? Symbols.schedule_send

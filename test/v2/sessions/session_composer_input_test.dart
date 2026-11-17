@@ -111,6 +111,42 @@ final _continues = find.descendant(
 );
 
 void main() {
+  testWidgets('stale live view shows hourglass without redundant notice', (
+    tester,
+  ) async {
+    final opened = await _open(tester, FakeOutbox());
+    opened.handle.emit(
+      SessionLiveView(
+        session: opened.ref,
+        phase: SessionLivePhase.live,
+        stale: true,
+        lastSyncedAt: DateTime.utc(2026, 10, 15, 12),
+        state: liveState(opened.ref, execution: _execution(ExecutionKind.idle)),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.descendant(
+        of: _send,
+        matching: find.byIcon(Symbols.hourglass_empty),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Sending resumes when the live view is up to date.'),
+      findsNothing,
+    );
+    await _report(tester, opened, ExecutionKind.idle);
+    expect(
+      find.descendant(
+        of: _send,
+        matching: find.byIcon(Symbols.hourglass_empty),
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets(
     'a physical Enter sends and keeps the field focused (#174)',
     variant: TargetPlatformVariant.only(TargetPlatform.linux),

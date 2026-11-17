@@ -1,0 +1,1 @@
+"Sending resumes when the live view is up to date." deve sumir porque o statusbar do Composer já mostra "loading state", porém, adicione uma ampulheta ⌛️ do nosso pacote de ícones no botão de enviar quando estiver nesse estado. Você sugere algum ícone diferente? Talvez um efeito de loading tranquilo?
