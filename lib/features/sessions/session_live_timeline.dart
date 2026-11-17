@@ -12,6 +12,7 @@ import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
+import 'session_report_group.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 import 'session_work_group.dart';
@@ -43,6 +44,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.topBuilder,
     this.errorRecovery,
     this.onOpenChild,
+    this.onOpenReportChild,
     this.bottomEndOverlay,
     this.emptyBuilder,
     this.userTurnRevert,
@@ -81,6 +83,7 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// Opens the sub-conversation of a subagent card; null for none.
   final ValueChanged<ToolCall>? onOpenChild;
+  final ValueChanged<SessionRef>? onOpenReportChild;
 
   /// The block below the header while there is no item: a loader while the
   /// session loads, or the empty conversation once it is known to be empty.
@@ -859,6 +862,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                       )
                     : null,
               ),
+            SessionReportRow() => SessionReportGroup(
+              reports: row.reports,
+              onOpenChild: widget.onOpenReportChild,
+            ),
             SessionToolRunRow() => SessionToolRun(
               row: row,
               onToggle: () => _toggle(row.id),

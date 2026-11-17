@@ -12,6 +12,27 @@ class V2LocalizationsRu extends V2Localizations {
   V2LocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'Ответы субагентов: $count';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'Ошибки: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'Ответ субагента';
+
+  @override
+  String reportBy(String agent) {
+    return 'Ответ от $agent';
+  }
+
+  @override
+  String get reportOpenChild => 'Открыть дочерний диалог';
+
+  @override
   String get liveSubagentsTitle => 'Субагенты';
 
   @override

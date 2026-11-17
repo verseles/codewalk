@@ -82,6 +82,7 @@ List<String> _shape(List<SessionTimelineRow> rows) => [
         'run(${tools.map((t) => t.id.value).join(',')})',
       SessionWorkGroupRow(:final work, :final messageCount, :final expanded) =>
         'work(${work.length}/$messageCount${expanded ? ',open' : ''})',
+      SessionReportRow(:final reports) => 'reports(${reports.length})',
       SessionPendingRow(:final anchor) => 'pending(${anchor.value})',
     },
 ];
@@ -97,6 +98,31 @@ List<TimelineItem> _turn({bool complete = true, String generation = 'g1'}) => [
 ];
 
 void main() {
+  test(
+    'replies group only across consecutive original items even with folded work',
+    () {
+      Notice reply(String id) => Notice(
+        meta: _meta(id),
+        kind: const OpenValue.known(NoticeKind.continuation),
+        text: 'body',
+        report: const SubagentReport(),
+      );
+      final rows = SessionTimelinePresentation().project([
+        reply('1'),
+        reply('2'),
+        _tool('call', 'm1'),
+        reply('3'),
+        _text('summary', 'm2'),
+      ], settled: true);
+      expect(_shape(rows), [
+        'work(1/1)',
+        'reports(2)',
+        'reports(1)',
+        'summary',
+      ]);
+    },
+  );
+
   test('a streaming turn shows its calls in a run and nothing collapses', () {
     final rows = SessionTimelinePresentation().project(
       _turn(complete: false),

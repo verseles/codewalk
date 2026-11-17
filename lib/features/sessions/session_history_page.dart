@@ -4,6 +4,7 @@ import '../../shared/sessions/session_history_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_history_controller.dart';
 import 'session_message_info.dart';
+import 'session_report_group.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 
@@ -48,6 +49,10 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
         _ => l10n.historyUnavailable,
       };
       final items = sessionTimelineItems(c.items);
+      final rows = groupSubagentReports([
+        for (final (i, item) in items.indexed)
+          SessionItemRow(item, messageHeader: opensMessage(items, i)),
+      ], c.items);
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -73,7 +78,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         horizontal: timelineSideInset(context),
                         vertical: 16,
                       ),
-                      itemCount: items.length + 2,
+                      itemCount: rows.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Column(
@@ -107,7 +112,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             ],
                           );
                         }
-                        if (index == items.length + 1) {
+                        if (index == rows.length + 1) {
                           return Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: Column(
@@ -125,12 +130,20 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             ),
                           );
                         }
-                        final item = items[index - 1];
+                        final row = rows[index - 1];
+                        if (row is SessionReportRow) {
+                          return SessionReportGroup(
+                            key: row.key,
+                            reports: row.reports,
+                          );
+                        }
+                        final single = row as SessionItemRow;
+                        final item = single.item;
                         return SessionTimelineTile(
                           key: ValueKey(item.id),
                           item: item,
                           minimizeUnknownShell: true,
-                          messageHeader: opensMessage(items, index - 1),
+                          messageHeader: single.messageHeader,
                         );
                       },
                     ),

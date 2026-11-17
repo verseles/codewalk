@@ -616,13 +616,25 @@ List<TimelineItem> projectOpenCodeHistory(
           });
         }
       case 'synthetic':
+        final notice = openCodeSyntheticNotice(
+          meta('notice', 0, status: completed),
+          ref,
+          text(message['text']),
+          message,
+        );
+        for (final retained in [
+          notice.report?.agent,
+          notice.report?.description,
+          notice.relatedSession?.nativeId,
+        ].nonNulls) {
+          text(retained);
+        }
+        add(notice);
       case 'system':
         add(
           Notice(
             meta: meta('notice', 0, status: completed),
-            kind: OpenValue.known(
-              type == 'synthetic' ? NoticeKind.continuation : NoticeKind.system,
-            ),
+            kind: const OpenValue.known(NoticeKind.system),
             text: openCodeNoticeText(text(message['text'])),
           ),
         );

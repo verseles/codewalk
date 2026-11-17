@@ -12,6 +12,27 @@ class V2LocalizationsFr extends V2Localizations {
   V2LocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return '$count réponses de sous-agents';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'Échecs : $count';
+  }
+
+  @override
+  String get reportUnnamed => 'Réponse de sous-agent';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent a répondu';
+  }
+
+  @override
+  String get reportOpenChild => 'Ouvrir la sous-conversation';
+
+  @override
   String get liveSubagentsTitle => 'Sous-agents';
 
   @override

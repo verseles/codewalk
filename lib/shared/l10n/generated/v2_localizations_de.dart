@@ -12,6 +12,27 @@ class V2LocalizationsDe extends V2Localizations {
   V2LocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return '$count Subagenten-Antworten';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'Fehlgeschlagen: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'Subagenten-Antwort';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent hat geantwortet';
+  }
+
+  @override
+  String get reportOpenChild => 'Unterhaltung öffnen';
+
+  @override
   String get liveSubagentsTitle => 'Unteragenten';
 
   @override

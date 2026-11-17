@@ -12,6 +12,27 @@ class V2LocalizationsKo extends V2Localizations {
   V2LocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return '하위 에이전트 응답 $count개';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return '실패 $count개';
+  }
+
+  @override
+  String get reportUnnamed => '하위 에이전트 응답';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent의 응답';
+  }
+
+  @override
+  String get reportOpenChild => '하위 대화 열기';
+
+  @override
   String get liveSubagentsTitle => '하위 에이전트';
 
   @override

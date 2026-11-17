@@ -302,6 +302,7 @@ sealed class TimelineItem {
       text: item.text,
       relatedSession: item.relatedSession,
       selection: item.selection,
+      report: item.report,
     ),
     final TurnOutcome item => TurnOutcome(
       meta: meta,
@@ -465,6 +466,14 @@ final class ShellRun extends TimelineItem {
   final String? outputText;
 }
 
+/// What the harness identified as one reply from delegated work.
+final class SubagentReport {
+  const SubagentReport({this.agent, this.description, this.outcome});
+  final String? agent;
+  final String? description;
+  final OutcomeKind? outcome;
+}
+
 /// A related child's notice belongs to this item's owner, not that child.
 /// It does not establish the child's own execution outcome.
 final class Notice extends TimelineItem {
@@ -473,12 +482,14 @@ final class Notice extends TimelineItem {
     required this.kind,
     required this.text,
     this.relatedSession,
+    this.report,
     this.selection,
   });
 
   final OpenValue<NoticeKind> kind;
   final String text;
   final SessionRef? relatedSession;
+  final SubagentReport? report;
 
   /// For a [NoticeKind.selectionChanged] notice, what the session switched
   /// to at this point of the conversation (#426): the agent, or the model

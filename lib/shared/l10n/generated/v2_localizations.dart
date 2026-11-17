@@ -123,6 +123,36 @@ abstract class V2Localizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @reportCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} subagent replies'**
+  String reportCount(int count);
+
+  /// No description provided for @reportFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count}'**
+  String reportFailures(int count);
+
+  /// No description provided for @reportUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subagent reply'**
+  String get reportUnnamed;
+
+  /// No description provided for @reportBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{agent} replied'**
+  String reportBy(String agent);
+
+  /// No description provided for @reportOpenChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Open sub-conversation'**
+  String get reportOpenChild;
+
   /// No description provided for @liveSubagentsTitle.
   ///
   /// In en, this message translates to:

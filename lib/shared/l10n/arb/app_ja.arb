@@ -1,5 +1,10 @@
 {
   "@@locale": "ja",
+  "reportCount": "サブエージェントからの返信 {count} 件",
+  "reportFailures": "失敗 {count} 件",
+  "reportUnnamed": "サブエージェントの返信",
+  "reportBy": "{agent} からの返信",
+  "reportOpenChild": "子セッションを開く",
   "liveSubagentsTitle": "サブエージェント",
   "liveSubagentsActive": "実行中",
   "liveSubagentsCompleted": "完了",

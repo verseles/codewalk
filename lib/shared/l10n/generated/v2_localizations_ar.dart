@@ -12,6 +12,27 @@ class V2LocalizationsAr extends V2Localizations {
   V2LocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'ردود الوكلاء الفرعيين: $count';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'حالات الفشل: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'رد وكيل فرعي';
+
+  @override
+  String reportBy(String agent) {
+    return 'ردّ $agent';
+  }
+
+  @override
+  String get reportOpenChild => 'فتح المحادثة الفرعية';
+
+  @override
   String get liveSubagentsTitle => 'الوكلاء الفرعيون';
 
   @override

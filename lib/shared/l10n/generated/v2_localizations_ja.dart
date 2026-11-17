@@ -12,6 +12,27 @@ class V2LocalizationsJa extends V2Localizations {
   V2LocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'サブエージェントからの返信 $count 件';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return '失敗 $count 件';
+  }
+
+  @override
+  String get reportUnnamed => 'サブエージェントの返信';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent からの返信';
+  }
+
+  @override
+  String get reportOpenChild => '子セッションを開く';
+
+  @override
   String get liveSubagentsTitle => 'サブエージェント';
 
   @override

@@ -12,6 +12,27 @@ class V2LocalizationsBn extends V2Localizations {
   V2LocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'সাব-এজেন্টের $countটি উত্তর';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'ব্যর্থ: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'সাব-এজেন্টের উত্তর';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent উত্তর দিয়েছে';
+  }
+
+  @override
+  String get reportOpenChild => 'উপ-কথোপকথন খুলুন';
+
+  @override
   String get liveSubagentsTitle => 'সাব-এজেন্ট';
 
   @override

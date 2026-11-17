@@ -453,6 +453,9 @@ class _SessionLivePageState extends State<SessionLivePage>
               final stopNotice =
                   c.outbox == null &&
                   c.stopState.phase != SessionStopPhase.ready;
+              final canReadChild =
+                  context.watch<SessionsController?>()?.sourceFor(c.session) !=
+                  null;
               final hasSubagents = subagentWork(state).isNotEmpty;
               final chrome =
                   (c.summary.info.lineage.parent != null
@@ -510,6 +513,9 @@ class _SessionLivePageState extends State<SessionLivePage>
                             highlight: search.open ? search.current : null,
                             reveals: search.reveals,
                             onOpenChild: _openChild,
+                            onOpenReportChild: canReadChild
+                                ? _openRosterChild
+                                : null,
                             items: items,
                             // A turn reverts from its message menu, where
                             // the session can (#492).

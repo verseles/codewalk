@@ -1,5 +1,10 @@
 {
   "@@locale": "zh",
+  "reportCount": "{count} 条子代理回复",
+  "reportFailures": "失败：{count}",
+  "reportUnnamed": "子代理回复",
+  "reportBy": "{agent} 已回复",
+  "reportOpenChild": "打开子会话",
   "liveSubagentsTitle": "子代理",
   "liveSubagentsActive": "活动中",
   "liveSubagentsCompleted": "已完成",

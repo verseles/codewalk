@@ -1,5 +1,10 @@
 {
   "@@locale": "hi",
+  "reportCount": "उप-एजेंट के {count} जवाब",
+  "reportFailures": "विफल: {count}",
+  "reportUnnamed": "उप-एजेंट का जवाब",
+  "reportBy": "{agent} ने जवाब दिया",
+  "reportOpenChild": "उप-संवाद खोलें",
   "liveSubagentsTitle": "उप-एजेंट",
   "liveSubagentsActive": "सक्रिय",
   "liveSubagentsCompleted": "पूर्ण",

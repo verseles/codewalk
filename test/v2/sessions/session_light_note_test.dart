@@ -1,3 +1,4 @@
+import 'package:codewalk/features/sessions/session_report_group.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/rendering/canonical_message_body.dart';
@@ -51,6 +52,68 @@ Future<void> _pump(WidgetTester tester, List<TimelineItem> items) async {
 }
 
 void main() {
+  testWidgets(
+    'compact replies disclose failures and open one report in place',
+    (tester) async {
+      const child = SessionRef(HostId('h'), HarnessInstanceId('test'), 'child');
+      SessionRef? opened;
+      Notice reply(String id, {bool failed = false}) => Notice(
+        meta: _meta(id),
+        kind: const OpenValue.known(NoticeKind.continuation),
+        text: '**Result**',
+        report: SubagentReport(
+          agent: id,
+          outcome: failed ? OutcomeKind.failed : OutcomeKind.succeeded,
+        ),
+        relatedSession: failed ? null : child,
+      );
+      Future<void> pump(List<Notice> reports) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 320,
+                child: SessionReportGroup(
+                  reports: reports,
+                  onOpenChild: (ref) => opened = ref,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      final first = reply('MiniMax');
+      await pump([first]);
+      expect(find.text('MiniMax replied'), findsOneWidget);
+      expect(find.byType(CanonicalMessageBody), findsNothing);
+      await pump([first, reply('Gemini', failed: true)]);
+      final summary = find.text('Failed: 1 · 2 subagent replies');
+      expect(summary, findsOneWidget);
+      expect(tester.widget<Text>(summary).maxLines, 1);
+      expect(find.text('MiniMax replied'), findsNothing);
+      await tester.tap(summary);
+      await tester.pump();
+      expect(find.text('Failed · Gemini replied'), findsOneWidget);
+      await tester.tap(find.text('MiniMax replied'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<CanonicalMessageBody>(find.byType(CanonicalMessageBody))
+            .source,
+        '**Result**',
+      );
+      await tester.tap(find.text('Open sub-conversation'));
+      expect(opened, child);
+      await tester.tap(summary);
+      await tester.pump();
+      expect(find.byType(CanonicalMessageBody), findsNothing);
+    },
+  );
+
   testWidgets('a reminder is one muted line that opens on a tap', (
     tester,
   ) async {

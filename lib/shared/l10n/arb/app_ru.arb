@@ -1,5 +1,10 @@
 {
   "@@locale": "ru",
+  "reportCount": "Ответы субагентов: {count}",
+  "reportFailures": "Ошибки: {count}",
+  "reportUnnamed": "Ответ субагента",
+  "reportBy": "Ответ от {agent}",
+  "reportOpenChild": "Открыть дочерний диалог",
   "liveSubagentsTitle": "Субагенты",
   "liveSubagentsActive": "Активные",
   "liveSubagentsCompleted": "Завершённые",

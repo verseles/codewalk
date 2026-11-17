@@ -159,6 +159,7 @@ KEYS |= SESSION_KEYS | set(SESSION_NEW_KEYS)
 KEYS |= HISTORY_KEYS | set(HISTORY_NEW_KEYS)
 KEYS |= LIVE_PORT_KEYS | set(LIVE_NEW_KEYS)
 KEYS |= {
+    "reportCount", "reportFailures", "reportUnnamed", "reportBy", "reportOpenChild",
     "liveSubagentsTitle", "liveSubagentsActive", "liveSubagentsCompleted",
     "liveSubagentsCount", "liveSubagentsEmpty", "liveSubagentsUnknown",
     "liveSubagentsCancelled", "liveSubagentsRecent",

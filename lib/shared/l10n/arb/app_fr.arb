@@ -1,5 +1,10 @@
 {
   "@@locale": "fr",
+  "reportCount": "{count} réponses de sous-agents",
+  "reportFailures": "Échecs : {count}",
+  "reportUnnamed": "Réponse de sous-agent",
+  "reportBy": "{agent} a répondu",
+  "reportOpenChild": "Ouvrir la sous-conversation",
   "liveSubagentsTitle": "Sous-agents",
   "liveSubagentsActive": "Actifs",
   "liveSubagentsCompleted": "Terminés",

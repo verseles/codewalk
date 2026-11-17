@@ -1,5 +1,10 @@
 {
   "@@locale": "de",
+  "reportCount": "{count} Subagenten-Antworten",
+  "reportFailures": "Fehlgeschlagen: {count}",
+  "reportUnnamed": "Subagenten-Antwort",
+  "reportBy": "{agent} hat geantwortet",
+  "reportOpenChild": "Unterhaltung öffnen",
   "liveSubagentsTitle": "Unteragenten",
   "liveSubagentsActive": "Aktiv",
   "liveSubagentsCompleted": "Abgeschlossen",

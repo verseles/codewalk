@@ -12,6 +12,27 @@ class V2LocalizationsHi extends V2Localizations {
   V2LocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'उप-एजेंट के $count जवाब';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'विफल: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'उप-एजेंट का जवाब';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent ने जवाब दिया';
+  }
+
+  @override
+  String get reportOpenChild => 'उप-संवाद खोलें';
+
+  @override
   String get liveSubagentsTitle => 'उप-एजेंट';
 
   @override

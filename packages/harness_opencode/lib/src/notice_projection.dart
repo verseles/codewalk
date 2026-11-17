@@ -42,8 +42,8 @@ const _durableVersions = {_instructions: 2, _synthetic: 1};
 /// whose ID equals the history `system`/`synthetic` row: the server derives
 /// that message ID from the event ID.
 ///
-/// Instruction sources, synthetic descriptions, native metadata and the frame
-/// location are validated where declared and never copied.
+/// A recognized subagent report retains its display fields. Other metadata,
+/// instruction sources and the frame location stay out of the timeline.
 List<SessionEvent> projectOpenCodeNoticeEvent(
   Object? value,
   SessionState current, {
@@ -135,6 +135,19 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
       'nativeMessageId': messageId,
     }),
   );
+  final meta = ItemMeta(
+    id: id,
+    anchor: openCodeMessageAnchor(messageId),
+    generation: jsonEncode([
+      'live',
+      ref.storageKey,
+      messageId,
+      position.id,
+      position.epoch,
+    ]),
+    status: const OpenValue.known(ItemStatus.completed),
+    source: source,
+  );
   return List.unmodifiable([
     ItemUpserted(
       meta: EventMeta(
@@ -143,23 +156,13 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
         receivedAt: receivedAt,
         source: source,
       ),
-      item: Notice(
-        meta: ItemMeta(
-          id: id,
-          anchor: openCodeMessageAnchor(messageId),
-          generation: jsonEncode([
-            'live',
-            ref.storageKey,
-            messageId,
-            position.id,
-            position.epoch,
-          ]),
-          status: const OpenValue.known(ItemStatus.completed),
-          source: source,
-        ),
-        kind: OpenValue.known(kind),
-        text: openCodeNoticeText(text),
-      ),
+      item: type == _synthetic
+          ? openCodeSyntheticNotice(meta, ref, text, data)
+          : Notice(
+              meta: meta,
+              kind: OpenValue.known(kind),
+              text: openCodeNoticeText(text),
+            ),
     ),
   ]);
 }

@@ -1,5 +1,10 @@
 {
   "@@locale": "pt",
+  "reportCount": "{count} respostas de subagentes",
+  "reportFailures": "Falhas: {count}",
+  "reportUnnamed": "Resposta de subagente",
+  "reportBy": "{agent} respondeu",
+  "reportOpenChild": "Abrir subconversa",
   "liveSubagentsTitle": "Subagentes",
   "liveSubagentsActive": "Ativos",
   "liveSubagentsCompleted": "Concluídos",

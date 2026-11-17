@@ -1,5 +1,13 @@
 {
   "@@locale": "en",
+  "reportCount": "{count} subagent replies",
+  "@reportCount": {"placeholders": {"count": {"type": "int"}}},
+  "reportFailures": "Failed: {count}",
+  "@reportFailures": {"placeholders": {"count": {"type": "int"}}},
+  "reportUnnamed": "Subagent reply",
+  "reportBy": "{agent} replied",
+  "@reportBy": {"placeholders": {"agent": {"type": "String"}}},
+  "reportOpenChild": "Open sub-conversation",
   "liveSubagentsTitle": "Sub-agents",
   "liveSubagentsActive": "Active",
   "liveSubagentsCompleted": "Completed",

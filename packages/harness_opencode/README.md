@@ -505,8 +505,9 @@ Reduce the events in order against the latest `SessionState`.
 - Only `accepted`/`queued` rows are open. History rows (delivery unknown) and
   delivered rows never regress, and frames for inbox IDs unknown to `current`
   return an empty list; nothing is invented from an ID-only frame.
-- Attachment data, names, URIs, mention text, metadata, synthetic descriptions,
-  move targets and the frame `location` are never read or copied. Text is capped
+- A synthetic subagent report carries the bounded agent, description, reported
+  outcome and related child. Attachment data, names, URIs, mention text,
+  other metadata, move targets and frame location stay out of the projection. Text is capped
   at 256 KiB, IDs at 4 KiB, each context list at 1,024 entries and the context
   marker at 64 KiB, with finite `OpenCodeInboxProjectionException` categories.
 - Known Core follow-up for V2-042 (#274): delivered live rows stay in Core's
@@ -740,8 +741,9 @@ with at most one `ItemUpserted`.
 - The server derives the transcript message ID from the event ID (`evt_` →
   `msg_`), so the notice ID equals the history `system`/`synthetic` row's ID.
   A resident item of another kind under that ID fails with `itemKindMismatch`.
-- Instruction sources and hashes, synthetic descriptions, native metadata and
-  the frame location are validated and never copied; text is capped at 256 KiB
+- Synthetic subagent reports use the same projection as inbox and history.
+  Other metadata, descriptions, instruction sources and hashes stay out of
+  the notice. Text is capped at 256 KiB
   and source lists at 4,096 entries, with finite
   `OpenCodeNoticeProjectionException` categories.
 

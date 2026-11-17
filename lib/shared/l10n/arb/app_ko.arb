@@ -1,5 +1,10 @@
 {
   "@@locale": "ko",
+  "reportCount": "하위 에이전트 응답 {count}개",
+  "reportFailures": "실패 {count}개",
+  "reportUnnamed": "하위 에이전트 응답",
+  "reportBy": "{agent}의 응답",
+  "reportOpenChild": "하위 대화 열기",
   "liveSubagentsTitle": "하위 에이전트",
   "liveSubagentsActive": "활성",
   "liveSubagentsCompleted": "완료",

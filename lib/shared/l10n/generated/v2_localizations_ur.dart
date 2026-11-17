@@ -12,6 +12,27 @@ class V2LocalizationsUr extends V2Localizations {
   V2LocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return 'ذیلی ایجنٹوں کے جوابات: $count';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return 'ناکام: $count';
+  }
+
+  @override
+  String get reportUnnamed => 'ذیلی ایجنٹ کا جواب';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent نے جواب دیا';
+  }
+
+  @override
+  String get reportOpenChild => 'ذیلی گفتگو کھولیں';
+
+  @override
   String get liveSubagentsTitle => 'ذیلی ایجنٹ';
 
   @override

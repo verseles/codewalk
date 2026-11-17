@@ -12,6 +12,27 @@ class V2LocalizationsZh extends V2Localizations {
   V2LocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String reportCount(int count) {
+    return '$count 条子代理回复';
+  }
+
+  @override
+  String reportFailures(int count) {
+    return '失败：$count';
+  }
+
+  @override
+  String get reportUnnamed => '子代理回复';
+
+  @override
+  String reportBy(String agent) {
+    return '$agent 已回复';
+  }
+
+  @override
+  String get reportOpenChild => '打开子会话';
+
+  @override
   String get liveSubagentsTitle => '子代理';
 
   @override

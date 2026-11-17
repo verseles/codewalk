@@ -575,9 +575,16 @@ description of this code.
 - **Then** an admitted compaction leaves the pending list when its matching start is observed; HTTP admission alone never proves completion
 - **Then** native zero-cost fixtures cover idle and busy admission, successful and failed terminal events and busy revert refusals; projection and stream-owner regressions cover duplicate delivery and hydration races; in-app undo, redo and compact controls remain separate work
 
+### V2 subagent replies
+
+- A harness-identified subagent reply appears as one collapsed line naming the agent when known. Consecutive replies share one line with the reply count. Any intervening conversation item ends the group.
+- A failed reply is visible in the collapsed summary, with an icon and text. Counts refer to replies, including repeated replies from the same agent.
+- Opening a group reveals its individual replies. Opening a reply shows the original report in Markdown in place. When the harness identifies a child and navigation is available, a separate action opens the verified direct child.
+- The same presentation applies to live and historical replies. A harness without structured replies keeps the normal notice presentation. User-authored text always remains a user message.
+
 ### V2 light notices
 
-- **Given** the harness adds a reminder to the conversation, such as OpenCode's Plan mode notes when the agent switches (`synthetic` inbox rows), or a system note (#491)
+- **Given** the harness adds a reminder to the conversation, other than a recognized subagent reply, such as OpenCode's Plan mode notes when the agent switches (`synthetic` inbox rows), or a system note (#491)
 - **When** the timeline shows it, from its admission on, live or from history
 - **Then** it is a light line like the agent and model switch notes: an info mark and muted small text on one line with an ellipsis, centered, with no card and no error color; a tap opens the whole note, rendered as Markdown with links, file paths and code copy working, and a second tap folds it
 - **Then** a text wholly inside one `<system-reminder>` envelope shows without the envelope; any other text, and anything the user typed, stays as written; the row's description and metadata are never shown

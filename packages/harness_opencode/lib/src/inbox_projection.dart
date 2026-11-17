@@ -54,8 +54,8 @@ const _itemTypes = {'user', 'synthetic', 'compaction', 'move'};
 /// Item IDs equal the history projection's IDs. Compaction and move control
 /// items are validated and not projected.
 ///
-/// Attachment data, names, URIs, mention text, metadata, synthetic
-/// descriptions, move targets and the frame location are never read or copied.
+/// A recognized subagent report retains its display fields. Other metadata,
+/// attachment data, names, URIs and move targets stay out of the timeline.
 List<SessionEvent> projectOpenCodeInboxEvent(
   Object? value,
   SessionState current, {
@@ -225,13 +225,6 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   // A synthetic row is a reminder OpenCode adds for the model (the Plan mode
   // notes when the agent switches): a light notice in the timeline from its
   // admission, never input waiting to be sent (#491).
-  Notice syntheticNotice(String text, ItemStatus status, String generation) =>
-      Notice(
-        meta: meta(noticeId, generation, status),
-        kind: const OpenValue.known(NoticeKind.continuation),
-        text: openCodeNoticeText(text),
-      );
-
   switch (type) {
     case _enqueued:
       if (itemType == 'compaction' || itemType == 'move') return const [];
@@ -240,7 +233,12 @@ List<SessionEvent> projectOpenCodeInboxEvent(
         // pending or delivered one never regresses.
         if (notice == null || notice.status.known == ItemStatus.interrupted) {
           items.add(
-            syntheticNotice(text, ItemStatus.pending, liveGeneration()),
+            openCodeSyntheticNotice(
+              meta(noticeId, liveGeneration(), ItemStatus.pending),
+              ref,
+              text,
+              _object(_object(data['item'])['payload']),
+            ),
           );
         }
         removePending();
@@ -289,7 +287,9 @@ List<SessionEvent> projectOpenCodeInboxEvent(
     case _delivered:
       if (notice is Notice && notice.status.known == ItemStatus.pending) {
         items.add(
-          syntheticNotice(notice.text, ItemStatus.completed, notice.generation),
+          notice.withMeta(
+            meta(noticeId, notice.generation, ItemStatus.completed),
+          ),
         );
       } else if (residentOpen) {
         items.add(
@@ -307,10 +307,8 @@ List<SessionEvent> projectOpenCodeInboxEvent(
     case _cancelled:
       if (notice is Notice && notice.status.known == ItemStatus.pending) {
         items.add(
-          syntheticNotice(
-            notice.text,
-            ItemStatus.interrupted,
-            notice.generation,
+          notice.withMeta(
+            meta(noticeId, notice.generation, ItemStatus.interrupted),
           ),
         );
       } else if (residentOpen) {
@@ -406,16 +404,17 @@ _inboxItem(Map<String, Object?> item) {
     return (
       pending: null,
       items: [
-        Notice(
-          meta: ItemMeta(
+        openCodeSyntheticNotice(
+          ItemMeta(
             anchor: openCodeMessageAnchor(inboxId),
             id: id,
             generation: generation,
             status: const OpenValue.known(ItemStatus.pending),
             source: source,
           ),
-          kind: const OpenValue.known(NoticeKind.continuation),
-          text: openCodeNoticeText(item.text),
+          ref,
+          item.text,
+          _object(row['payload']),
         ),
       ],
     );

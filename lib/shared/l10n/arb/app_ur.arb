@@ -1,5 +1,10 @@
 {
   "@@locale": "ur",
+  "reportCount": "ذیلی ایجنٹوں کے جوابات: {count}",
+  "reportFailures": "ناکام: {count}",
+  "reportUnnamed": "ذیلی ایجنٹ کا جواب",
+  "reportBy": "{agent} نے جواب دیا",
+  "reportOpenChild": "ذیلی گفتگو کھولیں",
   "liveSubagentsTitle": "ذیلی ایجنٹ",
   "liveSubagentsActive": "فعال",
   "liveSubagentsCompleted": "مکمل",

@@ -8,6 +8,9 @@ import 'package:test/test.dart';
 
 import 'execution_replay_test.dart' show eventLists, refOf;
 import 'history_test_data.dart';
+import 'inbox_test_data.dart';
+import 'package:harness_opencode/src/inbox_projection.dart'
+    show openCodeInboxRow;
 import 'support/fixture_replay.dart';
 import 'text_reasoning_test_data.dart' show observedPosition;
 
@@ -72,6 +75,75 @@ Notice noticeOf(List<SessionEvent> events) =>
     (events.single as ItemUpserted).item as Notice;
 
 void main() {
+  test(
+    'subagent reply keeps its body, outcome and child across all producers',
+    () {
+      const body = '    indented code\n\n**details**';
+      const description = 'Review "A"\nand B';
+      final payload = {
+        'text':
+            '<subagent sessionID="ses_child" state="error" description="$description">\n$body\n</subagent>',
+        'description': description,
+        'metadata': {
+          'source': 'subagent',
+          'agent': 'MiniMax',
+          'childID': 'ses_child',
+          'state': 'error',
+        },
+      };
+      final inbox = {
+        'type': 'synthetic',
+        'payload': payload,
+        'delivery': 'steer',
+      };
+      final admitted = applyInbox(
+        inboxFrame('enqueued', item: inbox),
+        SessionState(historyRef),
+        1,
+      );
+      for (final notice in [
+        noticeOf(
+          projectNotice(noticeFrame('session.synthetic', data: payload)),
+        ),
+        projectOpenCodeHistory(
+              [message('report', 'synthetic', payload)],
+              historyRef,
+              sourceVersion: '2.0.22',
+            ).single
+            as Notice,
+        openCodeInboxRow(
+              {
+                ...inbox,
+                'id': 'msg_in',
+                'sessionID': historyRef.nativeId,
+                'time': {'created': 10},
+              },
+              historyRef,
+              sourceVersion: '2.0.22',
+              generation: 'g',
+            ).items.single
+            as Notice,
+        admitted.timeline.single as Notice,
+        applyInbox(inboxFrame('delivered'), admitted, 2).timeline.single
+            as Notice,
+        applyInbox(inboxFrame('cancelled'), admitted, 2).timeline.single
+            as Notice,
+      ]) {
+        expect(notice.text, body);
+        expect(notice.report?.agent, 'MiniMax');
+        expect(notice.report?.description, description);
+        expect(notice.report?.outcome, OutcomeKind.failed);
+        expect(notice.relatedSession?.nativeId, 'ses_child');
+      }
+      final unknown = noticeOf(
+        projectNotice(
+          noticeFrame('session.synthetic', data: {'text': payload['text']}),
+        ),
+      );
+      expect(unknown.report, isNull);
+      expect(unknown.text, payload['text']);
+    },
+  );
   for (final (type, row, kind) in [
     ('session.instructions.updated', 'system', NoticeKind.system),
     ('session.synthetic', 'synthetic', NoticeKind.continuation),

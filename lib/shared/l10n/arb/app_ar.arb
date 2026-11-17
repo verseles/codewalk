@@ -1,4 +1,9 @@
 {
+  "reportCount": "ردود الوكلاء الفرعيين: {count}",
+  "reportFailures": "حالات الفشل: {count}",
+  "reportUnnamed": "رد وكيل فرعي",
+  "reportBy": "ردّ {agent}",
+  "reportOpenChild": "فتح المحادثة الفرعية",
   "liveSubagentsTitle": "الوكلاء الفرعيون",
   "liveSubagentsActive": "نشطون",
   "liveSubagentsCompleted": "مكتملون",

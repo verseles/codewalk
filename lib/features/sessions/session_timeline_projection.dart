@@ -37,6 +37,50 @@ final class SessionItemRow extends SessionTimelineRow {
   List<TimelineItem> get items => [item];
 }
 
+/// Consecutive replies, anchored to the first while more arrive.
+final class SessionReportRow extends SessionTimelineRow {
+  const SessionReportRow(this.reports);
+  final List<Notice> reports;
+  @override
+  Key get key => ValueKey(reports.first.id);
+  @override
+  List<TimelineItem> get items => reports;
+}
+
+/// Use original adjacency so folding work or hiding tools cannot join
+/// reports from opposite sides of an intervening item.
+List<SessionTimelineRow> groupSubagentReports(
+  List<SessionTimelineRow> rows,
+  List<TimelineItem> original,
+) {
+  if (!original.any((item) => item is Notice && item.report != null)) {
+    return rows;
+  }
+  final follows = <ItemId, ItemId>{};
+  for (var i = 1; i < original.length; i++) {
+    if (original[i] case Notice(report: != null)) {
+      follows[original[i].id] = original[i - 1].id;
+    }
+  }
+  final grouped = <SessionTimelineRow>[];
+  var run = <Notice>[];
+  for (final row in rows) {
+    if (row case SessionItemRow(
+      item: final Notice notice,
+    ) when notice.report != null) {
+      if (run.isEmpty || follows[notice.id] != run.last.id) {
+        run = [];
+        grouped.add(SessionReportRow(run));
+      }
+      run.add(notice);
+    } else {
+      run = [];
+      grouped.add(row);
+    }
+  }
+  return grouped;
+}
+
 /// Consecutive tool calls and shell runs of one turn, shown as one row whose
 /// summary counts them and whose calls open on demand.
 final class SessionToolRunRow extends SessionTimelineRow {
@@ -142,6 +186,7 @@ final class SessionTimelinePresentation {
     bool showToolCalls = true,
     ChatRenderMode renderMode = ChatRenderMode.live,
   }) {
+    final original = items;
     items = sessionTimelineItems(items);
     final out = _Rows(
       this,
@@ -182,7 +227,7 @@ final class SessionTimelinePresentation {
       }
     }
     _settled = latched;
-    return out.rows;
+    return groupSubagentReports(out.rows, original);
   }
 
   void _turn(

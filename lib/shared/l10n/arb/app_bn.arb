@@ -1,5 +1,10 @@
 {
   "@@locale": "bn",
+  "reportCount": "সাব-এজেন্টের {count}টি উত্তর",
+  "reportFailures": "ব্যর্থ: {count}",
+  "reportUnnamed": "সাব-এজেন্টের উত্তর",
+  "reportBy": "{agent} উত্তর দিয়েছে",
+  "reportOpenChild": "উপ-কথোপকথন খুলুন",
   "liveSubagentsTitle": "সাব-এজেন্ট",
   "liveSubagentsActive": "সক্রিয়",
   "liveSubagentsCompleted": "সম্পন্ন",
