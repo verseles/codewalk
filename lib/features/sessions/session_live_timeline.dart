@@ -862,6 +862,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                       )
                     : null,
               ),
+            SessionSubagentCallsRow() => SessionSubagentCalls(
+              row: row,
+              onOpenChild: widget.onOpenChild,
+            ),
             SessionReportRow() => SessionReportGroup(
               reports: row.reports,
               onOpenChild: widget.onOpenReportChild,

@@ -49,7 +49,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
         _ => l10n.historyUnavailable,
       };
       final items = sessionTimelineItems(c.items);
-      final rows = groupSubagentReports([
+      final rows = groupSubagentActivity([
         for (final (i, item) in items.indexed)
           SessionItemRow(item, messageHeader: opensMessage(items, i)),
       ], c.items);
@@ -131,6 +131,9 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                           );
                         }
                         final row = rows[index - 1];
+                        if (row is SessionSubagentCallsRow) {
+                          return SessionSubagentCalls(key: row.key, row: row);
+                        }
                         if (row is SessionReportRow) {
                           return SessionReportGroup(
                             key: row.key,

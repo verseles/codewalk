@@ -1,4 +1,5 @@
 import 'package:codewalk/features/sessions/session_report_group.dart';
+import 'package:codewalk/features/sessions/session_timeline_projection.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/rendering/canonical_message_body.dart';
@@ -52,6 +53,50 @@ Future<void> _pump(WidgetTester tester, List<TimelineItem> items) async {
 }
 
 void main() {
+  testWidgets('running calls share a line and flag a failure on update', (
+    tester,
+  ) async {
+    Future<void> pump(ItemStatus lastStatus) async {
+      final calls = [
+        for (var i = 0; i < 4; i++)
+          SessionItemRow(
+            ToolCall(
+              meta: _meta(
+                'c$i',
+                status: i == 3 ? lastStatus : ItemStatus.streaming,
+              ),
+              kind: const OpenValue.known(ToolKind.subagent),
+              rawName: 'subagent',
+            ),
+            messageHeader: false,
+          ),
+      ];
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SessionSubagentCalls(row: SessionSubagentCallsRow(calls)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pump(ItemStatus.streaming);
+    expect(find.text('Sub-agents · 4 running'), findsOneWidget);
+    expect(find.byType(SessionTimelineTile), findsNothing);
+    await pump(ItemStatus.failed);
+    final summary = find.text('Failed: 1 · Sub-agents · 4 calls · 3 running');
+    expect(summary, findsOneWidget);
+    await tester.tap(summary);
+    await tester.pump();
+    expect(find.byType(SessionTimelineTile), findsNWidgets(4));
+    await tester.tap(summary);
+    await tester.pump();
+    expect(find.byType(SessionTimelineTile), findsNothing);
+  });
   testWidgets(
     'compact replies disclose failures and open one report in place',
     (tester) async {

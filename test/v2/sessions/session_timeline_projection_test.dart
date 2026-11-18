@@ -82,6 +82,8 @@ List<String> _shape(List<SessionTimelineRow> rows) => [
         'run(${tools.map((t) => t.id.value).join(',')})',
       SessionWorkGroupRow(:final work, :final messageCount, :final expanded) =>
         'work(${work.length}/$messageCount${expanded ? ',open' : ''})',
+      SessionSubagentCallsRow(:final calls) =>
+        'agents(${calls.map((call) => call.item.id.value).join(',')})',
       SessionReportRow(:final reports) => 'reports(${reports.length})',
       SessionPendingRow(:final anchor) => 'pending(${anchor.value})',
     },
@@ -370,7 +372,15 @@ void main() {
     ];
     final presentation = SessionTimelinePresentation();
     final rows = presentation.project(items, settled: false);
-    expect(_shape(rows), ['u1', 't1', 'r1', 't2', 's1', 'run(t3,t4)', 'a1']);
+    expect(_shape(rows), [
+      'u1',
+      't1',
+      'r1',
+      't2',
+      'agents(s1)',
+      'run(t3,t4)',
+      'a1',
+    ]);
     final run = rows[5] as SessionToolRunRow;
     expect(run.expanded, isFalse);
     // The run's calls belong to a message opened above it.
@@ -385,6 +395,30 @@ void main() {
     final again = grown[5] as SessionToolRunRow;
     expect([again.id, again.expanded, again.tools.length], [run.id, true, 3]);
   });
+
+  test(
+    'only adjacent subagent calls share a summary, even with hidden reasoning',
+    () {
+      final items = [
+        _tool('s1', 'm1', kind: ToolKind.subagent),
+        _tool('s2', 'm1', kind: ToolKind.subagent),
+        _think('r1', 'm1'),
+        _tool('s3', 'm1', kind: ToolKind.subagent),
+      ];
+      final rows = SessionTimelinePresentation().project(
+        items,
+        settled: false,
+        showReasoning: false,
+      );
+      expect(_shape(rows), ['agents(s1,s2)', 'agents(s3)']);
+      expect(
+        (rows.first as SessionSubagentCallsRow).calls.map(
+          (c) => c.messageHeader,
+        ),
+        [true, false],
+      );
+    },
+  );
 
   test('only the first item of a message opens it', () {
     final rows = SessionTimelinePresentation().project(

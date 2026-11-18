@@ -47,23 +47,41 @@ final class SessionReportRow extends SessionTimelineRow {
   List<TimelineItem> get items => reports;
 }
 
+/// A compact summary which opens the original call rows and message headers.
+final class SessionSubagentCallsRow extends SessionTimelineRow {
+  SessionSubagentCallsRow(this.calls);
+  final List<SessionItemRow> calls;
+
+  @override
+  Key get key => calls.first.key;
+  @override
+  List<TimelineItem> get items => [for (final call in calls) call.item];
+}
+
+bool _subagentCall(TimelineItem item) =>
+    item is ToolCall && item.kind.known == ToolKind.subagent;
+
 /// Use original adjacency so folding work or hiding tools cannot join
 /// reports from opposite sides of an intervening item.
-List<SessionTimelineRow> groupSubagentReports(
+List<SessionTimelineRow> groupSubagentActivity(
   List<SessionTimelineRow> rows,
   List<TimelineItem> original,
 ) {
-  if (!original.any((item) => item is Notice && item.report != null)) {
+  if (!original.any(
+    (item) => _subagentCall(item) || item is Notice && item.report != null,
+  )) {
     return rows;
   }
   final follows = <ItemId, ItemId>{};
   for (var i = 1; i < original.length; i++) {
-    if (original[i] case Notice(report: != null)) {
+    final item = original[i];
+    if (_subagentCall(item) || item is Notice && item.report != null) {
       follows[original[i].id] = original[i - 1].id;
     }
   }
   final grouped = <SessionTimelineRow>[];
   var run = <Notice>[];
+  var calls = <SessionItemRow>[];
   for (final row in rows) {
     if (row case SessionItemRow(
       item: final Notice notice,
@@ -73,8 +91,17 @@ List<SessionTimelineRow> groupSubagentReports(
         grouped.add(SessionReportRow(run));
       }
       run.add(notice);
+      calls = [];
+    } else if (row is SessionItemRow && _subagentCall(row.item)) {
+      if (calls.isEmpty || follows[row.item.id] != calls.last.item.id) {
+        calls = [];
+        grouped.add(SessionSubagentCallsRow(calls));
+      }
+      calls.add(row);
+      run = [];
     } else {
       run = [];
+      calls = [];
       grouped.add(row);
     }
   }
@@ -227,7 +254,7 @@ final class SessionTimelinePresentation {
       }
     }
     _settled = latched;
-    return groupSubagentReports(out.rows, original);
+    return groupSubagentActivity(out.rows, original);
   }
 
   void _turn(

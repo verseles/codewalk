@@ -159,7 +159,7 @@ description of this code.
 ### V2 sub-conversations
 
 - **Given** a v2 session whose timeline shows a subagent call
-- **When** the user taps anywhere on that call's card (its own expand and copy controls keep their taps)
+- **When** the user expands the compact calls summary and taps that call's card (its own expand and copy controls keep their taps)
 - **Then** only a direct child of the session on screen opens: the child the call itself named while it ran or when it ended, else the only child the server lists for the session, else the call paired with the children by creation time, but only when the whole history is in view, both counts match, every creation time is known and distinct and no call contradicts the pairing
 - **Then** the chosen session is read first and opens only when it is exactly that child of the session on screen; a refused or contradictory name never falls back to another rule, a newer tap or any navigation meanwhile cancels the lookup, and when nothing can be told apart the session stays and a notice says no sub-conversation was found
 - **Then** a child named only by a live progress update is forgotten when the stream reconnects or the history is read again, until the server names it again; a name carried by the call's final event or by the history stays
@@ -623,7 +623,7 @@ description of this code.
 
 - **Given** an assistant turn in the live timeline uses tools
 - **When** two or more tool or shell calls follow each other in that turn
-- **Then** they show as one run: compact screens lead with the count (`3 calls`), wide screens name the first two calls (`read • grep • +1 more`); a second line counts what is running, queued or needs attention; `Show` (compact) or `Details` (wide) opens every call and `Hide` closes them; a call appended to an open run keeps the run open, and a sub-agent call keeps its own card
+- **Then** they show as one run: compact screens lead with the count (`3 calls`), wide screens name the first two calls (`read • grep • +1 more`); a second line counts what is running, queued or needs attention; `Show` (compact) or `Details` (wide) opens every call and `Hide` closes them; a call appended to an open run keeps the run open, and subagent calls have a separate one-line summary in live and history. Consecutive calls share the summary until another item intervenes. It counts calls, shows running activity and flags failures while collapsed. Expanding reveals each original call with its status, details and available child navigation
 - **Then** a message that opens inside a run keeps its elapsed chip and details: a closed run shows the first such message's chip on its header, an open run shows it on each call that opens a message
 - **Then** a call's input, output and error open in a details dialog from its `Show`/`Details` button, never inline; the dialog follows the call while it runs, opens at the top of each value, keeps a value's newest part in view only when the reader is already at its end, and closes with its button, the barrier or Escape
 

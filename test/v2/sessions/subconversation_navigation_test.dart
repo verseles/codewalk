@@ -2,6 +2,7 @@ import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
+import 'package:codewalk/features/sessions/session_report_group.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -162,6 +163,16 @@ Future<void> _tap(WidgetTester tester, ToolCall tool) async {
     await tester.pump();
   }
   final card = find.byKey(ValueKey('subagent-open-${tool.id.value}'));
+  if (card.evaluate().isEmpty) {
+    final group = find.byWidgetPredicate(
+      (w) =>
+          w is SessionSubagentCalls &&
+          w.row.calls.any((c) => c.item.id == tool.id),
+    );
+    await tester.ensureVisible(group);
+    await tester.tap(group);
+    await tester.pump();
+  }
   await tester.ensureVisible(card);
   await tester.tap(card);
   await tester.pump();
