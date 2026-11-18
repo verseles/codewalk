@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
+import 'session_message_info.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 
@@ -140,6 +141,7 @@ Widget _summary(
   required bool expanded,
   required bool failed,
   required VoidCallback onTap,
+  bool wrapStatus = false,
 }) {
   final theme = Theme.of(context);
   final color = failed
@@ -150,7 +152,10 @@ Widget _summary(
     expanded: expanded,
     child: InkWell(
       onTap: onTap,
-      child: Padding(
+      child: Container(
+        constraints: wrapStatus
+            ? const BoxConstraints(minHeight: kMinInteractiveDimension)
+            : null,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(
           children: [
@@ -163,8 +168,10 @@ Widget _summary(
             Flexible(
               child: Text(
                 title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                maxLines: wrapStatus ? null : 1,
+                overflow: wrapStatus
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
                 style: theme.textTheme.labelMedium?.copyWith(color: color),
               ),
             ),
@@ -181,8 +188,17 @@ Widget _summary(
 }
 
 class SessionSubagentCalls extends StatefulWidget {
-  const SessionSubagentCalls({super.key, required this.row, this.onOpenChild});
+  const SessionSubagentCalls({
+    super.key,
+    required this.row,
+    required this.expandedAnchors,
+    this.onOpenChild,
+  });
   final SessionSubagentCallsRow row;
+
+  /// The timeline owns these anchors so rebuilding a lazy row or prepending
+  /// an older call to the same group preserves the reader's choice.
+  final Set<ItemId> expandedAnchors;
   final ValueChanged<ToolCall>? onOpenChild;
 
   @override
@@ -190,19 +206,28 @@ class SessionSubagentCalls extends StatefulWidget {
 }
 
 class _SessionSubagentCallsState extends State<SessionSubagentCalls> {
-  bool expanded = false;
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final calls = widget.row.calls;
+    final anchors = widget.expandedAnchors;
+    final expanded = calls.any((call) => anchors.contains(call.item.id));
+    final opening = expanded
+        ? null
+        : calls
+              .where((call) => call.messageHeader)
+              .map((call) => call.item.meta.message)
+              .nonNulls
+              .firstOrNull;
     int count(ItemStatus status) =>
         calls.where((call) => call.item.status.known == status).length;
     final failed = count(ItemStatus.failed);
+    final interrupted = count(ItemStatus.interrupted);
     final running = count(ItemStatus.streaming);
     final queued = count(ItemStatus.pending);
     final title = [
       if (failed > 0) l10n.reportFailures(failed),
+      if (interrupted > 0) '${l10n.liveToolInterrupted} ($interrupted)',
       l10n.liveSubagentsTitle,
       if (running != calls.length && queued != calls.length)
         l10n.chatMessageToolChainCallsCompact(calls.length),
@@ -213,15 +238,29 @@ class _SessionSubagentCallsState extends State<SessionSubagentCalls> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ConversationTextScale(
-          child: _summary(
-            context,
-            title,
-            expanded: expanded,
-            failed: failed > 0,
-            onTap: () {
-              SessionTimelineScope.maybeOf(context)?.onReaderToggle();
-              setState(() => expanded = !expanded);
-            },
+          child: Row(
+            children: [
+              Expanded(
+                child: _summary(
+                  context,
+                  title,
+                  expanded: expanded,
+                  failed: failed > 0 || interrupted > 0,
+                  wrapStatus: true,
+                  onTap: () {
+                    SessionTimelineScope.maybeOf(context)?.onReaderToggle();
+                    setState(() {
+                      if (expanded) {
+                        anchors.removeAll(calls.map((call) => call.item.id));
+                      } else {
+                        anchors.add(calls.first.item.id);
+                      }
+                    });
+                  },
+                ),
+              ),
+              if (opening != null) MessageElapsedChip(message: opening),
+            ],
           ),
         ),
         if (expanded)

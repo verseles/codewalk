@@ -169,6 +169,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   /// What each row keeps while it is not built.
   final _rowState = PageStorageBucket();
+  final _expandedSubagentCalls = <ItemId>{};
 
   /// How the items are presented, and what the reader opened.
   final _presentation = SessionTimelinePresentation();
@@ -864,6 +865,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               ),
             SessionSubagentCallsRow() => SessionSubagentCalls(
               row: row,
+              expandedAnchors: _expandedSubagentCalls,
               onOpenChild: widget.onOpenChild,
             ),
             SessionReportRow() => SessionReportGroup(

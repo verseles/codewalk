@@ -1,3 +1,4 @@
+import 'package:codewalk_core/codewalk_core.dart' show ItemId;
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
@@ -18,6 +19,7 @@ class SessionHistoryPage extends StatefulWidget {
 class _SessionHistoryPageState extends State<SessionHistoryPage> {
   /// What each row keeps while it is not built, such as an opened tool.
   final _rowState = PageStorageBucket();
+  final _expandedSubagentCalls = <ItemId>{};
 
   @override
   void initState() {
@@ -132,7 +134,11 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         }
                         final row = rows[index - 1];
                         if (row is SessionSubagentCallsRow) {
-                          return SessionSubagentCalls(key: row.key, row: row);
+                          return SessionSubagentCalls(
+                            key: row.key,
+                            row: row,
+                            expandedAnchors: _expandedSubagentCalls,
+                          );
                         }
                         if (row is SessionReportRow) {
                           return SessionReportGroup(

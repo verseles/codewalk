@@ -9,17 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 // #491: reminders and other notes are light lines, not cards.
 
-ItemMeta _meta(String id, {ItemStatus status = ItemStatus.completed}) =>
-    ItemMeta(
-      id: ItemId('test/$id'),
-      generation: 'test',
-      status: OpenValue.known(status),
-      source: SourceProvenance(
-        harness: const HarnessRef(HostId('h'), HarnessInstanceId('test')),
-        version: '2.0.22',
-        nativeType: 'test',
-      ),
-    );
+ItemMeta _meta(
+  String id, {
+  ItemStatus status = ItemStatus.completed,
+  MessageContext? message,
+}) => ItemMeta(
+  id: ItemId('test/$id'),
+  message: message,
+  generation: 'test',
+  status: OpenValue.known(status),
+  source: SourceProvenance(
+    harness: const HarnessRef(HostId('h'), HarnessInstanceId('test')),
+    version: '2.0.22',
+    nativeType: 'test',
+  ),
+);
 
 Notice _notice(
   String id,
@@ -56,6 +60,7 @@ void main() {
   testWidgets('running calls share a line and flag a failure on update', (
     tester,
   ) async {
+    final anchors = <ItemId>{};
     Future<void> pump(ItemStatus lastStatus) async {
       final calls = [
         for (var i = 0; i < 4; i++)
@@ -77,7 +82,10 @@ void main() {
           supportedLocales: V2Localizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
-              child: SessionSubagentCalls(row: SessionSubagentCallsRow(calls)),
+              child: SessionSubagentCalls(
+                row: SessionSubagentCallsRow(calls),
+                expandedAnchors: anchors,
+              ),
             ),
           ),
         ),
@@ -97,6 +105,108 @@ void main() {
     await tester.pump();
     expect(find.byType(SessionTimelineTile), findsNothing);
   });
+  testWidgets(
+    'collapsed calls expose interruptions, message info and large status text',
+    (tester) async {
+      final anchors = <ItemId>{};
+      final calls = [
+        for (final status in [
+          ItemStatus.streaming,
+          ItemStatus.pending,
+          ItemStatus.interrupted,
+        ])
+          SessionItemRow(
+            ToolCall(
+              meta: _meta(
+                status.name,
+                status: status,
+                message: status == ItemStatus.pending
+                    ? MessageContext(message: MessageRef('m2'))
+                    : null,
+              ),
+              kind: const OpenValue.known(ToolKind.subagent),
+              rawName: 'subagent',
+            ),
+            messageHeader: status == ItemStatus.pending,
+          ),
+      ];
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: SizedBox(
+                width: 300,
+                child: SessionSubagentCalls(
+                  row: SessionSubagentCallsRow(calls),
+                  expandedAnchors: anchors,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final title = find.textContaining('Interrupted (1)');
+      expect(tester.widget<Text>(title).maxLines, isNull);
+      final toggle = find.ancestor(of: title, matching: find.byType(InkWell));
+      expect(tester.getSize(toggle).height, greaterThanOrEqualTo(48));
+      expect(tester.getSize(title).height, greaterThan(48));
+      await tester.tap(find.byKey(const ValueKey('message-elapsed-m2')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('message-info-m2')), findsOneWidget);
+      expect(find.byType(SessionTimelineTile), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'disclosure survives row disposal and older calls joining the group',
+    (tester) async {
+      final anchors = <ItemId>{};
+      Future<void> pump(List<String> ids) async {
+        final row = SessionSubagentCallsRow([
+          for (final id in ids)
+            SessionItemRow(
+              ToolCall(
+                meta: _meta(id),
+                kind: const OpenValue.known(ToolKind.subagent),
+                rawName: 'subagent',
+              ),
+              messageHeader: false,
+            ),
+        ]);
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: SessionSubagentCalls(
+                  key: row.key,
+                  row: row,
+                  expandedAnchors: anchors,
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await pump(['b', 'c']);
+      await tester.tap(find.text('Sub-agents · 2 calls'));
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox());
+      await pump(['a', 'b', 'c']);
+      expect(find.byType(SessionTimelineTile), findsNWidgets(3));
+      await tester.tap(find.text('Sub-agents · 3 calls'));
+      await tester.pump();
+      await pump(['b', 'c']);
+      expect(find.byType(SessionTimelineTile), findsNothing);
+    },
+  );
+
   testWidgets(
     'compact replies disclose failures and open one report in place',
     (tester) async {
