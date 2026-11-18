@@ -1,7 +1,7 @@
-> 📣 Keep conversations tidy with compact subagent replies. Expand any response to read its full report, with failures visible at a glance.
+> 📣 Keep conversations tidy with compact subagent call groups. Expand a group for call details, with failures and interruptions visible at a glance.
 
-### Subagent replies
+### Subagent calls
 
-- Consecutive subagent responses appear in compact, expandable groups to keep the conversation easy to scan.
-- Failed replies are marked in the collapsed summary; expand a reply to read its full report.
-- Long or malformed optional labels no longer prevent conversation history from opening.
+- Each call collapses into a compact summary. Consecutive calls share one in live chat and history, showing queued and running activity plus failures and interruptions.
+- Expand a group to inspect each call's status and details. Message timing and available child conversation navigation remain accessible.
+- Groups stay open while scrolling or loading older adjacent calls.
