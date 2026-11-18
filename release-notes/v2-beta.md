@@ -1,7 +1,7 @@
-> 📣 A quieter composer: a subtle hourglass on Send shows when the conversation is catching up, without repeating the loading message.
+> 📣 Keep conversations tidy with compact subagent replies. Expand any response to read its full report, with failures visible at a glance.
 
-### Composer
+### Subagent replies
 
-- Removed the redundant message about waiting for the live view to update.
-- Send shows a static hourglass while it waits for the current session state.
-- The status bar keeps showing loading progress, and sending remains disabled until ready.
+- Consecutive subagent responses appear in compact, expandable groups to keep the conversation easy to scan.
+- Failed replies are marked in the collapsed summary; expand a reply to read its full report.
+- Long or malformed optional labels no longer prevent conversation history from opening.
