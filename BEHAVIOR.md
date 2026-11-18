@@ -580,6 +580,7 @@ description of this code.
 - A harness-identified subagent reply appears as one collapsed line naming the agent when known. Consecutive replies share one line with the reply count. Any intervening conversation item ends the group.
 - A failed reply is visible in the collapsed summary, with an icon and text. Counts refer to replies, including repeated replies from the same agent.
 - Opening a group reveals its individual replies. Opening a reply shows the original report in Markdown in place. When the harness identifies a child and navigation is available, a separate action opens the verified direct child.
+- If the agent name is unavailable or malformed, the reply uses a generic subagent label. The report text and any verified child link remain available when the history page runs out of space for optional labels.
 - The same presentation applies to live and historical replies. A harness without structured replies keeps the normal notice presentation. User-authored text always remains a user message.
 
 ### V2 light notices

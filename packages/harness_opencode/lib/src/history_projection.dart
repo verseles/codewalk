@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'compaction_projection.dart';
+import 'display_label.dart';
 import 'error_projection.dart';
 import 'item_ids.dart';
 import 'notice_text.dart';
@@ -215,6 +216,15 @@ List<TimelineItem> projectOpenCodeHistory(
 
   CanonicalValue manifest(Object? value) =>
       structured(value, redact: false, onRedacted: () {});
+  String? historyLabel(Object? raw) {
+    final label = openCodeDisplayLabel(raw);
+    if (label == null) return null;
+    final size = utf8.encode(label).length;
+    if (labelBytes + size > 64 * 1024) return null;
+    labelBytes += size;
+    return label;
+  }
+
   text(sourceVersion, cap: 128, nonempty: true);
   // The last assistant message's error since the previous user or idle row.
   ErrorInfo? failure;
@@ -226,23 +236,8 @@ List<TimelineItem> projectOpenCodeHistory(
     if (!id.startsWith('msg_') || !messageIds.add(id)) malformed();
     final type = text(message['type'], cap: 4096, nonempty: true);
     final time = times(message['time']);
-    // Display-only labels are bounded apart from the content budget; an
-    // unexpected one is unknown instead of rejecting the page.
-    String? label(Object? value) {
-      if (value is! String ||
-          value.isEmpty ||
-          value.length > 256 ||
-          !_wellFormed(value)) {
-        return null;
-      }
-      final size = utf8.encode(value).length;
-      if (size > 256 || labelBytes + size > 64 * 1024) return null;
-      labelBytes += size;
-      return value;
-    }
-
     final context = type == 'assistant'
-        ? _historyMessageContext(id, message, time, label)
+        ? _historyMessageContext(id, message, time, historyLabel)
         : null;
     ItemMeta meta(
       String kind,
@@ -616,20 +611,15 @@ List<TimelineItem> projectOpenCodeHistory(
           });
         }
       case 'synthetic':
-        final notice = openCodeSyntheticNotice(
-          meta('notice', 0, status: completed),
-          ref,
-          text(message['text']),
-          message,
+        add(
+          openCodeSyntheticNotice(
+            meta('notice', 0, status: completed),
+            ref,
+            text(message['text']),
+            message,
+            readLabel: historyLabel,
+          ),
         );
-        for (final retained in [
-          notice.report?.agent,
-          notice.report?.description,
-          notice.relatedSession?.nativeId,
-        ].nonNulls) {
-          text(retained);
-        }
-        add(notice);
       case 'system':
         add(
           Notice(
@@ -856,19 +846,4 @@ MessageContext _historyMessageContext(
     cost: cost == null ? null : Cost(amount: cost, currency: 'USD'),
     finish: label(message['finish']),
   );
-}
-
-/// Whether every UTF-16 surrogate in [value] is paired.
-bool _wellFormed(String value) {
-  for (var i = 0; i < value.length; i++) {
-    final c = value.codeUnitAt(i);
-    if (c >= 0xd800 && c <= 0xdbff) {
-      if (++i >= value.length) return false;
-      final low = value.codeUnitAt(i);
-      if (low < 0xdc00 || low > 0xdfff) return false;
-    } else if (c >= 0xdc00 && c <= 0xdfff) {
-      return false;
-    }
-  }
-  return true;
 }

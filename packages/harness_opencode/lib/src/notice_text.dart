@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'display_label.dart';
 import 'subagent_child.dart';
 
 /// The readable text of an OpenCode synthetic or system message (#491).
@@ -27,8 +26,9 @@ Notice openCodeSyntheticNotice(
   ItemMeta meta,
   SessionRef parent,
   String text,
-  Map<String, Object?> payload,
-) {
+  Map<String, Object?> payload, {
+  String? Function(Object?) readLabel = openCodeDisplayLabel,
+}) {
   final metadata = payload['metadata'];
   if (metadata is! Map<String, Object?> || metadata['source'] != 'subagent') {
     return Notice(
@@ -57,13 +57,11 @@ Notice openCodeSyntheticNotice(
       body = text.substring(end + 3, text.length - closing.length);
     }
   }
-  String? label(Object? raw) =>
-      raw is String &&
-          raw.length <= 256 &&
-          utf8.encode(raw).length <= 256 &&
-          raw.trim().isNotEmpty
-      ? raw.trim()
-      : null;
+  String? label(Object? raw) {
+    final value = readLabel(raw)?.trim();
+    return value == null || value.isEmpty ? null : value;
+  }
+
   return Notice(
     meta: meta,
     kind: const OpenValue.known(NoticeKind.continuation),

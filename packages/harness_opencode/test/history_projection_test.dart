@@ -96,6 +96,54 @@ void main() {
     );
   });
 
+  test('optional report details do not consume the history node budget', () {
+    final items = project([
+      for (var i = 0; i < 100; i++)
+        message('report_$i', 'synthetic', {
+          'text': 'OK',
+          'description': 'Review',
+          'metadata': {
+            'source': 'subagent',
+            'childID': 'ses_child',
+            'agent': 'Reviewer',
+          },
+        }),
+      for (var i = 0; i < 10; i++)
+        assistant('answer_$i', List.generate(106, (_) => textBlock('hello'))),
+    ]);
+    expect(items, hasLength(1160));
+    final last = items.whereType<Notice>().last;
+    expect(last.report?.agent, 'Reviewer');
+    expect(last.relatedSession?.nativeId, 'ses_child');
+  });
+
+  test(
+    'exhausting the display label budget keeps later replies and child links',
+    () {
+      final name = 'a' * 256;
+      final rows = List.generate(
+        140,
+        (i) => message('report_$i', 'synthetic', {
+          'text': 'OK',
+          'description': name,
+          'metadata': {
+            'source': 'subagent',
+            'childID': 'ses_child',
+            'agent': name,
+          },
+        }),
+      );
+      final notices = project(rows).cast<Notice>();
+      expect(notices.first.report?.agent, name);
+      expect(notices, hasLength(140));
+      expect(notices.last.report, isNotNull);
+      expect(notices.last.report!.agent, isNull);
+      expect(notices.last.report!.description, isNull);
+      expect(notices.last.text, 'OK');
+      expect(notices.last.relatedSession?.nativeId, 'ses_child');
+    },
+  );
+
   test('assistant parts carry what their message reports', () {
     final items = project([
       message('u', 'user', {'text': 'hi'}),

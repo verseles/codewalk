@@ -144,6 +144,36 @@ void main() {
       expect(unknown.text, payload['text']);
     },
   );
+  test('a malformed agent label leaves live and historical reports readable', () {
+    const body = 'Review complete.';
+    final payload = {
+      'text':
+          '<subagent sessionID="ses_child" state="completed" description="review">\n$body\n</subagent>',
+      'description': 'review',
+      'metadata': {
+        'source': 'subagent',
+        'agent': String.fromCharCode(0xd800),
+        'childID': 'ses_child',
+        'state': 'completed',
+      },
+    };
+    for (final notice in [
+      noticeOf(projectNotice(noticeFrame('session.synthetic', data: payload))),
+      projectOpenCodeHistory(
+            [message('report', 'synthetic', payload)],
+            historyRef,
+            sourceVersion: '2.0.22',
+          ).single
+          as Notice,
+    ]) {
+      expect(notice.report, isNotNull);
+      expect(notice.report!.agent, isNull);
+      expect(notice.report!.description, 'review');
+      expect(notice.text, body);
+      expect(notice.relatedSession?.nativeId, 'ses_child');
+    }
+  });
+
   for (final (type, row, kind) in [
     ('session.instructions.updated', 'system', NoticeKind.system),
     ('session.synthetic', 'synthetic', NoticeKind.continuation),
