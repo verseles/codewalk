@@ -246,11 +246,10 @@ void main() {
       brightness: Brightness.light,
       items: _work(),
     );
-    for (final key in [
-      'work-group-toggle-work-golden/r1',
-      'reasoning-toggle',
+    for (final toggle in [
+      find.byKey(const ValueKey('work-group-toggle-work-golden/r1')),
+      find.byKey(const ValueKey('reasoning-toggle')).last,
     ]) {
-      final toggle = find.byKey(ValueKey(key));
       await tester.scrollUntilVisible(
         toggle,
         200,
