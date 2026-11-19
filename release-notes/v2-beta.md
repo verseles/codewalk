@@ -1,7 +1,11 @@
-> 📣 Keep conversations tidy with compact subagent call groups. Expand a group for call details, with failures and interruptions visible at a glance.
+> 📣 Cleaner timelines with single-line tool and reasoning rows that auto-compact once the assistant replies, permanent intermediate assistant text, and unified subagent + shell tracking with live output and Stop in the robot capsule.
 
-### Subagent calls
+### Compact timeline & activity compaction
 
-- Each call collapses into a compact summary. Consecutive calls share one in live chat and history, showing queued and running activity plus failures and interruptions.
-- Expand a group to inspect each call's status and details. Message timing and available child conversation navigation remain accessible.
-- Groups stay open while scrolling or loading older adjacent calls.
+- Tool calls, shell runs, and reasoning now render as clean single-line rows without heavy cards or redundant "Done" badges on clean success. Tap any row to inspect details or expand reasoning.
+- Intermediate assistant text stays visible permanently in both live chat and history, while only contiguous tool/shell/reasoning stretches auto-compact into one expandable summary line as soon as the next assistant reply arrives.
+
+### Unified subagent & shell capsule
+
+- The floating robot capsule now tracks both subagents and shell commands in its Active and Completed tabs, counting active subagents and running shells together and deduplicating timeline and live shell records.
+- Tap a live shell to inspect bounded, credential-redacted paged output, track elapsed runtime, or stop running shells directly when supported by the server.
