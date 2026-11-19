@@ -14,6 +14,53 @@ String redactCredentialText(String text) {
   return result;
 }
 
+/// Redacts [full] with full surrounding context and returns the portion
+/// corresponding to UTF-16 code-unit range `[sliceStart, sliceEnd)`.
+///
+/// Any credential or multi-line private-key block that starts before
+/// [sliceStart] and crosses into the slice is excluded from the returned slice
+/// (never leaking its secret tail), and any match starting inside the slice and
+/// crossing [sliceEnd] is included as its redacted replacement.
+String redactCredentialSlice(String full, int sliceStart, int sliceEnd) {
+  var text = full;
+  var s = sliceStart.clamp(0, text.length);
+  var e = sliceEnd.clamp(s, text.length);
+  for (final rule in _rules) {
+    final matches = rule.pattern.allMatches(text);
+    if (matches.isEmpty) continue;
+    final out = StringBuffer();
+    var cursor = 0;
+    var nextS = s;
+    var nextE = e;
+    for (final m in matches) {
+      out.write(text.substring(cursor, m.start));
+      final rep = rule.replace(m);
+      out.write(rep);
+      final repEnd = out.length;
+      final delta = rep.length - (m.end - m.start);
+      if (m.end <= s) {
+        nextS += delta;
+      } else if (m.start < s) {
+        // Match crosses sliceStart: advance past the redacted replacement so
+        // the second half of a split secret or PEM block never leaks.
+        nextS = repEnd;
+      }
+      if (m.end <= e) {
+        nextE += delta;
+      } else if (m.start < e) {
+        // Match crosses sliceEnd: extend to cover the redacted replacement.
+        nextE = repEnd;
+      }
+      cursor = m.end;
+    }
+    out.write(text.substring(cursor));
+    text = out.toString();
+    s = nextS.clamp(0, text.length);
+    e = nextE.clamp(s, text.length);
+  }
+  return text.substring(s, e);
+}
+
 const credentialRedaction = '[redacted]';
 
 final class _Rule {

@@ -456,7 +456,10 @@ class _SessionLivePageState extends State<SessionLivePage>
               final canReadChild =
                   context.watch<SessionsController?>()?.sourceFor(c.session) !=
                   null;
-              final hasSubagents = subagentWork(state).isNotEmpty;
+              final hasCapsule = hasSessionCapsuleActivity(
+                state,
+                canObserveShells: c.shells?.canObserve ?? false,
+              );
               final chrome =
                   (c.summary.info.lineage.parent != null
                       ? returnToParentHeight(context)
@@ -504,7 +507,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                           models: c.selectionState.models,
                           agents: c.selectionState.agents,
                           child: SessionLiveTimeline(
-                            bottomEndOverlay: hasSubagents
+                            bottomEndOverlay: hasCapsule
                                 ? SessionSubagentCapsule(
                                     live: c,
                                     onOpen: _openRosterChild,

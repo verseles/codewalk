@@ -2537,4 +2537,21 @@ class V2LocalizationsZh extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$count 个运行中的子代理与终端命令';
+  }
+
+  @override
+  String get liveActivityEmpty => '此处暂无内容。';
+
+  @override
+  String get liveShellOutputEmpty => '暂无输出。';
+
+  @override
+  String get liveShellOutputUnavailable => '该命令输出已不可用。';
+
+  @override
+  String get liveShellLoadMore => '加载更多输出';
 }

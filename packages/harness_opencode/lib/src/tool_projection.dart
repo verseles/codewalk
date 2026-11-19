@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import 'item_ids.dart';
 import 'message_context.dart';
+import 'shell_observation.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
 import 'tool_metadata.dart';
@@ -166,9 +167,26 @@ SessionEvent? projectOpenCodeToolEvent(
   if (called || terminal) {
     executed = _boolean(data['executed']);
   }
+  final id = ItemId(
+    jsonEncode([current.ref.storageKey, messageId, 'tool', callId]),
+  );
+  TimelineItem? resident;
+  for (final item in current.timeline) {
+    if (item.id == id) {
+      resident = item;
+      break;
+    }
+  }
+  final isShellTool =
+      (resident is ToolCall ? resident.kind.known : _kind(name)) ==
+      ToolKind.shell;
   if (called) input = selectedInput(data['input']);
   if (success || (failed && data.containsKey('content'))) {
-    (output, outputOmitted, outputRedacted) = _content(data['content'], budget);
+    (output, outputOmitted, outputRedacted) = _content(
+      data['content'],
+      budget,
+      shellTool: isShellTool,
+    );
   }
   Map<String, Object?>? terminalMetadata;
   if (terminal && data.containsKey('metadata')) {
@@ -204,9 +222,6 @@ SessionEvent? projectOpenCodeToolEvent(
     );
   }
 
-  final id = ItemId(
-    jsonEncode([current.ref.storageKey, messageId, 'tool', callId]),
-  );
   final generation = jsonEncode([
     'live',
     current.ref.storageKey,
@@ -242,13 +257,6 @@ SessionEvent? projectOpenCodeToolEvent(
       }),
     ),
   );
-  TimelineItem? resident;
-  for (final item in current.timeline) {
-    if (item.id == id) {
-      resident = item;
-      break;
-    }
-  }
   if (resident != null && resident is! ToolCall) {
     _fail(OpenCodeToolProjectionFailure.itemKindMismatch);
   }
@@ -466,7 +474,11 @@ bool _settled(ToolCall item) => const {
   ItemStatus.interrupted,
 }.contains(item.status.known);
 
-(CanonicalValue, bool, bool) _content(Object? value, _SelectedBudget budget) {
+(CanonicalValue, bool, bool) _content(
+  Object? value,
+  _SelectedBudget budget, {
+  bool shellTool = false,
+}) {
   if (value is! List<Object?> || value.isEmpty) {
     _fail(OpenCodeToolProjectionFailure.malformed);
   }
@@ -479,7 +491,10 @@ bool _settled(ToolCall item) => const {
     final type = _text(part['type'], cap: _idLimit, nonempty: true);
     if (type == 'text') {
       final raw = _text(part['text'], cap: _textLimit);
-      final clean = redactCredentialText(raw);
+      final sanitized = shellTool
+          ? openCodeSanitizeShellToolOutputText(raw)
+          : raw;
+      final clean = redactCredentialText(sanitized);
       redacted = redacted || clean != raw;
       selected.add({'type': 'text', 'text': clean});
     } else if (type == 'file') {

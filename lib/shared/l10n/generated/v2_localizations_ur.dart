@@ -2708,4 +2708,21 @@ class V2LocalizationsUr extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$count فعال ذیلی ایجنٹس اور شیلز';
+  }
+
+  @override
+  String get liveActivityEmpty => 'یہاں کچھ نہیں ہے۔';
+
+  @override
+  String get liveShellOutputEmpty => 'ابھی تک کوئی آؤٹ پٹ نہیں ہے۔';
+
+  @override
+  String get liveShellOutputUnavailable => 'شیل آؤٹ پٹ اب دستیاب نہیں ہے۔';
+
+  @override
+  String get liveShellLoadMore => 'مزید آؤٹ پٹ لوڈ کریں';
 }

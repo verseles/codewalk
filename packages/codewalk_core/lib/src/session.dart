@@ -239,6 +239,7 @@ final class SessionSnapshot {
     this.pending,
     this.interactions,
     this.work,
+    this.shells,
     this.plan,
     this.usage,
     this.selection,
@@ -253,6 +254,7 @@ final class SessionSnapshot {
       pending?.boundary,
       interactions?.boundary,
       work?.boundary,
+      shells?.boundary,
       plan?.boundary,
       usage?.boundary,
       selection?.boundary,
@@ -279,6 +281,7 @@ final class SessionSnapshot {
   final SnapshotCollection<PendingInput>? pending;
   final SnapshotCollection<InteractionRequest>? interactions;
   final SnapshotCollection<WorkItem>? work;
+  final SnapshotCollection<ShellWork>? shells;
   final SnapshotValue<PlanSnapshot>? plan;
   final SnapshotCollection<UsageObservation>? usage;
   final SnapshotValue<Selection>? selection;

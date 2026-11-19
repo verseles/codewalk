@@ -14,6 +14,7 @@ import 'interaction_projection.dart';
 import 'revert_projection.dart';
 import 'session_projection.dart';
 import 'session_rules.dart';
+import 'shell_client.dart';
 import 'version_policy.dart';
 
 enum OpenCodeSessionReadFailure {
@@ -824,6 +825,10 @@ final class OpenCodeSessionReader {
     Iterable<SessionRef> children = const [],
     Iterable<SessionSummary>? childSummaries,
     Iterable<InteractionRequest> residentInteractions = const [],
+    bool observeShells = false,
+    Iterable<ShellWork> residentShells = const [],
+    Map<String, String> knownShellLocations = const {},
+    void Function(Map<String, String>)? onShellLocations,
   }) async {
     _checkOpen();
     final childRefs = children.toList();
@@ -1129,6 +1134,36 @@ final class OpenCodeSessionReader {
         OpenCodeSessionReadFailure.incompatibleResponse,
       );
     }
+    SnapshotCollection<ShellWork>? shellsSnapshot;
+    if (observeShells) {
+      final shellsStart = clock();
+      try {
+        final reconciled =
+            await OpenCodeShellClient(
+              transport,
+              harness: harness,
+              connectedVersion: sourceVersion,
+              deadline: deadline,
+            ).reconcileHydration(
+              session: ref,
+              directory: summary.info.project?.canonicalDirectory,
+              residentShells: residentShells,
+              knownLocations: knownShellLocations,
+              cancellation: cancellation,
+            );
+        onShellLocations?.call(reconciled.locations);
+        final shellsEnd = clock();
+        if (!shellsEnd.isBefore(shellsStart)) {
+          shellsSnapshot = SnapshotCollection(
+            values: reconciled.shells,
+            boundary: boundary('shell.list', shellsStart, shellsEnd),
+            complete: true,
+          );
+        }
+      } on OpenCodeSessionReadException catch (error) {
+        if (error.failure == OpenCodeSessionReadFailure.cancelled) rethrow;
+      }
+    }
     final more = page.nextCursor;
     return SessionSnapshot(
       ref: ref,
@@ -1175,6 +1210,7 @@ final class OpenCodeSessionReader {
         boundary: boundary('session.active', activeStart, activeEnd),
         complete: true,
       ),
+      shells: shellsSnapshot,
       timeline: SnapshotCollection(
         values: [...page.items, ...admissions],
         boundary: boundary('session.message.list', historyStart, historyEnd),

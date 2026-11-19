@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{已思考} other{思考了 {count} 次}}",
   "activitySteps": "{count, plural, other{{count} 个步骤}}",
   "activityRunning": "{count, plural, other{{count} 项运行中}}",
-  "activityFailed": "{count, plural, other{{count} 项失败}}"
+  "activityFailed": "{count, plural, other{{count} 项失败}}",
+  "liveActivityCapsuleCount": "{count} 个运行中的子代理与终端命令",
+  "liveActivityEmpty": "此处暂无内容。",
+  "liveShellOutputEmpty": "暂无输出。",
+  "liveShellOutputUnavailable": "该命令输出已不可用。",
+  "liveShellLoadMore": "加载更多输出"
 }

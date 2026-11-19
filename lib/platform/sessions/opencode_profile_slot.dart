@@ -16,6 +16,8 @@ import '../storage/storage_support.dart';
 import 'opencode_catalog_lease.dart';
 import 'opencode_live_handle.dart';
 import 'opencode_selection_lane.dart';
+import 'opencode_shell_lane.dart';
+import 'opencode_slot_requests.dart';
 import 'opencode_turn_action_lane.dart';
 import 'prompt_outbox_store.dart';
 import 'turn_action_journal.dart';
@@ -78,12 +80,13 @@ final class OpenCodeProfileSlot {
   OpenCodeSessionRulesClient? _rules;
   OpenCodeSelectionLane? _selection;
   OpenCodeTurnActionLane? _turns;
-  final _stops = <SessionRef, _StopRequest>{};
+  OpenCodeShellLane? _shells;
+  final _stops = <SessionRef, OpenCodeStopRequest>{};
   final _older = <SessionRef, SessionOlderHistoryState>{};
-  final _unrestricted = <SessionRef, _UnrestrictedEntry>{};
+  final _unrestricted = <SessionRef, OpenCodeUnrestrictedEntry>{};
   // Keyed by session and native id: one slot multiplexes several sessions, and
   // ids are only unique inside their own session.
-  final _replyStates = <String, _ReplyRequest>{};
+  final _replyStates = <String, OpenCodeReplyRequest>{};
 
   /// One canonical fence for every reply, manual or automatic: a deliberate
   /// human decision wins and a repeated frame never answers the same
@@ -217,6 +220,23 @@ final class OpenCodeProfileSlot {
       harness: harness,
       sourceVersion: observed,
       observeChildren: true,
+      observeShells: true,
+    );
+    _shells = OpenCodeShellLane(
+      client: OpenCodeShellClient(
+        _transport,
+        harness: harness,
+        connectedVersion: observed,
+      ),
+      connectedVersion: observed,
+      commandIds: commandIds,
+      view: view,
+      publish: (ref) => _publish(ref, view(ref)),
+      refreshShells: (ref) =>
+          _owner?.refreshShells(ref) ?? Future<void>.value(),
+      dropLocalShell: (ref, shellId) => _owner?.dropShell(ref, shellId),
+      shellDirectory: (shellId) => _owner?.shellDirectoryOf(shellId),
+      currentBinding: () => _activeBinding,
     );
     _connection = connection;
     _owner = owner;
@@ -296,7 +316,7 @@ final class OpenCodeProfileSlot {
       );
     }
     if (supportsUnrestricted) {
-      _unrestricted.putIfAbsent(session, _UnrestrictedEntry.new);
+      _unrestricted.putIfAbsent(session, OpenCodeUnrestrictedEntry.new);
     }
     _selection?.open(session);
     _turns?.open(session);
@@ -353,6 +373,7 @@ final class OpenCodeProfileSlot {
   OpenCodeSelectionLane? get selection => _activeBinding ? _selection : null;
 
   OpenCodeTurnActionLane? get turns => _activeBinding ? _turns : null;
+  OpenCodeShellLane? get shells => _activeBinding ? _shells : null;
 
   SessionStopState stopState(SessionRef ref) =>
       _stops[ref]?.state ?? const SessionStopState();
@@ -375,7 +396,7 @@ final class OpenCodeProfileSlot {
     final client = _interrupt;
     if (client == null || !canStop(ref)) return;
     _stops[ref]?.dispose();
-    final request = _StopRequest();
+    final request = OpenCodeStopRequest();
     _stops[ref] = request;
     _publish(ref, view(ref));
     final attempt = await client.interrupt(
@@ -536,7 +557,10 @@ final class OpenCodeProfileSlot {
 
   /// The read a live period starts with; a failure is retried once in the
   /// same period, then waits for a reconnect or an explicit refresh.
-  Future<void> _automaticRead(SessionRef ref, _UnrestrictedEntry entry) async {
+  Future<void> _automaticRead(
+    SessionRef ref,
+    OpenCodeUnrestrictedEntry entry,
+  ) async {
     await refreshUnrestricted(ref);
     if (!_currentUnrestricted(ref, entry) || entry.retried) return;
     if (entry.state.phase != SessionUnrestrictedPhase.unavailable) return;
@@ -551,7 +575,7 @@ final class OpenCodeProfileSlot {
 
   Future<OpenCodeSessionRules?> _readRules(
     SessionRef ref,
-    _UnrestrictedEntry entry,
+    OpenCodeUnrestrictedEntry entry,
   ) async {
     try {
       return await _reader.readSessionRules(
@@ -565,7 +589,7 @@ final class OpenCodeProfileSlot {
 
   void _setUnrestricted(
     SessionRef ref,
-    _UnrestrictedEntry entry,
+    OpenCodeUnrestrictedEntry entry,
     SessionUnrestrictedState state,
   ) {
     entry.state = state;
@@ -579,7 +603,7 @@ final class OpenCodeProfileSlot {
   /// continues, even once the same binding is confirmed again.
   void suspendUnrestricted() => _unrestrictedEpoch++;
 
-  bool _currentUnrestricted(SessionRef ref, _UnrestrictedEntry entry) =>
+  bool _currentUnrestricted(SessionRef ref, OpenCodeUnrestrictedEntry entry) =>
       _activeBinding &&
       identical(_unrestricted[ref], entry) &&
       entry.epoch == _unrestrictedEpoch;
@@ -590,7 +614,7 @@ final class OpenCodeProfileSlot {
   /// receipt, unconfirmed unless it was refused.
   void _stopUnrestricted(
     SessionRef ref,
-    _UnrestrictedEntry entry, {
+    OpenCodeUnrestrictedEntry entry, {
     bool write = false,
     CommandReceipt? receipt,
   }) {
@@ -621,7 +645,7 @@ final class OpenCodeProfileSlot {
   /// known "in effect" so an active rule is never hidden by a failed read.
   Future<void> _settleUnrestricted(
     SessionRef ref,
-    _UnrestrictedEntry entry,
+    OpenCodeUnrestrictedEntry entry,
     OpenCodeSessionRules? rules, {
     SessionUnrestrictedNotice notice = SessionUnrestrictedNotice.none,
     CommandReceipt? receipt,
@@ -692,7 +716,7 @@ final class OpenCodeProfileSlot {
             a.base == b.base &&
             a.owned == b.owned;
 
-  void _markUnrestrictedBusy(SessionRef ref, _UnrestrictedEntry entry) {
+  void _markUnrestrictedBusy(SessionRef ref, OpenCodeUnrestrictedEntry entry) {
     entry.epoch = _unrestrictedEpoch;
     final state = entry.state;
     _setUnrestricted(
@@ -1107,7 +1131,7 @@ final class OpenCodeProfileSlot {
   }) async {
     final key = _requestKey(request);
     _replyStates[key]?.dispose();
-    final reply = _ReplyRequest(ref);
+    final reply = OpenCodeReplyRequest(ref);
     _replyStates[key] = reply;
     answered.add(key);
     _publish(ref, view(ref));
@@ -1389,6 +1413,7 @@ final class OpenCodeProfileSlot {
       _unrestricted.remove(handle.session)?.dispose();
       _selection?.release(handle.session);
       _turns?.release(handle.session);
+      _shells?.release(handle.session);
       _replyStates.removeWhere((_, reply) {
         if (reply.session != handle.session) return false;
         reply.dispose();
@@ -1438,6 +1463,7 @@ final class OpenCodeProfileSlot {
     _unrestricted.clear();
     _selection?.close();
     _turns?.close();
+    _shells?.close();
     for (final reply in _replyStates.values) {
       reply.dispose();
     }
@@ -1453,47 +1479,5 @@ final class OpenCodeProfileSlot {
     _reader.dispose();
     _transport.close();
     _store.clear();
-  }
-}
-
-final class _StopRequest {
-  final cancellation = RequestCancellation();
-  bool inFlight = true;
-  bool settled = false;
-  Timer? timer;
-  SessionStopState state = const SessionStopState(
-    phase: SessionStopPhase.requesting,
-  );
-  void dispose() {
-    timer?.cancel();
-    cancellation.cancel();
-  }
-}
-
-final class _UnrestrictedEntry {
-  final cancellation = RequestCancellation();
-  bool needsRead = true;
-
-  /// The slot's epoch when the operation in flight started.
-  int epoch = 0;
-
-  /// The current live period already retried a failed automatic read.
-  bool retried = false;
-  SessionUnrestrictedState state = const SessionUnrestrictedState();
-  void dispose() => cancellation.cancel();
-}
-
-final class _ReplyRequest {
-  _ReplyRequest(this.session);
-  final SessionRef session;
-  final cancellation = RequestCancellation();
-  bool inFlight = true;
-  Timer? timer;
-  SessionPermissionReplyState state = const SessionPermissionReplyState(
-    phase: SessionPermissionReplyPhase.requesting,
-  );
-  void dispose() {
-    timer?.cancel();
-    cancellation.cancel();
   }
 }

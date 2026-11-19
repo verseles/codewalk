@@ -298,6 +298,7 @@ sealed class TimelineItem {
       output: item.output,
       shellStatus: item.shellStatus,
       outputText: item.outputText,
+      shellId: item.shellId,
     ),
     final Notice item => Notice(
       meta: meta,
@@ -523,6 +524,7 @@ final class ShellRun extends TimelineItem {
     this.output,
     this.shellStatus,
     this.outputText,
+    this.shellId,
   });
 
   final String command;
@@ -538,6 +540,10 @@ final class ShellRun extends TimelineItem {
   final OutputRef? output;
 
   final OpenValue<ShellStatus>? shellStatus;
+
+  /// Optional harness-neutral opaque shell process identifier for correlation
+  /// with [ShellWork] observations.
+  final String? shellId;
 
   /// A bounded, redacted prefix of the captured output; the adapter never
   /// stores more than its own bound here.

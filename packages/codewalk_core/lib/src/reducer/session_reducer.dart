@@ -73,6 +73,7 @@ final class SessionState {
       pending = immutableList(draft.pending),
       interactions = immutableList(draft.interactions.values),
       work = immutableList(draft.work),
+      shells = immutableList(draft.shells),
       usage = immutableList(draft.usage),
       diagnostics = immutableList(draft.diagnostics),
       nextHistoryCursor = draft.nextHistoryCursor,
@@ -90,7 +91,8 @@ final class SessionState {
       _hydrationPending = Set<SessionCollection>.unmodifiable(
         draft.hydrationPending,
       ),
-      _seen = immutableList(draft.seen);
+      _seen = immutableList(draft.seen),
+      _shellsListed = draft.shellsListed;
 
   final SessionRef ref;
   final ReducerLimits limits;
@@ -109,6 +111,7 @@ final class SessionState {
   final List<PendingInput> pending;
   final List<InteractionRequest> interactions;
   final List<WorkItem> work;
+  final List<ShellWork> shells;
   final List<UsageObservation> usage;
 
   /// Bounded unsupported observations, separate from assistant timeline text.
@@ -130,6 +133,7 @@ final class SessionState {
   final List<(ItemId, String)> _retiredGenerations;
   final Set<SessionCollection> _hydrationPending;
   final List<String> _seen;
+  final bool _shellsListed;
 
   /// Bounded bookkeeping counts for diagnostics and deterministic limit tests.
   int get retainedItemPositionCount => _itemPositions.length;
@@ -137,6 +141,10 @@ final class SessionState {
   int get retainedGenerationCount => _retiredGenerations.length;
   int get retainedInteractionPositionCount =>
       _interactionPositions.length + _interactionRemovals.length;
+
+  /// Whether an authoritative shell list snapshot or shell-list refresh has
+  /// been applied in the current hydration generation.
+  bool get shellsObserved => _shellsListed;
   int get retainedUsagePositionCount => _usagePositions.length;
 
   TimelineItem? item(ItemId id) {
@@ -165,6 +173,7 @@ SessionState beginHydration(
   final draft = _Draft(state);
   draft.hydrationGeneration = generation;
   draft.snapshotStarts.clear();
+  draft.shellsListed = false;
   if (!_sameStream(draft.lastPosition, readStart)) {
     draft.seen.clear();
     draft.lastPosition = readStart;
@@ -176,6 +185,31 @@ SessionState beginHydration(
   );
   draft.timeline = [for (final item in draft.timeline) _forgetEphemeral(item)];
   return draft.freeze();
+}
+
+/// Merges an incoming shell set with resident terminal observations without
+/// exceeding [maxObservations], preventing retained terminal history from
+/// tripping `residentCollectionLimit` on running-only snapshots or refreshes.
+List<ShellWork> mergeShellObservations(
+  Iterable<ShellWork> existing,
+  Iterable<ShellWork> incoming, {
+  required int maxObservations,
+}) {
+  final incomingList = incoming.toList(growable: false);
+  final incomingIds = {for (final item in incomingList) item.id};
+  final preserved = <ShellWork>[
+    for (final item in existing)
+      if (!item.isRunning &&
+          item.status.known != null &&
+          !incomingIds.contains(item.id))
+        item,
+  ];
+  final room = maxObservations - incomingList.length;
+  if (room <= 0) return incomingList;
+  final keptTerminal = preserved.length > room
+      ? preserved.sublist(preserved.length - room)
+      : preserved;
+  return [...keptTerminal, ...incomingList];
 }
 
 /// Lost connection changes confidence and exposes a missing stream prefix; it
@@ -291,6 +325,23 @@ Reduction reduce(SessionState state, SessionEvent event) {
         draft.refetch(SessionCollection.work, 'workScopeMismatch');
       } else if (draft.acceptField(SessionCollection.work, position)) {
         draft.work = draft.bound(items, SessionCollection.work);
+        draft.changed = true;
+      }
+    case ShellChanged(:final items):
+      if (items.any((item) => !draft.relatedShell(item))) {
+        draft.refetch(SessionCollection.shells, 'shellScopeMismatch');
+      } else if (draft.acceptField(SessionCollection.shells, position)) {
+        final trimmed = items.length > draft.limits.maxObservations
+            ? mergeShellObservations(
+                items.where((s) => !s.isRunning && s.status.known != null),
+                items.where((s) => s.isRunning || s.status.known == null),
+                maxObservations: draft.limits.maxObservations,
+              )
+            : items;
+        draft.shells = draft.bound(trimmed, SessionCollection.shells);
+        if (event.meta.source.nativeType == 'shell.list') {
+          draft.shellsListed = true;
+        }
         draft.changed = true;
       }
     case PlanChanged(:final plan):
@@ -415,6 +466,30 @@ Reduction hydrate(SessionState state, SessionSnapshot snapshot) {
       draft.refetch(SessionCollection.work, 'workSnapshotIncomplete');
     }
   }
+  final shells = snapshot.shells;
+  if (shells != null &&
+      draft.acceptSnapshot(SessionCollection.shells, shells.boundary)) {
+    if (shells.values.any((item) => !draft.relatedShell(item))) {
+      draft.refetch(SessionCollection.shells, 'shellScopeMismatch');
+      draft.acceptedSnapshots--;
+    } else if (draft.canReplace(shells.boundary, shells.complete)) {
+      draft.recordReadBarrier(SessionCollection.shells, shells.boundary);
+      // Running-only shell listings omit already-exited shells; preserve
+      // resident terminal observations within maxObservations so retained
+      // history cannot trip residentCollectionLimit.
+      final merged = mergeShellObservations(
+        draft.shells,
+        shells.values,
+        maxObservations: draft.limits.maxObservations,
+      );
+      draft.shells = draft.bound(merged, SessionCollection.shells);
+      draft.shellsListed = true;
+      draft.changed = true;
+    } else {
+      draft.acceptedSnapshots--;
+      draft.refetch(SessionCollection.shells, 'shellSnapshotIncomplete');
+    }
+  }
   final plan = snapshot.plan;
   if (plan != null &&
       draft.acceptSnapshot(SessionCollection.plan, plan.boundary)) {
@@ -481,6 +556,7 @@ final class _Draft {
         for (final request in state.interactions) request.identityKey: request,
       },
       work = List.of(state.work),
+      shells = List.of(state.shells),
       usage = List.of(state.usage),
       diagnostics = List.of(state.diagnostics),
       nextHistoryCursor = state.nextHistoryCursor,
@@ -496,7 +572,8 @@ final class _Draft {
       admissions = Set.of(state._admissions),
       retiredGenerations = List.of(state._retiredGenerations),
       hydrationPending = Set.of(state._hydrationPending),
-      seen = List.of(state._seen);
+      seen = List.of(state._seen),
+      shellsListed = state._shellsListed;
 
   final SessionRef ref;
   final ReducerLimits limits;
@@ -515,6 +592,7 @@ final class _Draft {
   List<PendingInput> pending = [];
   Map<String, InteractionRequest> interactions = {};
   List<WorkItem> work = [];
+  List<ShellWork> shells = [];
   List<UsageObservation> usage = [];
   List<UnknownEvent> diagnostics = [];
   HistoryCursor? nextHistoryCursor;
@@ -535,6 +613,7 @@ final class _Draft {
   bool timelineTruncated = false;
   int acceptedSnapshots = 0;
   Set<SessionCollection> hydrationPending = {};
+  bool shellsListed = false;
 
   SessionState freeze() => SessionState._(this);
   Reduction result() {
@@ -549,6 +628,8 @@ final class _Draft {
       'snapshotAuthorityUnknown',
       'workScopeMismatch',
       'workSnapshotIncomplete',
+      'shellScopeMismatch',
+      'shellSnapshotIncomplete',
       'itemSourceMismatch',
       'historyReadBeforeRemoval',
       'interactionScopeMismatch',
@@ -644,6 +725,11 @@ final class _Draft {
           item.parent == ref &&
           item.owner is SessionOwner &&
           (item.owner as SessionOwner).session == item.child);
+
+  bool relatedShell(ShellWork item) =>
+      item.owner is SessionOwner &&
+      (item.owner as SessionOwner).session == ref &&
+      (item.source == null || item.source!.harness == ref.harnessRef);
 
   void upsert(TimelineItem item, StreamPosition position) {
     if (beforeReadBarrier(SessionCollection.timeline, position)) return;

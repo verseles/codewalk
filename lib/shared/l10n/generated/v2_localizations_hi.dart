@@ -2713,4 +2713,21 @@ class V2LocalizationsHi extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$count सक्रिय उप-एजेंट और शेल';
+  }
+
+  @override
+  String get liveActivityEmpty => 'यहाँ कुछ नहीं है।';
+
+  @override
+  String get liveShellOutputEmpty => 'अभी कोई आउटपुट नहीं है।';
+
+  @override
+  String get liveShellOutputUnavailable => 'शेल आउटपुट अब उपलब्ध नहीं है।';
+
+  @override
+  String get liveShellLoadMore => 'और आउटपुट लोड करें';
 }

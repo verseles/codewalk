@@ -163,6 +163,8 @@ KEYS |= {
     "liveSubagentsTitle", "liveSubagentsActive", "liveSubagentsCompleted",
     "liveSubagentsCount", "liveSubagentsEmpty", "liveSubagentsUnknown",
     "liveSubagentsCancelled", "liveSubagentsRecent",
+    "liveActivityCapsuleCount", "liveActivityEmpty",
+    "liveShellOutputEmpty", "liveShellOutputUnavailable", "liveShellLoadMore",
     "toolKindShell", "toolKindRead", "toolKindEdit", "toolKindWrite",
     "toolKindSearch", "toolKindFetch", "toolKindWebSearch", "toolKindSkill",
     "toolKindQuestion", "toolKindTool",

@@ -2585,4 +2585,21 @@ class V2LocalizationsJa extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '実行中のサブエージェントとシェル: $count';
+  }
+
+  @override
+  String get liveActivityEmpty => 'ここには何もありません。';
+
+  @override
+  String get liveShellOutputEmpty => 'まだ出力はありません。';
+
+  @override
+  String get liveShellOutputUnavailable => 'シェルの出力は利用できなくなりました。';
+
+  @override
+  String get liveShellLoadMore => '出力をさらに読み込む';
 }

@@ -4,6 +4,7 @@ import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
+import 'package:codewalk/shared/sessions/session_shells.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
@@ -12,14 +13,17 @@ import 'package:harness_opencode/harness_opencode.dart';
 
 import 'fakes.dart';
 
-class LiveHandle implements SessionLiveHandle, SessionTurnActionSource {
-  LiveHandle(this.session, {this.outbox, this.turnActions});
+class LiveHandle
+    implements SessionLiveHandle, SessionTurnActionSource, SessionShellSource {
+  LiveHandle(this.session, {this.outbox, this.turnActions, this.shells});
   @override
   final SessionRef session;
   @override
   PromptOutbox? outbox;
   @override
   SessionTurnActionPort? turnActions;
+  @override
+  SessionShellPort? shells;
   bool stopAvailable = false;
   Future<SessionStopState> Function(CommandId)? stopAction;
   final stops = <CommandId>[];
@@ -456,6 +460,8 @@ SessionState liveState(
   List<InteractionRequest> interactions = const [],
   List<PendingInput> pending = const [],
   List<WorkItem> work = const [],
+  List<ShellWork> shells = const [],
+  bool shellsObserved = true,
   bool hasMore = false,
   String? cursor,
   Selection? selection,
@@ -488,6 +494,9 @@ SessionState liveState(
         boundary: _boundary(ref),
       ),
       work: SnapshotCollection(values: work, boundary: _boundary(ref)),
+      shells: shellsObserved
+          ? SnapshotCollection(values: shells, boundary: _boundary(ref))
+          : null,
       selection: selection == null
           ? null
           : SnapshotValue(value: selection, boundary: _boundary(ref)),

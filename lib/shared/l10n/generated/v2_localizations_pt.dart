@@ -2739,4 +2739,22 @@ class V2LocalizationsPt extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$count subagentes e shells ativos';
+  }
+
+  @override
+  String get liveActivityEmpty => 'Nada aqui.';
+
+  @override
+  String get liveShellOutputEmpty => 'Sem saída ainda.';
+
+  @override
+  String get liveShellOutputUnavailable =>
+      'A saída do shell não está mais disponível.';
+
+  @override
+  String get liveShellLoadMore => 'Carregar mais saída';
 }

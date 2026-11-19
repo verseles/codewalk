@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{विचार किया} other{{count} बार विचार किया}}",
   "activitySteps": "{count, plural, =1{1 चरण} other{{count} चरण}}",
   "activityRunning": "{count, plural, =1{1 चल रहा है} other{{count} चल रहे हैं}}",
-  "activityFailed": "{count, plural, =1{1 विफल} other{{count} विफल}}"
+  "activityFailed": "{count, plural, =1{1 विफल} other{{count} विफल}}",
+  "liveActivityCapsuleCount": "{count} सक्रिय उप-एजेंट और शेल",
+  "liveActivityEmpty": "यहाँ कुछ नहीं है।",
+  "liveShellOutputEmpty": "अभी कोई आउटपुट नहीं है।",
+  "liveShellOutputUnavailable": "शेल आउटपुट अब उपलब्ध नहीं है।",
+  "liveShellLoadMore": "और आउटपुट लोड करें"
 }

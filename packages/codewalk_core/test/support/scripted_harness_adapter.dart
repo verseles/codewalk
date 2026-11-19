@@ -568,6 +568,7 @@ final class ScriptedHarnessAdapter implements HarnessAdapter {
       SessionCollection.pending: snapshot.pending?.boundary,
       SessionCollection.interactions: snapshot.interactions?.boundary,
       SessionCollection.work: snapshot.work?.boundary,
+      SessionCollection.shells: snapshot.shells?.boundary,
       SessionCollection.plan: snapshot.plan?.boundary,
       SessionCollection.usage: snapshot.usage?.boundary,
       SessionCollection.selection: snapshot.selection?.boundary,
@@ -738,6 +739,8 @@ final class _ScriptedHandle implements SessionHandle {
   UndoFacet? get undo => null;
   @override
   WorkFacet? get work => null;
+  @override
+  ShellFacet? get shells => null;
   @override
   LifecycleFacet? get lifecycle => null;
   @override

@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{سوچا} other{{count} بار سوچا}}",
   "activitySteps": "{count, plural, =1{1 مرحلہ} other{{count} مراحل}}",
   "activityRunning": "{count, plural, =1{1 جاری ہے} other{{count} جاری ہیں}}",
-  "activityFailed": "{count, plural, =1{1 ناکام} other{{count} ناکام}}"
+  "activityFailed": "{count, plural, =1{1 ناکام} other{{count} ناکام}}",
+  "liveActivityCapsuleCount": "{count} فعال ذیلی ایجنٹس اور شیلز",
+  "liveActivityEmpty": "یہاں کچھ نہیں ہے۔",
+  "liveShellOutputEmpty": "ابھی تک کوئی آؤٹ پٹ نہیں ہے۔",
+  "liveShellOutputUnavailable": "شیل آؤٹ پٹ اب دستیاب نہیں ہے۔",
+  "liveShellLoadMore": "مزید آؤٹ پٹ لوڈ کریں"
 }

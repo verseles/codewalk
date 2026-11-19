@@ -179,6 +179,15 @@ final class WorkChanged extends SessionEvent {
   final List<WorkItem> items;
 }
 
+/// Level-set observation of harness-observed shells for one session, isolated
+/// from [WorkChanged] so subagent child snapshots and deletions never wipe it.
+final class ShellChanged extends SessionEvent {
+  ShellChanged({required super.meta, required Iterable<ShellWork> items})
+    : items = immutableList(items);
+
+  final List<ShellWork> items;
+}
+
 final class PlanChanged extends SessionEvent {
   const PlanChanged({required super.meta, required this.plan});
 

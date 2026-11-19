@@ -74,6 +74,7 @@ abstract interface class SessionHandle {
   QueueFacet? get queue;
   UndoFacet? get undo;
   WorkFacet? get work;
+  ShellFacet? get shells;
   LifecycleFacet? get lifecycle;
   Future<void> detach();
 }
@@ -119,6 +120,14 @@ abstract interface class WorkFacet {
     PromptDraft draft, {
     required CommandId id,
   });
+}
+
+/// Optional shell observation and termination facet for harnesses that expose
+/// session-associated shell processes (`shell.observe`, `shell.stop`).
+abstract interface class ShellFacet {
+  Future<List<ShellWork>> list();
+  Future<ShellOutputPage> output(String shellId, {int? cursor, int? limit});
+  Future<CommandReceipt> stop(String shellId, {required CommandId id});
 }
 
 final class ForkRequest {

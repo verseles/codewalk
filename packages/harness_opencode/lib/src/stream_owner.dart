@@ -10,6 +10,8 @@ import 'interaction_projection.dart';
 import 'session_projection.dart';
 import 'session_reader.dart';
 import 'session_rules.dart';
+import 'shell_client.dart';
+import 'shell_observation.dart';
 
 /// Readiness predicate for the event stream connection: the transport must be
 /// built with `connectedWhen: openCodeServerConnected`, so it holds every
@@ -108,7 +110,20 @@ final class _Watch {
 
   /// Frames kept until the first snapshot; a child frame names its child.
   final held = <(int, Map<String, Object?>, SessionRef?)>[];
+
+  /// Bounded side buffer for shell exit/delete frames arriving before the
+  /// first snapshot, isolated from [held] so foreign shell traffic can never
+  /// exhaust [maxHeldFrames] or degrade the session.
+  final heldShellTerminals = <(int, Map<String, Object?>, String)>[];
+  final mutatedShellIdsWhileRefreshing = <String>{};
+  bool shellsRetried = false;
+  bool shellsRefreshing = false;
+  bool shellsRefreshInvalidated = false;
+  RequestCancellation? shellsCancellation;
 }
+
+const _maxHeldShellTerminals = 64;
+const _maxTrackedShellLocations = 512;
 
 const _retryable = {
   OpenCodeSessionReadFailure.unavailable,
@@ -146,6 +161,7 @@ final class OpenCodeStreamOwner {
     this.maxRepairs = 3,
     this.maxHeldFrames = 256,
     this.observeChildren = false,
+    this.observeShells = false,
     this.maxChildren = 64,
   }) : _now = now ?? DateTime.now,
        _delay = delay ?? Future<void>.delayed,
@@ -173,6 +189,10 @@ final class OpenCodeStreamOwner {
   /// Children are never watched for this.
   final bool observeChildren;
 
+  /// Projects harness-observed shell processes (`/api/shell` + `shell.*` SSE)
+  /// into `SessionState.shells`, isolated from subagent `work`.
+  final bool observeShells;
+
   /// Children followed per watched parent; later ones are ignored.
   final int maxChildren;
   final String streamId;
@@ -184,6 +204,7 @@ final class OpenCodeStreamOwner {
   final _locationCatalogs = StreamController<String>.broadcast();
   final _watched = <SessionRef, _Watch>{};
   final _children = <SessionRef, Set<SessionRef>>{};
+  final _shellLocations = <String, String>{};
   StreamSubscription<SseRecoveryUpdate>? _subscription;
   ConnectionKind? _connectionKind;
   int? _generation;
@@ -217,6 +238,181 @@ final class OpenCodeStreamOwner {
   /// One coalesced re-read of [ref], for example after a reply was refused
   /// because someone else answered first.
   void refresh(SessionRef ref) => _repair(ref);
+
+  /// Adapter-private verified directory for [shellId], retained from its
+  /// `shell.created` frame or `listRunning` response for per-shell routing.
+  String? shellDirectoryOf(String shellId) => _shellLocations[shellId];
+
+  void _recordShellLocation(String shellId, String directory) {
+    _shellLocations.remove(shellId);
+    _shellLocations[shellId] = directory;
+    while (_shellLocations.length > _maxTrackedShellLocations) {
+      _shellLocations.remove(_shellLocations.keys.first);
+    }
+  }
+
+  void _recordShellLocations(Map<String, String> entries) {
+    for (final entry in entries.entries) {
+      _recordShellLocation(entry.key, entry.value);
+    }
+  }
+
+  /// One coalesced shell-only refresh of [ref]'s running/reconciled shells,
+  /// without re-hydrating timeline or sub-agent collections.
+  ///
+  /// Preserves any live shell lifecycle mutations (`shell.created`,
+  /// `shell.exited`, `shell.deleted`, or `dropShell`) that arrived while the
+  /// HTTP reconciliation was in flight so stale responses can never erase
+  /// newly created shells or resurrect stopped/deleted ones.
+  Future<void> refreshShells(SessionRef ref) async {
+    final generation = _generation;
+    final watch = _watched[ref];
+    if (!observeShells ||
+        _closed ||
+        generation == null ||
+        watch == null ||
+        !watch.ready ||
+        watch.stalled ||
+        watch.hydrating ||
+        watch.shellsRefreshing) {
+      return;
+    }
+    watch
+      ..shellsRefreshing = true
+      ..shellsRefreshInvalidated = false
+      ..mutatedShellIdsWhileRefreshing.clear();
+    final refreshStartSeq = _seq;
+    final cancellation = RequestCancellation();
+    watch.shellsCancellation = cancellation;
+    try {
+      final state = store.read(ref);
+      if (state == null) return;
+      final reconciled =
+          await OpenCodeShellClient(
+            reader.transport,
+            harness: harness,
+            connectedVersion: sourceVersion,
+            deadline: reader.deadline,
+          ).reconcileHydration(
+            session: ref,
+            directory: state.info?.project?.canonicalDirectory,
+            residentShells: state.shells,
+            knownLocations: Map.of(_shellLocations),
+            cancellation: cancellation,
+          );
+      if (!_current(ref, watch, generation) ||
+          watch.stalled ||
+          watch.hydrating ||
+          watch.shellsRefreshInvalidated) {
+        return;
+      }
+      final mutated = Set<String>.of(watch.mutatedShellIdsWhileRefreshing);
+      for (final entry in reconciled.locations.entries) {
+        if (!mutated.contains(entry.key)) {
+          _recordShellLocation(entry.key, entry.value);
+        }
+      }
+      final latest = store.read(ref);
+      if (latest == null) return;
+      final incoming = <ShellWork>[
+        for (final item in reconciled.shells)
+          if (!mutated.contains(item.id)) item,
+        for (final item in latest.shells)
+          if (mutated.contains(item.id)) item,
+      ];
+      final merged = mergeShellObservations(
+        latest.shells,
+        incoming,
+        maxObservations: latest.limits.maxObservations,
+      );
+      final result = store.apply(
+        ref,
+        ShellChanged(
+          meta: EventMeta(
+            owner: SessionOwner(ref),
+            position: _position(++_seq),
+            receivedAt: _now(),
+            source: SourceProvenance(
+              harness: harness,
+              version: sourceVersion,
+              nativeType: 'shell.list',
+              durability: const OpenValue.known(Durability.ephemeral),
+            ),
+          ),
+          items: merged,
+        ),
+      );
+      _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
+      _handle(ref, result.effects);
+      // Replay any shell.exited/deleted frames that arrived while refreshing
+      // for shell IDs newly discovered by this response.
+      if (watch.heldShellTerminals.isNotEmpty) {
+        final pending = List.of(watch.heldShellTerminals);
+        watch.heldShellTerminals.clear();
+        for (final (seq, value, shellId) in pending) {
+          if (!_current(ref, watch, generation) || watch.stalled) break;
+          if (seq <= refreshStartSeq) continue;
+          if (store.read(ref)?.shells.any((s) => s.id == shellId) ?? false) {
+            _apply(ref, value, ++_seq);
+            if (value['type'] == 'shell.deleted') {
+              _shellLocations.remove(shellId);
+            }
+          }
+        }
+      }
+    } on OpenCodeSessionReadException {
+      // Shell refresh is best-effort and never degrades the live session.
+    } finally {
+      if (identical(watch.shellsCancellation, cancellation)) {
+        watch.shellsCancellation = null;
+      }
+      watch
+        ..shellsRefreshing = false
+        ..heldShellTerminals.clear()
+        ..mutatedShellIdsWhileRefreshing.clear();
+    }
+  }
+
+  /// Drops [shellId] locally from [ref]'s resident shell set (e.g. after a
+  /// deliberate stop returned 404/204), guarded against disconnected or
+  /// hydrating watches so it never emits a null epoch or races a snapshot.
+  void dropShell(SessionRef ref, String shellId) {
+    if (_closed || _generation == null) return;
+    final watch = _watched[ref];
+    if (watch == null || watch.stalled) return;
+    _shellLocations.remove(shellId);
+    if (watch.shellsRefreshing) {
+      watch.mutatedShellIdsWhileRefreshing.add(shellId);
+    }
+    if (!watch.ready || watch.hydrating) {
+      watch.dirty = true;
+      return;
+    }
+    final state = store.read(ref);
+    if (state == null || !state.shells.any((s) => s.id == shellId)) return;
+    final result = store.apply(
+      ref,
+      ShellChanged(
+        meta: EventMeta(
+          owner: SessionOwner(ref),
+          position: _position(++_seq),
+          receivedAt: _now(),
+          source: SourceProvenance(
+            harness: harness,
+            version: sourceVersion,
+            nativeType: 'shell.deleted',
+            durability: const OpenValue.known(Durability.ephemeral),
+          ),
+        ),
+        items: [
+          for (final shell in state.shells)
+            if (shell.id != shellId) shell,
+        ],
+      ),
+    );
+    _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
+    _handle(ref, result.effects);
+  }
 
   /// The page size of hydration and of every older page: the history cursor
   /// encodes it, so a continuation must use the same one.
@@ -395,6 +591,7 @@ final class OpenCodeStreamOwner {
     _children.remove(ref);
     watch.cancellation?.cancel();
     watch.olderCancellation?.cancel();
+    watch.shellsCancellation?.cancel();
     store.close(ref);
   }
 
@@ -404,6 +601,7 @@ final class OpenCodeStreamOwner {
     for (final watch in _watched.values) {
       watch.cancellation?.cancel();
       watch.olderCancellation?.cancel();
+      watch.shellsCancellation?.cancel();
     }
     await _subscription?.cancel();
     await _updates.close();
@@ -511,6 +709,9 @@ final class OpenCodeStreamOwner {
     for (final watch in _watched.values) {
       watch.cancellation?.cancel();
       watch.olderCancellation?.cancel();
+      watch.shellsCancellation?.cancel();
+      watch.heldShellTerminals.clear();
+      watch.shellsRetried = false;
     }
     if (first == null || !openCodeServerConnected(first)) {
       _generation = null;
@@ -559,10 +760,13 @@ final class OpenCodeStreamOwner {
     final watch = _watched[ref];
     final generation = _generation;
     if (watch == null || generation == null || watch.hydrating) return;
-    watch.hydrating = true;
-    // A re-hydration replaces the window; an older page read before it
-    // would land on the new one.
-    watch.olderCancellation?.cancel();
+    watch
+      ..hydrating = true
+      ..shellsRefreshInvalidated = true
+      ..shellsCancellation?.cancel()
+      // A re-hydration replaces the window; an older page read before it
+      // would land on the new one.
+      ..olderCancellation?.cancel();
     try {
       for (var attempt = 1; ; attempt++) {
         final cancellation = RequestCancellation();
@@ -610,6 +814,10 @@ final class OpenCodeStreamOwner {
             children: followed,
             childSummaries: childSummaries,
             residentInteractions: store.read(ref)?.interactions ?? const [],
+            observeShells: observeShells,
+            residentShells: store.read(ref)?.shells ?? const [],
+            knownShellLocations: Map.of(_shellLocations),
+            onShellLocations: _recordShellLocations,
           );
           if (!_current(ref, watch, generation) || watch.stalled) return;
           final result = store.applySnapshot(ref, snapshot);
@@ -628,14 +836,43 @@ final class OpenCodeStreamOwner {
             ..stalled = false
             ..oldestCovered = snapshot.timeline?.values.firstOrNull?.id
             ..trimmed = false;
+          if (snapshot.shells != null) watch.shellsRetried = false;
           _noteTrim(ref, watch);
           final held = List.of(watch.held);
           watch.held.clear();
-          for (final (seq, value, child) in held) {
+          final heldTerminals = List.of(watch.heldShellTerminals);
+          watch.heldShellTerminals.clear();
+          // Replay both held queues in strict ascending seq order so shell
+          // exits/deletions interleaved with session frames are never dropped
+          // as out-of-order by the reducer.
+          var hIdx = 0;
+          var tIdx = 0;
+          while (hIdx < held.length || tIdx < heldTerminals.length) {
             if (!_current(ref, watch, generation)) return;
-            child == null
-                ? _apply(ref, value, seq)
-                : _applyChild(ref, child, value, seq);
+            final takeHeld =
+                tIdx >= heldTerminals.length ||
+                (hIdx < held.length && held[hIdx].$1 <= heldTerminals[tIdx].$1);
+            if (takeHeld) {
+              final (seq, value, child) = held[hIdx++];
+              child == null
+                  ? _apply(ref, value, seq)
+                  : _applyChild(ref, child, value, seq);
+            } else {
+              final (seq, value, shellId) = heldTerminals[tIdx++];
+              if (store.read(ref)?.shells.any((s) => s.id == shellId) ??
+                  false) {
+                _apply(ref, value, seq);
+                if (value['type'] == 'shell.deleted') {
+                  _shellLocations.remove(shellId);
+                }
+              }
+            }
+          }
+          if (observeShells &&
+              snapshot.shells == null &&
+              !watch.shellsRetried) {
+            watch.shellsRetried = true;
+            unawaited(_retryShellsOnce(ref, watch, generation));
           }
           final current = store.read(ref);
           if (current != null && followed.isNotEmpty) {
@@ -690,13 +927,25 @@ final class OpenCodeStreamOwner {
   bool _current(SessionRef ref, _Watch watch, int generation) =>
       !_closed && _generation == generation && identical(_watched[ref], watch);
 
+  Future<void> _retryShellsOnce(
+    SessionRef ref,
+    _Watch watch,
+    int generation,
+  ) async {
+    await _delay(const Duration(seconds: 1));
+    if (!_current(ref, watch, generation) || watch.stalled) return;
+    await refreshShells(ref);
+  }
+
   void _setAside(SessionRef ref, _Watch watch) {
     watch.cancellation?.cancel();
     watch.olderCancellation?.cancel();
+    watch.shellsCancellation?.cancel();
     watch
       ..ready = false
       ..stalled = true
-      ..held.clear();
+      ..held.clear()
+      ..heldShellTerminals.clear();
     final state = store.disconnected(ref);
     if (state != null) _emit(OpenCodeSessionUpdated(ref, state, const []));
     _emit(
@@ -713,6 +962,8 @@ final class OpenCodeStreamOwner {
     final watch = _watched.remove(ref);
     watch?.cancellation?.cancel();
     watch?.olderCancellation?.cancel();
+    watch?.shellsCancellation?.cancel();
+    watch?.heldShellTerminals.clear();
     store.close(ref);
     _emit(OpenCodeSessionEvicted(ref));
   }
@@ -748,6 +999,10 @@ final class OpenCodeStreamOwner {
     // drops still reaches the list.
     _emitCatalogChange(value['type']);
     _emitLocationCatalog(value);
+    if (observeShells && isOpenCodeShellLifecycleEvent(value['type'])) {
+      _routeShell(value, seq);
+      return;
+    }
     final data = value['data'];
     Object? session;
     if (data is Map<String, Object?>) {
@@ -775,6 +1030,59 @@ final class OpenCodeStreamOwner {
     final watch = _watched[ref];
     if (watch == null || watch.stalled) return;
     _hold(ref, watch, value, seq, null);
+  }
+
+  /// Routes OpenCode ephemeral `shell.*` events (which omit top-level
+  /// `data.sessionID`) to the matching watched session(s), validating IDs
+  /// upfront and isolating pre-hydration terminal events from [maxHeldFrames].
+  void _routeShell(Map<String, Object?> value, int seq) {
+    final type = value['type'];
+    final data = value['data'];
+    if (data is! Map<String, Object?>) return;
+    if (type == 'shell.created') {
+      final info = data['info'];
+      if (info is! Map<String, Object?>) return;
+      final String shellId;
+      try {
+        shellId = openCodeShellId(info['id']);
+      } on Object {
+        return;
+      }
+      final sessionId = openCodeShellInfoSessionId(info);
+      if (sessionId == null) return;
+      final ref = SessionRef(harness.host, harness.harness, sessionId);
+      final watch = _watched[ref];
+      if (watch == null || watch.stalled) return;
+      final dir = openCodeShellFrameDirectory(value);
+      if (dir != null) _recordShellLocation(shellId, dir);
+      _hold(ref, watch, value, seq, null);
+      return;
+    }
+    final String shellId;
+    try {
+      shellId = openCodeShellId(data['id']);
+    } on Object {
+      return;
+    }
+    for (final entry in _watched.entries) {
+      final watch = entry.value;
+      if (watch.stalled) continue;
+      if (!watch.ready) {
+        if (watch.heldShellTerminals.length >= _maxHeldShellTerminals) {
+          watch.heldShellTerminals.removeAt(0);
+        }
+        watch.heldShellTerminals.add((seq, value, shellId));
+      } else if (store.read(entry.key)?.shells.any((s) => s.id == shellId) ??
+          false) {
+        _apply(entry.key, value, seq);
+        if (type == 'shell.deleted') _shellLocations.remove(shellId);
+      } else if (watch.shellsRefreshing) {
+        if (watch.heldShellTerminals.length >= _maxHeldShellTerminals) {
+          watch.heldShellTerminals.removeAt(0);
+        }
+        watch.heldShellTerminals.add((seq, value, shellId));
+      }
+    }
   }
 
   void _hold(
@@ -949,6 +1257,40 @@ final class OpenCodeStreamOwner {
       _repair(ref);
       return;
     }
+    if (observeShells && isOpenCodeShellLifecycleEvent(type)) {
+      final ShellChanged? shellEvent;
+      try {
+        shellEvent = projectOpenCodeShellLifecycleEvent(
+          value,
+          state,
+          sourceVersion: sourceVersion,
+          position: _position(seq),
+          receivedAt: _now(),
+        );
+      } on Object {
+        _repair(ref);
+        return;
+      }
+      if (shellEvent == null) return;
+      final watch = _watched[ref];
+      if (watch != null && watch.shellsRefreshing) {
+        final data = value['data'];
+        if (data is Map<String, Object?>) {
+          final rawId = type == 'shell.created'
+              ? (data['info'] is Map<String, Object?>
+                    ? (data['info']! as Map<String, Object?>)['id']
+                    : null)
+              : data['id'];
+          if (rawId is String && rawId.isNotEmpty) {
+            watch.mutatedShellIdsWhileRefreshing.add(rawId);
+          }
+        }
+      }
+      final result = store.apply(ref, shellEvent);
+      _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
+      _handle(ref, result.effects);
+      return;
+    }
     final List<SessionEvent> events;
     try {
       events = projectOpenCodeEvent(
@@ -1003,8 +1345,12 @@ final class OpenCodeStreamOwner {
       watch
         ..cancellation?.cancel()
         ..olderCancellation?.cancel()
+        ..shellsCancellation?.cancel()
+        ..shellsRefreshInvalidated = true
         ..ready = false
-        ..held.clear();
+        ..held.clear()
+        ..heldShellTerminals.clear()
+        ..mutatedShellIdsWhileRefreshing.clear();
       final state = store.disconnected(ref);
       if (state != null) _emit(OpenCodeSessionUpdated(ref, state, const []));
     }

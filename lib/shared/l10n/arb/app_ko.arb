@@ -1987,5 +1987,10 @@
   "activityThought": "{count, plural, =1{생각함} other{생각 {count}회}}",
   "activitySteps": "{count, plural, other{{count}단계}}",
   "activityRunning": "{count, plural, other{{count}개 실행 중}}",
-  "activityFailed": "{count, plural, other{{count}개 실패}}"
+  "activityFailed": "{count, plural, other{{count}개 실패}}",
+  "liveActivityCapsuleCount": "실행 중인 하위 에이전트 및 셸 {count}개",
+  "liveActivityEmpty": "여기에 항목이 없습니다.",
+  "liveShellOutputEmpty": "아직 출력이 없습니다.",
+  "liveShellOutputUnavailable": "셸 출력을 더 이상 사용할 수 없습니다.",
+  "liveShellLoadMore": "출력 더 불러오기"
 }

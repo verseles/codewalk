@@ -2709,4 +2709,21 @@ class V2LocalizationsBn extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$countটি সক্রিয় সাব-এজেন্ট ও শেল';
+  }
+
+  @override
+  String get liveActivityEmpty => 'এখানে কিছু নেই।';
+
+  @override
+  String get liveShellOutputEmpty => 'এখনো কোনো আউটপুট নেই।';
+
+  @override
+  String get liveShellOutputUnavailable => 'শেল আউটপুট আর উপলব্ধ নয়।';
+
+  @override
+  String get liveShellLoadMore => 'আরও আউটপুট লোড করুন';
 }

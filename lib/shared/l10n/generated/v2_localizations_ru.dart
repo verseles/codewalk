@@ -2733,4 +2733,21 @@ class V2LocalizationsRu extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return 'Активных субагентов и оболочек: $count';
+  }
+
+  @override
+  String get liveActivityEmpty => 'Здесь пусто.';
+
+  @override
+  String get liveShellOutputEmpty => 'Вывода пока нет.';
+
+  @override
+  String get liveShellOutputUnavailable => 'Вывод оболочки больше недоступен.';
+
+  @override
+  String get liveShellLoadMore => 'Загрузить ещё';
 }

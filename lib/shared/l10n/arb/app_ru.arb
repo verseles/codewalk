@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{Размышление} other{Размышлений: {count}}}",
   "activitySteps": "{count, plural, =1{1 шаг} other{Шагов: {count}}}",
   "activityRunning": "{count, plural, =1{Выполняется: 1} other{Выполняется: {count}}}",
-  "activityFailed": "{count, plural, =1{Ошибка: 1} other{Ошибок: {count}}}"
+  "activityFailed": "{count, plural, =1{Ошибка: 1} other{Ошибок: {count}}}",
+  "liveActivityCapsuleCount": "Активных субагентов и оболочек: {count}",
+  "liveActivityEmpty": "Здесь пусто.",
+  "liveShellOutputEmpty": "Вывода пока нет.",
+  "liveShellOutputUnavailable": "Вывод оболочки больше недоступен.",
+  "liveShellLoadMore": "Загрузить ещё"
 }

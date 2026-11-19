@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{思考} other{{count}回の思考}}",
   "activitySteps": "{count, plural, other{{count}ステップ}}",
   "activityRunning": "{count, plural, other{{count}件実行中}}",
-  "activityFailed": "{count, plural, other{{count}件失敗}}"
+  "activityFailed": "{count, plural, other{{count}件失敗}}",
+  "liveActivityCapsuleCount": "実行中のサブエージェントとシェル: {count}",
+  "liveActivityEmpty": "ここには何もありません。",
+  "liveShellOutputEmpty": "まだ出力はありません。",
+  "liveShellOutputUnavailable": "シェルの出力は利用できなくなりました。",
+  "liveShellLoadMore": "出力をさらに読み込む"
 }

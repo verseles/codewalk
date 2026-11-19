@@ -7,6 +7,7 @@ import 'display_label.dart';
 import 'error_projection.dart';
 import 'item_ids.dart';
 import 'notice_text.dart';
+import 'shell_observation.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
 import 'tool_metadata.dart';
@@ -444,6 +445,7 @@ List<TimelineItem> projectOpenCodeHistory(
                   },
                 );
               }
+              final toolKind = openCodeToolKind(name);
               CanonicalValue? output;
               if (stateType == 'completed' ||
                   (stateType == 'error' && state.containsKey('content'))) {
@@ -460,7 +462,10 @@ List<TimelineItem> projectOpenCodeHistory(
                   );
                   if (kind == 'text') {
                     final raw = text(part['text'], charge: false);
-                    final clean = redactCredentialText(raw);
+                    final sanitized = toolKind == ToolKind.shell
+                        ? openCodeSanitizeShellToolOutputText(raw)
+                        : raw;
+                    final clean = redactCredentialText(sanitized);
                     if (clean != raw) extra['outputRedacted'] = true;
                     selected.add({'type': 'text', 'text': clean});
                   } else if (kind == 'file') {
@@ -476,7 +481,6 @@ List<TimelineItem> projectOpenCodeHistory(
                 }
                 output = manifest(selected);
               }
-              final toolKind = openCodeToolKind(name);
               ({bool present, SessionRef? child})? named;
               ToolRunFacts? runFacts;
               if (state['metadata'] is Map<String, Object?>) {
@@ -810,6 +814,7 @@ List<TimelineItem> projectOpenCodeHistory(
             output: outputRef,
             shellStatus: OpenValue.known(status),
             outputText: outputText,
+            shellId: shellId,
           ),
         );
       default:

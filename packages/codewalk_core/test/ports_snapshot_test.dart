@@ -203,6 +203,8 @@ final class _Handle extends _ReceiptProducer implements SessionHandle {
   @override
   WorkFacet? work;
   @override
+  ShellFacet? shells;
+  @override
   LifecycleFacet? lifecycle;
   int detachments = 0;
   @override

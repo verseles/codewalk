@@ -1948,5 +1948,10 @@
   "activityThought": "{count, plural, =1{فكّر} other{فكّر {count} مرات}}",
   "activitySteps": "{count, plural, =1{خطوة واحدة} other{{count} خطوات}}",
   "activityRunning": "{count, plural, =1{1 قيد التشغيل} other{{count} قيد التشغيل}}",
-  "activityFailed": "{count, plural, =1{فشل 1} other{فشل {count}}}"
+  "activityFailed": "{count, plural, =1{فشل 1} other{فشل {count}}}",
+  "liveActivityCapsuleCount": "{count} وكلاء فرعيون وأوامر نشطة",
+  "liveActivityEmpty": "لا يوجد شيء هنا.",
+  "liveShellOutputEmpty": "لا يوجد مخرجات بعد.",
+  "liveShellOutputUnavailable": "لم تعد مخرجات الطرفية متاحة.",
+  "liveShellLoadMore": "تحميل المزيد من المخرجات"
 }

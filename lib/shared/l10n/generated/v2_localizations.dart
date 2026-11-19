@@ -4753,6 +4753,36 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 failed} other{{count} failed}}'**
   String activityFailed(int count);
+
+  /// Tooltip for the unified sub-agent and shell capsule when shells are present
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active sub-agents and shells'**
+  String liveActivityCapsuleCount(int count);
+
+  /// Empty tab state in the unified sub-agent and shell capsule
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here.'**
+  String get liveActivityEmpty;
+
+  /// Empty state when a running shell has produced no output yet
+  ///
+  /// In en, this message translates to:
+  /// **'No output yet.'**
+  String get liveShellOutputEmpty;
+
+  /// Notice when a shell's captured output is no longer available (e.g. 404)
+  ///
+  /// In en, this message translates to:
+  /// **'Shell output is no longer available.'**
+  String get liveShellOutputUnavailable;
+
+  /// Button to load the next page of captured shell output
+  ///
+  /// In en, this message translates to:
+  /// **'Load more output'**
+  String get liveShellLoadMore;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

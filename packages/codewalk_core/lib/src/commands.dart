@@ -32,6 +32,9 @@ enum MutationOperation {
 
   /// Marks the observed idle transition of a session as viewed.
   markViewed,
+
+  /// Terminates a running harness-observed shell command.
+  shellStop,
   unknown,
 }
 

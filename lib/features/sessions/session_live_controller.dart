@@ -11,6 +11,7 @@ import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_selection.dart';
+import '../../shared/sessions/session_shells.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
@@ -362,6 +363,7 @@ class SessionLiveController extends ChangeNotifier
   SessionState? get state => view?.state;
   PromptOutbox? get outbox => _handle?.outbox;
   SessionTurnActionPort? get turnActions => _handle?.turnActions;
+  SessionShellPort? get shells => _handle?.shells;
   SessionStopState get stopState =>
       _handle?.stopState ?? const SessionStopState();
   bool get stopping => stopState.busy;

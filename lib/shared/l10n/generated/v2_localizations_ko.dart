@@ -2583,4 +2583,21 @@ class V2LocalizationsKo extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '실행 중인 하위 에이전트 및 셸 $count개';
+  }
+
+  @override
+  String get liveActivityEmpty => '여기에 항목이 없습니다.';
+
+  @override
+  String get liveShellOutputEmpty => '아직 출력이 없습니다.';
+
+  @override
+  String get liveShellOutputUnavailable => '셸 출력을 더 이상 사용할 수 없습니다.';
+
+  @override
+  String get liveShellLoadMore => '출력 더 불러오기';
 }

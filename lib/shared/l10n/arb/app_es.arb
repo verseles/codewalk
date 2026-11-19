@@ -1949,5 +1949,10 @@
   "activityThought": "{count, plural, =1{Pensó} other{Pensó {count} veces}}",
   "activitySteps": "{count, plural, =1{1 paso} other{{count} pasos}}",
   "activityRunning": "{count, plural, =1{1 en ejecución} other{{count} en ejecución}}",
-  "activityFailed": "{count, plural, =1{1 falló} other{{count} fallaron}}"
+  "activityFailed": "{count, plural, =1{1 falló} other{{count} fallaron}}",
+  "liveActivityCapsuleCount": "{count} subagentes y shells activos",
+  "liveActivityEmpty": "Nada aquí.",
+  "liveShellOutputEmpty": "Sin salida todavía.",
+  "liveShellOutputUnavailable": "La salida del shell ya no está disponible.",
+  "liveShellLoadMore": "Cargar más salida"
 }

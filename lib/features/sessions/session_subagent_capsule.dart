@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
@@ -8,7 +9,10 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
+import '../../shared/sessions/session_shells.dart';
 import 'session_live_controller.dart';
+import 'session_shell_output_sheet.dart';
+import 'session_tool_details_dialog.dart';
 
 /// A real canonical child row is the adapter's discovery evidence. Harnesses
 /// without child work produce no rows and get no fabricated management control.
@@ -52,6 +56,281 @@ bool subagentIsCompleted(WorkStatus status) =>
     status == WorkStatus.failed ||
     status == WorkStatus.cancelled;
 
+/// One deduplicated shell row for the unified capsule pop-in.
+///
+/// Merges live harness-observed [ShellWork] with its matching timeline twin
+/// (`ShellRun` or `ToolKind.shell` [ToolCall]) by canonical opaque `shellId`
+/// so a running shell appears in Active only and never duplicates into
+/// Completed.
+final class CapsuleShellEntry {
+  const CapsuleShellEntry({
+    required this.key,
+    required this.command,
+    required this.isRunning,
+    this.isUnconfirmed = false,
+    this.shellId,
+    this.shellWork,
+    this.timelineItem,
+    this.status,
+    this.exitCode,
+    this.exitToken,
+    this.startedAt,
+    this.completedAt,
+  });
+
+  final String key;
+  final String command;
+  final bool isRunning;
+
+  /// True when the shell outcome is unrecognized/unconfirmed and must remain
+  /// in Active with an unconfirmed status instead of being labeled Done.
+  final bool isUnconfirmed;
+  final String? shellId;
+  final ShellWork? shellWork;
+  final TimelineItem? timelineItem;
+  final ShellStatus? status;
+  final int? exitCode;
+  final String? exitToken;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+
+  /// Active tab includes both confirmed running shells and unconfirmed outcomes.
+  bool get isActiveTab => isRunning || isUnconfirmed;
+
+  bool get isFailed =>
+      status == ShellStatus.timeout ||
+      status == ShellStatus.killed ||
+      (exitCode != null && exitCode != 0) ||
+      (timelineItem != null && toolFailed(timelineItem!));
+}
+
+String? _timelineShellId(TimelineItem item) => switch (item) {
+  ToolCall(:final runFacts) => runFacts?.shellId,
+  ShellRun(:final shellId) => shellId,
+  _ => null,
+};
+
+String _timelineShellCommand(TimelineItem item) => switch (item) {
+  ShellRun(:final command) => redactCredentialText(command).trim(),
+  ToolCall(:final input) => () {
+    final map = input?.value;
+    if (map is Map && map['command'] is String) {
+      return redactCredentialText(map['command'] as String).trim();
+    }
+    return '';
+  }(),
+  _ => '',
+};
+
+/// Projects deduplicated shell entries for [state].
+///
+/// When [canObserveShells] is false, live [SessionState.shells] observations
+/// and active/running timeline shell rows are omitted so harnesses without
+/// `shell.observe` never surface live shell counts, timers, Stop controls, or
+/// output paging; completed timeline shell records remain inspectable via
+/// [showToolDetailsDialog].
+///
+/// When [canObserveShells] is true:
+/// - If [state.shellsObserved] is false (initial `/api/shell` failed or has not
+///   settled yet), settled background shell `ToolCall`s with running status
+///   remain unconfirmed in Active instead of being inferred as Done.
+/// - Once [state.shellsObserved] is true, settled background shell `ToolCall`s
+///   whose `shellId` is absent from [SessionState.shells] move to Completed
+///   without fabricating a clean Done outcome when no exit code is reported.
+/// - Any shell ID in [confirmedRemovedShellIds] (previously observed live and
+///   subsequently stopped/deleted) is immediately suppressed from Active even
+///   if its timeline `ToolCall` is momentarily still streaming.
+List<CapsuleShellEntry> sessionShellEntries(
+  SessionState? state, {
+  required bool canObserveShells,
+  Set<String> confirmedRemovedShellIds = const {},
+}) {
+  if (state == null) return const [];
+  final byKey = <String, CapsuleShellEntry>{};
+  final order = <String>[];
+  final liveById = canObserveShells
+      ? {for (final shell in state.shells) shell.id: shell}
+      : const <String, ShellWork>{};
+
+  void put(String key, CapsuleShellEntry entry) {
+    if (!byKey.containsKey(key)) order.add(key);
+    byKey[key] = entry;
+  }
+
+  // First scan timeline shells (oldest to newest; newer updates same key).
+  for (final item in state.timeline) {
+    final isShellRun = item is ShellRun && item.shellStatus != null;
+    final isShellTool = item is ToolCall && item.kind.known == ToolKind.shell;
+    if (!isShellRun && !isShellTool) continue;
+    final shellId = _timelineShellId(item);
+    final key = shellId ?? item.id.value;
+    final command = _timelineShellCommand(item);
+    final rawRunning = toolProgress(item) == ToolProgress.running;
+    final itemStreaming =
+        item.status.known == ItemStatus.pending ||
+        item.status.known == ItemStatus.streaming;
+    final unknownShellRun = item is ShellRun && item.shellStatus?.known == null;
+
+    if (!canObserveShells) {
+      // Without `shell.observe`, omit active/running timeline shell rows so
+      // they never inflate active counts or mimic live observation.
+      if (rawRunning || itemStreaming) continue;
+      final status = switch (item) {
+        ShellRun(:final shellStatus) => shellStatus?.known,
+        ToolCall(:final runFacts) =>
+          runFacts?.shellStatus?.known ?? ShellStatus.exited,
+        _ => ShellStatus.exited,
+      };
+      final exitCode = switch (item) {
+        ShellRun(:final exitCode) => exitCode,
+        ToolCall(:final runFacts) => runFacts?.exitCode,
+        _ => null,
+      };
+      final exitToken = switch (item) {
+        ShellRun(:final exitToken) => exitToken,
+        ToolCall(:final runFacts) => runFacts?.exitToken,
+        _ => null,
+      };
+      put(
+        key,
+        CapsuleShellEntry(
+          key: key,
+          command: command,
+          isRunning: false,
+          isUnconfirmed: unknownShellRun,
+          shellId: shellId,
+          timelineItem: item,
+          status: status == ShellStatus.running ? null : status,
+          exitCode: exitCode,
+          exitToken: exitToken,
+        ),
+      );
+      continue;
+    }
+
+    final liveTwin = shellId == null ? null : liveById[shellId];
+    final confirmedRemoved =
+        liveTwin == null &&
+        shellId != null &&
+        confirmedRemovedShellIds.contains(shellId);
+    final bool isRunning;
+    final bool isUnconfirmed;
+    if (liveTwin != null) {
+      isRunning = liveTwin.isRunning;
+      isUnconfirmed = liveTwin.status.known == null;
+    } else if (confirmedRemoved) {
+      isRunning = false;
+      isUnconfirmed = false;
+    } else if (unknownShellRun) {
+      isRunning = false;
+      isUnconfirmed = true;
+    } else if (rawRunning && itemStreaming) {
+      isRunning = true;
+      isUnconfirmed = false;
+    } else if (rawRunning && !state.shellsObserved) {
+      // Shell observation has not succeeded yet: keep settled running-flagged
+      // background shells unconfirmed rather than inferring completion.
+      isRunning = false;
+      isUnconfirmed = true;
+    } else {
+      isRunning = false;
+      isUnconfirmed = false;
+    }
+    final rawStatus = switch (item) {
+      ShellRun(:final shellStatus) => shellStatus?.known,
+      ToolCall(:final runFacts) =>
+        runFacts?.shellStatus?.known ??
+            (isRunning ? ShellStatus.running : ShellStatus.exited),
+      _ => null,
+    };
+    final effectiveStatus = !isRunning && rawStatus == ShellStatus.running
+        ? null
+        : rawStatus;
+    final exitCode = switch (item) {
+      ShellRun(:final exitCode) => exitCode,
+      ToolCall(:final runFacts) => runFacts?.exitCode,
+      _ => null,
+    };
+    final exitToken = switch (item) {
+      ShellRun(:final exitToken) => exitToken,
+      ToolCall(:final runFacts) => runFacts?.exitToken,
+      _ => null,
+    };
+    put(
+      key,
+      CapsuleShellEntry(
+        key: key,
+        command: command,
+        isRunning: isRunning,
+        isUnconfirmed: isUnconfirmed,
+        shellId: shellId,
+        timelineItem: item,
+        status: effectiveStatus,
+        exitCode: exitCode,
+        exitToken: exitToken,
+      ),
+    );
+  }
+
+  // Overlay live harness-observed shells only when `shell.observe` is active.
+  if (canObserveShells) {
+    for (final shell in state.shells) {
+      final prior = byKey[shell.id];
+      final twin = prior?.timelineItem;
+      final command = shell.command.trim().isNotEmpty
+          ? redactCredentialText(shell.command).trim()
+          : (twin != null ? _timelineShellCommand(twin) : '');
+      final knownStatus = shell.status.known;
+      put(
+        shell.id,
+        CapsuleShellEntry(
+          key: shell.id,
+          command: command,
+          isRunning: shell.isRunning,
+          isUnconfirmed: knownStatus == null,
+          shellId: shell.id,
+          shellWork: shell,
+          timelineItem: twin,
+          status: knownStatus,
+          exitCode: shell.exitCode ?? prior?.exitCode,
+          exitToken: shell.exitToken ?? prior?.exitToken,
+          startedAt: shell.startedAt,
+          completedAt: shell.completedAt,
+        ),
+      );
+    }
+  }
+
+  return [for (final key in order) byKey[key]!];
+}
+
+/// Whether the floating robot capsule should be displayed for [state].
+bool hasSessionCapsuleActivity(
+  SessionState? state, {
+  required bool canObserveShells,
+}) =>
+    subagentWork(state).isNotEmpty ||
+    sessionShellEntries(state, canObserveShells: canObserveShells).isNotEmpty;
+
+sealed class _PopinAction {
+  const _PopinAction();
+}
+
+final class _OpenChildAction extends _PopinAction {
+  const _OpenChildAction(this.child);
+  final SessionRef child;
+}
+
+final class _OpenToolDetailsAction extends _PopinAction {
+  const _OpenToolDetailsAction(this.item);
+  final TimelineItem item;
+}
+
+final class _OpenShellOutputAction extends _PopinAction {
+  const _OpenShellOutputAction(this.shell);
+  final ShellWork shell;
+}
+
 /// The capsule owns only its popup, never a second subscription or transcript.
 class SessionSubagentCapsule extends StatefulWidget {
   const SessionSubagentCapsule({
@@ -69,9 +348,29 @@ class SessionSubagentCapsule extends StatefulWidget {
 }
 
 class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
+  static const _maxTrackedShellIds = 256;
   final _anchor = GlobalKey();
   final _focus = FocusNode();
+  final _observedShellIds = <String>{};
+  SessionRef? _observedSession;
   bool _open = false;
+
+  Set<String> _confirmedRemovedFor(SessionState? state) {
+    final session = widget.live.session;
+    if (_observedSession != session) {
+      _observedSession = session;
+      _observedShellIds.clear();
+    }
+    if (state == null || !_canObserveShells) return const {};
+    final liveIds = {for (final shell in state.shells) shell.id};
+    for (final id in liveIds) {
+      _observedShellIds.add(id);
+      while (_observedShellIds.length > _maxTrackedShellIds) {
+        _observedShellIds.remove(_observedShellIds.first);
+      }
+    }
+    return _observedShellIds.difference(liveIds);
+  }
 
   @override
   void dispose() {
@@ -82,6 +381,8 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
   bool get _current =>
       widget.live.phase == SessionLivePhase.live &&
       widget.live.view?.stale != true;
+
+  bool get _canObserveShells => widget.live.shells?.canObserve ?? false;
 
   Future<void> _show() async {
     if (_open) return;
@@ -103,7 +404,7 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     );
     final l10n = context.v2L10n;
     try {
-      final child = await showGeneralDialog<SessionRef>(
+      final action = await showGeneralDialog<_PopinAction>(
         context: context,
         barrierDismissible: true,
         barrierLabel: l10n.chatClose,
@@ -147,7 +448,9 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
                 final panel = _SubagentPopin(
                   live: widget.live,
                   parent: parent,
-                  onOpen: (ref) => Navigator.of(dialogContext).pop(ref),
+                  confirmedRemovedFor: _confirmedRemovedFor,
+                  onAction: (selected) =>
+                      Navigator.of(dialogContext).pop(selected),
                 );
                 return themes.wrap(
                   Stack(
@@ -192,10 +495,15 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
             ),
       );
       if (!mounted || widget.live.session != parent) return;
-      if (child != null) {
-        widget.onOpen(child);
-      } else {
-        _focus.requestFocus();
+      switch (action) {
+        case _OpenChildAction(:final child):
+          widget.onOpen(child);
+        case _OpenToolDetailsAction(:final item):
+          await showToolDetailsDialog(context, item);
+        case _OpenShellOutputAction(:final shell):
+          await showShellOutputDialog(context, live: widget.live, shell: shell);
+        case null:
+          _focus.requestFocus();
       }
     } finally {
       _open = false;
@@ -208,23 +516,37 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     builder: (context, _) {
       final state = widget.live.state;
       final children = subagentWork(state);
-      if (state == null || children.isEmpty) return const SizedBox.shrink();
-      final count = children
+      final shells = sessionShellEntries(
+        state,
+        canObserveShells: _canObserveShells,
+        confirmedRemovedShellIds: _confirmedRemovedFor(state),
+      );
+      if (state == null || (children.isEmpty && shells.isEmpty)) {
+        return const SizedBox.shrink();
+      }
+      final activeSubagents = children
           .where(
             (work) => subagentIsActive(
               subagentStatus(work, state, current: _current),
             ),
           )
           .length;
+      final activeShells = _current
+          ? shells.where((shell) => shell.isRunning).length
+          : 0;
+      final count = activeSubagents + activeShells;
       final l10n = context.v2L10n;
       final colors = Theme.of(context).colorScheme;
+      final tooltip = shells.isEmpty
+          ? l10n.liveSubagentsCount(count)
+          : l10n.liveActivityCapsuleCount(count);
       return SizedBox(
         height: SessionSubagentCapsule.height,
         child: Align(
           alignment: AlignmentDirectional.centerEnd,
           child: Tooltip(
             key: _anchor,
-            message: l10n.liveSubagentsCount(count),
+            message: tooltip,
             child: FilledButton.tonal(
               key: const ValueKey('subagent-capsule'),
               focusNode: _focus,
@@ -259,26 +581,170 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
   );
 }
 
-class _SubagentPopin extends StatelessWidget {
+class _SubagentPopin extends StatefulWidget {
   const _SubagentPopin({
     required this.live,
     required this.parent,
-    required this.onOpen,
+    required this.confirmedRemovedFor,
+    required this.onAction,
   });
 
   final SessionLiveController live;
   final SessionRef parent;
-  final ValueChanged<SessionRef> onOpen;
+  final Set<String> Function(SessionState?) confirmedRemovedFor;
+  final ValueChanged<_PopinAction> onAction;
+
+  @override
+  State<_SubagentPopin> createState() => _SubagentPopinState();
+}
+
+class _SubagentPopinState extends State<_SubagentPopin> {
+  Timer? _elapsedTimer;
+  SessionShellStopOutcome? _stopOutcome;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.live.addListener(_syncTimer);
+    _syncTimer();
+  }
+
+  @override
+  void dispose() {
+    widget.live.removeListener(_syncTimer);
+    _elapsedTimer?.cancel();
+    _elapsedTimer = null;
+    super.dispose();
+  }
+
+  bool get _canObserveShells => widget.live.shells?.canObserve ?? false;
+
+  bool _hasTimedRunningShell() {
+    if (!_canObserveShells ||
+        widget.live.session != widget.parent ||
+        widget.live.phase != SessionLivePhase.live ||
+        widget.live.view?.stale == true) {
+      return false;
+    }
+    final state = widget.live.state;
+    if (state == null) return false;
+    return state.shells.any(
+      (shell) => shell.isRunning && shell.startedAt != null,
+    );
+  }
+
+  void _syncTimer() {
+    final needsTimer = _hasTimedRunningShell();
+    if (needsTimer && _elapsedTimer == null) {
+      _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted) return;
+        if (!_hasTimedRunningShell()) {
+          _elapsedTimer?.cancel();
+          _elapsedTimer = null;
+          return;
+        }
+        setState(() {});
+      });
+    } else if (!needsTimer && _elapsedTimer != null) {
+      _elapsedTimer?.cancel();
+      _elapsedTimer = null;
+    }
+  }
+
+  Future<void> _stopShell(String shellId) async {
+    final port = widget.live.shells;
+    if (port == null || !port.canStop) return;
+    final outcome = await port.stop(shellId);
+    if (!mounted) return;
+    setState(() {
+      _stopOutcome =
+          outcome == SessionShellStopOutcome.rejected ||
+              outcome == SessionShellStopOutcome.uncertain
+          ? outcome
+          : null;
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    final seconds = max(0, duration.inSeconds);
+    if (seconds < 60) return '${seconds}s';
+    final minutes = seconds ~/ 60;
+    final rem = seconds % 60;
+    return rem == 0 ? '${minutes}m' : '${minutes}m ${rem}s';
+  }
+
+  String _shellSubtitle(
+    CapsuleShellEntry entry,
+    V2Localizations l10n, {
+    required bool current,
+  }) {
+    if (entry.isUnconfirmed) return l10n.liveSubagentsUnknown;
+    if (entry.isRunning) {
+      if (!current) return l10n.liveSubagentsUnknown;
+      if (_canObserveShells && entry.startedAt != null) {
+        final elapsed = widget.live.clock().toUtc().difference(
+          entry.startedAt!.toUtc(),
+        );
+        if (!elapsed.isNegative) {
+          return '${l10n.toolRunning} · ${_formatDuration(elapsed)}';
+        }
+      }
+      return l10n.toolRunning;
+    }
+    final statusLabel = switch (entry.status) {
+      ShellStatus.timeout =>
+        entry.exitToken != null
+            ? '${l10n.liveShellTimedOut} · ${l10n.liveShellExitCode} ${entry.exitToken}'
+            : l10n.liveShellTimedOut,
+      ShellStatus.killed =>
+        entry.exitCode != null
+            ? '${l10n.liveShellKilled} · ${l10n.liveShellExitCode} ${entry.exitCode}'
+            : l10n.liveShellKilled,
+      ShellStatus.exited => switch ((entry.exitCode, entry.exitToken)) {
+        (0, _) => l10n.liveToolDone,
+        (final int code, _) =>
+          '${l10n.statusFailed} · ${l10n.liveShellExitCode} $code',
+        (null, final String token) => '${l10n.liveShellExitCode} $token',
+        _ => l10n.liveSubagentsUnknown,
+      },
+      ShellStatus.running => l10n.toolRunning,
+      null => l10n.liveSubagentsUnknown,
+    };
+    if (entry.startedAt != null &&
+        entry.completedAt != null &&
+        !entry.completedAt!.isBefore(entry.startedAt!)) {
+      return '$statusLabel · ${_formatDuration(entry.completedAt!.difference(entry.startedAt!))}';
+    }
+    return statusLabel;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final initial = subagentWork(live.state);
-    final state = live.state;
+    final state = widget.live.state;
+    final initialSubagents = subagentWork(state);
+    final initialShells = sessionShellEntries(
+      state,
+      canObserveShells: _canObserveShells,
+      confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
+    );
+    final isLive =
+        widget.live.phase == SessionLivePhase.live &&
+        widget.live.view?.stale != true &&
+        state != null;
+    final anyActiveSubagent =
+        isLive &&
+        initialSubagents.any(
+          (w) => !subagentIsCompleted(subagentStatus(w, state)),
+        );
+    final anyActiveShell = isLive && initialShells.any((s) => s.isActiveTab);
+    final anyCompleted =
+        initialSubagents.any(
+          (w) => isLive && subagentIsCompleted(subagentStatus(w, state)),
+        ) ||
+        initialShells.any((s) => !s.isActiveTab);
     final completedOnly =
-        live.phase == SessionLivePhase.live &&
-        live.view?.stale != true &&
-        state != null &&
-        initial.every((w) => subagentIsCompleted(subagentStatus(w, state)));
+        isLive && !anyActiveSubagent && !anyActiveShell && anyCompleted;
+
     return DefaultTabController(
       length: 2,
       initialIndex: completedOnly ? 1 : 0,
@@ -288,26 +754,42 @@ class _SubagentPopin extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         child: ListenableBuilder(
-          listenable: live,
+          listenable: widget.live,
           builder: (context, _) {
             final l10n = context.v2L10n;
             final current =
-                live.phase == SessionLivePhase.live &&
-                live.view?.stale != true &&
-                live.session == parent;
-            final state = live.state;
+                widget.live.phase == SessionLivePhase.live &&
+                widget.live.view?.stale != true &&
+                widget.live.session == widget.parent;
+            final state = widget.live.state;
             final rows = subagentWork(state);
-            final active = <(WorkItem, WorkStatus)>[];
-            final completed = <(WorkItem, WorkStatus)>[];
-            if (state != null && live.session == parent) {
+            final shells = sessionShellEntries(
+              state,
+              canObserveShells: _canObserveShells,
+              confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
+            );
+            final hasShells = shells.isNotEmpty;
+            final activeSubagents = <(WorkItem, WorkStatus)>[];
+            final completedSubagents = <(WorkItem, WorkStatus)>[];
+            final activeShells = <CapsuleShellEntry>[];
+            final completedShells = <CapsuleShellEntry>[];
+            if (state != null && widget.live.session == widget.parent) {
               for (final work in rows) {
                 final status = subagentStatus(work, state, current: current);
-                (subagentIsCompleted(status) ? completed : active).add((
-                  work,
-                  status,
-                ));
+                (subagentIsCompleted(status)
+                        ? completedSubagents
+                        : activeSubagents)
+                    .add((work, status));
+              }
+              for (final shell in shells) {
+                (shell.isActiveTab ? activeShells : completedShells).add(shell);
               }
             }
+            final stopFeedback = switch (_stopOutcome) {
+              SessionShellStopOutcome.rejected => l10n.liveStopFailed,
+              SessionShellStopOutcome.uncertain => l10n.liveStopUnconfirmed,
+              _ => null,
+            };
             return Column(
               children: [
                 TabBar(
@@ -318,11 +800,39 @@ class _SubagentPopin extends StatelessWidget {
                     Tab(text: l10n.liveSubagentsCompleted),
                   ],
                 ),
+                if (stopFeedback != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        stopFeedback,
+                        key: const ValueKey('shell-stop-feedback'),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ),
                 Expanded(
                   child: TabBarView(
                     children: [
-                      _list(context, active, l10n, enabled: current),
-                      _list(context, completed, l10n, enabled: current),
+                      _list(
+                        context,
+                        activeSubagents,
+                        activeShells,
+                        l10n,
+                        enabled: current,
+                        hasShells: hasShells,
+                      ),
+                      _list(
+                        context,
+                        completedSubagents,
+                        completedShells,
+                        l10n,
+                        enabled: current,
+                        hasShells: hasShells,
+                      ),
                     ],
                   ),
                 ),
@@ -336,46 +846,152 @@ class _SubagentPopin extends StatelessWidget {
 
   Widget _list(
     BuildContext context,
-    List<(WorkItem, WorkStatus)> rows,
+    List<(WorkItem, WorkStatus)> subagents,
+    List<CapsuleShellEntry> shells,
     V2Localizations l10n, {
     required bool enabled,
-  }) => rows.isEmpty
-      ? Center(
-          child: Text(l10n.liveSubagentsEmpty, textAlign: TextAlign.center),
-        )
-      : ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            for (final (work, status) in rows)
-              ListTile(
-                key: ValueKey('subagent-row-${work.child!.storageKey}'),
-                leading: const Icon(Symbols.smart_toy),
-                title: Text(
-                  (work.title?.trim().isNotEmpty ?? false)
-                      ? work.title!
-                      : l10n.livePermissionChildBadge,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(switch (status) {
-                  WorkStatus.running => l10n.liveRunning,
-                  WorkStatus.queued => l10n.composerQueued,
-                  WorkStatus.waiting => l10n.liveNeedsYou,
-                  WorkStatus.completed => l10n.liveSubagentsCompleted,
-                  WorkStatus.failed => l10n.statusFailed,
-                  WorkStatus.cancelled => l10n.liveSubagentsCancelled,
-                  WorkStatus.unknown => l10n.liveSubagentsUnknown,
-                }),
-                trailing: const Icon(Symbols.chevron_right),
-                onTap: enabled ? () => onOpen(work.child!) : null,
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                l10n.liveSubagentsRecent,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+    required bool hasShells,
+  }) {
+    if (subagents.isEmpty && shells.isEmpty) {
+      return Center(
+        child: Text(
+          hasShells ? l10n.liveActivityEmpty : l10n.liveSubagentsEmpty,
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final shellPort = widget.live.shells;
+    final canStopShells = enabled && (shellPort?.canStop ?? false);
+
+    return ListView(
+      padding: const EdgeInsets.all(8),
+      children: [
+        for (final (work, status) in subagents)
+          ListTile(
+            key: ValueKey('subagent-row-${work.child!.storageKey}'),
+            leading: const Icon(Symbols.smart_toy),
+            title: Text(
+              (work.title?.trim().isNotEmpty ?? false)
+                  ? work.title!
+                  : l10n.livePermissionChildBadge,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        );
+            subtitle: Text(switch (status) {
+              WorkStatus.running => l10n.liveRunning,
+              WorkStatus.queued => l10n.composerQueued,
+              WorkStatus.waiting => l10n.liveNeedsYou,
+              WorkStatus.completed => l10n.liveSubagentsCompleted,
+              WorkStatus.failed => l10n.statusFailed,
+              WorkStatus.cancelled => l10n.liveSubagentsCancelled,
+              WorkStatus.unknown => l10n.liveSubagentsUnknown,
+            }),
+            trailing: const Icon(Symbols.chevron_right),
+            onTap: enabled
+                ? () => widget.onAction(_OpenChildAction(work.child!))
+                : null,
+          ),
+        for (final shell in shells)
+          _shellTile(
+            shell,
+            l10n,
+            theme: theme,
+            scheme: scheme,
+            enabled: enabled,
+            canStopShells: canStopShells,
+            stopping:
+                shell.shellId != null &&
+                (shellPort?.isStopping(shell.shellId!) ?? false),
+            onStop: shell.shellId == null || shellPort == null
+                ? null
+                : () => unawaited(_stopShell(shell.shellId!)),
+          ),
+        if (subagents.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              l10n.liveSubagentsRecent,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _shellTile(
+    CapsuleShellEntry shell,
+    V2Localizations l10n, {
+    required ThemeData theme,
+    required ColorScheme scheme,
+    required bool enabled,
+    required bool canStopShells,
+    required bool stopping,
+    required VoidCallback? onStop,
+  }) {
+    final title = shell.command.isNotEmpty ? shell.command : l10n.toolKindShell;
+    final subtitle = _shellSubtitle(shell, l10n, current: enabled);
+    // Stop is offered only for owner-verified running live ShellWork rows.
+    final showStop =
+        shell.shellWork != null &&
+        shell.shellWork!.isRunning &&
+        canStopShells &&
+        shell.shellId != null;
+
+    // Live observed running shells open the live output dialog; completed
+    // timeline shells open tool details (falling back to live output dialog
+    // only for ephemeral completed shells without a timeline twin).
+    VoidCallback? onTap;
+    if (shell.isRunning &&
+        _canObserveShells &&
+        shell.shellWork != null &&
+        enabled) {
+      onTap = () => widget.onAction(_OpenShellOutputAction(shell.shellWork!));
+    } else if (shell.timelineItem != null &&
+        toolHasDetails(shell.timelineItem!)) {
+      onTap = () =>
+          widget.onAction(_OpenToolDetailsAction(shell.timelineItem!));
+    } else if (_canObserveShells && shell.shellWork != null && enabled) {
+      onTap = () => widget.onAction(_OpenShellOutputAction(shell.shellWork!));
+    }
+
+    return ListTile(
+      key: ValueKey('shell-row-${shell.key}'),
+      leading: Icon(
+        Symbols.terminal,
+        color: shell.isFailed
+            ? scheme.error
+            : shell.isRunning
+            ? scheme.primary
+            : scheme.onSurfaceVariant,
+      ),
+      title: Text(
+        title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+      ),
+      subtitle: Text(
+        subtitle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: shell.isFailed
+            ? theme.textTheme.bodySmall?.copyWith(color: scheme.error)
+            : null,
+      ),
+      trailing: showStop
+          ? IconButton(
+              key: ValueKey('shell-stop-${shell.shellId}'),
+              tooltip: stopping ? l10n.liveStopping : l10n.liveStop,
+              onPressed: stopping ? null : onStop,
+              icon: Icon(
+                Symbols.stop_circle,
+                color: stopping ? scheme.onSurfaceVariant : scheme.error,
+              ),
+            )
+          : (onTap != null ? const Icon(Symbols.chevron_right) : null),
+      onTap: onTap,
+    );
+  }
 }

@@ -3308,5 +3308,30 @@
         "type": "int"
       }
     }
+  },
+  "liveActivityCapsuleCount": "{count} active sub-agents and shells",
+  "@liveActivityCapsuleCount": {
+    "description": "Tooltip for the unified sub-agent and shell capsule when shells are present",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveActivityEmpty": "Nothing here.",
+  "@liveActivityEmpty": {
+    "description": "Empty tab state in the unified sub-agent and shell capsule"
+  },
+  "liveShellOutputEmpty": "No output yet.",
+  "@liveShellOutputEmpty": {
+    "description": "Empty state when a running shell has produced no output yet"
+  },
+  "liveShellOutputUnavailable": "Shell output is no longer available.",
+  "@liveShellOutputUnavailable": {
+    "description": "Notice when a shell's captured output is no longer available (e.g. 404)"
+  },
+  "liveShellLoadMore": "Load more output",
+  "@liveShellLoadMore": {
+    "description": "Button to load the next page of captured shell output"
   }
 }

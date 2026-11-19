@@ -2687,4 +2687,21 @@ class V2LocalizationsAr extends V2Localizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String liveActivityCapsuleCount(int count) {
+    return '$count وكلاء فرعيون وأوامر نشطة';
+  }
+
+  @override
+  String get liveActivityEmpty => 'لا يوجد شيء هنا.';
+
+  @override
+  String get liveShellOutputEmpty => 'لا يوجد مخرجات بعد.';
+
+  @override
+  String get liveShellOutputUnavailable => 'لم تعد مخرجات الطرفية متاحة.';
+
+  @override
+  String get liveShellLoadMore => 'تحميل المزيد من المخرجات';
 }

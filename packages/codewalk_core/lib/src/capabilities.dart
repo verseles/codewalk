@@ -3,6 +3,15 @@ import 'identity.dart';
 import 'ownership.dart';
 import 'values.dart';
 
+/// Canonical capability keys for harness-observed shell processes.
+abstract final class ShellCapabilities {
+  /// Listing running shells, streaming shell lifecycle updates, and paging output.
+  static const observe = 'shell.observe';
+
+  /// Terminating a running harness-observed shell command.
+  static const stop = 'shell.stop';
+}
+
 enum Support { native, host, extension, experimental, unavailable, unknown }
 
 final class Capability {

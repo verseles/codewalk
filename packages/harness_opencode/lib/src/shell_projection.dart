@@ -287,6 +287,7 @@ List<SessionEvent> projectOpenCodeShellEvent(
         output: outputRef,
         shellStatus: OpenValue.known(status),
         outputText: outputText,
+        shellId: shellId,
       ),
     ),
   ]);

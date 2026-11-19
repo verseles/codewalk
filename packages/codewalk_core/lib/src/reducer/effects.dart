@@ -5,6 +5,7 @@ enum SessionCollection {
   pending,
   interactions,
   work,
+  shells,
   plan,
   usage,
   execution,
