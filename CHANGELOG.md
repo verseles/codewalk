@@ -2,6 +2,26 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.0.0 - 2026-11-19
+
+> 📣 CodeWalk 2.0.0 is now stable for Android, Linux (x64 & ARM64), Windows (x64), and macOS (Apple Silicon) — built fresh for OpenCode 2 with compact timelines, subagent + shell capsule, workspace tabs, QR pairing, and verified in-app updates.
+
+### Built fresh for OpenCode 2
+
+- New CodeWalk 2 native architecture connecting directly to OpenCode 2 servers with multi-server profiles, QR code and deep-link pairing, live SSE event streaming, older-history paging, offline draft persistence, and automatic network reconnect.
+- Responsive Material 3 workspace across mobile and desktop with dynamic color, customizable palettes, browser-style session tabs with per-project icons, integrated desktop title bar on Linux, keyboard navigation, and model/agent/variant selection.
+
+### Compact timeline & unified activity capsule
+
+- Tool calls, shell runs, and reasoning render as clean single-line rows that auto-compact into one expandable summary once the assistant replies, while intermediate assistant text remains permanently visible in both live chat and history.
+- The floating robot capsule tracks both active and completed subagents and live shell commands together, with bounded, credential-redacted paged output and direct Stop support when the server allows it.
+
+### Installers, platforms & migration
+
+- Ships signed Android arm64 APK, Linux x64 and ARM64 bundles, Windows x64 zip (ARM64 runs x64 under emulation), and macOS Apple Silicon (ARM64) app bundle.
+- One-command desktop installers (`install.sh` and `install.ps1`) default to CodeWalk 2 stable, protect existing CodeWalk 1 installations until `CODEWALK_MIGRATION=accept-v2` is passed, keep `CODEWALK_CHANNEL=v1` to stay on CodeWalk 1, and graduate existing Linux beta installations to stable automatically.
+- In-app verified updates run on Android and managed Linux installations; Windows and macOS update through the desktop installer scripts. Unsigned Windows and ad-hoc signed macOS builds may prompt SmartScreen or Gatekeeper on first run.
+
 ## v1.265.0 - 2026-10-01
 
 > 📣 Fixed desktop code editor right-click crashes. Clipboard menus now open reliably while preserving mobile selection, read-only behavior, and light and dark themes.
