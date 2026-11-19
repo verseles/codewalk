@@ -783,6 +783,8 @@ final class _Draft {
           text: item.text + event.text,
           complete: false,
           prefixMissing: item.prefixMissing,
+          started: item.started,
+          completed: item.completed,
         ),
       ToolCall()
           when field == DeltaField.toolInput && item.input?.value is String =>
@@ -796,6 +798,7 @@ final class _Draft {
           child: item.child,
           childEvidence: item.childEvidence,
           error: item.error,
+          runFacts: item.runFacts,
         ),
       _ => null,
     };
@@ -1105,6 +1108,7 @@ TimelineItem _forgetEphemeral(TimelineItem item) => switch (item) {
       output: item.output,
       outputRef: item.outputRef,
       error: item.error,
+      runFacts: item.runFacts,
     ),
   _ => item,
 };
@@ -1121,6 +1125,8 @@ TimelineItem _markGap(TimelineItem item) => switch (item) {
     text: item.text,
     complete: item.complete,
     prefixMissing: true,
+    started: item.started,
+    completed: item.completed,
   ),
   _ => item,
 };

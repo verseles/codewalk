@@ -1,32 +1,48 @@
 import 'dart:math';
 
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import 'session_composer_status.dart';
+import 'session_message_info.dart';
 import 'session_timeline_projection.dart';
 
-/// The body of a reasoning row, like the retained reference's: a few lines
-/// in a bounded area, more on demand, and while the reasoning streams the
-/// area keeps its newest lines in view without moving the timeline.
+/// Compact single-line reasoning row (`Thinking…` / `Thinking: <heading>` while
+/// streaming; `Thought · <duration>` / `Thought` when complete) that expands
+/// its full Markdown body in place on tap without a secondary hidden cutoff.
 class SessionReasoningBody extends StatefulWidget {
   const SessionReasoningBody({
     super.key,
     required this.text,
     required this.complete,
     required this.child,
+    this.duration,
+    this.messageHeader,
+    this.autoExpand = false,
+    this.storageKey,
   });
 
-  /// The lines the area shows, closed and opened.
-  static const closedLines = 4;
-  static const openLines = 12;
-
-  /// The reasoning text; a change to it while it streams is followed.
+  /// The reasoning text; a change to it while it streams is followed when open.
   final String text;
 
   /// Whether the reasoning stopped streaming.
   final bool complete;
 
-  /// The rendered reasoning.
+  /// Part-scoped reasoning duration when reported by the harness.
+  final Duration? duration;
+
+  /// Message context when this row opens its message.
+  final MessageContext? messageHeader;
+
+  /// Automatically expands the body (for example, when highlighted by search).
+  final bool autoExpand;
+
+  /// Stable per-item identifier used to persist expanded state in [PageStorage].
+  final Object? storageKey;
+
+  /// The rendered reasoning Markdown.
   final Widget child;
 
   @override
@@ -36,23 +52,33 @@ class SessionReasoningBody extends StatefulWidget {
 class _SessionReasoningBodyState extends State<SessionReasoningBody> {
   final _scroll = ScrollController();
   bool _open = false;
-
-  /// Whether the reasoning was ever taller than the closed area, measured
-  /// on the rendered content; once it was, the control stays, so a reasoning
-  /// that grows past the limit never switches back and forth.
-  bool _overflowed = false;
+  bool _restored = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // A new width or text size can make the same text overflow.
-    _afterLayout();
+    if (!_restored) {
+      _restored = true;
+      final saved = widget.storageKey == null
+          ? null
+          : PageStorage.maybeOf(
+              context,
+            )?.readState(context, identifier: widget.storageKey);
+      _open = (saved is bool ? saved : false) || widget.autoExpand;
+      if (_open && saved != true) _saveOpen(true);
+    }
   }
 
   @override
   void didUpdateWidget(covariant SessionReasoningBody old) {
     super.didUpdateWidget(old);
-    if (old.text != widget.text) _afterLayout();
+    if (widget.autoExpand && !old.autoExpand && !_open) {
+      _open = true;
+      _saveOpen(true);
+    }
+    if (_open && old.text != widget.text && !widget.complete) {
+      _followBottom();
+    }
   }
 
   @override
@@ -61,86 +87,145 @@ class _SessionReasoningBodyState extends State<SessionReasoningBody> {
     super.dispose();
   }
 
-  /// Once the content is laid out: offers the control if it overflows, and
-  /// keeps the newest lines in view while the reasoning streams.
-  void _afterLayout() {
+  void _saveOpen(bool value) {
+    if (widget.storageKey != null) {
+      PageStorage.maybeOf(
+        context,
+      )?.writeState(context, value, identifier: widget.storageKey);
+    }
+  }
+
+  void _followBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scroll.hasClients) return;
       final end = _scroll.position.maxScrollExtent;
-      if (end > 0 && !_overflowed) setState(() => _overflowed = true);
-      if (end > 0 && !widget.complete) _scroll.jumpTo(end);
+      if (end > 0) _scroll.jumpTo(end);
     });
-  }
-
-  /// The area's content or size changed, whatever changed it: a narrower
-  /// pane, a rotation or a new text size. Only the area's own vertical
-  /// scroll counts, not a code block, formula or diagram scrolling sideways
-  /// inside it.
-  bool _onMetrics(ScrollMetricsNotification notification) {
-    if (notification.depth == 0 &&
-        notification.metrics.axis == Axis.vertical &&
-        notification.metrics.maxScrollExtent > 0 &&
-        !_overflowed) {
-      setState(() => _overflowed = true);
-    }
-    return false;
   }
 
   void _toggle() {
     SessionTimelineScope.maybeOf(context)?.onReaderToggle();
-    setState(() => _open = !_open);
-    _afterLayout();
+    final next = !_open;
+    setState(() => _open = next);
+    _saveOpen(next);
+    if (next && !widget.complete) _followBottom();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
-    final style = Theme.of(context).textTheme.bodyMedium;
-    final line =
-        MediaQuery.textScalerOf(context).scale(style?.fontSize ?? 14) *
-        (style?.height ?? 1.4);
-    final lines = _open
-        ? SessionReasoningBody.openLines
-        : SessionReasoningBody.closedLines;
-    final compact = MediaQuery.sizeOf(context).width < 600;
-    final area = NotificationListener<ScrollMetricsNotification>(
-      onNotification: _onMetrics,
-      child: SingleChildScrollView(
-        controller: _scroll,
-        primary: false,
-        child: widget.child,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final heading = widget.complete ? null : reasoningHeading(widget.text);
+    final elapsed = widget.complete
+        ? formatCompactDuration(widget.duration)
+        : null;
+    final label = !widget.complete
+        ? (heading != null
+              ? l10n.chatThinkingHeading(heading)
+              : l10n.chatStatusThinking)
+        : (elapsed != null
+              ? l10n.chatThoughtDuration(elapsed)
+              : l10n.chatThought);
+    final hasBody = widget.text.trim().isNotEmpty;
+
+    final headerBody = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 6, 8, 6),
+        child: Row(
+          children: [
+            Icon(
+              Symbols.psychology,
+              size: 16,
+              color: !widget.complete
+                  ? scheme.primary
+                  : scheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            if (hasBody) ...[
+              const SizedBox(width: 4),
+              Icon(
+                _open ? Symbols.expand_less : Symbols.expand_more,
+                size: 18,
+                color: scheme.onSurfaceVariant,
+              ),
+            ],
+          ],
+        ),
       ),
     );
+
+    final labeled = Semantics(
+      button: hasBody,
+      toggled: hasBody ? _open : null,
+      label: label,
+      excludeSemantics: true,
+      child: headerBody,
+    );
+
+    final headerTap = Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: hasBody
+          ? InkWell(
+              key: const ValueKey('reasoning-toggle'),
+              borderRadius: BorderRadius.circular(10),
+              onTap: _toggle,
+              child: labeled,
+            )
+          : labeled,
+    );
+
+    final header = widget.messageHeader == null
+        ? headerTap
+        : Row(
+            children: [
+              Expanded(child: headerTap),
+              MessageElapsedChip(message: widget.messageHeader!),
+            ],
+          );
+
+    if (!_open || !hasBody) return header;
+
+    final maxHeight = max(120.0, MediaQuery.sizeOf(context).height * 0.4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: max(1, lines) * line),
-          child: _open
-              ? Scrollbar(
+        header,
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 8),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: Scrollbar(
+                controller: _scroll,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
                   controller: _scroll,
-                  thumbVisibility: true,
-                  child: area,
-                )
-              : area,
-        ),
-        if (_overflowed)
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              key: const ValueKey('reasoning-toggle'),
-              onPressed: _toggle,
-              child: Text(
-                _open
-                    ? (compact
-                          ? l10n.chatMessageShowLessCompact
-                          : l10n.chatMessageShowLess)
-                    : (compact
-                          ? l10n.chatMessageShowMoreCompact
-                          : l10n.chatMessageShowMore),
+                  primary: false,
+                  padding: const EdgeInsets.all(12),
+                  child: widget.child,
+                ),
               ),
             ),
           ),
+        ),
       ],
     );
   }

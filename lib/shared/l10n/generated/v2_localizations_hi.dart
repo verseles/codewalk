@@ -2560,4 +2560,157 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get settingsBehaviorWindowCloseDescription =>
       'बंद करें CodeWalk से बाहर निकलता है। छोटा करें उसे टास्कबार में चलता रखता है।';
+
+  @override
+  String get toolKindShell => 'शेल';
+
+  @override
+  String get toolKindRead => 'पढ़ें';
+
+  @override
+  String get toolKindEdit => 'संपादित करें';
+
+  @override
+  String get toolKindWrite => 'लिखें';
+
+  @override
+  String get toolKindSearch => 'खोजें';
+
+  @override
+  String get toolKindFetch => 'प्राप्त करें';
+
+  @override
+  String get toolKindWebSearch => 'वेब खोज';
+
+  @override
+  String get toolKindSkill => 'स्किल';
+
+  @override
+  String get toolKindQuestion => 'प्रश्न';
+
+  @override
+  String get toolKindTool => 'टूल';
+
+  @override
+  String chatThinkingHeading(String heading) {
+    return 'सोच रहा है: $heading';
+  }
+
+  @override
+  String get chatThought => 'विचार किया';
+
+  @override
+  String chatThoughtDuration(String duration) {
+    return 'विचार किया · $duration';
+  }
+
+  @override
+  String activityEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count फ़ाइलें संपादित कीं',
+      one: '1 फ़ाइल संपादित की',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityExplored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count फ़ाइलें देखीं',
+      one: '1 फ़ाइल देखी',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySearched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count खोजें',
+      one: '1 खोज',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFetched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count पृष्ठ प्राप्त किए',
+      one: '1 पृष्ठ प्राप्त किया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityCommands(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count कमांड चलाए',
+      one: '1 कमांड चलाया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySkills(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count स्किल्स',
+      one: '1 स्किल',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityThought(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बार विचार किया',
+      one: 'विचार किया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count चरण',
+      one: '1 चरण',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityRunning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count चल रहे हैं',
+      one: '1 चल रहा है',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count विफल',
+      one: '1 विफल',
+    );
+    return '$_temp0';
+  }
 }

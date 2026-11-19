@@ -3,6 +3,7 @@ import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -115,7 +116,7 @@ ScrollPosition _sectionScroll(WidgetTester tester, String id, int index) =>
         .position;
 
 void main() {
-  testWidgets('a tool row is collapsed and shows its result on demand', (
+  testWidgets('a tool row is a compact single line and opens details on tap', (
     tester,
   ) async {
     final l10n = await _pump(tester, [
@@ -128,15 +129,27 @@ void main() {
         ],
       ),
     ]);
-    expect(find.text('read'), findsOneWidget);
-    expect(find.text(l10n.liveToolDone), findsOneWidget);
-    expect(find.textContaining('lib/main.dart'), findsNothing);
+    // Compact row shows localized kind + target on one line, no Done badge, no Show/Details button.
+    expect(find.text('${l10n.toolKindRead} · lib/main.dart'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tool-status-done')), findsNothing);
+    expect(find.text(l10n.liveToolDone), findsNothing);
+    expect(find.text(l10n.chatMessageShow), findsNothing);
+    expect(find.text(l10n.chatMessageDetails), findsNothing);
     expect(find.textContaining('line one'), findsNothing);
-    // Compact screens use the retained reference's short label.
-    expect(find.text(l10n.chatMessageShow), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('tool-toggle-done'))).height,
+      greaterThanOrEqualTo(48),
+    );
     await _open(tester, 'done');
+    expect(find.text(l10n.liveToolDone), findsOneWidget);
     expect(find.text(l10n.chatMessageToolInput), findsOneWidget);
-    expect(find.textContaining('lib/main.dart'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('tool-section-done-0')),
+        matching: find.textContaining('lib/main.dart'),
+      ),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('line one\nline two\n[image/png]'),
       findsOneWidget,
@@ -150,91 +163,147 @@ void main() {
     expect(find.byKey(const ValueKey('tool-details-done')), findsNothing);
   });
 
-  testWidgets('a wide screen offers the details by name', (tester) async {
-    final l10n = await _pump(tester, [
-      _tool('wide', ItemStatus.completed),
-    ], size: const Size(1280, 800));
-    final toggle = find.byKey(const ValueKey('tool-toggle-wide'));
-    expect(
-      find.descendant(of: toggle, matching: find.text(l10n.chatMessageDetails)),
-      findsOneWidget,
-    );
-    expect(find.text(l10n.chatMessageShow), findsNothing);
-  });
+  testWidgets(
+    'a wide screen keeps the same single-line row without a Details button',
+    (tester) async {
+      final l10n = await _pump(tester, [
+        _tool('wide', ItemStatus.completed),
+      ], size: const Size(1280, 800));
+      expect(find.byKey(const ValueKey('tool-toggle-wide')), findsOneWidget);
+      expect(find.text('${l10n.toolKindRead} · lib/main.dart'), findsOneWidget);
+      expect(find.text(l10n.chatMessageDetails), findsNothing);
+      expect(find.text(l10n.chatMessageShow), findsNothing);
+    },
+  );
 
-  testWidgets('a running tool and a failed tool show their state', (
-    tester,
-  ) async {
-    final l10n = await _pump(tester, [
-      _tool('run', ItemStatus.streaming, input: null),
-      _tool(
-        'fail',
-        ItemStatus.failed,
-        error: ErrorInfo(
-          kind: const OpenValue.known(ErrorKind.toolFailure),
-          rawType: 'unknown',
-          rawMessage: 'file not found',
+  testWidgets(
+    'queued, running, failed, interrupted, and background shell tools show status badges',
+    (tester) async {
+      final l10n = await _pump(tester, [
+        _tool('queued', ItemStatus.pending, input: null),
+        _tool('run', ItemStatus.streaming, input: null),
+        ToolCall(
+          meta: _meta('bg', ItemStatus.completed),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'npm run dev'}),
+          runFacts: ToolRunFacts(
+            shellId: 'sh_bg1',
+            background: true,
+            shellStatus: const OpenValue.known(ShellStatus.running),
+          ),
         ),
-      ),
-      _tool(
-        'stop',
-        ItemStatus.interrupted,
-        input: null,
-        error: ErrorInfo(
-          kind: const OpenValue.known(ErrorKind.toolFailure),
-          rawType: 'aborted',
-          rawMessage: '',
+        ToolCall(
+          meta: _meta('shok', ItemStatus.completed),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'echo hi'}),
+          runFacts: ToolRunFacts(
+            exitCode: 0,
+            shellStatus: const OpenValue.known(ShellStatus.exited),
+          ),
         ),
-      ),
-    ]);
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey('tool-status-run'))).data,
-      l10n.toolRunning,
-    );
-    // A running tool with nothing to show has no details control.
-    expect(find.byKey(const ValueKey('tool-toggle-run')), findsNothing);
-    expect(find.text(l10n.statusFailed), findsOneWidget);
-    expect(find.text(l10n.liveToolInterrupted), findsOneWidget);
-    await _open(tester, 'fail');
-    expect(find.text('file not found'), findsOneWidget);
-    await _close(tester);
-    await _open(tester, 'stop');
-    expect(find.text('aborted'), findsOneWidget);
-  });
+        ToolCall(
+          meta: _meta('shbad', ItemStatus.completed),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'false'}),
+          runFacts: ToolRunFacts(
+            exitCode: 1,
+            shellStatus: const OpenValue.known(ShellStatus.exited),
+          ),
+        ),
+        _tool(
+          'fail',
+          ItemStatus.failed,
+          error: ErrorInfo(
+            kind: const OpenValue.known(ErrorKind.toolFailure),
+            rawType: 'unknown',
+            rawMessage: 'file not found',
+          ),
+        ),
+        _tool(
+          'stop',
+          ItemStatus.interrupted,
+          input: null,
+          error: ErrorInfo(
+            kind: const OpenValue.known(ErrorKind.toolFailure),
+            rawType: 'aborted',
+            rawMessage: '',
+          ),
+        ),
+      ]);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('tool-status-queued')))
+            .data,
+        l10n.composerQueued,
+      );
+      expect(
+        tester.widget<Text>(find.byKey(const ValueKey('tool-status-run'))).data,
+        l10n.toolRunning,
+      );
+      // Background shell tool stays Running even if tool part completed.
+      expect(
+        tester.widget<Text>(find.byKey(const ValueKey('tool-status-bg'))).data,
+        l10n.toolRunning,
+      );
+      // Clean shell tool exit 0 shows no status badge.
+      expect(find.byKey(const ValueKey('tool-status-shok')), findsNothing);
+      // Nonzero shell exit shows failure badge.
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('tool-status-shbad')))
+            .data,
+        '${l10n.statusFailed} · ${l10n.liveShellExitCode} 1',
+      );
+      // A running tool with nothing to show has no details control.
+      expect(find.byKey(const ValueKey('tool-toggle-run')), findsNothing);
+      expect(find.text(l10n.statusFailed), findsOneWidget);
+      expect(find.text(l10n.liveToolInterrupted), findsOneWidget);
+      await _open(tester, 'fail');
+      expect(find.text('file not found'), findsOneWidget);
+      await _close(tester);
+      await _open(tester, 'stop');
+      expect(find.text('aborted'), findsOneWidget);
+    },
+  );
 
-  testWidgets('a shell row shows its command, outcome and output', (
-    tester,
-  ) async {
-    final l10n = await _pump(tester, [
-      _shell('ok', ShellStatus.exited, exit: 0, output: 'all passed'),
-      _shell('bad', ShellStatus.exited, exit: 2, output: 'error: x'),
-      _shell(
-        'slow',
-        ShellStatus.timeout,
-        token: 'NaN',
-        output: 'partial',
-        truncated: true,
-      ),
-      _shell('live', ShellStatus.running),
-    ]);
-    expect(find.text(r'$ make test'), findsNWidgets(4));
-    expect(find.text(l10n.liveToolDone), findsOneWidget);
-    expect(
-      find.text('${l10n.statusFailed} · ${l10n.liveShellExitCode} 2'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('${l10n.liveShellTimedOut} · ${l10n.liveShellExitCode} NaN'),
-      findsOneWidget,
-    );
-    expect(find.text(l10n.toolRunning), findsOneWidget);
-    expect(find.textContaining('all passed'), findsNothing);
-    await _open(tester, 'ok');
-    expect(find.text('all passed'), findsOneWidget);
-    await _close(tester);
-    await _open(tester, 'slow');
-    expect(find.text(l10n.liveShellOutputPartial), findsOneWidget);
-  });
+  testWidgets(
+    'a shell row shows its command, non-clean outcomes, and output on tap',
+    (tester) async {
+      final l10n = await _pump(tester, [
+        _shell('ok', ShellStatus.exited, exit: 0, output: 'all passed'),
+        _shell('bad', ShellStatus.exited, exit: 2, output: 'error: x'),
+        _shell(
+          'slow',
+          ShellStatus.timeout,
+          token: 'NaN',
+          output: 'partial',
+          truncated: true,
+        ),
+        _shell('live', ShellStatus.running),
+      ]);
+      expect(find.text('${l10n.toolKindShell} · make test'), findsNWidgets(4));
+      expect(find.byKey(const ValueKey('tool-status-ok')), findsNothing);
+      expect(
+        find.text('${l10n.statusFailed} · ${l10n.liveShellExitCode} 2'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('${l10n.liveShellTimedOut} · ${l10n.liveShellExitCode} NaN'),
+        findsOneWidget,
+      );
+      expect(find.text(l10n.toolRunning), findsOneWidget);
+      expect(find.textContaining('all passed'), findsNothing);
+      await _open(tester, 'ok');
+      expect(find.text(l10n.liveToolDone), findsOneWidget);
+      expect(find.text('all passed'), findsOneWidget);
+      await _close(tester);
+      await _open(tester, 'slow');
+      expect(find.text(l10n.liveShellOutputPartial), findsOneWidget);
+    },
+  );
 
   testWidgets('an exit without a code is not called a failure', (tester) async {
     final l10n = await _pump(tester, [
@@ -387,4 +456,72 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets(
+    'compact tool toggle preserves SemanticsAction.tap, failed/interrupted status overrides running runFacts, and 320px 2x with elapsed chip fits',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        final runningFacts = ToolRunFacts(
+          shellId: 'sh_stale',
+          background: true,
+          shellStatus: const OpenValue.known(ShellStatus.running),
+        );
+        final failedWithRunningFacts = ToolCall(
+          meta: ItemMeta(
+            id: const ItemId('fail-bg'),
+            generation: 'test',
+            status: const OpenValue.known(ItemStatus.failed),
+            source: SourceProvenance(
+              harness: const HarnessRef(HostId('h'), HarnessInstanceId('test')),
+              version: '2.0.22',
+              nativeType: 'test',
+            ),
+            message: MessageContext(
+              message: MessageRef('m1'),
+              created: DateTime.utc(2026, 11, 19, 1, 0, 0),
+              completed: DateTime.utc(2026, 11, 19, 1, 0, 5),
+            ),
+          ),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'make very-long-command'}),
+          runFacts: runningFacts,
+        );
+        final interruptedWithRunningFacts = ToolCall(
+          meta: _meta('stop-bg', ItemStatus.interrupted),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'sleep 99'}),
+          runFacts: runningFacts,
+        );
+
+        final l10n = await _pump(
+          tester,
+          [failedWithRunningFacts, interruptedWithRunningFacts],
+          size: const Size(320, 640),
+          scale: 2.0,
+        );
+        expect(tester.takeException(), isNull);
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('tool-status-fail-bg')))
+              .data,
+          l10n.statusFailed,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('tool-status-stop-bg')))
+              .data,
+          l10n.liveToolInterrupted,
+        );
+        final node = tester.getSemantics(
+          find.byKey(const ValueKey('tool-toggle-fail-bg')),
+        );
+        expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
 }

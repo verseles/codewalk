@@ -84,7 +84,10 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
               _quietTools.contains(rawName.toLowerCase()):
         continue;
       case ToolCall() || ShellRun():
-        return (kind: ComposerStatusKind.progress, label: toolTitle(item));
+        return (
+          kind: ComposerStatusKind.progress,
+          label: toolCompactSummary(item, l10n),
+        );
       case Reasoning(:final text) when text.trim().isNotEmpty:
         return (
           kind: ComposerStatusKind.reasoning,

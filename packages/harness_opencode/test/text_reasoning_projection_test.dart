@@ -405,6 +405,42 @@ void main() {
         failsWith(OpenCodeTextProjectionFailure.unsupportedVersion),
       );
     });
+
+    test(
+      'live reasoning started and ended project part timestamps and duration',
+      () {
+        var state = SessionState(historyRef);
+        final startFrame = textFrame('session.reasoning.started', id: 'evt_r1');
+        startFrame['created'] = 1760000000000;
+        final startEvent =
+            projectText(startFrame, current: state, seq: 1)! as ItemUpserted;
+        state = reduce(state, startEvent).state;
+        final streaming = state.timeline.single as Reasoning;
+        expect(
+          streaming.started,
+          DateTime.fromMillisecondsSinceEpoch(1760000000000, isUtc: true),
+        );
+        expect(streaming.completed, isNull);
+        expect(streaming.duration, isNull);
+
+        final endFrame = textFrame(
+          'session.reasoning.ended',
+          id: 'evt_r2',
+          content: 'done thinking',
+        );
+        endFrame['created'] = 1760000004500;
+        final endEvent =
+            projectText(endFrame, current: state, seq: 2)! as ItemUpserted;
+        state = reduce(state, endEvent).state;
+        final completed = state.timeline.single as Reasoning;
+        expect(completed.started, streaming.started);
+        expect(
+          completed.completed,
+          DateTime.fromMillisecondsSinceEpoch(1760000004500, isUtc: true),
+        );
+        expect(completed.duration, const Duration(milliseconds: 4500));
+      },
+    );
   });
 }
 

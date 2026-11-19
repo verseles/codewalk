@@ -192,10 +192,23 @@ SessionEvent? projectOpenCodeTextReasoningEvent(
     source: source,
     message: liveMessageContext(current, id, messageId),
   );
+  final DateTime? eventInstant = created >= 0 && created <= 8640000000000000
+      ? DateTime.fromMillisecondsSinceEpoch(created.floor(), isUtc: true)
+      : null;
+  final reasoningStarted = started
+      ? eventInstant
+      : (existing is Reasoning ? existing.started : null);
+  final reasoningCompleted = started ? null : eventInstant;
   return ItemUpserted(
     meta: meta,
     item: reasoning
-        ? Reasoning(meta: itemMeta, text: text, complete: !started)
+        ? Reasoning(
+            meta: itemMeta,
+            text: text,
+            complete: !started,
+            started: reasoningStarted,
+            completed: reasoningCompleted,
+          )
         : AssistantText(meta: itemMeta, text: text, complete: !started),
   );
 }

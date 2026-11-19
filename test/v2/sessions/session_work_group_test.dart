@@ -3,12 +3,15 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_live_scroll.dart';
 import 'package:codewalk/features/sessions/session_live_timeline.dart';
 import 'package:codewalk/features/sessions/session_reasoning_body.dart';
+import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
@@ -159,82 +162,82 @@ void main() {
     expect(row.left, greaterThanOrEqualTo(border.width));
   });
 
-  testWidgets('a finished turn shows its work as one header to open', (
-    tester,
-  ) async {
-    await _pump(tester, _turn('1'), settled: true);
-    final l10n = _l10n(tester);
-    final header = find.byKey(const ValueKey('work-group-work-r1'));
-    expect(header, findsOneWidget);
-    expect(find.text(l10n.chatWorkMessagesMultiple(2)), findsOneWidget);
-    // One quiet line (#490): no surface, no icon, small muted text.
-    expect(
-      find.descendant(of: header, matching: find.byType(DecoratedBox)),
-      findsNothing,
-    );
-    expect(
-      find.ancestor(
-        of: header,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is DecoratedBox &&
-              widget.decoration is BoxDecoration &&
-              ((widget.decoration as BoxDecoration).color != null ||
-                  (widget.decoration as BoxDecoration).border != null),
+  testWidgets(
+    'a turn with following answer compacts its activity into a descriptive summary',
+    (tester) async {
+      await _pump(tester, _turn('1'), settled: true);
+      final l10n = _l10n(tester);
+      final header = find.byKey(const ValueKey('work-group-work-r1'));
+      expect(header, findsOneWidget);
+      expect(
+        find.text('${l10n.activityExplored(2)} · ${l10n.activityThought(1)}'),
+        findsOneWidget,
+      );
+      expect(find.text('answer 1'), findsOneWidget);
+      expect(find.byKey(const ValueKey('tool-result-t11')), findsNothing);
+      final toggle = find.byKey(const ValueKey('work-group-toggle-work-r1'));
+      expect(tester.getSize(toggle).height, greaterThanOrEqualTo(48));
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      // Expanding shows compact single-line rows in place (reasoning stays 1-line until tapped).
+      expect(find.text(l10n.chatThought), findsOneWidget);
+      expect(find.byKey(const ValueKey('tool-result-t11')), findsOneWidget);
+      expect(find.byKey(const ValueKey('tool-result-t21')), findsOneWidget);
+      // Tapping the reasoning row reveals its full Markdown body.
+      await tester.tap(find.byKey(const ValueKey('reasoning-toggle')));
+      await tester.pumpAndSettle();
+      expect(find.text('thinking 1'), findsOneWidget);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('tool-result-t11')), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'activity compacts immediately when following answer streams and surfaces failures',
+    (tester) async {
+      final scroll = SessionLiveScroll();
+      addTearDown(scroll.dispose);
+      // Live work without following answer stays open as individual compact rows.
+      final liveWork = [
+        UserInput(
+          meta: _meta('u1'),
+          text: 'prompt 1',
+          delivery: const OpenValue.known(DeliveryState.delivered),
         ),
-      ),
-      findsNothing,
-    );
-    expect(
-      find.descendant(of: header, matching: find.byType(Icon)),
-      findsNothing,
-    );
-    final count = tester.widget<Text>(
-      find.text(l10n.chatWorkMessagesMultiple(2)),
-    );
-    final theme = Theme.of(tester.element(header));
-    expect(count.style?.fontSize, theme.textTheme.bodySmall?.fontSize);
-    expect(count.style?.color, theme.colorScheme.onSurfaceVariant);
-    expect(find.text('answer 1'), findsOneWidget);
-    expect(find.text('thinking 1'), findsNothing);
-    final toggle = find.byKey(const ValueKey('work-group-toggle-work-r1'));
-    await tester.tap(toggle);
-    await tester.pumpAndSettle();
-    expect(find.text('thinking 1'), findsOneWidget);
-    expect(find.byKey(const ValueKey('tool-run-tools-t11')), findsOneWidget);
-    expect(find.text(l10n.chatWorkHide), findsOneWidget);
-    await tester.tap(toggle);
-    await tester.pumpAndSettle();
-    expect(find.text('thinking 1'), findsNothing);
-  });
+        _tool('t1', 'm1', status: ItemStatus.failed),
+        _tool('t2', 'm1', status: ItemStatus.streaming),
+      ];
+      await _pump(tester, liveWork, settled: false, scroll: scroll);
+      expect(find.byKey(const ValueKey('work-group-work-t1')), findsNothing);
+      expect(find.byKey(const ValueKey('tool-result-t1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('tool-result-t2')), findsOneWidget);
 
-  testWidgets('the work collapses only once the turn finished (#273)', (
-    tester,
-  ) async {
-    final scroll = SessionLiveScroll();
-    addTearDown(scroll.dispose);
-    await _pump(
-      tester,
-      _turn('1', complete: false),
-      settled: false,
-      scroll: scroll,
-    );
-    expect(find.byKey(const ValueKey('work-group-work-r1')), findsNothing);
-    expect(find.text('thinking 1'), findsOneWidget);
-    // The session settles before the answer completes: still open.
-    await _pump(
-      tester,
-      _turn('1', complete: false),
-      settled: true,
-      scroll: scroll,
-    );
-    expect(find.byKey(const ValueKey('work-group-work-r1')), findsNothing);
-    await _pump(tester, _turn('1'), settled: true, scroll: scroll);
-    expect(find.byKey(const ValueKey('work-group-work-r1')), findsOneWidget);
-    expect(find.text('thinking 1'), findsNothing);
-  });
+      // As soon as the answer begins streaming, the stretch compacts and keeps failure visible.
+      await _pump(
+        tester,
+        [
+          liveWork[0],
+          liveWork[1],
+          _tool('t2', 'm1'),
+          AssistantText(
+            meta: _meta('a1', message: 'm2', status: ItemStatus.streaming),
+            text: 'Streaming answer...',
+            complete: false,
+          ),
+        ],
+        settled: false,
+        scroll: scroll,
+      );
+      final l10n = _l10n(tester);
+      expect(find.byKey(const ValueKey('work-group-work-t1')), findsOneWidget);
+      expect(find.text(l10n.activityExplored(2)), findsOneWidget);
+      expect(find.text('· ${l10n.activityFailed(1)}'), findsOneWidget);
+      expect(find.text('Streaming answer...'), findsOneWidget);
+    },
+  );
 
-  testWidgets('a settled group keeps its element through jitter (#274)', (
+  testWidgets('a collapsed stretch keeps its element through jitter (#274)', (
     tester,
   ) async {
     final scroll = SessionLiveScroll();
@@ -242,8 +245,6 @@ void main() {
     await _pump(tester, _turn('1'), settled: true, scroll: scroll);
     final header = find.byKey(const ValueKey('work-group-work-r1'));
     final element = tester.element(header);
-    // A status pulse that reports the session busy, a rehydration under a
-    // new generation, and the session settling again.
     for (final (items, settled) in [
       (_turn('1'), false),
       (_turn('1', generation: 'g2'), false),
@@ -252,11 +253,11 @@ void main() {
       await _pump(tester, items, settled: settled, scroll: scroll);
       expect(header, findsOneWidget);
       expect(identical(tester.element(header), element), isTrue);
-      expect(find.text('thinking 1'), findsNothing);
+      expect(find.byKey(const ValueKey('tool-result-t11')), findsNothing);
     }
   });
 
-  testWidgets('opening a work group above the answer does not jump', (
+  testWidgets('opening a stretch above the answer does not jump', (
     tester,
   ) async {
     final scroll = SessionLiveScroll();
@@ -272,253 +273,118 @@ void main() {
     final at = controller.position.pixels;
     await tester.tap(toggle);
     await tester.pumpAndSettle();
-    // The work opened under the header; the follow did not chase it.
     expect(controller.position.pixels, at);
     expect(controller.position.maxScrollExtent, greaterThan(at));
-    expect(find.text('thinking 5'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tool-result-t15')), findsOneWidget);
   });
 
-  testWidgets('a run of calls counts first and shows each on demand', (
-    tester,
-  ) async {
-    final items = [
-      UserInput(
-        meta: _meta('u'),
-        text: 'go',
-        delivery: const OpenValue.known(DeliveryState.delivered),
-      ),
-      _tool('t1', 'm1'),
-      _tool('t2', 'm1', status: ItemStatus.streaming, name: 'grep'),
-      _tool('t3', 'm1', status: ItemStatus.pending, name: 'bash'),
-    ];
-    await _pump(tester, items, settled: false);
-    final l10n = _l10n(tester);
-    const title = ValueKey('tool-run-title-tools-t1');
-    const progress = ValueKey('tool-run-progress-tools-t1');
-    String text(ValueKey<String> key) =>
-        tester.widget<Text>(find.byKey(key)).data!;
-    // Compact: count first, with what still runs.
-    expect(text(title), l10n.chatMessageToolChainCallsCompact(3));
-    expect(
-      text(progress),
-      '${l10n.chatMessageToolRunningCount(1)} • '
-      '${l10n.chatMessageToolQueuedCount(1)}',
-    );
-    expect(find.byKey(const ValueKey('tool-result-t1')), findsNothing);
-    final toggle = find.byKey(const ValueKey('tool-run-toggle-tools-t1'));
-    expect(
-      find.descendant(of: toggle, matching: find.text(l10n.chatMessageShow)),
-      findsOneWidget,
-    );
-    await tester.tap(toggle);
-    await tester.pumpAndSettle();
-    expect(text(title), l10n.chatMessageToolCallsTitle);
-    expect(
-      text(progress),
-      '${l10n.chatMessageToolChainCallsCompact(3)} • '
-      '${l10n.chatMessageToolDoneCount(1)} • '
-      '${l10n.chatMessageToolRunningCount(1)} • '
-      '${l10n.chatMessageToolQueuedCount(1)}',
-    );
-    expect(find.byKey(const ValueKey('tool-result-t1')), findsOneWidget);
-    // A call appended to the open run keeps the row and its state.
-    final row = tester.element(find.byKey(const ValueKey('tool-run-tools-t1')));
-    await _pump(tester, [
-      ...items,
-      _tool('t4', 'm1', status: ItemStatus.pending),
-    ], settled: false);
-    expect(
-      identical(
-        tester.element(find.byKey(const ValueKey('tool-run-tools-t1'))),
-        row,
-      ),
-      isTrue,
-    );
-    expect(find.byKey(const ValueKey('tool-result-t4')), findsOneWidget);
-  });
-
-  testWidgets('a message that opens in a run keeps its details', (
-    tester,
-  ) async {
-    await _pump(tester, [
-      _tool('t1', 'm1'),
-      _tool('t2', 'm1'),
-      _tool('t3', 'm2'),
-    ], settled: false);
-    final run = find.byKey(const ValueKey('tool-run-tools-t1'));
-    Finder chip(String message) => find.descendant(
-      of: run,
-      matching: find.byKey(ValueKey('message-elapsed-$message')),
-    );
-    // Closed: the first message's details, on the run.
-    expect(chip('m1'), findsOneWidget);
-    expect(chip('m2'), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('tool-run-toggle-tools-t1')));
-    await tester.pumpAndSettle();
-    // Open: each call that opens a message offers its own.
-    expect(chip('m1'), findsOneWidget);
-    expect(chip('m2'), findsOneWidget);
-    await tester.tap(chip('m2'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('message-info-m2')), findsOneWidget);
-  });
-
-  testWidgets('a wide run names its calls', (tester) async {
-    await _pump(
-      tester,
-      [
+  testWidgets(
+    'message elapsed chips stay reachable on collapsed and expanded stretches',
+    (tester) async {
+      await _pump(tester, [
         _tool('t1', 'm1'),
-        _tool('t2', 'm1', name: 'grep'),
-        _tool('t3', 'm1', name: 'bash'),
-      ],
-      settled: false,
-      size: const Size(1280, 800),
-    );
-    final l10n = _l10n(tester);
-    expect(
-      tester
-          .widget<Text>(find.byKey(const ValueKey('tool-run-title-tools-t1')))
-          .data,
-      'read • grep • ${l10n.chatMessageToolChainMore(1)}',
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('tool-run-toggle-tools-t1')),
-        matching: find.text(l10n.chatMessageDetails),
-      ),
-      findsOneWidget,
-    );
-  });
+        _tool('t2', 'm1'),
+        _tool('t3', 'm2'),
+        AssistantText(
+          meta: _meta('a1', message: 'm3'),
+          text: 'done',
+          complete: true,
+        ),
+      ], settled: true);
+      // Closed: first message's chip sits on the stretch header.
+      expect(find.byKey(const ValueKey('message-elapsed-m1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('message-elapsed-m2')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('work-group-toggle-work-t1')));
+      await tester.pumpAndSettle();
+      // Open: each row opening a message offers its own chip.
+      expect(find.byKey(const ValueKey('message-elapsed-m1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('message-elapsed-m2')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('message-elapsed-m2')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('message-info-m2')), findsOneWidget);
+    },
+  );
 
   for (final (name, size) in const [
     ('compact', Size(390, 844)),
     ('wide', Size(1280, 800)),
   ]) {
-    testWidgets('a long reasoning shows a few lines and more, $name', (
-      tester,
-    ) async {
-      final text = [for (var i = 0; i < 30; i++) 'step $i'].join('\n\n');
+    testWidgets(
+      'reasoning renders as a compact single line and expands on tap, $name',
+      (tester) async {
+        final start = DateTime.utc(2026, 11, 19, 1, 0, 0);
+        final end = DateTime.utc(2026, 11, 19, 1, 0, 3);
+        final text = [for (var i = 0; i < 12; i++) 'step $i'].join('\n\n');
+        await _pump(
+          tester,
+          [
+            Reasoning(
+              meta: _meta('r', message: 'm'),
+              text: text,
+              complete: true,
+              started: start,
+              completed: end,
+            ),
+          ],
+          settled: false,
+          size: size,
+        );
+        final l10n = _l10n(tester);
+        expect(find.text(l10n.chatThoughtDuration('3s')), findsOneWidget);
+        expect(find.text('step 0'), findsNothing);
+        final body = find.byType(SessionReasoningBody);
+        final closed = tester.getSize(body).height;
+        final toggle = find.byKey(const ValueKey('reasoning-toggle'));
+        expect(tester.getSize(toggle).height, greaterThanOrEqualTo(48));
+        await tester.tap(toggle);
+        await tester.pumpAndSettle();
+        expect(tester.getSize(body).height, greaterThan(closed));
+        expect(find.text('step 0'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets(
+    'streaming reasoning shows extracted heading or Thinking and auto-expands on search highlight',
+    (tester) async {
       await _pump(
         tester,
         [
           Reasoning(
-            meta: _meta('r', message: 'm'),
-            text: text,
-            complete: true,
+            meta: _meta('r1', message: 'm1', status: ItemStatus.streaming),
+            text: '**Checking parser**\nInspecting edge cases',
+            complete: false,
+          ),
+          Reasoning(
+            meta: _meta('r2', message: 'm2', status: ItemStatus.streaming),
+            text: 'Plain thoughts without heading',
+            complete: false,
           ),
         ],
         settled: false,
-        size: size,
+        highlight: const ItemId('r2'),
       );
       final l10n = _l10n(tester);
-      final compact = size.width < 600;
       expect(
-        find.text(
-          compact ? l10n.chatMessageThinking : l10n.chatMessageThinkingProcess,
-        ),
+        find.text(l10n.chatThinkingHeading('Checking parser')),
         findsOneWidget,
       );
-      final body = find.byType(SessionReasoningBody);
-      final closed = tester.getSize(body).height;
-      final toggle = find.byKey(const ValueKey('reasoning-toggle'));
-      expect(
-        find.descendant(
-          of: toggle,
-          matching: find.text(
-            compact
-                ? l10n.chatMessageShowMoreCompact
-                : l10n.chatMessageShowMore,
-          ),
-        ),
-        findsOneWidget,
-      );
-      await tester.tap(toggle);
-      await tester.pumpAndSettle();
-      expect(tester.getSize(body).height, greaterThan(closed));
-      expect(
-        find.descendant(
-          of: toggle,
-          matching: find.text(
-            compact
-                ? l10n.chatMessageShowLessCompact
-                : l10n.chatMessageShowLess,
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(tester.takeException(), isNull);
-    });
-  }
+      expect(find.text('Inspecting edge cases'), findsNothing);
+      expect(find.text(l10n.chatStatusThinking), findsOneWidget);
+      // Highlighted reasoning auto-expands so the search match is visible.
+      expect(find.text('Plain thoughts without heading'), findsOneWidget);
+    },
+  );
 
-  testWidgets('a reasoning that overflows after a resize offers more', (
-    tester,
-  ) async {
-    final text = ['A' * 40, 'B' * 40].join('\n\n');
-    final items = [
-      Reasoning(
-        meta: _meta('r', message: 'm'),
-        text: text,
-        complete: true,
-      ),
-    ];
-    final scroll = SessionLiveScroll();
-    addTearDown(scroll.dispose);
-    await _pump(
-      tester,
-      items,
-      settled: false,
-      size: const Size(1280, 800),
-      scroll: scroll,
-    );
-    expect(find.byKey(const ValueKey('reasoning-toggle')), findsNothing);
-    await _pump(tester, items, settled: false, scroll: scroll);
-    expect(find.byKey(const ValueKey('reasoning-toggle')), findsOneWidget);
-  });
-
-  for (final (name, height, offered) in const [
-    ('a short reasoning that scrolls sideways', 20.0, false),
-    ('a tall reasoning', 400.0, true),
-  ]) {
-    testWidgets('only the reasoning\'s own height offers more: $name', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: V2Localizations.localizationsDelegates,
-          supportedLocales: V2Localizations.supportedLocales,
-          home: Scaffold(
-            body: SessionReasoningBody(
-              text: 'x',
-              complete: true,
-              // Like a code block or a formula that scrolls sideways.
-              child: SizedBox(
-                height: height,
-                child: const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(width: 4000, height: 10),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey('reasoning-toggle')),
-        offered ? findsOneWidget : findsNothing,
-      );
-    });
-  }
-
-  testWidgets('a short reasoning shows in full', (tester) async {
+  testWidgets('empty reasoning has no toggle', (tester) async {
     await _pump(tester, [
       Reasoning(
         meta: _meta('r', message: 'm'),
-        text: 'brief',
+        text: '   ',
         complete: true,
       ),
     ], settled: false);
-    expect(find.text('brief'), findsOneWidget);
     expect(find.byKey(const ValueKey('reasoning-toggle')), findsNothing);
   });
 
@@ -624,7 +490,7 @@ void main() {
     // Nothing of the turn ended in a message, but its calls did.
     expect(find.textContaining('answer 1'), findsNothing);
     expect(find.textContaining('thinking 1'), findsNothing);
-    expect(find.byKey(const ValueKey('tool-run-tools-t11')), findsOne);
+    expect(find.byKey(const ValueKey('tool-result-t11')), findsOne);
     // Once the session settles, the whole turn shows and the placeholder
     // leaves.
     await _pump(
@@ -644,7 +510,7 @@ void main() {
       settled: false,
       showToolCalls: false,
     );
-    expect(find.byKey(const ValueKey('tool-run-tools-t11')), findsNothing);
+    expect(find.byKey(const ValueKey('tool-result-t11')), findsNothing);
     expect(find.textContaining('answer 1'), findsOneWidget);
   });
 
@@ -706,4 +572,255 @@ void main() {
       expect(scroll.unreadBelow, isTrue);
     });
   }
+
+  testWidgets(
+    'stretch and reasoning toggles expose SemanticsAction.tap and reasoning open state persists via PageStorage',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        final items = <TimelineItem>[
+          Reasoning(
+            meta: _meta('r_top', message: 'm0'),
+            text: 'persistent reasoning body',
+            complete: true,
+          ),
+          for (var n = 0; n < 12; n++) ..._turn('p$n'),
+        ];
+        final scroll = SessionLiveScroll();
+        addTearDown(scroll.dispose);
+        await _pump(tester, items, settled: true, scroll: scroll);
+
+        // Check SemanticsAction.tap on stretch toggle at bottom.
+        final stretchToggle = find.byKey(
+          const ValueKey('work-group-toggle-work-rp11'),
+        );
+        expect(
+          tester
+              .getSemantics(stretchToggle)
+              .getSemanticsData()
+              .hasAction(SemanticsAction.tap),
+          isTrue,
+        );
+
+        // Jump to top, expand r_top's stretch, then expand r_top itself,
+        // verifying tap semantics and PageStorage persistence across unmount.
+        scroll.controller.jumpTo(0);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('work-group-toggle-work-r_top')),
+        );
+        await tester.pumpAndSettle();
+        final reasoningToggle = find.byKey(const ValueKey('reasoning-toggle'));
+        expect(
+          tester
+              .getSemantics(reasoningToggle.first)
+              .getSemanticsData()
+              .hasAction(SemanticsAction.tap),
+          isTrue,
+        );
+        await tester.tap(reasoningToggle.first);
+        await tester.pumpAndSettle();
+        expect(find.text('persistent reasoning body'), findsOneWidget);
+
+        // Scroll far away so r_top unmounts from SliverList, then scroll back.
+        scroll.controller.jumpTo(scroll.controller.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+        expect(find.text('persistent reasoning body'), findsNothing);
+
+        scroll.controller.jumpTo(0);
+        await tester.pumpAndSettle();
+        expect(find.text('persistent reasoning body'), findsOneWidget);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
+
+  testWidgets(
+    'stretch header uses RTL-neutral expand icon and keeps running/failed tails visible at 320px 2x',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final scroll = SessionLiveScroll();
+      addTearDown(scroll.dispose);
+      final bgFacts = ToolRunFacts(
+        shellId: 'sh_1',
+        background: true,
+        shellStatus: const OpenValue.known(ShellStatus.running),
+      );
+      final items = [
+        ToolCall(
+          meta: _meta('s1', message: 'm1'),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          runFacts: bgFacts,
+        ),
+        _tool('t1', 'm1', status: ItemStatus.failed),
+        AssistantText(
+          meta: _meta('a1', message: 'm2', status: ItemStatus.streaming),
+          text: 'answer',
+          complete: false,
+        ),
+      ];
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(320, 640),
+              textScaler: TextScaler.linear(2.0),
+            ),
+            child: Scaffold(
+              body: ChatAppearance(
+                mathRendering: true,
+                conversationTextScale: 1,
+                renderMode: ChatRenderMode.live,
+                showReasoning: true,
+                showToolCalls: true,
+                child: SessionLiveTimeline(
+                  items: items,
+                  headerBuilder: (_) => const SizedBox(height: 8),
+                  scroll: scroll,
+                  settled: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final l10n = _l10n(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byIcon(Symbols.expand_more), findsOneWidget);
+      expect(find.text('· ${l10n.activityRunning(1)}'), findsOneWidget);
+      expect(find.text('· ${l10n.activityFailed(1)}'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('work-group-toggle-work-s1')));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Symbols.expand_less), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ToolCall.runFacts update counts as a live arrival when scrolled up',
+    (tester) async {
+      final scroll = SessionLiveScroll();
+      addTearDown(scroll.dispose);
+      final base = [
+        for (var n = 0; n < 6; n++) ..._turn('rf$n'),
+        ToolCall(
+          meta: _meta('sh_call', message: 'm_last'),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          runFacts: ToolRunFacts(
+            shellId: 'sh_1',
+            background: true,
+            shellStatus: const OpenValue.known(ShellStatus.running),
+          ),
+        ),
+      ];
+      await _pump(tester, base, settled: false, scroll: scroll);
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, 600));
+      await tester.pumpAndSettle();
+      expect(scroll.following, isFalse);
+      expect(scroll.unreadBelow, isFalse);
+
+      final updated = [
+        ...base.take(base.length - 1),
+        ToolCall(
+          meta: _meta('sh_call', message: 'm_last'),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          runFacts: ToolRunFacts(
+            shellId: 'sh_1',
+            background: true,
+            exitCode: 0,
+            shellStatus: const OpenValue.known(ShellStatus.exited),
+          ),
+        ),
+      ];
+      await _pump(tester, updated, settled: false, scroll: scroll);
+      expect(scroll.unreadBelow, isTrue);
+    },
+  );
+
+  testWidgets(
+    'expanded subagent card body tap still opens child while Details button opens dialog',
+    (tester) async {
+      var opened = false;
+      final subagent = ToolCall(
+        meta: _meta('sub1', message: 'm1'),
+        kind: const OpenValue.known(ToolKind.subagent),
+        rawName: 'subagent',
+        input: CanonicalValue(const {'prompt': 'check tests'}),
+        output: CanonicalValue(const [
+          {'type': 'text', 'text': 'all clear'},
+        ]),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: ListView(
+              children: [
+                SessionTimelineTile(
+                  item: subagent,
+                  onOpenChild: (_) => opened = true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('tool-status-sub1')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('tool-title-sub1')));
+      await tester.pumpAndSettle();
+      expect(opened, isTrue);
+      expect(find.byKey(const ValueKey('tool-details-sub1')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('tool-toggle-sub1')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('tool-details-sub1')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'initial autoExpand on search highlight persists reasoning open state in PageStorage',
+    (tester) async {
+      final items = <TimelineItem>[
+        Reasoning(
+          meta: _meta('r_hit', message: 'm0', status: ItemStatus.streaming),
+          text: 'highlighted reasoning body',
+          complete: false,
+        ),
+        for (var n = 0; n < 12; n++) ..._turn('h$n'),
+      ];
+      final scroll = SessionLiveScroll();
+      addTearDown(scroll.dispose);
+      await _pump(
+        tester,
+        items,
+        settled: false,
+        scroll: scroll,
+        highlight: const ItemId('r_hit'),
+      );
+      scroll.controller.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(find.text('highlighted reasoning body'), findsOneWidget);
+
+      // Clear highlight, unmount by scrolling to bottom, then scroll back.
+      await _pump(tester, items, settled: false, scroll: scroll);
+      scroll.controller.jumpTo(scroll.controller.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(find.text('highlighted reasoning body'), findsNothing);
+
+      scroll.controller.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(find.text('highlighted reasoning body'), findsOneWidget);
+    },
+  );
 }

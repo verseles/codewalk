@@ -9,6 +9,7 @@ import 'item_ids.dart';
 import 'notice_text.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
+import 'tool_metadata.dart';
 
 /// Atomic, flat HTTP history projection. These are selected-content limits,
 /// not OS memory limits: 128 blocks/message, 2000 items/page, depth 16,
@@ -377,10 +378,22 @@ List<TimelineItem> projectOpenCodeHistory(
                 extra: {...extra, 'blockTimestamps': ?partTime},
               );
               final content = text(block['text']);
+              DateTime? partInstant(Object? value) => value is num
+                  ? DateTime.fromMillisecondsSinceEpoch(
+                      value.floor(),
+                      isUtc: true,
+                    )
+                  : null;
               add(
                 blockType == 'text'
                     ? AssistantText(meta: m, text: content, complete: complete)
-                    : Reasoning(meta: m, text: content, complete: complete),
+                    : Reasoning(
+                        meta: m,
+                        text: content,
+                        complete: complete,
+                        started: partInstant(partTime?['created']),
+                        completed: partInstant(partTime?['completed']),
+                      ),
               );
             case 'tool':
               final callId = text(block['id'], cap: 4096, charge: false);
@@ -463,12 +476,23 @@ List<TimelineItem> projectOpenCodeHistory(
                 }
                 output = manifest(selected);
               }
+              final toolKind = openCodeToolKind(name);
               ({bool present, SessionRef? child})? named;
+              ToolRunFacts? runFacts;
               if (state['metadata'] is Map<String, Object?>) {
                 final metadata = state['metadata'] as Map<String, Object?>;
                 // Only the child this read names, with this read's source.
-                if (name == openCodeSubagentTool) {
+                if (toolKind == ToolKind.subagent) {
                   named = openCodeSubagentChild(metadata, ref);
+                }
+                if (toolKind == ToolKind.shell) {
+                  try {
+                    runFacts = openCodeShellToolRunFacts(metadata);
+                  } on FormatException {
+                    malformed();
+                  } on RangeError {
+                    malformed();
+                  }
                 }
                 if (metadata.containsKey('truncated')) {
                   if (metadata['truncated'] is! bool) malformed();
@@ -523,17 +547,14 @@ List<TimelineItem> projectOpenCodeHistory(
               add(
                 ToolCall(
                   meta: itemMeta,
-                  kind: OpenValue.known(switch (name) {
-                    'read' => ToolKind.read,
-                    openCodeSubagentTool => ToolKind.subagent,
-                    _ => ToolKind.other,
-                  }),
+                  kind: OpenValue.known(toolKind),
                   rawName: name,
                   input: canonicalInput,
                   output: output,
                   child: observed?.child,
                   childEvidence: observed?.evidence,
                   error: error,
+                  runFacts: runFacts,
                 ),
               );
             default:

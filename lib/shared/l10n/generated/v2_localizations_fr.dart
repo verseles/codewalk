@@ -2606,4 +2606,157 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get settingsBehaviorWindowCloseDescription =>
       'Fermer quitte CodeWalk. Réduire le laisse ouvert dans la barre des tâches.';
+
+  @override
+  String get toolKindShell => 'Shell';
+
+  @override
+  String get toolKindRead => 'Lire';
+
+  @override
+  String get toolKindEdit => 'Modifier';
+
+  @override
+  String get toolKindWrite => 'Écrire';
+
+  @override
+  String get toolKindSearch => 'Rechercher';
+
+  @override
+  String get toolKindFetch => 'Récupérer';
+
+  @override
+  String get toolKindWebSearch => 'Recherche web';
+
+  @override
+  String get toolKindSkill => 'Skill';
+
+  @override
+  String get toolKindQuestion => 'Question';
+
+  @override
+  String get toolKindTool => 'Outil';
+
+  @override
+  String chatThinkingHeading(String heading) {
+    return 'Réflexion : $heading';
+  }
+
+  @override
+  String get chatThought => 'Réflexion';
+
+  @override
+  String chatThoughtDuration(String duration) {
+    return 'Réflexion · $duration';
+  }
+
+  @override
+  String activityEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers modifiés',
+      one: '1 fichier modifié',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityExplored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers explorés',
+      one: '1 fichier exploré',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySearched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recherches',
+      one: '1 recherche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFetched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages récupérées',
+      one: '1 page récupérée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityCommands(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count commandes exécutées',
+      one: '1 commande exécutée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySkills(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count skills',
+      one: '1 skill',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityThought(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count réflexions',
+      one: 'Réflexion',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count étapes',
+      one: '1 étape',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityRunning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en cours',
+      one: '1 en cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échecs',
+      one: '1 échec',
+    );
+    return '$_temp0';
+  }
 }

@@ -74,6 +74,7 @@ class SessionTimelineTile extends StatelessWidget {
     this.messageHeader = false,
     this.revert,
     this.minimizeUnknownShell = false,
+    this.highlighted = false,
   });
   final TimelineItem item;
 
@@ -81,6 +82,7 @@ class SessionTimelineTile extends StatelessWidget {
   /// offered in the message's menu. Null for none.
   final SessionBubbleAction? revert;
   final bool minimizeUnknownShell;
+  final bool highlighted;
   final void Function(String text, String href, String? title)? onTapLink;
   final void Function(String path, int? line, int? col)? onTapFilePath;
   final ValueChanged<String>? onCopyCode;
@@ -161,16 +163,59 @@ class SessionTimelineTile extends StatelessWidget {
         );
       }
     }
+    final message = messageHeader ? item.meta.message : null;
+    // Non-subagent tool calls, shell runs (when not minimized-unknown), and
+    // reasoning render as lightweight compact rows without an outer Card or
+    // vertical "Details" header.
+    final compactTool =
+        (item is ToolCall && item.kind.known != ToolKind.subagent) ||
+        (item is ShellRun &&
+            !(minimizeUnknownShell && item.shellStatus?.known == null));
+    if (compactTool) {
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: ConversationTextScale(
+            child: SessionToolResult(item: item, messageHeader: message),
+          ),
+        ),
+      );
+    }
+    if (item is Reasoning) {
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: ConversationTextScale(
+            child: SessionReasoningBody(
+              text: item.text,
+              complete: item.complete,
+              duration: item.duration,
+              messageHeader: message,
+              autoExpand: highlighted,
+              storageKey: 'reasoning-${item.id.value}',
+              child: SelectionArea(
+                child: CanonicalMessageBody(
+                  key: ValueKey('timeline-content-${item.id.value}'),
+                  source: item.text,
+                  complete: item.complete,
+                  prefixMissing: item.prefixMissing,
+                  allowBasicHtml: false,
+                  onTapLink: onTapLink,
+                  onTapFilePath: onTapFilePath,
+                  onCopyCode: onCopyCode,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final (label, icon) = switch (item) {
       UserInput() => (l10n.chatMessageYou, Symbols.person_outline),
       AssistantText() => (l10n.historyAssistant, Symbols.chat_bubble_outline),
-      // Compact screens use the retained reference's short label.
-      Reasoning() => (
-        MediaQuery.sizeOf(context).width < 600
-            ? l10n.chatMessageThinking
-            : l10n.chatMessageThinkingProcess,
-        Symbols.psychology,
-      ),
+      Reasoning() => (l10n.chatThought, Symbols.psychology),
       Notice() => (l10n.historyDetails, Symbols.info),
       ToolCall() => (l10n.historyDetails, Symbols.build),
       ShellRun() => (l10n.historyDetails, Symbols.terminal),
@@ -181,7 +226,6 @@ class SessionTimelineTile extends StatelessWidget {
     final child = item is ToolCall && item.kind.known == ToolKind.subagent
         ? open
         : null;
-    final message = messageHeader ? item.meta.message : null;
     final isUser = item is UserInput;
     final assistant = !isUser;
     final theme = Theme.of(context);
@@ -363,23 +407,8 @@ class SessionTimelineTile extends StatelessWidget {
           onCopyCode: onCopyCode,
           onCopyInlineCode: (code) => copyConversationText(context, code),
         );
-      case Reasoning(:final text, :final complete, :final prefixMissing):
-        return SessionReasoningBody(
-          text: text,
-          complete: complete,
-          child: SelectionArea(
-            child: CanonicalMessageBody(
-              key: ValueKey('timeline-content-${item.id.value}'),
-              source: text,
-              complete: complete,
-              prefixMissing: prefixMissing,
-              allowBasicHtml: false,
-              onTapLink: onTapLink,
-              onTapFilePath: onTapFilePath,
-              onCopyCode: onCopyCode,
-            ),
-          ),
-        );
+      case Reasoning():
+        return const SizedBox.shrink();
       case Notice(:final text):
         return SelectionArea(
           child: CanonicalMessageBody(
@@ -399,8 +428,10 @@ class SessionTimelineTile extends StatelessWidget {
           maxLines: 16,
           overflow: TextOverflow.ellipsis,
         );
-      case ToolCall() || ShellRun():
-        return SessionToolResult(item: item);
+      case ToolCall():
+        return SessionSubagentToolBody(item: item);
+      case ShellRun():
+        return const SizedBox.shrink();
       case TurnOutcome(:final kind):
         final text = switch (kind.known) {
           OutcomeKind.succeeded => l10n.liveOutcomeSucceeded as String,

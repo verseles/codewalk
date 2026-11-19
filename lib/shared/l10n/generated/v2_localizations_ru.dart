@@ -2580,4 +2580,157 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get settingsBehaviorWindowCloseDescription =>
       '«Закрыть» завершает CodeWalk. «Свернуть» оставляет его работать на панели задач.';
+
+  @override
+  String get toolKindShell => 'Shell';
+
+  @override
+  String get toolKindRead => 'Чтение';
+
+  @override
+  String get toolKindEdit => 'Правка';
+
+  @override
+  String get toolKindWrite => 'Запись';
+
+  @override
+  String get toolKindSearch => 'Поиск';
+
+  @override
+  String get toolKindFetch => 'Загрузка';
+
+  @override
+  String get toolKindWebSearch => 'Поиск в сети';
+
+  @override
+  String get toolKindSkill => 'Навык';
+
+  @override
+  String get toolKindQuestion => 'Вопрос';
+
+  @override
+  String get toolKindTool => 'Инструмент';
+
+  @override
+  String chatThinkingHeading(String heading) {
+    return 'Размышление: $heading';
+  }
+
+  @override
+  String get chatThought => 'Размышлял';
+
+  @override
+  String chatThoughtDuration(String duration) {
+    return 'Размышлял · $duration';
+  }
+
+  @override
+  String activityEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Изменено файлов: $count',
+      one: 'Изменён 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityExplored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Прочитано файлов: $count',
+      one: 'Прочитан 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySearched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Поисков: $count',
+      one: '1 поиск',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFetched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Загружено страниц: $count',
+      one: 'Загружена 1 страница',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityCommands(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Выполнено команд: $count',
+      one: 'Выполнена 1 команда',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySkills(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Навыков: $count',
+      one: '1 навык',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityThought(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Размышлений: $count',
+      one: 'Размышление',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Шагов: $count',
+      one: '1 шаг',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityRunning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Выполняется: $count',
+      one: 'Выполняется: 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ошибок: $count',
+      one: 'Ошибка: 1',
+    );
+    return '$_temp0';
+  }
 }

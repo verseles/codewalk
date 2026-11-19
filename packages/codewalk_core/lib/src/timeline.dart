@@ -275,6 +275,8 @@ sealed class TimelineItem {
       text: item.text,
       complete: item.complete,
       prefixMissing: item.prefixMissing,
+      started: item.started,
+      completed: item.completed,
     ),
     final ToolCall item => ToolCall(
       meta: meta,
@@ -286,6 +288,7 @@ sealed class TimelineItem {
       child: item.child,
       childEvidence: item.childEvidence,
       error: item.error,
+      runFacts: item.runFacts,
     ),
     final ShellRun item => ShellRun(
       meta: meta,
@@ -364,11 +367,82 @@ final class Reasoning extends TimelineItem {
     required this.text,
     required this.complete,
     this.prefixMissing = false,
+    this.started,
+    this.completed,
   });
 
   final String text;
   final bool complete;
   final bool prefixMissing;
+
+  /// Part-scoped start and completion instants reported by the harness.
+  /// Never derived from message-wide timings.
+  final DateTime? started;
+  final DateTime? completed;
+
+  /// Elapsed thinking time when both part timestamps exist and are non-inverted.
+  Duration? get duration {
+    final s = started;
+    final c = completed;
+    if (s == null || c == null || c.isBefore(s)) return null;
+    return c.difference(s);
+  }
+}
+
+/// Harness-neutral runtime facts reported for a tool call, such as a shell
+/// tool's exit outcome, timeout, interruption, background state, or opaque
+/// shell identifier. Never carries host paths, working directories, or PIDs.
+final class ToolRunFacts {
+  ToolRunFacts({
+    this.exitCode,
+    this.exitToken,
+    this.shellStatus,
+    this.timedOut = false,
+    this.interrupted = false,
+    this.background = false,
+    String? shellId,
+  }) : shellId = shellId == null ? null : requireText(shellId, 'shellId');
+
+  final int? exitCode;
+  final String? exitToken;
+  final OpenValue<ShellStatus>? shellStatus;
+  final bool timedOut;
+  final bool interrupted;
+  final bool background;
+
+  /// Opaque harness identifier linking this tool call to a live shell run.
+  final String? shellId;
+
+  bool get isEmpty =>
+      exitCode == null &&
+      exitToken == null &&
+      shellStatus == null &&
+      !timedOut &&
+      !interrupted &&
+      !background &&
+      shellId == null;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ToolRunFacts &&
+      other.exitCode == exitCode &&
+      other.exitToken == exitToken &&
+      other.shellStatus == shellStatus &&
+      other.timedOut == timedOut &&
+      other.interrupted == interrupted &&
+      other.background == background &&
+      other.shellId == shellId;
+
+  @override
+  int get hashCode => Object.hash(
+    exitCode,
+    exitToken,
+    shellStatus,
+    timedOut,
+    interrupted,
+    background,
+    shellId,
+  );
 }
 
 /// Whether a tool call's child session was observed or refused.
@@ -401,6 +475,7 @@ final class ToolCall extends TimelineItem {
     this.child,
     this.childEvidence,
     this.error,
+    this.runFacts,
   });
 
   final OpenValue<ToolKind> kind;
@@ -418,6 +493,9 @@ final class ToolCall extends TimelineItem {
   /// Where [child] came from, or that an explicit child was refused.
   final ToolChildEvidence? childEvidence;
   final ErrorInfo? error;
+
+  /// Optional harness-neutral execution facts (e.g., for shell tools).
+  final ToolRunFacts? runFacts;
 
   /// Whether [childEvidence] fits this call: an observation names a child of
   /// this call's harness and generation, and a refusal names none.

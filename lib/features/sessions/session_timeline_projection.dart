@@ -4,12 +4,12 @@ import 'package:flutter/widgets.dart';
 
 import '../../shared/theme/chat_appearance.dart';
 
-/// One row of the live timeline: a resident item, a run of tool calls shown
-/// together, or the header of a finished turn's work.
+/// One row of the timeline: a resident item, a subagent call/report group, a
+/// collapsed activity stretch, or a Block-mode pending placeholder.
 ///
-/// Rows are presentation only: the canonical items stay untouched, and every
-/// row knows the items it stands for, so the timeline still places its
-/// center and measures arrivals on the items themselves.
+/// Rows are presentation only: canonical items stay untouched, and every row
+/// knows the items it stands for, so the timeline still places its center and
+/// measures arrivals on the items themselves.
 sealed class SessionTimelineRow {
   const SessionTimelineRow();
 
@@ -108,53 +108,47 @@ List<SessionTimelineRow> groupSubagentActivity(
   return grouped;
 }
 
-/// Consecutive tool calls and shell runs of one turn, shown as one row whose
-/// summary counts them and whose calls open on demand.
-final class SessionToolRunRow extends SessionTimelineRow {
-  const SessionToolRunRow(
-    this.tools, {
-    required this.expanded,
-    required this.messageHeaders,
-  });
-
-  /// Two or more [ToolCall] or [ShellRun] items.
-  final List<TimelineItem> tools;
-  final bool expanded;
-
-  /// For each call, whether it opens its message, so the run still offers
-  /// that message's details.
-  final List<bool> messageHeaders;
-
-  /// Anchored to the first call, so the run keeps its identity while calls
-  /// are appended to it.
-  String get id => 'tools-${tools.first.id.value}';
-
-  @override
-  Key get key => ValueKey(id);
-
-  @override
-  List<TimelineItem> get items => tools;
-}
-
-/// The header of a finished turn's work: everything the turn did before its
-/// final answer, collapsed to a count until the reader expands it.
-final class SessionWorkGroupRow extends SessionTimelineRow {
-  const SessionWorkGroupRow(
+/// A maximal contiguous stretch of non-text activity (reasoning, shell runs,
+/// and non-subagent tool calls) collapsed into one descriptive summary row.
+///
+/// [AssistantText] items are never members: every assistant text response stays
+/// visible in the conversation forever.
+final class SessionActivityStretchRow extends SessionTimelineRow {
+  const SessionActivityStretchRow(
     this.work, {
     required this.id,
-    required this.messageCount,
     required this.expanded,
+    required this.messageHeaders,
+    required this.runningCount,
+    required this.failedCount,
   });
 
-  /// Anchored to the turn's first item, never to a list position or a
-  /// generation, so a passive refresh of the same turn keeps the same row.
+  /// Anchored to the stretch's first item, never to a list position or a
+  /// generation, so a passive refresh keeps the same row and toggle state.
   final String id;
 
   final List<TimelineItem> work;
-
-  /// The number of harness messages the work spans.
-  final int messageCount;
   final bool expanded;
+
+  /// For each item in [work], whether it opens its harness message.
+  final List<bool> messageHeaders;
+
+  /// Items in this stretch still pending, streaming, or running.
+  final int runningCount;
+
+  /// Items in this stretch that failed, timed out, were killed, or interrupted.
+  final int failedCount;
+
+  /// The first harness message opened inside this stretch, shown on the
+  /// collapsed header so message details stay reachable.
+  MessageContext? get openingMessage {
+    for (var i = 0; i < work.length; i++) {
+      if (messageHeaders[i] && work[i].meta.message != null) {
+        return work[i].meta.message;
+      }
+    }
+    return null;
+  }
 
   @override
   Key get key => ValueKey(id);
@@ -179,33 +173,45 @@ final class SessionPendingRow extends SessionTimelineRow {
   List<TimelineItem> get items => const [];
 }
 
-/// How the live timeline presents its resident items: tool calls in runs,
-/// and a finished turn's work collapsed behind its final answer.
+/// How the live and history timelines present their resident items:
+/// non-text activity stretches collapse into descriptive summaries as soon as
+/// following visible answer text arrives (or when settled), while every
+/// [AssistantText] stays visible forever.
 ///
-/// It keeps what the reader opened and which turns settled for as long as
-/// the timeline that owns it is shown; a session shown again starts with
-/// every finished turn collapsed.
+/// Keeps what the reader opened and which trailing stretches settled for as
+/// long as the owning timeline is shown; reopening a session starts collapsed.
 final class SessionTimelinePresentation {
   final Set<String> _expanded = {};
 
-  /// The turns already collapsed, with the answer and the length they had,
-  /// so a status pulse that briefly reports the session busy again does not
-  /// reopen a settled turn; only new content in that turn does.
-  Map<String, ({ItemId answer, int length})> _settled = {};
+  /// Trailing stretches already collapsed on settle, with their length, so a
+  /// brief busy status pulse does not pop them back open until new items arrive.
+  Map<String, int> _settledTrailing = {};
 
   bool isExpanded(String id) => _expanded.contains(id);
 
-  /// Opens or closes a run or a work group.
+  /// Opens or closes an activity stretch.
   void toggle(String id) {
     if (!_expanded.remove(id)) _expanded.add(id);
   }
 
-  /// The rows of [items]. [settled] tells whether the session has no turn in
-  /// flight, so its last turn may be collapsed.
+  /// Whether [item] participates in non-text activity stretch compaction.
   ///
-  /// Reasoning and tool calls the reader hid are left out before anything is
-  /// grouped, so a group they emptied is not shown (#108). In the Block
-  /// render mode the turn in flight shows only what finished (#284).
+  /// Every [AssistantText], [UserInput], [Notice], [TurnOutcome],
+  /// [UnknownItem], unknown-status [ShellRun], and subagent [ToolCall] stays
+  /// outside stretches.
+  static bool isCompactable(TimelineItem item) => switch (item) {
+    Reasoning() => true,
+    ShellRun(:final shellStatus) => shellStatus?.known != null,
+    ToolCall(:final kind) => kind.known != ToolKind.subagent,
+    _ => false,
+  };
+
+  /// The rows of [items]. [settled] tells whether the session has no turn in
+  /// flight, so a trailing stretch with no following text may also collapse.
+  ///
+  /// Reasoning and tool calls the reader hid are filtered out before grouping,
+  /// so an emptied stretch emits no row (#108). In Block render mode, the turn
+  /// in flight hides unfinished answers and reasoning until they end (#284).
   List<SessionTimelineRow> project(
     List<TimelineItem> items, {
     required bool settled,
@@ -220,17 +226,16 @@ final class SessionTimelinePresentation {
       showReasoning: showReasoning,
       showToolCalls: showToolCalls,
     );
-    final latched = <String, ({ItemId answer, int length})>{};
+    final latched = <String, int>{};
     final block = renderMode == ChatRenderMode.block && !settled;
     var index = 0;
     while (index < items.length) {
       if (items[index] is UserInput) {
-        out.runs([items[index]]);
+        out.emitSingle(items[index]);
         index++;
         continue;
       }
-      // A turn: everything up to the next prompt. The window may open in the
-      // middle of one, which is then presented from where it starts.
+      // A turn: everything up to the next prompt.
       var end = index;
       while (end < items.length && items[end] is! UserInput) {
         end++;
@@ -253,7 +258,7 @@ final class SessionTimelinePresentation {
         out.rows.add(SessionPendingRow(prompt.id));
       }
     }
-    _settled = latched;
+    _settledTrailing = latched;
     return groupSubagentActivity(out.rows, original);
   }
 
@@ -262,73 +267,101 @@ final class SessionTimelinePresentation {
     int start,
     int end,
     _Rows out,
-    Map<String, ({ItemId answer, int length})> latched, {
+    Map<String, int> latched, {
     required bool settled,
     required bool held,
   }) {
-    final last = _lastText(items, start, end);
-    final message = last == null ? null : items[last].meta.message?.message;
-    // The final answer is the harness message that holds the last answer
-    // text; without that message its start is unknown, and nothing is
-    // collapsed on a guess.
-    final answer = message == null
-        ? null
-        : _answerStart(items, start, last!, message);
-    if (answer != null && answer > start) {
-      final id = 'work-${items[start].id.value}';
-      final mark = (answer: items[last!].id, length: end - start);
-      // The turn must have finished either way (#273); the latch only
-      // stands in for a session that a status pulse reports busy again.
-      final collapse =
-          _finished(items, start, end, last) &&
-          (settled || _settled[id] == mark);
-      if (collapse) {
-        latched[id] = mark;
-        // A switch of model or agent made while the turn ran stays in the
-        // conversation, after the collapsed work it interrupted (#426), as
-        // does a reminder the harness added there (#491).
-        final work = items.sublist(start, answer);
-        out.group(id, [
-          for (final item in work)
-            if (!_staysOut(item)) item,
-        ]);
-        out.runs([
-          for (final item in work)
-            if (_staysOut(item)) item,
-        ]);
-        out.runs(items.sublist(answer, end));
-        return;
-      }
-    }
     if (held) {
-      _held(items, start, end, out);
+      _held(items, start, end, out, latched);
       return;
     }
-    out.runs(items.sublist(start, end));
+    _emitTurn(items.sublist(start, end), out, latched, settled: settled);
   }
 
-  /// The turn in flight in the Block render mode: the messages that already
-  /// ended, in order; then every call that ended, which never waits for the
-  /// message it belongs to; then the pending row for the rest.
-  void _held(List<TimelineItem> items, int start, int end, _Rows out) {
+  void _emitTurn(
+    List<TimelineItem> turnItems,
+    _Rows out,
+    Map<String, int> latched, {
+    required bool settled,
+  }) {
+    final shown = turnItems.where(out._shows).toList();
+    if (shown.isEmpty) return;
+
+    // Precompute the last visible non-empty AssistantText index so an empty
+    // `session.text.started` or whitespace-only part never collapses activity
+    // before visible text actually renders.
+    var lastAnswerIndex = -1;
+    for (var i = shown.length - 1; i >= 0; i--) {
+      if (shown[i] case AssistantText(
+        :final text,
+      ) when text.trim().isNotEmpty) {
+        lastAnswerIndex = i;
+        break;
+      }
+    }
+
+    var index = 0;
+    while (index < shown.length) {
+      if (!isCompactable(shown[index])) {
+        out.emitSingle(shown[index]);
+        index++;
+        continue;
+      }
+      var stop = index + 1;
+      while (stop < shown.length && isCompactable(shown[stop])) {
+        stop++;
+      }
+      final stretch = shown.sublist(index, stop);
+      final hasFollowingAnswer = lastAnswerIndex >= stop;
+      final id = 'work-${stretch.first.id.value}';
+      final activeCount = stretch.where(_isActiveItem).length;
+      final failedCount = stretch.where(_isFailedItem).length;
+      final settledTrailing =
+          !hasFollowingAnswer &&
+          activeCount == 0 &&
+          (settled || _settledTrailing[id] == stretch.length);
+      final collapse = hasFollowingAnswer || settledTrailing;
+      if (collapse) {
+        if (settledTrailing) latched[id] = stretch.length;
+        out.stretch(
+          id,
+          stretch,
+          runningCount: activeCount,
+          failedCount: failedCount,
+        );
+      } else {
+        for (final item in stretch) {
+          out.emitSingle(item);
+        }
+      }
+      index = stop;
+    }
+  }
+
+  /// The turn in flight in Block render mode: already-ended leading items
+  /// (compacting any stretch before a published intermediate answer, never
+  /// before held answers), then ended calls that finished early, then the
+  /// pending placeholder.
+  void _held(
+    List<TimelineItem> items,
+    int start,
+    int end,
+    _Rows out,
+    Map<String, int> latched,
+  ) {
     var published = start;
     while (published < end && _ended(items[published])) {
       published++;
     }
-    out.runs(items.sublist(start, published));
-    // The calls that ended join as Live will join them: a held call keeps
-    // them together, a held text or reasoning shown between them does not.
-    var calls = <TimelineItem>[];
+    if (published > start) {
+      _emitTurn(items.sublist(start, published), out, latched, settled: false);
+    }
     for (var index = published; index < end; index++) {
       final item = items[index];
-      if (_callEnded(item)) {
-        calls.add(item);
-      } else if (!_joinable(item) && out._shows(item)) {
-        out.runs(calls);
-        calls = [];
+      if (_callEnded(item) && out._shows(item)) {
+        out.emitSingle(item);
       }
     }
-    out.runs(calls);
     out.rows.add(
       SessionPendingRow(start > 0 ? items[start - 1].id : items[start].id),
     );
@@ -336,8 +369,7 @@ final class SessionTimelinePresentation {
 
   /// The answers and reasoning the Block render mode holds back now, so a
   /// search does not find what the timeline does not show yet (#462): the
-  /// part of the turn in flight after the first item that has not ended,
-  /// by the same rule [project] publishes with.
+  /// part of the turn in flight after the first item that has not ended.
   static Set<ItemId> heldText(
     List<TimelineItem> items, {
     required bool settled,
@@ -349,12 +381,6 @@ final class SessionTimelinePresentation {
     while (start > 0 && items[start - 1] is! UserInput) {
       start--;
     }
-    // A finished turn shows whole, as [project] may still collapse it
-    // during a brief busy report (its latch): nothing of it is held.
-    final last = _lastText(items, start, items.length);
-    if (last != null && _finished(items, start, items.length, last)) {
-      return const {};
-    }
     var published = start;
     while (published < items.length && _ended(items[published])) {
       published++;
@@ -365,9 +391,6 @@ final class SessionTimelinePresentation {
     };
   }
 
-  static bool _isSwitch(TimelineItem item) =>
-      item is Notice && item.kind.known == NoticeKind.selectionChanged;
-
   /// A reminder or system note the harness adds (#491): a light line, never
   /// work in flight, whatever its own status.
   static bool _isReminder(TimelineItem item) =>
@@ -375,15 +398,7 @@ final class SessionTimelinePresentation {
       (item.kind.known == NoticeKind.continuation ||
           item.kind.known == NoticeKind.system);
 
-  /// Notes that stay in the conversation when the work around them folds.
-  static bool _staysOut(TimelineItem item) =>
-      _isSwitch(item) || _isReminder(item);
-
-  /// Whether an item can be published in the Block render mode: its message
-  /// ended, as the harness reported, or, outside any message, it ended. An
-  /// item outside any message whose end is unknown, such as the context a
-  /// prompt carries, is not the response: holding it would hold the whole
-  /// turn behind it.
+  /// Whether an item can be published in Block render mode.
   static bool _ended(TimelineItem item) {
     if (_isReminder(item)) return true;
     final message = item.meta.message;
@@ -394,11 +409,20 @@ final class SessionTimelinePresentation {
     };
   }
 
-  /// Whether a call ended: completed, failed or interrupted.
+  /// Whether a call ended: completed, failed or interrupted (never a
+  /// backgrounded shell tool still running via [ToolCall.runFacts]).
   static bool _callEnded(TimelineItem item) => switch (item) {
     ShellRun(:final shellStatus?) =>
       shellStatus.known != null && shellStatus.known != ShellStatus.running,
-    ToolCall() || ShellRun() => switch (item.status.known) {
+    ToolCall() =>
+      !_isActiveItem(item) &&
+          switch (item.status.known) {
+            ItemStatus.completed ||
+            ItemStatus.failed ||
+            ItemStatus.interrupted => true,
+            _ => false,
+          },
+    ShellRun() => switch (item.status.known) {
       ItemStatus.completed ||
       ItemStatus.failed ||
       ItemStatus.interrupted => true,
@@ -407,102 +431,75 @@ final class SessionTimelinePresentation {
     _ => false,
   };
 
-  static bool _running(TimelineItem item) =>
-      item is ShellRun && item.shellStatus?.known == ShellStatus.running;
-
-  /// A call that may share a run. A sub-agent call is a way into its own
-  /// conversation, so it keeps a row of its own.
-  static bool _joinable(TimelineItem item) => switch (item) {
-    ShellRun() => true,
-    ToolCall(:final kind) => kind.known != ToolKind.subagent,
+  static bool _running(TimelineItem item) => switch (item) {
+    ShellRun(:final shellStatus) => shellStatus?.known == ShellStatus.running,
+    ToolCall() => _isActiveItem(item),
     _ => false,
   };
 
-  /// The index of the last answer text in [start]..[end].
-  static int? _lastText(List<TimelineItem> items, int start, int end) {
-    for (var index = end - 1; index >= start; index--) {
-      if (items[index] is AssistantText) return index;
-    }
-    return null;
-  }
-
-  /// Where the turn's final answer starts: the first answer text of
-  /// [message], the message that holds the last answer text at [last].
-  static int _answerStart(
-    List<TimelineItem> items,
-    int start,
-    int last,
-    MessageRef message,
-  ) {
-    // The message's reasoning and calls before its first answer text are
-    // work too; every answer text of the message stays out of the group,
-    // even past an item outside any message. [last] ends the scan.
-    var first = start;
-    while (items[first] is! AssistantText ||
-        items[first].meta.message?.message != message) {
-      first++;
-    }
-    return first;
-  }
-
-  /// Whether every item of the turn reached its end and the turn ended with
-  /// a complete answer, at [last], so its work may be collapsed (#273):
-  /// never while anything still streams, and never over a failure the reader
-  /// must see.
-  static bool _finished(
-    List<TimelineItem> items,
-    int start,
-    int end,
-    int last,
-  ) {
-    if (!(items[last] as AssistantText).complete) return false;
-    for (var index = start; index < end; index++) {
-      final item = items[index];
-      if (_isReminder(item)) continue;
-      switch (item.status.known) {
-        case ItemStatus.pending || ItemStatus.streaming:
+  static bool _isActiveItem(TimelineItem item) => switch (item) {
+    Reasoning(:final complete) =>
+      !complete ||
+          item.status.known == ItemStatus.pending ||
+          item.status.known == ItemStatus.streaming,
+    ShellRun(:final shellStatus) =>
+      shellStatus?.known == ShellStatus.running ||
+          item.status.known == ItemStatus.pending ||
+          item.status.known == ItemStatus.streaming,
+    ToolCall(:final runFacts) => () {
+      final itemStatus = item.status.known;
+      if (itemStatus == ItemStatus.failed ||
+          itemStatus == ItemStatus.interrupted) {
+        return false;
+      }
+      if (runFacts != null) {
+        if (runFacts.timedOut ||
+            runFacts.interrupted ||
+            runFacts.shellStatus?.known == ShellStatus.timeout ||
+            runFacts.shellStatus?.known == ShellStatus.killed) {
           return false;
-        case ItemStatus.failed || ItemStatus.interrupted when index >= last:
-          return false;
-        default:
+        }
+        if (runFacts.shellStatus?.known == ShellStatus.running ||
+            (runFacts.background &&
+                runFacts.exitCode == null &&
+                runFacts.exitToken == null &&
+                runFacts.shellStatus?.known != ShellStatus.exited)) {
+          return true;
+        }
+        if (runFacts.exitCode != null) return false;
       }
-      if (item case ShellRun(
-        shellStatus: OpenValue(known: ShellStatus.running),
-      )) {
-        return false;
-      }
-      if (item case TurnOutcome(:final kind)
-          when kind.known == OutcomeKind.failed ||
-              kind.known == OutcomeKind.interrupted) {
-        return false;
-      }
-      // The reader must see a compaction that failed, wherever it is.
-      if (item case Notice(
-        kind: OpenValue(known: NoticeKind.compaction),
-        status: OpenValue(known: ItemStatus.failed),
-      )) {
-        return false;
-      }
-    }
-    return true;
-  }
+      return itemStatus == ItemStatus.pending ||
+          itemStatus == ItemStatus.streaming;
+    }(),
+    _ => false,
+  };
 
-  /// The harness messages [work] spans; an item without one counts alone.
-  static int _messageCount(List<TimelineItem> work) {
-    var count = 0;
-    MessageRef? previous;
-    for (final item in work) {
-      final message = item.meta.message?.message;
-      if (message == null || message != previous) count++;
-      previous = message;
-    }
-    return count;
-  }
+  static bool _isFailedItem(TimelineItem item) => switch (item) {
+    ShellRun(:final shellStatus, :final exitCode) =>
+      shellStatus?.known == ShellStatus.timeout ||
+          shellStatus?.known == ShellStatus.killed ||
+          (shellStatus?.known == ShellStatus.exited &&
+              exitCode != null &&
+              exitCode != 0) ||
+          item.status.known == ItemStatus.failed ||
+          item.status.known == ItemStatus.interrupted,
+    ToolCall(:final runFacts) =>
+      (runFacts?.timedOut ?? false) ||
+          (runFacts?.interrupted ?? false) ||
+          runFacts?.shellStatus?.known == ShellStatus.timeout ||
+          runFacts?.shellStatus?.known == ShellStatus.killed ||
+          (runFacts?.exitCode != null && runFacts!.exitCode != 0) ||
+          item.status.known == ItemStatus.failed ||
+          item.status.known == ItemStatus.interrupted,
+    _ =>
+      item.status.known == ItemStatus.failed ||
+          item.status.known == ItemStatus.interrupted,
+  };
 }
 
 /// The rows a projection emits, in chronological order: it leaves out what
-/// the reader hid, joins consecutive calls in runs and marks the first shown
-/// item of each message, so its details stay reachable.
+/// the reader hid and marks the first shown item of each message so its
+/// details stay reachable.
 final class _Rows {
   _Rows(
     this.presentation, {
@@ -532,49 +529,35 @@ final class _Rows {
     return opens;
   }
 
-  /// Rows for [items], in order, with consecutive calls joined in runs.
-  void runs(List<TimelineItem> items) {
-    final shown = items.where(_shows).toList();
-    var index = 0;
-    while (index < shown.length) {
-      var stop = index;
-      while (stop < shown.length &&
-          SessionTimelinePresentation._joinable(shown[stop])) {
-        stop++;
-      }
-      if (stop - index >= 2) {
-        final tools = shown.sublist(index, stop);
-        rows.add(
-          SessionToolRunRow(
-            tools,
-            expanded: presentation.isExpanded('tools-${tools.first.id.value}'),
-            messageHeaders: [for (final tool in tools) _opens(tool)],
-          ),
-        );
-        index = stop;
-        continue;
-      }
-      final item = shown[index];
-      rows.add(SessionItemRow(item, messageHeader: _opens(item)));
-      index++;
-    }
+  void emitSingle(TimelineItem item) {
+    if (!_shows(item)) return;
+    rows.add(SessionItemRow(item, messageHeader: _opens(item)));
   }
 
-  /// The header of a finished turn's [work], and the work itself when the
-  /// reader opened it. Work the reader hid entirely leaves no header.
-  void group(String id, List<TimelineItem> work) {
-    final shown = work.where(_shows).toList();
-    if (shown.isEmpty) return;
+  void stretch(
+    String id,
+    List<TimelineItem> items, {
+    required int runningCount,
+    required int failedCount,
+  }) {
+    if (items.isEmpty) return;
+    final headers = [for (final item in items) _opens(item)];
     final expanded = presentation.isExpanded(id);
     rows.add(
-      SessionWorkGroupRow(
-        shown,
+      SessionActivityStretchRow(
+        items,
         id: id,
-        messageCount: SessionTimelinePresentation._messageCount(shown),
         expanded: expanded,
+        messageHeaders: headers,
+        runningCount: runningCount,
+        failedCount: failedCount,
       ),
     );
-    if (expanded) runs(shown);
+    if (expanded) {
+      for (var i = 0; i < items.length; i++) {
+        rows.add(SessionItemRow(items[i], messageHeader: headers[i]));
+      }
+    }
   }
 }
 

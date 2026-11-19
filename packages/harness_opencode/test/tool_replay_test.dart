@@ -160,7 +160,7 @@ void main() {
     'queue-steer-space-bunny',
   ]) {
     test(
-      'observed B $name: progress does not supply terminal content or metadata',
+      'observed B $name: shell tool projects kind and facts without leaking raw metadata',
       () {
         final events = stream(readB(name), 'stream');
         var state = SessionState(refFor(events));
@@ -176,15 +176,23 @@ void main() {
           expect(result.effects.every((e) => e is Notify), isTrue);
           state = result.state;
         }
-        expect(projected.length, 3);
+        final hasShellProgress = tools.any(
+          (f) =>
+              f['type'] == 'session.tool.progress' &&
+              (toolData(f)['metadata'] as Map?)?.containsKey('shellID') == true,
+        );
+        expect(projected.length, hasShellProgress ? 4 : 3);
         final tool = state.timeline.single as ToolCall;
         expect(tool.rawName, 'shell');
-        expect(tool.kind.known, ToolKind.other);
+        expect(tool.kind.known, ToolKind.shell);
         final terminal = toolData(tools.last);
         expect(
           tool.source.extra!.value,
           containsPair('executed', terminal['executed']),
         );
+        if (hasShellProgress) {
+          expect(tool.runFacts?.shellId, startsWith('sh_'));
+        }
         if (name == 'interrupt-resume') {
           expect(tool.status.known, ItemStatus.interrupted);
           expect(tool.error!.rawType, 'aborted');
@@ -194,6 +202,8 @@ void main() {
           expect(tool.status.known, ItemStatus.completed);
           expect(tool.output!.value, terminal['content']);
           expect(tool.source.extra!.value, containsPair('truncated', false));
+          expect(tool.runFacts?.exitCode, 0);
+          expect(tool.runFacts?.shellStatus?.known, ShellStatus.exited);
         }
         for (final event in projected) {
           final manifest = toolManifest(event);

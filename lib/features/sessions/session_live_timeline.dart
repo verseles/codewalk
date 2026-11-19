@@ -275,7 +275,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
           (row) => row.items.any((item) => item.id == target),
         );
         if (index < 0) return;
-        if (rows[index] case SessionWorkGroupRow(
+        if (rows[index] case SessionActivityStretchRow(
           :final id,
           expanded: false,
         ) when !opened) {
@@ -856,6 +856,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 errorRecovery: widget.errorRecovery,
                 onOpenChild: widget.onOpenChild,
                 messageHeader: messageHeader,
+                highlighted: found,
                 revert: item is UserInput && item.confirmed
                     ? widget.userTurnRevert?.call(
                         item,
@@ -872,11 +873,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               reports: row.reports,
               onOpenChild: widget.onOpenReportChild,
             ),
-            SessionToolRunRow() => SessionToolRun(
-              row: row,
-              onToggle: () => _toggle(row.id),
-            ),
-            SessionWorkGroupRow() => SessionWorkGroupHeader(
+            SessionActivityStretchRow() => SessionActivityStretchHeader(
               row: row,
               onToggle: () => _toggle(row.id),
             ),
@@ -1118,10 +1115,15 @@ _ItemSignature _itemSignature(TimelineItem item) => (
     ShellRun(:final exitCode) => exitCode,
     _ => null,
   },
-  // A tool's input and output, compared by value: a re-read that brings the
-  // same values back is not an arrival. A failed turn's error card too.
+  // A tool's input, output and runtime facts, compared by value: a re-read
+  // that brings the same values back is not an arrival. A failed turn's error
+  // card too.
   payload: switch (item) {
-    ToolCall(:final input, :final output) => (input, output),
+    ToolCall(:final input, :final output, :final runFacts) => (
+      input,
+      output,
+      runFacts,
+    ),
     TurnOutcome(:final error) => (error?.kind.value, error?.rawMessage),
     _ => null,
   },

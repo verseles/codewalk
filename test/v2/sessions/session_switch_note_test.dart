@@ -159,18 +159,18 @@ void main() {
       ),
       AssistantText(meta: inMessage('a1', 'm3'), text: 'done', complete: true),
     ], settled: true);
-    final group = rows.whereType<SessionWorkGroupRow>().single;
-    expect(group.work.map((item) => item.id.value), ['t1', 't2']);
-    expect(group.messageCount, 2);
-    // The note shows after the collapsed work, before the answer.
+    final stretches = rows.whereType<SessionActivityStretchRow>().toList();
+    expect(stretches.length, 2);
+    expect(stretches[0].work.map((item) => item.id.value), ['t1']);
+    expect(stretches[1].work.map((item) => item.id.value), ['t2']);
+    // The note stays in chronological order between the stretches, before the answer.
     final shown = [
       for (final row in rows)
         if (row is SessionItemRow) row.item.id.value,
     ];
     expect(shown, ['u1', 'n1', 'a1']);
-    expect(
-      rows.indexWhere((row) => row is SessionWorkGroupRow),
-      lessThan(rows.indexWhere((row) => row.items.contains(note))),
-    );
+    final noteIndex = rows.indexWhere((row) => row.items.contains(note));
+    expect(rows.indexOf(stretches[0]), lessThan(noteIndex));
+    expect(rows.indexOf(stretches[1]), greaterThan(noteIndex));
   });
 }

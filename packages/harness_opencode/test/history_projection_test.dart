@@ -882,4 +882,86 @@ void main() {
       );
     },
   );
+
+  test(
+    'history classifies built-in tools, projects shell ToolRunFacts, and copies reasoning part times',
+    () {
+      final items = project([
+        assistant('a', [
+          {
+            'type': 'reasoning',
+            'text': 'Checking files',
+            'time': {'created': 1000, 'completed': 3500},
+          },
+          {'type': 'reasoning', 'text': 'No time block'},
+          {
+            ...toolBlock(
+              's1',
+              'completed',
+              name: 'shell',
+              input: {'command': 'ls'},
+            ),
+            'state': {
+              'status': 'completed',
+              'input': {'command': 'ls'},
+              'content': [
+                {'type': 'text', 'text': 'a.dart'},
+              ],
+              'metadata': PrivateToolFields(
+                {
+                  'shellID': 'sh_hist1',
+                  'exit': 124,
+                  'status': 'timeout',
+                  'timeout': true,
+                  'interrupted': false,
+                  'background': false,
+                  'truncated': false,
+                  'file': '/tmp/nope',
+                  'cwd': '/home/nope',
+                  'pid': 99,
+                },
+                {'file', 'cwd', 'pid'},
+              ),
+            },
+          },
+          toolBlock('e1', 'completed', name: 'patch'),
+          toolBlock('g1', 'completed', name: 'grep'),
+          toolBlock('w1', 'completed', name: 'webfetch'),
+          toolBlock('ws1', 'completed', name: 'websearch'),
+          toolBlock('sk1', 'completed', name: 'skill'),
+          toolBlock('q1', 'completed', name: 'question'),
+          toolBlock('ex1', 'completed', name: 'execute'),
+        ], completed: true),
+      ]);
+      final r1 = items[0] as Reasoning;
+      expect(
+        r1.started,
+        DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
+      );
+      expect(
+        r1.completed,
+        DateTime.fromMillisecondsSinceEpoch(3500, isUtc: true),
+      );
+      expect(r1.duration, const Duration(milliseconds: 2500));
+      final r2 = items[1] as Reasoning;
+      expect(r2.started, isNull);
+      expect(r2.completed, isNull);
+      expect(r2.duration, isNull);
+
+      final shell = items[2] as ToolCall;
+      expect(shell.kind.known, ToolKind.shell);
+      expect(shell.runFacts?.shellId, 'sh_hist1');
+      expect(shell.runFacts?.exitCode, 124);
+      expect(shell.runFacts?.shellStatus?.known, ShellStatus.timeout);
+      expect(shell.runFacts?.timedOut, isTrue);
+
+      expect((items[3] as ToolCall).kind.known, ToolKind.edit);
+      expect((items[4] as ToolCall).kind.known, ToolKind.search);
+      expect((items[5] as ToolCall).kind.known, ToolKind.fetch);
+      expect((items[6] as ToolCall).kind.known, ToolKind.webSearch);
+      expect((items[7] as ToolCall).kind.known, ToolKind.skill);
+      expect((items[8] as ToolCall).kind.known, ToolKind.question);
+      expect((items[9] as ToolCall).kind.known, ToolKind.other);
+    },
+  );
 }

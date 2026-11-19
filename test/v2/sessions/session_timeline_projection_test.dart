@@ -32,10 +32,20 @@ UserInput _user(String id) => UserInput(
   delivery: const OpenValue.known(DeliveryState.delivered),
 );
 
-Reasoning _think(String id, String message, {bool ended = false}) => Reasoning(
-  meta: _meta(id, message: message, ended: ended),
+Reasoning _think(
+  String id,
+  String message, {
+  bool complete = true,
+  bool ended = false,
+}) => Reasoning(
+  meta: _meta(
+    id,
+    message: message,
+    status: complete ? ItemStatus.completed : ItemStatus.streaming,
+    ended: ended,
+  ),
   text: 'hmm',
-  complete: true,
+  complete: complete,
 );
 
 ToolCall _tool(
@@ -45,6 +55,7 @@ ToolCall _tool(
   ToolKind kind = ToolKind.read,
   String generation = 'g1',
   bool ended = false,
+  ToolRunFacts? runFacts,
 }) => ToolCall(
   meta: _meta(
     id,
@@ -55,6 +66,7 @@ ToolCall _tool(
   ),
   kind: OpenValue.known(kind),
   rawName: kind.name,
+  runFacts: runFacts,
 );
 
 AssistantText _text(
@@ -62,12 +74,14 @@ AssistantText _text(
   String message, {
   bool complete = true,
   String generation = 'g1',
+  bool ended = false,
 }) => AssistantText(
   meta: _meta(
     id,
     message: message,
     status: complete ? ItemStatus.completed : ItemStatus.streaming,
     generation: generation,
+    ended: ended,
   ),
   text: 'answer',
   complete: complete,
@@ -78,10 +92,16 @@ List<String> _shape(List<SessionTimelineRow> rows) => [
   for (final row in rows)
     switch (row) {
       SessionItemRow(:final item) => item.id.value,
-      SessionToolRunRow(:final tools) =>
-        'run(${tools.map((t) => t.id.value).join(',')})',
-      SessionWorkGroupRow(:final work, :final messageCount, :final expanded) =>
-        'work(${work.length}/$messageCount${expanded ? ',open' : ''})',
+      SessionActivityStretchRow(
+        :final work,
+        :final expanded,
+        :final runningCount,
+        :final failedCount,
+      ) =>
+        'stretch(${work.map((w) => w.id.value).join(',')}'
+            '${runningCount > 0 ? ',run=$runningCount' : ''}'
+            '${failedCount > 0 ? ',fail=$failedCount' : ''}'
+            '${expanded ? ',open' : ''})',
       SessionSubagentCallsRow(:final calls) =>
         'agents(${calls.map((call) => call.item.id.value).join(',')})',
       SessionReportRow(:final reports) => 'reports(${reports.length})',
@@ -117,427 +137,415 @@ void main() {
         _text('summary', 'm2'),
       ], settled: true);
       expect(_shape(rows), [
-        'work(1/1)',
         'reports(2)',
+        'stretch(call)',
         'reports(1)',
         'summary',
       ]);
     },
   );
 
-  test('a streaming turn shows its calls in a run and nothing collapses', () {
+  test('stretch collapses immediately as soon as following answer streams', () {
     final rows = SessionTimelinePresentation().project(
       _turn(complete: false),
       settled: false,
     );
-    expect(_shape(rows), ['u1', 'r1', 'run(t1,t2,t3)', 'a1']);
+    expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,t3)', 'a1']);
   });
 
-  test('a reminder neither holds the fold nor hides in it (#491)', () {
+  test('live tail with no following text stays individual compact rows', () {
+    final rows = SessionTimelinePresentation().project([
+      _user('u1'),
+      _think('r1', 'm1', complete: false),
+      _tool('t1', 'm1'),
+      _tool('t2', 'm1', status: ItemStatus.streaming),
+    ], settled: false);
+    expect(_shape(rows), ['u1', 'r1', 't1', 't2']);
+  });
+
+  test(
+    'intermediate AssistantText stays visible forever while only tool stretches compact',
+    () {
+      final presentation = SessionTimelinePresentation();
+      // Phase 1: work -> intermediate text -> more live work (no final text yet).
+      final midTurn = [
+        _user('u1'),
+        _tool('t1', 'm1', kind: ToolKind.read),
+        _tool('t2', 'm1', kind: ToolKind.shell),
+        _text('a1', 'm2'),
+        _tool('t3', 'm3', kind: ToolKind.search),
+        _tool('t4', 'm3', kind: ToolKind.edit, status: ItemStatus.streaming),
+      ];
+      expect(_shape(presentation.project(midTurn, settled: false)), [
+        'u1',
+        'stretch(t1,t2)',
+        'a1',
+        't3',
+        't4',
+      ]);
+      // Phase 2: final answer begins arriving -> second stretch collapses too,
+      // and BOTH intermediate a1 and final a2 stay visible forever.
+      final withFinal = [
+        ...midTurn.take(5),
+        _tool('t4', 'm3', kind: ToolKind.edit),
+        _text('a2', 'm4', complete: false),
+      ];
+      expect(_shape(presentation.project(withFinal, settled: false)), [
+        'u1',
+        'stretch(t1,t2)',
+        'a1',
+        'stretch(t3,t4)',
+        'a2',
+      ]);
+      expect(_shape(presentation.project(withFinal, settled: true)), [
+        'u1',
+        'stretch(t1,t2)',
+        'a1',
+        'stretch(t3,t4)',
+        'a2',
+      ]);
+    },
+  );
+
+  test('a reminder stays outside stretches in chronological order (#491)', () {
     Notice reminder(String id, ItemStatus status) => Notice(
       meta: _meta(id, status: status),
       kind: const OpenValue.known(NoticeKind.continuation),
       text: 'You are in Plan mode.',
     );
-    // A reminder admitted after the answer, still pending or cancelled,
-    // leaves the finished work folded.
     for (final status in [ItemStatus.pending, ItemStatus.interrupted]) {
       final rows = SessionTimelinePresentation().project([
         ..._turn(),
         reminder('n1', status),
       ], settled: true);
-      expect(_shape(rows), ['u1', 'work(4/2)', 'a1', 'n1'], reason: '$status');
+      expect(_shape(rows), [
+        'u1',
+        'stretch(r1,t1,t2,t3)',
+        'a1',
+        'n1',
+      ], reason: '$status');
     }
-    // One added among the work stays in sight after the folded work.
     final turn = _turn();
     final rows = SessionTimelinePresentation().project([
       ...turn.take(3),
       reminder('n2', ItemStatus.completed),
       ...turn.skip(3),
     ], settled: true);
-    expect(_shape(rows), ['u1', 'work(4/2)', 'n2', 'a1']);
-  });
-
-  test('a finished turn collapses its work behind the answer', () {
-    final presentation = SessionTimelinePresentation();
-    var rows = presentation.project(_turn(), settled: true);
-    expect(_shape(rows), ['u1', 'work(4/2)', 'a1']);
-    final group = rows[1] as SessionWorkGroupRow;
-    presentation.toggle(group.id);
-    rows = presentation.project(_turn(), settled: true);
-    expect(_shape(rows), ['u1', 'work(4/2,open)', 'r1', 'run(t1,t2,t3)', 'a1']);
-    // The reader's choice survives the rebuilds of the same timeline...
-    rows = presentation.project(_turn(generation: 'g2'), settled: true);
-    expect((rows[1] as SessionWorkGroupRow).expanded, isTrue);
-    // ...and a timeline shown again starts collapsed.
-    rows = SessionTimelinePresentation().project(_turn(), settled: true);
-    expect(_shape(rows), ['u1', 'work(4/2)', 'a1']);
-  });
-
-  test('the final message\'s work before its text joins the group (#469)', () {
-    final items = [
-      _user('u1'),
-      _tool('t1', 'm1'),
-      _think('r2', 'm2'),
-      _tool('t2', 'm2'),
-      _text('a2', 'm2'),
-    ];
-    final rows = SessionTimelinePresentation().project(items, settled: true);
-    expect(_shape(rows), ['u1', 'work(3/2)', 'a2']);
-    // A one-message answer collapses its reasoning too.
-    expect(
-      _shape(
-        SessionTimelinePresentation().project([
-          _user('u1'),
-          _think('r1', 'm1'),
-          _text('a1', 'm1'),
-        ], settled: true),
-      ),
-      ['u1', 'work(1/1)', 'a1'],
-    );
-  });
-
-  test('every answer text of the final message stays shown (#469)', () {
-    final items = [
-      _user('u1'),
-      _think('r1', 'm1'),
-      _text('a1', 'm1'),
-      _tool('t1', 'm1'),
-      _think('r2', 'm1'),
-      _text('a2', 'm1'),
-    ];
-    final rows = SessionTimelinePresentation().project(items, settled: true);
-    expect(_shape(rows), ['u1', 'work(1/1)', 'a1', 't1', 'r2', 'a2']);
-  });
-
-  test('a succeeded outcome has no row; other outcomes keep theirs', () {
-    TurnOutcome end(String id, OutcomeKind kind) =>
-        TurnOutcome(meta: _meta(id), kind: OpenValue.known(kind));
-    final items = [
-      ..._turn(),
-      end('o1', OutcomeKind.succeeded),
-      _user('u2'),
-      _text('a2', 'm4'),
-      end('o2', OutcomeKind.interrupted),
-    ];
-    final rows = SessionTimelinePresentation().project(items, settled: true);
-    expect(_shape(rows), ['u1', 'work(4/2)', 'a1', 'u2', 'a2', 'o2']);
-  });
-
-  test('a compaction collapses with the work unless it failed (#469)', () {
-    Notice compaction(ItemStatus status) => Notice(
-      meta: _meta('c1', status: status),
-      kind: const OpenValue.known(NoticeKind.compaction),
-      text: 'summary',
-    );
-    List<String> shape(ItemStatus status) => _shape(
-      SessionTimelinePresentation().project([
-        _user('u1'),
-        compaction(status),
-        ..._turn().skip(1),
-      ], settled: true),
-    );
-    expect(shape(ItemStatus.completed), ['u1', 'work(5/3)', 'a1']);
-    expect(shape(ItemStatus.failed), ['u1', 'c1', 'r1', 'run(t1,t2,t3)', 'a1']);
-    expect(shape(ItemStatus.streaming).first, 'u1');
-    expect(shape(ItemStatus.streaming), contains('c1'));
-    // After the answer: a completed one stays a row below it, a failed one
-    // keeps the turn expanded.
-    List<String> after(ItemStatus status) => _shape(
-      SessionTimelinePresentation().project([
-        ..._turn(),
-        compaction(status),
-      ], settled: true),
-    );
-    expect(after(ItemStatus.completed), ['u1', 'work(4/2)', 'a1', 'c1']);
-    expect(after(ItemStatus.failed), ['u1', 'r1', 'run(t1,t2,t3)', 'a1', 'c1']);
-  });
-
-  test('an item outside any message never hides an answer text', () {
-    final items = [
-      _user('u1'),
-      _text('a1', 'm1'),
-      Notice(
-        meta: _meta('n1'),
-        kind: const OpenValue.known(NoticeKind.system),
-        text: 'between',
-      ),
-      _think('r2', 'm1'),
-      _text('a2', 'm1'),
-    ];
-    final rows = SessionTimelinePresentation().project(items, settled: true);
-    expect(_shape(rows), ['u1', 'a1', 'n1', 'r2', 'a2']);
-  });
-
-  group('the work never collapses before the turn finished (#273)', () {
-    for (final (name, items, settled) in [
-      ('while the session runs', _turn(), false),
-      ('while the answer streams', _turn(complete: false), true),
-      (
-        'while a call still runs',
-        [..._turn(), _tool('t4', 'm4', status: ItemStatus.streaming)],
-        true,
-      ),
-      (
-        'over a failed turn',
-        [
-          ..._turn(),
-          TurnOutcome(
-            meta: _meta('o1'),
-            kind: const OpenValue.known(OutcomeKind.failed),
-          ),
-        ],
-        true,
-      ),
-      (
-        'without the harness message of the answer',
-        [
-          _user('u1'),
-          _tool('t1', 'm1'),
-          AssistantText(meta: _meta('a1'), text: 'answer', complete: true),
-        ],
-        true,
-      ),
-      (
-        'without an answer',
-        [_user('u1'), _tool('t1', 'm1'), _tool('t2', 'm1')],
-        true,
-      ),
-    ]) {
-      test(name, () {
-        final rows = SessionTimelinePresentation().project(
-          items,
-          settled: settled,
-        );
-        expect(rows.whereType<SessionWorkGroupRow>(), isEmpty);
-      });
-    }
-  });
-
-  test('an earlier turn collapses while a newer one runs', () {
-    final items = [
-      ..._turn(),
-      _user('u2'),
-      _tool('t9', 'm9', status: ItemStatus.streaming),
-    ];
-    final rows = SessionTimelinePresentation().project(items, settled: false);
-    expect(_shape(rows), ['u1', 'work(4/2)', 'a1', 'u2', 't9']);
-  });
-
-  test('a settled turn stays collapsed through status jitter (#274)', () {
-    final presentation = SessionTimelinePresentation();
-    final settledRows = presentation.project(_turn(), settled: true);
-    final id = (settledRows[1] as SessionWorkGroupRow).id;
-    // A pulse that briefly reports the session busy, and a rehydration that
-    // brings the same items back under a new generation.
-    for (final items in [_turn(), _turn(generation: 'g2')]) {
-      final rows = presentation.project(items, settled: false);
-      expect(_shape(rows), ['u1', 'work(4/2)', 'a1']);
-      expect((rows[1] as SessionWorkGroupRow).id, id);
-    }
-    // An item of the turn that streams again reopens it, latch or not
-    // (#273).
-    final resumed = [
-      for (final item in _turn())
-        item.id.value == 't3'
-            ? _tool('t3', 'm2', status: ItemStatus.streaming, generation: 'g3')
-            : item,
-    ];
-    for (final settled in [false, true]) {
-      expect(
-        presentation
-            .project(resumed, settled: settled)
-            .whereType<SessionWorkGroupRow>(),
-        isEmpty,
-      );
-    }
-    // New content in the same turn reopens it while it runs.
-    final rows = presentation.project([
-      ..._turn(),
-      _tool('t4', 'm4', status: ItemStatus.streaming),
-    ], settled: false);
-    expect(rows.whereType<SessionWorkGroupRow>(), isEmpty);
-  });
-
-  test('a run is two or more calls; a sub-agent keeps its own row', () {
-    final items = [
-      _user('u1'),
-      _tool('t1', 'm1'),
-      _think('r1', 'm1'),
-      _tool('t2', 'm1'),
-      _tool('s1', 'm1', kind: ToolKind.subagent),
-      _tool('t3', 'm1'),
-      _tool('t4', 'm1'),
-      _text('a1', 'm1', complete: false),
-    ];
-    final presentation = SessionTimelinePresentation();
-    final rows = presentation.project(items, settled: false);
     expect(_shape(rows), [
       'u1',
-      't1',
-      'r1',
-      't2',
-      'agents(s1)',
-      'run(t3,t4)',
+      'stretch(r1,t1)',
+      'n2',
+      'stretch(t2,t3)',
       'a1',
     ]);
-    final run = rows[5] as SessionToolRunRow;
-    expect(run.expanded, isFalse);
-    // The run's calls belong to a message opened above it.
-    expect(run.messageHeaders, [false, false]);
-    presentation.toggle(run.id);
-    // A call appended to the run keeps its identity and its open state.
-    final grown = presentation.project([
-      ...items.take(7),
-      _tool('t5', 'm1', status: ItemStatus.pending),
-      ...items.skip(7),
-    ], settled: false);
-    final again = grown[5] as SessionToolRunRow;
-    expect([again.id, again.expanded, again.tools.length], [run.id, true, 3]);
   });
 
   test(
-    'only adjacent subagent calls share a summary, even with hidden reasoning',
+    'expanding a collapsed stretch reveals individual rows and survives rebuilds',
     () {
-      final items = [
-        _tool('s1', 'm1', kind: ToolKind.subagent),
-        _tool('s2', 'm1', kind: ToolKind.subagent),
-        _think('r1', 'm1'),
-        _tool('s3', 'm1', kind: ToolKind.subagent),
-      ];
-      final rows = SessionTimelinePresentation().project(
-        items,
-        settled: false,
-        showReasoning: false,
-      );
-      expect(_shape(rows), ['agents(s1,s2)', 'agents(s3)']);
-      expect(
-        (rows.first as SessionSubagentCallsRow).calls.map(
-          (c) => c.messageHeader,
-        ),
-        [true, false],
-      );
+      final presentation = SessionTimelinePresentation();
+      var rows = presentation.project(_turn(), settled: true);
+      expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,t3)', 'a1']);
+      final stretch = rows[1] as SessionActivityStretchRow;
+      expect(stretch.openingMessage?.message, MessageRef('m1'));
+      expect(stretch.messageHeaders, [true, false, false, true]);
+
+      presentation.toggle(stretch.id);
+      rows = presentation.project(_turn(), settled: true);
+      expect(_shape(rows), [
+        'u1',
+        'stretch(r1,t1,t2,t3,open)',
+        'r1',
+        't1',
+        't2',
+        't3',
+        'a1',
+      ]);
+      // Expanded rows preserve per-item message headers.
+      expect((rows[2] as SessionItemRow).messageHeader, isTrue);
+      expect((rows[3] as SessionItemRow).messageHeader, isFalse);
+      expect((rows[5] as SessionItemRow).messageHeader, isTrue);
+
+      // Reader choice survives passive refresh under new generation.
+      rows = presentation.project(_turn(generation: 'g2'), settled: true);
+      expect((rows[1] as SessionActivityStretchRow).expanded, isTrue);
+
+      // A fresh presentation starts collapsed.
+      rows = SessionTimelinePresentation().project(_turn(), settled: true);
+      expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,t3)', 'a1']);
     },
   );
 
-  test('only the first item of a message opens it', () {
-    final rows = SessionTimelinePresentation().project(
-      _turn(complete: false),
-      settled: false,
-    );
-    expect(
-      [
-        for (final row in rows)
-          if (row is SessionItemRow) row.messageHeader,
-      ],
-      [false, true, true],
-    );
-  });
+  test(
+    'failed and background-running items surface on the stretch summary',
+    () {
+      final bgFacts = ToolRunFacts(
+        shellId: 'sh_bg',
+        background: true,
+        shellStatus: const OpenValue.known(ShellStatus.running),
+      );
+      final failFacts = ToolRunFacts(
+        exitCode: 1,
+        shellStatus: const OpenValue.known(ShellStatus.exited),
+      );
+      final rows = SessionTimelinePresentation().project([
+        _user('u1'),
+        _tool('s1', 'm1', kind: ToolKind.shell, runFacts: bgFacts),
+        _tool('s2', 'm1', kind: ToolKind.shell, runFacts: failFacts),
+        _text('a1', 'm2', complete: false),
+      ], settled: false);
+      expect(_shape(rows), ['u1', 'stretch(s1,s2,run=1,fail=1)', 'a1']);
+    },
+  );
 
-  test('hidden reasoning and calls leave no row and no empty group (#108)', () {
-    final presentation = SessionTimelinePresentation();
-    List<String> shape(
-      bool settled, {
-      bool reasoning = true,
-      bool tools = true,
-    }) => _shape(
-      presentation.project(
-        _turn(complete: settled),
-        settled: settled,
-        showReasoning: reasoning,
-        showToolCalls: tools,
+  test('failed TurnOutcome and Notices stay outside stretches', () {
+    final rows = SessionTimelinePresentation().project([
+      ..._turn(),
+      TurnOutcome(
+        meta: _meta('o1'),
+        kind: const OpenValue.known(OutcomeKind.failed),
       ),
-    );
-    expect(shape(false, tools: false), ['u1', 'r1', 'a1']);
-    expect(shape(false, reasoning: false), ['u1', 'run(t1,t2,t3)', 'a1']);
-    expect(shape(true, tools: false), ['u1', 'work(1/1)', 'a1']);
-    expect(shape(true, reasoning: false), ['u1', 'work(3/2)', 'a1']);
-    expect(shape(true, reasoning: false, tools: false), ['u1', 'a1']);
-    // The first item shown of a message opens it, so its details stay
-    // reachable when the item that opened it is hidden.
-    final rows = presentation.project(
-      _turn(complete: false),
-      settled: false,
-      showReasoning: false,
-    );
-    expect((rows[1] as SessionToolRunRow).messageHeaders, [true, false, true]);
+      Notice(
+        meta: _meta('c1', status: ItemStatus.failed),
+        kind: const OpenValue.known(NoticeKind.compaction),
+        text: 'compaction failed',
+      ),
+    ], settled: true);
+    expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,t3)', 'a1', 'o1', 'c1']);
   });
 
-  test('the Block render mode holds what did not finish (#284)', () {
+  test('settled trailing stretch collapses and resists brief busy jitter', () {
+    final items = [_user('u1'), _tool('t1', 'm1'), _tool('t2', 'm1')];
     final presentation = SessionTimelinePresentation();
-    List<String> block(List<TimelineItem> items, {bool settled = false}) =>
-        _shape(
-          presentation.project(
-            items,
-            settled: settled,
-            renderMode: ChatRenderMode.block,
-          ),
-        );
-    final inFlight = [
-      _user('u1'),
-      _think('r1', 'm1', ended: true),
-      _tool('t1', 'm1', ended: true),
-      _tool('t2', 'm1', ended: true),
-      _text('x1', 'm2', complete: false),
-      _tool('t3', 'm2'),
-      _tool('t4', 'm2', status: ItemStatus.streaming),
-    ];
-    // The messages that ended, then each call that ended, then the rest
-    // waits behind the pending row.
-    expect(block(inFlight), ['u1', 'r1', 'run(t1,t2)', 't3', 'pending(u1)']);
-    expect(_shape(presentation.project(inFlight, settled: false)), [
-      'u1',
-      'r1',
-      'run(t1,t2)',
-      'x1',
-      'run(t3,t4)',
-    ]);
-    // A prompt waiting for its first answer keeps the same pending row.
-    expect(block([_user('u1')]), ['u1', 'pending(u1)']);
-    // Only the turn in flight is held.
-    expect(
-      block([..._turn(), _user('u2'), _text('a2', 'm9', complete: false)]),
-      ['u1', 'work(4/2)', 'a1', 'u2', 'pending(u2)'],
-    );
-    // A settled session shows everything, collapsed as in Live.
-    expect(block(_turn(), settled: true), ['u1', 'work(4/2)', 'a1']);
-    // Ended calls join as Live would join them: a held call keeps them
-    // together, a held text or a shown reasoning between them does not.
-    List<TimelineItem> interleaved(TimelineItem between) => [
-      _user('u1'),
-      _tool('t1', 'm1'),
-      between,
-      _tool('t2', 'm1'),
-      _tool('t3', 'm1', status: ItemStatus.streaming),
-      _tool('t4', 'm1'),
-    ];
-    expect(block(interleaved(_text('x1', 'm1', complete: false))), [
+    expect(_shape(presentation.project(items, settled: false)), [
       'u1',
       't1',
-      'run(t2,t4)',
-      'pending(u1)',
+      't2',
     ]);
-    expect(block(interleaved(_think('r1', 'm1'))), [
+    final settledRows = presentation.project(items, settled: true);
+    expect(_shape(settledRows), ['u1', 'stretch(t1,t2)']);
+    // Brief busy pulse keeps settled trailing stretch closed.
+    expect(_shape(presentation.project(items, settled: false)), [
       'u1',
-      't1',
-      'run(t2,t4)',
-      'pending(u1)',
+      'stretch(t1,t2)',
     ]);
+    // A new streaming item reopens the live tail.
     expect(
       _shape(
-        presentation.project(
-          interleaved(_think('r1', 'm1')),
-          settled: false,
-          showReasoning: false,
-          renderMode: ChatRenderMode.block,
-        ),
+        presentation.project([
+          ...items,
+          _tool('t3', 'm2', status: ItemStatus.streaming),
+        ], settled: false),
       ),
-      ['u1', 'run(t1,t2,t4)', 'pending(u1)'],
+      ['u1', 't1', 't2', 't3'],
     );
-    // A window that opens in the middle of the turn anchors on its first
-    // item.
-    expect(block([_tool('t9', 'm9', status: ItemStatus.streaming)]), [
-      'pending(t9)',
+  });
+
+  test('subagent calls stay outside stretches and keep original adjacency', () {
+    final items = [
+      _user('u1'),
+      _tool('t1', 'm1'),
+      _tool('s1', 'm1', kind: ToolKind.subagent),
+      _tool('s2', 'm1', kind: ToolKind.subagent),
+      _think('r1', 'm1'),
+      _tool('s3', 'm1', kind: ToolKind.subagent),
+      _text('a1', 'm2'),
+    ];
+    final rows = SessionTimelinePresentation().project(
+      items,
+      settled: true,
+      showReasoning: false,
+    );
+    expect(_shape(rows), [
+      'u1',
+      'stretch(t1)',
+      'agents(s1,s2)',
+      'agents(s3)',
+      'a1',
     ]);
   });
+
+  test(
+    'hidden reasoning and calls leave no row and no empty stretch (#108)',
+    () {
+      final presentation = SessionTimelinePresentation();
+      List<String> shape({bool reasoning = true, bool tools = true}) => _shape(
+        presentation.project(
+          _turn(),
+          settled: true,
+          showReasoning: reasoning,
+          showToolCalls: tools,
+        ),
+      );
+      expect(shape(tools: false), ['u1', 'stretch(r1)', 'a1']);
+      expect(shape(reasoning: false), ['u1', 'stretch(t1,t2,t3)', 'a1']);
+      expect(shape(reasoning: false, tools: false), ['u1', 'a1']);
+      final rows = presentation.project(
+        _turn(),
+        settled: true,
+        showReasoning: false,
+      );
+      expect((rows[1] as SessionActivityStretchRow).messageHeaders, [
+        true,
+        false,
+        true,
+      ]);
+    },
+  );
+
+  test(
+    'Block render mode holds unfinished answers and does not collapse before heldText (#284)',
+    () {
+      final presentation = SessionTimelinePresentation();
+      List<String> block(List<TimelineItem> items, {bool settled = false}) =>
+          _shape(
+            presentation.project(
+              items,
+              settled: settled,
+              renderMode: ChatRenderMode.block,
+            ),
+          );
+      final inFlight = [
+        _user('u1'),
+        _think('r1', 'm1', ended: true),
+        _tool('t1', 'm1', ended: true),
+        _tool('t2', 'm1', ended: true),
+        _text('x1', 'm2', complete: false),
+        _tool('t3', 'm2'),
+        _tool('t4', 'm2', status: ItemStatus.streaming),
+      ];
+      // x1 is held (not visible yet), so r1/t1/t2 do NOT collapse in Block mode!
+      expect(block(inFlight), ['u1', 'r1', 't1', 't2', 't3', 'pending(u1)']);
+      expect(
+        SessionTimelinePresentation.heldText(
+          inFlight,
+          settled: false,
+          renderMode: ChatRenderMode.block,
+        ),
+        {const ItemId('x1')},
+      );
+      // In Live mode x1 IS visible, so r1/t1/t2 DO collapse before x1.
+      expect(_shape(presentation.project(inFlight, settled: false)), [
+        'u1',
+        'stretch(r1,t1,t2)',
+        'x1',
+        't3',
+        't4',
+      ]);
+      // A published intermediate ended answer DOES collapse the stretch before it in Block mode.
+      final withPublishedIntermediate = [
+        _user('u1'),
+        _tool('t1', 'm1', ended: true),
+        _text('a1', 'm2', ended: true),
+        _tool('t2', 'm3', ended: true),
+        _text('x2', 'm4', complete: false),
+      ];
+      expect(block(withPublishedIntermediate), [
+        'u1',
+        'stretch(t1)',
+        'a1',
+        't2',
+        'pending(u1)',
+      ]);
+      // Prompt waiting for its first answer keeps pending row.
+      expect(block([_user('u1')]), ['u1', 'pending(u1)']);
+      // Settled Block mode collapses identically to Live.
+      expect(block(_turn(), settled: true), [
+        'u1',
+        'stretch(r1,t1,t2,t3)',
+        'a1',
+      ]);
+    },
+  );
+
+  test(
+    'unknown-status ShellRun is excluded from compaction so history minimizes it',
+    () {
+      final unknownShell = ShellRun(
+        meta: _meta('sh_u', message: 'm1'),
+        command: 'echo hi',
+        shellStatus: OpenValue.unknown('custom_state'),
+      );
+      final rows = SessionTimelinePresentation().project([
+        _user('u1'),
+        _tool('t1', 'm1'),
+        unknownShell,
+        _tool('t2', 'm1'),
+        _text('a1', 'm2'),
+      ], settled: true);
+      expect(_shape(rows), ['u1', 'stretch(t1)', 'sh_u', 'stretch(t2)', 'a1']);
+    },
+  );
+
+  test(
+    'empty or whitespace AssistantText does not prematurely collapse a stretch',
+    () {
+      final emptyAnswer = AssistantText(
+        meta: _meta('a0', message: 'm2', status: ItemStatus.streaming),
+        text: '   \n\t  ',
+        complete: false,
+      );
+      final rows = SessionTimelinePresentation().project([
+        _user('u1'),
+        _tool('t1', 'm1'),
+        emptyAnswer,
+      ], settled: false);
+      expect(_shape(rows), ['u1', 't1', 'a0']);
+    },
+  );
+
+  test(
+    'failed/interrupted ToolCall with running runFacts is never active and Block mode keeps running shell calls live',
+    () {
+      final runningFacts = ToolRunFacts(
+        shellId: 'sh_live',
+        background: true,
+        shellStatus: const OpenValue.known(ShellStatus.running),
+      );
+      final failedStale = _tool(
+        'tf',
+        'm1',
+        status: ItemStatus.failed,
+        kind: ToolKind.shell,
+        runFacts: runningFacts,
+      );
+      final liveBg = _tool(
+        'tb',
+        'm1',
+        status: ItemStatus.completed,
+        kind: ToolKind.shell,
+        runFacts: runningFacts,
+      );
+      final doneTool = _tool('td', 'm1');
+      final liveRows = SessionTimelinePresentation().project([
+        _user('u1'),
+        failedStale,
+        _text('a1', 'm2', complete: false),
+      ], settled: false);
+      expect(_shape(liveRows), ['u1', 'stretch(tf,fail=1)', 'a1']);
+
+      // In Block mode, a completed ToolCall whose background shell is still
+      // running is not treated as an ended call, unlike a finished call.
+      final blockRows = SessionTimelinePresentation().project(
+        [_user('u1'), doneTool, liveBg],
+        settled: false,
+        renderMode: ChatRenderMode.block,
+      );
+      expect(_shape(blockRows), ['u1', 'td', 'pending(u1)']);
+
+      // Without message context, _ended also consults _running for ToolCall.
+      final liveBgNoMsg = ToolCall(
+        meta: _meta('tb2', status: ItemStatus.completed),
+        kind: const OpenValue.known(ToolKind.shell),
+        rawName: 'shell',
+        runFacts: runningFacts,
+      );
+      final blockNoMsg = SessionTimelinePresentation().project(
+        [_user('u1'), liveBgNoMsg],
+        settled: false,
+        renderMode: ChatRenderMode.block,
+      );
+      expect(_shape(blockNoMsg), ['u1', 'pending(u1)']);
+    },
+  );
 }

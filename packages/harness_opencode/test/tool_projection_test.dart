@@ -777,4 +777,148 @@ void main() {
       expect(state.timeline.single.status.known, ItemStatus.streaming);
     },
   );
+
+  test(
+    'built-in OpenCode v2 tool names map to canonical ToolKind without guessing MCP',
+    () {
+      const expected = {
+        'read': ToolKind.read,
+        'edit': ToolKind.edit,
+        'patch': ToolKind.edit,
+        'write': ToolKind.write,
+        'grep': ToolKind.search,
+        'glob': ToolKind.search,
+        'webfetch': ToolKind.fetch,
+        'websearch': ToolKind.webSearch,
+        'shell': ToolKind.shell,
+        'skill': ToolKind.skill,
+        'question': ToolKind.question,
+        'subagent': ToolKind.subagent,
+        'execute': ToolKind.other,
+        'session_rename': ToolKind.other,
+        'github_create_issue': ToolKind.other,
+      };
+      for (final entry in expected.entries) {
+        final event =
+            projectTool(toolFrame('input.started', name: entry.key))!
+                as ItemUpserted;
+        final item = event.item as ToolCall;
+        expect(item.kind.known, entry.value, reason: entry.key);
+      }
+    },
+  );
+
+  test(
+    'shell tool projects progress shellID and terminal ToolRunFacts without reading host paths or PIDs',
+    () {
+      var state = SessionState(historyRef);
+      state = reduce(
+        state,
+        projectTool(
+          toolFrame('input.started', id: 'evt_sh_1', name: 'shell'),
+          current: state,
+        )!,
+      ).state;
+      state = reduce(
+        state,
+        projectTool(
+          toolFrame('called', id: 'evt_sh_2', input: {'command': 'make test'}),
+          current: state,
+          seq: 2,
+        )!,
+      ).state;
+      final progress = toolFrame('progress', id: 'evt_sh_3');
+      toolData(progress)['metadata'] = PrivateToolFields(
+        {
+          'shellID': 'sh_abc123',
+          'file': '/tmp/private',
+          'cwd': '/home/private',
+          'pid': 4242,
+        },
+        {'file', 'cwd', 'pid'},
+      );
+      final progEvent =
+          projectTool(progress, current: state, seq: 3)! as ItemUpserted;
+      state = reduce(state, progEvent).state;
+      expect(
+        (state.timeline.single as ToolCall).runFacts?.shellId,
+        'sh_abc123',
+      );
+      // Identical progress metadata is a no-op.
+      final progressDup = toolFrame('progress', id: 'evt_sh_3b');
+      toolData(progressDup)['metadata'] = {'shellID': 'sh_abc123'};
+      expect(projectTool(progressDup, current: state, seq: 4), isNull);
+
+      final success = toolFrame(
+        'success',
+        id: 'evt_sh_4',
+        content: [
+          {'type': 'text', 'text': 'ok'},
+        ],
+      );
+      toolData(success)['metadata'] = PrivateToolFields(
+        {
+          'status': 'running',
+          'background': true,
+          'truncated': false,
+          'file': '/tmp/private',
+          'cwd': '/home/private',
+          'pid': 4242,
+        },
+        {'file', 'cwd', 'pid'},
+      );
+      final doneEvent =
+          projectTool(success, current: state, seq: 5)! as ItemUpserted;
+      state = reduce(state, doneEvent).state;
+      final tool = state.timeline.single as ToolCall;
+      expect(tool.runFacts?.shellId, 'sh_abc123');
+      expect(tool.runFacts?.background, isTrue);
+      expect(tool.runFacts?.shellStatus?.known, ShellStatus.running);
+      expect(tool.runFacts?.exitCode, isNull);
+    },
+  );
+
+  test(
+    'shell tool metadata enforces UTF-8 byte cap and valid UTF-16 surrogates',
+    () {
+      var state = SessionState(historyRef);
+      state = reduce(
+        state,
+        projectTool(
+          toolFrame('input.started', id: 'evt_sh_utf1', name: 'shell'),
+          current: state,
+        )!,
+      ).state;
+
+      // 2000 3-byte chars = 2000 UTF-16 units (<4096) but 6000 UTF-8 bytes (>4096).
+      final overUtf8 = toolFrame('progress', id: 'evt_sh_utf2');
+      toolData(overUtf8)['metadata'] = {'shellID': '€' * 2000};
+      expect(
+        () => projectTool(overUtf8, current: state, seq: 2),
+        fails(OpenCodeToolProjectionFailure.limitExceeded),
+      );
+
+      final unpairedHigh = toolFrame('progress', id: 'evt_sh_utf3');
+      toolData(unpairedHigh)['metadata'] = {
+        'shellID': 'sh_${String.fromCharCode(0xd800)}',
+      };
+      expect(
+        () => projectTool(unpairedHigh, current: state, seq: 3),
+        fails(OpenCodeToolProjectionFailure.malformed),
+      );
+
+      final unpairedStatus = toolFrame(
+        'success',
+        id: 'evt_sh_utf4',
+        content: const [],
+      );
+      toolData(unpairedStatus)['metadata'] = {
+        'status': 'bad_${String.fromCharCode(0xdc00)}',
+      };
+      expect(
+        () => projectTool(unpairedStatus, current: state, seq: 4),
+        fails(OpenCodeToolProjectionFailure.malformed),
+      );
+    },
+  );
 }

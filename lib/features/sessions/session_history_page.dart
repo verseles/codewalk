@@ -4,10 +4,10 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_history_controller.dart';
-import 'session_message_info.dart';
 import 'session_report_group.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
+import 'session_work_group.dart';
 
 class SessionHistoryPage extends StatefulWidget {
   const SessionHistoryPage({super.key, required this.controller});
@@ -19,6 +19,7 @@ class SessionHistoryPage extends StatefulWidget {
 class _SessionHistoryPageState extends State<SessionHistoryPage> {
   /// What each row keeps while it is not built, such as an opened tool.
   final _rowState = PageStorageBucket();
+  final _presentation = SessionTimelinePresentation();
   final _expandedSubagentCalls = <ItemId>{};
 
   @override
@@ -50,11 +51,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
         SessionHistoryFailure.invalidCursor => l10n.sessionsInvalidCursor,
         _ => l10n.historyUnavailable,
       };
-      final items = sessionTimelineItems(c.items);
-      final rows = groupSubagentActivity([
-        for (final (i, item) in items.indexed)
-          SessionItemRow(item, messageHeader: opensMessage(items, i)),
-      ], c.items);
+      final rows = _presentation.project(c.items, settled: true);
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -144,6 +141,14 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                           return SessionReportGroup(
                             key: row.key,
                             reports: row.reports,
+                          );
+                        }
+                        if (row is SessionActivityStretchRow) {
+                          return SessionActivityStretchHeader(
+                            key: row.key,
+                            row: row,
+                            onToggle: () =>
+                                setState(() => _presentation.toggle(row.id)),
                           );
                         }
                         final single = row as SessionItemRow;

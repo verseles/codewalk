@@ -2393,4 +2393,148 @@ class V2LocalizationsZh extends V2Localizations {
   @override
   String get settingsBehaviorWindowCloseDescription =>
       '“关闭”会退出 CodeWalk。“最小化”会让它在任务栏中继续运行。';
+
+  @override
+  String get toolKindShell => 'Shell';
+
+  @override
+  String get toolKindRead => '读取';
+
+  @override
+  String get toolKindEdit => '编辑';
+
+  @override
+  String get toolKindWrite => '写入';
+
+  @override
+  String get toolKindSearch => '搜索';
+
+  @override
+  String get toolKindFetch => '获取';
+
+  @override
+  String get toolKindWebSearch => '网页搜索';
+
+  @override
+  String get toolKindSkill => '技能';
+
+  @override
+  String get toolKindQuestion => '问题';
+
+  @override
+  String get toolKindTool => '工具';
+
+  @override
+  String chatThinkingHeading(String heading) {
+    return '正在思考：$heading';
+  }
+
+  @override
+  String get chatThought => '已思考';
+
+  @override
+  String chatThoughtDuration(String duration) {
+    return '已思考 · $duration';
+  }
+
+  @override
+  String activityEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '编辑了 $count 个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityExplored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '查看了 $count 个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySearched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次搜索',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFetched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '获取了 $count 个页面',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityCommands(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '运行了 $count 条命令',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySkills(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个技能',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityThought(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '思考了 $count 次',
+      one: '已思考',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个步骤',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityRunning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项运行中',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项失败',
+    );
+    return '$_temp0';
+  }
 }

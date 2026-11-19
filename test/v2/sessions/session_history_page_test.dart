@@ -179,4 +179,94 @@ void main() {
       );
     }
   }
+
+  testWidgets(
+    'history page compacts activity stretches and keeps intermediate text visible',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      await rig.save('a');
+      final sources = <HistorySource>[];
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: LiveDirectory.new,
+        sessionHistoryFactory: (p, c, ref) {
+          final source = HistorySource(ref);
+          sources.add(source);
+          return source;
+        },
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await showSessionList(tester);
+      final read = dependencies.sessions!.selectProfile('profile_a');
+      final catalog = rig.sources.single;
+      final row = catalog.row('one');
+      catalog.respond([row]);
+      await read;
+      await tester.pumpAndSettle();
+      await tester.longPress(
+        find.byKey(ValueKey('live-open-${row.info.ref.storageKey}')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(ValueKey('history-open-${row.info.ref.storageKey}')),
+      );
+      await tester.pump();
+      final source = sources.single;
+      source.respond([
+        UserInput(
+          meta: source.meta(1),
+          text: 'Run tests',
+          delivery: const OpenValue.known(DeliveryState.delivered),
+        ),
+        ToolCall(
+          meta: source.meta(2),
+          kind: const OpenValue.known(ToolKind.shell),
+          rawName: 'shell',
+          input: CanonicalValue(const {'command': 'make test'}),
+        ),
+        ToolCall(
+          meta: source.meta(3),
+          kind: const OpenValue.known(ToolKind.skill),
+          rawName: 'skill',
+          input: CanonicalValue(const {'name': 'planner'}),
+        ),
+        source.item(4, text: 'Intermediate note'),
+        ToolCall(
+          meta: source.meta(5),
+          kind: const OpenValue.known(ToolKind.edit),
+          rawName: 'edit',
+          input: CanonicalValue(const {'path': 'lib/a.dart'}),
+        ),
+        source.item(6, text: 'Final answer'),
+      ]);
+      await tester.pumpAndSettle();
+      final l10n = dependencies.localizations.current;
+      // Both intermediate and final assistant texts remain visible forever.
+      expect(find.text('Intermediate note'), findsOneWidget);
+      expect(find.text('Final answer'), findsOneWidget);
+      // Activity stretches are collapsed with descriptive summaries.
+      expect(
+        find.text('${l10n.activityCommands(1)} · ${l10n.activitySkills(1)}'),
+        findsOneWidget,
+      );
+      expect(find.text(l10n.activityEdited(1)), findsOneWidget);
+      expect(find.text('${l10n.toolKindShell} · make test'), findsNothing);
+      // Tapping a stretch expands its compact single-line rows in place.
+      await tester.tap(
+        find.text('${l10n.activityCommands(1)} · ${l10n.activitySkills(1)}'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('${l10n.toolKindShell} · make test'), findsOneWidget);
+      expect(find.text('${l10n.toolKindSkill} · planner'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
 }

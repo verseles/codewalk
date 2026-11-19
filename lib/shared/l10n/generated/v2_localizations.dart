@@ -4615,6 +4615,144 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Close quits CodeWalk. Minimize keeps it running in the taskbar.'**
   String get settingsBehaviorWindowCloseDescription;
+
+  /// Compact row label for a shell command tool
+  ///
+  /// In en, this message translates to:
+  /// **'Shell'**
+  String get toolKindShell;
+
+  /// Compact row label for a file read tool
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get toolKindRead;
+
+  /// Compact row label for a file edit or patch tool
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get toolKindEdit;
+
+  /// Compact row label for a file write tool
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get toolKindWrite;
+
+  /// Compact row label for a grep or glob search tool
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get toolKindSearch;
+
+  /// Compact row label for a web fetch tool
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch'**
+  String get toolKindFetch;
+
+  /// Compact row label for a web search tool
+  ///
+  /// In en, this message translates to:
+  /// **'Web search'**
+  String get toolKindWebSearch;
+
+  /// Compact row label for a skill loading tool
+  ///
+  /// In en, this message translates to:
+  /// **'Skill'**
+  String get toolKindSkill;
+
+  /// Compact row label for a question tool
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get toolKindQuestion;
+
+  /// Fallback compact row label for an unclassified tool
+  ///
+  /// In en, this message translates to:
+  /// **'Tool'**
+  String get toolKindTool;
+
+  /// Compact streaming reasoning line with extracted heading
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking: {heading}'**
+  String chatThinkingHeading(String heading);
+
+  /// Compact completed reasoning line without duration
+  ///
+  /// In en, this message translates to:
+  /// **'Thought'**
+  String get chatThought;
+
+  /// Compact completed reasoning line with elapsed thinking duration
+  ///
+  /// In en, this message translates to:
+  /// **'Thought · {duration}'**
+  String chatThoughtDuration(String duration);
+
+  /// Compact activity summary fragment for edited or written files
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Edited 1 file} other{Edited {count} files}}'**
+  String activityEdited(int count);
+
+  /// Compact activity summary fragment for read files
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Explored 1 file} other{Explored {count} files}}'**
+  String activityExplored(int count);
+
+  /// Compact activity summary fragment for searches
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 search} other{{count} searches}}'**
+  String activitySearched(int count);
+
+  /// Compact activity summary fragment for fetched web pages
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Fetched 1 page} other{Fetched {count} pages}}'**
+  String activityFetched(int count);
+
+  /// Compact activity summary fragment for shell commands
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Ran 1 command} other{Ran {count} commands}}'**
+  String activityCommands(int count);
+
+  /// Compact activity summary fragment for loaded skills
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 skill} other{{count} skills}}'**
+  String activitySkills(int count);
+
+  /// Compact activity summary fragment for reasoning steps
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Thought} other{Thought {count} times}}'**
+  String activityThought(int count);
+
+  /// Compact activity summary fragment for other tool steps
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 step} other{{count} steps}}'**
+  String activitySteps(int count);
+
+  /// Compact activity summary fragment for still-running items
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 running} other{{count} running}}'**
+  String activityRunning(int count);
+
+  /// Compact activity summary fragment for failed or interrupted items
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 failed} other{{count} failed}}'**
+  String activityFailed(int count);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

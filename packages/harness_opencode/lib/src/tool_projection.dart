@@ -5,8 +5,9 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'item_ids.dart';
 import 'message_context.dart';
 import 'shell_projection.dart';
-import 'version_policy.dart';
 import 'subagent_child.dart';
+import 'tool_metadata.dart';
+import 'version_policy.dart';
 
 enum OpenCodeToolProjectionFailure {
   malformed,
@@ -272,12 +273,51 @@ SessionEvent? projectOpenCodeToolEvent(
   }
 
   if (progressMetadata != null) {
-    // Only the live call of this generation learns its child; an unknown,
-    // stale or settled call is left to its durable events.
-    if (resident is! ToolCall ||
-        !compatible(resident) ||
-        _settled(resident) ||
-        resident.kind.known != ToolKind.subagent) {
+    // Only the live call of this generation learns progress observations; an
+    // unknown, stale or settled call is left to its durable events.
+    if (resident is! ToolCall || !compatible(resident) || _settled(resident)) {
+      return null;
+    }
+    final kind = resident.kind.known;
+    if (kind == ToolKind.shell) {
+      final facts = _shellFacts(progressMetadata, prior: resident.runFacts);
+      if (facts == resident.runFacts) return null;
+      final origin = SourceProvenance(
+        harness: current.ref.harnessRef,
+        version: sourceVersion,
+        nativeType: type,
+        nativeEventId: nativeId,
+        durability: const OpenValue.known(Durability.ephemeral),
+        extra: CanonicalValue({
+          'nativeCreated': created,
+          'nativeMessageId': messageId,
+          'nativeToolCallId': callId,
+        }),
+      );
+      return ItemUpserted(
+        meta: EventMeta(
+          owner: SessionOwner(current.ref),
+          position: position,
+          receivedAt: receivedAt,
+          source: origin,
+        ),
+        item: ToolCall(
+          meta: resident.meta,
+          kind: resident.kind,
+          rawName: resident.rawName,
+          input: resident.input == null
+              ? null
+              : selectedInput(resident.input!.value),
+          output: resident.output,
+          outputRef: resident.outputRef,
+          child: resident.child,
+          childEvidence: resident.childEvidence,
+          error: resident.error,
+          runFacts: facts,
+        ),
+      );
+    }
+    if (kind != ToolKind.subagent) {
       return null;
     }
     final (:present, child: named) = openCodeSubagentChild(
@@ -330,6 +370,7 @@ SessionEvent? projectOpenCodeToolEvent(
         child: child,
         childEvidence: evidence,
         error: resident.error,
+        runFacts: resident.runFacts,
       ),
     );
   }
@@ -362,9 +403,8 @@ SessionEvent? projectOpenCodeToolEvent(
   // not keeps what this generation already observed.
   var child = prior?.child;
   var evidence = prior?.childEvidence;
-  if (terminal &&
-      _kind(name) == ToolKind.subagent &&
-      terminalMetadata != null) {
+  final toolKind = _kind(name);
+  if (terminal && toolKind == ToolKind.subagent && terminalMetadata != null) {
     final (:present, child: named) = openCodeSubagentChild(
       terminalMetadata,
       current.ref,
@@ -378,6 +418,10 @@ SessionEvent? projectOpenCodeToolEvent(
       );
     }
   }
+  var runFacts = prior?.runFacts;
+  if (terminal && toolKind == ToolKind.shell && terminalMetadata != null) {
+    runFacts = _shellFacts(terminalMetadata, prior: runFacts);
+  }
   return ItemUpserted(
     meta: eventMeta,
     item: ToolCall(
@@ -389,22 +433,33 @@ SessionEvent? projectOpenCodeToolEvent(
         source: eventMeta.source,
         message: liveMessageContext(current, id, messageId),
       ),
-      kind: OpenValue.known(_kind(name)),
+      kind: OpenValue.known(toolKind),
       rawName: name,
       input: input,
       output: output,
       child: child,
       childEvidence: evidence,
       error: error,
+      runFacts: runFacts,
     ),
   );
 }
 
-ToolKind _kind(String name) => switch (name) {
-  'read' => ToolKind.read,
-  openCodeSubagentTool => ToolKind.subagent,
-  _ => ToolKind.other,
-};
+ToolKind _kind(String name) => openCodeToolKind(name);
+
+ToolRunFacts? _shellFacts(
+  Map<String, Object?> metadata, {
+  ToolRunFacts? prior,
+}) {
+  try {
+    return openCodeShellToolRunFacts(metadata, prior: prior);
+  } on RangeError {
+    _fail(OpenCodeToolProjectionFailure.limitExceeded);
+  } on FormatException {
+    _fail(OpenCodeToolProjectionFailure.malformed);
+  }
+}
+
 bool _settled(ToolCall item) => const {
   ItemStatus.completed,
   ItemStatus.failed,

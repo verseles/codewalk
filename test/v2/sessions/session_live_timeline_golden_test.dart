@@ -248,7 +248,6 @@ void main() {
     );
     for (final key in [
       'work-group-toggle-work-golden/r1',
-      'tool-run-toggle-tools-golden/t3',
       'reasoning-toggle',
     ]) {
       final toggle = find.byKey(ValueKey(key));

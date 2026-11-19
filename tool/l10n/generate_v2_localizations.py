@@ -163,6 +163,13 @@ KEYS |= {
     "liveSubagentsTitle", "liveSubagentsActive", "liveSubagentsCompleted",
     "liveSubagentsCount", "liveSubagentsEmpty", "liveSubagentsUnknown",
     "liveSubagentsCancelled", "liveSubagentsRecent",
+    "toolKindShell", "toolKindRead", "toolKindEdit", "toolKindWrite",
+    "toolKindSearch", "toolKindFetch", "toolKindWebSearch", "toolKindSkill",
+    "toolKindQuestion", "toolKindTool",
+    "chatThinkingHeading", "chatThought", "chatThoughtDuration",
+    "activityEdited", "activityExplored", "activitySearched", "activityFetched",
+    "activityCommands", "activitySkills", "activityThought", "activitySteps",
+    "activityRunning", "activityFailed",
 }
 KEYS |= set(COMPOSER_NEW_KEYS)
 KEYS |= set(SEARCH_NEW_KEYS) | set(SWITCH_KEYS) | set(VOICE_KEYS) | set(BUBBLE_KEYS) | set(SERVER_RULE_KEYS)

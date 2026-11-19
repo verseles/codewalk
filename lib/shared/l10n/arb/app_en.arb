@@ -1,18 +1,43 @@
 {
   "@@locale": "en",
   "reportCount": "{count} subagent replies",
-  "@reportCount": {"placeholders": {"count": {"type": "int"}}},
+  "@reportCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reportFailures": "Failed: {count}",
-  "@reportFailures": {"placeholders": {"count": {"type": "int"}}},
+  "@reportFailures": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reportUnnamed": "Subagent reply",
   "reportBy": "{agent} replied",
-  "@reportBy": {"placeholders": {"agent": {"type": "String"}}},
+  "@reportBy": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "reportOpenChild": "Open sub-conversation",
   "liveSubagentsTitle": "Sub-agents",
   "liveSubagentsActive": "Active",
   "liveSubagentsCompleted": "Completed",
   "liveSubagentsCount": "{count} active sub-agents",
-  "@liveSubagentsCount": {"description": "Accessible label for the subagent capsule; counts executing or awaiting a human reply.", "placeholders": {"count": {"type": "int"}}},
+  "@liveSubagentsCount": {
+    "description": "Accessible label for the subagent capsule; counts executing or awaiting a human reply.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveSubagentsEmpty": "No sub-agents here.",
   "liveSubagentsUnknown": "Status unconfirmed",
   "liveSubagentsCancelled": "Cancelled",
@@ -947,9 +972,13 @@
   },
   "liveResuming": "Interrupted; continuation not confirmed",
   "liveStepInterrupted": "Response interrupted.",
-  "@liveStepInterrupted": {"description": "An observed interrupted assistant step, not a terminal turn outcome"},
+  "@liveStepInterrupted": {
+    "description": "An observed interrupted assistant step, not a terminal turn outcome"
+  },
   "liveExecutionUnconfirmed": "The execution is not active; its outcome is unconfirmed.",
-  "@liveExecutionUnconfirmed": {"description": "A previously observed execution is inactive without a new confirmed outcome"},
+  "@liveExecutionUnconfirmed": {
+    "description": "A previously observed execution is inactive without a new confirmed outcome"
+  },
   "@liveResuming": {
     "description": "V2 live read-only session view"
   },
@@ -3127,5 +3156,157 @@
   "settingsBehaviorWindowCloseDescription": "Close quits CodeWalk. Minimize keeps it running in the taskbar.",
   "@settingsBehaviorWindowCloseDescription": {
     "description": "Desktop window: settingsBehaviorWindowCloseDescription"
+  },
+  "toolKindShell": "Shell",
+  "@toolKindShell": {
+    "description": "Compact row label for a shell command tool"
+  },
+  "toolKindRead": "Read",
+  "@toolKindRead": {
+    "description": "Compact row label for a file read tool"
+  },
+  "toolKindEdit": "Edit",
+  "@toolKindEdit": {
+    "description": "Compact row label for a file edit or patch tool"
+  },
+  "toolKindWrite": "Write",
+  "@toolKindWrite": {
+    "description": "Compact row label for a file write tool"
+  },
+  "toolKindSearch": "Search",
+  "@toolKindSearch": {
+    "description": "Compact row label for a grep or glob search tool"
+  },
+  "toolKindFetch": "Fetch",
+  "@toolKindFetch": {
+    "description": "Compact row label for a web fetch tool"
+  },
+  "toolKindWebSearch": "Web search",
+  "@toolKindWebSearch": {
+    "description": "Compact row label for a web search tool"
+  },
+  "toolKindSkill": "Skill",
+  "@toolKindSkill": {
+    "description": "Compact row label for a skill loading tool"
+  },
+  "toolKindQuestion": "Question",
+  "@toolKindQuestion": {
+    "description": "Compact row label for a question tool"
+  },
+  "toolKindTool": "Tool",
+  "@toolKindTool": {
+    "description": "Fallback compact row label for an unclassified tool"
+  },
+  "chatThinkingHeading": "Thinking: {heading}",
+  "@chatThinkingHeading": {
+    "description": "Compact streaming reasoning line with extracted heading",
+    "placeholders": {
+      "heading": {
+        "type": "String"
+      }
+    }
+  },
+  "chatThought": "Thought",
+  "@chatThought": {
+    "description": "Compact completed reasoning line without duration"
+  },
+  "chatThoughtDuration": "Thought · {duration}",
+  "@chatThoughtDuration": {
+    "description": "Compact completed reasoning line with elapsed thinking duration",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "activityEdited": "{count, plural, =1{Edited 1 file} other{Edited {count} files}}",
+  "@activityEdited": {
+    "description": "Compact activity summary fragment for edited or written files",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityExplored": "{count, plural, =1{Explored 1 file} other{Explored {count} files}}",
+  "@activityExplored": {
+    "description": "Compact activity summary fragment for read files",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activitySearched": "{count, plural, =1{1 search} other{{count} searches}}",
+  "@activitySearched": {
+    "description": "Compact activity summary fragment for searches",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityFetched": "{count, plural, =1{Fetched 1 page} other{Fetched {count} pages}}",
+  "@activityFetched": {
+    "description": "Compact activity summary fragment for fetched web pages",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityCommands": "{count, plural, =1{Ran 1 command} other{Ran {count} commands}}",
+  "@activityCommands": {
+    "description": "Compact activity summary fragment for shell commands",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activitySkills": "{count, plural, =1{1 skill} other{{count} skills}}",
+  "@activitySkills": {
+    "description": "Compact activity summary fragment for loaded skills",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityThought": "{count, plural, =1{Thought} other{Thought {count} times}}",
+  "@activityThought": {
+    "description": "Compact activity summary fragment for reasoning steps",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activitySteps": "{count, plural, =1{1 step} other{{count} steps}}",
+  "@activitySteps": {
+    "description": "Compact activity summary fragment for other tool steps",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityRunning": "{count, plural, =1{1 running} other{{count} running}}",
+  "@activityRunning": {
+    "description": "Compact activity summary fragment for still-running items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityFailed": "{count, plural, =1{1 failed} other{{count} failed}}",
+  "@activityFailed": {
+    "description": "Compact activity summary fragment for failed or interrupted items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -1,80 +1,86 @@
+import 'dart:math';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
-import '../../shared/theme/app_shapes.dart';
 import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_message_info.dart';
 import 'session_timeline_projection.dart';
-import 'session_tool_details_dialog.dart';
-import 'session_tool_result.dart';
 
-/// The header of a finished turn's work: how many messages the work spans
-/// and the control that shows or hides it, as one quiet line with no surface
-/// of its own, so the user's and the agent's messages lead (#490).
-class SessionWorkGroupHeader extends StatelessWidget {
-  const SessionWorkGroupHeader({
+/// Builds the fixed-order descriptive activity fragments for [work], omitting
+/// zero categories: edited, explored, searched, fetched, commands, skills,
+/// thought, and other steps.
+List<String> activitySummaryParts(
+  List<TimelineItem> work,
+  V2Localizations l10n,
+) {
+  var edited = 0;
+  var explored = 0;
+  var searched = 0;
+  var fetched = 0;
+  var commands = 0;
+  var skills = 0;
+  var thought = 0;
+  var steps = 0;
+
+  for (final item in work) {
+    switch (item) {
+      case Reasoning():
+        thought++;
+      case ShellRun():
+        commands++;
+      case ToolCall(:final kind):
+        switch (kind.known) {
+          case ToolKind.edit || ToolKind.write:
+            edited++;
+          case ToolKind.read:
+            explored++;
+          case ToolKind.search || ToolKind.webSearch:
+            searched++;
+          case ToolKind.fetch:
+            fetched++;
+          case ToolKind.shell:
+            commands++;
+          case ToolKind.skill:
+            skills++;
+          case ToolKind.question || ToolKind.mcp || ToolKind.other || null:
+            steps++;
+          case ToolKind.subagent:
+            steps++;
+        }
+      default:
+        steps++;
+    }
+  }
+
+  return [
+    if (edited > 0) l10n.activityEdited(edited),
+    if (explored > 0) l10n.activityExplored(explored),
+    if (searched > 0) l10n.activitySearched(searched),
+    if (fetched > 0) l10n.activityFetched(fetched),
+    if (commands > 0) l10n.activityCommands(commands),
+    if (skills > 0) l10n.activitySkills(skills),
+    if (thought > 0) l10n.activityThought(thought),
+    if (steps > 0) l10n.activitySteps(steps),
+  ];
+}
+
+/// The quiet single-line summary header of a collapsed activity stretch,
+/// showing descriptive counts plus running/failure indicators and expanding
+/// its compact rows in place on tap.
+class SessionActivityStretchHeader extends StatelessWidget {
+  const SessionActivityStretchHeader({
     super.key,
     required this.row,
     required this.onToggle,
   });
 
-  final SessionWorkGroupRow row;
-  final VoidCallback onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final theme = Theme.of(context);
-    final quiet = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    final title = row.messageCount == 1
-        ? l10n.chatWorkMessageOne
-        : l10n.chatWorkMessagesMultiple(row.messageCount);
-    return ConversationTextScale(
-      child: Row(
-        key: ValueKey('work-group-${row.id}'),
-        children: [
-          Flexible(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: quiet,
-            ),
-          ),
-          const SizedBox(width: 4),
-          TextButton(
-            key: ValueKey('work-group-toggle-${row.id}'),
-            onPressed: onToggle,
-            style: TextButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-              textStyle: theme.textTheme.bodySmall,
-            ),
-            child: Text(row.expanded ? l10n.chatWorkHide : l10n.chatWorkExpand),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A run of tool calls shown together, like the retained reference's tool
-/// chain: a count-first summary with what is still running or needs the
-/// reader, and every call on demand, each opening its details.
-///
-/// A message that opens inside the run keeps its details: closed, the run
-/// offers the first such message's; open, each call that opens a message
-/// offers its own.
-class SessionToolRun extends StatelessWidget {
-  const SessionToolRun({super.key, required this.row, required this.onToggle});
-
-  final SessionToolRunRow row;
+  final SessionActivityStretchRow row;
   final VoidCallback onToggle;
 
   @override
@@ -82,130 +88,126 @@ class SessionToolRun extends StatelessWidget {
     final l10n = context.v2L10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final compact = MediaQuery.sizeOf(context).width < 600;
-    final tools = row.tools;
-    final counts = {for (final value in ToolProgress.values) value: 0};
-    for (final tool in tools) {
-      counts.update(toolProgress(tool), (count) => count + 1);
-    }
-    final calls = l10n.chatMessageToolChainCallsCompact(tools.length);
-    final title = row.expanded
-        ? l10n.chatMessageToolCallsTitle
-        : compact
-        ? calls
-        : _describe(l10n, tools);
-    final progress = [
-      if (row.expanded) calls,
-      if (row.expanded && counts[ToolProgress.done]! > 0)
-        l10n.chatMessageToolDoneCount(counts[ToolProgress.done]!),
-      if (counts[ToolProgress.running]! > 0)
-        l10n.chatMessageToolRunningCount(counts[ToolProgress.running]!),
-      if (counts[ToolProgress.queued]! > 0)
-        l10n.chatMessageToolQueuedCount(counts[ToolProgress.queued]!),
-      if (counts[ToolProgress.attention]! > 0)
-        l10n.chatMessageToolAttentionCount(counts[ToolProgress.attention]!),
-    ].join(' • ');
-    final opening = row.expanded
-        ? null
-        : [
-            for (final (index, tool) in tools.indexed)
-              if (row.messageHeaders[index]) tool.meta.message,
-          ].nonNulls.firstOrNull;
-    return ConversationTextScale(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: DecoratedBox(
-          key: ValueKey('tool-run-${row.id}'),
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.36),
-            borderRadius: AppShapes.borderSmall,
-          ),
+    final quiet = theme.textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+    final parts = activitySummaryParts(row.work, l10n);
+    final base = parts.isEmpty
+        ? l10n.activitySteps(row.work.length)
+        : parts.join(' · ');
+    final runningText = row.runningCount > 0
+        ? l10n.activityRunning(row.runningCount)
+        : null;
+    final failedText = row.failedCount > 0
+        ? l10n.activityFailed(row.failedCount)
+        : null;
+    final fullLabel = [base, ?runningText, ?failedText].join(' · ');
+    final opening = row.expanded ? null : row.openingMessage;
+
+    final body = LayoutBuilder(
+      builder: (context, constraints) {
+        final tailCount =
+            (runningText != null ? 1 : 0) + (failedText != null ? 1 : 0);
+        final available = constraints.maxWidth.isFinite
+            ? max(0.0, constraints.maxWidth - 48)
+            : 360.0;
+        final tailShare = tailCount > 1 ? 0.28 : 0.42;
+        final tailCap = min(160.0, available * tailShare);
+        return ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 4, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            padding: const EdgeInsetsDirectional.fromSTEB(6, 6, 8, 6),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(Symbols.account_tree, size: 16, color: scheme.primary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            key: ValueKey('tool-run-title-${row.id}'),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (progress.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                progress,
-                                key: ValueKey('tool-run-progress-${row.id}'),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: counts[ToolProgress.attention]! > 0
-                                      ? scheme.error
-                                      : scheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    if (opening != null) MessageElapsedChip(message: opening),
-                    TextButton(
-                      key: ValueKey('tool-run-toggle-${row.id}'),
-                      onPressed: onToggle,
-                      child: Text(
-                        row.expanded
-                            ? l10n.chatMessageHide
-                            : compact
-                            ? l10n.chatMessageShow
-                            : l10n.chatMessageDetails,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  row.expanded ? Symbols.expand_less : Symbols.expand_more,
+                  size: 18,
+                  color: row.failedCount > 0
+                      ? scheme.error
+                      : scheme.onSurfaceVariant,
                 ),
-                if (row.expanded)
-                  for (final (index, tool) in tools.indexed)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(top: 8, end: 8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: SessionToolResult(item: tool)),
-                          if (tool.meta.message case final message?
-                              when row.messageHeaders[index])
-                            MessageElapsedChip(message: message),
-                        ],
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    base,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: quiet,
+                  ),
+                ),
+                if (runningText != null) ...[
+                  const SizedBox(width: 6),
+                  Flexible(
+                    flex: 0,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: tailCap),
+                      child: Text(
+                        '· $runningText',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: quiet?.copyWith(color: scheme.primary),
                       ),
                     ),
+                  ),
+                ],
+                if (failedText != null) ...[
+                  const SizedBox(width: 6),
+                  Flexible(
+                    flex: 0,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: tailCap),
+                      child: Text(
+                        '· $failedText',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: quiet?.copyWith(
+                          color: scheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
+          ),
+        );
+      },
+    );
+
+    final toggle = Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: ValueKey('work-group-toggle-${row.id}'),
+        borderRadius: BorderRadius.circular(10),
+        onTap: onToggle,
+        child: Semantics(
+          button: true,
+          toggled: row.expanded,
+          label: fullLabel,
+          excludeSemantics: true,
+          child: body,
+        ),
+      ),
+    );
+
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: ConversationTextScale(
+          child: Row(
+            key: ValueKey('work-group-${row.id}'),
+            children: [
+              Expanded(child: toggle),
+              if (opening != null) MessageElapsedChip(message: opening),
+            ],
           ),
         ),
       ),
     );
-  }
-
-  /// The first two calls by name, and how many more there are.
-  static String _describe(V2Localizations l10n, List<TimelineItem> tools) {
-    final names = [
-      for (final tool in tools)
-        if (toolTitle(tool).trim() case final name when name.isNotEmpty) name,
-    ];
-    if (names.isEmpty) {
-      return l10n.chatMessageToolChainCallsCompact(tools.length);
-    }
-    final shown = names.take(2).join(' • ');
-    final more = names.length - 2;
-    return more > 0 ? '$shown • ${l10n.chatMessageToolChainMore(more)}' : shown;
   }
 }
 

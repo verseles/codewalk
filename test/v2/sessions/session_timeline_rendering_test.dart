@@ -19,7 +19,9 @@ Widget _surface(TimelineItem item, Locale locale) => MaterialApp(
   locale: locale,
   localizationsDelegates: V2Localizations.localizationsDelegates,
   supportedLocales: V2Localizations.supportedLocales,
-  home: Scaffold(body: SingleChildScrollView(child: SessionTimelineTile(item: item))),
+  home: Scaffold(
+    body: SingleChildScrollView(child: SessionTimelineTile(item: item)),
+  ),
 );
 
 Finder _rich(String s) => find.byWidgetPredicate(
@@ -39,7 +41,11 @@ void main() {
         // AssistantText rich <b>.
         await tester.pumpWidget(
           _surface(
-            AssistantText(meta: _meta('a1'), text: '<b>Bold body</b>', complete: true),
+            AssistantText(
+              meta: _meta('a1'),
+              text: '<b>Bold body</b>',
+              complete: true,
+            ),
             locale,
           ),
         );
@@ -47,7 +53,7 @@ void main() {
         expect(_rich('Bold body'), findsWidgets);
         expect(find.text('<b>Bold body</b>'), findsNothing);
 
-        // Reasoning without HTML keeps literal tags.
+        // Reasoning without HTML collapses to a single line and keeps literal tags when expanded.
         await tester.pumpWidget(
           _surface(
             Reasoning(meta: _meta('r1'), text: '<b>user</b>', complete: true),
@@ -55,9 +61,12 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.textContaining('<b>user</b>'), findsNothing);
+        await tester.tap(find.byKey(const ValueKey('reasoning-toggle')));
+        await tester.pumpAndSettle();
         expect(find.textContaining('<b>user</b>'), findsWidgets);
 
-        // ToolCall stays minimized, payload hidden.
+        // ToolCall stays minimized, payload hidden, localized kind shown.
         await tester.pumpWidget(
           _surface(
             ToolCall(
@@ -70,8 +79,11 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final l10n = V2Localizations.of(
+          tester.element(find.byType(SessionTimelineTile)),
+        );
         expect(find.textContaining('do-not-render'), findsNothing);
-        expect(find.textContaining('read'), findsOneWidget);
+        expect(find.textContaining(l10n.toolKindRead), findsOneWidget);
 
         // Unknown stays neutral.
         await tester.pumpWidget(
@@ -116,10 +128,8 @@ void main() {
         home: Scaffold(
           body: ListView.builder(
             itemCount: items.length,
-            itemBuilder: (_, i) => SessionTimelineTile(
-              key: ValueKey(items[i].id),
-              item: items[i],
-            ),
+            itemBuilder: (_, i) =>
+                SessionTimelineTile(key: ValueKey(items[i].id), item: items[i]),
           ),
         ),
       ),

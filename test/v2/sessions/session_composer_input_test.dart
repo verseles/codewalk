@@ -329,13 +329,17 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    final l10n = opened.graph.localizations.current;
     final slot = find.byKey(const ValueKey('composer-status'));
-    expect(find.descendant(of: slot, matching: find.text('grep')), findsOne);
+    expect(
+      find.descendant(of: slot, matching: find.text(l10n.toolKindSearch)),
+      findsOne,
+    );
     await _report(tester, opened, ExecutionKind.idle);
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(
-      find.descendant(of: slot, matching: find.text('grep')),
+      find.descendant(of: slot, matching: find.text(l10n.toolKindSearch)),
       findsNothing,
     );
   });

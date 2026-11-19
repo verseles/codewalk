@@ -2441,4 +2441,148 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get settingsBehaviorWindowCloseDescription =>
       '「閉じる」は CodeWalk を終了します。「最小化」はタスクバーで実行を続けます。';
+
+  @override
+  String get toolKindShell => 'Shell';
+
+  @override
+  String get toolKindRead => '読み込み';
+
+  @override
+  String get toolKindEdit => '編集';
+
+  @override
+  String get toolKindWrite => '書き込み';
+
+  @override
+  String get toolKindSearch => '検索';
+
+  @override
+  String get toolKindFetch => '取得';
+
+  @override
+  String get toolKindWebSearch => 'Web検索';
+
+  @override
+  String get toolKindSkill => 'スキル';
+
+  @override
+  String get toolKindQuestion => '質問';
+
+  @override
+  String get toolKindTool => 'ツール';
+
+  @override
+  String chatThinkingHeading(String heading) {
+    return '思考中: $heading';
+  }
+
+  @override
+  String get chatThought => '思考完了';
+
+  @override
+  String chatThoughtDuration(String duration) {
+    return '思考 · $duration';
+  }
+
+  @override
+  String activityEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のファイルを編集',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityExplored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のファイルを参照',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySearched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回の検索',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFetched(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のページを取得',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityCommands(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のコマンドを実行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySkills(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のスキル',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityThought(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回の思考',
+      one: '思考',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activitySteps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countステップ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityRunning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件実行中',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String activityFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件失敗',
+    );
+    return '$_temp0';
+  }
 }

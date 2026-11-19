@@ -344,11 +344,11 @@ description of this code.
 
 - **Given** a v2 live or history timeline shows a tool call or a shell command the harness reported
 - **When** the row is shown
-- **Then** it is collapsed: the tool name, or the shell command after a `$`, and a status line - running, done, failed, interrupted; for a shell, timed out or killed, with the exit code when one was reported; an exit without a code is never called a failure, and a non-finite exit (`Infinity`, `-Infinity`, `NaN`) is shown as reported
-- **Then** a `Details` control (`Show` on compact screens) opens a dialog with the tool's input, output and error text, or the shell's command and captured output; each value shows its first 4,000 characters or 40 lines and a Show more control for the rest, inside a scroll area of at most 300 logical pixels or 40% of the screen; an output the server or the client cut says so
-- **Then** a file in a tool's output is named by its type only and never fetched; a shell's captured output is the part the harness sent (at most 64 KiB), never read from the shell output route
+- **Then** non-subagent tool calls and shell commands render as one lightweight compact line (at least 48 dp tall, no outer card or `Show`/`Details` button): kind icon, localized kind label (`Shell`, `Read`, `Edit`, `Write`, `Search`, `Fetch`, `Web search`, `Skill`, `Question`, or raw name for unclassified tools), optional redacted single-line primary target (`command`, `path`, `pattern`, `url`, `query`, `name`, `header`), and a compact status badge only when queued, running, failed, interrupted, timed out, or killed (clean success and shell exit `0` omit the badge; a backgrounded shell tool still running keeps `Running`); an exit without a code is never called a failure, and a non-finite exit (`Infinity`, `-Infinity`, `NaN`) is shown as reported
+- **Then** tapping anywhere on the compact row opens a details dialog with the tool's status (including `Done` when inspecting), input, output and error text, or the shell's command and captured output; each value shows its first 4,000 characters or 40 lines and a Show more control for the rest, inside a scroll area of at most 300 logical pixels or 40% of the screen; an output the server or the client cut says so
+- **Then** a file in a tool's output is named by its type only and never fetched; a shell's captured output is the part the harness sent (at most 64 KiB)
 - **Then** credential-looking values - assignments, JSON properties and command flags named like a password, secret, token or key, authorization headers and variables, URL user info, private-key blocks and well-known token shapes - are replaced by `[redacted]` before a value is kept and again before it is shown; the rule is finite and best-effort
-- **Then** a change in a tool's input or output, or in a shell's output or exit, is content that arrived, and an unchanged re-read is not; in the live timeline an open dialog shows the change
+- **Then** a change in a tool's input, output or runtime facts, or in a shell's output or exit, is content that arrived, and an unchanged re-read is not; in the live timeline an open dialog shows the change
 - **Then** an unknown shell status in history is one minimized unknown row; the rest of the page still shows
 
 ### V2 live session older history
@@ -615,31 +615,28 @@ description of this code.
 
 - **Given** the refined visual style
 - **When** timeline cards render
-- **Then** the agent's text has no card: no fill, no border and no inset of its own beside it, so it sits on the page; reasoning, tools and notices keep borderless cards with slightly tighter vertical padding; the user's turn keeps its tinted bubble, right-aligned, with no outline (#488); everything follows theme, density, text-size and width changes on rebuild
+- **Then** the agent's text has no card: no fill, no border and no inset of its own beside it, so it sits on the page; non-subagent tools, shell runs and reasoning render as compact lightweight rows without outer cards; subagent calls, notices and non-error outcomes keep borderless cards with slightly tighter vertical padding; the user's turn keeps its tinted bubble, right-aligned, with no outline (#488); everything follows theme, density, text-size and width changes on rebuild
 - **Then** below 600 dp wide, the live and history timelines keep an 8 dp side margin instead of 16 dp, so the agent's text reaches close to the screen's edge; wider screens keep 16 dp and the 760 dp reading width
 - **Then** a search match is outlined just outside its row, so the outline never covers text that has no card
 
 ### V2 work groups, tool runs and loading
 
-- **Given** an assistant turn in the live timeline uses tools
-- **When** two or more tool or shell calls follow each other in that turn
-- **Then** they show as one run: compact screens lead with the count (`3 calls`), wide screens name the first two calls (`read • grep • +1 more`); a second line counts what is running, queued or needs attention; `Show` (compact) or `Details` (wide) opens every call and `Hide` closes them; a call appended to an open run keeps the run open
+- **Given** an assistant turn in the live or history timeline uses reasoning, shell runs or non-subagent tools
+- **When** those items form a contiguous non-text stretch
+- **Then** every `AssistantText` — including intermediate text produced before later tool calls — stays visible in the conversation forever and is never swallowed into an activity stretch; `UserInput`, `Notice`, `TurnOutcome`, `UnknownItem` and subagent calls also remain outside stretches in chronological order
+- **Then** while the live turn has no following visible `AssistantText` yet, the stretch stays open as individual compact single-line rows (without wrapping them in a second tool-run card)
+- **Then** as soon as a following visible `AssistantText` begins arriving (even while streaming), or when the turn is settled (including in `SessionHistoryPage`) with no active items in the stretch, the stretch collapses into one quiet single-line summary (`Edited N files · Explored N files · N searches · Fetched N pages · Ran N commands · N skills · Thought · N steps`, omitting zero fragments), surfacing still-running counts and error-colored failure counts (`· 1 failed`) directly on the summary line; tapping expands or collapses the compact rows in place
 - **Then** consecutive subagent calls share a compact summary in live and history. Any intervening item ends the group. The summary counts calls, shows running and queued activity, and flags failed and interrupted calls. It wraps when space is tight or text is enlarged, and has a tap target of at least 48 dp. A message that opens in the group keeps its elapsed chip accessible while collapsed
 - **Then** expanding reveals each original call with its status, details and available child navigation. An open group stays open when scrolled out of view and back, or when older adjacent calls load
-- **Then** a message that opens inside a run keeps its elapsed chip and details: a closed run shows the first such message's chip on its header, an open run shows it on each call that opens a message
-- **Then** a call's input, output and error open in a details dialog from its `Show`/`Details` button, never inline; the dialog follows the call while it runs, opens at the top of each value, keeps a value's newest part in view only when the reader is already at its end, and closes with its button, the barrier or Escape
+- **Then** a message that opens inside an activity stretch keeps its elapsed chip and details: collapsed, the stretch header shows the first such message's chip outside its toggle target; expanded, each row that opens a message shows its own chip
+- **Then** a call's input, output and error open in a details dialog on row tap, never inline; the dialog follows the call while it runs, opens at the top of each value, keeps a value's newest part in view only when the reader is already at its end, and closes with its button, the barrier or Escape
+- **Then** a succeeded turn has no row of its own, live or in the read-only history; the header reports it; failed and interrupted turns keep their rows outside stretches
+- **Then** once collapsed, a status pulse that briefly reports the session busy, or a rehydration of the same items, keeps the same stretch header and element; new streaming items in a trailing stretch reopen that tail
+- **Then** opening a stretch or a reasoning row is the reader's: the timeline does not follow the growth it makes; what the reader opened survives rebuilds and passive refreshes, and a session shown again starts collapsed; searching a hidden reasoning item expands its stretch and opens its body automatically
 
-- **Given** a turn finished: every item reached its end, the last answer text is complete and no failure is shown at or after it, and the session is settled or a newer prompt exists
-- **When** the timeline shows it
-- **Then** everything before the first answer text of the harness message that holds the final answer collapses to one quiet line (`2 work messages` in small muted text, then a flat `Expand`/`Hide`, with no surface, border or icon, #490), including that message's own reasoning and calls, so a one-message answer collapses its reasoning too; every answer text of that message, and what follows its first one, stays visible below it; nothing collapses while anything in the turn still streams, after a failure at or after the answer, while a compaction in the turn runs or after one failed, or without the harness message of the answer
-- **Then** a completed compaction before the answer collapses with the work, one after it stays a row below the answer, and a failed one keeps the whole turn open
-- **Then** a succeeded turn has no row of its own, live or in the read-only history; the header reports it; failed and interrupted turns keep their rows
-- **Then** once collapsed, a status pulse that briefly reports the session busy, or a rehydration of the same items, keeps the same header and element; new content in that turn, or an item of it that streams again, reopens it
-- **Then** opening a group, a run or a reasoning is the reader's: the timeline does not follow the growth it makes; what the reader opened survives rebuilds and passive refreshes, and a session shown again starts with every finished turn collapsed
-
-- **Given** a reasoning part taller than four lines
+- **Given** a reasoning part in the live or history timeline
 - **When** it renders
-- **Then** it shows four lines in a bounded area, twelve with `More`/`Show more` (with a scrollbar), back with `Less`/`Show less`; while it streams the area keeps its newest lines in view without moving the timeline; compact screens label it `Thinking`, wide screens `Thinking Process`
+- **Then** it shows as a single compact line (at least 48 dp tall): `Thinking: <heading>` (from its opening bold heading) or `Thinking…` while streaming, and `Thought · <duration>` (from harness part timestamps, never message-wide times) or `Thought` when complete; tapping expands or collapses the full Markdown body inside a bounded scroll container (capped at 40% of viewport height) with auto-follow while streaming
 
 - **Given** a live session has no items
 - **When** it is still being read (probing, connecting or hydrating)
@@ -653,12 +650,12 @@ description of this code.
 - **When** it is Live (the default)
 - **Then** the live timeline shows assistant text, reasoning and tool activity as they stream
 - **When** it is Block and the session has a turn in flight
-- **Then** that turn shows only the messages the harness reports ended, in order, then each tool or shell call that ended, in runs broken only by held text or reasoning; a `Generating response` placeholder holds the rest, also while a prompt waits for its first answer; content it holds is not an arrival and does not move the reader
-- **Then** once the session settles the whole turn shows, with its work collapsed as in Live; earlier turns are never held; the choice persists under `cw2.settings.chatRenderMode` (`live` is not written; an unknown stored value keeps Live)
+- **Then** that turn shows only the messages the harness reports ended, in order (compacting stretches only before already-published visible answers, never before held answers), then each tool or shell call that ended as compact rows; a `Generating response` placeholder holds the rest, also while a prompt waits for its first answer; content it holds is not an arrival and does not move the reader
+- **Then** once the session settles the whole turn shows, with its stretches collapsed as in Live; earlier turns are never held; the choice persists under `cw2.settings.chatRenderMode` (`live` is not written; an unknown stored value keeps Live)
 
 - **Given** the user turns off Settings > Appearance > Thinking bubbles or Tool call bubbles
 - **When** the live timeline shows a turn
-- **Then** the reasoning or the tool and shell calls leave the timeline before anything is grouped: a run or a finished turn's work header shows only what remains, and a work header with nothing left to show disappears (#108)
+- **Then** the reasoning or the tool and shell calls leave the timeline before anything is grouped: an activity stretch shows only what remains, and a stretch with nothing left to show disappears (#108)
 - **Then** the first item shown of a harness message keeps its elapsed chip and details; hidden items that arrive do not move the reader, and showing hidden items again or changing the render mode is not an arrival either, while content that arrived meanwhile (even while the session was hidden) is still followed or marked; the history page is unaffected
 - **Then** the choices persist under `cw2.settings.showReasoning` and `cw2.settings.showToolCalls` (shown by default, only `false` is written)
 

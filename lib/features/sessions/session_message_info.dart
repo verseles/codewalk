@@ -12,14 +12,10 @@ bool opensMessage(List<TimelineItem> items, int index) {
       (index == 0 || items[index - 1].meta.message?.message != message);
 }
 
-/// Compact time from the message's creation to its completion, both as the
-/// harness reported them. Null while it runs or when the times disagree.
-String? formatMessageElapsed(MessageContext context) {
-  final created = context.created;
-  final completed = context.completed;
-  if (created == null || completed == null) return null;
-  final elapsed = completed.difference(created);
-  if (elapsed.isNegative) return null;
+/// Compact duration formatting shared by message elapsed chips and reasoning
+/// summaries. Null when missing or negative.
+String? formatCompactDuration(Duration? elapsed) {
+  if (elapsed == null || elapsed.isNegative) return null;
   if (elapsed.inMilliseconds < 1000) return '${elapsed.inMilliseconds}ms';
   if (elapsed.inSeconds < 60) return '${elapsed.inSeconds}s';
   if (elapsed.inMinutes < 60) {
@@ -32,6 +28,15 @@ String? formatMessageElapsed(MessageContext context) {
   return minutes == 0
       ? '${elapsed.inHours}h'
       : '${elapsed.inHours}h ${minutes}m';
+}
+
+/// Compact time from the message's creation to its completion, both as the
+/// harness reported them. Null while it runs or when the times disagree.
+String? formatMessageElapsed(MessageContext context) {
+  final created = context.created;
+  final completed = context.completed;
+  if (created == null || completed == null) return null;
+  return formatCompactDuration(completed.difference(created));
 }
 
 /// The reported token count, only when input and output are both known.

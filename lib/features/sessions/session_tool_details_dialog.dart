@@ -11,14 +11,112 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/app_surface_tokens.dart';
 import 'session_timeline_projection.dart';
 
-/// The title a tool or shell row shows: the tool's name, or the command.
-String toolTitle(TimelineItem item) => switch (item) {
-  ShellRun(:final command) => '\$ ${redactCredentialText(command)}',
-  ToolCall(:final rawName) => redactCredentialText(rawName),
+/// Material symbol matching the canonical kind of a tool or shell run.
+IconData toolIcon(TimelineItem item) => switch (item) {
+  ShellRun() => Symbols.terminal,
+  ToolCall(:final kind) => switch (kind.known) {
+    ToolKind.shell => Symbols.terminal,
+    ToolKind.read => Symbols.description,
+    ToolKind.edit => Symbols.edit,
+    ToolKind.write => Symbols.edit_document,
+    ToolKind.search => Symbols.search,
+    ToolKind.fetch => Symbols.download,
+    ToolKind.webSearch => Symbols.travel_explore,
+    ToolKind.skill => Symbols.auto_stories,
+    ToolKind.question => Symbols.help,
+    ToolKind.subagent => Symbols.smart_toy,
+    ToolKind.mcp || ToolKind.other || null => Symbols.build,
+  },
+  _ => Symbols.build,
+};
+
+/// Short localized kind label for a compact tool or shell row.
+String toolKindLabel(TimelineItem item, V2Localizations l10n) => switch (item) {
+  ShellRun() => l10n.toolKindShell,
+  ToolCall(:final kind, :final rawName) => switch (kind.known) {
+    ToolKind.shell => l10n.toolKindShell,
+    ToolKind.read => l10n.toolKindRead,
+    ToolKind.edit => l10n.toolKindEdit,
+    ToolKind.write => l10n.toolKindWrite,
+    ToolKind.search => l10n.toolKindSearch,
+    ToolKind.fetch => l10n.toolKindFetch,
+    ToolKind.webSearch => l10n.toolKindWebSearch,
+    ToolKind.skill => l10n.toolKindSkill,
+    ToolKind.question => l10n.toolKindQuestion,
+    ToolKind.subagent => l10n.liveSubagentsTitle,
+    ToolKind.mcp || ToolKind.other || null =>
+      redactCredentialText(rawName).trim().isNotEmpty
+          ? redactCredentialText(rawName).trim()
+          : l10n.toolKindTool,
+  },
   _ => '',
 };
 
-/// How a tool or shell run stands, for the counts of a run of calls.
+/// Redacted single-line primary argument for a compact tool or shell row.
+///
+/// Only reads bounded canonical keys (`command`, `path`, `pattern`, `url`,
+/// `query`, `name`, `header`); never parses `patchText` or arbitrary blobs.
+String? toolTarget(TimelineItem item) {
+  String? clean(Object? value) {
+    if (value is! String) return null;
+    final single = redactCredentialText(
+      value,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+    return single.isEmpty ? null : single;
+  }
+
+  switch (item) {
+    case ShellRun(:final command):
+      return clean(command);
+    case ToolCall(:final input):
+      final value = input?.value;
+      if (value is! Map<Object?, Object?>) return null;
+      for (final key in const [
+        'command',
+        'path',
+        'pattern',
+        'url',
+        'query',
+        'name',
+        'header',
+      ]) {
+        final found = clean(value[key]);
+        if (found != null) return found;
+      }
+      if (value['questions'] case final List<Object?> questions
+          when questions.isNotEmpty) {
+        final first = questions.first;
+        if (first is Map<Object?, Object?>) {
+          return clean(first['header']);
+        }
+      }
+      return null;
+    default:
+      return null;
+  }
+}
+
+/// Concise single-line label (`Kind · target`) used in compact timeline rows
+/// and the composer status bar.
+String toolCompactSummary(TimelineItem item, V2Localizations l10n) {
+  final label = toolKindLabel(item, l10n);
+  final target = toolTarget(item);
+  if (target == null || target.isEmpty) return label;
+  return label.isEmpty ? target : '$label · $target';
+}
+
+/// Whether [facts] reports a shell tool that is still running (including a
+/// backgrounded shell call whose tool part completed without an exit).
+bool _factsRunning(ToolRunFacts facts) =>
+    facts.shellStatus?.known == ShellStatus.running ||
+    (facts.background &&
+        facts.exitCode == null &&
+        facts.exitToken == null &&
+        facts.shellStatus?.known != ShellStatus.exited &&
+        !facts.timedOut &&
+        !facts.interrupted);
+
+/// How a tool or shell run stands, for summaries and compact badges.
 enum ToolProgress { queued, running, done, attention, unknown }
 
 ToolProgress toolProgress(TimelineItem item) {
@@ -30,6 +128,26 @@ ToolProgress toolProgress(TimelineItem item) {
       ShellStatus.timeout || ShellStatus.killed => ToolProgress.attention,
       _ => ToolProgress.unknown,
     };
+  }
+  if (item case ToolCall(:final runFacts?)) {
+    final itemStatus = item.status.known;
+    if (itemStatus == ItemStatus.failed ||
+        itemStatus == ItemStatus.interrupted) {
+      return ToolProgress.attention;
+    }
+    if (runFacts.timedOut ||
+        runFacts.interrupted ||
+        runFacts.shellStatus?.known == ShellStatus.timeout ||
+        runFacts.shellStatus?.known == ShellStatus.killed) {
+      return ToolProgress.attention;
+    }
+    if (_factsRunning(runFacts)) return ToolProgress.running;
+    if (runFacts.exitCode != null) {
+      return runFacts.exitCode == 0
+          ? ToolProgress.done
+          : ToolProgress.attention;
+    }
+    if (runFacts.exitToken != null) return ToolProgress.unknown;
   }
   return switch (item.status.known) {
     ItemStatus.pending => ToolProgress.queued,
@@ -80,14 +198,11 @@ class _ToolDetailsDialog extends StatelessWidget {
               padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 8),
               child: Row(
                 children: [
-                  Icon(
-                    item is ShellRun ? Symbols.terminal : Symbols.build,
-                    size: 18,
-                  ),
+                  Icon(toolIcon(item), size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      toolTitle(item),
+                      toolCompactSummary(item, l10n),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium,
@@ -136,7 +251,7 @@ class _ToolDetailsBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (toolStatusLabel(item, l10n) case final status?)
+          if (toolStatusLabel(item, l10n, includeDone: true) case final status?)
             Text(
               status,
               style: theme.textTheme.labelMedium?.copyWith(
@@ -167,20 +282,34 @@ bool toolFailed(TimelineItem item) => switch (item) {
     ShellStatus.exited => item.exitCode != null && item.exitCode != 0,
     ShellStatus.running => false,
   },
+  ToolCall(:final runFacts?) =>
+    runFacts.timedOut ||
+        runFacts.interrupted ||
+        runFacts.shellStatus?.known == ShellStatus.timeout ||
+        runFacts.shellStatus?.known == ShellStatus.killed ||
+        (runFacts.exitCode != null && runFacts.exitCode != 0) ||
+        item.status.known == ItemStatus.failed ||
+        item.status.known == ItemStatus.interrupted,
   _ => switch (item.status.known) {
     ItemStatus.failed || ItemStatus.interrupted => true,
     _ => false,
   },
 };
 
-/// How a tool or shell run stands, in words; null when nothing is known.
-String? toolStatusLabel(TimelineItem item, V2Localizations l10n) {
+/// How a tool or shell run stands, in words; null on clean success unless
+/// [includeDone] is true (used inside the details dialog).
+String? toolStatusLabel(
+  TimelineItem item,
+  V2Localizations l10n, {
+  bool includeDone = false,
+}) {
   if (item case ShellRun(:final shellStatus?)) {
     final exit = item.exitCode?.toString() ?? item.exitToken;
     final code = exit == null ? '' : ' · ${l10n.liveShellExitCode} $exit';
     return switch (shellStatus.known) {
       ShellStatus.running => l10n.toolRunning,
-      ShellStatus.exited when item.exitCode == 0 => l10n.liveToolDone,
+      ShellStatus.exited when item.exitCode == 0 =>
+        includeDone ? l10n.liveToolDone : null,
       // Only a reported nonzero code is a failure; without one the outcome
       // is unknown and only the token, if any, is shown.
       ShellStatus.exited when item.exitCode != null =>
@@ -192,12 +321,43 @@ String? toolStatusLabel(TimelineItem item, V2Localizations l10n) {
       null => null,
     };
   }
+  if (item case ToolCall(:final runFacts?)) {
+    final exit = runFacts.exitCode?.toString() ?? runFacts.exitToken;
+    final code = exit == null ? '' : ' · ${l10n.liveShellExitCode} $exit';
+    final itemStatus = item.status.known;
+    if (runFacts.timedOut ||
+        runFacts.shellStatus?.known == ShellStatus.timeout) {
+      return '${l10n.liveShellTimedOut}$code';
+    }
+    if (runFacts.interrupted || itemStatus == ItemStatus.interrupted) {
+      return '${l10n.liveToolInterrupted}$code';
+    }
+    if (runFacts.shellStatus?.known == ShellStatus.killed) {
+      return '${l10n.liveShellKilled}$code';
+    }
+    if (itemStatus == ItemStatus.failed) {
+      return '${l10n.statusFailed}$code';
+    }
+    if (_factsRunning(runFacts)) {
+      return l10n.toolRunning;
+    }
+    if (runFacts.exitCode != null) {
+      if (runFacts.exitCode == 0) {
+        return includeDone ? l10n.liveToolDone : null;
+      }
+      return '${l10n.statusFailed}$code';
+    }
+    if (runFacts.exitToken != null) {
+      return '${l10n.liveShellExitCode} ${runFacts.exitToken}';
+    }
+  }
   return switch (item.status.known) {
+    ItemStatus.pending => l10n.composerQueued,
     ItemStatus.streaming => l10n.toolRunning,
-    ItemStatus.completed => l10n.liveToolDone,
+    ItemStatus.completed => includeDone ? l10n.liveToolDone : null,
     ItemStatus.failed => l10n.statusFailed,
     ItemStatus.interrupted => l10n.liveToolInterrupted,
-    ItemStatus.pending || null => null,
+    null => null,
   };
 }
 

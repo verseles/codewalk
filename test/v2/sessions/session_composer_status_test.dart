@@ -119,9 +119,9 @@ void main() {
       of(ExecutionKind.running, [
         _prompt('u1'),
         _think('r1', 'm1', 'hmm'),
-        _tool('t1', 'm1', name: 'grep'),
+        _tool('t1', 'm1', name: 'grep', kind: ToolKind.search),
       ]),
-      (kind: ComposerStatusKind.progress, label: 'grep'),
+      (kind: ComposerStatusKind.progress, label: l10n.toolKindSearch),
     );
     expect(
       of(ExecutionKind.running, [
@@ -166,7 +166,10 @@ void main() {
         ]),
         l10n,
       ),
-      (kind: ComposerStatusKind.progress, label: r'$ make check'),
+      (
+        kind: ComposerStatusKind.progress,
+        label: '${l10n.toolKindShell} · make check',
+      ),
     );
     for (final status in [
       ShellStatus.exited,
@@ -192,7 +195,7 @@ void main() {
         _state(ExecutionKind.running, [_prompt('u1'), _tool('t1', 'm1')]),
         l10n,
       )?.label,
-      'read',
+      l10n.toolKindRead,
     );
   });
 
